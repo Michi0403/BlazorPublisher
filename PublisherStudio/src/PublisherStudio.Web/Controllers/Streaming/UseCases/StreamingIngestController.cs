@@ -1,10 +1,13 @@
-using PublisherStudio.Hubs.Streaming.Lan;
+﻿using PublisherStudio.Hubs.Streaming.Lan;
 using System.Net.WebSockets;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 
 namespace PublisherStudio.Controllers.Streaming.UseCases;
 
+/// <summary>
+/// Provides streaming ingest controller operations.
+/// </summary>
 [ApiController]
 [Route("api/mediahost/sessions/{sessionId:guid}")]
 public sealed class StreamingIngestController(StreamingIngestUseCases useCases, WebRtcSignalingHub webRtcHub) : ControllerBase
@@ -13,6 +16,9 @@ public sealed class StreamingIngestController(StreamingIngestUseCases useCases, 
     private readonly StreamingIngestUseCases _useCases = useCases;
     private readonly WebRtcSignalingHub _webRtcHub = webRtcHub;
 
+    /// <summary>
+    /// Runs the ingest operation.
+    /// </summary>
     [HttpGet("ingest/websocket")]
     public async Task Ingest(Guid sessionId, [FromQuery] Guid? outputId)
     {
@@ -58,10 +64,16 @@ public sealed class StreamingIngestController(StreamingIngestUseCases useCases, 
         }
     }
 
+    /// <summary>
+    /// Runs the announce operation.
+    /// </summary>
     [HttpPost("ingest/announce")]
     public IActionResult Announce(Guid sessionId, [FromBody] IngestAnnouncement announcement) =>
         _useCases.Announce(sessionId, announcement.OutputId, announcement) ? Accepted() : NotFound();
 
+    /// <summary>
+    /// Publishes web rtc.
+    /// </summary>
     [HttpGet("webrtc/publisher")]
     public async Task PublishWebRtc(Guid sessionId)
     {

@@ -158,8 +158,8 @@ assert.match(ribbon, /Navigation\.NavigateTo\("\/organic-plugins"\)/);
 assert.equal(settings.OrganicPlugins.DiscoveryPort, 51141);
 assert.equal(settings.OrganicPlugins.DiscoveryReceivePollSeconds, 5);
 assert.equal(settings.OrganicPlugins.Enabled, true);
-assert.equal(packageJson.version, '2.0.5');
-assert.match(webProject, /<Version>2\.0\.5<\/Version>/);
-assert.match(installerProject, /<Version>2\.0\.5<\/Version>/);
+assert.equal(packageJson.version, '2.1.1');
+assert.match(webProject, /<Version>2\.1\.1<\/Version>/);
+assert.match(installerProject, /<Version>2\.1\.1<\/Version>/);
 
 console.log('PublisherStudio LocalGPT organic 1-Wire, permission, OpenSCAD and spreadsheet workflow source contracts passed.');

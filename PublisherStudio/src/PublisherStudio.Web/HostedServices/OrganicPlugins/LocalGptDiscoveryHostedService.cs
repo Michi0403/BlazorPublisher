@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.OrganicPlugins;
 using System.Net;
@@ -7,6 +7,9 @@ using System.Text.Json;
 
 namespace PublisherStudio.HostedServices.OrganicPlugins;
 
+/// <summary>
+/// Provides local gpt discovery hosted service operations.
+/// </summary>
 public sealed class LocalGptDiscoveryHostedService(
     IOptions<OrganicPluginOptions> options,
     ILocalGptDiscoveryRegistry registry,
@@ -17,6 +20,9 @@ public sealed class LocalGptDiscoveryHostedService(
     private int autoConnectInProgress;
     private readonly HashSet<string> automaticallyAttemptedPeers = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// Runs the execute async operation.
+    /// </summary>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         if (!options.Value.Enabled || !options.Value.EnableDiscovery) return;

@@ -1,8 +1,11 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 using System.Text.Json;
 
 namespace PublisherStudio.Services.OrganicPlugins;
 
+/// <summary>
+/// Defines the organic plugin protocol codec contract.
+/// </summary>
 public interface IOrganicPluginProtocolCodec
 {
     JsonSerializerOptions JsonOptions { get; }
@@ -11,6 +14,9 @@ public interface IOrganicPluginProtocolCodec
     bool Validate(OrganicWireEnvelope envelope, out string error);
 }
 
+/// <summary>
+/// Defines the local gpt discovery registry contract.
+/// </summary>
 public interface ILocalGptDiscoveryRegistry
 {
     event Action? Changed;
@@ -23,12 +29,18 @@ public interface ILocalGptDiscoveryRegistry
 
 
 
+/// <summary>
+/// Defines the organic transport security policy contract.
+/// </summary>
 public interface IOrganicTransportSecurityPolicy
 {
     bool RequiresProtectedTransport(OrganicWireMessageType messageType);
     bool IsProtected(OrganicWireEnvelope envelope);
 }
 
+/// <summary>
+/// Defines the organic connection runtime state contract.
+/// </summary>
 public interface IOrganicConnectionRuntimeState
 {
     OrganicConnectionRuntimeSnapshot GetSnapshot();
@@ -36,11 +48,17 @@ public interface IOrganicConnectionRuntimeState
     void Reset(Guid connectionId);
 }
 
+/// <summary>
+/// Defines the organic wire envelope factory contract.
+/// </summary>
 public interface IOrganicWireEnvelopeFactory
 {
     OrganicWireEnvelope CreateWorkEnvelope(OrganicPluginWorkItem item, string sourcePeerId);
 }
 
+/// <summary>
+/// Defines the organic runtime security service contract.
+/// </summary>
 public interface IOrganicRuntimeSecurityService
 {
     Task<OneWireRuntimeSecurityStatus> GetStatusAsync(CancellationToken cancellationToken = default);
@@ -57,6 +75,9 @@ public interface IOrganicRuntimeSecurityService
     Task UnprotectIncomingAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default);
 }
 
+/// <summary>
+/// Defines the organic capability catalog contract.
+/// </summary>
 public interface IOrganicCapabilityCatalog : LocalGPT.WireProtocol.IOneWireCapabilityProvider
 {
     new Task<IReadOnlyList<OrganicCapabilityDescriptor>> GetCapabilitiesAsync(CancellationToken cancellationToken = default);
@@ -65,6 +86,9 @@ public interface IOrganicCapabilityCatalog : LocalGPT.WireProtocol.IOneWireCapab
     new Task<IReadOnlyList<OrganicHardwareDescriptor>> GetHardwareAsync(CancellationToken cancellationToken = default);
 }
 
+/// <summary>
+/// Defines the organic permission store contract.
+/// </summary>
 public interface IOrganicPermissionStore
 {
     IReadOnlyList<OrganicPermissionRule> GetRules();
@@ -76,6 +100,9 @@ public interface IOrganicPermissionStore
     OrganicPermissionRule? Resolve(string peerId, string capabilityKey, string organ = "");
 }
 
+/// <summary>
+/// Defines the organic work coordinator contract.
+/// </summary>
 public interface IOrganicWorkCoordinator
 {
     event Action? Changed;
@@ -87,22 +114,34 @@ public interface IOrganicWorkCoordinator
     bool Decline(Guid id, string reason);
 }
 
+/// <summary>
+/// Defines the organic work executor contract.
+/// </summary>
 public interface IOrganicWorkExecutor
 {
     Task<string> ExecuteAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default);
 }
 
 
+/// <summary>
+/// Defines the organic replay policy data service contract.
+/// </summary>
 public interface IOrganicReplayPolicyDataService
 {
     OrganicReplayPolicySnapshot GetSnapshot();
 }
 
+/// <summary>
+/// Defines the organic replay guard contract.
+/// </summary>
 public interface IOrganicReplayGuard
 {
     bool TryAccept(string peerId, Guid messageId, DateTimeOffset createdUtc);
 }
 
+/// <summary>
+/// Defines the organic result store contract.
+/// </summary>
 public interface IOrganicResultStore
 {
     event Action? Changed;
@@ -113,6 +152,9 @@ public interface IOrganicResultStore
     bool RemoveTextProposal(Guid id);
 }
 
+/// <summary>
+/// Defines the local gpt connection service contract.
+/// </summary>
 public interface ILocalGptConnectionService : IAsyncDisposable
 {
     event Action? Changed;
@@ -125,6 +167,9 @@ public interface ILocalGptConnectionService : IAsyncDisposable
     Task SendWorkResultAsync(OrganicPluginWorkItem item, CancellationToken cancellationToken = default);
 }
 
+/// <summary>
+/// Defines the recurring screen reader service contract.
+/// </summary>
 public interface IRecurringScreenReaderService
 {
     event Action? Changed;

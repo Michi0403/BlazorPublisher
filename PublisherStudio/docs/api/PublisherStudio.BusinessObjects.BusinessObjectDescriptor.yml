@@ -1,0 +1,539 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.BusinessObjectDescriptor
+  commentId: T:PublisherStudio.BusinessObjects.BusinessObjectDescriptor
+  id: BusinessObjectDescriptor
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.BusinessObjectDescriptor.#ctor
+  - PublisherStudio.BusinessObjects.BusinessObjectDescriptor.FullName
+  - PublisherStudio.BusinessObjects.BusinessObjectDescriptor.Kind
+  - PublisherStudio.BusinessObjects.BusinessObjectDescriptor.Name
+  - PublisherStudio.BusinessObjects.BusinessObjectDescriptor.Properties
+  langs:
+  - csharp
+  - vb
+  name: BusinessObjectDescriptor
+  nameWithType: BusinessObjectDescriptor
+  fullName: PublisherStudio.BusinessObjects.BusinessObjectDescriptor
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents a business object descriptor.
+  example: []
+  syntax:
+    content: public sealed class BusinessObjectDescriptor
+    content.vb: Public NotInheritable Class BusinessObjectDescriptor
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.#ctor
+  commentId: M:PublisherStudio.BusinessObjects.BusinessObjectDescriptor.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.BusinessObjects.BusinessObjectDescriptor
+  langs:
+  - csharp
+  - vb
+  name: BusinessObjectDescriptor()
+  nameWithType: BusinessObjectDescriptor.BusinessObjectDescriptor()
+  fullName: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.BusinessObjectDescriptor()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public BusinessObjectDescriptor()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.#ctor*
+  nameWithType.vb: BusinessObjectDescriptor.New()
+  fullName.vb: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.New()
+  name.vb: New()
+- uid: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.Name
+  commentId: P:PublisherStudio.BusinessObjects.BusinessObjectDescriptor.Name
+  id: Name
+  parent: PublisherStudio.BusinessObjects.BusinessObjectDescriptor
+  langs:
+  - csharp
+  - vb
+  name: Name
+  nameWithType: BusinessObjectDescriptor.Name
+  fullName: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.Name
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets the display name.
+  example: []
+  syntax:
+    content: public string Name { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Name As String
+  overload: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.Name*
+- uid: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.FullName
+  commentId: P:PublisherStudio.BusinessObjects.BusinessObjectDescriptor.FullName
+  id: FullName
+  parent: PublisherStudio.BusinessObjects.BusinessObjectDescriptor
+  langs:
+  - csharp
+  - vb
+  name: FullName
+  nameWithType: BusinessObjectDescriptor.FullName
+  fullName: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.FullName
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets full name.
+  example: []
+  syntax:
+    content: public string FullName { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property FullName As String
+  overload: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.FullName*
+- uid: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.Kind
+  commentId: P:PublisherStudio.BusinessObjects.BusinessObjectDescriptor.Kind
+  id: Kind
+  parent: PublisherStudio.BusinessObjects.BusinessObjectDescriptor
+  langs:
+  - csharp
+  - vb
+  name: Kind
+  nameWithType: BusinessObjectDescriptor.Kind
+  fullName: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.Kind
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets kind.
+  example: []
+  syntax:
+    content: public string Kind { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Kind As String
+  overload: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.Kind*
+- uid: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.Properties
+  commentId: P:PublisherStudio.BusinessObjects.BusinessObjectDescriptor.Properties
+  id: Properties
+  parent: PublisherStudio.BusinessObjects.BusinessObjectDescriptor
+  langs:
+  - csharp
+  - vb
+  name: Properties
+  nameWithType: BusinessObjectDescriptor.Properties
+  fullName: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.Properties
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets properties.
+  example: []
+  syntax:
+    content: public List<string> Properties { get; set; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.List{System.String}
+    content.vb: Public Property Properties As List(Of String)
+  overload: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.Properties*
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.#ctor*
+  commentId: Overload:PublisherStudio.BusinessObjects.BusinessObjectDescriptor.#ctor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.html#PublisherStudio_BusinessObjects_BusinessObjectDescriptor__ctor
+  name: BusinessObjectDescriptor
+  nameWithType: BusinessObjectDescriptor.BusinessObjectDescriptor
+  fullName: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.BusinessObjectDescriptor
+  nameWithType.vb: BusinessObjectDescriptor.New
+  fullName.vb: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.New
+  name.vb: New
+- uid: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.Name*
+  commentId: Overload:PublisherStudio.BusinessObjects.BusinessObjectDescriptor.Name
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.html#PublisherStudio_BusinessObjects_BusinessObjectDescriptor_Name
+  name: Name
+  nameWithType: BusinessObjectDescriptor.Name
+  fullName: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.Name
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.FullName*
+  commentId: Overload:PublisherStudio.BusinessObjects.BusinessObjectDescriptor.FullName
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.html#PublisherStudio_BusinessObjects_BusinessObjectDescriptor_FullName
+  name: FullName
+  nameWithType: BusinessObjectDescriptor.FullName
+  fullName: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.FullName
+- uid: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.Kind*
+  commentId: Overload:PublisherStudio.BusinessObjects.BusinessObjectDescriptor.Kind
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.html#PublisherStudio_BusinessObjects_BusinessObjectDescriptor_Kind
+  name: Kind
+  nameWithType: BusinessObjectDescriptor.Kind
+  fullName: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.Kind
+- uid: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.Properties*
+  commentId: Overload:PublisherStudio.BusinessObjects.BusinessObjectDescriptor.Properties
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.html#PublisherStudio_BusinessObjects_BusinessObjectDescriptor_Properties
+  name: Properties
+  nameWithType: BusinessObjectDescriptor.Properties
+  fullName: PublisherStudio.BusinessObjects.BusinessObjectDescriptor.Properties
+- uid: System.Collections.Generic.List{System.String}
+  commentId: T:System.Collections.Generic.List{System.String}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.List`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<string>
+  nameWithType: List<string>
+  fullName: System.Collections.Generic.List<string>
+  nameWithType.vb: List(Of String)
+  fullName.vb: System.Collections.Generic.List(Of String)
+  name.vb: List(Of String)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: System.Collections.Generic.List`1
+  commentId: T:System.Collections.Generic.List`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<T>
+  nameWithType: List<T>
+  fullName: System.Collections.Generic.List<T>
+  nameWithType.vb: List(Of T)
+  fullName.vb: System.Collections.Generic.List(Of T)
+  name.vb: List(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic

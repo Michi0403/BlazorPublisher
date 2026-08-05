@@ -25,8 +25,8 @@ const program = read('src', 'PublisherStudio.Web', 'Program.cs');
 const applicationComposition = read('src', 'PublisherStudio.Web', 'PublisherStudioServiceCollectionExtensions.cs');
 const project = read('src', 'PublisherStudio.Web', 'PublisherStudio.Web.csproj');
 const packageJson = JSON.parse(read('src', 'PublisherStudio.Web', 'package.json'));
-const docs = read('docs', 'architecture', 'interchange-formats.md');
-const adr = read('docs', 'decisions', 'ADR-007-open-interchange-adapters.md');
+const docs = read('docs', 'articles', 'pictures-and-media.md');
+const adr = read('docs', 'articles', 'architecture.md');
 const agents = read('AGENTS.md');
 const layeredSvgFixture = read('tests', 'fixtures', 'interchange', 'layered-inkscape.svg');
 const unsafeSvgFixture = read('tests', 'fixtures', 'interchange', 'unsafe-online.svg');
@@ -165,7 +165,7 @@ assert.match(docs, /SVG \/ SVGZ/);
 assert.match(docs, /OpenRaster/);
 assert.match(docs, /OpenDocument Drawing/);
 assert.match(docs, /OpenDocument Presentation/);
-assert.match(adr, /No new NuGet or JavaScript package/);
+assert.match(adr, /New packages, native binaries, or helper processes require/);
 assert.deepEqual(Object.keys(packageJson.dependencies).sort(), [
   'devexpress-aspnetcore-spreadsheet',
   'devextreme-dist',

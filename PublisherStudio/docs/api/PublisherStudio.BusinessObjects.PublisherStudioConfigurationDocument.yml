@@ -1,0 +1,799 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+  commentId: T:PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+  id: PublisherStudioConfigurationDocument
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.#ctor
+  - PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.Equals(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument)
+  - PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.Equals(System.Object)
+  - PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.GetHashCode
+  - PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.OrganicPlugins
+  - PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.PublisherStudio
+  - PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.ToString
+  - PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.Twitch
+  - PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.op_Equality(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument,PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument)
+  - PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.op_Inequality(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument,PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument)
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudioConfigurationDocument
+  nameWithType: PublisherStudioConfigurationDocument
+  fullName: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents a publisher studio configuration document.
+  example: []
+  syntax:
+    content: 'public sealed record PublisherStudioConfigurationDocument : IEquatable<PublisherStudioConfigurationDocument>'
+    content.vb: Public NotInheritable Class PublisherStudioConfigurationDocument Implements IEquatable(Of PublisherStudioConfigurationDocument)
+  inheritance:
+  - System.Object
+  implements:
+  - System.IEquatable{PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument}
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+- uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.ToString
+  commentId: M:PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.ToString
+  id: ToString
+  parent: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+  langs:
+  - csharp
+  - vb
+  name: ToString()
+  nameWithType: PublisherStudioConfigurationDocument.ToString()
+  fullName: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.ToString()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  example: []
+  syntax:
+    content: public override string ToString()
+    return:
+      type: System.String
+    content.vb: Public Overrides Function ToString() As String
+  overridden: System.Object.ToString
+  overload: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.ToString*
+- uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.op_Inequality(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument,PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument)
+  commentId: M:PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.op_Inequality(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument,PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument)
+  id: op_Inequality(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument,PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument)
+  parent: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+  langs:
+  - csharp
+  - vb
+  name: operator !=(PublisherStudioConfigurationDocument?, PublisherStudioConfigurationDocument?)
+  nameWithType: PublisherStudioConfigurationDocument.operator !=(PublisherStudioConfigurationDocument?, PublisherStudioConfigurationDocument?)
+  fullName: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.operator !=(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument?, PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument?)
+  type: Operator
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public static bool operator !=(PublisherStudioConfigurationDocument? left, PublisherStudioConfigurationDocument? right)
+    parameters:
+    - id: left
+      type: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+    - id: right
+      type: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+    return:
+      type: System.Boolean
+    content.vb: Public Shared Operator <>(left As PublisherStudioConfigurationDocument, right As PublisherStudioConfigurationDocument) As Boolean
+  overload: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.op_Inequality*
+  nameWithType.vb: PublisherStudioConfigurationDocument.<>(PublisherStudioConfigurationDocument, PublisherStudioConfigurationDocument)
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.<>(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument, PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument)
+  name.vb: <>(PublisherStudioConfigurationDocument, PublisherStudioConfigurationDocument)
+- uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.op_Equality(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument,PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument)
+  commentId: M:PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.op_Equality(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument,PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument)
+  id: op_Equality(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument,PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument)
+  parent: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+  langs:
+  - csharp
+  - vb
+  name: operator ==(PublisherStudioConfigurationDocument?, PublisherStudioConfigurationDocument?)
+  nameWithType: PublisherStudioConfigurationDocument.operator ==(PublisherStudioConfigurationDocument?, PublisherStudioConfigurationDocument?)
+  fullName: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.operator ==(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument?, PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument?)
+  type: Operator
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public static bool operator ==(PublisherStudioConfigurationDocument? left, PublisherStudioConfigurationDocument? right)
+    parameters:
+    - id: left
+      type: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+    - id: right
+      type: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+    return:
+      type: System.Boolean
+    content.vb: Public Shared Operator =(left As PublisherStudioConfigurationDocument, right As PublisherStudioConfigurationDocument) As Boolean
+  overload: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.op_Equality*
+  nameWithType.vb: PublisherStudioConfigurationDocument.=(PublisherStudioConfigurationDocument, PublisherStudioConfigurationDocument)
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.=(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument, PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument)
+  name.vb: =(PublisherStudioConfigurationDocument, PublisherStudioConfigurationDocument)
+- uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.GetHashCode
+  commentId: M:PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.GetHashCode
+  id: GetHashCode
+  parent: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+  langs:
+  - csharp
+  - vb
+  name: GetHashCode()
+  nameWithType: PublisherStudioConfigurationDocument.GetHashCode()
+  fullName: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.GetHashCode()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  example: []
+  syntax:
+    content: public override int GetHashCode()
+    return:
+      type: System.Int32
+    content.vb: Public Overrides Function GetHashCode() As Integer
+  overridden: System.Object.GetHashCode
+  overload: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.GetHashCode*
+- uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.Equals(System.Object)
+  commentId: M:PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.Equals(System.Object)
+  id: Equals(System.Object)
+  parent: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+  langs:
+  - csharp
+  - vb
+  name: Equals(object?)
+  nameWithType: PublisherStudioConfigurationDocument.Equals(object?)
+  fullName: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.Equals(object?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  example: []
+  syntax:
+    content: public override bool Equals(object? obj)
+    parameters:
+    - id: obj
+      type: System.Object
+    return:
+      type: System.Boolean
+    content.vb: Public Overrides Function Equals(obj As Object) As Boolean
+  overridden: System.Object.Equals(System.Object)
+  overload: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.Equals*
+  nameWithType.vb: PublisherStudioConfigurationDocument.Equals(Object)
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.Equals(Object)
+  name.vb: Equals(Object)
+- uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.Equals(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument)
+  commentId: M:PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.Equals(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument)
+  id: Equals(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument)
+  parent: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+  langs:
+  - csharp
+  - vb
+  name: Equals(PublisherStudioConfigurationDocument?)
+  nameWithType: PublisherStudioConfigurationDocument.Equals(PublisherStudioConfigurationDocument?)
+  fullName: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.Equals(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  example: []
+  syntax:
+    content: public bool Equals(PublisherStudioConfigurationDocument? other)
+    parameters:
+    - id: other
+      type: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+    return:
+      type: System.Boolean
+    content.vb: Public Function Equals(other As PublisherStudioConfigurationDocument) As Boolean
+  overload: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.Equals*
+  implements:
+  - System.IEquatable{PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument}.Equals(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument)
+  nameWithType.vb: PublisherStudioConfigurationDocument.Equals(PublisherStudioConfigurationDocument)
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.Equals(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument)
+  name.vb: Equals(PublisherStudioConfigurationDocument)
+- uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.#ctor
+  commentId: M:PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudioConfigurationDocument()
+  nameWithType: PublisherStudioConfigurationDocument.PublisherStudioConfigurationDocument()
+  fullName: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.PublisherStudioConfigurationDocument()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public PublisherStudioConfigurationDocument()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.#ctor*
+  nameWithType.vb: PublisherStudioConfigurationDocument.New()
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.New()
+  name.vb: New()
+- uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.Twitch
+  commentId: P:PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.Twitch
+  id: Twitch
+  parent: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+  langs:
+  - csharp
+  - vb
+  name: Twitch
+  nameWithType: PublisherStudioConfigurationDocument.Twitch
+  fullName: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.Twitch
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets twitch.
+  example: []
+  syntax:
+    content: public PublisherTwitchConfiguration Twitch { get; init; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.PublisherTwitchConfiguration
+    content.vb: Public Property Twitch As PublisherTwitchConfiguration
+  overload: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.Twitch*
+- uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.OrganicPlugins
+  commentId: P:PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.OrganicPlugins
+  id: OrganicPlugins
+  parent: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+  langs:
+  - csharp
+  - vb
+  name: OrganicPlugins
+  nameWithType: PublisherStudioConfigurationDocument.OrganicPlugins
+  fullName: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.OrganicPlugins
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets organic plugins.
+  example: []
+  syntax:
+    content: public OrganicPluginOptions OrganicPlugins { get; init; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.OrganicPluginOptions
+    content.vb: Public Property OrganicPlugins As OrganicPluginOptions
+  overload: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.OrganicPlugins*
+- uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.PublisherStudio
+  commentId: P:PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.PublisherStudio
+  id: PublisherStudio
+  parent: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio
+  nameWithType: PublisherStudioConfigurationDocument.PublisherStudio
+  fullName: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.PublisherStudio
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets publisher studio.
+  example: []
+  syntax:
+    content: public PublisherStudioConfigurationNode PublisherStudio { get; init; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.PublisherStudioConfigurationNode
+    content.vb: Public Property PublisherStudio As PublisherStudioConfigurationNode
+  overload: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.PublisherStudio*
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.IEquatable{PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument}
+  commentId: T:System.IEquatable{PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument}
+  parent: System
+  definition: System.IEquatable`1
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<PublisherStudioConfigurationDocument>
+  nameWithType: IEquatable<PublisherStudioConfigurationDocument>
+  fullName: System.IEquatable<PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument>
+  nameWithType.vb: IEquatable(Of PublisherStudioConfigurationDocument)
+  fullName.vb: System.IEquatable(Of PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument)
+  name.vb: IEquatable(Of PublisherStudioConfigurationDocument)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+    name: PublisherStudioConfigurationDocument
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.html
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+    name: PublisherStudioConfigurationDocument
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.html
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: System.IEquatable`1
+  commentId: T:System.IEquatable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<T>
+  nameWithType: IEquatable<T>
+  fullName: System.IEquatable<T>
+  nameWithType.vb: IEquatable(Of T)
+  fullName.vb: System.IEquatable(Of T)
+  name.vb: IEquatable(Of T)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.ToString*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.ToString
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.html#PublisherStudio_BusinessObjects_PublisherStudioConfigurationDocument_ToString
+  name: ToString
+  nameWithType: PublisherStudioConfigurationDocument.ToString
+  fullName: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.ToString
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.op_Inequality*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.op_Inequality
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.html#PublisherStudio_BusinessObjects_PublisherStudioConfigurationDocument_op_Inequality_PublisherStudio_BusinessObjects_PublisherStudioConfigurationDocument_PublisherStudio_BusinessObjects_PublisherStudioConfigurationDocument_
+  name: operator !=
+  nameWithType: PublisherStudioConfigurationDocument.operator !=
+  fullName: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.operator !=
+  nameWithType.vb: PublisherStudioConfigurationDocument.<>
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.<>
+  name.vb: <>
+  spec.csharp:
+  - name: operator
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.op_Inequality*
+    name: '!='
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.html#PublisherStudio_BusinessObjects_PublisherStudioConfigurationDocument_op_Inequality_PublisherStudio_BusinessObjects_PublisherStudioConfigurationDocument_PublisherStudio_BusinessObjects_PublisherStudioConfigurationDocument_
+- uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+  commentId: T:PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.html
+  name: PublisherStudioConfigurationDocument
+  nameWithType: PublisherStudioConfigurationDocument
+  fullName: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.op_Equality*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.op_Equality
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.html#PublisherStudio_BusinessObjects_PublisherStudioConfigurationDocument_op_Equality_PublisherStudio_BusinessObjects_PublisherStudioConfigurationDocument_PublisherStudio_BusinessObjects_PublisherStudioConfigurationDocument_
+  name: operator ==
+  nameWithType: PublisherStudioConfigurationDocument.operator ==
+  fullName: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.operator ==
+  nameWithType.vb: PublisherStudioConfigurationDocument.=
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.=
+  name.vb: =
+  spec.csharp:
+  - name: operator
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.op_Equality*
+    name: ==
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.html#PublisherStudio_BusinessObjects_PublisherStudioConfigurationDocument_op_Equality_PublisherStudio_BusinessObjects_PublisherStudioConfigurationDocument_PublisherStudio_BusinessObjects_PublisherStudioConfigurationDocument_
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.GetHashCode*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.GetHashCode
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.html#PublisherStudio_BusinessObjects_PublisherStudioConfigurationDocument_GetHashCode
+  name: GetHashCode
+  nameWithType: PublisherStudioConfigurationDocument.GetHashCode
+  fullName: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.GetHashCode
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.Equals*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.Equals
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.html#PublisherStudio_BusinessObjects_PublisherStudioConfigurationDocument_Equals_System_Object_
+  name: Equals
+  nameWithType: PublisherStudioConfigurationDocument.Equals
+  fullName: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.Equals
+- uid: System.IEquatable{PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument}.Equals(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument)
+  commentId: M:System.IEquatable{PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument}.Equals(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument)
+  parent: System.IEquatable{PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument}
+  definition: System.IEquatable`1.Equals(`0)
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  name: Equals(PublisherStudioConfigurationDocument)
+  nameWithType: IEquatable<PublisherStudioConfigurationDocument>.Equals(PublisherStudioConfigurationDocument)
+  fullName: System.IEquatable<PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument>.Equals(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument)
+  nameWithType.vb: IEquatable(Of PublisherStudioConfigurationDocument).Equals(PublisherStudioConfigurationDocument)
+  fullName.vb: System.IEquatable(Of PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument).Equals(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument)
+  spec.csharp:
+  - uid: System.IEquatable{PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument}.Equals(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+    name: PublisherStudioConfigurationDocument
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.html
+  - name: )
+  spec.vb:
+  - uid: System.IEquatable{PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument}.Equals(PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument
+    name: PublisherStudioConfigurationDocument
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.html
+  - name: )
+- uid: System.IEquatable`1.Equals(`0)
+  commentId: M:System.IEquatable`1.Equals(`0)
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  name: Equals(T)
+  nameWithType: IEquatable<T>.Equals(T)
+  fullName: System.IEquatable<T>.Equals(T)
+  nameWithType.vb: IEquatable(Of T).Equals(T)
+  fullName.vb: System.IEquatable(Of T).Equals(T)
+  spec.csharp:
+  - uid: System.IEquatable`1.Equals(`0)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - name: T
+  - name: )
+  spec.vb:
+  - uid: System.IEquatable`1.Equals(`0)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - name: T
+  - name: )
+- uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.#ctor*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.#ctor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.html#PublisherStudio_BusinessObjects_PublisherStudioConfigurationDocument__ctor
+  name: PublisherStudioConfigurationDocument
+  nameWithType: PublisherStudioConfigurationDocument.PublisherStudioConfigurationDocument
+  fullName: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.PublisherStudioConfigurationDocument
+  nameWithType.vb: PublisherStudioConfigurationDocument.New
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.New
+  name.vb: New
+- uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.Twitch*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.Twitch
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.html#PublisherStudio_BusinessObjects_PublisherStudioConfigurationDocument_Twitch
+  name: Twitch
+  nameWithType: PublisherStudioConfigurationDocument.Twitch
+  fullName: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.Twitch
+- uid: PublisherStudio.BusinessObjects.PublisherTwitchConfiguration
+  commentId: T:PublisherStudio.BusinessObjects.PublisherTwitchConfiguration
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherTwitchConfiguration.html
+  name: PublisherTwitchConfiguration
+  nameWithType: PublisherTwitchConfiguration
+  fullName: PublisherStudio.BusinessObjects.PublisherTwitchConfiguration
+- uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.OrganicPlugins*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.html#PublisherStudio_BusinessObjects_PublisherStudioConfigurationDocument_OrganicPlugins
+  name: OrganicPlugins
+  nameWithType: PublisherStudioConfigurationDocument.OrganicPlugins
+  fullName: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.OrganicPlugins
+- uid: PublisherStudio.BusinessObjects.OrganicPluginOptions
+  commentId: T:PublisherStudio.BusinessObjects.OrganicPluginOptions
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OrganicPluginOptions.html
+  name: OrganicPluginOptions
+  nameWithType: OrganicPluginOptions
+  fullName: PublisherStudio.BusinessObjects.OrganicPluginOptions
+- uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.PublisherStudio*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.PublisherStudio
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.html#PublisherStudio_BusinessObjects_PublisherStudioConfigurationDocument_PublisherStudio
+  name: PublisherStudio
+  nameWithType: PublisherStudioConfigurationDocument.PublisherStudio
+  fullName: PublisherStudio.BusinessObjects.PublisherStudioConfigurationDocument.PublisherStudio
+- uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationNode
+  commentId: T:PublisherStudio.BusinessObjects.PublisherStudioConfigurationNode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherStudioConfigurationNode.html
+  name: PublisherStudioConfigurationNode
+  nameWithType: PublisherStudioConfigurationNode
+  fullName: PublisherStudio.BusinessObjects.PublisherStudioConfigurationNode

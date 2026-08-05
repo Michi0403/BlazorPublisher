@@ -1,4 +1,4 @@
-
+﻿
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -9,6 +9,9 @@ using System.Collections.Concurrent;
 namespace PublisherStudio.InstallerConsole.Helper
 {
 
+    /// <summary>
+    /// Provides color console logger provider operations.
+    /// </summary>
     [ProviderAlias("ColorConsole")]
     public sealed class ColorConsoleLoggerProvider : ILoggerProvider
     {
@@ -16,17 +19,26 @@ namespace PublisherStudio.InstallerConsole.Helper
         private readonly ConcurrentDictionary<string, ColorConsoleLogger> loggers =
             new(StringComparer.OrdinalIgnoreCase);
 
+        /// <summary>
+        /// Runs the color console logger provider operation.
+        /// </summary>
         public ColorConsoleLoggerProvider(
             ColorConsoleLoggerConfiguration config)
         {
             _currentConfig = config;
         }
 
+        /// <summary>
+        /// Creates logger.
+        /// </summary>
         public ILogger CreateLogger(string categoryName) =>
             loggers.GetOrAdd(categoryName, name => new ColorConsoleLogger(name, GetCurrentConfig));
 
         private ColorConsoleLoggerConfiguration GetCurrentConfig() => _currentConfig;
 
+        /// <summary>
+        /// Runs the dispose operation.
+        /// </summary>
         public void Dispose()
         {
             loggers.Clear();

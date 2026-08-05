@@ -1,0 +1,902 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService
+  commentId: T:PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService
+  id: PublisherDocumentationCatalogService
+  parent: PublisherStudio.Services.Documentation
+  children:
+  - PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.#ctor(Microsoft.AspNetCore.Hosting.IWebHostEnvironment,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService})
+  - PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetHtmlFilePath(System.String)
+  - PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetPdfPath
+  - PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetStatus
+  - PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.SearchComments(System.String,System.Int32)
+  langs:
+  - csharp
+  - vb
+  name: PublisherDocumentationCatalogService
+  nameWithType: PublisherDocumentationCatalogService
+  fullName: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Documentation
+  summary: Reads build-generated DocFX artifacts and compiler XML comments from the installed application tree.
+  example: []
+  syntax:
+    content: 'public sealed class PublisherDocumentationCatalogService : IPublisherDocumentationCatalogService'
+    content.vb: Public NotInheritable Class PublisherDocumentationCatalogService Implements IPublisherDocumentationCatalogService
+  inheritance:
+  - System.Object
+  implements:
+  - PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.#ctor(Microsoft.AspNetCore.Hosting.IWebHostEnvironment,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService})
+  commentId: M:PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.#ctor(Microsoft.AspNetCore.Hosting.IWebHostEnvironment,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService})
+  id: '#ctor(Microsoft.AspNetCore.Hosting.IWebHostEnvironment,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService})'
+  parent: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService
+  langs:
+  - csharp
+  - vb
+  name: PublisherDocumentationCatalogService(IWebHostEnvironment, ILogger<PublisherDocumentationCatalogService>)
+  nameWithType: PublisherDocumentationCatalogService.PublisherDocumentationCatalogService(IWebHostEnvironment, ILogger<PublisherDocumentationCatalogService>)
+  fullName: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.PublisherDocumentationCatalogService(Microsoft.AspNetCore.Hosting.IWebHostEnvironment, Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Documentation
+  summary: Reads build-generated DocFX artifacts and compiler XML comments from the installed application tree.
+  example: []
+  syntax:
+    content: public PublisherDocumentationCatalogService(IWebHostEnvironment environment, ILogger<PublisherDocumentationCatalogService> logger)
+    parameters:
+    - id: environment
+      type: Microsoft.AspNetCore.Hosting.IWebHostEnvironment
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService}
+    content.vb: Public Sub New(environment As IWebHostEnvironment, logger As ILogger(Of PublisherDocumentationCatalogService))
+  overload: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.#ctor*
+  nameWithType.vb: PublisherDocumentationCatalogService.New(IWebHostEnvironment, ILogger(Of PublisherDocumentationCatalogService))
+  fullName.vb: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.New(Microsoft.AspNetCore.Hosting.IWebHostEnvironment, Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService))
+  name.vb: New(IWebHostEnvironment, ILogger(Of PublisherDocumentationCatalogService))
+- uid: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetStatus
+  commentId: M:PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetStatus
+  id: GetStatus
+  parent: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService
+  langs:
+  - csharp
+  - vb
+  name: GetStatus()
+  nameWithType: PublisherDocumentationCatalogService.GetStatus()
+  fullName: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetStatus()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Documentation
+  summary: Returns availability information for the generated HTML, PDF, and XML documentation.
+  example: []
+  syntax:
+    content: public PublisherDocumentationStatus GetStatus()
+    return:
+      type: PublisherStudio.BusinessObjects.PublisherDocumentationStatus
+    content.vb: Public Function GetStatus() As PublisherDocumentationStatus
+  overload: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetStatus*
+  implements:
+  - PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.GetStatus
+- uid: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetHtmlFilePath(System.String)
+  commentId: M:PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetHtmlFilePath(System.String)
+  id: GetHtmlFilePath(System.String)
+  parent: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService
+  langs:
+  - csharp
+  - vb
+  name: GetHtmlFilePath(string?)
+  nameWithType: PublisherDocumentationCatalogService.GetHtmlFilePath(string?)
+  fullName: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetHtmlFilePath(string?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Documentation
+  summary: Resolves a safe generated documentation file path for an application-relative request.
+  example: []
+  syntax:
+    content: public string? GetHtmlFilePath(string? relativePath)
+    parameters:
+    - id: relativePath
+      type: System.String
+      description: The relative documentation path, or <a href="https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/null">null</a> for the index page.
+    return:
+      type: System.String
+      description: The full file path when it exists below the documentation root; otherwise <a href="https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/null">null</a>.
+    content.vb: Public Function GetHtmlFilePath(relativePath As String) As String
+  overload: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetHtmlFilePath*
+  implements:
+  - PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.GetHtmlFilePath(System.String)
+  nameWithType.vb: PublisherDocumentationCatalogService.GetHtmlFilePath(String)
+  fullName.vb: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetHtmlFilePath(String)
+  name.vb: GetHtmlFilePath(String)
+- uid: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetPdfPath
+  commentId: M:PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetPdfPath
+  id: GetPdfPath
+  parent: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService
+  langs:
+  - csharp
+  - vb
+  name: GetPdfPath()
+  nameWithType: PublisherDocumentationCatalogService.GetPdfPath()
+  fullName: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetPdfPath()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Documentation
+  summary: Resolves the generated PDF book for the current application version.
+  example: []
+  syntax:
+    content: public string? GetPdfPath()
+    return:
+      type: System.String
+      description: The PDF path when available; otherwise <a href="https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/null">null</a>.
+    content.vb: Public Function GetPdfPath() As String
+  overload: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetPdfPath*
+  implements:
+  - PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.GetPdfPath
+- uid: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.SearchComments(System.String,System.Int32)
+  commentId: M:PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.SearchComments(System.String,System.Int32)
+  id: SearchComments(System.String,System.Int32)
+  parent: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService
+  langs:
+  - csharp
+  - vb
+  name: SearchComments(string?, int)
+  nameWithType: PublisherDocumentationCatalogService.SearchComments(string?, int)
+  fullName: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.SearchComments(string?, int)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Documentation
+  summary: Searches compiler-generated XML comments by identifier, display name, summary, or remarks.
+  example: []
+  syntax:
+    content: public IReadOnlyList<PublisherDocumentationComment> SearchComments(string? query, int limit)
+    parameters:
+    - id: query
+      type: System.String
+      description: Optional case-insensitive search text.
+    - id: limit
+      type: System.Int32
+      description: Maximum number of comments to return.
+    return:
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublisherDocumentationComment}
+    content.vb: Public Function SearchComments(query As String, limit As Integer) As IReadOnlyList(Of PublisherDocumentationComment)
+  overload: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.SearchComments*
+  implements:
+  - PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.SearchComments(System.String,System.Int32)
+  nameWithType.vb: PublisherDocumentationCatalogService.SearchComments(String, Integer)
+  fullName.vb: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.SearchComments(String, Integer)
+  name.vb: SearchComments(String, Integer)
+references:
+- uid: PublisherStudio.Services.Documentation
+  commentId: N:PublisherStudio.Services.Documentation
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Documentation
+  nameWithType: PublisherStudio.Services.Documentation
+  fullName: PublisherStudio.Services.Documentation
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Documentation
+    name: Documentation
+    isExternal: true
+    href: PublisherStudio.Services.Documentation.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Documentation
+    name: Documentation
+    isExternal: true
+    href: PublisherStudio.Services.Documentation.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService
+  commentId: T:PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService
+  parent: PublisherStudio.Services.Documentation
+  isExternal: true
+  href: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.html
+  name: IPublisherDocumentationCatalogService
+  nameWithType: IPublisherDocumentationCatalogService
+  fullName: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.#ctor*
+  commentId: Overload:PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.html#PublisherStudio_Services_Documentation_PublisherDocumentationCatalogService__ctor_Microsoft_AspNetCore_Hosting_IWebHostEnvironment_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_Documentation_PublisherDocumentationCatalogService__
+  name: PublisherDocumentationCatalogService
+  nameWithType: PublisherDocumentationCatalogService.PublisherDocumentationCatalogService
+  fullName: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.PublisherDocumentationCatalogService
+  nameWithType.vb: PublisherDocumentationCatalogService.New
+  fullName.vb: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.New
+  name.vb: New
+- uid: Microsoft.AspNetCore.Hosting.IWebHostEnvironment
+  commentId: T:Microsoft.AspNetCore.Hosting.IWebHostEnvironment
+  parent: Microsoft.AspNetCore.Hosting
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.hosting.iwebhostenvironment
+  name: IWebHostEnvironment
+  nameWithType: IWebHostEnvironment
+  fullName: Microsoft.AspNetCore.Hosting.IWebHostEnvironment
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<PublisherDocumentationCatalogService>
+  nameWithType: ILogger<PublisherDocumentationCatalogService>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService>
+  nameWithType.vb: ILogger(Of PublisherDocumentationCatalogService)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService)
+  name.vb: ILogger(Of PublisherDocumentationCatalogService)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService
+    name: PublisherDocumentationCatalogService
+    isExternal: true
+    href: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService
+    name: PublisherDocumentationCatalogService
+    isExternal: true
+    href: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.html
+  - name: )
+- uid: Microsoft.AspNetCore.Hosting
+  commentId: N:Microsoft.AspNetCore.Hosting
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.AspNetCore.Hosting
+  nameWithType: Microsoft.AspNetCore.Hosting
+  fullName: Microsoft.AspNetCore.Hosting
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.AspNetCore
+    name: AspNetCore
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore
+  - name: .
+  - uid: Microsoft.AspNetCore.Hosting
+    name: Hosting
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.hosting
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.AspNetCore
+    name: AspNetCore
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore
+  - name: .
+  - uid: Microsoft.AspNetCore.Hosting
+    name: Hosting
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.hosting
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetStatus*
+  commentId: Overload:PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetStatus
+  isExternal: true
+  href: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.html#PublisherStudio_Services_Documentation_PublisherDocumentationCatalogService_GetStatus
+  name: GetStatus
+  nameWithType: PublisherDocumentationCatalogService.GetStatus
+  fullName: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetStatus
+- uid: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.GetStatus
+  commentId: M:PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.GetStatus
+  parent: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService
+  isExternal: true
+  href: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.html#PublisherStudio_Services_Documentation_IPublisherDocumentationCatalogService_GetStatus
+  name: GetStatus()
+  nameWithType: IPublisherDocumentationCatalogService.GetStatus()
+  fullName: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.GetStatus()
+  spec.csharp:
+  - uid: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.GetStatus
+    name: GetStatus
+    isExternal: true
+    href: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.html#PublisherStudio_Services_Documentation_IPublisherDocumentationCatalogService_GetStatus
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.GetStatus
+    name: GetStatus
+    isExternal: true
+    href: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.html#PublisherStudio_Services_Documentation_IPublisherDocumentationCatalogService_GetStatus
+  - name: (
+  - name: )
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus
+  commentId: T:PublisherStudio.BusinessObjects.PublisherDocumentationStatus
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.html
+  name: PublisherDocumentationStatus
+  nameWithType: PublisherDocumentationStatus
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetHtmlFilePath*
+  commentId: Overload:PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetHtmlFilePath
+  isExternal: true
+  href: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.html#PublisherStudio_Services_Documentation_PublisherDocumentationCatalogService_GetHtmlFilePath_System_String_
+  name: GetHtmlFilePath
+  nameWithType: PublisherDocumentationCatalogService.GetHtmlFilePath
+  fullName: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetHtmlFilePath
+- uid: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.GetHtmlFilePath(System.String)
+  commentId: M:PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.GetHtmlFilePath(System.String)
+  parent: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService
+  isExternal: true
+  href: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.html#PublisherStudio_Services_Documentation_IPublisherDocumentationCatalogService_GetHtmlFilePath_System_String_
+  name: GetHtmlFilePath(string)
+  nameWithType: IPublisherDocumentationCatalogService.GetHtmlFilePath(string)
+  fullName: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.GetHtmlFilePath(string)
+  nameWithType.vb: IPublisherDocumentationCatalogService.GetHtmlFilePath(String)
+  fullName.vb: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.GetHtmlFilePath(String)
+  name.vb: GetHtmlFilePath(String)
+  spec.csharp:
+  - uid: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.GetHtmlFilePath(System.String)
+    name: GetHtmlFilePath
+    isExternal: true
+    href: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.html#PublisherStudio_Services_Documentation_IPublisherDocumentationCatalogService_GetHtmlFilePath_System_String_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.GetHtmlFilePath(System.String)
+    name: GetHtmlFilePath
+    isExternal: true
+    href: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.html#PublisherStudio_Services_Documentation_IPublisherDocumentationCatalogService_GetHtmlFilePath_System_String_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetPdfPath*
+  commentId: Overload:PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetPdfPath
+  isExternal: true
+  href: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.html#PublisherStudio_Services_Documentation_PublisherDocumentationCatalogService_GetPdfPath
+  name: GetPdfPath
+  nameWithType: PublisherDocumentationCatalogService.GetPdfPath
+  fullName: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.GetPdfPath
+- uid: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.GetPdfPath
+  commentId: M:PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.GetPdfPath
+  parent: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService
+  isExternal: true
+  href: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.html#PublisherStudio_Services_Documentation_IPublisherDocumentationCatalogService_GetPdfPath
+  name: GetPdfPath()
+  nameWithType: IPublisherDocumentationCatalogService.GetPdfPath()
+  fullName: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.GetPdfPath()
+  spec.csharp:
+  - uid: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.GetPdfPath
+    name: GetPdfPath
+    isExternal: true
+    href: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.html#PublisherStudio_Services_Documentation_IPublisherDocumentationCatalogService_GetPdfPath
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.GetPdfPath
+    name: GetPdfPath
+    isExternal: true
+    href: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.html#PublisherStudio_Services_Documentation_IPublisherDocumentationCatalogService_GetPdfPath
+  - name: (
+  - name: )
+- uid: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.SearchComments*
+  commentId: Overload:PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.SearchComments
+  isExternal: true
+  href: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.html#PublisherStudio_Services_Documentation_PublisherDocumentationCatalogService_SearchComments_System_String_System_Int32_
+  name: SearchComments
+  nameWithType: PublisherDocumentationCatalogService.SearchComments
+  fullName: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.SearchComments
+- uid: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.SearchComments(System.String,System.Int32)
+  commentId: M:PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.SearchComments(System.String,System.Int32)
+  parent: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService
+  isExternal: true
+  href: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.html#PublisherStudio_Services_Documentation_IPublisherDocumentationCatalogService_SearchComments_System_String_System_Int32_
+  name: SearchComments(string, int)
+  nameWithType: IPublisherDocumentationCatalogService.SearchComments(string, int)
+  fullName: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.SearchComments(string, int)
+  nameWithType.vb: IPublisherDocumentationCatalogService.SearchComments(String, Integer)
+  fullName.vb: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.SearchComments(String, Integer)
+  name.vb: SearchComments(String, Integer)
+  spec.csharp:
+  - uid: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.SearchComments(System.String,System.Int32)
+    name: SearchComments
+    isExternal: true
+    href: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.html#PublisherStudio_Services_Documentation_IPublisherDocumentationCatalogService_SearchComments_System_String_System_Int32_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.Int32
+    name: int
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.int32
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.SearchComments(System.String,System.Int32)
+    name: SearchComments
+    isExternal: true
+    href: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.html#PublisherStudio_Services_Documentation_IPublisherDocumentationCatalogService_SearchComments_System_String_System_Int32_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.Int32
+    name: Integer
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.int32
+  - name: )
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublisherDocumentationComment}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublisherDocumentationComment}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<PublisherDocumentationComment>
+  nameWithType: IReadOnlyList<PublisherDocumentationComment>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.PublisherDocumentationComment>
+  nameWithType.vb: IReadOnlyList(Of PublisherDocumentationComment)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.PublisherDocumentationComment)
+  name.vb: IReadOnlyList(Of PublisherDocumentationComment)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.PublisherDocumentationComment
+    name: PublisherDocumentationComment
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublisherDocumentationComment.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.PublisherDocumentationComment
+    name: PublisherDocumentationComment
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublisherDocumentationComment.html
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic

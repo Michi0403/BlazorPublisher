@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using PublisherStudio.Services.Configuration;
 using System.Globalization;
@@ -6,10 +6,16 @@ using System.Net;
 
 namespace PublisherStudio.Services;
 
+/// <summary>
+/// Provides panel studio text service operations.
+/// </summary>
 public sealed class PanelStudioTextService(IPanelStudioTextPatternDataService patterns)
 {
     private readonly IPanelStudioTextPatternDataService _patterns = patterns;
 
+    /// <summary>
+    /// Determines whether expected interaction shutdown.
+    /// </summary>
     public bool IsExpectedInteractionShutdown(string? message, ILogger logger)
     {
         try
@@ -25,6 +31,9 @@ public sealed class PanelStudioTextService(IPanelStudioTextPatternDataService pa
         }
     }
 
+    /// <summary>
+    /// Reads number.
+    /// </summary>
     public double ReadNumber(System.Text.Json.JsonElement node, string propertyName, double fallback, ILogger logger)
     {
         try
@@ -38,6 +47,9 @@ public sealed class PanelStudioTextService(IPanelStudioTextPatternDataService pa
         }
     }
 
+    /// <summary>
+    /// Runs the plain text operation.
+    /// </summary>
     public string PlainText(string? markup, ILogger logger)
     {
         try
@@ -53,6 +65,9 @@ public sealed class PanelStudioTextService(IPanelStudioTextPatternDataService pa
         }
     }
 
+    /// <summary>
+    /// Parses list.
+    /// </summary>
     public IReadOnlyList<string> ParseList(string? value, ILogger logger)
     {
         try
@@ -72,6 +87,9 @@ public sealed class PanelStudioTextService(IPanelStudioTextPatternDataService pa
         }
     }
 
+    /// <summary>
+    /// Runs the safe file name operation.
+    /// </summary>
     public string SafeFileName(string? value, string fallback, ILogger logger)
     {
         try
@@ -86,6 +104,9 @@ public sealed class PanelStudioTextService(IPanelStudioTextPatternDataService pa
         }
     }
 
+    /// <summary>
+    /// Runs the as bool operation.
+    /// </summary>
     public bool AsBool(ChangeEventArgs args, ILogger logger)
     {
         try
@@ -99,6 +120,9 @@ public sealed class PanelStudioTextService(IPanelStudioTextPatternDataService pa
         }
     }
 
+    /// <summary>
+    /// Runs the text operation.
+    /// </summary>
     public string Text(ChangeEventArgs args, ILogger logger)
     {
         try { return args.Value?.ToString() ?? string.Empty; }
@@ -109,6 +133,9 @@ public sealed class PanelStudioTextService(IPanelStudioTextPatternDataService pa
         }
     }
 
+    /// <summary>
+    /// Runs the invariant operation.
+    /// </summary>
     public string Invariant(double value, ILogger logger)
     {
         try { return value.ToString("0.###", CultureInfo.InvariantCulture); }
@@ -119,6 +146,9 @@ public sealed class PanelStudioTextService(IPanelStudioTextPatternDataService pa
         }
     }
 
+    /// <summary>
+    /// Runs the change number operation.
+    /// </summary>
     public void ChangeNumber(ChangeEventArgs args, Action<double> update, ILogger logger)
     {
         try
@@ -128,6 +158,9 @@ public sealed class PanelStudioTextService(IPanelStudioTextPatternDataService pa
         catch (Exception exception) { logger.LogError(exception, $"{nameof(ChangeNumber)} failed while updating a panel number."); }
     }
 
+    /// <summary>
+    /// Runs the change int operation.
+    /// </summary>
     public void ChangeInt(ChangeEventArgs args, Action<int> update, ILogger logger)
     {
         try

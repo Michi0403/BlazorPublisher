@@ -1,0 +1,533 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases
+  commentId: T:PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases
+  id: StreamingLanUseCases
+  parent: PublisherStudio.Services.Streaming.UseCases.Lan
+  children:
+  - PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.#ctor(PublisherStudio.Services.Streaming.Sessions.MediaSessionRegistry)
+  - PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.BuildWatchPage(System.Guid)
+  - PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.GetStatus(System.Guid)
+  - PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.ResolveAsset(System.Guid,System.String)
+  langs:
+  - csharp
+  - vb
+  name: StreamingLanUseCases
+  nameWithType: StreamingLanUseCases
+  fullName: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Lan
+  summary: Resolves LAN status, safe HLS assets and the local watch page without coupling controllers to session internals.
+  example: []
+  syntax:
+    content: public sealed class StreamingLanUseCases
+    content.vb: Public NotInheritable Class StreamingLanUseCases
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.#ctor(PublisherStudio.Services.Streaming.Sessions.MediaSessionRegistry)
+  commentId: M:PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.#ctor(PublisherStudio.Services.Streaming.Sessions.MediaSessionRegistry)
+  id: '#ctor(PublisherStudio.Services.Streaming.Sessions.MediaSessionRegistry)'
+  parent: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases
+  langs:
+  - csharp
+  - vb
+  name: StreamingLanUseCases(MediaSessionRegistry)
+  nameWithType: StreamingLanUseCases.StreamingLanUseCases(MediaSessionRegistry)
+  fullName: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.StreamingLanUseCases(PublisherStudio.Services.Streaming.Sessions.MediaSessionRegistry)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Lan
+  summary: Resolves LAN status, safe HLS assets and the local watch page without coupling controllers to session internals.
+  example: []
+  syntax:
+    content: public StreamingLanUseCases(MediaSessionRegistry sessions)
+    parameters:
+    - id: sessions
+      type: PublisherStudio.Services.Streaming.Sessions.MediaSessionRegistry
+    content.vb: Public Sub New(sessions As MediaSessionRegistry)
+  overload: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.#ctor*
+  nameWithType.vb: StreamingLanUseCases.New(MediaSessionRegistry)
+  fullName.vb: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.New(PublisherStudio.Services.Streaming.Sessions.MediaSessionRegistry)
+  name.vb: New(MediaSessionRegistry)
+- uid: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.GetStatus(System.Guid)
+  commentId: M:PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.GetStatus(System.Guid)
+  id: GetStatus(System.Guid)
+  parent: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases
+  langs:
+  - csharp
+  - vb
+  name: GetStatus(Guid)
+  nameWithType: StreamingLanUseCases.GetStatus(Guid)
+  fullName: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.GetStatus(System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Lan
+  summary: Gets status.
+  example: []
+  syntax:
+    content: public StreamingLanStatus? GetStatus(Guid sessionId)
+    parameters:
+    - id: sessionId
+      type: System.Guid
+    return:
+      type: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanStatus
+    content.vb: Public Function GetStatus(sessionId As Guid) As StreamingLanStatus
+  overload: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.GetStatus*
+- uid: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.ResolveAsset(System.Guid,System.String)
+  commentId: M:PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.ResolveAsset(System.Guid,System.String)
+  id: ResolveAsset(System.Guid,System.String)
+  parent: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases
+  langs:
+  - csharp
+  - vb
+  name: ResolveAsset(Guid, string?)
+  nameWithType: StreamingLanUseCases.ResolveAsset(Guid, string?)
+  fullName: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.ResolveAsset(System.Guid, string?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Lan
+  summary: Resolves asset.
+  example: []
+  syntax:
+    content: public StreamingAsset? ResolveAsset(Guid sessionId, string? asset)
+    parameters:
+    - id: sessionId
+      type: System.Guid
+    - id: asset
+      type: System.String
+    return:
+      type: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingAsset
+    content.vb: Public Function ResolveAsset(sessionId As Guid, asset As String) As StreamingAsset
+  overload: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.ResolveAsset*
+  nameWithType.vb: StreamingLanUseCases.ResolveAsset(Guid, String)
+  fullName.vb: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.ResolveAsset(System.Guid, String)
+  name.vb: ResolveAsset(Guid, String)
+- uid: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.BuildWatchPage(System.Guid)
+  commentId: M:PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.BuildWatchPage(System.Guid)
+  id: BuildWatchPage(System.Guid)
+  parent: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases
+  langs:
+  - csharp
+  - vb
+  name: BuildWatchPage(Guid)
+  nameWithType: StreamingLanUseCases.BuildWatchPage(Guid)
+  fullName: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.BuildWatchPage(System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Lan
+  summary: Builds watch page.
+  example: []
+  syntax:
+    content: public string? BuildWatchPage(Guid sessionId)
+    parameters:
+    - id: sessionId
+      type: System.Guid
+    return:
+      type: System.String
+    content.vb: Public Function BuildWatchPage(sessionId As Guid) As String
+  overload: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.BuildWatchPage*
+references:
+- uid: PublisherStudio.Services.Streaming.UseCases.Lan
+  commentId: N:PublisherStudio.Services.Streaming.UseCases.Lan
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.UseCases.Lan
+  nameWithType: PublisherStudio.Services.Streaming.UseCases.Lan
+  fullName: PublisherStudio.Services.Streaming.UseCases.Lan
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases.Lan
+    name: Lan
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Lan.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases.Lan
+    name: Lan
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Lan.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.#ctor*
+  commentId: Overload:PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.html#PublisherStudio_Services_Streaming_UseCases_Lan_StreamingLanUseCases__ctor_PublisherStudio_Services_Streaming_Sessions_MediaSessionRegistry_
+  name: StreamingLanUseCases
+  nameWithType: StreamingLanUseCases.StreamingLanUseCases
+  fullName: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.StreamingLanUseCases
+  nameWithType.vb: StreamingLanUseCases.New
+  fullName.vb: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.New
+  name.vb: New
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSessionRegistry
+  commentId: T:PublisherStudio.Services.Streaming.Sessions.MediaSessionRegistry
+  parent: PublisherStudio.Services.Streaming.Sessions
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSessionRegistry.html
+  name: MediaSessionRegistry
+  nameWithType: MediaSessionRegistry
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSessionRegistry
+- uid: PublisherStudio.Services.Streaming.Sessions
+  commentId: N:PublisherStudio.Services.Streaming.Sessions
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Sessions
+  nameWithType: PublisherStudio.Services.Streaming.Sessions
+  fullName: PublisherStudio.Services.Streaming.Sessions
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Sessions
+    name: Sessions
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Sessions.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Sessions
+    name: Sessions
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Sessions.html
+- uid: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.GetStatus*
+  commentId: Overload:PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.GetStatus
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.html#PublisherStudio_Services_Streaming_UseCases_Lan_StreamingLanUseCases_GetStatus_System_Guid_
+  name: GetStatus
+  nameWithType: StreamingLanUseCases.GetStatus
+  fullName: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.GetStatus
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanStatus
+  commentId: T:PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanStatus
+  parent: PublisherStudio.Services.Streaming.UseCases.Lan
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanStatus.html
+  name: StreamingLanStatus
+  nameWithType: StreamingLanStatus
+  fullName: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanStatus
+- uid: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.ResolveAsset*
+  commentId: Overload:PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.ResolveAsset
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.html#PublisherStudio_Services_Streaming_UseCases_Lan_StreamingLanUseCases_ResolveAsset_System_Guid_System_String_
+  name: ResolveAsset
+  nameWithType: StreamingLanUseCases.ResolveAsset
+  fullName: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.ResolveAsset
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingAsset
+  commentId: T:PublisherStudio.Services.Streaming.UseCases.Lan.StreamingAsset
+  parent: PublisherStudio.Services.Streaming.UseCases.Lan
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingAsset.html
+  name: StreamingAsset
+  nameWithType: StreamingAsset
+  fullName: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingAsset
+- uid: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.BuildWatchPage*
+  commentId: Overload:PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.BuildWatchPage
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.html#PublisherStudio_Services_Streaming_UseCases_Lan_StreamingLanUseCases_BuildWatchPage_System_Guid_
+  name: BuildWatchPage
+  nameWithType: StreamingLanUseCases.BuildWatchPage
+  fullName: PublisherStudio.Services.Streaming.UseCases.Lan.StreamingLanUseCases.BuildWatchPage

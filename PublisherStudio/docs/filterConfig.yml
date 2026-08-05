@@ -1,0 +1,7 @@
+apiRules:
+- include:
+    uidRegex: ^PublisherStudio
+    type: Namespace
+- exclude:
+    uidRegex: ^PublisherStudio\.Components\..*__Generated
+    type: Type

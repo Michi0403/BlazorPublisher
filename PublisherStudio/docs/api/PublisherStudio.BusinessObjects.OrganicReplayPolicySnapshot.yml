@@ -1,0 +1,447 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot
+  commentId: T:PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot
+  id: OrganicReplayPolicySnapshot
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.#ctor
+  - PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.AllowedFutureSkew
+  - PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.CleanupInterval
+  - PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.MaximumTrackedMessages
+  - PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.Retention
+  langs:
+  - csharp
+  - vb
+  name: OrganicReplayPolicySnapshot
+  nameWithType: OrganicReplayPolicySnapshot
+  fullName: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents an organic replay policy snapshot.
+  example: []
+  syntax:
+    content: public sealed class OrganicReplayPolicySnapshot
+    content.vb: Public NotInheritable Class OrganicReplayPolicySnapshot
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.#ctor
+  commentId: M:PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot
+  langs:
+  - csharp
+  - vb
+  name: OrganicReplayPolicySnapshot()
+  nameWithType: OrganicReplayPolicySnapshot.OrganicReplayPolicySnapshot()
+  fullName: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.OrganicReplayPolicySnapshot()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public OrganicReplayPolicySnapshot()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.#ctor*
+  nameWithType.vb: OrganicReplayPolicySnapshot.New()
+  fullName.vb: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.New()
+  name.vb: New()
+- uid: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.Retention
+  commentId: P:PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.Retention
+  id: Retention
+  parent: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot
+  langs:
+  - csharp
+  - vb
+  name: Retention
+  nameWithType: OrganicReplayPolicySnapshot.Retention
+  fullName: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.Retention
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets retention.
+  example: []
+  syntax:
+    content: public TimeSpan Retention { get; init; }
+    parameters: []
+    return:
+      type: System.TimeSpan
+    content.vb: Public Property Retention As TimeSpan
+  overload: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.Retention*
+- uid: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.AllowedFutureSkew
+  commentId: P:PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.AllowedFutureSkew
+  id: AllowedFutureSkew
+  parent: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot
+  langs:
+  - csharp
+  - vb
+  name: AllowedFutureSkew
+  nameWithType: OrganicReplayPolicySnapshot.AllowedFutureSkew
+  fullName: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.AllowedFutureSkew
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets allowed future skew.
+  example: []
+  syntax:
+    content: public TimeSpan AllowedFutureSkew { get; init; }
+    parameters: []
+    return:
+      type: System.TimeSpan
+    content.vb: Public Property AllowedFutureSkew As TimeSpan
+  overload: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.AllowedFutureSkew*
+- uid: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.CleanupInterval
+  commentId: P:PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.CleanupInterval
+  id: CleanupInterval
+  parent: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot
+  langs:
+  - csharp
+  - vb
+  name: CleanupInterval
+  nameWithType: OrganicReplayPolicySnapshot.CleanupInterval
+  fullName: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.CleanupInterval
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets cleanup interval.
+  example: []
+  syntax:
+    content: public int CleanupInterval { get; init; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property CleanupInterval As Integer
+  overload: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.CleanupInterval*
+- uid: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.MaximumTrackedMessages
+  commentId: P:PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.MaximumTrackedMessages
+  id: MaximumTrackedMessages
+  parent: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot
+  langs:
+  - csharp
+  - vb
+  name: MaximumTrackedMessages
+  nameWithType: OrganicReplayPolicySnapshot.MaximumTrackedMessages
+  fullName: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.MaximumTrackedMessages
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets maximum tracked messages.
+  example: []
+  syntax:
+    content: public int MaximumTrackedMessages { get; init; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property MaximumTrackedMessages As Integer
+  overload: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.MaximumTrackedMessages*
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.#ctor*
+  commentId: Overload:PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.#ctor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.html#PublisherStudio_BusinessObjects_OrganicReplayPolicySnapshot__ctor
+  name: OrganicReplayPolicySnapshot
+  nameWithType: OrganicReplayPolicySnapshot.OrganicReplayPolicySnapshot
+  fullName: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.OrganicReplayPolicySnapshot
+  nameWithType.vb: OrganicReplayPolicySnapshot.New
+  fullName.vb: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.New
+  name.vb: New
+- uid: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.Retention*
+  commentId: Overload:PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.Retention
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.html#PublisherStudio_BusinessObjects_OrganicReplayPolicySnapshot_Retention
+  name: Retention
+  nameWithType: OrganicReplayPolicySnapshot.Retention
+  fullName: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.Retention
+- uid: System.TimeSpan
+  commentId: T:System.TimeSpan
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.timespan
+  name: TimeSpan
+  nameWithType: TimeSpan
+  fullName: System.TimeSpan
+- uid: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.AllowedFutureSkew*
+  commentId: Overload:PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.AllowedFutureSkew
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.html#PublisherStudio_BusinessObjects_OrganicReplayPolicySnapshot_AllowedFutureSkew
+  name: AllowedFutureSkew
+  nameWithType: OrganicReplayPolicySnapshot.AllowedFutureSkew
+  fullName: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.AllowedFutureSkew
+- uid: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.CleanupInterval*
+  commentId: Overload:PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.CleanupInterval
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.html#PublisherStudio_BusinessObjects_OrganicReplayPolicySnapshot_CleanupInterval
+  name: CleanupInterval
+  nameWithType: OrganicReplayPolicySnapshot.CleanupInterval
+  fullName: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.CleanupInterval
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.MaximumTrackedMessages*
+  commentId: Overload:PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.MaximumTrackedMessages
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.html#PublisherStudio_BusinessObjects_OrganicReplayPolicySnapshot_MaximumTrackedMessages
+  name: MaximumTrackedMessages
+  nameWithType: OrganicReplayPolicySnapshot.MaximumTrackedMessages
+  fullName: PublisherStudio.BusinessObjects.OrganicReplayPolicySnapshot.MaximumTrackedMessages

@@ -1,0 +1,891 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService
+  commentId: T:PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService
+  id: LocalGptDiscoveryHostedService
+  parent: PublisherStudio.HostedServices.OrganicPlugins
+  children:
+  - PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService.#ctor(Microsoft.Extensions.Options.IOptions{PublisherStudio.BusinessObjects.OrganicPluginOptions},PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry,PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService,PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec,Microsoft.Extensions.Logging.ILogger{PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService})
+  - PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService.ExecuteAsync(System.Threading.CancellationToken)
+  langs:
+  - csharp
+  - vb
+  name: LocalGptDiscoveryHostedService
+  nameWithType: LocalGptDiscoveryHostedService
+  fullName: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.HostedServices.OrganicPlugins
+  summary: Provides local gpt discovery hosted service operations.
+  example: []
+  syntax:
+    content: 'public sealed class LocalGptDiscoveryHostedService : BackgroundService, IHostedService, IDisposable'
+    content.vb: Public NotInheritable Class LocalGptDiscoveryHostedService Inherits BackgroundService Implements IHostedService, IDisposable
+  inheritance:
+  - System.Object
+  - Microsoft.Extensions.Hosting.BackgroundService
+  implements:
+  - Microsoft.Extensions.Hosting.IHostedService
+  - System.IDisposable
+  inheritedMembers:
+  - Microsoft.Extensions.Hosting.BackgroundService.StartAsync(System.Threading.CancellationToken)
+  - Microsoft.Extensions.Hosting.BackgroundService.StopAsync(System.Threading.CancellationToken)
+  - Microsoft.Extensions.Hosting.BackgroundService.Dispose
+  - Microsoft.Extensions.Hosting.BackgroundService.ExecuteTask
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService.#ctor(Microsoft.Extensions.Options.IOptions{PublisherStudio.BusinessObjects.OrganicPluginOptions},PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry,PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService,PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec,Microsoft.Extensions.Logging.ILogger{PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService})
+  commentId: M:PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService.#ctor(Microsoft.Extensions.Options.IOptions{PublisherStudio.BusinessObjects.OrganicPluginOptions},PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry,PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService,PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec,Microsoft.Extensions.Logging.ILogger{PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService})
+  id: '#ctor(Microsoft.Extensions.Options.IOptions{PublisherStudio.BusinessObjects.OrganicPluginOptions},PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry,PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService,PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec,Microsoft.Extensions.Logging.ILogger{PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService})'
+  parent: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService
+  langs:
+  - csharp
+  - vb
+  name: LocalGptDiscoveryHostedService(IOptions<OrganicPluginOptions>, ILocalGptDiscoveryRegistry, ILocalGptConnectionService, IOrganicPluginProtocolCodec, ILogger<LocalGptDiscoveryHostedService>)
+  nameWithType: LocalGptDiscoveryHostedService.LocalGptDiscoveryHostedService(IOptions<OrganicPluginOptions>, ILocalGptDiscoveryRegistry, ILocalGptConnectionService, IOrganicPluginProtocolCodec, ILogger<LocalGptDiscoveryHostedService>)
+  fullName: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService.LocalGptDiscoveryHostedService(Microsoft.Extensions.Options.IOptions<PublisherStudio.BusinessObjects.OrganicPluginOptions>, PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry, PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService, PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec, Microsoft.Extensions.Logging.ILogger<PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.HostedServices.OrganicPlugins
+  summary: Provides local gpt discovery hosted service operations.
+  example: []
+  syntax:
+    content: public LocalGptDiscoveryHostedService(IOptions<OrganicPluginOptions> options, ILocalGptDiscoveryRegistry registry, ILocalGptConnectionService connection, IOrganicPluginProtocolCodec codec, ILogger<LocalGptDiscoveryHostedService> logger)
+    parameters:
+    - id: options
+      type: Microsoft.Extensions.Options.IOptions{PublisherStudio.BusinessObjects.OrganicPluginOptions}
+    - id: registry
+      type: PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry
+    - id: connection
+      type: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService
+    - id: codec
+      type: PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService}
+    content.vb: Public Sub New(options As IOptions(Of OrganicPluginOptions), registry As ILocalGptDiscoveryRegistry, connection As ILocalGptConnectionService, codec As IOrganicPluginProtocolCodec, logger As ILogger(Of LocalGptDiscoveryHostedService))
+  overload: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService.#ctor*
+  nameWithType.vb: LocalGptDiscoveryHostedService.New(IOptions(Of OrganicPluginOptions), ILocalGptDiscoveryRegistry, ILocalGptConnectionService, IOrganicPluginProtocolCodec, ILogger(Of LocalGptDiscoveryHostedService))
+  fullName.vb: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService.New(Microsoft.Extensions.Options.IOptions(Of PublisherStudio.BusinessObjects.OrganicPluginOptions), PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry, PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService, PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec, Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService))
+  name.vb: New(IOptions(Of OrganicPluginOptions), ILocalGptDiscoveryRegistry, ILocalGptConnectionService, IOrganicPluginProtocolCodec, ILogger(Of LocalGptDiscoveryHostedService))
+- uid: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService.ExecuteAsync(System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService.ExecuteAsync(System.Threading.CancellationToken)
+  id: ExecuteAsync(System.Threading.CancellationToken)
+  parent: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService
+  langs:
+  - csharp
+  - vb
+  name: ExecuteAsync(CancellationToken)
+  nameWithType: LocalGptDiscoveryHostedService.ExecuteAsync(CancellationToken)
+  fullName: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService.ExecuteAsync(System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.HostedServices.OrganicPlugins
+  summary: Runs the execute async operation.
+  example: []
+  syntax:
+    content: protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    parameters:
+    - id: stoppingToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task
+    content.vb: Protected Overrides Function ExecuteAsync(stoppingToken As CancellationToken) As Task
+  overridden: Microsoft.Extensions.Hosting.BackgroundService.ExecuteAsync(System.Threading.CancellationToken)
+  overload: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService.ExecuteAsync*
+references:
+- uid: PublisherStudio.HostedServices.OrganicPlugins
+  commentId: N:PublisherStudio.HostedServices.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.HostedServices.OrganicPlugins
+  nameWithType: PublisherStudio.HostedServices.OrganicPlugins
+  fullName: PublisherStudio.HostedServices.OrganicPlugins
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.HostedServices
+    name: HostedServices
+    isExternal: true
+    href: PublisherStudio.HostedServices.html
+  - name: .
+  - uid: PublisherStudio.HostedServices.OrganicPlugins
+    name: OrganicPlugins
+    isExternal: true
+    href: PublisherStudio.HostedServices.OrganicPlugins.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.HostedServices
+    name: HostedServices
+    isExternal: true
+    href: PublisherStudio.HostedServices.html
+  - name: .
+  - uid: PublisherStudio.HostedServices.OrganicPlugins
+    name: OrganicPlugins
+    isExternal: true
+    href: PublisherStudio.HostedServices.OrganicPlugins.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: Microsoft.Extensions.Hosting.BackgroundService
+  commentId: T:Microsoft.Extensions.Hosting.BackgroundService
+  parent: Microsoft.Extensions.Hosting
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.hosting.backgroundservice
+  name: BackgroundService
+  nameWithType: BackgroundService
+  fullName: Microsoft.Extensions.Hosting.BackgroundService
+- uid: Microsoft.Extensions.Hosting.IHostedService
+  commentId: T:Microsoft.Extensions.Hosting.IHostedService
+  parent: Microsoft.Extensions.Hosting
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.hosting.ihostedservice
+  name: IHostedService
+  nameWithType: IHostedService
+  fullName: Microsoft.Extensions.Hosting.IHostedService
+- uid: System.IDisposable
+  commentId: T:System.IDisposable
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.idisposable
+  name: IDisposable
+  nameWithType: IDisposable
+  fullName: System.IDisposable
+- uid: Microsoft.Extensions.Hosting.BackgroundService.StartAsync(System.Threading.CancellationToken)
+  commentId: M:Microsoft.Extensions.Hosting.BackgroundService.StartAsync(System.Threading.CancellationToken)
+  parent: Microsoft.Extensions.Hosting.BackgroundService
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.hosting.backgroundservice.startasync
+  name: StartAsync(CancellationToken)
+  nameWithType: BackgroundService.StartAsync(CancellationToken)
+  fullName: Microsoft.Extensions.Hosting.BackgroundService.StartAsync(System.Threading.CancellationToken)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Hosting.BackgroundService.StartAsync(System.Threading.CancellationToken)
+    name: StartAsync
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.hosting.backgroundservice.startasync
+  - name: (
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+  spec.vb:
+  - uid: Microsoft.Extensions.Hosting.BackgroundService.StartAsync(System.Threading.CancellationToken)
+    name: StartAsync
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.hosting.backgroundservice.startasync
+  - name: (
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+- uid: Microsoft.Extensions.Hosting.BackgroundService.StopAsync(System.Threading.CancellationToken)
+  commentId: M:Microsoft.Extensions.Hosting.BackgroundService.StopAsync(System.Threading.CancellationToken)
+  parent: Microsoft.Extensions.Hosting.BackgroundService
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.hosting.backgroundservice.stopasync
+  name: StopAsync(CancellationToken)
+  nameWithType: BackgroundService.StopAsync(CancellationToken)
+  fullName: Microsoft.Extensions.Hosting.BackgroundService.StopAsync(System.Threading.CancellationToken)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Hosting.BackgroundService.StopAsync(System.Threading.CancellationToken)
+    name: StopAsync
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.hosting.backgroundservice.stopasync
+  - name: (
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+  spec.vb:
+  - uid: Microsoft.Extensions.Hosting.BackgroundService.StopAsync(System.Threading.CancellationToken)
+    name: StopAsync
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.hosting.backgroundservice.stopasync
+  - name: (
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+- uid: Microsoft.Extensions.Hosting.BackgroundService.Dispose
+  commentId: M:Microsoft.Extensions.Hosting.BackgroundService.Dispose
+  parent: Microsoft.Extensions.Hosting.BackgroundService
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.hosting.backgroundservice.dispose
+  name: Dispose()
+  nameWithType: BackgroundService.Dispose()
+  fullName: Microsoft.Extensions.Hosting.BackgroundService.Dispose()
+  spec.csharp:
+  - uid: Microsoft.Extensions.Hosting.BackgroundService.Dispose
+    name: Dispose
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.hosting.backgroundservice.dispose
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Microsoft.Extensions.Hosting.BackgroundService.Dispose
+    name: Dispose
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.hosting.backgroundservice.dispose
+  - name: (
+  - name: )
+- uid: Microsoft.Extensions.Hosting.BackgroundService.ExecuteTask
+  commentId: P:Microsoft.Extensions.Hosting.BackgroundService.ExecuteTask
+  parent: Microsoft.Extensions.Hosting.BackgroundService
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.hosting.backgroundservice.executetask
+  name: ExecuteTask
+  nameWithType: BackgroundService.ExecuteTask
+  fullName: Microsoft.Extensions.Hosting.BackgroundService.ExecuteTask
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Microsoft.Extensions.Hosting
+  commentId: N:Microsoft.Extensions.Hosting
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Hosting
+  nameWithType: Microsoft.Extensions.Hosting
+  fullName: Microsoft.Extensions.Hosting
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Hosting
+    name: Hosting
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.hosting
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Hosting
+    name: Hosting
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.hosting
+- uid: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService.#ctor*
+  commentId: Overload:PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService.#ctor
+  isExternal: true
+  href: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService.html#PublisherStudio_HostedServices_OrganicPlugins_LocalGptDiscoveryHostedService__ctor_Microsoft_Extensions_Options_IOptions_PublisherStudio_BusinessObjects_OrganicPluginOptions__PublisherStudio_Services_OrganicPlugins_ILocalGptDiscoveryRegistry_PublisherStudio_Services_OrganicPlugins_ILocalGptConnectionService_PublisherStudio_Services_OrganicPlugins_IOrganicPluginProtocolCodec_Microsoft_Extensions_Logging_ILogger_PublisherStudio_HostedServices_OrganicPlugins_LocalGptDiscoveryHostedService__
+  name: LocalGptDiscoveryHostedService
+  nameWithType: LocalGptDiscoveryHostedService.LocalGptDiscoveryHostedService
+  fullName: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService.LocalGptDiscoveryHostedService
+  nameWithType.vb: LocalGptDiscoveryHostedService.New
+  fullName.vb: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService.New
+  name.vb: New
+- uid: Microsoft.Extensions.Options.IOptions{PublisherStudio.BusinessObjects.OrganicPluginOptions}
+  commentId: T:Microsoft.Extensions.Options.IOptions{PublisherStudio.BusinessObjects.OrganicPluginOptions}
+  parent: Microsoft.Extensions.Options
+  definition: Microsoft.Extensions.Options.IOptions`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.options.ioptions-1
+  name: IOptions<OrganicPluginOptions>
+  nameWithType: IOptions<OrganicPluginOptions>
+  fullName: Microsoft.Extensions.Options.IOptions<PublisherStudio.BusinessObjects.OrganicPluginOptions>
+  nameWithType.vb: IOptions(Of OrganicPluginOptions)
+  fullName.vb: Microsoft.Extensions.Options.IOptions(Of PublisherStudio.BusinessObjects.OrganicPluginOptions)
+  name.vb: IOptions(Of OrganicPluginOptions)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Options.IOptions`1
+    name: IOptions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.options.ioptions-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.OrganicPluginOptions
+    name: OrganicPluginOptions
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.OrganicPluginOptions.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Options.IOptions`1
+    name: IOptions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.options.ioptions-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.OrganicPluginOptions
+    name: OrganicPluginOptions
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.OrganicPluginOptions.html
+  - name: )
+- uid: PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry
+  commentId: T:PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry
+  parent: PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry.html
+  name: ILocalGptDiscoveryRegistry
+  nameWithType: ILocalGptDiscoveryRegistry
+  fullName: PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry
+- uid: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService
+  commentId: T:PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService
+  parent: PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.html
+  name: ILocalGptConnectionService
+  nameWithType: ILocalGptConnectionService
+  fullName: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec
+  commentId: T:PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec
+  parent: PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec.html
+  name: IOrganicPluginProtocolCodec
+  nameWithType: IOrganicPluginProtocolCodec
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<LocalGptDiscoveryHostedService>
+  nameWithType: ILogger<LocalGptDiscoveryHostedService>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService>
+  nameWithType.vb: ILogger(Of LocalGptDiscoveryHostedService)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService)
+  name.vb: ILogger(Of LocalGptDiscoveryHostedService)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService
+    name: LocalGptDiscoveryHostedService
+    isExternal: true
+    href: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService
+    name: LocalGptDiscoveryHostedService
+    isExternal: true
+    href: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService.html
+  - name: )
+- uid: Microsoft.Extensions.Options.IOptions`1
+  commentId: T:Microsoft.Extensions.Options.IOptions`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.options.ioptions-1
+  name: IOptions<TOptions>
+  nameWithType: IOptions<TOptions>
+  fullName: Microsoft.Extensions.Options.IOptions<TOptions>
+  nameWithType.vb: IOptions(Of TOptions)
+  fullName.vb: Microsoft.Extensions.Options.IOptions(Of TOptions)
+  name.vb: IOptions(Of TOptions)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Options.IOptions`1
+    name: IOptions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.options.ioptions-1
+  - name: <
+  - name: TOptions
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Options.IOptions`1
+    name: IOptions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.options.ioptions-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TOptions
+  - name: )
+- uid: Microsoft.Extensions.Options
+  commentId: N:Microsoft.Extensions.Options
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Options
+  nameWithType: Microsoft.Extensions.Options
+  fullName: Microsoft.Extensions.Options
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Options
+    name: Options
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.options
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Options
+    name: Options
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.options
+- uid: PublisherStudio.Services.OrganicPlugins
+  commentId: N:PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.OrganicPlugins
+  nameWithType: PublisherStudio.Services.OrganicPlugins
+  fullName: PublisherStudio.Services.OrganicPlugins
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OrganicPlugins
+    name: OrganicPlugins
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OrganicPlugins
+    name: OrganicPlugins
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.html
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: Microsoft.Extensions.Hosting.BackgroundService.ExecuteAsync(System.Threading.CancellationToken)
+  commentId: M:Microsoft.Extensions.Hosting.BackgroundService.ExecuteAsync(System.Threading.CancellationToken)
+  parent: Microsoft.Extensions.Hosting.BackgroundService
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.hosting.backgroundservice.executeasync
+  name: ExecuteAsync(CancellationToken)
+  nameWithType: BackgroundService.ExecuteAsync(CancellationToken)
+  fullName: Microsoft.Extensions.Hosting.BackgroundService.ExecuteAsync(System.Threading.CancellationToken)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Hosting.BackgroundService.ExecuteAsync(System.Threading.CancellationToken)
+    name: ExecuteAsync
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.hosting.backgroundservice.executeasync
+  - name: (
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+  spec.vb:
+  - uid: Microsoft.Extensions.Hosting.BackgroundService.ExecuteAsync(System.Threading.CancellationToken)
+    name: ExecuteAsync
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.hosting.backgroundservice.executeasync
+  - name: (
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+- uid: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService.ExecuteAsync*
+  commentId: Overload:PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService.ExecuteAsync
+  isExternal: true
+  href: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService.html#PublisherStudio_HostedServices_OrganicPlugins_LocalGptDiscoveryHostedService_ExecuteAsync_System_Threading_CancellationToken_
+  name: ExecuteAsync
+  nameWithType: LocalGptDiscoveryHostedService.ExecuteAsync
+  fullName: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService.ExecuteAsync
+- uid: System.Threading.CancellationToken
+  commentId: T:System.Threading.CancellationToken
+  parent: System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  name: CancellationToken
+  nameWithType: CancellationToken
+  fullName: System.Threading.CancellationToken
+- uid: System.Threading.Tasks.Task
+  commentId: T:System.Threading.Tasks.Task
+  parent: System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task
+  name: Task
+  nameWithType: Task
+  fullName: System.Threading.Tasks.Task
+- uid: System.Threading
+  commentId: N:System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading
+  nameWithType: System.Threading
+  fullName: System.Threading
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+- uid: System.Threading.Tasks
+  commentId: N:System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading.Tasks
+  nameWithType: System.Threading.Tasks
+  fullName: System.Threading.Tasks
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks

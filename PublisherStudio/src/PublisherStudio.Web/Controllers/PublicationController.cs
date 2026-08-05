@@ -1,13 +1,19 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services;
 
 namespace PublisherStudio.Controllers;
 
+/// <summary>
+/// Provides publication controller operations.
+/// </summary>
 [ApiController]
 [Route("api/publications")]
 public sealed class PublicationController(PublicationFileService files, ILogger<PublicationController> logger) : ControllerBase
 {
+    /// <summary>
+    /// Runs the download operation.
+    /// </summary>
     [HttpPost("download")]
     public IActionResult Download([FromBody] PublicationDocument document)
     {
@@ -26,6 +32,9 @@ public sealed class PublicationController(PublicationFileService files, ILogger<
         }
     }
 
+    /// <summary>
+    /// Runs the validate operation.
+    /// </summary>
     [HttpPost("validate")]
     [DisableRequestSizeLimit]
     public async Task<ActionResult<PublicationDocument>> Validate(IFormFile file, CancellationToken cancellationToken)

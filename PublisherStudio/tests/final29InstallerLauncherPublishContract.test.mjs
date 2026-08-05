@@ -8,31 +8,16 @@ const project = fs.readFileSync(
   path.join(root, 'src', 'PublisherStudio.InstallerConsole', 'PublisherStudio.InstallerConsole.csproj'),
   'utf8',
 );
-const launchers = [
-  'Default.cmd',
-  'Install.cmd',
-  'Update.cmd',
-  'Start.cmd',
-  'Start-NoBrowser.cmd',
-  'Check-FFmpeg.cmd',
-  'Install-FFmpeg.cmd',
-  'Uninstall.cmd',
-];
+const launchers = ['Install.cmd', 'Update.cmd', 'Start.cmd'];
 
-test('all reviewed PublisherStudio launchers are explicitly and generically deployed', () => {
-  assert.match(
-    project,
-    /<None Update="\*\.cmd" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" \/>/,
-  );
-
+test('the three mandatory PublisherStudio launchers are explicitly published', () => {
   for (const launcher of launchers) {
     const escaped = launcher.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const item = new RegExp(
-      `<None Update="${escaped}">\\s*` +
-      '<CopyToOutputDirectory>Always<\\/CopyToOutputDirectory>\\s*' +
-      '<CopyToPublishDirectory>Always<\\/CopyToPublishDirectory>\\s*' +
-      '<\\/None>',
+    assert.match(
+      project,
+      new RegExp(`<None Update="${escaped}" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" \\/>`),
+      launcher,
     );
-    assert.match(project, item, launcher);
   }
+  assert.doesNotMatch(project, /Default\.cmd|Start-NoBrowser\.cmd|Check-FFmpeg\.cmd|Install-FFmpeg\.cmd|Uninstall\.cmd/);
 });

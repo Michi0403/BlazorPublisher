@@ -1,0 +1,52 @@
+﻿{
+  "metadata": [
+    {
+      "src": [
+        {
+          "files": ["PublisherStudio.Web.dll"],
+          "src": "input"
+        }
+      ],
+      "dest": "api",
+      "filter": "filterConfig.yml",
+      "disableGitFeatures": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage"
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": [
+          "index.md",
+          "toc.yml",
+          "articles/**/*.md",
+          "guide/toc.yml",
+          "api/**/*.yml",
+          "api/**/*.md",
+          "pdf/toc.yml"
+        ],
+        "exclude": ["_site/**", "input/**", ".tools/**", ".print-book/**"]
+      }
+    ],
+    "resource": [
+      {
+        "files": ["media/**", "styles/**", "pdf-cover.html", "PublisherStudio-*.pdf"]
+      }
+    ],
+    "output": "_site",
+    "template": ["default", "modern", "templates/publisherstudio"],
+    "globalMetadata": {
+      "_appName": "PublisherStudio",
+      "_appTitle": "PublisherStudio Documentation",
+      "_appFooter": "PublisherStudio 2.1.1 · generated documentation",
+      "_enableSearch": true,
+      "_disableContribution": true,
+      "_disableTocFilter": false,
+      "_disableNextArticle": false,
+      "_lang": "en",
+      "publisherstudioVersion": "2.1.1"
+    }
+  }
+}
+

@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.IO.Compression;
 using System.Net;
 using System.Text;
@@ -20,6 +20,9 @@ public sealed class SpreadsheetDocumentService
     private readonly XNamespace Relationships = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
     private readonly XNamespace PackageRelationships = "http://schemas.openxmlformats.org/package/2006/relationships";
 
+    /// <summary>
+    /// Runs the spreadsheet document service operation.
+    /// </summary>
     public SpreadsheetDocumentService(IPublicationMarkupService markup)
     {
         _markup = markup ?? throw new ArgumentNullException(nameof(markup));
@@ -27,6 +30,9 @@ public sealed class SpreadsheetDocumentService
         defaultCellStyle = new CellStyle(defaultFontStyle, string.Empty, string.Empty, null, null, false, false);
     }
 
+    /// <summary>
+    /// Creates blank xlsx.
+    /// </summary>
     public byte[] CreateBlankXlsx(string sheetName = "Sheet1")
     {
         sheetName = NormalizeSheetName(sheetName);
@@ -110,6 +116,9 @@ public sealed class SpreadsheetDocumentService
         return output.ToArray();
     }
 
+    /// <summary>
+    /// Runs the detect format operation.
+    /// </summary>
     public SpreadsheetStorageFormat DetectFormat(string? fileName, string? contentType = null)
     {
         return Path.GetExtension(fileName ?? string.Empty).ToLowerInvariant() switch
@@ -125,6 +134,9 @@ public sealed class SpreadsheetDocumentService
         };
     }
 
+    /// <summary>
+    /// Runs the default extension operation.
+    /// </summary>
     public string DefaultExtension(SpreadsheetStorageFormat format) => format switch
     {
         SpreadsheetStorageFormat.Xlsm => ".xlsm",
@@ -134,12 +146,18 @@ public sealed class SpreadsheetDocumentService
         _ => ".xlsx"
     };
 
+    /// <summary>
+    /// Normalizes workbook file name.
+    /// </summary>
     public string NormalizeWorkbookFileName(string? fileName, SpreadsheetStorageFormat format)
     {
         var safe = _markup.SafeFileName(Path.GetFileNameWithoutExtension(fileName ?? "Spreadsheet"));
         return safe + DefaultExtension(format);
     }
 
+    /// <summary>
+    /// Runs the render preview HTML operation.
+    /// </summary>
     public string RenderPreviewHtml(byte[]? content, SpreadsheetStorageFormat format, out string activeSheetName)
     {
         activeSheetName = "Sheet1";
@@ -164,6 +182,9 @@ public sealed class SpreadsheetDocumentService
         }
     }
 
+    /// <summary>
+    /// Validates workbook content.
+    /// </summary>
     public void ValidateWorkbookContent(byte[]? content, SpreadsheetStorageFormat format)
     {
         if (content is null || content.Length == 0)
@@ -196,6 +217,9 @@ public sealed class SpreadsheetDocumentService
         }
     }
 
+    /// <summary>
+    /// Determines whether open XML workbook.
+    /// </summary>
     public bool IsOpenXmlWorkbook(byte[]? content)
     {
         if (content is null || content.Length < 4 || content[0] != (byte)'P' || content[1] != (byte)'K') return false;
@@ -649,6 +673,9 @@ public sealed class SpreadsheetDocumentService
     private sealed record FontStyle(string Family, double SizePt, bool Bold, bool Italic, bool Underline, string Color);
     private sealed record CellStyle(FontStyle Font, string Fill, string Border, string? Horizontal, string? Vertical, bool Wrap, bool IsDate)
     {
+        /// <summary>
+        /// Runs the to CSS operation.
+        /// </summary>
         public string ToCss(Func<string, string> cssText)
         {
             var css = new List<string>

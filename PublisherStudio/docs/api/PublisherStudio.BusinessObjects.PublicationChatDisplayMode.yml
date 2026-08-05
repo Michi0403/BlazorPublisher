@@ -1,0 +1,134 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationChatDisplayMode
+  commentId: T:PublisherStudio.BusinessObjects.PublicationChatDisplayMode
+  id: PublicationChatDisplayMode
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationChatDisplayMode.Auto
+  - PublisherStudio.BusinessObjects.PublicationChatDisplayMode.Interactive
+  - PublisherStudio.BusinessObjects.PublicationChatDisplayMode.StreamOverlay
+  - PublisherStudio.BusinessObjects.PublicationChatDisplayMode.ViewerOnly
+  langs:
+  - csharp
+  - vb
+  name: PublicationChatDisplayMode
+  nameWithType: PublicationChatDisplayMode
+  fullName: PublisherStudio.BusinessObjects.PublicationChatDisplayMode
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication chat display mode values.
+  example: []
+  syntax:
+    content: public enum PublicationChatDisplayMode
+    content.vb: Public Enum PublicationChatDisplayMode
+- uid: PublisherStudio.BusinessObjects.PublicationChatDisplayMode.Auto
+  commentId: F:PublisherStudio.BusinessObjects.PublicationChatDisplayMode.Auto
+  id: Auto
+  parent: PublisherStudio.BusinessObjects.PublicationChatDisplayMode
+  langs:
+  - csharp
+  - vb
+  name: Auto
+  nameWithType: PublicationChatDisplayMode.Auto
+  fullName: PublisherStudio.BusinessObjects.PublicationChatDisplayMode.Auto
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Auto = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationChatDisplayMode
+- uid: PublisherStudio.BusinessObjects.PublicationChatDisplayMode.Interactive
+  commentId: F:PublisherStudio.BusinessObjects.PublicationChatDisplayMode.Interactive
+  id: Interactive
+  parent: PublisherStudio.BusinessObjects.PublicationChatDisplayMode
+  langs:
+  - csharp
+  - vb
+  name: Interactive
+  nameWithType: PublicationChatDisplayMode.Interactive
+  fullName: PublisherStudio.BusinessObjects.PublicationChatDisplayMode.Interactive
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Interactive = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationChatDisplayMode
+- uid: PublisherStudio.BusinessObjects.PublicationChatDisplayMode.ViewerOnly
+  commentId: F:PublisherStudio.BusinessObjects.PublicationChatDisplayMode.ViewerOnly
+  id: ViewerOnly
+  parent: PublisherStudio.BusinessObjects.PublicationChatDisplayMode
+  langs:
+  - csharp
+  - vb
+  name: ViewerOnly
+  nameWithType: PublicationChatDisplayMode.ViewerOnly
+  fullName: PublisherStudio.BusinessObjects.PublicationChatDisplayMode.ViewerOnly
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: ViewerOnly = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationChatDisplayMode
+- uid: PublisherStudio.BusinessObjects.PublicationChatDisplayMode.StreamOverlay
+  commentId: F:PublisherStudio.BusinessObjects.PublicationChatDisplayMode.StreamOverlay
+  id: StreamOverlay
+  parent: PublisherStudio.BusinessObjects.PublicationChatDisplayMode
+  langs:
+  - csharp
+  - vb
+  name: StreamOverlay
+  nameWithType: PublicationChatDisplayMode.StreamOverlay
+  fullName: PublisherStudio.BusinessObjects.PublicationChatDisplayMode.StreamOverlay
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: StreamOverlay = 3
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationChatDisplayMode
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationChatDisplayMode
+  commentId: T:PublisherStudio.BusinessObjects.PublicationChatDisplayMode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationChatDisplayMode.html
+  name: PublicationChatDisplayMode
+  nameWithType: PublicationChatDisplayMode
+  fullName: PublisherStudio.BusinessObjects.PublicationChatDisplayMode

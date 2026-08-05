@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.DataProtection;
 using PublisherStudio.BusinessObjects;
@@ -25,6 +25,9 @@ public sealed class PublicationStreamingSettingsStore
     };
     private Dictionary<Guid, PublicationStreamingSettings>? _cache;
 
+    /// <summary>
+    /// Runs the publication streaming settings store operation.
+    /// </summary>
     public PublicationStreamingSettingsStore(IDataProtectionProvider protectionProvider)
     {
         _protector = protectionProvider.CreateProtector("PublisherStudio.PublicationStreamingSettings.v1");
@@ -35,6 +38,9 @@ public sealed class PublicationStreamingSettingsStore
         _filePath = Path.Combine(directory, "publication-streaming-settings.dat");
     }
 
+    /// <summary>
+    /// Attempts to load.
+    /// </summary>
     public bool TryLoad(Guid publicationId, out PublicationStreamingSettings settings)
     {
         lock (_gate)
@@ -51,9 +57,15 @@ public sealed class PublicationStreamingSettingsStore
         return false;
     }
 
+    /// <summary>
+    /// Loads or default.
+    /// </summary>
     public PublicationStreamingSettings LoadOrDefault(Guid publicationId) =>
         TryLoad(publicationId, out var settings) ? settings : new PublicationStreamingSettings();
 
+    /// <summary>
+    /// Runs the save operation.
+    /// </summary>
     public void Save(Guid publicationId, PublicationStreamingSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);

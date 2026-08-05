@@ -1,8 +1,11 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Services;
 
+/// <summary>
+/// Defines the publisher document factory contract.
+/// </summary>
 public interface IPublisherDocumentFactory
 {
     PublicationDocument CreatePublication();
@@ -11,10 +14,16 @@ public interface IPublisherDocumentFactory
     PictureDocument CreatePictureFromRaster(string dataUrl, string name, int? widthPixels = null, int? heightPixels = null);
 }
 
+/// <summary>
+/// Provides publisher document factory operations.
+/// </summary>
 public sealed class PublisherDocumentFactory(
     IPublisherRuntimePolicyDataService runtimePolicy,
     ILogger<PublisherDocumentFactory> logger) : IPublisherDocumentFactory
 {
+    /// <summary>
+    /// Creates publication.
+    /// </summary>
     public PublicationDocument CreatePublication()
     {
         try
@@ -62,6 +71,9 @@ public sealed class PublisherDocumentFactory(
         }
     }
 
+    /// <summary>
+    /// Creates page.
+    /// </summary>
     public PublicationPage CreatePage(string? name = null)
     {
         try
@@ -83,6 +95,9 @@ public sealed class PublisherDocumentFactory(
         }
     }
 
+    /// <summary>
+    /// Creates picture.
+    /// </summary>
     public PictureDocument CreatePicture(int? widthPixels = null, int? heightPixels = null, bool transparent = true)
     {
         try
@@ -109,6 +124,9 @@ public sealed class PublisherDocumentFactory(
         }
     }
 
+    /// <summary>
+    /// Creates picture from raster.
+    /// </summary>
     public PictureDocument CreatePictureFromRaster(string dataUrl, string name, int? widthPixels = null, int? heightPixels = null)
     {
         try
@@ -136,13 +154,22 @@ public sealed class PublisherDocumentFactory(
     }
 }
 
+/// <summary>
+/// Defines the publication grid row factory contract.
+/// </summary>
 public interface IPublicationGridRowFactory
 {
     PublicationGridRow Create(PublicationDataRow row, IReadOnlyList<string> columns);
 }
 
+/// <summary>
+/// Provides publication grid row factory operations.
+/// </summary>
 public sealed class PublicationGridRowFactory(ILogger<PublicationGridRowFactory> logger) : IPublicationGridRowFactory
 {
+    /// <summary>
+    /// Runs the create operation.
+    /// </summary>
     public PublicationGridRow Create(PublicationDataRow row, IReadOnlyList<string> columns)
     {
         try

@@ -1,39 +1,16 @@
 {
   "profiles": {
-    "BlazorPublisher Default Install and Update": {
-      "commandName": "Project"
-    },
-    "BlazorPublisher Install Preserving Data": {
+    "PublisherStudio Install": {
       "commandName": "Project",
-      "commandLineArgs": "--install-blazorpublisher --install-ffmpeg --start-blazorpublisher --shortcuts"
+      "commandLineArgs": "--install-publisherstudio --start-publisherstudio --shortcuts --port 58071"
     },
-    "BlazorPublisher Update Preserving Data": {
+    "PublisherStudio Update": {
       "commandName": "Project",
-      "commandLineArgs": "--update-blazorpublisher --install-ffmpeg --start-blazorpublisher --shortcuts"
+      "commandLineArgs": "--update-publisherstudio --start-publisherstudio --shortcuts --port 58071"
     },
-    "BlazorPublisher Start": {
+    "PublisherStudio Start": {
       "commandName": "Project",
-      "commandLineArgs": "--start-blazorpublisher"
-    },
-    "BlazorPublisher Start without Browser": {
-      "commandName": "Project",
-      "commandLineArgs": "--start-blazorpublisher --no-browser"
-    },
-    "BlazorPublisher Check FFmpeg": {
-      "commandName": "Project",
-      "commandLineArgs": "--check-ffmpeg"
-    },
-    "BlazorPublisher Install FFmpeg": {
-      "commandName": "Project",
-      "commandLineArgs": "--install-ffmpeg"
-    },
-    "BlazorPublisher Uninstall Preview": {
-      "commandName": "Project",
-      "commandLineArgs": "--uninstall"
-    },
-    "BlazorPublisher Uninstall Explicit Delete": {
-      "commandName": "Project",
-      "commandLineArgs": "--uninstall --force-delete"
+      "commandLineArgs": "--start-publisherstudio --port 58071"
     }
   }
 }

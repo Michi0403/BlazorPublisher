@@ -12,6 +12,9 @@ public sealed class StreamingRuntimeUseCases
     private readonly NowPlayingReader nowPlayingReader;
     private readonly ILogger<StreamingRuntimeUseCases> logger;
 
+    /// <summary>
+    /// Runs the streaming runtime use cases operation.
+    /// </summary>
     public StreamingRuntimeUseCases(
         IWindowsHotkeyNativeService hotkeyNativeService,
         IWindowsProcessLoopbackNativeService processLoopbackNativeService,
@@ -25,13 +28,16 @@ public sealed class StreamingRuntimeUseCases
         this.nowPlayingReader = nowPlayingReader;
         this.logger = logger;
     }
+    /// <summary>
+    /// Gets capabilities.
+    /// </summary>
     public StreamingRuntimeCapabilities GetCapabilities() {
         try
         {
             logger.LogTrace($"Entering StreamingRuntimeUseCases.GetCapabilities.");
             return new()
     {
-        Version = "2.0.5",
+        Version = "2.1.1",
         BrowserCapture = true,
         BrowserAudioMix = true,
         NativeDeviceDiscovery = true,
@@ -53,6 +59,9 @@ public sealed class StreamingRuntimeUseCases
         }
     }
 
+    /// <summary>
+    /// Runs the discover devices async operation.
+    /// </summary>
     public async Task<IReadOnlyList<PublisherStudio.BusinessObjects.NativeMediaDeviceInfo>> DiscoverDevicesAsync(
         string? ffmpegPath,
         CancellationToken cancellationToken)
@@ -79,6 +88,9 @@ public sealed class StreamingRuntimeUseCases
         }
     }
 
+    /// <summary>
+    /// Reads now playing.
+    /// </summary>
     public object? ReadNowPlaying(string directory) {
         try
         {
@@ -93,19 +105,61 @@ public sealed class StreamingRuntimeUseCases
     }
 }
 
+/// <summary>
+/// Represents a streaming runtime capabilities.
+/// </summary>
 public sealed class StreamingRuntimeCapabilities
 {
+    /// <summary>
+    /// Gets or sets the version.
+    /// </summary>
     public string Version { get; init; } = string.Empty;
+    /// <summary>
+    /// Gets or sets browser capture.
+    /// </summary>
     public bool BrowserCapture { get; init; }
+    /// <summary>
+    /// Gets or sets browser audio mix.
+    /// </summary>
     public bool BrowserAudioMix { get; init; }
+    /// <summary>
+    /// Gets or sets native device discovery.
+    /// </summary>
     public bool NativeDeviceDiscovery { get; init; }
+    /// <summary>
+    /// Gets or sets native camera capture.
+    /// </summary>
     public bool NativeCameraCapture { get; init; }
+    /// <summary>
+    /// Gets or sets process audio loopback.
+    /// </summary>
     public bool ProcessAudioLoopback { get; init; }
+    /// <summary>
+    /// Gets or sets browser window audio fallback.
+    /// </summary>
     public bool BrowserWindowAudioFallback { get; init; }
+    /// <summary>
+    /// Gets or sets device timestamps.
+    /// </summary>
     public bool DeviceTimestamps { get; init; }
+    /// <summary>
+    /// Gets or sets global hotkeys.
+    /// </summary>
     public bool GlobalHotkeys { get; init; }
+    /// <summary>
+    /// Gets or sets recording.
+    /// </summary>
     public bool Recording { get; init; }
+    /// <summary>
+    /// Gets or sets transports.
+    /// </summary>
     public string[] Transports { get; init; } = [];
+    /// <summary>
+    /// Gets or sets hardware encoder probe.
+    /// </summary>
     public bool HardwareEncoderProbe { get; init; }
+    /// <summary>
+    /// Gets or sets note.
+    /// </summary>
     public string Note { get; init; } = string.Empty;
 }

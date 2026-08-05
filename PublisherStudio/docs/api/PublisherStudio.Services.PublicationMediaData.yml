@@ -1,0 +1,496 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.PublicationMediaData
+  commentId: T:PublisherStudio.Services.PublicationMediaData
+  id: PublicationMediaData
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.PublicationMediaData.#ctor(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationMediaData})
+  - PublisherStudio.Services.PublicationMediaData.NormalizeDataUrl(System.String,System.String)
+  - PublisherStudio.Services.PublicationMediaData.NormalizeMimeType(System.String,System.String)
+  langs:
+  - csharp
+  - vb
+  name: PublicationMediaData
+  nameWithType: PublicationMediaData
+  fullName: PublisherStudio.Services.PublicationMediaData
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Represents a publication media data.
+  example: []
+  syntax:
+    content: public sealed class PublicationMediaData
+    content.vb: Public NotInheritable Class PublicationMediaData
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.PublicationMediaData.#ctor(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationMediaData})
+  commentId: M:PublisherStudio.Services.PublicationMediaData.#ctor(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationMediaData})
+  id: '#ctor(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationMediaData})'
+  parent: PublisherStudio.Services.PublicationMediaData
+  langs:
+  - csharp
+  - vb
+  name: PublicationMediaData(ILogger<PublicationMediaData>)
+  nameWithType: PublicationMediaData.PublicationMediaData(ILogger<PublicationMediaData>)
+  fullName: PublisherStudio.Services.PublicationMediaData.PublicationMediaData(Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.PublicationMediaData>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Represents a publication media data.
+  example: []
+  syntax:
+    content: public PublicationMediaData(ILogger<PublicationMediaData> logger)
+    parameters:
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationMediaData}
+    content.vb: Public Sub New(logger As ILogger(Of PublicationMediaData))
+  overload: PublisherStudio.Services.PublicationMediaData.#ctor*
+  nameWithType.vb: PublicationMediaData.New(ILogger(Of PublicationMediaData))
+  fullName.vb: PublisherStudio.Services.PublicationMediaData.New(Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.PublicationMediaData))
+  name.vb: New(ILogger(Of PublicationMediaData))
+- uid: PublisherStudio.Services.PublicationMediaData.NormalizeMimeType(System.String,System.String)
+  commentId: M:PublisherStudio.Services.PublicationMediaData.NormalizeMimeType(System.String,System.String)
+  id: NormalizeMimeType(System.String,System.String)
+  parent: PublisherStudio.Services.PublicationMediaData
+  langs:
+  - csharp
+  - vb
+  name: NormalizeMimeType(string?, string)
+  nameWithType: PublicationMediaData.NormalizeMimeType(string?, string)
+  fullName: PublisherStudio.Services.PublicationMediaData.NormalizeMimeType(string?, string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Normalizes mime type.
+  example: []
+  syntax:
+    content: public string NormalizeMimeType(string? mimeType, string fallback)
+    parameters:
+    - id: mimeType
+      type: System.String
+    - id: fallback
+      type: System.String
+    return:
+      type: System.String
+    content.vb: Public Function NormalizeMimeType(mimeType As String, fallback As String) As String
+  overload: PublisherStudio.Services.PublicationMediaData.NormalizeMimeType*
+  nameWithType.vb: PublicationMediaData.NormalizeMimeType(String, String)
+  fullName.vb: PublisherStudio.Services.PublicationMediaData.NormalizeMimeType(String, String)
+  name.vb: NormalizeMimeType(String, String)
+- uid: PublisherStudio.Services.PublicationMediaData.NormalizeDataUrl(System.String,System.String)
+  commentId: M:PublisherStudio.Services.PublicationMediaData.NormalizeDataUrl(System.String,System.String)
+  id: NormalizeDataUrl(System.String,System.String)
+  parent: PublisherStudio.Services.PublicationMediaData
+  langs:
+  - csharp
+  - vb
+  name: NormalizeDataUrl(string?, string)
+  nameWithType: PublicationMediaData.NormalizeDataUrl(string?, string)
+  fullName: PublisherStudio.Services.PublicationMediaData.NormalizeDataUrl(string?, string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Normalizes data URL.
+  example: []
+  syntax:
+    content: public string NormalizeDataUrl(string? dataUrl, string fallbackMimeType)
+    parameters:
+    - id: dataUrl
+      type: System.String
+    - id: fallbackMimeType
+      type: System.String
+    return:
+      type: System.String
+    content.vb: Public Function NormalizeDataUrl(dataUrl As String, fallbackMimeType As String) As String
+  overload: PublisherStudio.Services.PublicationMediaData.NormalizeDataUrl*
+  nameWithType.vb: PublicationMediaData.NormalizeDataUrl(String, String)
+  fullName.vb: PublisherStudio.Services.PublicationMediaData.NormalizeDataUrl(String, String)
+  name.vb: NormalizeDataUrl(String, String)
+references:
+- uid: PublisherStudio.Services
+  commentId: N:PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services
+  nameWithType: PublisherStudio.Services
+  fullName: PublisherStudio.Services
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.PublicationMediaData.#ctor*
+  commentId: Overload:PublisherStudio.Services.PublicationMediaData.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.PublicationMediaData.html#PublisherStudio_Services_PublicationMediaData__ctor_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_PublicationMediaData__
+  name: PublicationMediaData
+  nameWithType: PublicationMediaData.PublicationMediaData
+  fullName: PublisherStudio.Services.PublicationMediaData.PublicationMediaData
+  nameWithType.vb: PublicationMediaData.New
+  fullName.vb: PublisherStudio.Services.PublicationMediaData.New
+  name.vb: New
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationMediaData}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationMediaData}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<PublicationMediaData>
+  nameWithType: ILogger<PublicationMediaData>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.PublicationMediaData>
+  nameWithType.vb: ILogger(Of PublicationMediaData)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.PublicationMediaData)
+  name.vb: ILogger(Of PublicationMediaData)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.PublicationMediaData
+    name: PublicationMediaData
+    isExternal: true
+    href: PublisherStudio.Services.PublicationMediaData.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.PublicationMediaData
+    name: PublicationMediaData
+    isExternal: true
+    href: PublisherStudio.Services.PublicationMediaData.html
+  - name: )
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: PublisherStudio.Services.PublicationMediaData.NormalizeMimeType*
+  commentId: Overload:PublisherStudio.Services.PublicationMediaData.NormalizeMimeType
+  isExternal: true
+  href: PublisherStudio.Services.PublicationMediaData.html#PublisherStudio_Services_PublicationMediaData_NormalizeMimeType_System_String_System_String_
+  name: NormalizeMimeType
+  nameWithType: PublicationMediaData.NormalizeMimeType
+  fullName: PublisherStudio.Services.PublicationMediaData.NormalizeMimeType
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.Services.PublicationMediaData.NormalizeDataUrl*
+  commentId: Overload:PublisherStudio.Services.PublicationMediaData.NormalizeDataUrl
+  isExternal: true
+  href: PublisherStudio.Services.PublicationMediaData.html#PublisherStudio_Services_PublicationMediaData_NormalizeDataUrl_System_String_System_String_
+  name: NormalizeDataUrl
+  nameWithType: PublicationMediaData.NormalizeDataUrl
+  fullName: PublisherStudio.Services.PublicationMediaData.NormalizeDataUrl

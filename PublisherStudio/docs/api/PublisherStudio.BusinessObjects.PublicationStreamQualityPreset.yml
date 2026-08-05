@@ -1,0 +1,153 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset
+  commentId: T:PublisherStudio.BusinessObjects.PublicationStreamQualityPreset
+  id: PublicationStreamQualityPreset
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationStreamQualityPreset.BandwidthSaving
+  - PublisherStudio.BusinessObjects.PublicationStreamQualityPreset.Custom
+  - PublisherStudio.BusinessObjects.PublicationStreamQualityPreset.HighQuality
+  - PublisherStudio.BusinessObjects.PublicationStreamQualityPreset.LowLatency
+  - PublisherStudio.BusinessObjects.PublicationStreamQualityPreset.Recommended
+  langs:
+  - csharp
+  - vb
+  name: PublicationStreamQualityPreset
+  nameWithType: PublicationStreamQualityPreset
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication stream quality preset values.
+  example: []
+  syntax:
+    content: public enum PublicationStreamQualityPreset
+    content.vb: Public Enum PublicationStreamQualityPreset
+- uid: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset.Recommended
+  commentId: F:PublisherStudio.BusinessObjects.PublicationStreamQualityPreset.Recommended
+  id: Recommended
+  parent: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset
+  langs:
+  - csharp
+  - vb
+  name: Recommended
+  nameWithType: PublicationStreamQualityPreset.Recommended
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset.Recommended
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Recommended = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset
+- uid: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset.HighQuality
+  commentId: F:PublisherStudio.BusinessObjects.PublicationStreamQualityPreset.HighQuality
+  id: HighQuality
+  parent: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset
+  langs:
+  - csharp
+  - vb
+  name: HighQuality
+  nameWithType: PublicationStreamQualityPreset.HighQuality
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset.HighQuality
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: HighQuality = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset
+- uid: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset.LowLatency
+  commentId: F:PublisherStudio.BusinessObjects.PublicationStreamQualityPreset.LowLatency
+  id: LowLatency
+  parent: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset
+  langs:
+  - csharp
+  - vb
+  name: LowLatency
+  nameWithType: PublicationStreamQualityPreset.LowLatency
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset.LowLatency
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: LowLatency = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset
+- uid: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset.BandwidthSaving
+  commentId: F:PublisherStudio.BusinessObjects.PublicationStreamQualityPreset.BandwidthSaving
+  id: BandwidthSaving
+  parent: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset
+  langs:
+  - csharp
+  - vb
+  name: BandwidthSaving
+  nameWithType: PublicationStreamQualityPreset.BandwidthSaving
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset.BandwidthSaving
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: BandwidthSaving = 3
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset
+- uid: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset.Custom
+  commentId: F:PublisherStudio.BusinessObjects.PublicationStreamQualityPreset.Custom
+  id: Custom
+  parent: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset
+  langs:
+  - csharp
+  - vb
+  name: Custom
+  nameWithType: PublicationStreamQualityPreset.Custom
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset.Custom
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Custom = 4
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset
+  commentId: T:PublisherStudio.BusinessObjects.PublicationStreamQualityPreset
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset.html
+  name: PublicationStreamQualityPreset
+  nameWithType: PublicationStreamQualityPreset
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset

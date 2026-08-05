@@ -1,0 +1,662 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.ApplicationPortResolver
+  commentId: T:PublisherStudio.Services.ApplicationPortResolver
+  id: ApplicationPortResolver
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.ApplicationPortResolver.#ctor(PublisherStudio.Services.Configuration.ISystemVariableStoreService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.ApplicationPortResolver})
+  - PublisherStudio.Services.ApplicationPortResolver.Resolve(System.Collections.Generic.IReadOnlyList{System.String})
+  langs:
+  - csharp
+  - vb
+  name: ApplicationPortResolver
+  nameWithType: ApplicationPortResolver
+  fullName: PublisherStudio.Services.ApplicationPortResolver
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Provides application port resolver operations.
+  example: []
+  syntax:
+    content: 'public sealed class ApplicationPortResolver : IApplicationPortResolver'
+    content.vb: Public NotInheritable Class ApplicationPortResolver Implements IApplicationPortResolver
+  inheritance:
+  - System.Object
+  implements:
+  - PublisherStudio.Services.IApplicationPortResolver
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.ApplicationPortResolver.#ctor(PublisherStudio.Services.Configuration.ISystemVariableStoreService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.ApplicationPortResolver})
+  commentId: M:PublisherStudio.Services.ApplicationPortResolver.#ctor(PublisherStudio.Services.Configuration.ISystemVariableStoreService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.ApplicationPortResolver})
+  id: '#ctor(PublisherStudio.Services.Configuration.ISystemVariableStoreService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.ApplicationPortResolver})'
+  parent: PublisherStudio.Services.ApplicationPortResolver
+  langs:
+  - csharp
+  - vb
+  name: ApplicationPortResolver(ISystemVariableStoreService, ILogger<ApplicationPortResolver>?)
+  nameWithType: ApplicationPortResolver.ApplicationPortResolver(ISystemVariableStoreService, ILogger<ApplicationPortResolver>?)
+  fullName: PublisherStudio.Services.ApplicationPortResolver.ApplicationPortResolver(PublisherStudio.Services.Configuration.ISystemVariableStoreService, Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.ApplicationPortResolver>?)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Provides application port resolver operations.
+  example: []
+  syntax:
+    content: public ApplicationPortResolver(ISystemVariableStoreService systemVariables, ILogger<ApplicationPortResolver>? logger = null)
+    parameters:
+    - id: systemVariables
+      type: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.ApplicationPortResolver}
+    content.vb: Public Sub New(systemVariables As ISystemVariableStoreService, logger As ILogger(Of ApplicationPortResolver) = Nothing)
+  overload: PublisherStudio.Services.ApplicationPortResolver.#ctor*
+  nameWithType.vb: ApplicationPortResolver.New(ISystemVariableStoreService, ILogger(Of ApplicationPortResolver))
+  fullName.vb: PublisherStudio.Services.ApplicationPortResolver.New(PublisherStudio.Services.Configuration.ISystemVariableStoreService, Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.ApplicationPortResolver))
+  name.vb: New(ISystemVariableStoreService, ILogger(Of ApplicationPortResolver))
+- uid: PublisherStudio.Services.ApplicationPortResolver.Resolve(System.Collections.Generic.IReadOnlyList{System.String})
+  commentId: M:PublisherStudio.Services.ApplicationPortResolver.Resolve(System.Collections.Generic.IReadOnlyList{System.String})
+  id: Resolve(System.Collections.Generic.IReadOnlyList{System.String})
+  parent: PublisherStudio.Services.ApplicationPortResolver
+  langs:
+  - csharp
+  - vb
+  name: Resolve(IReadOnlyList<string>)
+  nameWithType: ApplicationPortResolver.Resolve(IReadOnlyList<string>)
+  fullName: PublisherStudio.Services.ApplicationPortResolver.Resolve(System.Collections.Generic.IReadOnlyList<string>)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the resolve operation.
+  example: []
+  syntax:
+    content: public int Resolve(IReadOnlyList<string> args)
+    parameters:
+    - id: args
+      type: System.Collections.Generic.IReadOnlyList{System.String}
+    return:
+      type: System.Int32
+    content.vb: Public Function Resolve(args As IReadOnlyList(Of String)) As Integer
+  overload: PublisherStudio.Services.ApplicationPortResolver.Resolve*
+  implements:
+  - PublisherStudio.Services.IApplicationPortResolver.Resolve(System.Collections.Generic.IReadOnlyList{System.String})
+  nameWithType.vb: ApplicationPortResolver.Resolve(IReadOnlyList(Of String))
+  fullName.vb: PublisherStudio.Services.ApplicationPortResolver.Resolve(System.Collections.Generic.IReadOnlyList(Of String))
+  name.vb: Resolve(IReadOnlyList(Of String))
+references:
+- uid: PublisherStudio.Services
+  commentId: N:PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services
+  nameWithType: PublisherStudio.Services
+  fullName: PublisherStudio.Services
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: PublisherStudio.Services.IApplicationPortResolver
+  commentId: T:PublisherStudio.Services.IApplicationPortResolver
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.IApplicationPortResolver.html
+  name: IApplicationPortResolver
+  nameWithType: IApplicationPortResolver
+  fullName: PublisherStudio.Services.IApplicationPortResolver
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.ApplicationPortResolver.#ctor*
+  commentId: Overload:PublisherStudio.Services.ApplicationPortResolver.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.ApplicationPortResolver.html#PublisherStudio_Services_ApplicationPortResolver__ctor_PublisherStudio_Services_Configuration_ISystemVariableStoreService_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_ApplicationPortResolver__
+  name: ApplicationPortResolver
+  nameWithType: ApplicationPortResolver.ApplicationPortResolver
+  fullName: PublisherStudio.Services.ApplicationPortResolver.ApplicationPortResolver
+  nameWithType.vb: ApplicationPortResolver.New
+  fullName.vb: PublisherStudio.Services.ApplicationPortResolver.New
+  name.vb: New
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  commentId: T:PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  parent: PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.ISystemVariableStoreService.html
+  name: ISystemVariableStoreService
+  nameWithType: ISystemVariableStoreService
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.ApplicationPortResolver}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.ApplicationPortResolver}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<ApplicationPortResolver>
+  nameWithType: ILogger<ApplicationPortResolver>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.ApplicationPortResolver>
+  nameWithType.vb: ILogger(Of ApplicationPortResolver)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.ApplicationPortResolver)
+  name.vb: ILogger(Of ApplicationPortResolver)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.ApplicationPortResolver
+    name: ApplicationPortResolver
+    isExternal: true
+    href: PublisherStudio.Services.ApplicationPortResolver.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.ApplicationPortResolver
+    name: ApplicationPortResolver
+    isExternal: true
+    href: PublisherStudio.Services.ApplicationPortResolver.html
+  - name: )
+- uid: PublisherStudio.Services.Configuration
+  commentId: N:PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Configuration
+  nameWithType: PublisherStudio.Services.Configuration
+  fullName: PublisherStudio.Services.Configuration
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: PublisherStudio.Services.ApplicationPortResolver.Resolve*
+  commentId: Overload:PublisherStudio.Services.ApplicationPortResolver.Resolve
+  isExternal: true
+  href: PublisherStudio.Services.ApplicationPortResolver.html#PublisherStudio_Services_ApplicationPortResolver_Resolve_System_Collections_Generic_IReadOnlyList_System_String__
+  name: Resolve
+  nameWithType: ApplicationPortResolver.Resolve
+  fullName: PublisherStudio.Services.ApplicationPortResolver.Resolve
+- uid: PublisherStudio.Services.IApplicationPortResolver.Resolve(System.Collections.Generic.IReadOnlyList{System.String})
+  commentId: M:PublisherStudio.Services.IApplicationPortResolver.Resolve(System.Collections.Generic.IReadOnlyList{System.String})
+  parent: PublisherStudio.Services.IApplicationPortResolver
+  isExternal: true
+  href: PublisherStudio.Services.IApplicationPortResolver.html#PublisherStudio_Services_IApplicationPortResolver_Resolve_System_Collections_Generic_IReadOnlyList_System_String__
+  name: Resolve(IReadOnlyList<string>)
+  nameWithType: IApplicationPortResolver.Resolve(IReadOnlyList<string>)
+  fullName: PublisherStudio.Services.IApplicationPortResolver.Resolve(System.Collections.Generic.IReadOnlyList<string>)
+  nameWithType.vb: IApplicationPortResolver.Resolve(IReadOnlyList(Of String))
+  fullName.vb: PublisherStudio.Services.IApplicationPortResolver.Resolve(System.Collections.Generic.IReadOnlyList(Of String))
+  name.vb: Resolve(IReadOnlyList(Of String))
+  spec.csharp:
+  - uid: PublisherStudio.Services.IApplicationPortResolver.Resolve(System.Collections.Generic.IReadOnlyList{System.String})
+    name: Resolve
+    isExternal: true
+    href: PublisherStudio.Services.IApplicationPortResolver.html#PublisherStudio_Services_IApplicationPortResolver_Resolve_System_Collections_Generic_IReadOnlyList_System_String__
+  - name: (
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.IApplicationPortResolver.Resolve(System.Collections.Generic.IReadOnlyList{System.String})
+    name: Resolve
+    isExternal: true
+    href: PublisherStudio.Services.IApplicationPortResolver.html#PublisherStudio_Services_IApplicationPortResolver_Resolve_System_Collections_Generic_IReadOnlyList_System_String__
+  - name: (
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList{System.String}
+  commentId: T:System.Collections.Generic.IReadOnlyList{System.String}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<string>
+  nameWithType: IReadOnlyList<string>
+  fullName: System.Collections.Generic.IReadOnlyList<string>
+  nameWithType.vb: IReadOnlyList(Of String)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of String)
+  name.vb: IReadOnlyList(Of String)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic

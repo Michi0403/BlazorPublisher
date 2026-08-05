@@ -1,11 +1,17 @@
-using PublisherStudio.Services.Automation;
+﻿using PublisherStudio.Services.Automation;
 
 namespace PublisherStudio.Diagnostics;
 
+/// <summary>
+/// Provides service registration logging hosted service operations.
+/// </summary>
 public sealed class ServiceRegistrationLoggingHostedService(
     IEnumerable<ServiceArchitectureDescriptor> descriptors,
     ILogger<ServiceRegistrationLoggingHostedService> logger) : IHostedService
 {
+    /// <summary>
+    /// Starts async.
+    /// </summary>
     public Task StartAsync(CancellationToken cancellationToken)
     {
         try
@@ -31,6 +37,9 @@ public sealed class ServiceRegistrationLoggingHostedService(
         }
     }
 
+    /// <summary>
+    /// Stops async.
+    /// </summary>
     public Task StopAsync(CancellationToken cancellationToken)
     {
         try

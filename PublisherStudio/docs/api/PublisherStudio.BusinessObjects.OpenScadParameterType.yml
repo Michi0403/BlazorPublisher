@@ -1,0 +1,286 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.OpenScadParameterType
+  commentId: T:PublisherStudio.BusinessObjects.OpenScadParameterType
+  id: OpenScadParameterType
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.OpenScadParameterType.Boolean
+  - PublisherStudio.BusinessObjects.OpenScadParameterType.Expression
+  - PublisherStudio.BusinessObjects.OpenScadParameterType.Faces
+  - PublisherStudio.BusinessObjects.OpenScadParameterType.FilePath
+  - PublisherStudio.BusinessObjects.OpenScadParameterType.Integer
+  - PublisherStudio.BusinessObjects.OpenScadParameterType.Matrix4
+  - PublisherStudio.BusinessObjects.OpenScadParameterType.Number
+  - PublisherStudio.BusinessObjects.OpenScadParameterType.Points2D
+  - PublisherStudio.BusinessObjects.OpenScadParameterType.String
+  - PublisherStudio.BusinessObjects.OpenScadParameterType.Vector2
+  - PublisherStudio.BusinessObjects.OpenScadParameterType.Vector3
+  - PublisherStudio.BusinessObjects.OpenScadParameterType.Vector4
+  langs:
+  - csharp
+  - vb
+  name: OpenScadParameterType
+  nameWithType: OpenScadParameterType
+  fullName: PublisherStudio.BusinessObjects.OpenScadParameterType
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported open scad parameter type values.
+  example: []
+  syntax:
+    content: public enum OpenScadParameterType
+    content.vb: Public Enum OpenScadParameterType
+- uid: PublisherStudio.BusinessObjects.OpenScadParameterType.Number
+  commentId: F:PublisherStudio.BusinessObjects.OpenScadParameterType.Number
+  id: Number
+  parent: PublisherStudio.BusinessObjects.OpenScadParameterType
+  langs:
+  - csharp
+  - vb
+  name: Number
+  nameWithType: OpenScadParameterType.Number
+  fullName: PublisherStudio.BusinessObjects.OpenScadParameterType.Number
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Number = 0
+    return:
+      type: PublisherStudio.BusinessObjects.OpenScadParameterType
+- uid: PublisherStudio.BusinessObjects.OpenScadParameterType.Integer
+  commentId: F:PublisherStudio.BusinessObjects.OpenScadParameterType.Integer
+  id: Integer
+  parent: PublisherStudio.BusinessObjects.OpenScadParameterType
+  langs:
+  - csharp
+  - vb
+  name: Integer
+  nameWithType: OpenScadParameterType.Integer
+  fullName: PublisherStudio.BusinessObjects.OpenScadParameterType.Integer
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Integer = 1
+    return:
+      type: PublisherStudio.BusinessObjects.OpenScadParameterType
+- uid: PublisherStudio.BusinessObjects.OpenScadParameterType.Boolean
+  commentId: F:PublisherStudio.BusinessObjects.OpenScadParameterType.Boolean
+  id: Boolean
+  parent: PublisherStudio.BusinessObjects.OpenScadParameterType
+  langs:
+  - csharp
+  - vb
+  name: Boolean
+  nameWithType: OpenScadParameterType.Boolean
+  fullName: PublisherStudio.BusinessObjects.OpenScadParameterType.Boolean
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Boolean = 2
+    return:
+      type: PublisherStudio.BusinessObjects.OpenScadParameterType
+- uid: PublisherStudio.BusinessObjects.OpenScadParameterType.String
+  commentId: F:PublisherStudio.BusinessObjects.OpenScadParameterType.String
+  id: String
+  parent: PublisherStudio.BusinessObjects.OpenScadParameterType
+  langs:
+  - csharp
+  - vb
+  name: String
+  nameWithType: OpenScadParameterType.String
+  fullName: PublisherStudio.BusinessObjects.OpenScadParameterType.String
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: String = 3
+    return:
+      type: PublisherStudio.BusinessObjects.OpenScadParameterType
+- uid: PublisherStudio.BusinessObjects.OpenScadParameterType.Vector2
+  commentId: F:PublisherStudio.BusinessObjects.OpenScadParameterType.Vector2
+  id: Vector2
+  parent: PublisherStudio.BusinessObjects.OpenScadParameterType
+  langs:
+  - csharp
+  - vb
+  name: Vector2
+  nameWithType: OpenScadParameterType.Vector2
+  fullName: PublisherStudio.BusinessObjects.OpenScadParameterType.Vector2
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Vector2 = 4
+    return:
+      type: PublisherStudio.BusinessObjects.OpenScadParameterType
+- uid: PublisherStudio.BusinessObjects.OpenScadParameterType.Vector3
+  commentId: F:PublisherStudio.BusinessObjects.OpenScadParameterType.Vector3
+  id: Vector3
+  parent: PublisherStudio.BusinessObjects.OpenScadParameterType
+  langs:
+  - csharp
+  - vb
+  name: Vector3
+  nameWithType: OpenScadParameterType.Vector3
+  fullName: PublisherStudio.BusinessObjects.OpenScadParameterType.Vector3
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Vector3 = 5
+    return:
+      type: PublisherStudio.BusinessObjects.OpenScadParameterType
+- uid: PublisherStudio.BusinessObjects.OpenScadParameterType.Vector4
+  commentId: F:PublisherStudio.BusinessObjects.OpenScadParameterType.Vector4
+  id: Vector4
+  parent: PublisherStudio.BusinessObjects.OpenScadParameterType
+  langs:
+  - csharp
+  - vb
+  name: Vector4
+  nameWithType: OpenScadParameterType.Vector4
+  fullName: PublisherStudio.BusinessObjects.OpenScadParameterType.Vector4
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Vector4 = 6
+    return:
+      type: PublisherStudio.BusinessObjects.OpenScadParameterType
+- uid: PublisherStudio.BusinessObjects.OpenScadParameterType.Matrix4
+  commentId: F:PublisherStudio.BusinessObjects.OpenScadParameterType.Matrix4
+  id: Matrix4
+  parent: PublisherStudio.BusinessObjects.OpenScadParameterType
+  langs:
+  - csharp
+  - vb
+  name: Matrix4
+  nameWithType: OpenScadParameterType.Matrix4
+  fullName: PublisherStudio.BusinessObjects.OpenScadParameterType.Matrix4
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Matrix4 = 7
+    return:
+      type: PublisherStudio.BusinessObjects.OpenScadParameterType
+- uid: PublisherStudio.BusinessObjects.OpenScadParameterType.Points2D
+  commentId: F:PublisherStudio.BusinessObjects.OpenScadParameterType.Points2D
+  id: Points2D
+  parent: PublisherStudio.BusinessObjects.OpenScadParameterType
+  langs:
+  - csharp
+  - vb
+  name: Points2D
+  nameWithType: OpenScadParameterType.Points2D
+  fullName: PublisherStudio.BusinessObjects.OpenScadParameterType.Points2D
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Points2D = 8
+    return:
+      type: PublisherStudio.BusinessObjects.OpenScadParameterType
+- uid: PublisherStudio.BusinessObjects.OpenScadParameterType.Faces
+  commentId: F:PublisherStudio.BusinessObjects.OpenScadParameterType.Faces
+  id: Faces
+  parent: PublisherStudio.BusinessObjects.OpenScadParameterType
+  langs:
+  - csharp
+  - vb
+  name: Faces
+  nameWithType: OpenScadParameterType.Faces
+  fullName: PublisherStudio.BusinessObjects.OpenScadParameterType.Faces
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Faces = 9
+    return:
+      type: PublisherStudio.BusinessObjects.OpenScadParameterType
+- uid: PublisherStudio.BusinessObjects.OpenScadParameterType.Expression
+  commentId: F:PublisherStudio.BusinessObjects.OpenScadParameterType.Expression
+  id: Expression
+  parent: PublisherStudio.BusinessObjects.OpenScadParameterType
+  langs:
+  - csharp
+  - vb
+  name: Expression
+  nameWithType: OpenScadParameterType.Expression
+  fullName: PublisherStudio.BusinessObjects.OpenScadParameterType.Expression
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Expression = 10
+    return:
+      type: PublisherStudio.BusinessObjects.OpenScadParameterType
+- uid: PublisherStudio.BusinessObjects.OpenScadParameterType.FilePath
+  commentId: F:PublisherStudio.BusinessObjects.OpenScadParameterType.FilePath
+  id: FilePath
+  parent: PublisherStudio.BusinessObjects.OpenScadParameterType
+  langs:
+  - csharp
+  - vb
+  name: FilePath
+  nameWithType: OpenScadParameterType.FilePath
+  fullName: PublisherStudio.BusinessObjects.OpenScadParameterType.FilePath
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: FilePath = 11
+    return:
+      type: PublisherStudio.BusinessObjects.OpenScadParameterType
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.OpenScadParameterType
+  commentId: T:PublisherStudio.BusinessObjects.OpenScadParameterType
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OpenScadParameterType.html
+  name: OpenScadParameterType
+  nameWithType: OpenScadParameterType
+  fullName: PublisherStudio.BusinessObjects.OpenScadParameterType

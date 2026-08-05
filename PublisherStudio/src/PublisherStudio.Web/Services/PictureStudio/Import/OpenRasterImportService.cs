@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.IO.Compression;
 using System.Text;
 using System.Xml;
@@ -7,6 +7,9 @@ using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.PictureStudio.Import;
 
+/// <summary>
+/// Provides open raster import service operations.
+/// </summary>
 public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFactory, 
     SvgInterchangeSanitizer svgSanitizer,
     ILogger<OpenRasterImportService> logger)
@@ -14,6 +17,9 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
     private readonly XName LayerName = "layer";
     private readonly XName StackName = "stack";
 
+    /// <summary>
+    /// Imports async.
+    /// </summary>
     public async Task<PictureImportResult> ImportAsync(Stream input, string fileName, CancellationToken cancellationToken = default)
     {
         try

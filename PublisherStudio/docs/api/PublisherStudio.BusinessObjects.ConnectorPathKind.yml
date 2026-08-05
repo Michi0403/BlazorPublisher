@@ -1,0 +1,115 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.ConnectorPathKind
+  commentId: T:PublisherStudio.BusinessObjects.ConnectorPathKind
+  id: ConnectorPathKind
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.ConnectorPathKind.Curved
+  - PublisherStudio.BusinessObjects.ConnectorPathKind.Elbow
+  - PublisherStudio.BusinessObjects.ConnectorPathKind.Straight
+  langs:
+  - csharp
+  - vb
+  name: ConnectorPathKind
+  nameWithType: ConnectorPathKind
+  fullName: PublisherStudio.BusinessObjects.ConnectorPathKind
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported connector path kind values.
+  example: []
+  syntax:
+    content: public enum ConnectorPathKind
+    content.vb: Public Enum ConnectorPathKind
+- uid: PublisherStudio.BusinessObjects.ConnectorPathKind.Straight
+  commentId: F:PublisherStudio.BusinessObjects.ConnectorPathKind.Straight
+  id: Straight
+  parent: PublisherStudio.BusinessObjects.ConnectorPathKind
+  langs:
+  - csharp
+  - vb
+  name: Straight
+  nameWithType: ConnectorPathKind.Straight
+  fullName: PublisherStudio.BusinessObjects.ConnectorPathKind.Straight
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Straight = 0
+    return:
+      type: PublisherStudio.BusinessObjects.ConnectorPathKind
+- uid: PublisherStudio.BusinessObjects.ConnectorPathKind.Elbow
+  commentId: F:PublisherStudio.BusinessObjects.ConnectorPathKind.Elbow
+  id: Elbow
+  parent: PublisherStudio.BusinessObjects.ConnectorPathKind
+  langs:
+  - csharp
+  - vb
+  name: Elbow
+  nameWithType: ConnectorPathKind.Elbow
+  fullName: PublisherStudio.BusinessObjects.ConnectorPathKind.Elbow
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Elbow = 1
+    return:
+      type: PublisherStudio.BusinessObjects.ConnectorPathKind
+- uid: PublisherStudio.BusinessObjects.ConnectorPathKind.Curved
+  commentId: F:PublisherStudio.BusinessObjects.ConnectorPathKind.Curved
+  id: Curved
+  parent: PublisherStudio.BusinessObjects.ConnectorPathKind
+  langs:
+  - csharp
+  - vb
+  name: Curved
+  nameWithType: ConnectorPathKind.Curved
+  fullName: PublisherStudio.BusinessObjects.ConnectorPathKind.Curved
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Curved = 2
+    return:
+      type: PublisherStudio.BusinessObjects.ConnectorPathKind
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.ConnectorPathKind
+  commentId: T:PublisherStudio.BusinessObjects.ConnectorPathKind
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ConnectorPathKind.html
+  name: ConnectorPathKind
+  nameWithType: ConnectorPathKind
+  fullName: PublisherStudio.BusinessObjects.ConnectorPathKind

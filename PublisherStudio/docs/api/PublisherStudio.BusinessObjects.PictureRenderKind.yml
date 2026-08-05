@@ -1,0 +1,267 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PictureRenderKind
+  commentId: T:PublisherStudio.BusinessObjects.PictureRenderKind
+  id: PictureRenderKind
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PictureRenderKind.Bloom
+  - PublisherStudio.BusinessObjects.PictureRenderKind.Clouds
+  - PublisherStudio.BusinessObjects.PictureRenderKind.GrainNoise
+  - PublisherStudio.BusinessObjects.PictureRenderKind.LensFlare
+  - PublisherStudio.BusinessObjects.PictureRenderKind.MotionBlur
+  - PublisherStudio.BusinessObjects.PictureRenderKind.Neon
+  - PublisherStudio.BusinessObjects.PictureRenderKind.Noise
+  - PublisherStudio.BusinessObjects.PictureRenderKind.OceanWaves
+  - PublisherStudio.BusinessObjects.PictureRenderKind.Stripes
+  - PublisherStudio.BusinessObjects.PictureRenderKind.Vignette
+  - PublisherStudio.BusinessObjects.PictureRenderKind.Wind
+  langs:
+  - csharp
+  - vb
+  name: PictureRenderKind
+  nameWithType: PictureRenderKind
+  fullName: PublisherStudio.BusinessObjects.PictureRenderKind
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported picture render kind values.
+  example: []
+  syntax:
+    content: public enum PictureRenderKind
+    content.vb: Public Enum PictureRenderKind
+- uid: PublisherStudio.BusinessObjects.PictureRenderKind.Clouds
+  commentId: F:PublisherStudio.BusinessObjects.PictureRenderKind.Clouds
+  id: Clouds
+  parent: PublisherStudio.BusinessObjects.PictureRenderKind
+  langs:
+  - csharp
+  - vb
+  name: Clouds
+  nameWithType: PictureRenderKind.Clouds
+  fullName: PublisherStudio.BusinessObjects.PictureRenderKind.Clouds
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Clouds = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PictureRenderKind
+- uid: PublisherStudio.BusinessObjects.PictureRenderKind.Noise
+  commentId: F:PublisherStudio.BusinessObjects.PictureRenderKind.Noise
+  id: Noise
+  parent: PublisherStudio.BusinessObjects.PictureRenderKind
+  langs:
+  - csharp
+  - vb
+  name: Noise
+  nameWithType: PictureRenderKind.Noise
+  fullName: PublisherStudio.BusinessObjects.PictureRenderKind.Noise
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Noise = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PictureRenderKind
+- uid: PublisherStudio.BusinessObjects.PictureRenderKind.Stripes
+  commentId: F:PublisherStudio.BusinessObjects.PictureRenderKind.Stripes
+  id: Stripes
+  parent: PublisherStudio.BusinessObjects.PictureRenderKind
+  langs:
+  - csharp
+  - vb
+  name: Stripes
+  nameWithType: PictureRenderKind.Stripes
+  fullName: PublisherStudio.BusinessObjects.PictureRenderKind.Stripes
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Stripes = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PictureRenderKind
+- uid: PublisherStudio.BusinessObjects.PictureRenderKind.Vignette
+  commentId: F:PublisherStudio.BusinessObjects.PictureRenderKind.Vignette
+  id: Vignette
+  parent: PublisherStudio.BusinessObjects.PictureRenderKind
+  langs:
+  - csharp
+  - vb
+  name: Vignette
+  nameWithType: PictureRenderKind.Vignette
+  fullName: PublisherStudio.BusinessObjects.PictureRenderKind.Vignette
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Vignette = 3
+    return:
+      type: PublisherStudio.BusinessObjects.PictureRenderKind
+- uid: PublisherStudio.BusinessObjects.PictureRenderKind.Bloom
+  commentId: F:PublisherStudio.BusinessObjects.PictureRenderKind.Bloom
+  id: Bloom
+  parent: PublisherStudio.BusinessObjects.PictureRenderKind
+  langs:
+  - csharp
+  - vb
+  name: Bloom
+  nameWithType: PictureRenderKind.Bloom
+  fullName: PublisherStudio.BusinessObjects.PictureRenderKind.Bloom
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Bloom = 4
+    return:
+      type: PublisherStudio.BusinessObjects.PictureRenderKind
+- uid: PublisherStudio.BusinessObjects.PictureRenderKind.Neon
+  commentId: F:PublisherStudio.BusinessObjects.PictureRenderKind.Neon
+  id: Neon
+  parent: PublisherStudio.BusinessObjects.PictureRenderKind
+  langs:
+  - csharp
+  - vb
+  name: Neon
+  nameWithType: PictureRenderKind.Neon
+  fullName: PublisherStudio.BusinessObjects.PictureRenderKind.Neon
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Neon = 5
+    return:
+      type: PublisherStudio.BusinessObjects.PictureRenderKind
+- uid: PublisherStudio.BusinessObjects.PictureRenderKind.LensFlare
+  commentId: F:PublisherStudio.BusinessObjects.PictureRenderKind.LensFlare
+  id: LensFlare
+  parent: PublisherStudio.BusinessObjects.PictureRenderKind
+  langs:
+  - csharp
+  - vb
+  name: LensFlare
+  nameWithType: PictureRenderKind.LensFlare
+  fullName: PublisherStudio.BusinessObjects.PictureRenderKind.LensFlare
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: LensFlare = 6
+    return:
+      type: PublisherStudio.BusinessObjects.PictureRenderKind
+- uid: PublisherStudio.BusinessObjects.PictureRenderKind.GrainNoise
+  commentId: F:PublisherStudio.BusinessObjects.PictureRenderKind.GrainNoise
+  id: GrainNoise
+  parent: PublisherStudio.BusinessObjects.PictureRenderKind
+  langs:
+  - csharp
+  - vb
+  name: GrainNoise
+  nameWithType: PictureRenderKind.GrainNoise
+  fullName: PublisherStudio.BusinessObjects.PictureRenderKind.GrainNoise
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: GrainNoise = 7
+    return:
+      type: PublisherStudio.BusinessObjects.PictureRenderKind
+- uid: PublisherStudio.BusinessObjects.PictureRenderKind.MotionBlur
+  commentId: F:PublisherStudio.BusinessObjects.PictureRenderKind.MotionBlur
+  id: MotionBlur
+  parent: PublisherStudio.BusinessObjects.PictureRenderKind
+  langs:
+  - csharp
+  - vb
+  name: MotionBlur
+  nameWithType: PictureRenderKind.MotionBlur
+  fullName: PublisherStudio.BusinessObjects.PictureRenderKind.MotionBlur
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: MotionBlur = 8
+    return:
+      type: PublisherStudio.BusinessObjects.PictureRenderKind
+- uid: PublisherStudio.BusinessObjects.PictureRenderKind.Wind
+  commentId: F:PublisherStudio.BusinessObjects.PictureRenderKind.Wind
+  id: Wind
+  parent: PublisherStudio.BusinessObjects.PictureRenderKind
+  langs:
+  - csharp
+  - vb
+  name: Wind
+  nameWithType: PictureRenderKind.Wind
+  fullName: PublisherStudio.BusinessObjects.PictureRenderKind.Wind
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Wind = 9
+    return:
+      type: PublisherStudio.BusinessObjects.PictureRenderKind
+- uid: PublisherStudio.BusinessObjects.PictureRenderKind.OceanWaves
+  commentId: F:PublisherStudio.BusinessObjects.PictureRenderKind.OceanWaves
+  id: OceanWaves
+  parent: PublisherStudio.BusinessObjects.PictureRenderKind
+  langs:
+  - csharp
+  - vb
+  name: OceanWaves
+  nameWithType: PictureRenderKind.OceanWaves
+  fullName: PublisherStudio.BusinessObjects.PictureRenderKind.OceanWaves
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: OceanWaves = 10
+    return:
+      type: PublisherStudio.BusinessObjects.PictureRenderKind
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PictureRenderKind
+  commentId: T:PublisherStudio.BusinessObjects.PictureRenderKind
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PictureRenderKind.html
+  name: PictureRenderKind
+  nameWithType: PictureRenderKind
+  fullName: PublisherStudio.BusinessObjects.PictureRenderKind

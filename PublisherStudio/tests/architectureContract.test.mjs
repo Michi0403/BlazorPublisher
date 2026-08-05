@@ -8,9 +8,9 @@ const web = path.join(root, 'src', 'PublisherStudio.Web');
 const read = (...parts) => fs.readFileSync(path.join(root, ...parts), 'utf8');
 
 const agents = read('AGENTS.md');
-const overview = read('docs', 'architecture', 'system-overview.md');
-const streaming = read('docs', 'architecture', 'streaming.md');
-const formats = read('docs', 'architecture', 'interchange-formats.md');
+const overview = read('docs', 'articles', 'architecture.md');
+const streaming = read('docs', 'articles', 'streaming-and-recording.md');
+const formats = read('docs', 'articles', 'pictures-and-media.md');
 const program = read('src', 'PublisherStudio.Web', 'Program.cs');
 const composition = read('src', 'PublisherStudio.Web', 'StreamingServiceCollectionExtensions.cs');
 const applicationComposition = read('src', 'PublisherStudio.Web', 'PublisherStudioServiceCollectionExtensions.cs');
@@ -36,24 +36,17 @@ assert.match(agents, /Adapters belong under the owning `Services\/<Area>\/Import
 assert.match(agents, /DTD processing must be prohibited/);
 assert.match(agents, /Do not add a NuGet, npm package, native binary or separate process/);
 assert.doesNotMatch(agents, /`Backend` for/);
-assert.match(overview, /C\[Controllers: backend request entry\]/);
-assert.match(overview, /HB\[Hubs: persistent connection entry\]/);
-assert.match(overview, /UI\[Blazor Components\] --> S\[Reusable Services/);
-assert.match(streaming, /no separate `Backend` architectural root/);
-assert.match(streaming, /PlatformChatHub.*Hubs\/Streaming/s);
+assert.match(overview, /Controllers: backend request entry/);
+assert.match(overview, /Hubs: persistent connection entry/);
+assert.match(overview, /Blazor Components.*Reusable Services/s);
+assert.match(overview, /modular monolith/);
+assert.match(streaming, /Streaming Studio combines scenes, live inputs, chat, hotkeys, recording, and output control/);
 assert.match(formats, /OpenRaster/);
 assert.match(formats, /OpenTimelineIO/);
 assert.match(formats, /Broadcast WAV/);
 
-for (const decision of [
-  'ADR-001-monolith-first.md',
-  'ADR-002-controller-and-hub-entry-points.md',
-  'ADR-003-usecase-subnamespaces.md',
-  'ADR-004-native-and-interchange-formats.md',
-  'ADR-005-services-own-reusable-processing-and-io.md',
-  'ADR-006-canonical-shared-contract-ownership.md',
-  'ADR-007-open-interchange-adapters.md'
-]) assert.ok(fs.existsSync(path.join(root, 'docs', 'decisions', decision)), `${decision} is missing.`);
+for (const article of ['architecture.md', 'streaming-and-recording.md', 'pictures-and-media.md'])
+  assert.ok(fs.existsSync(path.join(root, 'docs', 'articles', article)), `${article} is missing.`);
 
 for (const directory of ['Components', 'Controllers', 'Hubs', 'HostedServices', 'Services'])
   assert.ok(fs.existsSync(path.join(web, directory)), `${directory} architectural root is missing.`);

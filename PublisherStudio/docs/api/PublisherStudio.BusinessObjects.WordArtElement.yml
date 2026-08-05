@@ -1,0 +1,1521 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.WordArtElement
+  commentId: T:PublisherStudio.BusinessObjects.WordArtElement
+  id: WordArtElement
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.WordArtElement.#ctor
+  - PublisherStudio.BusinessObjects.WordArtElement.Bold
+  - PublisherStudio.BusinessObjects.WordArtElement.CustomPathPoints
+  - PublisherStudio.BusinessObjects.WordArtElement.ExtrudeColor
+  - PublisherStudio.BusinessObjects.WordArtElement.ExtrudeDepth
+  - PublisherStudio.BusinessObjects.WordArtElement.FillColor
+  - PublisherStudio.BusinessObjects.WordArtElement.FillKind
+  - PublisherStudio.BusinessObjects.WordArtElement.FillMediaDataUrl
+  - PublisherStudio.BusinessObjects.WordArtElement.FillMediaFitMode
+  - PublisherStudio.BusinessObjects.WordArtElement.FillMediaLoop
+  - PublisherStudio.BusinessObjects.WordArtElement.FillMediaMimeType
+  - PublisherStudio.BusinessObjects.WordArtElement.FillMediaOffsetXPercent
+  - PublisherStudio.BusinessObjects.WordArtElement.FillMediaOffsetYPercent
+  - PublisherStudio.BusinessObjects.WordArtElement.FillMediaPosterDataUrl
+  - PublisherStudio.BusinessObjects.WordArtElement.FillMediaScale
+  - PublisherStudio.BusinessObjects.WordArtElement.FontFamily
+  - PublisherStudio.BusinessObjects.WordArtElement.FontSizePt
+  - PublisherStudio.BusinessObjects.WordArtElement.GradientFill
+  - PublisherStudio.BusinessObjects.WordArtElement.Italic
+  - PublisherStudio.BusinessObjects.WordArtElement.Kind
+  - PublisherStudio.BusinessObjects.WordArtElement.LetterSpacing
+  - PublisherStudio.BusinessObjects.WordArtElement.OutlineColor
+  - PublisherStudio.BusinessObjects.WordArtElement.OutlineWidth
+  - PublisherStudio.BusinessObjects.WordArtElement.PathBaselineOffset
+  - PublisherStudio.BusinessObjects.WordArtElement.PathStartOffsetPercent
+  - PublisherStudio.BusinessObjects.WordArtElement.SecondaryColor
+  - PublisherStudio.BusinessObjects.WordArtElement.ShadowColor
+  - PublisherStudio.BusinessObjects.WordArtElement.ShadowEnabled
+  - PublisherStudio.BusinessObjects.WordArtElement.Text
+  - PublisherStudio.BusinessObjects.WordArtElement.Warp
+  langs:
+  - csharp
+  - vb
+  name: WordArtElement
+  nameWithType: WordArtElement
+  fullName: PublisherStudio.BusinessObjects.WordArtElement
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents a word art element.
+  example: []
+  syntax:
+    content: 'public sealed class WordArtElement : PublicationElement'
+    content.vb: Public NotInheritable Class WordArtElement Inherits PublicationElement
+  inheritance:
+  - System.Object
+  - PublisherStudio.BusinessObjects.PublicationElement
+  inheritedMembers:
+  - PublisherStudio.BusinessObjects.PublicationElement.Id
+  - PublisherStudio.BusinessObjects.PublicationElement.Name
+  - PublisherStudio.BusinessObjects.PublicationElement.X
+  - PublisherStudio.BusinessObjects.PublicationElement.Y
+  - PublisherStudio.BusinessObjects.PublicationElement.Width
+  - PublisherStudio.BusinessObjects.PublicationElement.Height
+  - PublisherStudio.BusinessObjects.PublicationElement.Rotation
+  - PublisherStudio.BusinessObjects.PublicationElement.ZIndex
+  - PublisherStudio.BusinessObjects.PublicationElement.Visible
+  - PublisherStudio.BusinessObjects.PublicationElement.Locked
+  - PublisherStudio.BusinessObjects.PublicationElement.HiddenAtPresentationStart
+  - PublisherStudio.BusinessObjects.PublicationElement.GroupId
+  - PublisherStudio.BusinessObjects.PublicationElement.Animations
+  - PublisherStudio.BusinessObjects.PublicationElement.Interaction
+  - PublisherStudio.BusinessObjects.PublicationElement.ConnectorPorts
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.BusinessObjects.WordArtElement.#ctor
+  commentId: M:PublisherStudio.BusinessObjects.WordArtElement.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: WordArtElement()
+  nameWithType: WordArtElement.WordArtElement()
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.WordArtElement()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public WordArtElement()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.BusinessObjects.WordArtElement.#ctor*
+  nameWithType.vb: WordArtElement.New()
+  fullName.vb: PublisherStudio.BusinessObjects.WordArtElement.New()
+  name.vb: New()
+- uid: PublisherStudio.BusinessObjects.WordArtElement.Kind
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.Kind
+  id: Kind
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: Kind
+  nameWithType: WordArtElement.Kind
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.Kind
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets kind.
+  example: []
+  syntax:
+    content: public override PublicationElementKind Kind { get; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationElementKind
+    content.vb: Public Overrides ReadOnly Property Kind As PublicationElementKind
+  overridden: PublisherStudio.BusinessObjects.PublicationElement.Kind
+  overload: PublisherStudio.BusinessObjects.WordArtElement.Kind*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.Text
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.Text
+  id: Text
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: Text
+  nameWithType: WordArtElement.Text
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.Text
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets text.
+  example: []
+  syntax:
+    content: public string Text { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Text As String
+  overload: PublisherStudio.BusinessObjects.WordArtElement.Text*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.FontFamily
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.FontFamily
+  id: FontFamily
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: FontFamily
+  nameWithType: WordArtElement.FontFamily
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.FontFamily
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets font family.
+  example: []
+  syntax:
+    content: public string FontFamily { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property FontFamily As String
+  overload: PublisherStudio.BusinessObjects.WordArtElement.FontFamily*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.FontSizePt
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.FontSizePt
+  id: FontSizePt
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: FontSizePt
+  nameWithType: WordArtElement.FontSizePt
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.FontSizePt
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets font size pt.
+  example: []
+  syntax:
+    content: public double FontSizePt { get; set; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property FontSizePt As Double
+  overload: PublisherStudio.BusinessObjects.WordArtElement.FontSizePt*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.Bold
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.Bold
+  id: Bold
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: Bold
+  nameWithType: WordArtElement.Bold
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.Bold
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets bold.
+  example: []
+  syntax:
+    content: public bool Bold { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property Bold As Boolean
+  overload: PublisherStudio.BusinessObjects.WordArtElement.Bold*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.Italic
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.Italic
+  id: Italic
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: Italic
+  nameWithType: WordArtElement.Italic
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.Italic
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets italic.
+  example: []
+  syntax:
+    content: public bool Italic { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property Italic As Boolean
+  overload: PublisherStudio.BusinessObjects.WordArtElement.Italic*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.LetterSpacing
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.LetterSpacing
+  id: LetterSpacing
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: LetterSpacing
+  nameWithType: WordArtElement.LetterSpacing
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.LetterSpacing
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets letter spacing.
+  example: []
+  syntax:
+    content: public double LetterSpacing { get; set; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property LetterSpacing As Double
+  overload: PublisherStudio.BusinessObjects.WordArtElement.LetterSpacing*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.FillColor
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.FillColor
+  id: FillColor
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: FillColor
+  nameWithType: WordArtElement.FillColor
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.FillColor
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets fill color.
+  example: []
+  syntax:
+    content: public string FillColor { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property FillColor As String
+  overload: PublisherStudio.BusinessObjects.WordArtElement.FillColor*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.SecondaryColor
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.SecondaryColor
+  id: SecondaryColor
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: SecondaryColor
+  nameWithType: WordArtElement.SecondaryColor
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.SecondaryColor
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets secondary color.
+  example: []
+  syntax:
+    content: public string SecondaryColor { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property SecondaryColor As String
+  overload: PublisherStudio.BusinessObjects.WordArtElement.SecondaryColor*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.GradientFill
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.GradientFill
+  id: GradientFill
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: GradientFill
+  nameWithType: WordArtElement.GradientFill
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.GradientFill
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets gradient fill.
+  example: []
+  syntax:
+    content: public bool GradientFill { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property GradientFill As Boolean
+  overload: PublisherStudio.BusinessObjects.WordArtElement.GradientFill*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.FillKind
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.FillKind
+  id: FillKind
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: FillKind
+  nameWithType: WordArtElement.FillKind
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.FillKind
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets fill kind.
+  example: []
+  syntax:
+    content: public WordArtFillKind FillKind { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.WordArtFillKind
+    content.vb: Public Property FillKind As WordArtFillKind
+  overload: PublisherStudio.BusinessObjects.WordArtElement.FillKind*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.FillMediaDataUrl
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.FillMediaDataUrl
+  id: FillMediaDataUrl
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: FillMediaDataUrl
+  nameWithType: WordArtElement.FillMediaDataUrl
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.FillMediaDataUrl
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets fill media data URL.
+  example: []
+  syntax:
+    content: public string FillMediaDataUrl { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property FillMediaDataUrl As String
+  overload: PublisherStudio.BusinessObjects.WordArtElement.FillMediaDataUrl*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.FillMediaMimeType
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.FillMediaMimeType
+  id: FillMediaMimeType
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: FillMediaMimeType
+  nameWithType: WordArtElement.FillMediaMimeType
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.FillMediaMimeType
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets fill media mime type.
+  example: []
+  syntax:
+    content: public string FillMediaMimeType { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property FillMediaMimeType As String
+  overload: PublisherStudio.BusinessObjects.WordArtElement.FillMediaMimeType*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.FillMediaPosterDataUrl
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.FillMediaPosterDataUrl
+  id: FillMediaPosterDataUrl
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: FillMediaPosterDataUrl
+  nameWithType: WordArtElement.FillMediaPosterDataUrl
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.FillMediaPosterDataUrl
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets fill media poster data URL.
+  example: []
+  syntax:
+    content: public string FillMediaPosterDataUrl { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property FillMediaPosterDataUrl As String
+  overload: PublisherStudio.BusinessObjects.WordArtElement.FillMediaPosterDataUrl*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.FillMediaFitMode
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.FillMediaFitMode
+  id: FillMediaFitMode
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: FillMediaFitMode
+  nameWithType: WordArtElement.FillMediaFitMode
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.FillMediaFitMode
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets fill media fit mode.
+  example: []
+  syntax:
+    content: public PublicationVideoFitMode FillMediaFitMode { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationVideoFitMode
+    content.vb: Public Property FillMediaFitMode As PublicationVideoFitMode
+  overload: PublisherStudio.BusinessObjects.WordArtElement.FillMediaFitMode*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.FillMediaLoop
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.FillMediaLoop
+  id: FillMediaLoop
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: FillMediaLoop
+  nameWithType: WordArtElement.FillMediaLoop
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.FillMediaLoop
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets fill media loop.
+  example: []
+  syntax:
+    content: public bool FillMediaLoop { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property FillMediaLoop As Boolean
+  overload: PublisherStudio.BusinessObjects.WordArtElement.FillMediaLoop*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.FillMediaScale
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.FillMediaScale
+  id: FillMediaScale
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: FillMediaScale
+  nameWithType: WordArtElement.FillMediaScale
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.FillMediaScale
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets fill media scale.
+  example: []
+  syntax:
+    content: public double FillMediaScale { get; set; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property FillMediaScale As Double
+  overload: PublisherStudio.BusinessObjects.WordArtElement.FillMediaScale*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.FillMediaOffsetXPercent
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.FillMediaOffsetXPercent
+  id: FillMediaOffsetXPercent
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: FillMediaOffsetXPercent
+  nameWithType: WordArtElement.FillMediaOffsetXPercent
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.FillMediaOffsetXPercent
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets fill media offset xpercent.
+  example: []
+  syntax:
+    content: public double FillMediaOffsetXPercent { get; set; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property FillMediaOffsetXPercent As Double
+  overload: PublisherStudio.BusinessObjects.WordArtElement.FillMediaOffsetXPercent*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.FillMediaOffsetYPercent
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.FillMediaOffsetYPercent
+  id: FillMediaOffsetYPercent
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: FillMediaOffsetYPercent
+  nameWithType: WordArtElement.FillMediaOffsetYPercent
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.FillMediaOffsetYPercent
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets fill media offset ypercent.
+  example: []
+  syntax:
+    content: public double FillMediaOffsetYPercent { get; set; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property FillMediaOffsetYPercent As Double
+  overload: PublisherStudio.BusinessObjects.WordArtElement.FillMediaOffsetYPercent*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.OutlineColor
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.OutlineColor
+  id: OutlineColor
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: OutlineColor
+  nameWithType: WordArtElement.OutlineColor
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.OutlineColor
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets outline color.
+  example: []
+  syntax:
+    content: public string OutlineColor { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property OutlineColor As String
+  overload: PublisherStudio.BusinessObjects.WordArtElement.OutlineColor*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.OutlineWidth
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.OutlineWidth
+  id: OutlineWidth
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: OutlineWidth
+  nameWithType: WordArtElement.OutlineWidth
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.OutlineWidth
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets outline width.
+  example: []
+  syntax:
+    content: public double OutlineWidth { get; set; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property OutlineWidth As Double
+  overload: PublisherStudio.BusinessObjects.WordArtElement.OutlineWidth*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.ShadowEnabled
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.ShadowEnabled
+  id: ShadowEnabled
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: ShadowEnabled
+  nameWithType: WordArtElement.ShadowEnabled
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.ShadowEnabled
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets shadow enabled.
+  example: []
+  syntax:
+    content: public bool ShadowEnabled { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property ShadowEnabled As Boolean
+  overload: PublisherStudio.BusinessObjects.WordArtElement.ShadowEnabled*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.ShadowColor
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.ShadowColor
+  id: ShadowColor
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: ShadowColor
+  nameWithType: WordArtElement.ShadowColor
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.ShadowColor
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets shadow color.
+  example: []
+  syntax:
+    content: public string ShadowColor { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property ShadowColor As String
+  overload: PublisherStudio.BusinessObjects.WordArtElement.ShadowColor*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.ExtrudeDepth
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.ExtrudeDepth
+  id: ExtrudeDepth
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: ExtrudeDepth
+  nameWithType: WordArtElement.ExtrudeDepth
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.ExtrudeDepth
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets extrude depth.
+  example: []
+  syntax:
+    content: public double ExtrudeDepth { get; set; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property ExtrudeDepth As Double
+  overload: PublisherStudio.BusinessObjects.WordArtElement.ExtrudeDepth*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.ExtrudeColor
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.ExtrudeColor
+  id: ExtrudeColor
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: ExtrudeColor
+  nameWithType: WordArtElement.ExtrudeColor
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.ExtrudeColor
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets extrude color.
+  example: []
+  syntax:
+    content: public string ExtrudeColor { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property ExtrudeColor As String
+  overload: PublisherStudio.BusinessObjects.WordArtElement.ExtrudeColor*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.Warp
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.Warp
+  id: Warp
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: Warp
+  nameWithType: WordArtElement.Warp
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.Warp
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets warp.
+  example: []
+  syntax:
+    content: public WordArtWarp Warp { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.WordArtWarp
+    content.vb: Public Property Warp As WordArtWarp
+  overload: PublisherStudio.BusinessObjects.WordArtElement.Warp*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.CustomPathPoints
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.CustomPathPoints
+  id: CustomPathPoints
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: CustomPathPoints
+  nameWithType: WordArtElement.CustomPathPoints
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.CustomPathPoints
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets custom path points.
+  example: []
+  syntax:
+    content: public List<WordArtPathPoint> CustomPathPoints { get; set; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.List{PublisherStudio.BusinessObjects.WordArtPathPoint}
+    content.vb: Public Property CustomPathPoints As List(Of WordArtPathPoint)
+  overload: PublisherStudio.BusinessObjects.WordArtElement.CustomPathPoints*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.PathStartOffsetPercent
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.PathStartOffsetPercent
+  id: PathStartOffsetPercent
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: PathStartOffsetPercent
+  nameWithType: WordArtElement.PathStartOffsetPercent
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.PathStartOffsetPercent
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets path start offset percent.
+  example: []
+  syntax:
+    content: public double PathStartOffsetPercent { get; set; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property PathStartOffsetPercent As Double
+  overload: PublisherStudio.BusinessObjects.WordArtElement.PathStartOffsetPercent*
+- uid: PublisherStudio.BusinessObjects.WordArtElement.PathBaselineOffset
+  commentId: P:PublisherStudio.BusinessObjects.WordArtElement.PathBaselineOffset
+  id: PathBaselineOffset
+  parent: PublisherStudio.BusinessObjects.WordArtElement
+  langs:
+  - csharp
+  - vb
+  name: PathBaselineOffset
+  nameWithType: WordArtElement.PathBaselineOffset
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.PathBaselineOffset
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets path baseline offset.
+  example: []
+  syntax:
+    content: public double PathBaselineOffset { get; set; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property PathBaselineOffset As Double
+  overload: PublisherStudio.BusinessObjects.WordArtElement.PathBaselineOffset*
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: PublisherStudio.BusinessObjects.PublicationElement
+  commentId: T:PublisherStudio.BusinessObjects.PublicationElement
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html
+  name: PublicationElement
+  nameWithType: PublicationElement
+  fullName: PublisherStudio.BusinessObjects.PublicationElement
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Id
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Id
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Id
+  name: Id
+  nameWithType: PublicationElement.Id
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Id
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Name
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Name
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Name
+  name: Name
+  nameWithType: PublicationElement.Name
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Name
+- uid: PublisherStudio.BusinessObjects.PublicationElement.X
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.X
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_X
+  name: X
+  nameWithType: PublicationElement.X
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.X
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Y
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Y
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Y
+  name: Y
+  nameWithType: PublicationElement.Y
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Y
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Width
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Width
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Width
+  name: Width
+  nameWithType: PublicationElement.Width
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Width
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Height
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Height
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Height
+  name: Height
+  nameWithType: PublicationElement.Height
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Height
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Rotation
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Rotation
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Rotation
+  name: Rotation
+  nameWithType: PublicationElement.Rotation
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Rotation
+- uid: PublisherStudio.BusinessObjects.PublicationElement.ZIndex
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.ZIndex
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_ZIndex
+  name: ZIndex
+  nameWithType: PublicationElement.ZIndex
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.ZIndex
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Visible
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Visible
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Visible
+  name: Visible
+  nameWithType: PublicationElement.Visible
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Visible
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Locked
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Locked
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Locked
+  name: Locked
+  nameWithType: PublicationElement.Locked
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Locked
+- uid: PublisherStudio.BusinessObjects.PublicationElement.HiddenAtPresentationStart
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.HiddenAtPresentationStart
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_HiddenAtPresentationStart
+  name: HiddenAtPresentationStart
+  nameWithType: PublicationElement.HiddenAtPresentationStart
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.HiddenAtPresentationStart
+- uid: PublisherStudio.BusinessObjects.PublicationElement.GroupId
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.GroupId
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_GroupId
+  name: GroupId
+  nameWithType: PublicationElement.GroupId
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.GroupId
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Animations
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Animations
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Animations
+  name: Animations
+  nameWithType: PublicationElement.Animations
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Animations
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Interaction
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Interaction
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Interaction
+  name: Interaction
+  nameWithType: PublicationElement.Interaction
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Interaction
+- uid: PublisherStudio.BusinessObjects.PublicationElement.ConnectorPorts
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.ConnectorPorts
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_ConnectorPorts
+  name: ConnectorPorts
+  nameWithType: PublicationElement.ConnectorPorts
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.ConnectorPorts
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.BusinessObjects.WordArtElement.#ctor*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.#ctor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement__ctor
+  name: WordArtElement
+  nameWithType: WordArtElement.WordArtElement
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.WordArtElement
+  nameWithType.vb: WordArtElement.New
+  fullName.vb: PublisherStudio.BusinessObjects.WordArtElement.New
+  name.vb: New
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Kind
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Kind
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Kind
+  name: Kind
+  nameWithType: PublicationElement.Kind
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Kind
+- uid: PublisherStudio.BusinessObjects.WordArtElement.Kind*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.Kind
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_Kind
+  name: Kind
+  nameWithType: WordArtElement.Kind
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.Kind
+- uid: PublisherStudio.BusinessObjects.PublicationElementKind
+  commentId: T:PublisherStudio.BusinessObjects.PublicationElementKind
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElementKind.html
+  name: PublicationElementKind
+  nameWithType: PublicationElementKind
+  fullName: PublisherStudio.BusinessObjects.PublicationElementKind
+- uid: PublisherStudio.BusinessObjects.WordArtElement.Text*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.Text
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_Text
+  name: Text
+  nameWithType: WordArtElement.Text
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.Text
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.BusinessObjects.WordArtElement.FontFamily*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.FontFamily
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_FontFamily
+  name: FontFamily
+  nameWithType: WordArtElement.FontFamily
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.FontFamily
+- uid: PublisherStudio.BusinessObjects.WordArtElement.FontSizePt*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.FontSizePt
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_FontSizePt
+  name: FontSizePt
+  nameWithType: WordArtElement.FontSizePt
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.FontSizePt
+- uid: System.Double
+  commentId: T:System.Double
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.double
+  name: double
+  nameWithType: double
+  fullName: double
+  nameWithType.vb: Double
+  fullName.vb: Double
+  name.vb: Double
+- uid: PublisherStudio.BusinessObjects.WordArtElement.Bold*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.Bold
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_Bold
+  name: Bold
+  nameWithType: WordArtElement.Bold
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.Bold
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.BusinessObjects.WordArtElement.Italic*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.Italic
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_Italic
+  name: Italic
+  nameWithType: WordArtElement.Italic
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.Italic
+- uid: PublisherStudio.BusinessObjects.WordArtElement.LetterSpacing*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.LetterSpacing
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_LetterSpacing
+  name: LetterSpacing
+  nameWithType: WordArtElement.LetterSpacing
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.LetterSpacing
+- uid: PublisherStudio.BusinessObjects.WordArtElement.FillColor*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.FillColor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_FillColor
+  name: FillColor
+  nameWithType: WordArtElement.FillColor
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.FillColor
+- uid: PublisherStudio.BusinessObjects.WordArtElement.SecondaryColor*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.SecondaryColor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_SecondaryColor
+  name: SecondaryColor
+  nameWithType: WordArtElement.SecondaryColor
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.SecondaryColor
+- uid: PublisherStudio.BusinessObjects.WordArtElement.GradientFill*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.GradientFill
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_GradientFill
+  name: GradientFill
+  nameWithType: WordArtElement.GradientFill
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.GradientFill
+- uid: PublisherStudio.BusinessObjects.WordArtElement.FillKind*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.FillKind
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_FillKind
+  name: FillKind
+  nameWithType: WordArtElement.FillKind
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.FillKind
+- uid: PublisherStudio.BusinessObjects.WordArtFillKind
+  commentId: T:PublisherStudio.BusinessObjects.WordArtFillKind
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtFillKind.html
+  name: WordArtFillKind
+  nameWithType: WordArtFillKind
+  fullName: PublisherStudio.BusinessObjects.WordArtFillKind
+- uid: PublisherStudio.BusinessObjects.WordArtElement.FillMediaDataUrl*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.FillMediaDataUrl
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_FillMediaDataUrl
+  name: FillMediaDataUrl
+  nameWithType: WordArtElement.FillMediaDataUrl
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.FillMediaDataUrl
+- uid: PublisherStudio.BusinessObjects.WordArtElement.FillMediaMimeType*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.FillMediaMimeType
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_FillMediaMimeType
+  name: FillMediaMimeType
+  nameWithType: WordArtElement.FillMediaMimeType
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.FillMediaMimeType
+- uid: PublisherStudio.BusinessObjects.WordArtElement.FillMediaPosterDataUrl*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.FillMediaPosterDataUrl
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_FillMediaPosterDataUrl
+  name: FillMediaPosterDataUrl
+  nameWithType: WordArtElement.FillMediaPosterDataUrl
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.FillMediaPosterDataUrl
+- uid: PublisherStudio.BusinessObjects.WordArtElement.FillMediaFitMode*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.FillMediaFitMode
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_FillMediaFitMode
+  name: FillMediaFitMode
+  nameWithType: WordArtElement.FillMediaFitMode
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.FillMediaFitMode
+- uid: PublisherStudio.BusinessObjects.PublicationVideoFitMode
+  commentId: T:PublisherStudio.BusinessObjects.PublicationVideoFitMode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationVideoFitMode.html
+  name: PublicationVideoFitMode
+  nameWithType: PublicationVideoFitMode
+  fullName: PublisherStudio.BusinessObjects.PublicationVideoFitMode
+- uid: PublisherStudio.BusinessObjects.WordArtElement.FillMediaLoop*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.FillMediaLoop
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_FillMediaLoop
+  name: FillMediaLoop
+  nameWithType: WordArtElement.FillMediaLoop
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.FillMediaLoop
+- uid: PublisherStudio.BusinessObjects.WordArtElement.FillMediaScale*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.FillMediaScale
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_FillMediaScale
+  name: FillMediaScale
+  nameWithType: WordArtElement.FillMediaScale
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.FillMediaScale
+- uid: PublisherStudio.BusinessObjects.WordArtElement.FillMediaOffsetXPercent*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.FillMediaOffsetXPercent
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_FillMediaOffsetXPercent
+  name: FillMediaOffsetXPercent
+  nameWithType: WordArtElement.FillMediaOffsetXPercent
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.FillMediaOffsetXPercent
+- uid: PublisherStudio.BusinessObjects.WordArtElement.FillMediaOffsetYPercent*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.FillMediaOffsetYPercent
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_FillMediaOffsetYPercent
+  name: FillMediaOffsetYPercent
+  nameWithType: WordArtElement.FillMediaOffsetYPercent
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.FillMediaOffsetYPercent
+- uid: PublisherStudio.BusinessObjects.WordArtElement.OutlineColor*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.OutlineColor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_OutlineColor
+  name: OutlineColor
+  nameWithType: WordArtElement.OutlineColor
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.OutlineColor
+- uid: PublisherStudio.BusinessObjects.WordArtElement.OutlineWidth*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.OutlineWidth
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_OutlineWidth
+  name: OutlineWidth
+  nameWithType: WordArtElement.OutlineWidth
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.OutlineWidth
+- uid: PublisherStudio.BusinessObjects.WordArtElement.ShadowEnabled*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.ShadowEnabled
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_ShadowEnabled
+  name: ShadowEnabled
+  nameWithType: WordArtElement.ShadowEnabled
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.ShadowEnabled
+- uid: PublisherStudio.BusinessObjects.WordArtElement.ShadowColor*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.ShadowColor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_ShadowColor
+  name: ShadowColor
+  nameWithType: WordArtElement.ShadowColor
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.ShadowColor
+- uid: PublisherStudio.BusinessObjects.WordArtElement.ExtrudeDepth*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.ExtrudeDepth
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_ExtrudeDepth
+  name: ExtrudeDepth
+  nameWithType: WordArtElement.ExtrudeDepth
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.ExtrudeDepth
+- uid: PublisherStudio.BusinessObjects.WordArtElement.ExtrudeColor*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.ExtrudeColor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_ExtrudeColor
+  name: ExtrudeColor
+  nameWithType: WordArtElement.ExtrudeColor
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.ExtrudeColor
+- uid: PublisherStudio.BusinessObjects.WordArtElement.Warp*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.Warp
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_Warp
+  name: Warp
+  nameWithType: WordArtElement.Warp
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.Warp
+- uid: PublisherStudio.BusinessObjects.WordArtWarp
+  commentId: T:PublisherStudio.BusinessObjects.WordArtWarp
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtWarp.html
+  name: WordArtWarp
+  nameWithType: WordArtWarp
+  fullName: PublisherStudio.BusinessObjects.WordArtWarp
+- uid: PublisherStudio.BusinessObjects.WordArtElement.CustomPathPoints*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.CustomPathPoints
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_CustomPathPoints
+  name: CustomPathPoints
+  nameWithType: WordArtElement.CustomPathPoints
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.CustomPathPoints
+- uid: System.Collections.Generic.List{PublisherStudio.BusinessObjects.WordArtPathPoint}
+  commentId: T:System.Collections.Generic.List{PublisherStudio.BusinessObjects.WordArtPathPoint}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.List`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<WordArtPathPoint>
+  nameWithType: List<WordArtPathPoint>
+  fullName: System.Collections.Generic.List<PublisherStudio.BusinessObjects.WordArtPathPoint>
+  nameWithType.vb: List(Of WordArtPathPoint)
+  fullName.vb: System.Collections.Generic.List(Of PublisherStudio.BusinessObjects.WordArtPathPoint)
+  name.vb: List(Of WordArtPathPoint)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.WordArtPathPoint
+    name: WordArtPathPoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.WordArtPathPoint.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.WordArtPathPoint
+    name: WordArtPathPoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.WordArtPathPoint.html
+  - name: )
+- uid: System.Collections.Generic.List`1
+  commentId: T:System.Collections.Generic.List`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<T>
+  nameWithType: List<T>
+  fullName: System.Collections.Generic.List<T>
+  nameWithType.vb: List(Of T)
+  fullName.vb: System.Collections.Generic.List(Of T)
+  name.vb: List(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: PublisherStudio.BusinessObjects.WordArtElement.PathStartOffsetPercent*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.PathStartOffsetPercent
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_PathStartOffsetPercent
+  name: PathStartOffsetPercent
+  nameWithType: WordArtElement.PathStartOffsetPercent
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.PathStartOffsetPercent
+- uid: PublisherStudio.BusinessObjects.WordArtElement.PathBaselineOffset*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtElement.PathBaselineOffset
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html#PublisherStudio_BusinessObjects_WordArtElement_PathBaselineOffset
+  name: PathBaselineOffset
+  nameWithType: WordArtElement.PathBaselineOffset
+  fullName: PublisherStudio.BusinessObjects.WordArtElement.PathBaselineOffset

@@ -10,7 +10,7 @@ const editor = read('src/PublisherStudio.Web/Components/Pages/Editor.razor');
 const ribbon = read('src/PublisherStudio.Web/Components/Editor/PublicationRibbon.razor');
 const interop = read('src/PublisherStudio.Web/wwwroot/js/publisherInterop.js');
 const css = read('src/PublisherStudio.Web/wwwroot/css/site.css');
-const doctrine = read('docs/architecture/structured-website-export.md');
+const doctrine = read('docs/articles/publishing-and-export.md');
 const packageJson = JSON.parse(read('src/PublisherStudio.Web/package.json'));
 const lockJson = JSON.parse(read('src/PublisherStudio.Web/package-lock.json'));
 const webProject = read('src/PublisherStudio.Web/PublisherStudio.Web.csproj');
@@ -63,11 +63,11 @@ assert.match(doctrine, /FFV1/);
 assert.match(doctrine, /FFmpeg\.wasm/);
 assert.match(doctrine, /Blazor.*JavaScript interop/is);
 
-assert.equal(packageJson.version, '2.0.5');
-assert.equal(lockJson.version, '2.0.5');
-assert.equal(lockJson.packages[''].version, '2.0.5');
-assert.match(webProject, /<Version>2\.0\.5<\/Version>/);
-assert.match(installerProject, /<Version>2\.0\.5<\/Version>/);
-assert.match(streamingRuntime, /Version = "2\.0\.5"/);
+assert.equal(packageJson.version, '2.1.1');
+assert.equal(lockJson.version, '2.1.1');
+assert.equal(lockJson.packages[''].version, '2.1.1');
+assert.match(webProject, /<Version>2\.1\.1<\/Version>/);
+assert.match(installerProject, /<Version>2\.1\.1<\/Version>/);
+assert.match(streamingRuntime, /Version = "2\.1\.1"/);
 
 console.log('structured offline website, media externalization, browser-safe optimization, fallback, and version contracts passed');

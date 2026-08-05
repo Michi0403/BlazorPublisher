@@ -61,14 +61,9 @@ test('installer launch profiles are enumerated by exact name without fragile pro
   assert.match(installerGuard, /foreach \(\$profileName in \$requiredLaunchProfiles\)/);
   assert.doesNotMatch(installerGuard, /profiles\.PSObject\.Properties\.Count/);
   for (const profile of [
-    'BlazorPublisher Default Install and Update',
-    'BlazorPublisher Install Preserving Data',
-    'BlazorPublisher Update Preserving Data',
-    'BlazorPublisher Start',
-    'BlazorPublisher Start without Browser',
-    'BlazorPublisher Check FFmpeg',
-    'BlazorPublisher Install FFmpeg',
-    'BlazorPublisher Uninstall Preview',
-    'BlazorPublisher Uninstall Explicit Delete',
+    'PublisherStudio Install',
+    'PublisherStudio Update',
+    'PublisherStudio Start',
   ]) assert.ok(installerGuard.includes(`'${profile}'`), profile);
+  assert.match(installerGuard, /Visual Studio launch profiles must expose only Install, Update, and Start/);
 });

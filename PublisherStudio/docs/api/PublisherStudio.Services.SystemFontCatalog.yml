@@ -1,0 +1,568 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.SystemFontCatalog
+  commentId: T:PublisherStudio.Services.SystemFontCatalog
+  id: SystemFontCatalog
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.SystemFontCatalog.#ctor(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.SystemFontCatalog})
+  - PublisherStudio.Services.SystemFontCatalog.FontFamilies
+  - PublisherStudio.Services.SystemFontCatalog.Refresh
+  langs:
+  - csharp
+  - vb
+  name: SystemFontCatalog
+  nameWithType: SystemFontCatalog
+  fullName: PublisherStudio.Services.SystemFontCatalog
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Discovers font families installed on the computer that runs PublisherStudio. The application is offline-first, so the catalog never contacts a remote service. Users may still type a font family that is not in this catalog.
+  example: []
+  syntax:
+    content: public sealed class SystemFontCatalog
+    content.vb: Public NotInheritable Class SystemFontCatalog
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.SystemFontCatalog.#ctor(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.SystemFontCatalog})
+  commentId: M:PublisherStudio.Services.SystemFontCatalog.#ctor(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.SystemFontCatalog})
+  id: '#ctor(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.SystemFontCatalog})'
+  parent: PublisherStudio.Services.SystemFontCatalog
+  langs:
+  - csharp
+  - vb
+  name: SystemFontCatalog(ILogger<SystemFontCatalog>)
+  nameWithType: SystemFontCatalog.SystemFontCatalog(ILogger<SystemFontCatalog>)
+  fullName: PublisherStudio.Services.SystemFontCatalog.SystemFontCatalog(Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.SystemFontCatalog>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Discovers font families installed on the computer that runs PublisherStudio. The application is offline-first, so the catalog never contacts a remote service. Users may still type a font family that is not in this catalog.
+  example: []
+  syntax:
+    content: public SystemFontCatalog(ILogger<SystemFontCatalog> logger)
+    parameters:
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.SystemFontCatalog}
+    content.vb: Public Sub New(logger As ILogger(Of SystemFontCatalog))
+  overload: PublisherStudio.Services.SystemFontCatalog.#ctor*
+  nameWithType.vb: SystemFontCatalog.New(ILogger(Of SystemFontCatalog))
+  fullName.vb: PublisherStudio.Services.SystemFontCatalog.New(Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.SystemFontCatalog))
+  name.vb: New(ILogger(Of SystemFontCatalog))
+- uid: PublisherStudio.Services.SystemFontCatalog.Refresh
+  commentId: M:PublisherStudio.Services.SystemFontCatalog.Refresh
+  id: Refresh
+  parent: PublisherStudio.Services.SystemFontCatalog
+  langs:
+  - csharp
+  - vb
+  name: Refresh()
+  nameWithType: SystemFontCatalog.Refresh()
+  fullName: PublisherStudio.Services.SystemFontCatalog.Refresh()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the refresh operation.
+  example: []
+  syntax:
+    content: public IReadOnlyList<string> Refresh()
+    return:
+      type: System.Collections.Generic.IReadOnlyList{System.String}
+    content.vb: Public Function Refresh() As IReadOnlyList(Of String)
+  overload: PublisherStudio.Services.SystemFontCatalog.Refresh*
+- uid: PublisherStudio.Services.SystemFontCatalog.FontFamilies
+  commentId: P:PublisherStudio.Services.SystemFontCatalog.FontFamilies
+  id: FontFamilies
+  parent: PublisherStudio.Services.SystemFontCatalog
+  langs:
+  - csharp
+  - vb
+  name: FontFamilies
+  nameWithType: SystemFontCatalog.FontFamilies
+  fullName: PublisherStudio.Services.SystemFontCatalog.FontFamilies
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public IReadOnlyList<string> FontFamilies { get; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.IReadOnlyList{System.String}
+    content.vb: Public ReadOnly Property FontFamilies As IReadOnlyList(Of String)
+  overload: PublisherStudio.Services.SystemFontCatalog.FontFamilies*
+references:
+- uid: PublisherStudio.Services
+  commentId: N:PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services
+  nameWithType: PublisherStudio.Services
+  fullName: PublisherStudio.Services
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.SystemFontCatalog.#ctor*
+  commentId: Overload:PublisherStudio.Services.SystemFontCatalog.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.SystemFontCatalog.html#PublisherStudio_Services_SystemFontCatalog__ctor_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_SystemFontCatalog__
+  name: SystemFontCatalog
+  nameWithType: SystemFontCatalog.SystemFontCatalog
+  fullName: PublisherStudio.Services.SystemFontCatalog.SystemFontCatalog
+  nameWithType.vb: SystemFontCatalog.New
+  fullName.vb: PublisherStudio.Services.SystemFontCatalog.New
+  name.vb: New
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.SystemFontCatalog}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.SystemFontCatalog}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<SystemFontCatalog>
+  nameWithType: ILogger<SystemFontCatalog>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.SystemFontCatalog>
+  nameWithType.vb: ILogger(Of SystemFontCatalog)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.SystemFontCatalog)
+  name.vb: ILogger(Of SystemFontCatalog)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.SystemFontCatalog
+    name: SystemFontCatalog
+    isExternal: true
+    href: PublisherStudio.Services.SystemFontCatalog.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.SystemFontCatalog
+    name: SystemFontCatalog
+    isExternal: true
+    href: PublisherStudio.Services.SystemFontCatalog.html
+  - name: )
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: PublisherStudio.Services.SystemFontCatalog.Refresh*
+  commentId: Overload:PublisherStudio.Services.SystemFontCatalog.Refresh
+  isExternal: true
+  href: PublisherStudio.Services.SystemFontCatalog.html#PublisherStudio_Services_SystemFontCatalog_Refresh
+  name: Refresh
+  nameWithType: SystemFontCatalog.Refresh
+  fullName: PublisherStudio.Services.SystemFontCatalog.Refresh
+- uid: System.Collections.Generic.IReadOnlyList{System.String}
+  commentId: T:System.Collections.Generic.IReadOnlyList{System.String}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<string>
+  nameWithType: IReadOnlyList<string>
+  fullName: System.Collections.Generic.IReadOnlyList<string>
+  nameWithType.vb: IReadOnlyList(Of String)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of String)
+  name.vb: IReadOnlyList(Of String)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: PublisherStudio.Services.SystemFontCatalog.FontFamilies*
+  commentId: Overload:PublisherStudio.Services.SystemFontCatalog.FontFamilies
+  isExternal: true
+  href: PublisherStudio.Services.SystemFontCatalog.html#PublisherStudio_Services_SystemFontCatalog_FontFamilies
+  name: FontFamilies
+  nameWithType: SystemFontCatalog.FontFamilies
+  fullName: PublisherStudio.Services.SystemFontCatalog.FontFamilies

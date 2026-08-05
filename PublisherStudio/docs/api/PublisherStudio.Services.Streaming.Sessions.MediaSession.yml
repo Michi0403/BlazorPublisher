@@ -1,0 +1,2505 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  commentId: T:PublisherStudio.Services.Streaming.Sessions.MediaSession
+  id: MediaSession
+  parent: PublisherStudio.Services.Streaming.Sessions
+  children:
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.#ctor(PublisherStudio.BusinessObjects.PublisherMediaSessionDefaultsPolicy,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Sessions.MediaSession},Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Lan.WebRtcSignalingService})
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.Apply(System.Text.Json.JsonElement)
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.Chat
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.CompleteIngestSubscribers
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.DryRun
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.Encoder
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.FfmpegPath
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.GetIngest(System.Nullable{System.Guid})
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.HardwareEncoder
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.HasIngest(System.Nullable{System.Guid})
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.HlsDirectory
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.Hotkeys
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.Id
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.Ingest
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.LanDefinition
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.LanEnabled
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.LanServer
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.MasterFrameRate
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.MasterHeight
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.MasterWidth
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.Name
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.OutputDefinitions
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.OutputIngests
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.Outputs
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.PreferDeviceTimestamps
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.ProgramPageId
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.PublicView
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.PublishIngestChunk(System.Byte[])
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.Recording
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.RecordingDefinition
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.RtspRelayPort
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.RtspUrl
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.SetIngest(System.Nullable{System.Guid},PublisherStudio.BusinessObjects.Streaming.IngestAnnouncement)
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.StartedUtc
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.StoppedUtc
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.SubscribeIngest
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.UnsubscribeIngest(System.Guid)
+  - PublisherStudio.Services.Streaming.Sessions.MediaSession.WebRtc
+  langs:
+  - csharp
+  - vb
+  name: MediaSession
+  nameWithType: MediaSession
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Represents a media session.
+  example: []
+  syntax:
+    content: public sealed class MediaSession
+    content.vb: Public NotInheritable Class MediaSession
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.#ctor(PublisherStudio.BusinessObjects.PublisherMediaSessionDefaultsPolicy,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Sessions.MediaSession},Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Lan.WebRtcSignalingService})
+  commentId: M:PublisherStudio.Services.Streaming.Sessions.MediaSession.#ctor(PublisherStudio.BusinessObjects.PublisherMediaSessionDefaultsPolicy,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Sessions.MediaSession},Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Lan.WebRtcSignalingService})
+  id: '#ctor(PublisherStudio.BusinessObjects.PublisherMediaSessionDefaultsPolicy,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Sessions.MediaSession},Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Lan.WebRtcSignalingService})'
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: MediaSession(PublisherMediaSessionDefaultsPolicy, ILogger<MediaSession>, ILogger<WebRtcSignalingService>)
+  nameWithType: MediaSession.MediaSession(PublisherMediaSessionDefaultsPolicy, ILogger<MediaSession>, ILogger<WebRtcSignalingService>)
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.MediaSession(PublisherStudio.BusinessObjects.PublisherMediaSessionDefaultsPolicy, Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.Streaming.Sessions.MediaSession>, Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.Streaming.Lan.WebRtcSignalingService>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Runs the media session operation.
+  example: []
+  syntax:
+    content: public MediaSession(PublisherMediaSessionDefaultsPolicy defaults, ILogger<MediaSession> logger, ILogger<WebRtcSignalingService> webRtcLogger)
+    parameters:
+    - id: defaults
+      type: PublisherStudio.BusinessObjects.PublisherMediaSessionDefaultsPolicy
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Sessions.MediaSession}
+    - id: webRtcLogger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Lan.WebRtcSignalingService}
+    content.vb: Public Sub New(defaults As PublisherMediaSessionDefaultsPolicy, logger As ILogger(Of MediaSession), webRtcLogger As ILogger(Of WebRtcSignalingService))
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.#ctor*
+  nameWithType.vb: MediaSession.New(PublisherMediaSessionDefaultsPolicy, ILogger(Of MediaSession), ILogger(Of WebRtcSignalingService))
+  fullName.vb: PublisherStudio.Services.Streaming.Sessions.MediaSession.New(PublisherStudio.BusinessObjects.PublisherMediaSessionDefaultsPolicy, Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.Streaming.Sessions.MediaSession), Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.Streaming.Lan.WebRtcSignalingService))
+  name.vb: New(PublisherMediaSessionDefaultsPolicy, ILogger(Of MediaSession), ILogger(Of WebRtcSignalingService))
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.Apply(System.Text.Json.JsonElement)
+  commentId: M:PublisherStudio.Services.Streaming.Sessions.MediaSession.Apply(System.Text.Json.JsonElement)
+  id: Apply(System.Text.Json.JsonElement)
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: Apply(JsonElement)
+  nameWithType: MediaSession.Apply(JsonElement)
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.Apply(System.Text.Json.JsonElement)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Runs the apply operation.
+  example: []
+  syntax:
+    content: public void Apply(JsonElement request)
+    parameters:
+    - id: request
+      type: System.Text.Json.JsonElement
+    content.vb: Public Sub Apply(request As JsonElement)
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.Apply*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.SetIngest(System.Nullable{System.Guid},PublisherStudio.BusinessObjects.Streaming.IngestAnnouncement)
+  commentId: M:PublisherStudio.Services.Streaming.Sessions.MediaSession.SetIngest(System.Nullable{System.Guid},PublisherStudio.BusinessObjects.Streaming.IngestAnnouncement)
+  id: SetIngest(System.Nullable{System.Guid},PublisherStudio.BusinessObjects.Streaming.IngestAnnouncement)
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: SetIngest(Guid?, IngestAnnouncement)
+  nameWithType: MediaSession.SetIngest(Guid?, IngestAnnouncement)
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.SetIngest(System.Guid?, PublisherStudio.BusinessObjects.Streaming.IngestAnnouncement)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Sets ingest.
+  example: []
+  syntax:
+    content: public void SetIngest(Guid? outputId, IngestAnnouncement announcement)
+    parameters:
+    - id: outputId
+      type: System.Nullable{System.Guid}
+    - id: announcement
+      type: PublisherStudio.BusinessObjects.Streaming.IngestAnnouncement
+    content.vb: Public Sub SetIngest(outputId As Guid?, announcement As IngestAnnouncement)
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.SetIngest*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.GetIngest(System.Nullable{System.Guid})
+  commentId: M:PublisherStudio.Services.Streaming.Sessions.MediaSession.GetIngest(System.Nullable{System.Guid})
+  id: GetIngest(System.Nullable{System.Guid})
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: GetIngest(Guid?)
+  nameWithType: MediaSession.GetIngest(Guid?)
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.GetIngest(System.Guid?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets ingest.
+  example: []
+  syntax:
+    content: public IngestAnnouncement? GetIngest(Guid? outputId)
+    parameters:
+    - id: outputId
+      type: System.Nullable{System.Guid}
+    return:
+      type: PublisherStudio.BusinessObjects.Streaming.IngestAnnouncement
+    content.vb: Public Function GetIngest(outputId As Guid?) As IngestAnnouncement
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.GetIngest*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.HasIngest(System.Nullable{System.Guid})
+  commentId: M:PublisherStudio.Services.Streaming.Sessions.MediaSession.HasIngest(System.Nullable{System.Guid})
+  id: HasIngest(System.Nullable{System.Guid})
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: HasIngest(Guid?)
+  nameWithType: MediaSession.HasIngest(Guid?)
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.HasIngest(System.Guid?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Determines whether ingest.
+  example: []
+  syntax:
+    content: public bool HasIngest(Guid? outputId)
+    parameters:
+    - id: outputId
+      type: System.Nullable{System.Guid}
+    return:
+      type: System.Boolean
+    content.vb: Public Function HasIngest(outputId As Guid?) As Boolean
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.HasIngest*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.SubscribeIngest
+  commentId: M:PublisherStudio.Services.Streaming.Sessions.MediaSession.SubscribeIngest
+  id: SubscribeIngest
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: SubscribeIngest()
+  nameWithType: MediaSession.SubscribeIngest()
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.SubscribeIngest()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Runs the subscribe ingest operation.
+  example: []
+  syntax:
+    content: public (Guid Id, byte[]? InitializationChunk, ChannelReader<byte[]> Reader) SubscribeIngest()
+    return:
+      type: System.ValueTuple{System.Guid,System.Byte[],System.Threading.Channels.ChannelReader{System.Byte[]}}
+    content.vb: Public Function SubscribeIngest() As (Id As Guid, InitializationChunk As Byte(), Reader As ChannelReader(Of Byte()))
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.SubscribeIngest*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.UnsubscribeIngest(System.Guid)
+  commentId: M:PublisherStudio.Services.Streaming.Sessions.MediaSession.UnsubscribeIngest(System.Guid)
+  id: UnsubscribeIngest(System.Guid)
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: UnsubscribeIngest(Guid)
+  nameWithType: MediaSession.UnsubscribeIngest(Guid)
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.UnsubscribeIngest(System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Runs the unsubscribe ingest operation.
+  example: []
+  syntax:
+    content: public void UnsubscribeIngest(Guid subscriberId)
+    parameters:
+    - id: subscriberId
+      type: System.Guid
+    content.vb: Public Sub UnsubscribeIngest(subscriberId As Guid)
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.UnsubscribeIngest*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.PublishIngestChunk(System.Byte[])
+  commentId: M:PublisherStudio.Services.Streaming.Sessions.MediaSession.PublishIngestChunk(System.Byte[])
+  id: PublishIngestChunk(System.Byte[])
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: PublishIngestChunk(byte[])
+  nameWithType: MediaSession.PublishIngestChunk(byte[])
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.PublishIngestChunk(byte[])
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Publishes ingest chunk.
+  example: []
+  syntax:
+    content: public void PublishIngestChunk(byte[] chunk)
+    parameters:
+    - id: chunk
+      type: System.Byte[]
+    content.vb: Public Sub PublishIngestChunk(chunk As Byte())
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.PublishIngestChunk*
+  nameWithType.vb: MediaSession.PublishIngestChunk(Byte())
+  fullName.vb: PublisherStudio.Services.Streaming.Sessions.MediaSession.PublishIngestChunk(Byte())
+  name.vb: PublishIngestChunk(Byte())
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.CompleteIngestSubscribers
+  commentId: M:PublisherStudio.Services.Streaming.Sessions.MediaSession.CompleteIngestSubscribers
+  id: CompleteIngestSubscribers
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: CompleteIngestSubscribers()
+  nameWithType: MediaSession.CompleteIngestSubscribers()
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.CompleteIngestSubscribers()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Runs the complete ingest subscribers operation.
+  example: []
+  syntax:
+    content: public void CompleteIngestSubscribers()
+    content.vb: Public Sub CompleteIngestSubscribers()
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.CompleteIngestSubscribers*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.PublicView
+  commentId: M:PublisherStudio.Services.Streaming.Sessions.MediaSession.PublicView
+  id: PublicView
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: PublicView()
+  nameWithType: MediaSession.PublicView()
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.PublicView()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Runs the public view operation.
+  example: []
+  syntax:
+    content: public object PublicView()
+    return:
+      type: System.Object
+    content.vb: Public Function PublicView() As Object
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.PublicView*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.Id
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.Id
+  id: Id
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: Id
+  nameWithType: MediaSession.Id
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.Id
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets or sets the stable identifier.
+  example: []
+  syntax:
+    content: public Guid Id { get; }
+    parameters: []
+    return:
+      type: System.Guid
+    content.vb: Public ReadOnly Property Id As Guid
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.Id*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.Name
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.Name
+  id: Name
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: Name
+  nameWithType: MediaSession.Name
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.Name
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets or sets the display name.
+  example: []
+  syntax:
+    content: public string Name { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public ReadOnly Property Name As String
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.Name*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.DryRun
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.DryRun
+  id: DryRun
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: DryRun
+  nameWithType: MediaSession.DryRun
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.DryRun
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets or sets dry run.
+  example: []
+  syntax:
+    content: public bool DryRun { get; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public ReadOnly Property DryRun As Boolean
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.DryRun*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.StartedUtc
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.StartedUtc
+  id: StartedUtc
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: StartedUtc
+  nameWithType: MediaSession.StartedUtc
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.StartedUtc
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets or sets started UTC.
+  example: []
+  syntax:
+    content: public DateTimeOffset StartedUtc { get; }
+    parameters: []
+    return:
+      type: System.DateTimeOffset
+    content.vb: Public ReadOnly Property StartedUtc As DateTimeOffset
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.StartedUtc*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.StoppedUtc
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.StoppedUtc
+  id: StoppedUtc
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: StoppedUtc
+  nameWithType: MediaSession.StoppedUtc
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.StoppedUtc
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets or sets stopped UTC.
+  example: []
+  syntax:
+    content: public DateTimeOffset? StoppedUtc { get; set; }
+    parameters: []
+    return:
+      type: System.Nullable{System.DateTimeOffset}
+    content.vb: Public Property StoppedUtc As DateTimeOffset?
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.StoppedUtc*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.Recording
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.Recording
+  id: Recording
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: Recording
+  nameWithType: MediaSession.Recording
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.Recording
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets or sets recording.
+  example: []
+  syntax:
+    content: public bool Recording { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property Recording As Boolean
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.Recording*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.ProgramPageId
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.ProgramPageId
+  id: ProgramPageId
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: ProgramPageId
+  nameWithType: MediaSession.ProgramPageId
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.ProgramPageId
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets or sets program page identifier.
+  example: []
+  syntax:
+    content: public Guid? ProgramPageId { get; set; }
+    parameters: []
+    return:
+      type: System.Nullable{System.Guid}
+    content.vb: Public Property ProgramPageId As Guid?
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.ProgramPageId*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.LanEnabled
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.LanEnabled
+  id: LanEnabled
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: LanEnabled
+  nameWithType: MediaSession.LanEnabled
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.LanEnabled
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets LAN enabled.
+  example: []
+  syntax:
+    content: public bool LanEnabled { get; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public ReadOnly Property LanEnabled As Boolean
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.LanEnabled*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.LanDefinition
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.LanDefinition
+  id: LanDefinition
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: LanDefinition
+  nameWithType: MediaSession.LanDefinition
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.LanDefinition
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets LAN definition.
+  example: []
+  syntax:
+    content: public MediaLanDefinition LanDefinition { get; }
+    parameters: []
+    return:
+      type: PublisherStudio.Services.Streaming.Lan.MediaLanDefinition
+    content.vb: Public ReadOnly Property LanDefinition As MediaLanDefinition
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.LanDefinition*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.LanServer
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.LanServer
+  id: LanServer
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: LanServer
+  nameWithType: MediaSession.LanServer
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.LanServer
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets or sets LAN server.
+  example: []
+  syntax:
+    content: public LanStreamingServer? LanServer { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.Services.Streaming.Lan.LanStreamingServer
+    content.vb: Public Property LanServer As LanStreamingServer
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.LanServer*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.MasterWidth
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.MasterWidth
+  id: MasterWidth
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: MasterWidth
+  nameWithType: MediaSession.MasterWidth
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.MasterWidth
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets or sets master width.
+  example: []
+  syntax:
+    content: public int MasterWidth { get; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public ReadOnly Property MasterWidth As Integer
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.MasterWidth*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.MasterHeight
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.MasterHeight
+  id: MasterHeight
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: MasterHeight
+  nameWithType: MediaSession.MasterHeight
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.MasterHeight
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets or sets master height.
+  example: []
+  syntax:
+    content: public int MasterHeight { get; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public ReadOnly Property MasterHeight As Integer
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.MasterHeight*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.MasterFrameRate
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.MasterFrameRate
+  id: MasterFrameRate
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: MasterFrameRate
+  nameWithType: MediaSession.MasterFrameRate
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.MasterFrameRate
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets or sets master frame rate.
+  example: []
+  syntax:
+    content: public int MasterFrameRate { get; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public ReadOnly Property MasterFrameRate As Integer
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.MasterFrameRate*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.PreferDeviceTimestamps
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.PreferDeviceTimestamps
+  id: PreferDeviceTimestamps
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: PreferDeviceTimestamps
+  nameWithType: MediaSession.PreferDeviceTimestamps
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.PreferDeviceTimestamps
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets or sets prefer device timestamps.
+  example: []
+  syntax:
+    content: public bool PreferDeviceTimestamps { get; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public ReadOnly Property PreferDeviceTimestamps As Boolean
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.PreferDeviceTimestamps*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.FfmpegPath
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.FfmpegPath
+  id: FfmpegPath
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: FfmpegPath
+  nameWithType: MediaSession.FfmpegPath
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.FfmpegPath
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets or sets FFmpeg path.
+  example: []
+  syntax:
+    content: public string FfmpegPath { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public ReadOnly Property FfmpegPath As String
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.FfmpegPath*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.HardwareEncoder
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.HardwareEncoder
+  id: HardwareEncoder
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: HardwareEncoder
+  nameWithType: MediaSession.HardwareEncoder
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.HardwareEncoder
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets or sets hardware encoder.
+  example: []
+  syntax:
+    content: public int HardwareEncoder { get; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public ReadOnly Property HardwareEncoder As Integer
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.HardwareEncoder*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.Outputs
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.Outputs
+  id: Outputs
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: Outputs
+  nameWithType: MediaSession.Outputs
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.Outputs
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets outputs.
+  example: []
+  syntax:
+    content: public ConcurrentDictionary<Guid, bool> Outputs { get; }
+    parameters: []
+    return:
+      type: System.Collections.Concurrent.ConcurrentDictionary{System.Guid,System.Boolean}
+    content.vb: Public ReadOnly Property Outputs As ConcurrentDictionary(Of Guid, Boolean)
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.Outputs*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.OutputDefinitions
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.OutputDefinitions
+  id: OutputDefinitions
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: OutputDefinitions
+  nameWithType: MediaSession.OutputDefinitions
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.OutputDefinitions
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets output definitions.
+  example: []
+  syntax:
+    content: public List<MediaOutputDefinition> OutputDefinitions { get; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.List{PublisherStudio.Services.Streaming.Encoding.MediaOutputDefinition}
+    content.vb: Public ReadOnly Property OutputDefinitions As List(Of MediaOutputDefinition)
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.OutputDefinitions*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.RecordingDefinition
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.RecordingDefinition
+  id: RecordingDefinition
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: RecordingDefinition
+  nameWithType: MediaSession.RecordingDefinition
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.RecordingDefinition
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets recording definition.
+  example: []
+  syntax:
+    content: public MediaRecordingDefinition RecordingDefinition { get; }
+    parameters: []
+    return:
+      type: PublisherStudio.Services.Streaming.Encoding.MediaRecordingDefinition
+    content.vb: Public ReadOnly Property RecordingDefinition As MediaRecordingDefinition
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.RecordingDefinition*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.Hotkeys
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.Hotkeys
+  id: Hotkeys
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: Hotkeys
+  nameWithType: MediaSession.Hotkeys
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.Hotkeys
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets hotkeys.
+  example: []
+  syntax:
+    content: public List<MediaHotkey> Hotkeys { get; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.List{PublisherStudio.BusinessObjects.Streaming.MediaHotkey}
+    content.vb: Public ReadOnly Property Hotkeys As List(Of MediaHotkey)
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.Hotkeys*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.Ingest
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.Ingest
+  id: Ingest
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: Ingest
+  nameWithType: MediaSession.Ingest
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.Ingest
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets or sets ingest.
+  example: []
+  syntax:
+    content: public IngestAnnouncement? Ingest { get; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.Streaming.IngestAnnouncement
+    content.vb: Public ReadOnly Property Ingest As IngestAnnouncement
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.Ingest*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.OutputIngests
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.OutputIngests
+  id: OutputIngests
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: OutputIngests
+  nameWithType: MediaSession.OutputIngests
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.OutputIngests
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets output ingests.
+  example: []
+  syntax:
+    content: public ConcurrentDictionary<Guid, IngestAnnouncement> OutputIngests { get; }
+    parameters: []
+    return:
+      type: System.Collections.Concurrent.ConcurrentDictionary{System.Guid,PublisherStudio.BusinessObjects.Streaming.IngestAnnouncement}
+    content.vb: Public ReadOnly Property OutputIngests As ConcurrentDictionary(Of Guid, IngestAnnouncement)
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.OutputIngests*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.Encoder
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.Encoder
+  id: Encoder
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: Encoder
+  nameWithType: MediaSession.Encoder
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.Encoder
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets or sets encoder.
+  example: []
+  syntax:
+    content: public EncoderSessionService? Encoder { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.Services.Streaming.Encoding.EncoderSessionService
+    content.vb: Public Property Encoder As EncoderSessionService
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.Encoder*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.HlsDirectory
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.HlsDirectory
+  id: HlsDirectory
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: HlsDirectory
+  nameWithType: MediaSession.HlsDirectory
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.HlsDirectory
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets or sets hls directory.
+  example: []
+  syntax:
+    content: public string HlsDirectory { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property HlsDirectory As String
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.HlsDirectory*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.RtspUrl
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.RtspUrl
+  id: RtspUrl
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: RtspUrl
+  nameWithType: MediaSession.RtspUrl
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.RtspUrl
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets or sets rtsp URL.
+  example: []
+  syntax:
+    content: public string RtspUrl { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property RtspUrl As String
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.RtspUrl*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.RtspRelayPort
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.RtspRelayPort
+  id: RtspRelayPort
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: RtspRelayPort
+  nameWithType: MediaSession.RtspRelayPort
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.RtspRelayPort
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets or sets rtsp relay port.
+  example: []
+  syntax:
+    content: public int RtspRelayPort { get; set; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property RtspRelayPort As Integer
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.RtspRelayPort*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.WebRtc
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.WebRtc
+  id: WebRtc
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: WebRtc
+  nameWithType: MediaSession.WebRtc
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.WebRtc
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets web rtc.
+  example: []
+  syntax:
+    content: public WebRtcSignalingService WebRtc { get; }
+    parameters: []
+    return:
+      type: PublisherStudio.Services.Streaming.Lan.WebRtcSignalingService
+    content.vb: Public ReadOnly Property WebRtc As WebRtcSignalingService
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.WebRtc*
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.Chat
+  commentId: P:PublisherStudio.Services.Streaming.Sessions.MediaSession.Chat
+  id: Chat
+  parent: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  langs:
+  - csharp
+  - vb
+  name: Chat
+  nameWithType: MediaSession.Chat
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.Chat
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Gets or sets chat.
+  example: []
+  syntax:
+    content: public PlatformChatService? Chat { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.Services.Streaming.Chat.PlatformChatService
+    content.vb: Public Property Chat As PlatformChatService
+  overload: PublisherStudio.Services.Streaming.Sessions.MediaSession.Chat*
+references:
+- uid: PublisherStudio.Services.Streaming.Sessions
+  commentId: N:PublisherStudio.Services.Streaming.Sessions
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Sessions
+  nameWithType: PublisherStudio.Services.Streaming.Sessions
+  fullName: PublisherStudio.Services.Streaming.Sessions
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Sessions
+    name: Sessions
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Sessions.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Sessions
+    name: Sessions
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Sessions.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.#ctor*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession__ctor_PublisherStudio_BusinessObjects_PublisherMediaSessionDefaultsPolicy_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_Streaming_Sessions_MediaSession__Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_Streaming_Lan_WebRtcSignalingService__
+  name: MediaSession
+  nameWithType: MediaSession.MediaSession
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.MediaSession
+  nameWithType.vb: MediaSession.New
+  fullName.vb: PublisherStudio.Services.Streaming.Sessions.MediaSession.New
+  name.vb: New
+- uid: PublisherStudio.BusinessObjects.PublisherMediaSessionDefaultsPolicy
+  commentId: T:PublisherStudio.BusinessObjects.PublisherMediaSessionDefaultsPolicy
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherMediaSessionDefaultsPolicy.html
+  name: PublisherMediaSessionDefaultsPolicy
+  nameWithType: PublisherMediaSessionDefaultsPolicy
+  fullName: PublisherStudio.BusinessObjects.PublisherMediaSessionDefaultsPolicy
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Sessions.MediaSession}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Sessions.MediaSession}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<MediaSession>
+  nameWithType: ILogger<MediaSession>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.Streaming.Sessions.MediaSession>
+  nameWithType.vb: ILogger(Of MediaSession)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.Streaming.Sessions.MediaSession)
+  name.vb: ILogger(Of MediaSession)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.Streaming.Sessions.MediaSession
+    name: MediaSession
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.Streaming.Sessions.MediaSession
+    name: MediaSession
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html
+  - name: )
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Lan.WebRtcSignalingService}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Lan.WebRtcSignalingService}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<WebRtcSignalingService>
+  nameWithType: ILogger<WebRtcSignalingService>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.Streaming.Lan.WebRtcSignalingService>
+  nameWithType.vb: ILogger(Of WebRtcSignalingService)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.Streaming.Lan.WebRtcSignalingService)
+  name.vb: ILogger(Of WebRtcSignalingService)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.Streaming.Lan.WebRtcSignalingService
+    name: WebRtcSignalingService
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Lan.WebRtcSignalingService.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.Streaming.Lan.WebRtcSignalingService
+    name: WebRtcSignalingService
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Lan.WebRtcSignalingService.html
+  - name: )
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.Apply*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.Apply
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_Apply_System_Text_Json_JsonElement_
+  name: Apply
+  nameWithType: MediaSession.Apply
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.Apply
+- uid: System.Text.Json.JsonElement
+  commentId: T:System.Text.Json.JsonElement
+  parent: System.Text.Json
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.text.json.jsonelement
+  name: JsonElement
+  nameWithType: JsonElement
+  fullName: System.Text.Json.JsonElement
+- uid: System.Text.Json
+  commentId: N:System.Text.Json
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Text.Json
+  nameWithType: System.Text.Json
+  fullName: System.Text.Json
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Text
+    name: Text
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.text
+  - name: .
+  - uid: System.Text.Json
+    name: Json
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.text.json
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Text
+    name: Text
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.text
+  - name: .
+  - uid: System.Text.Json
+    name: Json
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.text.json
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.SetIngest*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.SetIngest
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_SetIngest_System_Nullable_System_Guid__PublisherStudio_BusinessObjects_Streaming_IngestAnnouncement_
+  name: SetIngest
+  nameWithType: MediaSession.SetIngest
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.SetIngest
+- uid: System.Nullable{System.Guid}
+  commentId: T:System.Nullable{System.Guid}
+  parent: System
+  definition: System.Nullable`1
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid?
+  nameWithType: Guid?
+  fullName: System.Guid?
+  spec.csharp:
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: '?'
+  spec.vb:
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: '?'
+- uid: PublisherStudio.BusinessObjects.Streaming.IngestAnnouncement
+  commentId: T:PublisherStudio.BusinessObjects.Streaming.IngestAnnouncement
+  parent: PublisherStudio.BusinessObjects.Streaming
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.Streaming.IngestAnnouncement.html
+  name: IngestAnnouncement
+  nameWithType: IngestAnnouncement
+  fullName: PublisherStudio.BusinessObjects.Streaming.IngestAnnouncement
+- uid: System.Nullable`1
+  commentId: T:System.Nullable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  name: Nullable<T>
+  nameWithType: Nullable<T>
+  fullName: System.Nullable<T>
+  nameWithType.vb: Nullable(Of T)
+  fullName.vb: System.Nullable(Of T)
+  name.vb: Nullable(Of T)
+  spec.csharp:
+  - uid: System.Nullable`1
+    name: Nullable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Nullable`1
+    name: Nullable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: PublisherStudio.BusinessObjects.Streaming
+  commentId: N:PublisherStudio.BusinessObjects.Streaming
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects.Streaming
+  nameWithType: PublisherStudio.BusinessObjects.Streaming
+  fullName: PublisherStudio.BusinessObjects.Streaming
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.Streaming.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.Streaming.html
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.GetIngest*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.GetIngest
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_GetIngest_System_Nullable_System_Guid__
+  name: GetIngest
+  nameWithType: MediaSession.GetIngest
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.GetIngest
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.HasIngest*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.HasIngest
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_HasIngest_System_Nullable_System_Guid__
+  name: HasIngest
+  nameWithType: MediaSession.HasIngest
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.HasIngest
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.SubscribeIngest*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.SubscribeIngest
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_SubscribeIngest
+  name: SubscribeIngest
+  nameWithType: MediaSession.SubscribeIngest
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.SubscribeIngest
+- uid: System.ValueTuple{System.Guid,System.Byte[],System.Threading.Channels.ChannelReader{System.Byte[]}}
+  commentId: T:System.ValueTuple{System.Guid,System.Byte[],System.Threading.Channels.ChannelReader{System.Byte[]}}
+  parent: System
+  definition: System.ValueTuple`3
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: (Guid Id, byte[] Initialization, ChannelReader<byte[]> Reader)
+  nameWithType: (Guid Id, byte[] Initialization, ChannelReader<byte[]> Reader)
+  fullName: (System.Guid Id, byte[] Initialization, System.Threading.Channels.ChannelReader<byte[]> Reader)
+  nameWithType.vb: (Id As Guid, Initialization As Byte(), Reader As ChannelReader(Of Byte()))
+  fullName.vb: (Id As System.Guid, Initialization As Byte(), Reader As System.Threading.Channels.ChannelReader(Of Byte()))
+  name.vb: (Id As Guid, Initialization As Byte(), Reader As ChannelReader(Of Byte()))
+  spec.csharp:
+  - name: (
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: " "
+  - uid: System.ValueTuple{System.Guid,System.Byte[],System.Threading.Channels.ChannelReader{System.Byte[]}}.Id
+    name: Id
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetuple-system.guid,system.byte[],system.threading.channels.channelreader-system.byte[]--.id
+  - name: ','
+  - name: " "
+  - uid: System.Byte
+    name: byte
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.byte
+  - name: '['
+  - name: ']'
+  - name: " "
+  - uid: System.ValueTuple{System.Guid,System.Byte[],System.Threading.Channels.ChannelReader{System.Byte[]}}.Initialization
+    name: Initialization
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetuple-system.guid,system.byte[],system.threading.channels.channelreader-system.byte[]--.initialization
+  - name: ','
+  - name: " "
+  - uid: System.Threading.Channels.ChannelReader`1
+    name: ChannelReader
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.channels.channelreader-1
+  - name: <
+  - uid: System.Byte
+    name: byte
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.byte
+  - name: '['
+  - name: ']'
+  - name: '>'
+  - name: " "
+  - uid: System.ValueTuple{System.Guid,System.Byte[],System.Threading.Channels.ChannelReader{System.Byte[]}}.Reader
+    name: Reader
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetuple-system.guid,system.byte[],system.threading.channels.channelreader-system.byte[]--.reader
+  - name: )
+  spec.vb:
+  - name: (
+  - uid: System.ValueTuple{System.Guid,System.Byte[],System.Threading.Channels.ChannelReader{System.Byte[]}}.Id
+    name: Id
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetuple-system.guid,system.byte[],system.threading.channels.channelreader-system.byte[]--.id
+  - name: " "
+  - name: As
+  - name: " "
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: ','
+  - name: " "
+  - uid: System.ValueTuple{System.Guid,System.Byte[],System.Threading.Channels.ChannelReader{System.Byte[]}}.Initialization
+    name: Initialization
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetuple-system.guid,system.byte[],system.threading.channels.channelreader-system.byte[]--.initialization
+  - name: " "
+  - name: As
+  - name: " "
+  - uid: System.Byte
+    name: Byte
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.byte
+  - name: (
+  - name: )
+  - name: ','
+  - name: " "
+  - uid: System.ValueTuple{System.Guid,System.Byte[],System.Threading.Channels.ChannelReader{System.Byte[]}}.Reader
+    name: Reader
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetuple-system.guid,system.byte[],system.threading.channels.channelreader-system.byte[]--.reader
+  - name: " "
+  - name: As
+  - name: " "
+  - uid: System.Threading.Channels.ChannelReader`1
+    name: ChannelReader
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.channels.channelreader-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Byte
+    name: Byte
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.byte
+  - name: (
+  - name: )
+  - name: )
+  - name: )
+- uid: System.ValueTuple`3
+  commentId: T:System.ValueTuple`3
+  name: (T1, T2, T3)
+  nameWithType: (T1, T2, T3)
+  fullName: (T1, T2, T3)
+  spec.csharp:
+  - name: (
+  - name: T1
+  - name: ','
+  - name: " "
+  - name: T2
+  - name: ','
+  - name: " "
+  - name: T3
+  - name: )
+  spec.vb:
+  - name: (
+  - name: T1
+  - name: ','
+  - name: " "
+  - name: T2
+  - name: ','
+  - name: " "
+  - name: T3
+  - name: )
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.UnsubscribeIngest*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.UnsubscribeIngest
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_UnsubscribeIngest_System_Guid_
+  name: UnsubscribeIngest
+  nameWithType: MediaSession.UnsubscribeIngest
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.UnsubscribeIngest
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.PublishIngestChunk*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.PublishIngestChunk
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_PublishIngestChunk_System_Byte___
+  name: PublishIngestChunk
+  nameWithType: MediaSession.PublishIngestChunk
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.PublishIngestChunk
+- uid: System.Byte[]
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.byte
+  name: byte[]
+  nameWithType: byte[]
+  fullName: byte[]
+  nameWithType.vb: Byte()
+  fullName.vb: Byte()
+  name.vb: Byte()
+  spec.csharp:
+  - uid: System.Byte
+    name: byte
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.byte
+  - name: '['
+  - name: ']'
+  spec.vb:
+  - uid: System.Byte
+    name: Byte
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.byte
+  - name: (
+  - name: )
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.CompleteIngestSubscribers*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.CompleteIngestSubscribers
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_CompleteIngestSubscribers
+  name: CompleteIngestSubscribers
+  nameWithType: MediaSession.CompleteIngestSubscribers
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.CompleteIngestSubscribers
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.PublicView*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.PublicView
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_PublicView
+  name: PublicView
+  nameWithType: MediaSession.PublicView
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.PublicView
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.Id*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.Id
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_Id
+  name: Id
+  nameWithType: MediaSession.Id
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.Id
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.Name*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.Name
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_Name
+  name: Name
+  nameWithType: MediaSession.Name
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.Name
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.DryRun*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.DryRun
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_DryRun
+  name: DryRun
+  nameWithType: MediaSession.DryRun
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.DryRun
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.StartedUtc*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.StartedUtc
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_StartedUtc
+  name: StartedUtc
+  nameWithType: MediaSession.StartedUtc
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.StartedUtc
+- uid: System.DateTimeOffset
+  commentId: T:System.DateTimeOffset
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.datetimeoffset
+  name: DateTimeOffset
+  nameWithType: DateTimeOffset
+  fullName: System.DateTimeOffset
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.StoppedUtc*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.StoppedUtc
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_StoppedUtc
+  name: StoppedUtc
+  nameWithType: MediaSession.StoppedUtc
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.StoppedUtc
+- uid: System.Nullable{System.DateTimeOffset}
+  commentId: T:System.Nullable{System.DateTimeOffset}
+  parent: System
+  definition: System.Nullable`1
+  href: https://learn.microsoft.com/dotnet/api/system.datetimeoffset
+  name: DateTimeOffset?
+  nameWithType: DateTimeOffset?
+  fullName: System.DateTimeOffset?
+  spec.csharp:
+  - uid: System.DateTimeOffset
+    name: DateTimeOffset
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.datetimeoffset
+  - name: '?'
+  spec.vb:
+  - uid: System.DateTimeOffset
+    name: DateTimeOffset
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.datetimeoffset
+  - name: '?'
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.Recording*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.Recording
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_Recording
+  name: Recording
+  nameWithType: MediaSession.Recording
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.Recording
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.ProgramPageId*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.ProgramPageId
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_ProgramPageId
+  name: ProgramPageId
+  nameWithType: MediaSession.ProgramPageId
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.ProgramPageId
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.LanEnabled*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.LanEnabled
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_LanEnabled
+  name: LanEnabled
+  nameWithType: MediaSession.LanEnabled
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.LanEnabled
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.LanDefinition*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.LanDefinition
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_LanDefinition
+  name: LanDefinition
+  nameWithType: MediaSession.LanDefinition
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.LanDefinition
+- uid: PublisherStudio.Services.Streaming.Lan.MediaLanDefinition
+  commentId: T:PublisherStudio.Services.Streaming.Lan.MediaLanDefinition
+  parent: PublisherStudio.Services.Streaming.Lan
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Lan.MediaLanDefinition.html
+  name: MediaLanDefinition
+  nameWithType: MediaLanDefinition
+  fullName: PublisherStudio.Services.Streaming.Lan.MediaLanDefinition
+- uid: PublisherStudio.Services.Streaming.Lan
+  commentId: N:PublisherStudio.Services.Streaming.Lan
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Lan
+  nameWithType: PublisherStudio.Services.Streaming.Lan
+  fullName: PublisherStudio.Services.Streaming.Lan
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Lan
+    name: Lan
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Lan.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Lan
+    name: Lan
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Lan.html
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.LanServer*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.LanServer
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_LanServer
+  name: LanServer
+  nameWithType: MediaSession.LanServer
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.LanServer
+- uid: PublisherStudio.Services.Streaming.Lan.LanStreamingServer
+  commentId: T:PublisherStudio.Services.Streaming.Lan.LanStreamingServer
+  parent: PublisherStudio.Services.Streaming.Lan
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Lan.LanStreamingServer.html
+  name: LanStreamingServer
+  nameWithType: LanStreamingServer
+  fullName: PublisherStudio.Services.Streaming.Lan.LanStreamingServer
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.MasterWidth*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.MasterWidth
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_MasterWidth
+  name: MasterWidth
+  nameWithType: MediaSession.MasterWidth
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.MasterWidth
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.MasterHeight*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.MasterHeight
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_MasterHeight
+  name: MasterHeight
+  nameWithType: MediaSession.MasterHeight
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.MasterHeight
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.MasterFrameRate*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.MasterFrameRate
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_MasterFrameRate
+  name: MasterFrameRate
+  nameWithType: MediaSession.MasterFrameRate
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.MasterFrameRate
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.PreferDeviceTimestamps*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.PreferDeviceTimestamps
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_PreferDeviceTimestamps
+  name: PreferDeviceTimestamps
+  nameWithType: MediaSession.PreferDeviceTimestamps
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.PreferDeviceTimestamps
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.FfmpegPath*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.FfmpegPath
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_FfmpegPath
+  name: FfmpegPath
+  nameWithType: MediaSession.FfmpegPath
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.FfmpegPath
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.HardwareEncoder*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.HardwareEncoder
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_HardwareEncoder
+  name: HardwareEncoder
+  nameWithType: MediaSession.HardwareEncoder
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.HardwareEncoder
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.Outputs*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.Outputs
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_Outputs
+  name: Outputs
+  nameWithType: MediaSession.Outputs
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.Outputs
+- uid: System.Collections.Concurrent.ConcurrentDictionary{System.Guid,System.Boolean}
+  commentId: T:System.Collections.Concurrent.ConcurrentDictionary{System.Guid,System.Boolean}
+  parent: System.Collections.Concurrent
+  definition: System.Collections.Concurrent.ConcurrentDictionary`2
+  href: https://learn.microsoft.com/dotnet/api/system.collections.concurrent.concurrentdictionary-2
+  name: ConcurrentDictionary<Guid, bool>
+  nameWithType: ConcurrentDictionary<Guid, bool>
+  fullName: System.Collections.Concurrent.ConcurrentDictionary<System.Guid, bool>
+  nameWithType.vb: ConcurrentDictionary(Of Guid, Boolean)
+  fullName.vb: System.Collections.Concurrent.ConcurrentDictionary(Of System.Guid, Boolean)
+  name.vb: ConcurrentDictionary(Of Guid, Boolean)
+  spec.csharp:
+  - uid: System.Collections.Concurrent.ConcurrentDictionary`2
+    name: ConcurrentDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.concurrent.concurrentdictionary-2
+  - name: <
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: ','
+  - name: " "
+  - uid: System.Boolean
+    name: bool
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.boolean
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Concurrent.ConcurrentDictionary`2
+    name: ConcurrentDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.concurrent.concurrentdictionary-2
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: ','
+  - name: " "
+  - uid: System.Boolean
+    name: Boolean
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.boolean
+  - name: )
+- uid: System.Collections.Concurrent.ConcurrentDictionary`2
+  commentId: T:System.Collections.Concurrent.ConcurrentDictionary`2
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.concurrent.concurrentdictionary-2
+  name: ConcurrentDictionary<TKey, TValue>
+  nameWithType: ConcurrentDictionary<TKey, TValue>
+  fullName: System.Collections.Concurrent.ConcurrentDictionary<TKey, TValue>
+  nameWithType.vb: ConcurrentDictionary(Of TKey, TValue)
+  fullName.vb: System.Collections.Concurrent.ConcurrentDictionary(Of TKey, TValue)
+  name.vb: ConcurrentDictionary(Of TKey, TValue)
+  spec.csharp:
+  - uid: System.Collections.Concurrent.ConcurrentDictionary`2
+    name: ConcurrentDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.concurrent.concurrentdictionary-2
+  - name: <
+  - name: TKey
+  - name: ','
+  - name: " "
+  - name: TValue
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Concurrent.ConcurrentDictionary`2
+    name: ConcurrentDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.concurrent.concurrentdictionary-2
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TKey
+  - name: ','
+  - name: " "
+  - name: TValue
+  - name: )
+- uid: System.Collections.Concurrent
+  commentId: N:System.Collections.Concurrent
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Concurrent
+  nameWithType: System.Collections.Concurrent
+  fullName: System.Collections.Concurrent
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Concurrent
+    name: Concurrent
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.concurrent
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Concurrent
+    name: Concurrent
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.concurrent
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.OutputDefinitions*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.OutputDefinitions
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_OutputDefinitions
+  name: OutputDefinitions
+  nameWithType: MediaSession.OutputDefinitions
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.OutputDefinitions
+- uid: System.Collections.Generic.List{PublisherStudio.Services.Streaming.Encoding.MediaOutputDefinition}
+  commentId: T:System.Collections.Generic.List{PublisherStudio.Services.Streaming.Encoding.MediaOutputDefinition}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.List`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<MediaOutputDefinition>
+  nameWithType: List<MediaOutputDefinition>
+  fullName: System.Collections.Generic.List<PublisherStudio.Services.Streaming.Encoding.MediaOutputDefinition>
+  nameWithType.vb: List(Of MediaOutputDefinition)
+  fullName.vb: System.Collections.Generic.List(Of PublisherStudio.Services.Streaming.Encoding.MediaOutputDefinition)
+  name.vb: List(Of MediaOutputDefinition)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: PublisherStudio.Services.Streaming.Encoding.MediaOutputDefinition
+    name: MediaOutputDefinition
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Encoding.MediaOutputDefinition.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.Streaming.Encoding.MediaOutputDefinition
+    name: MediaOutputDefinition
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Encoding.MediaOutputDefinition.html
+  - name: )
+- uid: System.Collections.Generic.List`1
+  commentId: T:System.Collections.Generic.List`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<T>
+  nameWithType: List<T>
+  fullName: System.Collections.Generic.List<T>
+  nameWithType.vb: List(Of T)
+  fullName.vb: System.Collections.Generic.List(Of T)
+  name.vb: List(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.RecordingDefinition*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.RecordingDefinition
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_RecordingDefinition
+  name: RecordingDefinition
+  nameWithType: MediaSession.RecordingDefinition
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.RecordingDefinition
+- uid: PublisherStudio.Services.Streaming.Encoding.MediaRecordingDefinition
+  commentId: T:PublisherStudio.Services.Streaming.Encoding.MediaRecordingDefinition
+  parent: PublisherStudio.Services.Streaming.Encoding
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Encoding.MediaRecordingDefinition.html
+  name: MediaRecordingDefinition
+  nameWithType: MediaRecordingDefinition
+  fullName: PublisherStudio.Services.Streaming.Encoding.MediaRecordingDefinition
+- uid: PublisherStudio.Services.Streaming.Encoding
+  commentId: N:PublisherStudio.Services.Streaming.Encoding
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Encoding
+  nameWithType: PublisherStudio.Services.Streaming.Encoding
+  fullName: PublisherStudio.Services.Streaming.Encoding
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Encoding
+    name: Encoding
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Encoding.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Encoding
+    name: Encoding
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Encoding.html
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.Hotkeys*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.Hotkeys
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_Hotkeys
+  name: Hotkeys
+  nameWithType: MediaSession.Hotkeys
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.Hotkeys
+- uid: System.Collections.Generic.List{PublisherStudio.BusinessObjects.Streaming.MediaHotkey}
+  commentId: T:System.Collections.Generic.List{PublisherStudio.BusinessObjects.Streaming.MediaHotkey}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.List`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<MediaHotkey>
+  nameWithType: List<MediaHotkey>
+  fullName: System.Collections.Generic.List<PublisherStudio.BusinessObjects.Streaming.MediaHotkey>
+  nameWithType.vb: List(Of MediaHotkey)
+  fullName.vb: System.Collections.Generic.List(Of PublisherStudio.BusinessObjects.Streaming.MediaHotkey)
+  name.vb: List(Of MediaHotkey)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.Streaming.MediaHotkey
+    name: MediaHotkey
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.Streaming.MediaHotkey.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.Streaming.MediaHotkey
+    name: MediaHotkey
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.Streaming.MediaHotkey.html
+  - name: )
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.Ingest*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.Ingest
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_Ingest
+  name: Ingest
+  nameWithType: MediaSession.Ingest
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.Ingest
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.OutputIngests*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.OutputIngests
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_OutputIngests
+  name: OutputIngests
+  nameWithType: MediaSession.OutputIngests
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.OutputIngests
+- uid: System.Collections.Concurrent.ConcurrentDictionary{System.Guid,PublisherStudio.BusinessObjects.Streaming.IngestAnnouncement}
+  commentId: T:System.Collections.Concurrent.ConcurrentDictionary{System.Guid,PublisherStudio.BusinessObjects.Streaming.IngestAnnouncement}
+  parent: System.Collections.Concurrent
+  definition: System.Collections.Concurrent.ConcurrentDictionary`2
+  href: https://learn.microsoft.com/dotnet/api/system.collections.concurrent.concurrentdictionary-2
+  name: ConcurrentDictionary<Guid, IngestAnnouncement>
+  nameWithType: ConcurrentDictionary<Guid, IngestAnnouncement>
+  fullName: System.Collections.Concurrent.ConcurrentDictionary<System.Guid, PublisherStudio.BusinessObjects.Streaming.IngestAnnouncement>
+  nameWithType.vb: ConcurrentDictionary(Of Guid, IngestAnnouncement)
+  fullName.vb: System.Collections.Concurrent.ConcurrentDictionary(Of System.Guid, PublisherStudio.BusinessObjects.Streaming.IngestAnnouncement)
+  name.vb: ConcurrentDictionary(Of Guid, IngestAnnouncement)
+  spec.csharp:
+  - uid: System.Collections.Concurrent.ConcurrentDictionary`2
+    name: ConcurrentDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.concurrent.concurrentdictionary-2
+  - name: <
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: ','
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.Streaming.IngestAnnouncement
+    name: IngestAnnouncement
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.Streaming.IngestAnnouncement.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Concurrent.ConcurrentDictionary`2
+    name: ConcurrentDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.concurrent.concurrentdictionary-2
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: ','
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.Streaming.IngestAnnouncement
+    name: IngestAnnouncement
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.Streaming.IngestAnnouncement.html
+  - name: )
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.Encoder*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.Encoder
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_Encoder
+  name: Encoder
+  nameWithType: MediaSession.Encoder
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.Encoder
+- uid: PublisherStudio.Services.Streaming.Encoding.EncoderSessionService
+  commentId: T:PublisherStudio.Services.Streaming.Encoding.EncoderSessionService
+  parent: PublisherStudio.Services.Streaming.Encoding
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Encoding.EncoderSessionService.html
+  name: EncoderSessionService
+  nameWithType: EncoderSessionService
+  fullName: PublisherStudio.Services.Streaming.Encoding.EncoderSessionService
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.HlsDirectory*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.HlsDirectory
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_HlsDirectory
+  name: HlsDirectory
+  nameWithType: MediaSession.HlsDirectory
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.HlsDirectory
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.RtspUrl*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.RtspUrl
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_RtspUrl
+  name: RtspUrl
+  nameWithType: MediaSession.RtspUrl
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.RtspUrl
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.RtspRelayPort*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.RtspRelayPort
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_RtspRelayPort
+  name: RtspRelayPort
+  nameWithType: MediaSession.RtspRelayPort
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.RtspRelayPort
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.WebRtc*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.WebRtc
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_WebRtc
+  name: WebRtc
+  nameWithType: MediaSession.WebRtc
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.WebRtc
+- uid: PublisherStudio.Services.Streaming.Lan.WebRtcSignalingService
+  commentId: T:PublisherStudio.Services.Streaming.Lan.WebRtcSignalingService
+  parent: PublisherStudio.Services.Streaming.Lan
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Lan.WebRtcSignalingService.html
+  name: WebRtcSignalingService
+  nameWithType: WebRtcSignalingService
+  fullName: PublisherStudio.Services.Streaming.Lan.WebRtcSignalingService
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession.Chat*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.MediaSession.Chat
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html#PublisherStudio_Services_Streaming_Sessions_MediaSession_Chat
+  name: Chat
+  nameWithType: MediaSession.Chat
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession.Chat
+- uid: PublisherStudio.Services.Streaming.Chat.PlatformChatService
+  commentId: T:PublisherStudio.Services.Streaming.Chat.PlatformChatService
+  parent: PublisherStudio.Services.Streaming.Chat
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Chat.PlatformChatService.html
+  name: PlatformChatService
+  nameWithType: PlatformChatService
+  fullName: PublisherStudio.Services.Streaming.Chat.PlatformChatService
+- uid: PublisherStudio.Services.Streaming.Chat
+  commentId: N:PublisherStudio.Services.Streaming.Chat
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Chat
+  nameWithType: PublisherStudio.Services.Streaming.Chat
+  fullName: PublisherStudio.Services.Streaming.Chat
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Chat
+    name: Chat
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Chat.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Chat
+    name: Chat
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Chat.html

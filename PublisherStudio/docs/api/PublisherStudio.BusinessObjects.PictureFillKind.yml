@@ -1,0 +1,115 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PictureFillKind
+  commentId: T:PublisherStudio.BusinessObjects.PictureFillKind
+  id: PictureFillKind
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PictureFillKind.LinearGradient
+  - PublisherStudio.BusinessObjects.PictureFillKind.RadialGradient
+  - PublisherStudio.BusinessObjects.PictureFillKind.Solid
+  langs:
+  - csharp
+  - vb
+  name: PictureFillKind
+  nameWithType: PictureFillKind
+  fullName: PublisherStudio.BusinessObjects.PictureFillKind
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported picture fill kind values.
+  example: []
+  syntax:
+    content: public enum PictureFillKind
+    content.vb: Public Enum PictureFillKind
+- uid: PublisherStudio.BusinessObjects.PictureFillKind.Solid
+  commentId: F:PublisherStudio.BusinessObjects.PictureFillKind.Solid
+  id: Solid
+  parent: PublisherStudio.BusinessObjects.PictureFillKind
+  langs:
+  - csharp
+  - vb
+  name: Solid
+  nameWithType: PictureFillKind.Solid
+  fullName: PublisherStudio.BusinessObjects.PictureFillKind.Solid
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Solid = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PictureFillKind
+- uid: PublisherStudio.BusinessObjects.PictureFillKind.LinearGradient
+  commentId: F:PublisherStudio.BusinessObjects.PictureFillKind.LinearGradient
+  id: LinearGradient
+  parent: PublisherStudio.BusinessObjects.PictureFillKind
+  langs:
+  - csharp
+  - vb
+  name: LinearGradient
+  nameWithType: PictureFillKind.LinearGradient
+  fullName: PublisherStudio.BusinessObjects.PictureFillKind.LinearGradient
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: LinearGradient = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PictureFillKind
+- uid: PublisherStudio.BusinessObjects.PictureFillKind.RadialGradient
+  commentId: F:PublisherStudio.BusinessObjects.PictureFillKind.RadialGradient
+  id: RadialGradient
+  parent: PublisherStudio.BusinessObjects.PictureFillKind
+  langs:
+  - csharp
+  - vb
+  name: RadialGradient
+  nameWithType: PictureFillKind.RadialGradient
+  fullName: PublisherStudio.BusinessObjects.PictureFillKind.RadialGradient
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: RadialGradient = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PictureFillKind
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PictureFillKind
+  commentId: T:PublisherStudio.BusinessObjects.PictureFillKind
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PictureFillKind.html
+  name: PictureFillKind
+  nameWithType: PictureFillKind
+  fullName: PublisherStudio.BusinessObjects.PictureFillKind

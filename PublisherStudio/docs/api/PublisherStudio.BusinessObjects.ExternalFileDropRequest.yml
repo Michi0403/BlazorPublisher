@@ -1,0 +1,1255 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  commentId: T:PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  id: ExternalFileDropRequest
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.ExternalFileDropRequest.#ctor(System.Guid,System.String,System.String,System.String,System.Int64,System.Double,System.Int32,System.Int32,System.Double,System.Double,System.Nullable{System.Guid},System.String,System.Double,System.Double)
+  - PublisherStudio.BusinessObjects.ExternalFileDropRequest.AssetId
+  - PublisherStudio.BusinessObjects.ExternalFileDropRequest.Deconstruct(System.Guid@,System.String@,System.String@,System.String@,System.Int64@,System.Double@,System.Int32@,System.Int32@,System.Double@,System.Double@,System.Nullable{System.Guid}@,System.String@,System.Double@,System.Double@)
+  - PublisherStudio.BusinessObjects.ExternalFileDropRequest.DurationSeconds
+  - PublisherStudio.BusinessObjects.ExternalFileDropRequest.Equals(PublisherStudio.BusinessObjects.ExternalFileDropRequest)
+  - PublisherStudio.BusinessObjects.ExternalFileDropRequest.Equals(System.Object)
+  - PublisherStudio.BusinessObjects.ExternalFileDropRequest.GetHashCode
+  - PublisherStudio.BusinessObjects.ExternalFileDropRequest.Kind
+  - PublisherStudio.BusinessObjects.ExternalFileDropRequest.MimeType
+  - PublisherStudio.BusinessObjects.ExternalFileDropRequest.Name
+  - PublisherStudio.BusinessObjects.ExternalFileDropRequest.PixelHeight
+  - PublisherStudio.BusinessObjects.ExternalFileDropRequest.PixelWidth
+  - PublisherStudio.BusinessObjects.ExternalFileDropRequest.Size
+  - PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetElementId
+  - PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetElementKind
+  - PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetX
+  - PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetY
+  - PublisherStudio.BusinessObjects.ExternalFileDropRequest.ToString
+  - PublisherStudio.BusinessObjects.ExternalFileDropRequest.X
+  - PublisherStudio.BusinessObjects.ExternalFileDropRequest.Y
+  - PublisherStudio.BusinessObjects.ExternalFileDropRequest.op_Equality(PublisherStudio.BusinessObjects.ExternalFileDropRequest,PublisherStudio.BusinessObjects.ExternalFileDropRequest)
+  - PublisherStudio.BusinessObjects.ExternalFileDropRequest.op_Inequality(PublisherStudio.BusinessObjects.ExternalFileDropRequest,PublisherStudio.BusinessObjects.ExternalFileDropRequest)
+  langs:
+  - csharp
+  - vb
+  name: ExternalFileDropRequest
+  nameWithType: ExternalFileDropRequest
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents an external file drop request.
+  example: []
+  syntax:
+    content: 'public sealed record ExternalFileDropRequest : IEquatable<ExternalFileDropRequest>'
+    content.vb: Public NotInheritable Class ExternalFileDropRequest Implements IEquatable(Of ExternalFileDropRequest)
+  inheritance:
+  - System.Object
+  implements:
+  - System.IEquatable{PublisherStudio.BusinessObjects.ExternalFileDropRequest}
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.#ctor(System.Guid,System.String,System.String,System.String,System.Int64,System.Double,System.Int32,System.Int32,System.Double,System.Double,System.Nullable{System.Guid},System.String,System.Double,System.Double)
+  commentId: M:PublisherStudio.BusinessObjects.ExternalFileDropRequest.#ctor(System.Guid,System.String,System.String,System.String,System.Int64,System.Double,System.Int32,System.Int32,System.Double,System.Double,System.Nullable{System.Guid},System.String,System.Double,System.Double)
+  id: '#ctor(System.Guid,System.String,System.String,System.String,System.Int64,System.Double,System.Int32,System.Int32,System.Double,System.Double,System.Nullable{System.Guid},System.String,System.Double,System.Double)'
+  parent: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  langs:
+  - csharp
+  - vb
+  name: ExternalFileDropRequest(Guid, string, string, string, long, double, int, int, double, double, Guid?, string, double, double)
+  nameWithType: ExternalFileDropRequest.ExternalFileDropRequest(Guid, string, string, string, long, double, int, int, double, double, Guid?, string, double, double)
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.ExternalFileDropRequest(System.Guid, string, string, string, long, double, int, int, double, double, System.Guid?, string, double, double)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents an external file drop request.
+  example: []
+  syntax:
+    content: public ExternalFileDropRequest(Guid AssetId, string Kind, string Name, string MimeType, long Size, double DurationSeconds, int PixelWidth, int PixelHeight, double X, double Y, Guid? TargetElementId = null, string TargetElementKind = "", double TargetX = 0.5, double TargetY = 0.5)
+    parameters:
+    - id: AssetId
+      type: System.Guid
+    - id: Kind
+      type: System.String
+    - id: Name
+      type: System.String
+    - id: MimeType
+      type: System.String
+    - id: Size
+      type: System.Int64
+    - id: DurationSeconds
+      type: System.Double
+    - id: PixelWidth
+      type: System.Int32
+    - id: PixelHeight
+      type: System.Int32
+    - id: X
+      type: System.Double
+    - id: Y
+      type: System.Double
+    - id: TargetElementId
+      type: System.Nullable{System.Guid}
+    - id: TargetElementKind
+      type: System.String
+    - id: TargetX
+      type: System.Double
+    - id: TargetY
+      type: System.Double
+    content.vb: Public Sub New(AssetId As Guid, Kind As String, Name As String, MimeType As String, Size As Long, DurationSeconds As Double, PixelWidth As Integer, PixelHeight As Integer, X As Double, Y As Double, TargetElementId As Guid? = Nothing, TargetElementKind As String = "", TargetX As Double = 0.5, TargetY As Double = 0.5)
+  overload: PublisherStudio.BusinessObjects.ExternalFileDropRequest.#ctor*
+  nameWithType.vb: ExternalFileDropRequest.New(Guid, String, String, String, Long, Double, Integer, Integer, Double, Double, Guid?, String, Double, Double)
+  fullName.vb: PublisherStudio.BusinessObjects.ExternalFileDropRequest.New(System.Guid, String, String, String, Long, Double, Integer, Integer, Double, Double, System.Guid?, String, Double, Double)
+  name.vb: New(Guid, String, String, String, Long, Double, Integer, Integer, Double, Double, Guid?, String, Double, Double)
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.ToString
+  commentId: M:PublisherStudio.BusinessObjects.ExternalFileDropRequest.ToString
+  id: ToString
+  parent: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  langs:
+  - csharp
+  - vb
+  name: ToString()
+  nameWithType: ExternalFileDropRequest.ToString()
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.ToString()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  example: []
+  syntax:
+    content: public override string ToString()
+    return:
+      type: System.String
+    content.vb: Public Overrides Function ToString() As String
+  overridden: System.Object.ToString
+  overload: PublisherStudio.BusinessObjects.ExternalFileDropRequest.ToString*
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.op_Inequality(PublisherStudio.BusinessObjects.ExternalFileDropRequest,PublisherStudio.BusinessObjects.ExternalFileDropRequest)
+  commentId: M:PublisherStudio.BusinessObjects.ExternalFileDropRequest.op_Inequality(PublisherStudio.BusinessObjects.ExternalFileDropRequest,PublisherStudio.BusinessObjects.ExternalFileDropRequest)
+  id: op_Inequality(PublisherStudio.BusinessObjects.ExternalFileDropRequest,PublisherStudio.BusinessObjects.ExternalFileDropRequest)
+  parent: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  langs:
+  - csharp
+  - vb
+  name: operator !=(ExternalFileDropRequest?, ExternalFileDropRequest?)
+  nameWithType: ExternalFileDropRequest.operator !=(ExternalFileDropRequest?, ExternalFileDropRequest?)
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.operator !=(PublisherStudio.BusinessObjects.ExternalFileDropRequest?, PublisherStudio.BusinessObjects.ExternalFileDropRequest?)
+  type: Operator
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public static bool operator !=(ExternalFileDropRequest? left, ExternalFileDropRequest? right)
+    parameters:
+    - id: left
+      type: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+    - id: right
+      type: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+    return:
+      type: System.Boolean
+    content.vb: Public Shared Operator <>(left As ExternalFileDropRequest, right As ExternalFileDropRequest) As Boolean
+  overload: PublisherStudio.BusinessObjects.ExternalFileDropRequest.op_Inequality*
+  nameWithType.vb: ExternalFileDropRequest.<>(ExternalFileDropRequest, ExternalFileDropRequest)
+  fullName.vb: PublisherStudio.BusinessObjects.ExternalFileDropRequest.<>(PublisherStudio.BusinessObjects.ExternalFileDropRequest, PublisherStudio.BusinessObjects.ExternalFileDropRequest)
+  name.vb: <>(ExternalFileDropRequest, ExternalFileDropRequest)
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.op_Equality(PublisherStudio.BusinessObjects.ExternalFileDropRequest,PublisherStudio.BusinessObjects.ExternalFileDropRequest)
+  commentId: M:PublisherStudio.BusinessObjects.ExternalFileDropRequest.op_Equality(PublisherStudio.BusinessObjects.ExternalFileDropRequest,PublisherStudio.BusinessObjects.ExternalFileDropRequest)
+  id: op_Equality(PublisherStudio.BusinessObjects.ExternalFileDropRequest,PublisherStudio.BusinessObjects.ExternalFileDropRequest)
+  parent: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  langs:
+  - csharp
+  - vb
+  name: operator ==(ExternalFileDropRequest?, ExternalFileDropRequest?)
+  nameWithType: ExternalFileDropRequest.operator ==(ExternalFileDropRequest?, ExternalFileDropRequest?)
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.operator ==(PublisherStudio.BusinessObjects.ExternalFileDropRequest?, PublisherStudio.BusinessObjects.ExternalFileDropRequest?)
+  type: Operator
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public static bool operator ==(ExternalFileDropRequest? left, ExternalFileDropRequest? right)
+    parameters:
+    - id: left
+      type: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+    - id: right
+      type: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+    return:
+      type: System.Boolean
+    content.vb: Public Shared Operator =(left As ExternalFileDropRequest, right As ExternalFileDropRequest) As Boolean
+  overload: PublisherStudio.BusinessObjects.ExternalFileDropRequest.op_Equality*
+  nameWithType.vb: ExternalFileDropRequest.=(ExternalFileDropRequest, ExternalFileDropRequest)
+  fullName.vb: PublisherStudio.BusinessObjects.ExternalFileDropRequest.=(PublisherStudio.BusinessObjects.ExternalFileDropRequest, PublisherStudio.BusinessObjects.ExternalFileDropRequest)
+  name.vb: =(ExternalFileDropRequest, ExternalFileDropRequest)
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.GetHashCode
+  commentId: M:PublisherStudio.BusinessObjects.ExternalFileDropRequest.GetHashCode
+  id: GetHashCode
+  parent: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  langs:
+  - csharp
+  - vb
+  name: GetHashCode()
+  nameWithType: ExternalFileDropRequest.GetHashCode()
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.GetHashCode()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  example: []
+  syntax:
+    content: public override int GetHashCode()
+    return:
+      type: System.Int32
+    content.vb: Public Overrides Function GetHashCode() As Integer
+  overridden: System.Object.GetHashCode
+  overload: PublisherStudio.BusinessObjects.ExternalFileDropRequest.GetHashCode*
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Equals(System.Object)
+  commentId: M:PublisherStudio.BusinessObjects.ExternalFileDropRequest.Equals(System.Object)
+  id: Equals(System.Object)
+  parent: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  langs:
+  - csharp
+  - vb
+  name: Equals(object?)
+  nameWithType: ExternalFileDropRequest.Equals(object?)
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Equals(object?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  example: []
+  syntax:
+    content: public override bool Equals(object? obj)
+    parameters:
+    - id: obj
+      type: System.Object
+    return:
+      type: System.Boolean
+    content.vb: Public Overrides Function Equals(obj As Object) As Boolean
+  overridden: System.Object.Equals(System.Object)
+  overload: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Equals*
+  nameWithType.vb: ExternalFileDropRequest.Equals(Object)
+  fullName.vb: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Equals(Object)
+  name.vb: Equals(Object)
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Equals(PublisherStudio.BusinessObjects.ExternalFileDropRequest)
+  commentId: M:PublisherStudio.BusinessObjects.ExternalFileDropRequest.Equals(PublisherStudio.BusinessObjects.ExternalFileDropRequest)
+  id: Equals(PublisherStudio.BusinessObjects.ExternalFileDropRequest)
+  parent: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  langs:
+  - csharp
+  - vb
+  name: Equals(ExternalFileDropRequest?)
+  nameWithType: ExternalFileDropRequest.Equals(ExternalFileDropRequest?)
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Equals(PublisherStudio.BusinessObjects.ExternalFileDropRequest?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  example: []
+  syntax:
+    content: public bool Equals(ExternalFileDropRequest? other)
+    parameters:
+    - id: other
+      type: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+    return:
+      type: System.Boolean
+    content.vb: Public Function Equals(other As ExternalFileDropRequest) As Boolean
+  overload: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Equals*
+  implements:
+  - System.IEquatable{PublisherStudio.BusinessObjects.ExternalFileDropRequest}.Equals(PublisherStudio.BusinessObjects.ExternalFileDropRequest)
+  nameWithType.vb: ExternalFileDropRequest.Equals(ExternalFileDropRequest)
+  fullName.vb: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Equals(PublisherStudio.BusinessObjects.ExternalFileDropRequest)
+  name.vb: Equals(ExternalFileDropRequest)
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Deconstruct(System.Guid@,System.String@,System.String@,System.String@,System.Int64@,System.Double@,System.Int32@,System.Int32@,System.Double@,System.Double@,System.Nullable{System.Guid}@,System.String@,System.Double@,System.Double@)
+  commentId: M:PublisherStudio.BusinessObjects.ExternalFileDropRequest.Deconstruct(System.Guid@,System.String@,System.String@,System.String@,System.Int64@,System.Double@,System.Int32@,System.Int32@,System.Double@,System.Double@,System.Nullable{System.Guid}@,System.String@,System.Double@,System.Double@)
+  id: Deconstruct(System.Guid@,System.String@,System.String@,System.String@,System.Int64@,System.Double@,System.Int32@,System.Int32@,System.Double@,System.Double@,System.Nullable{System.Guid}@,System.String@,System.Double@,System.Double@)
+  parent: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  langs:
+  - csharp
+  - vb
+  name: Deconstruct(out Guid, out string, out string, out string, out long, out double, out int, out int, out double, out double, out Guid?, out string, out double, out double)
+  nameWithType: ExternalFileDropRequest.Deconstruct(out Guid, out string, out string, out string, out long, out double, out int, out int, out double, out double, out Guid?, out string, out double, out double)
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Deconstruct(out System.Guid, out string, out string, out string, out long, out double, out int, out int, out double, out double, out System.Guid?, out string, out double, out double)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public void Deconstruct(out Guid AssetId, out string Kind, out string Name, out string MimeType, out long Size, out double DurationSeconds, out int PixelWidth, out int PixelHeight, out double X, out double Y, out Guid? TargetElementId, out string TargetElementKind, out double TargetX, out double TargetY)
+    parameters:
+    - id: AssetId
+      type: System.Guid
+    - id: Kind
+      type: System.String
+    - id: Name
+      type: System.String
+    - id: MimeType
+      type: System.String
+    - id: Size
+      type: System.Int64
+    - id: DurationSeconds
+      type: System.Double
+    - id: PixelWidth
+      type: System.Int32
+    - id: PixelHeight
+      type: System.Int32
+    - id: X
+      type: System.Double
+    - id: Y
+      type: System.Double
+    - id: TargetElementId
+      type: System.Nullable{System.Guid}
+    - id: TargetElementKind
+      type: System.String
+    - id: TargetX
+      type: System.Double
+    - id: TargetY
+      type: System.Double
+    content.vb: Public Sub Deconstruct(AssetId As Guid, Kind As String, Name As String, MimeType As String, Size As Long, DurationSeconds As Double, PixelWidth As Integer, PixelHeight As Integer, X As Double, Y As Double, TargetElementId As Guid?, TargetElementKind As String, TargetX As Double, TargetY As Double)
+  overload: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Deconstruct*
+  nameWithType.vb: ExternalFileDropRequest.Deconstruct(Guid, String, String, String, Long, Double, Integer, Integer, Double, Double, Guid?, String, Double, Double)
+  fullName.vb: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Deconstruct(System.Guid, String, String, String, Long, Double, Integer, Integer, Double, Double, System.Guid?, String, Double, Double)
+  name.vb: Deconstruct(Guid, String, String, String, Long, Double, Integer, Integer, Double, Double, Guid?, String, Double, Double)
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.AssetId
+  commentId: P:PublisherStudio.BusinessObjects.ExternalFileDropRequest.AssetId
+  id: AssetId
+  parent: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  langs:
+  - csharp
+  - vb
+  name: AssetId
+  nameWithType: ExternalFileDropRequest.AssetId
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.AssetId
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public Guid AssetId { get; init; }
+    parameters: []
+    return:
+      type: System.Guid
+    content.vb: Public Property AssetId As Guid
+  overload: PublisherStudio.BusinessObjects.ExternalFileDropRequest.AssetId*
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Kind
+  commentId: P:PublisherStudio.BusinessObjects.ExternalFileDropRequest.Kind
+  id: Kind
+  parent: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  langs:
+  - csharp
+  - vb
+  name: Kind
+  nameWithType: ExternalFileDropRequest.Kind
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Kind
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public string Kind { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Kind As String
+  overload: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Kind*
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Name
+  commentId: P:PublisherStudio.BusinessObjects.ExternalFileDropRequest.Name
+  id: Name
+  parent: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  langs:
+  - csharp
+  - vb
+  name: Name
+  nameWithType: ExternalFileDropRequest.Name
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Name
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public string Name { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Name As String
+  overload: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Name*
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.MimeType
+  commentId: P:PublisherStudio.BusinessObjects.ExternalFileDropRequest.MimeType
+  id: MimeType
+  parent: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  langs:
+  - csharp
+  - vb
+  name: MimeType
+  nameWithType: ExternalFileDropRequest.MimeType
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.MimeType
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public string MimeType { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property MimeType As String
+  overload: PublisherStudio.BusinessObjects.ExternalFileDropRequest.MimeType*
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Size
+  commentId: P:PublisherStudio.BusinessObjects.ExternalFileDropRequest.Size
+  id: Size
+  parent: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  langs:
+  - csharp
+  - vb
+  name: Size
+  nameWithType: ExternalFileDropRequest.Size
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Size
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public long Size { get; init; }
+    parameters: []
+    return:
+      type: System.Int64
+    content.vb: Public Property Size As Long
+  overload: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Size*
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.DurationSeconds
+  commentId: P:PublisherStudio.BusinessObjects.ExternalFileDropRequest.DurationSeconds
+  id: DurationSeconds
+  parent: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  langs:
+  - csharp
+  - vb
+  name: DurationSeconds
+  nameWithType: ExternalFileDropRequest.DurationSeconds
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.DurationSeconds
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public double DurationSeconds { get; init; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property DurationSeconds As Double
+  overload: PublisherStudio.BusinessObjects.ExternalFileDropRequest.DurationSeconds*
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.PixelWidth
+  commentId: P:PublisherStudio.BusinessObjects.ExternalFileDropRequest.PixelWidth
+  id: PixelWidth
+  parent: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  langs:
+  - csharp
+  - vb
+  name: PixelWidth
+  nameWithType: ExternalFileDropRequest.PixelWidth
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.PixelWidth
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public int PixelWidth { get; init; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property PixelWidth As Integer
+  overload: PublisherStudio.BusinessObjects.ExternalFileDropRequest.PixelWidth*
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.PixelHeight
+  commentId: P:PublisherStudio.BusinessObjects.ExternalFileDropRequest.PixelHeight
+  id: PixelHeight
+  parent: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  langs:
+  - csharp
+  - vb
+  name: PixelHeight
+  nameWithType: ExternalFileDropRequest.PixelHeight
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.PixelHeight
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public int PixelHeight { get; init; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property PixelHeight As Integer
+  overload: PublisherStudio.BusinessObjects.ExternalFileDropRequest.PixelHeight*
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.X
+  commentId: P:PublisherStudio.BusinessObjects.ExternalFileDropRequest.X
+  id: X
+  parent: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  langs:
+  - csharp
+  - vb
+  name: X
+  nameWithType: ExternalFileDropRequest.X
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.X
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public double X { get; init; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property X As Double
+  overload: PublisherStudio.BusinessObjects.ExternalFileDropRequest.X*
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Y
+  commentId: P:PublisherStudio.BusinessObjects.ExternalFileDropRequest.Y
+  id: Y
+  parent: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  langs:
+  - csharp
+  - vb
+  name: Y
+  nameWithType: ExternalFileDropRequest.Y
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Y
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public double Y { get; init; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property Y As Double
+  overload: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Y*
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetElementId
+  commentId: P:PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetElementId
+  id: TargetElementId
+  parent: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  langs:
+  - csharp
+  - vb
+  name: TargetElementId
+  nameWithType: ExternalFileDropRequest.TargetElementId
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetElementId
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public Guid? TargetElementId { get; init; }
+    parameters: []
+    return:
+      type: System.Nullable{System.Guid}
+    content.vb: Public Property TargetElementId As Guid?
+  overload: PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetElementId*
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetElementKind
+  commentId: P:PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetElementKind
+  id: TargetElementKind
+  parent: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  langs:
+  - csharp
+  - vb
+  name: TargetElementKind
+  nameWithType: ExternalFileDropRequest.TargetElementKind
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetElementKind
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public string TargetElementKind { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property TargetElementKind As String
+  overload: PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetElementKind*
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetX
+  commentId: P:PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetX
+  id: TargetX
+  parent: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  langs:
+  - csharp
+  - vb
+  name: TargetX
+  nameWithType: ExternalFileDropRequest.TargetX
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetX
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public double TargetX { get; init; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property TargetX As Double
+  overload: PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetX*
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetY
+  commentId: P:PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetY
+  id: TargetY
+  parent: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  langs:
+  - csharp
+  - vb
+  name: TargetY
+  nameWithType: ExternalFileDropRequest.TargetY
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetY
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public double TargetY { get; init; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property TargetY As Double
+  overload: PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetY*
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.IEquatable{PublisherStudio.BusinessObjects.ExternalFileDropRequest}
+  commentId: T:System.IEquatable{PublisherStudio.BusinessObjects.ExternalFileDropRequest}
+  parent: System
+  definition: System.IEquatable`1
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<ExternalFileDropRequest>
+  nameWithType: IEquatable<ExternalFileDropRequest>
+  fullName: System.IEquatable<PublisherStudio.BusinessObjects.ExternalFileDropRequest>
+  nameWithType.vb: IEquatable(Of ExternalFileDropRequest)
+  fullName.vb: System.IEquatable(Of PublisherStudio.BusinessObjects.ExternalFileDropRequest)
+  name.vb: IEquatable(Of ExternalFileDropRequest)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+    name: ExternalFileDropRequest
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+    name: ExternalFileDropRequest
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: System.IEquatable`1
+  commentId: T:System.IEquatable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<T>
+  nameWithType: IEquatable<T>
+  fullName: System.IEquatable<T>
+  nameWithType.vb: IEquatable(Of T)
+  fullName.vb: System.IEquatable(Of T)
+  name.vb: IEquatable(Of T)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.#ctor*
+  commentId: Overload:PublisherStudio.BusinessObjects.ExternalFileDropRequest.#ctor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html#PublisherStudio_BusinessObjects_ExternalFileDropRequest__ctor_System_Guid_System_String_System_String_System_String_System_Int64_System_Double_System_Int32_System_Int32_System_Double_System_Double_System_Nullable_System_Guid__System_String_System_Double_System_Double_
+  name: ExternalFileDropRequest
+  nameWithType: ExternalFileDropRequest.ExternalFileDropRequest
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.ExternalFileDropRequest
+  nameWithType.vb: ExternalFileDropRequest.New
+  fullName.vb: PublisherStudio.BusinessObjects.ExternalFileDropRequest.New
+  name.vb: New
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System.Int64
+  commentId: T:System.Int64
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int64
+  name: long
+  nameWithType: long
+  fullName: long
+  nameWithType.vb: Long
+  fullName.vb: Long
+  name.vb: Long
+- uid: System.Double
+  commentId: T:System.Double
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.double
+  name: double
+  nameWithType: double
+  fullName: double
+  nameWithType.vb: Double
+  fullName.vb: Double
+  name.vb: Double
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: System.Nullable{System.Guid}
+  commentId: T:System.Nullable{System.Guid}
+  parent: System
+  definition: System.Nullable`1
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid?
+  nameWithType: Guid?
+  fullName: System.Guid?
+  spec.csharp:
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: '?'
+  spec.vb:
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: '?'
+- uid: System.Nullable`1
+  commentId: T:System.Nullable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  name: Nullable<T>
+  nameWithType: Nullable<T>
+  fullName: System.Nullable<T>
+  nameWithType.vb: Nullable(Of T)
+  fullName.vb: System.Nullable(Of T)
+  name.vb: Nullable(Of T)
+  spec.csharp:
+  - uid: System.Nullable`1
+    name: Nullable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Nullable`1
+    name: Nullable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.ToString*
+  commentId: Overload:PublisherStudio.BusinessObjects.ExternalFileDropRequest.ToString
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html#PublisherStudio_BusinessObjects_ExternalFileDropRequest_ToString
+  name: ToString
+  nameWithType: ExternalFileDropRequest.ToString
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.ToString
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.op_Inequality*
+  commentId: Overload:PublisherStudio.BusinessObjects.ExternalFileDropRequest.op_Inequality
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html#PublisherStudio_BusinessObjects_ExternalFileDropRequest_op_Inequality_PublisherStudio_BusinessObjects_ExternalFileDropRequest_PublisherStudio_BusinessObjects_ExternalFileDropRequest_
+  name: operator !=
+  nameWithType: ExternalFileDropRequest.operator !=
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.operator !=
+  nameWithType.vb: ExternalFileDropRequest.<>
+  fullName.vb: PublisherStudio.BusinessObjects.ExternalFileDropRequest.<>
+  name.vb: <>
+  spec.csharp:
+  - name: operator
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.op_Inequality*
+    name: '!='
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html#PublisherStudio_BusinessObjects_ExternalFileDropRequest_op_Inequality_PublisherStudio_BusinessObjects_ExternalFileDropRequest_PublisherStudio_BusinessObjects_ExternalFileDropRequest_
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  commentId: T:PublisherStudio.BusinessObjects.ExternalFileDropRequest
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html
+  name: ExternalFileDropRequest
+  nameWithType: ExternalFileDropRequest
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.op_Equality*
+  commentId: Overload:PublisherStudio.BusinessObjects.ExternalFileDropRequest.op_Equality
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html#PublisherStudio_BusinessObjects_ExternalFileDropRequest_op_Equality_PublisherStudio_BusinessObjects_ExternalFileDropRequest_PublisherStudio_BusinessObjects_ExternalFileDropRequest_
+  name: operator ==
+  nameWithType: ExternalFileDropRequest.operator ==
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.operator ==
+  nameWithType.vb: ExternalFileDropRequest.=
+  fullName.vb: PublisherStudio.BusinessObjects.ExternalFileDropRequest.=
+  name.vb: =
+  spec.csharp:
+  - name: operator
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.op_Equality*
+    name: ==
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html#PublisherStudio_BusinessObjects_ExternalFileDropRequest_op_Equality_PublisherStudio_BusinessObjects_ExternalFileDropRequest_PublisherStudio_BusinessObjects_ExternalFileDropRequest_
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.GetHashCode*
+  commentId: Overload:PublisherStudio.BusinessObjects.ExternalFileDropRequest.GetHashCode
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html#PublisherStudio_BusinessObjects_ExternalFileDropRequest_GetHashCode
+  name: GetHashCode
+  nameWithType: ExternalFileDropRequest.GetHashCode
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.GetHashCode
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Equals*
+  commentId: Overload:PublisherStudio.BusinessObjects.ExternalFileDropRequest.Equals
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html#PublisherStudio_BusinessObjects_ExternalFileDropRequest_Equals_System_Object_
+  name: Equals
+  nameWithType: ExternalFileDropRequest.Equals
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Equals
+- uid: System.IEquatable{PublisherStudio.BusinessObjects.ExternalFileDropRequest}.Equals(PublisherStudio.BusinessObjects.ExternalFileDropRequest)
+  commentId: M:System.IEquatable{PublisherStudio.BusinessObjects.ExternalFileDropRequest}.Equals(PublisherStudio.BusinessObjects.ExternalFileDropRequest)
+  parent: System.IEquatable{PublisherStudio.BusinessObjects.ExternalFileDropRequest}
+  definition: System.IEquatable`1.Equals(`0)
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  name: Equals(ExternalFileDropRequest)
+  nameWithType: IEquatable<ExternalFileDropRequest>.Equals(ExternalFileDropRequest)
+  fullName: System.IEquatable<PublisherStudio.BusinessObjects.ExternalFileDropRequest>.Equals(PublisherStudio.BusinessObjects.ExternalFileDropRequest)
+  nameWithType.vb: IEquatable(Of ExternalFileDropRequest).Equals(ExternalFileDropRequest)
+  fullName.vb: System.IEquatable(Of PublisherStudio.BusinessObjects.ExternalFileDropRequest).Equals(PublisherStudio.BusinessObjects.ExternalFileDropRequest)
+  spec.csharp:
+  - uid: System.IEquatable{PublisherStudio.BusinessObjects.ExternalFileDropRequest}.Equals(PublisherStudio.BusinessObjects.ExternalFileDropRequest)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+    name: ExternalFileDropRequest
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html
+  - name: )
+  spec.vb:
+  - uid: System.IEquatable{PublisherStudio.BusinessObjects.ExternalFileDropRequest}.Equals(PublisherStudio.BusinessObjects.ExternalFileDropRequest)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest
+    name: ExternalFileDropRequest
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html
+  - name: )
+- uid: System.IEquatable`1.Equals(`0)
+  commentId: M:System.IEquatable`1.Equals(`0)
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  name: Equals(T)
+  nameWithType: IEquatable<T>.Equals(T)
+  fullName: System.IEquatable<T>.Equals(T)
+  nameWithType.vb: IEquatable(Of T).Equals(T)
+  fullName.vb: System.IEquatable(Of T).Equals(T)
+  spec.csharp:
+  - uid: System.IEquatable`1.Equals(`0)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - name: T
+  - name: )
+  spec.vb:
+  - uid: System.IEquatable`1.Equals(`0)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - name: T
+  - name: )
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Deconstruct*
+  commentId: Overload:PublisherStudio.BusinessObjects.ExternalFileDropRequest.Deconstruct
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html#PublisherStudio_BusinessObjects_ExternalFileDropRequest_Deconstruct_System_Guid__System_String__System_String__System_String__System_Int64__System_Double__System_Int32__System_Int32__System_Double__System_Double__System_Nullable_System_Guid___System_String__System_Double__System_Double__
+  name: Deconstruct
+  nameWithType: ExternalFileDropRequest.Deconstruct
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Deconstruct
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.AssetId*
+  commentId: Overload:PublisherStudio.BusinessObjects.ExternalFileDropRequest.AssetId
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html#PublisherStudio_BusinessObjects_ExternalFileDropRequest_AssetId
+  name: AssetId
+  nameWithType: ExternalFileDropRequest.AssetId
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.AssetId
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Kind*
+  commentId: Overload:PublisherStudio.BusinessObjects.ExternalFileDropRequest.Kind
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html#PublisherStudio_BusinessObjects_ExternalFileDropRequest_Kind
+  name: Kind
+  nameWithType: ExternalFileDropRequest.Kind
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Kind
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Name*
+  commentId: Overload:PublisherStudio.BusinessObjects.ExternalFileDropRequest.Name
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html#PublisherStudio_BusinessObjects_ExternalFileDropRequest_Name
+  name: Name
+  nameWithType: ExternalFileDropRequest.Name
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Name
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.MimeType*
+  commentId: Overload:PublisherStudio.BusinessObjects.ExternalFileDropRequest.MimeType
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html#PublisherStudio_BusinessObjects_ExternalFileDropRequest_MimeType
+  name: MimeType
+  nameWithType: ExternalFileDropRequest.MimeType
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.MimeType
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Size*
+  commentId: Overload:PublisherStudio.BusinessObjects.ExternalFileDropRequest.Size
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html#PublisherStudio_BusinessObjects_ExternalFileDropRequest_Size
+  name: Size
+  nameWithType: ExternalFileDropRequest.Size
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Size
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.DurationSeconds*
+  commentId: Overload:PublisherStudio.BusinessObjects.ExternalFileDropRequest.DurationSeconds
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html#PublisherStudio_BusinessObjects_ExternalFileDropRequest_DurationSeconds
+  name: DurationSeconds
+  nameWithType: ExternalFileDropRequest.DurationSeconds
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.DurationSeconds
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.PixelWidth*
+  commentId: Overload:PublisherStudio.BusinessObjects.ExternalFileDropRequest.PixelWidth
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html#PublisherStudio_BusinessObjects_ExternalFileDropRequest_PixelWidth
+  name: PixelWidth
+  nameWithType: ExternalFileDropRequest.PixelWidth
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.PixelWidth
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.PixelHeight*
+  commentId: Overload:PublisherStudio.BusinessObjects.ExternalFileDropRequest.PixelHeight
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html#PublisherStudio_BusinessObjects_ExternalFileDropRequest_PixelHeight
+  name: PixelHeight
+  nameWithType: ExternalFileDropRequest.PixelHeight
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.PixelHeight
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.X*
+  commentId: Overload:PublisherStudio.BusinessObjects.ExternalFileDropRequest.X
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html#PublisherStudio_BusinessObjects_ExternalFileDropRequest_X
+  name: X
+  nameWithType: ExternalFileDropRequest.X
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.X
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Y*
+  commentId: Overload:PublisherStudio.BusinessObjects.ExternalFileDropRequest.Y
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html#PublisherStudio_BusinessObjects_ExternalFileDropRequest_Y
+  name: Y
+  nameWithType: ExternalFileDropRequest.Y
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.Y
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetElementId*
+  commentId: Overload:PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetElementId
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html#PublisherStudio_BusinessObjects_ExternalFileDropRequest_TargetElementId
+  name: TargetElementId
+  nameWithType: ExternalFileDropRequest.TargetElementId
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetElementId
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetElementKind*
+  commentId: Overload:PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetElementKind
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html#PublisherStudio_BusinessObjects_ExternalFileDropRequest_TargetElementKind
+  name: TargetElementKind
+  nameWithType: ExternalFileDropRequest.TargetElementKind
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetElementKind
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetX*
+  commentId: Overload:PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetX
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html#PublisherStudio_BusinessObjects_ExternalFileDropRequest_TargetX
+  name: TargetX
+  nameWithType: ExternalFileDropRequest.TargetX
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetX
+- uid: PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetY*
+  commentId: Overload:PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetY
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ExternalFileDropRequest.html#PublisherStudio_BusinessObjects_ExternalFileDropRequest_TargetY
+  name: TargetY
+  nameWithType: ExternalFileDropRequest.TargetY
+  fullName: PublisherStudio.BusinessObjects.ExternalFileDropRequest.TargetY

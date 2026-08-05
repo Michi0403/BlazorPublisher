@@ -1,0 +1,229 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService
+  commentId: T:PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService
+  id: IVideoLayerInterchangeService
+  parent: PublisherStudio.Services.VideoStudio.Export
+  children:
+  - PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateDefaultBlobLayer(System.String)
+  - PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateMainframeInsert(PublisherStudio.BusinessObjects.VideoEffectLayer)
+  - PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateOpenScad(PublisherStudio.BusinessObjects.VideoEffectLayer)
+  langs:
+  - csharp
+  - vb
+  name: IVideoLayerInterchangeService
+  nameWithType: IVideoLayerInterchangeService
+  fullName: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService
+  type: Interface
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.VideoStudio.Export
+  summary: Defines the video layer interchange service contract.
+  example: []
+  syntax:
+    content: public interface IVideoLayerInterchangeService
+    content.vb: Public Interface IVideoLayerInterchangeService
+  derivedClasses:
+  - PublisherStudio.Services.VideoStudio.Export.VideoLayerInterchangeService
+- uid: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateDefaultBlobLayer(System.String)
+  commentId: M:PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateDefaultBlobLayer(System.String)
+  id: CreateDefaultBlobLayer(System.String)
+  parent: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService
+  langs:
+  - csharp
+  - vb
+  name: CreateDefaultBlobLayer(string?)
+  nameWithType: IVideoLayerInterchangeService.CreateDefaultBlobLayer(string?)
+  fullName: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateDefaultBlobLayer(string?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.VideoStudio.Export
+  syntax:
+    content: VideoEffectLayer CreateDefaultBlobLayer(string? name = null)
+    parameters:
+    - id: name
+      type: System.String
+    return:
+      type: PublisherStudio.BusinessObjects.VideoEffectLayer
+    content.vb: Function CreateDefaultBlobLayer(name As String = Nothing) As VideoEffectLayer
+  overload: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateDefaultBlobLayer*
+  nameWithType.vb: IVideoLayerInterchangeService.CreateDefaultBlobLayer(String)
+  fullName.vb: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateDefaultBlobLayer(String)
+  name.vb: CreateDefaultBlobLayer(String)
+- uid: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateOpenScad(PublisherStudio.BusinessObjects.VideoEffectLayer)
+  commentId: M:PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateOpenScad(PublisherStudio.BusinessObjects.VideoEffectLayer)
+  id: CreateOpenScad(PublisherStudio.BusinessObjects.VideoEffectLayer)
+  parent: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService
+  langs:
+  - csharp
+  - vb
+  name: CreateOpenScad(VideoEffectLayer)
+  nameWithType: IVideoLayerInterchangeService.CreateOpenScad(VideoEffectLayer)
+  fullName: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateOpenScad(PublisherStudio.BusinessObjects.VideoEffectLayer)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.VideoStudio.Export
+  syntax:
+    content: string CreateOpenScad(VideoEffectLayer layer)
+    parameters:
+    - id: layer
+      type: PublisherStudio.BusinessObjects.VideoEffectLayer
+    return:
+      type: System.String
+    content.vb: Function CreateOpenScad(layer As VideoEffectLayer) As String
+  overload: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateOpenScad*
+- uid: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateMainframeInsert(PublisherStudio.BusinessObjects.VideoEffectLayer)
+  commentId: M:PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateMainframeInsert(PublisherStudio.BusinessObjects.VideoEffectLayer)
+  id: CreateMainframeInsert(PublisherStudio.BusinessObjects.VideoEffectLayer)
+  parent: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService
+  langs:
+  - csharp
+  - vb
+  name: CreateMainframeInsert(VideoEffectLayer)
+  nameWithType: IVideoLayerInterchangeService.CreateMainframeInsert(VideoEffectLayer)
+  fullName: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateMainframeInsert(PublisherStudio.BusinessObjects.VideoEffectLayer)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.VideoStudio.Export
+  syntax:
+    content: VideoLayerMainframeInsertRequest CreateMainframeInsert(VideoEffectLayer layer)
+    parameters:
+    - id: layer
+      type: PublisherStudio.BusinessObjects.VideoEffectLayer
+    return:
+      type: PublisherStudio.BusinessObjects.VideoLayerMainframeInsertRequest
+    content.vb: Function CreateMainframeInsert(layer As VideoEffectLayer) As VideoLayerMainframeInsertRequest
+  overload: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateMainframeInsert*
+references:
+- uid: PublisherStudio.Services.VideoStudio.Export
+  commentId: N:PublisherStudio.Services.VideoStudio.Export
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.VideoStudio.Export
+  nameWithType: PublisherStudio.Services.VideoStudio.Export
+  fullName: PublisherStudio.Services.VideoStudio.Export
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio
+    name: VideoStudio
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio.Export
+    name: Export
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.Export.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio
+    name: VideoStudio
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio.Export
+    name: Export
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.Export.html
+- uid: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateDefaultBlobLayer*
+  commentId: Overload:PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateDefaultBlobLayer
+  isExternal: true
+  href: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.html#PublisherStudio_Services_VideoStudio_Export_IVideoLayerInterchangeService_CreateDefaultBlobLayer_System_String_
+  name: CreateDefaultBlobLayer
+  nameWithType: IVideoLayerInterchangeService.CreateDefaultBlobLayer
+  fullName: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateDefaultBlobLayer
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.BusinessObjects.VideoEffectLayer
+  commentId: T:PublisherStudio.BusinessObjects.VideoEffectLayer
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.VideoEffectLayer.html
+  name: VideoEffectLayer
+  nameWithType: VideoEffectLayer
+  fullName: PublisherStudio.BusinessObjects.VideoEffectLayer
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateOpenScad*
+  commentId: Overload:PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateOpenScad
+  isExternal: true
+  href: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.html#PublisherStudio_Services_VideoStudio_Export_IVideoLayerInterchangeService_CreateOpenScad_PublisherStudio_BusinessObjects_VideoEffectLayer_
+  name: CreateOpenScad
+  nameWithType: IVideoLayerInterchangeService.CreateOpenScad
+  fullName: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateOpenScad
+- uid: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateMainframeInsert*
+  commentId: Overload:PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateMainframeInsert
+  isExternal: true
+  href: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.html#PublisherStudio_Services_VideoStudio_Export_IVideoLayerInterchangeService_CreateMainframeInsert_PublisherStudio_BusinessObjects_VideoEffectLayer_
+  name: CreateMainframeInsert
+  nameWithType: IVideoLayerInterchangeService.CreateMainframeInsert
+  fullName: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.CreateMainframeInsert
+- uid: PublisherStudio.BusinessObjects.VideoLayerMainframeInsertRequest
+  commentId: T:PublisherStudio.BusinessObjects.VideoLayerMainframeInsertRequest
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.VideoLayerMainframeInsertRequest.html
+  name: VideoLayerMainframeInsertRequest
+  nameWithType: VideoLayerMainframeInsertRequest
+  fullName: PublisherStudio.BusinessObjects.VideoLayerMainframeInsertRequest

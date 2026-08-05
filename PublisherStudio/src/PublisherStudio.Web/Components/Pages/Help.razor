@@ -1,0 +1,86 @@
+@page "/help"
+@rendermode InteractiveServer
+@inject PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService Documentation
+@inject IUserNotificationService Notifications
+@inject ILogger<Help> Logger
+@inject NavigationManager Navigation
+
+<PageTitle>PublisherStudio Documentation</PageTitle>
+<UserNotificationHost />
+
+<main class="publisher-help-page">
+    <header class="publisher-help-hero">
+        <div class="publisher-help-copy">
+            <p class="publisher-help-kicker">PublisherStudio @Status.Version · documentation nook 🐾</p>
+            <h1>Help and documentation</h1>
+            <p>Open the complete guide, keep a PDF nearby, or jump straight to the part of the studio you are using now.</p>
+            <div class="publisher-help-status" aria-label="Documentation status">
+                <span class="publisher-help-badge @(Status.HtmlAvailable ? "ready" : "missing")">HTML @(Status.HtmlAvailable ? "ready" : "not built")</span>
+                <span class="publisher-help-badge @(Status.PdfAvailable ? "ready" : "missing")">PDF @(Status.PdfAvailable ? "ready" : "not built")</span>
+                <span class="publisher-help-badge neutral">@Status.CommentCount XML members</span>
+                @if (Status.GeneratedAtUtc is DateTime generatedAtUtc)
+                {
+                    <span>Generated @generatedAtUtc.ToLocalTime().ToString("g")</span>
+                }
+            </div>
+        </div>
+        <div class="publisher-help-actions" aria-label="Documentation actions">
+            <a class="publisher-help-primary" href="/help-docs/index.html" target="_blank" rel="noopener">Open HTML guide</a>
+            <a class="publisher-help-secondary" href="@Status.PdfUrl" target="_blank" rel="noopener" data-enhance-nav="false">Open PDF book</a>
+            <a class="publisher-help-secondary" href="/help-docs/api/index.html" target="_blank" rel="noopener">Browse API reference</a>
+            <a class="publisher-help-secondary" href="/api/documentation/status" target="_blank" rel="noopener">Build status</a>
+        </div>
+    </header>
+
+    <section class="publisher-help-grid" aria-label="Documentation chapters">
+        <a class="publisher-help-card" href="/help-docs/articles/getting-started.html" target="_blank" rel="noopener">
+            <span aria-hidden="true">🌸</span><strong>Getting started</strong><small>Create a publication and learn the main flow.</small>
+        </a>
+        <a class="publisher-help-card" href="/help-docs/articles/editor-workspace.html" target="_blank" rel="noopener">
+            <span aria-hidden="true">🖋️</span><strong>Editor workspace</strong><small>Pages, Mainframe, inspector, timeline, and arranging.</small>
+        </a>
+        <a class="publisher-help-card" href="/help-docs/articles/pictures-and-media.html" target="_blank" rel="noopener">
+            <span aria-hidden="true">🎨</span><strong>Pictures and media</strong><small>Picture Studio, video, audio, selections, and preview behavior.</small>
+        </a>
+        <a class="publisher-help-card" href="/help-docs/articles/streaming-and-recording.html" target="_blank" rel="noopener">
+            <span aria-hidden="true">🎥</span><strong>Streaming and recording</strong><small>Profiles, sources, dry runs, recording, and outputs.</small>
+        </a>
+        <a class="publisher-help-card" href="/help-docs/articles/publishing-and-export.html" target="_blank" rel="noopener">
+            <span aria-hidden="true">✨</span><strong>Publishing and export</strong><small>PDF, images, websites, and recorded presentations.</small>
+        </a>
+        <a class="publisher-help-card" href="/help-docs/articles/localgpt-and-onewire.html" target="_blank" rel="noopener">
+            <span aria-hidden="true">🐾</span><strong>LocalGPT and 1-Wire</strong><small>The optional connection, ports, and approval boundaries.</small>
+        </a>
+        <a class="publisher-help-card" href="/help-docs/articles/installer-and-updates.html" target="_blank" rel="noopener">
+            <span aria-hidden="true">📦</span><strong>Installer and updates</strong><small>One-click AppData install, update, start, and shortcuts.</small>
+        </a>
+        <a class="publisher-help-card" href="/help-docs/articles/troubleshooting.html" target="_blank" rel="noopener">
+            <span aria-hidden="true">🛟</span><strong>Troubleshooting</strong><small>Build assets, ports, circuits, recording previews, and docs.</small>
+        </a>
+    </section>
+
+    <footer class="publisher-help-footer">
+        <button type="button" @onclick="BackToStudio">Back to PublisherStudio</button>
+        <p>The HTML site and PDF are generated from the same maintained articles and C# XML comments used by the release build.</p>
+    </footer>
+</main>
+
+@code {
+    private PublisherDocumentationStatus Status { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        try
+        {
+            Status = Documentation.GetStatus();
+            Logger.LogInformation("Loaded PublisherStudio documentation status for version {Version}.", Status.Version);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Loading PublisherStudio documentation status failed.");
+            Notifications.Warning("The generated guide is not available yet. Run a normal build or release build to create it.", "Documentation is not ready", nameof(Help));
+        }
+    }
+
+    private void BackToStudio() => Navigation.NavigateTo("/");
+}

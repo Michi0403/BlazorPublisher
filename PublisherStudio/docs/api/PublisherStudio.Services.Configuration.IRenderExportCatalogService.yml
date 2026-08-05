@@ -1,0 +1,277 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Configuration.IRenderExportCatalogService
+  commentId: T:PublisherStudio.Services.Configuration.IRenderExportCatalogService
+  id: IRenderExportCatalogService
+  parent: PublisherStudio.Services.Configuration
+  children:
+  - PublisherStudio.Services.Configuration.IRenderExportCatalogService.Find(System.String)
+  - PublisherStudio.Services.Configuration.IRenderExportCatalogService.GetCapabilities
+  langs:
+  - csharp
+  - vb
+  name: IRenderExportCatalogService
+  nameWithType: IRenderExportCatalogService
+  fullName: PublisherStudio.Services.Configuration.IRenderExportCatalogService
+  type: Interface
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  summary: Defines the render export catalog service contract.
+  example: []
+  syntax:
+    content: public interface IRenderExportCatalogService
+    content.vb: Public Interface IRenderExportCatalogService
+  derivedClasses:
+  - PublisherStudio.Services.Configuration.RenderExportCatalogService
+- uid: PublisherStudio.Services.Configuration.IRenderExportCatalogService.GetCapabilities
+  commentId: M:PublisherStudio.Services.Configuration.IRenderExportCatalogService.GetCapabilities
+  id: GetCapabilities
+  parent: PublisherStudio.Services.Configuration.IRenderExportCatalogService
+  langs:
+  - csharp
+  - vb
+  name: GetCapabilities()
+  nameWithType: IRenderExportCatalogService.GetCapabilities()
+  fullName: PublisherStudio.Services.Configuration.IRenderExportCatalogService.GetCapabilities()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: IReadOnlyList<RenderExportCapability> GetCapabilities()
+    return:
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.RenderExportCapability}
+    content.vb: Function GetCapabilities() As IReadOnlyList(Of RenderExportCapability)
+  overload: PublisherStudio.Services.Configuration.IRenderExportCatalogService.GetCapabilities*
+- uid: PublisherStudio.Services.Configuration.IRenderExportCatalogService.Find(System.String)
+  commentId: M:PublisherStudio.Services.Configuration.IRenderExportCatalogService.Find(System.String)
+  id: Find(System.String)
+  parent: PublisherStudio.Services.Configuration.IRenderExportCatalogService
+  langs:
+  - csharp
+  - vb
+  name: Find(string)
+  nameWithType: IRenderExportCatalogService.Find(string)
+  fullName: PublisherStudio.Services.Configuration.IRenderExportCatalogService.Find(string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: RenderExportCapability? Find(string format)
+    parameters:
+    - id: format
+      type: System.String
+    return:
+      type: PublisherStudio.BusinessObjects.RenderExportCapability
+    content.vb: Function Find(format As String) As RenderExportCapability
+  overload: PublisherStudio.Services.Configuration.IRenderExportCatalogService.Find*
+  nameWithType.vb: IRenderExportCatalogService.Find(String)
+  fullName.vb: PublisherStudio.Services.Configuration.IRenderExportCatalogService.Find(String)
+  name.vb: Find(String)
+references:
+- uid: PublisherStudio.Services.Configuration
+  commentId: N:PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Configuration
+  nameWithType: PublisherStudio.Services.Configuration
+  fullName: PublisherStudio.Services.Configuration
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+- uid: PublisherStudio.Services.Configuration.IRenderExportCatalogService.GetCapabilities*
+  commentId: Overload:PublisherStudio.Services.Configuration.IRenderExportCatalogService.GetCapabilities
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IRenderExportCatalogService.html#PublisherStudio_Services_Configuration_IRenderExportCatalogService_GetCapabilities
+  name: GetCapabilities
+  nameWithType: IRenderExportCatalogService.GetCapabilities
+  fullName: PublisherStudio.Services.Configuration.IRenderExportCatalogService.GetCapabilities
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.RenderExportCapability}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.RenderExportCapability}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<RenderExportCapability>
+  nameWithType: IReadOnlyList<RenderExportCapability>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.RenderExportCapability>
+  nameWithType.vb: IReadOnlyList(Of RenderExportCapability)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.RenderExportCapability)
+  name.vb: IReadOnlyList(Of RenderExportCapability)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.RenderExportCapability
+    name: RenderExportCapability
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.RenderExportCapability.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.RenderExportCapability
+    name: RenderExportCapability
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.RenderExportCapability.html
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: PublisherStudio.Services.Configuration.IRenderExportCatalogService.Find*
+  commentId: Overload:PublisherStudio.Services.Configuration.IRenderExportCatalogService.Find
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IRenderExportCatalogService.html#PublisherStudio_Services_Configuration_IRenderExportCatalogService_Find_System_String_
+  name: Find
+  nameWithType: IRenderExportCatalogService.Find
+  fullName: PublisherStudio.Services.Configuration.IRenderExportCatalogService.Find
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.BusinessObjects.RenderExportCapability
+  commentId: T:PublisherStudio.BusinessObjects.RenderExportCapability
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.RenderExportCapability.html
+  name: RenderExportCapability
+  nameWithType: RenderExportCapability
+  fullName: PublisherStudio.BusinessObjects.RenderExportCapability
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html

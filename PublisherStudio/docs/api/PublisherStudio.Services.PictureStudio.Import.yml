@@ -1,0 +1,81 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.PictureStudio.Import
+  commentId: N:PublisherStudio.Services.PictureStudio.Import
+  id: PictureStudio.Import
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.PictureStudio.Import.OpenRasterImportService
+  - PublisherStudio.Services.PictureStudio.Import.SvgInterchangeSanitizer
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.Services.PictureStudio.Import
+  nameWithType: PublisherStudio.Services.PictureStudio.Import
+  fullName: PublisherStudio.Services.PictureStudio.Import
+  type: Namespace
+  assemblies:
+  - PublisherStudio.Web
+references:
+- uid: PublisherStudio.Services.PictureStudio.Import.OpenRasterImportService
+  commentId: T:PublisherStudio.Services.PictureStudio.Import.OpenRasterImportService
+  isExternal: true
+  href: PublisherStudio.Services.PictureStudio.Import.OpenRasterImportService.html
+  name: OpenRasterImportService
+  nameWithType: OpenRasterImportService
+  fullName: PublisherStudio.Services.PictureStudio.Import.OpenRasterImportService
+- uid: PublisherStudio.Services.PictureStudio.Import.SvgInterchangeSanitizer
+  commentId: T:PublisherStudio.Services.PictureStudio.Import.SvgInterchangeSanitizer
+  parent: PublisherStudio.Services.PictureStudio.Import
+  isExternal: true
+  href: PublisherStudio.Services.PictureStudio.Import.SvgInterchangeSanitizer.html
+  name: SvgInterchangeSanitizer
+  nameWithType: SvgInterchangeSanitizer
+  fullName: PublisherStudio.Services.PictureStudio.Import.SvgInterchangeSanitizer
+- uid: PublisherStudio.Services.PictureStudio.Import
+  commentId: N:PublisherStudio.Services.PictureStudio.Import
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.PictureStudio.Import
+  nameWithType: PublisherStudio.Services.PictureStudio.Import
+  fullName: PublisherStudio.Services.PictureStudio.Import
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.PictureStudio
+    name: PictureStudio
+    isExternal: true
+    href: PublisherStudio.Services.PictureStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.PictureStudio.Import
+    name: Import
+    isExternal: true
+    href: PublisherStudio.Services.PictureStudio.Import.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.PictureStudio
+    name: PictureStudio
+    isExternal: true
+    href: PublisherStudio.Services.PictureStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.PictureStudio.Import
+    name: Import
+    isExternal: true
+    href: PublisherStudio.Services.PictureStudio.Import.html

@@ -1,0 +1,2487 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.PictureEditorStateService
+  commentId: T:PublisherStudio.Services.PictureEditorStateService
+  id: PictureEditorStateService
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.PictureEditorStateService.#ctor(PublisherStudio.Services.PictureDocumentService,PublisherStudio.Services.IPublisherDocumentFactory)
+  - PublisherStudio.Services.PictureEditorStateService.AddAreaFill(System.String,System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.String,System.String,System.Boolean)
+  - PublisherStudio.Services.PictureEditorStateService.AddFill(PublisherStudio.BusinessObjects.PictureFillKind)
+  - PublisherStudio.Services.PictureEditorStateService.AddImportedLayers(PublisherStudio.BusinessObjects.PictureDocument,System.String,System.Nullable{System.Double},System.Nullable{System.Double})
+  - PublisherStudio.Services.PictureEditorStateService.AddPaint(System.String)
+  - PublisherStudio.Services.PictureEditorStateService.AddPath(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.String,System.Double,System.Boolean,System.Boolean)
+  - PublisherStudio.Services.PictureEditorStateService.AddRaster(System.String,System.String,System.Int32,System.Int32,System.Nullable{System.Double},System.Nullable{System.Double})
+  - PublisherStudio.Services.PictureEditorStateService.AddRender(PublisherStudio.BusinessObjects.PictureRenderKind)
+  - PublisherStudio.Services.PictureEditorStateService.AddShape(PublisherStudio.BusinessObjects.PictureShapeKind)
+  - PublisherStudio.Services.PictureEditorStateService.AddShapeAt(PublisherStudio.BusinessObjects.PictureShapeKind,System.Double,System.Double,System.Double,System.Double,System.Double)
+  - PublisherStudio.Services.PictureEditorStateService.AddStroke(PublisherStudio.BusinessObjects.PictureStrokeKind,System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.String,System.Double,System.Double,System.Double)
+  - PublisherStudio.Services.PictureEditorStateService.AddText
+  - PublisherStudio.Services.PictureEditorStateService.ApplySelectedClip(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.Boolean)
+  - PublisherStudio.Services.PictureEditorStateService.BringSelectedToFront
+  - PublisherStudio.Services.PictureEditorStateService.CanPaste
+  - PublisherStudio.Services.PictureEditorStateService.CanRedo
+  - PublisherStudio.Services.PictureEditorStateService.CanUndo
+  - PublisherStudio.Services.PictureEditorStateService.CenterSelected
+  - PublisherStudio.Services.PictureEditorStateService.Changed
+  - PublisherStudio.Services.PictureEditorStateService.ClearSelectedClip
+  - PublisherStudio.Services.PictureEditorStateService.ClearSelectedPaint
+  - PublisherStudio.Services.PictureEditorStateService.CloneDocument
+  - PublisherStudio.Services.PictureEditorStateService.CommitTransform(System.Guid,System.Double,System.Double,System.Double,System.Double,System.Double)
+  - PublisherStudio.Services.PictureEditorStateService.CopySelected
+  - PublisherStudio.Services.PictureEditorStateService.CopySelectedRegion(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.Boolean)
+  - PublisherStudio.Services.PictureEditorStateService.DeleteSelected
+  - PublisherStudio.Services.PictureEditorStateService.Document
+  - PublisherStudio.Services.PictureEditorStateService.DuplicateSelected
+  - PublisherStudio.Services.PictureEditorStateService.EndLiveEdit
+  - PublisherStudio.Services.PictureEditorStateService.FitSelectedToCanvas
+  - PublisherStudio.Services.PictureEditorStateService.MoveSelectedLayer(System.Int32)
+  - PublisherStudio.Services.PictureEditorStateService.Paste
+  - PublisherStudio.Services.PictureEditorStateService.Redo
+  - PublisherStudio.Services.PictureEditorStateService.ReplaceRaster(System.Guid,System.String)
+  - PublisherStudio.Services.PictureEditorStateService.SelectLayer(System.Nullable{System.Guid})
+  - PublisherStudio.Services.PictureEditorStateService.SelectedLayer
+  - PublisherStudio.Services.PictureEditorStateService.SelectedLayerId
+  - PublisherStudio.Services.PictureEditorStateService.SendSelectedToBack
+  - PublisherStudio.Services.PictureEditorStateService.SetBackground(System.String)
+  - PublisherStudio.Services.PictureEditorStateService.SetDocumentName(System.String)
+  - PublisherStudio.Services.PictureEditorStateService.SetDocumentSize(System.Int32,System.Int32)
+  - PublisherStudio.Services.PictureEditorStateService.SetGrid(System.Boolean)
+  - PublisherStudio.Services.PictureEditorStateService.SetGridSpacing(System.Int32)
+  - PublisherStudio.Services.PictureEditorStateService.SetSnap(System.Boolean)
+  - PublisherStudio.Services.PictureEditorStateService.SetZoom(System.Double)
+  - PublisherStudio.Services.PictureEditorStateService.StartFromDocument(PublisherStudio.BusinessObjects.PictureDocument)
+  - PublisherStudio.Services.PictureEditorStateService.StartFromRaster(System.String,System.String,System.Int32,System.Int32)
+  - PublisherStudio.Services.PictureEditorStateService.StartNew(System.Int32,System.Int32,System.Boolean)
+  - PublisherStudio.Services.PictureEditorStateService.ToggleLock(System.Guid)
+  - PublisherStudio.Services.PictureEditorStateService.ToggleVisibility(System.Guid)
+  - PublisherStudio.Services.PictureEditorStateService.Undo
+  - PublisherStudio.Services.PictureEditorStateService.UpdateSelected(System.Action{PublisherStudio.BusinessObjects.PictureLayer},System.Boolean,System.Boolean)
+  - PublisherStudio.Services.PictureEditorStateService.UpdateSelectedLive(System.String,System.Action{PublisherStudio.BusinessObjects.PictureLayer})
+  langs:
+  - csharp
+  - vb
+  name: PictureEditorStateService
+  nameWithType: PictureEditorStateService
+  fullName: PublisherStudio.Services.PictureEditorStateService
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Provides picture editor state service operations.
+  example: []
+  syntax:
+    content: public sealed class PictureEditorStateService
+    content.vb: Public NotInheritable Class PictureEditorStateService
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.PictureEditorStateService.#ctor(PublisherStudio.Services.PictureDocumentService,PublisherStudio.Services.IPublisherDocumentFactory)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.#ctor(PublisherStudio.Services.PictureDocumentService,PublisherStudio.Services.IPublisherDocumentFactory)
+  id: '#ctor(PublisherStudio.Services.PictureDocumentService,PublisherStudio.Services.IPublisherDocumentFactory)'
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: PictureEditorStateService(PictureDocumentService, IPublisherDocumentFactory)
+  nameWithType: PictureEditorStateService.PictureEditorStateService(PictureDocumentService, IPublisherDocumentFactory)
+  fullName: PublisherStudio.Services.PictureEditorStateService.PictureEditorStateService(PublisherStudio.Services.PictureDocumentService, PublisherStudio.Services.IPublisherDocumentFactory)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the picture editor state service operation.
+  example: []
+  syntax:
+    content: public PictureEditorStateService(PictureDocumentService documents, IPublisherDocumentFactory documentFactory)
+    parameters:
+    - id: documents
+      type: PublisherStudio.Services.PictureDocumentService
+    - id: documentFactory
+      type: PublisherStudio.Services.IPublisherDocumentFactory
+    content.vb: Public Sub New(documents As PictureDocumentService, documentFactory As IPublisherDocumentFactory)
+  overload: PublisherStudio.Services.PictureEditorStateService.#ctor*
+  nameWithType.vb: PictureEditorStateService.New(PictureDocumentService, IPublisherDocumentFactory)
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.New(PublisherStudio.Services.PictureDocumentService, PublisherStudio.Services.IPublisherDocumentFactory)
+  name.vb: New(PictureDocumentService, IPublisherDocumentFactory)
+- uid: PublisherStudio.Services.PictureEditorStateService.StartNew(System.Int32,System.Int32,System.Boolean)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.StartNew(System.Int32,System.Int32,System.Boolean)
+  id: StartNew(System.Int32,System.Int32,System.Boolean)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: StartNew(int, int, bool)
+  nameWithType: PictureEditorStateService.StartNew(int, int, bool)
+  fullName: PublisherStudio.Services.PictureEditorStateService.StartNew(int, int, bool)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Starts new.
+  example: []
+  syntax:
+    content: public void StartNew(int widthPx = 1200, int heightPx = 800, bool transparent = true)
+    parameters:
+    - id: widthPx
+      type: System.Int32
+    - id: heightPx
+      type: System.Int32
+    - id: transparent
+      type: System.Boolean
+    content.vb: Public Sub StartNew(widthPx As Integer = 1200, heightPx As Integer = 800, transparent As Boolean = True)
+  overload: PublisherStudio.Services.PictureEditorStateService.StartNew*
+  nameWithType.vb: PictureEditorStateService.StartNew(Integer, Integer, Boolean)
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.StartNew(Integer, Integer, Boolean)
+  name.vb: StartNew(Integer, Integer, Boolean)
+- uid: PublisherStudio.Services.PictureEditorStateService.StartFromDocument(PublisherStudio.BusinessObjects.PictureDocument)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.StartFromDocument(PublisherStudio.BusinessObjects.PictureDocument)
+  id: StartFromDocument(PublisherStudio.BusinessObjects.PictureDocument)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: StartFromDocument(PictureDocument)
+  nameWithType: PictureEditorStateService.StartFromDocument(PictureDocument)
+  fullName: PublisherStudio.Services.PictureEditorStateService.StartFromDocument(PublisherStudio.BusinessObjects.PictureDocument)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Starts from document.
+  example: []
+  syntax:
+    content: public void StartFromDocument(PictureDocument document)
+    parameters:
+    - id: document
+      type: PublisherStudio.BusinessObjects.PictureDocument
+    content.vb: Public Sub StartFromDocument(document As PictureDocument)
+  overload: PublisherStudio.Services.PictureEditorStateService.StartFromDocument*
+- uid: PublisherStudio.Services.PictureEditorStateService.StartFromRaster(System.String,System.String,System.Int32,System.Int32)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.StartFromRaster(System.String,System.String,System.Int32,System.Int32)
+  id: StartFromRaster(System.String,System.String,System.Int32,System.Int32)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: StartFromRaster(string, string, int, int)
+  nameWithType: PictureEditorStateService.StartFromRaster(string, string, int, int)
+  fullName: PublisherStudio.Services.PictureEditorStateService.StartFromRaster(string, string, int, int)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Starts from raster.
+  example: []
+  syntax:
+    content: public void StartFromRaster(string dataUrl, string name, int widthPx = 1200, int heightPx = 800)
+    parameters:
+    - id: dataUrl
+      type: System.String
+    - id: name
+      type: System.String
+    - id: widthPx
+      type: System.Int32
+    - id: heightPx
+      type: System.Int32
+    content.vb: Public Sub StartFromRaster(dataUrl As String, name As String, widthPx As Integer = 1200, heightPx As Integer = 800)
+  overload: PublisherStudio.Services.PictureEditorStateService.StartFromRaster*
+  nameWithType.vb: PictureEditorStateService.StartFromRaster(String, String, Integer, Integer)
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.StartFromRaster(String, String, Integer, Integer)
+  name.vb: StartFromRaster(String, String, Integer, Integer)
+- uid: PublisherStudio.Services.PictureEditorStateService.CloneDocument
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.CloneDocument
+  id: CloneDocument
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: CloneDocument()
+  nameWithType: PictureEditorStateService.CloneDocument()
+  fullName: PublisherStudio.Services.PictureEditorStateService.CloneDocument()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the clone document operation.
+  example: []
+  syntax:
+    content: public PictureDocument CloneDocument()
+    return:
+      type: PublisherStudio.BusinessObjects.PictureDocument
+    content.vb: Public Function CloneDocument() As PictureDocument
+  overload: PublisherStudio.Services.PictureEditorStateService.CloneDocument*
+- uid: PublisherStudio.Services.PictureEditorStateService.SetDocumentName(System.String)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.SetDocumentName(System.String)
+  id: SetDocumentName(System.String)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: SetDocumentName(string)
+  nameWithType: PictureEditorStateService.SetDocumentName(string)
+  fullName: PublisherStudio.Services.PictureEditorStateService.SetDocumentName(string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Sets document name.
+  example: []
+  syntax:
+    content: public void SetDocumentName(string name)
+    parameters:
+    - id: name
+      type: System.String
+    content.vb: Public Sub SetDocumentName(name As String)
+  overload: PublisherStudio.Services.PictureEditorStateService.SetDocumentName*
+  nameWithType.vb: PictureEditorStateService.SetDocumentName(String)
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.SetDocumentName(String)
+  name.vb: SetDocumentName(String)
+- uid: PublisherStudio.Services.PictureEditorStateService.SetDocumentSize(System.Int32,System.Int32)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.SetDocumentSize(System.Int32,System.Int32)
+  id: SetDocumentSize(System.Int32,System.Int32)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: SetDocumentSize(int, int)
+  nameWithType: PictureEditorStateService.SetDocumentSize(int, int)
+  fullName: PublisherStudio.Services.PictureEditorStateService.SetDocumentSize(int, int)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Sets document size.
+  example: []
+  syntax:
+    content: public void SetDocumentSize(int widthPx, int heightPx)
+    parameters:
+    - id: widthPx
+      type: System.Int32
+    - id: heightPx
+      type: System.Int32
+    content.vb: Public Sub SetDocumentSize(widthPx As Integer, heightPx As Integer)
+  overload: PublisherStudio.Services.PictureEditorStateService.SetDocumentSize*
+  nameWithType.vb: PictureEditorStateService.SetDocumentSize(Integer, Integer)
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.SetDocumentSize(Integer, Integer)
+  name.vb: SetDocumentSize(Integer, Integer)
+- uid: PublisherStudio.Services.PictureEditorStateService.SetBackground(System.String)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.SetBackground(System.String)
+  id: SetBackground(System.String)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: SetBackground(string)
+  nameWithType: PictureEditorStateService.SetBackground(string)
+  fullName: PublisherStudio.Services.PictureEditorStateService.SetBackground(string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Sets background.
+  example: []
+  syntax:
+    content: public void SetBackground(string value)
+    parameters:
+    - id: value
+      type: System.String
+    content.vb: Public Sub SetBackground(value As String)
+  overload: PublisherStudio.Services.PictureEditorStateService.SetBackground*
+  nameWithType.vb: PictureEditorStateService.SetBackground(String)
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.SetBackground(String)
+  name.vb: SetBackground(String)
+- uid: PublisherStudio.Services.PictureEditorStateService.SetZoom(System.Double)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.SetZoom(System.Double)
+  id: SetZoom(System.Double)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: SetZoom(double)
+  nameWithType: PictureEditorStateService.SetZoom(double)
+  fullName: PublisherStudio.Services.PictureEditorStateService.SetZoom(double)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Sets zoom.
+  example: []
+  syntax:
+    content: public void SetZoom(double zoom)
+    parameters:
+    - id: zoom
+      type: System.Double
+    content.vb: Public Sub SetZoom(zoom As Double)
+  overload: PublisherStudio.Services.PictureEditorStateService.SetZoom*
+  nameWithType.vb: PictureEditorStateService.SetZoom(Double)
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.SetZoom(Double)
+  name.vb: SetZoom(Double)
+- uid: PublisherStudio.Services.PictureEditorStateService.SetGrid(System.Boolean)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.SetGrid(System.Boolean)
+  id: SetGrid(System.Boolean)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: SetGrid(bool)
+  nameWithType: PictureEditorStateService.SetGrid(bool)
+  fullName: PublisherStudio.Services.PictureEditorStateService.SetGrid(bool)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Sets grid.
+  example: []
+  syntax:
+    content: public void SetGrid(bool visible)
+    parameters:
+    - id: visible
+      type: System.Boolean
+    content.vb: Public Sub SetGrid(visible As Boolean)
+  overload: PublisherStudio.Services.PictureEditorStateService.SetGrid*
+  nameWithType.vb: PictureEditorStateService.SetGrid(Boolean)
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.SetGrid(Boolean)
+  name.vb: SetGrid(Boolean)
+- uid: PublisherStudio.Services.PictureEditorStateService.SetSnap(System.Boolean)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.SetSnap(System.Boolean)
+  id: SetSnap(System.Boolean)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: SetSnap(bool)
+  nameWithType: PictureEditorStateService.SetSnap(bool)
+  fullName: PublisherStudio.Services.PictureEditorStateService.SetSnap(bool)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Sets snap.
+  example: []
+  syntax:
+    content: public void SetSnap(bool enabled)
+    parameters:
+    - id: enabled
+      type: System.Boolean
+    content.vb: Public Sub SetSnap(enabled As Boolean)
+  overload: PublisherStudio.Services.PictureEditorStateService.SetSnap*
+  nameWithType.vb: PictureEditorStateService.SetSnap(Boolean)
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.SetSnap(Boolean)
+  name.vb: SetSnap(Boolean)
+- uid: PublisherStudio.Services.PictureEditorStateService.SetGridSpacing(System.Int32)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.SetGridSpacing(System.Int32)
+  id: SetGridSpacing(System.Int32)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: SetGridSpacing(int)
+  nameWithType: PictureEditorStateService.SetGridSpacing(int)
+  fullName: PublisherStudio.Services.PictureEditorStateService.SetGridSpacing(int)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Sets grid spacing.
+  example: []
+  syntax:
+    content: public void SetGridSpacing(int pixels)
+    parameters:
+    - id: pixels
+      type: System.Int32
+    content.vb: Public Sub SetGridSpacing(pixels As Integer)
+  overload: PublisherStudio.Services.PictureEditorStateService.SetGridSpacing*
+  nameWithType.vb: PictureEditorStateService.SetGridSpacing(Integer)
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.SetGridSpacing(Integer)
+  name.vb: SetGridSpacing(Integer)
+- uid: PublisherStudio.Services.PictureEditorStateService.SelectLayer(System.Nullable{System.Guid})
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.SelectLayer(System.Nullable{System.Guid})
+  id: SelectLayer(System.Nullable{System.Guid})
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: SelectLayer(Guid?)
+  nameWithType: PictureEditorStateService.SelectLayer(Guid?)
+  fullName: PublisherStudio.Services.PictureEditorStateService.SelectLayer(System.Guid?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the select layer operation.
+  example: []
+  syntax:
+    content: public void SelectLayer(Guid? id)
+    parameters:
+    - id: id
+      type: System.Nullable{System.Guid}
+    content.vb: Public Sub SelectLayer(id As Guid?)
+  overload: PublisherStudio.Services.PictureEditorStateService.SelectLayer*
+- uid: PublisherStudio.Services.PictureEditorStateService.AddRaster(System.String,System.String,System.Int32,System.Int32,System.Nullable{System.Double},System.Nullable{System.Double})
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.AddRaster(System.String,System.String,System.Int32,System.Int32,System.Nullable{System.Double},System.Nullable{System.Double})
+  id: AddRaster(System.String,System.String,System.Int32,System.Int32,System.Nullable{System.Double},System.Nullable{System.Double})
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: AddRaster(string, string, int, int, double?, double?)
+  nameWithType: PictureEditorStateService.AddRaster(string, string, int, int, double?, double?)
+  fullName: PublisherStudio.Services.PictureEditorStateService.AddRaster(string, string, int, int, double?, double?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Adds raster.
+  example: []
+  syntax:
+    content: public RasterPictureLayer AddRaster(string dataUrl, string name, int naturalWidth = 0, int naturalHeight = 0, double? centerX = null, double? centerY = null)
+    parameters:
+    - id: dataUrl
+      type: System.String
+    - id: name
+      type: System.String
+    - id: naturalWidth
+      type: System.Int32
+    - id: naturalHeight
+      type: System.Int32
+    - id: centerX
+      type: System.Nullable{System.Double}
+    - id: centerY
+      type: System.Nullable{System.Double}
+    return:
+      type: PublisherStudio.BusinessObjects.RasterPictureLayer
+    content.vb: Public Function AddRaster(dataUrl As String, name As String, naturalWidth As Integer = 0, naturalHeight As Integer = 0, centerX As Double? = Nothing, centerY As Double? = Nothing) As RasterPictureLayer
+  overload: PublisherStudio.Services.PictureEditorStateService.AddRaster*
+  nameWithType.vb: PictureEditorStateService.AddRaster(String, String, Integer, Integer, Double?, Double?)
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.AddRaster(String, String, Integer, Integer, Double?, Double?)
+  name.vb: AddRaster(String, String, Integer, Integer, Double?, Double?)
+- uid: PublisherStudio.Services.PictureEditorStateService.AddImportedLayers(PublisherStudio.BusinessObjects.PictureDocument,System.String,System.Nullable{System.Double},System.Nullable{System.Double})
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.AddImportedLayers(PublisherStudio.BusinessObjects.PictureDocument,System.String,System.Nullable{System.Double},System.Nullable{System.Double})
+  id: AddImportedLayers(PublisherStudio.BusinessObjects.PictureDocument,System.String,System.Nullable{System.Double},System.Nullable{System.Double})
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: AddImportedLayers(PictureDocument, string?, double?, double?)
+  nameWithType: PictureEditorStateService.AddImportedLayers(PictureDocument, string?, double?, double?)
+  fullName: PublisherStudio.Services.PictureEditorStateService.AddImportedLayers(PublisherStudio.BusinessObjects.PictureDocument, string?, double?, double?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Adds imported layers.
+  example: []
+  syntax:
+    content: public int AddImportedLayers(PictureDocument importedDocument, string? groupName = null, double? centerX = null, double? centerY = null)
+    parameters:
+    - id: importedDocument
+      type: PublisherStudio.BusinessObjects.PictureDocument
+    - id: groupName
+      type: System.String
+    - id: centerX
+      type: System.Nullable{System.Double}
+    - id: centerY
+      type: System.Nullable{System.Double}
+    return:
+      type: System.Int32
+    content.vb: Public Function AddImportedLayers(importedDocument As PictureDocument, groupName As String = Nothing, centerX As Double? = Nothing, centerY As Double? = Nothing) As Integer
+  overload: PublisherStudio.Services.PictureEditorStateService.AddImportedLayers*
+  nameWithType.vb: PictureEditorStateService.AddImportedLayers(PictureDocument, String, Double?, Double?)
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.AddImportedLayers(PublisherStudio.BusinessObjects.PictureDocument, String, Double?, Double?)
+  name.vb: AddImportedLayers(PictureDocument, String, Double?, Double?)
+- uid: PublisherStudio.Services.PictureEditorStateService.ReplaceRaster(System.Guid,System.String)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.ReplaceRaster(System.Guid,System.String)
+  id: ReplaceRaster(System.Guid,System.String)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: ReplaceRaster(Guid, string)
+  nameWithType: PictureEditorStateService.ReplaceRaster(Guid, string)
+  fullName: PublisherStudio.Services.PictureEditorStateService.ReplaceRaster(System.Guid, string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the replace raster operation.
+  example: []
+  syntax:
+    content: public bool ReplaceRaster(Guid id, string dataUrl)
+    parameters:
+    - id: id
+      type: System.Guid
+    - id: dataUrl
+      type: System.String
+    return:
+      type: System.Boolean
+    content.vb: Public Function ReplaceRaster(id As Guid, dataUrl As String) As Boolean
+  overload: PublisherStudio.Services.PictureEditorStateService.ReplaceRaster*
+  nameWithType.vb: PictureEditorStateService.ReplaceRaster(Guid, String)
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.ReplaceRaster(System.Guid, String)
+  name.vb: ReplaceRaster(Guid, String)
+- uid: PublisherStudio.Services.PictureEditorStateService.AddText
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.AddText
+  id: AddText
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: AddText()
+  nameWithType: PictureEditorStateService.AddText()
+  fullName: PublisherStudio.Services.PictureEditorStateService.AddText()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Adds text.
+  example: []
+  syntax:
+    content: public TextPictureLayer AddText()
+    return:
+      type: PublisherStudio.BusinessObjects.TextPictureLayer
+    content.vb: Public Function AddText() As TextPictureLayer
+  overload: PublisherStudio.Services.PictureEditorStateService.AddText*
+- uid: PublisherStudio.Services.PictureEditorStateService.AddShape(PublisherStudio.BusinessObjects.PictureShapeKind)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.AddShape(PublisherStudio.BusinessObjects.PictureShapeKind)
+  id: AddShape(PublisherStudio.BusinessObjects.PictureShapeKind)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: AddShape(PictureShapeKind)
+  nameWithType: PictureEditorStateService.AddShape(PictureShapeKind)
+  fullName: PublisherStudio.Services.PictureEditorStateService.AddShape(PublisherStudio.BusinessObjects.PictureShapeKind)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Adds shape.
+  example: []
+  syntax:
+    content: public ShapePictureLayer AddShape(PictureShapeKind shape = PictureShapeKind.Rectangle)
+    parameters:
+    - id: shape
+      type: PublisherStudio.BusinessObjects.PictureShapeKind
+    return:
+      type: PublisherStudio.BusinessObjects.ShapePictureLayer
+    content.vb: Public Function AddShape(shape As PictureShapeKind = PictureShapeKind.Rectangle) As ShapePictureLayer
+  overload: PublisherStudio.Services.PictureEditorStateService.AddShape*
+- uid: PublisherStudio.Services.PictureEditorStateService.AddShapeAt(PublisherStudio.BusinessObjects.PictureShapeKind,System.Double,System.Double,System.Double,System.Double,System.Double)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.AddShapeAt(PublisherStudio.BusinessObjects.PictureShapeKind,System.Double,System.Double,System.Double,System.Double,System.Double)
+  id: AddShapeAt(PublisherStudio.BusinessObjects.PictureShapeKind,System.Double,System.Double,System.Double,System.Double,System.Double)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: AddShapeAt(PictureShapeKind, double, double, double, double, double)
+  nameWithType: PictureEditorStateService.AddShapeAt(PictureShapeKind, double, double, double, double, double)
+  fullName: PublisherStudio.Services.PictureEditorStateService.AddShapeAt(PublisherStudio.BusinessObjects.PictureShapeKind, double, double, double, double, double)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Adds shape at.
+  example: []
+  syntax:
+    content: public ShapePictureLayer AddShapeAt(PictureShapeKind shape, double x, double y, double width, double height, double rotation = 0)
+    parameters:
+    - id: shape
+      type: PublisherStudio.BusinessObjects.PictureShapeKind
+    - id: x
+      type: System.Double
+    - id: y
+      type: System.Double
+    - id: width
+      type: System.Double
+    - id: height
+      type: System.Double
+    - id: rotation
+      type: System.Double
+    return:
+      type: PublisherStudio.BusinessObjects.ShapePictureLayer
+    content.vb: Public Function AddShapeAt(shape As PictureShapeKind, x As Double, y As Double, width As Double, height As Double, rotation As Double = 0) As ShapePictureLayer
+  overload: PublisherStudio.Services.PictureEditorStateService.AddShapeAt*
+  nameWithType.vb: PictureEditorStateService.AddShapeAt(PictureShapeKind, Double, Double, Double, Double, Double)
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.AddShapeAt(PublisherStudio.BusinessObjects.PictureShapeKind, Double, Double, Double, Double, Double)
+  name.vb: AddShapeAt(PictureShapeKind, Double, Double, Double, Double, Double)
+- uid: PublisherStudio.Services.PictureEditorStateService.AddPath(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.String,System.Double,System.Boolean,System.Boolean)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.AddPath(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.String,System.Double,System.Boolean,System.Boolean)
+  id: AddPath(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.String,System.Double,System.Boolean,System.Boolean)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: AddPath(IReadOnlyList<PicturePoint>, string, double, bool, bool)
+  nameWithType: PictureEditorStateService.AddPath(IReadOnlyList<PicturePoint>, string, double, bool, bool)
+  fullName: PublisherStudio.Services.PictureEditorStateService.AddPath(System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.PicturePoint>, string, double, bool, bool)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Adds path.
+  example: []
+  syntax:
+    content: public ShapePictureLayer AddPath(IReadOnlyList<PicturePoint> points, string strokeColor, double strokeWidth, bool closed = false, bool smooth = true)
+    parameters:
+    - id: points
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint}
+    - id: strokeColor
+      type: System.String
+    - id: strokeWidth
+      type: System.Double
+    - id: closed
+      type: System.Boolean
+    - id: smooth
+      type: System.Boolean
+    return:
+      type: PublisherStudio.BusinessObjects.ShapePictureLayer
+    content.vb: Public Function AddPath(points As IReadOnlyList(Of PicturePoint), strokeColor As String, strokeWidth As Double, closed As Boolean = False, smooth As Boolean = True) As ShapePictureLayer
+  overload: PublisherStudio.Services.PictureEditorStateService.AddPath*
+  nameWithType.vb: PictureEditorStateService.AddPath(IReadOnlyList(Of PicturePoint), String, Double, Boolean, Boolean)
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.AddPath(System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.PicturePoint), String, Double, Boolean, Boolean)
+  name.vb: AddPath(IReadOnlyList(Of PicturePoint), String, Double, Boolean, Boolean)
+- uid: PublisherStudio.Services.PictureEditorStateService.AddAreaFill(System.String,System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.String,System.String,System.Boolean)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.AddAreaFill(System.String,System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.String,System.String,System.Boolean)
+  id: AddAreaFill(System.String,System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.String,System.String,System.Boolean)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: AddAreaFill(string, IReadOnlyList<PicturePoint>, string, string, bool)
+  nameWithType: PictureEditorStateService.AddAreaFill(string, IReadOnlyList<PicturePoint>, string, string, bool)
+  fullName: PublisherStudio.Services.PictureEditorStateService.AddAreaFill(string, System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.PicturePoint>, string, string, bool)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Adds area fill.
+  example: []
+  syntax:
+    content: public ShapePictureLayer AddAreaFill(string selectionKind, IReadOnlyList<PicturePoint> points, string primaryColor, string secondaryColor, bool gradient)
+    parameters:
+    - id: selectionKind
+      type: System.String
+    - id: points
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint}
+    - id: primaryColor
+      type: System.String
+    - id: secondaryColor
+      type: System.String
+    - id: gradient
+      type: System.Boolean
+    return:
+      type: PublisherStudio.BusinessObjects.ShapePictureLayer
+    content.vb: Public Function AddAreaFill(selectionKind As String, points As IReadOnlyList(Of PicturePoint), primaryColor As String, secondaryColor As String, gradient As Boolean) As ShapePictureLayer
+  overload: PublisherStudio.Services.PictureEditorStateService.AddAreaFill*
+  nameWithType.vb: PictureEditorStateService.AddAreaFill(String, IReadOnlyList(Of PicturePoint), String, String, Boolean)
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.AddAreaFill(String, System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.PicturePoint), String, String, Boolean)
+  name.vb: AddAreaFill(String, IReadOnlyList(Of PicturePoint), String, String, Boolean)
+- uid: PublisherStudio.Services.PictureEditorStateService.AddFill(PublisherStudio.BusinessObjects.PictureFillKind)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.AddFill(PublisherStudio.BusinessObjects.PictureFillKind)
+  id: AddFill(PublisherStudio.BusinessObjects.PictureFillKind)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: AddFill(PictureFillKind)
+  nameWithType: PictureEditorStateService.AddFill(PictureFillKind)
+  fullName: PublisherStudio.Services.PictureEditorStateService.AddFill(PublisherStudio.BusinessObjects.PictureFillKind)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Adds fill.
+  example: []
+  syntax:
+    content: public FillPictureLayer AddFill(PictureFillKind fillKind = PictureFillKind.LinearGradient)
+    parameters:
+    - id: fillKind
+      type: PublisherStudio.BusinessObjects.PictureFillKind
+    return:
+      type: PublisherStudio.BusinessObjects.FillPictureLayer
+    content.vb: Public Function AddFill(fillKind As PictureFillKind = PictureFillKind.LinearGradient) As FillPictureLayer
+  overload: PublisherStudio.Services.PictureEditorStateService.AddFill*
+- uid: PublisherStudio.Services.PictureEditorStateService.AddRender(PublisherStudio.BusinessObjects.PictureRenderKind)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.AddRender(PublisherStudio.BusinessObjects.PictureRenderKind)
+  id: AddRender(PublisherStudio.BusinessObjects.PictureRenderKind)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: AddRender(PictureRenderKind)
+  nameWithType: PictureEditorStateService.AddRender(PictureRenderKind)
+  fullName: PublisherStudio.Services.PictureEditorStateService.AddRender(PublisherStudio.BusinessObjects.PictureRenderKind)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Adds render.
+  example: []
+  syntax:
+    content: public RenderPictureLayer AddRender(PictureRenderKind renderKind = PictureRenderKind.Clouds)
+    parameters:
+    - id: renderKind
+      type: PublisherStudio.BusinessObjects.PictureRenderKind
+    return:
+      type: PublisherStudio.BusinessObjects.RenderPictureLayer
+    content.vb: Public Function AddRender(renderKind As PictureRenderKind = PictureRenderKind.Clouds) As RenderPictureLayer
+  overload: PublisherStudio.Services.PictureEditorStateService.AddRender*
+- uid: PublisherStudio.Services.PictureEditorStateService.AddPaint(System.String)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.AddPaint(System.String)
+  id: AddPaint(System.String)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: AddPaint(string)
+  nameWithType: PictureEditorStateService.AddPaint(string)
+  fullName: PublisherStudio.Services.PictureEditorStateService.AddPaint(string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Adds paint.
+  example: []
+  syntax:
+    content: public PaintPictureLayer AddPaint(string name = "Paint")
+    parameters:
+    - id: name
+      type: System.String
+    return:
+      type: PublisherStudio.BusinessObjects.PaintPictureLayer
+    content.vb: Public Function AddPaint(name As String = "Paint") As PaintPictureLayer
+  overload: PublisherStudio.Services.PictureEditorStateService.AddPaint*
+  nameWithType.vb: PictureEditorStateService.AddPaint(String)
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.AddPaint(String)
+  name.vb: AddPaint(String)
+- uid: PublisherStudio.Services.PictureEditorStateService.AddStroke(PublisherStudio.BusinessObjects.PictureStrokeKind,System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.String,System.Double,System.Double,System.Double)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.AddStroke(PublisherStudio.BusinessObjects.PictureStrokeKind,System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.String,System.Double,System.Double,System.Double)
+  id: AddStroke(PublisherStudio.BusinessObjects.PictureStrokeKind,System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.String,System.Double,System.Double,System.Double)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: AddStroke(PictureStrokeKind, IReadOnlyList<PicturePoint>, string, double, double, double)
+  nameWithType: PictureEditorStateService.AddStroke(PictureStrokeKind, IReadOnlyList<PicturePoint>, string, double, double, double)
+  fullName: PublisherStudio.Services.PictureEditorStateService.AddStroke(PublisherStudio.BusinessObjects.PictureStrokeKind, System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.PicturePoint>, string, double, double, double)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Adds stroke.
+  example: []
+  syntax:
+    content: public void AddStroke(PictureStrokeKind kind, IReadOnlyList<PicturePoint> points, string color, double widthPx, double opacity, double hardness)
+    parameters:
+    - id: kind
+      type: PublisherStudio.BusinessObjects.PictureStrokeKind
+    - id: points
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint}
+    - id: color
+      type: System.String
+    - id: widthPx
+      type: System.Double
+    - id: opacity
+      type: System.Double
+    - id: hardness
+      type: System.Double
+    content.vb: Public Sub AddStroke(kind As PictureStrokeKind, points As IReadOnlyList(Of PicturePoint), color As String, widthPx As Double, opacity As Double, hardness As Double)
+  overload: PublisherStudio.Services.PictureEditorStateService.AddStroke*
+  nameWithType.vb: PictureEditorStateService.AddStroke(PictureStrokeKind, IReadOnlyList(Of PicturePoint), String, Double, Double, Double)
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.AddStroke(PublisherStudio.BusinessObjects.PictureStrokeKind, System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.PicturePoint), String, Double, Double, Double)
+  name.vb: AddStroke(PictureStrokeKind, IReadOnlyList(Of PicturePoint), String, Double, Double, Double)
+- uid: PublisherStudio.Services.PictureEditorStateService.ClearSelectedPaint
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.ClearSelectedPaint
+  id: ClearSelectedPaint
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: ClearSelectedPaint()
+  nameWithType: PictureEditorStateService.ClearSelectedPaint()
+  fullName: PublisherStudio.Services.PictureEditorStateService.ClearSelectedPaint()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the clear selected paint operation.
+  example: []
+  syntax:
+    content: public void ClearSelectedPaint()
+    content.vb: Public Sub ClearSelectedPaint()
+  overload: PublisherStudio.Services.PictureEditorStateService.ClearSelectedPaint*
+- uid: PublisherStudio.Services.PictureEditorStateService.DeleteSelected
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.DeleteSelected
+  id: DeleteSelected
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: DeleteSelected()
+  nameWithType: PictureEditorStateService.DeleteSelected()
+  fullName: PublisherStudio.Services.PictureEditorStateService.DeleteSelected()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Deletes selected.
+  example: []
+  syntax:
+    content: public void DeleteSelected()
+    content.vb: Public Sub DeleteSelected()
+  overload: PublisherStudio.Services.PictureEditorStateService.DeleteSelected*
+- uid: PublisherStudio.Services.PictureEditorStateService.CopySelected
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.CopySelected
+  id: CopySelected
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: CopySelected()
+  nameWithType: PictureEditorStateService.CopySelected()
+  fullName: PublisherStudio.Services.PictureEditorStateService.CopySelected()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the copy selected operation.
+  example: []
+  syntax:
+    content: public void CopySelected()
+    content.vb: Public Sub CopySelected()
+  overload: PublisherStudio.Services.PictureEditorStateService.CopySelected*
+- uid: PublisherStudio.Services.PictureEditorStateService.CopySelectedRegion(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.Boolean)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.CopySelectedRegion(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.Boolean)
+  id: CopySelectedRegion(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.Boolean)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: CopySelectedRegion(IReadOnlyList<PicturePoint>, bool)
+  nameWithType: PictureEditorStateService.CopySelectedRegion(IReadOnlyList<PicturePoint>, bool)
+  fullName: PublisherStudio.Services.PictureEditorStateService.CopySelectedRegion(System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.PicturePoint>, bool)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the copy selected region operation.
+  example: []
+  syntax:
+    content: public bool CopySelectedRegion(IReadOnlyList<PicturePoint> points, bool inverted = false)
+    parameters:
+    - id: points
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint}
+    - id: inverted
+      type: System.Boolean
+    return:
+      type: System.Boolean
+    content.vb: Public Function CopySelectedRegion(points As IReadOnlyList(Of PicturePoint), inverted As Boolean = False) As Boolean
+  overload: PublisherStudio.Services.PictureEditorStateService.CopySelectedRegion*
+  nameWithType.vb: PictureEditorStateService.CopySelectedRegion(IReadOnlyList(Of PicturePoint), Boolean)
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.CopySelectedRegion(System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.PicturePoint), Boolean)
+  name.vb: CopySelectedRegion(IReadOnlyList(Of PicturePoint), Boolean)
+- uid: PublisherStudio.Services.PictureEditorStateService.ApplySelectedClip(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.Boolean)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.ApplySelectedClip(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.Boolean)
+  id: ApplySelectedClip(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint},System.Boolean)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: ApplySelectedClip(IReadOnlyList<PicturePoint>, bool)
+  nameWithType: PictureEditorStateService.ApplySelectedClip(IReadOnlyList<PicturePoint>, bool)
+  fullName: PublisherStudio.Services.PictureEditorStateService.ApplySelectedClip(System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.PicturePoint>, bool)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Applies selected clip.
+  example: []
+  syntax:
+    content: public bool ApplySelectedClip(IReadOnlyList<PicturePoint> points, bool inverted)
+    parameters:
+    - id: points
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint}
+    - id: inverted
+      type: System.Boolean
+    return:
+      type: System.Boolean
+    content.vb: Public Function ApplySelectedClip(points As IReadOnlyList(Of PicturePoint), inverted As Boolean) As Boolean
+  overload: PublisherStudio.Services.PictureEditorStateService.ApplySelectedClip*
+  nameWithType.vb: PictureEditorStateService.ApplySelectedClip(IReadOnlyList(Of PicturePoint), Boolean)
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.ApplySelectedClip(System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.PicturePoint), Boolean)
+  name.vb: ApplySelectedClip(IReadOnlyList(Of PicturePoint), Boolean)
+- uid: PublisherStudio.Services.PictureEditorStateService.ClearSelectedClip
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.ClearSelectedClip
+  id: ClearSelectedClip
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: ClearSelectedClip()
+  nameWithType: PictureEditorStateService.ClearSelectedClip()
+  fullName: PublisherStudio.Services.PictureEditorStateService.ClearSelectedClip()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the clear selected clip operation.
+  example: []
+  syntax:
+    content: public bool ClearSelectedClip()
+    return:
+      type: System.Boolean
+    content.vb: Public Function ClearSelectedClip() As Boolean
+  overload: PublisherStudio.Services.PictureEditorStateService.ClearSelectedClip*
+- uid: PublisherStudio.Services.PictureEditorStateService.Paste
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.Paste
+  id: Paste
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: Paste()
+  nameWithType: PictureEditorStateService.Paste()
+  fullName: PublisherStudio.Services.PictureEditorStateService.Paste()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the paste operation.
+  example: []
+  syntax:
+    content: public void Paste()
+    content.vb: Public Sub Paste()
+  overload: PublisherStudio.Services.PictureEditorStateService.Paste*
+- uid: PublisherStudio.Services.PictureEditorStateService.DuplicateSelected
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.DuplicateSelected
+  id: DuplicateSelected
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: DuplicateSelected()
+  nameWithType: PictureEditorStateService.DuplicateSelected()
+  fullName: PublisherStudio.Services.PictureEditorStateService.DuplicateSelected()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the duplicate selected operation.
+  example: []
+  syntax:
+    content: public void DuplicateSelected()
+    content.vb: Public Sub DuplicateSelected()
+  overload: PublisherStudio.Services.PictureEditorStateService.DuplicateSelected*
+- uid: PublisherStudio.Services.PictureEditorStateService.CenterSelected
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.CenterSelected
+  id: CenterSelected
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: CenterSelected()
+  nameWithType: PictureEditorStateService.CenterSelected()
+  fullName: PublisherStudio.Services.PictureEditorStateService.CenterSelected()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the center selected operation.
+  example: []
+  syntax:
+    content: public void CenterSelected()
+    content.vb: Public Sub CenterSelected()
+  overload: PublisherStudio.Services.PictureEditorStateService.CenterSelected*
+- uid: PublisherStudio.Services.PictureEditorStateService.FitSelectedToCanvas
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.FitSelectedToCanvas
+  id: FitSelectedToCanvas
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: FitSelectedToCanvas()
+  nameWithType: PictureEditorStateService.FitSelectedToCanvas()
+  fullName: PublisherStudio.Services.PictureEditorStateService.FitSelectedToCanvas()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the fit selected to canvas operation.
+  example: []
+  syntax:
+    content: public void FitSelectedToCanvas()
+    content.vb: Public Sub FitSelectedToCanvas()
+  overload: PublisherStudio.Services.PictureEditorStateService.FitSelectedToCanvas*
+- uid: PublisherStudio.Services.PictureEditorStateService.MoveSelectedLayer(System.Int32)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.MoveSelectedLayer(System.Int32)
+  id: MoveSelectedLayer(System.Int32)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: MoveSelectedLayer(int)
+  nameWithType: PictureEditorStateService.MoveSelectedLayer(int)
+  fullName: PublisherStudio.Services.PictureEditorStateService.MoveSelectedLayer(int)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the move selected layer operation.
+  example: []
+  syntax:
+    content: public void MoveSelectedLayer(int delta)
+    parameters:
+    - id: delta
+      type: System.Int32
+    content.vb: Public Sub MoveSelectedLayer(delta As Integer)
+  overload: PublisherStudio.Services.PictureEditorStateService.MoveSelectedLayer*
+  nameWithType.vb: PictureEditorStateService.MoveSelectedLayer(Integer)
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.MoveSelectedLayer(Integer)
+  name.vb: MoveSelectedLayer(Integer)
+- uid: PublisherStudio.Services.PictureEditorStateService.BringSelectedToFront
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.BringSelectedToFront
+  id: BringSelectedToFront
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: BringSelectedToFront()
+  nameWithType: PictureEditorStateService.BringSelectedToFront()
+  fullName: PublisherStudio.Services.PictureEditorStateService.BringSelectedToFront()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the bring selected to front operation.
+  example: []
+  syntax:
+    content: public void BringSelectedToFront()
+    content.vb: Public Sub BringSelectedToFront()
+  overload: PublisherStudio.Services.PictureEditorStateService.BringSelectedToFront*
+- uid: PublisherStudio.Services.PictureEditorStateService.SendSelectedToBack
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.SendSelectedToBack
+  id: SendSelectedToBack
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: SendSelectedToBack()
+  nameWithType: PictureEditorStateService.SendSelectedToBack()
+  fullName: PublisherStudio.Services.PictureEditorStateService.SendSelectedToBack()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the send selected to back operation.
+  example: []
+  syntax:
+    content: public void SendSelectedToBack()
+    content.vb: Public Sub SendSelectedToBack()
+  overload: PublisherStudio.Services.PictureEditorStateService.SendSelectedToBack*
+- uid: PublisherStudio.Services.PictureEditorStateService.ToggleVisibility(System.Guid)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.ToggleVisibility(System.Guid)
+  id: ToggleVisibility(System.Guid)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: ToggleVisibility(Guid)
+  nameWithType: PictureEditorStateService.ToggleVisibility(Guid)
+  fullName: PublisherStudio.Services.PictureEditorStateService.ToggleVisibility(System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the toggle visibility operation.
+  example: []
+  syntax:
+    content: public void ToggleVisibility(Guid id)
+    parameters:
+    - id: id
+      type: System.Guid
+    content.vb: Public Sub ToggleVisibility(id As Guid)
+  overload: PublisherStudio.Services.PictureEditorStateService.ToggleVisibility*
+- uid: PublisherStudio.Services.PictureEditorStateService.ToggleLock(System.Guid)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.ToggleLock(System.Guid)
+  id: ToggleLock(System.Guid)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: ToggleLock(Guid)
+  nameWithType: PictureEditorStateService.ToggleLock(Guid)
+  fullName: PublisherStudio.Services.PictureEditorStateService.ToggleLock(System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the toggle lock operation.
+  example: []
+  syntax:
+    content: public void ToggleLock(Guid id)
+    parameters:
+    - id: id
+      type: System.Guid
+    content.vb: Public Sub ToggleLock(id As Guid)
+  overload: PublisherStudio.Services.PictureEditorStateService.ToggleLock*
+- uid: PublisherStudio.Services.PictureEditorStateService.CommitTransform(System.Guid,System.Double,System.Double,System.Double,System.Double,System.Double)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.CommitTransform(System.Guid,System.Double,System.Double,System.Double,System.Double,System.Double)
+  id: CommitTransform(System.Guid,System.Double,System.Double,System.Double,System.Double,System.Double)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: CommitTransform(Guid, double, double, double, double, double)
+  nameWithType: PictureEditorStateService.CommitTransform(Guid, double, double, double, double, double)
+  fullName: PublisherStudio.Services.PictureEditorStateService.CommitTransform(System.Guid, double, double, double, double, double)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the commit transform operation.
+  example: []
+  syntax:
+    content: public void CommitTransform(Guid id, double x, double y, double width, double height, double rotation)
+    parameters:
+    - id: id
+      type: System.Guid
+    - id: x
+      type: System.Double
+    - id: y
+      type: System.Double
+    - id: width
+      type: System.Double
+    - id: height
+      type: System.Double
+    - id: rotation
+      type: System.Double
+    content.vb: Public Sub CommitTransform(id As Guid, x As Double, y As Double, width As Double, height As Double, rotation As Double)
+  overload: PublisherStudio.Services.PictureEditorStateService.CommitTransform*
+  nameWithType.vb: PictureEditorStateService.CommitTransform(Guid, Double, Double, Double, Double, Double)
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.CommitTransform(System.Guid, Double, Double, Double, Double, Double)
+  name.vb: CommitTransform(Guid, Double, Double, Double, Double, Double)
+- uid: PublisherStudio.Services.PictureEditorStateService.UpdateSelected(System.Action{PublisherStudio.BusinessObjects.PictureLayer},System.Boolean,System.Boolean)
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.UpdateSelected(System.Action{PublisherStudio.BusinessObjects.PictureLayer},System.Boolean,System.Boolean)
+  id: UpdateSelected(System.Action{PublisherStudio.BusinessObjects.PictureLayer},System.Boolean,System.Boolean)
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: UpdateSelected(Action<PictureLayer>, bool, bool)
+  nameWithType: PictureEditorStateService.UpdateSelected(Action<PictureLayer>, bool, bool)
+  fullName: PublisherStudio.Services.PictureEditorStateService.UpdateSelected(System.Action<PublisherStudio.BusinessObjects.PictureLayer>, bool, bool)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Updates selected.
+  example: []
+  syntax:
+    content: public void UpdateSelected(Action<PictureLayer> update, bool capture = true, bool allowLocked = false)
+    parameters:
+    - id: update
+      type: System.Action{PublisherStudio.BusinessObjects.PictureLayer}
+    - id: capture
+      type: System.Boolean
+    - id: allowLocked
+      type: System.Boolean
+    content.vb: Public Sub UpdateSelected(update As Action(Of PictureLayer), capture As Boolean = True, allowLocked As Boolean = False)
+  overload: PublisherStudio.Services.PictureEditorStateService.UpdateSelected*
+  nameWithType.vb: PictureEditorStateService.UpdateSelected(Action(Of PictureLayer), Boolean, Boolean)
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.UpdateSelected(System.Action(Of PublisherStudio.BusinessObjects.PictureLayer), Boolean, Boolean)
+  name.vb: UpdateSelected(Action(Of PictureLayer), Boolean, Boolean)
+- uid: PublisherStudio.Services.PictureEditorStateService.UpdateSelectedLive(System.String,System.Action{PublisherStudio.BusinessObjects.PictureLayer})
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.UpdateSelectedLive(System.String,System.Action{PublisherStudio.BusinessObjects.PictureLayer})
+  id: UpdateSelectedLive(System.String,System.Action{PublisherStudio.BusinessObjects.PictureLayer})
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: UpdateSelectedLive(string, Action<PictureLayer>)
+  nameWithType: PictureEditorStateService.UpdateSelectedLive(string, Action<PictureLayer>)
+  fullName: PublisherStudio.Services.PictureEditorStateService.UpdateSelectedLive(string, System.Action<PublisherStudio.BusinessObjects.PictureLayer>)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Updates selected live.
+  example: []
+  syntax:
+    content: public void UpdateSelectedLive(string key, Action<PictureLayer> update)
+    parameters:
+    - id: key
+      type: System.String
+    - id: update
+      type: System.Action{PublisherStudio.BusinessObjects.PictureLayer}
+    content.vb: Public Sub UpdateSelectedLive(key As String, update As Action(Of PictureLayer))
+  overload: PublisherStudio.Services.PictureEditorStateService.UpdateSelectedLive*
+  nameWithType.vb: PictureEditorStateService.UpdateSelectedLive(String, Action(Of PictureLayer))
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.UpdateSelectedLive(String, System.Action(Of PublisherStudio.BusinessObjects.PictureLayer))
+  name.vb: UpdateSelectedLive(String, Action(Of PictureLayer))
+- uid: PublisherStudio.Services.PictureEditorStateService.EndLiveEdit
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.EndLiveEdit
+  id: EndLiveEdit
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: EndLiveEdit()
+  nameWithType: PictureEditorStateService.EndLiveEdit()
+  fullName: PublisherStudio.Services.PictureEditorStateService.EndLiveEdit()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the end live edit operation.
+  example: []
+  syntax:
+    content: public void EndLiveEdit()
+    content.vb: Public Sub EndLiveEdit()
+  overload: PublisherStudio.Services.PictureEditorStateService.EndLiveEdit*
+- uid: PublisherStudio.Services.PictureEditorStateService.Undo
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.Undo
+  id: Undo
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: Undo()
+  nameWithType: PictureEditorStateService.Undo()
+  fullName: PublisherStudio.Services.PictureEditorStateService.Undo()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the undo operation.
+  example: []
+  syntax:
+    content: public void Undo()
+    content.vb: Public Sub Undo()
+  overload: PublisherStudio.Services.PictureEditorStateService.Undo*
+- uid: PublisherStudio.Services.PictureEditorStateService.Redo
+  commentId: M:PublisherStudio.Services.PictureEditorStateService.Redo
+  id: Redo
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: Redo()
+  nameWithType: PictureEditorStateService.Redo()
+  fullName: PublisherStudio.Services.PictureEditorStateService.Redo()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the redo operation.
+  example: []
+  syntax:
+    content: public void Redo()
+    content.vb: Public Sub Redo()
+  overload: PublisherStudio.Services.PictureEditorStateService.Redo*
+- uid: PublisherStudio.Services.PictureEditorStateService.Document
+  commentId: P:PublisherStudio.Services.PictureEditorStateService.Document
+  id: Document
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: Document
+  nameWithType: PictureEditorStateService.Document
+  fullName: PublisherStudio.Services.PictureEditorStateService.Document
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Gets or sets document.
+  example: []
+  syntax:
+    content: public PictureDocument Document { get; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.PictureDocument
+    content.vb: Public ReadOnly Property Document As PictureDocument
+  overload: PublisherStudio.Services.PictureEditorStateService.Document*
+- uid: PublisherStudio.Services.PictureEditorStateService.SelectedLayerId
+  commentId: P:PublisherStudio.Services.PictureEditorStateService.SelectedLayerId
+  id: SelectedLayerId
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: SelectedLayerId
+  nameWithType: PictureEditorStateService.SelectedLayerId
+  fullName: PublisherStudio.Services.PictureEditorStateService.SelectedLayerId
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Gets or sets selected layer identifier.
+  example: []
+  syntax:
+    content: public Guid? SelectedLayerId { get; }
+    parameters: []
+    return:
+      type: System.Nullable{System.Guid}
+    content.vb: Public ReadOnly Property SelectedLayerId As Guid?
+  overload: PublisherStudio.Services.PictureEditorStateService.SelectedLayerId*
+- uid: PublisherStudio.Services.PictureEditorStateService.SelectedLayer
+  commentId: P:PublisherStudio.Services.PictureEditorStateService.SelectedLayer
+  id: SelectedLayer
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: SelectedLayer
+  nameWithType: PictureEditorStateService.SelectedLayer
+  fullName: PublisherStudio.Services.PictureEditorStateService.SelectedLayer
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Gets selected layer.
+  example: []
+  syntax:
+    content: public PictureLayer? SelectedLayer { get; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.PictureLayer
+    content.vb: Public ReadOnly Property SelectedLayer As PictureLayer
+  overload: PublisherStudio.Services.PictureEditorStateService.SelectedLayer*
+- uid: PublisherStudio.Services.PictureEditorStateService.CanUndo
+  commentId: P:PublisherStudio.Services.PictureEditorStateService.CanUndo
+  id: CanUndo
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: CanUndo
+  nameWithType: PictureEditorStateService.CanUndo
+  fullName: PublisherStudio.Services.PictureEditorStateService.CanUndo
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Gets can undo.
+  example: []
+  syntax:
+    content: public bool CanUndo { get; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public ReadOnly Property CanUndo As Boolean
+  overload: PublisherStudio.Services.PictureEditorStateService.CanUndo*
+- uid: PublisherStudio.Services.PictureEditorStateService.CanRedo
+  commentId: P:PublisherStudio.Services.PictureEditorStateService.CanRedo
+  id: CanRedo
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: CanRedo
+  nameWithType: PictureEditorStateService.CanRedo
+  fullName: PublisherStudio.Services.PictureEditorStateService.CanRedo
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Gets can redo.
+  example: []
+  syntax:
+    content: public bool CanRedo { get; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public ReadOnly Property CanRedo As Boolean
+  overload: PublisherStudio.Services.PictureEditorStateService.CanRedo*
+- uid: PublisherStudio.Services.PictureEditorStateService.CanPaste
+  commentId: P:PublisherStudio.Services.PictureEditorStateService.CanPaste
+  id: CanPaste
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: CanPaste
+  nameWithType: PictureEditorStateService.CanPaste
+  fullName: PublisherStudio.Services.PictureEditorStateService.CanPaste
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Gets can paste.
+  example: []
+  syntax:
+    content: public bool CanPaste { get; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public ReadOnly Property CanPaste As Boolean
+  overload: PublisherStudio.Services.PictureEditorStateService.CanPaste*
+- uid: PublisherStudio.Services.PictureEditorStateService.Changed
+  commentId: E:PublisherStudio.Services.PictureEditorStateService.Changed
+  id: Changed
+  parent: PublisherStudio.Services.PictureEditorStateService
+  langs:
+  - csharp
+  - vb
+  name: Changed
+  nameWithType: PictureEditorStateService.Changed
+  fullName: PublisherStudio.Services.PictureEditorStateService.Changed
+  type: Event
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Occurs when changed.
+  example: []
+  syntax:
+    content: public event Action? Changed
+    return:
+      type: System.Action
+    content.vb: Public Event Changed As Action
+references:
+- uid: PublisherStudio.Services
+  commentId: N:PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services
+  nameWithType: PublisherStudio.Services
+  fullName: PublisherStudio.Services
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.PictureEditorStateService.#ctor*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService__ctor_PublisherStudio_Services_PictureDocumentService_PublisherStudio_Services_IPublisherDocumentFactory_
+  name: PictureEditorStateService
+  nameWithType: PictureEditorStateService.PictureEditorStateService
+  fullName: PublisherStudio.Services.PictureEditorStateService.PictureEditorStateService
+  nameWithType.vb: PictureEditorStateService.New
+  fullName.vb: PublisherStudio.Services.PictureEditorStateService.New
+  name.vb: New
+- uid: PublisherStudio.Services.PictureDocumentService
+  commentId: T:PublisherStudio.Services.PictureDocumentService
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.PictureDocumentService.html
+  name: PictureDocumentService
+  nameWithType: PictureDocumentService
+  fullName: PublisherStudio.Services.PictureDocumentService
+- uid: PublisherStudio.Services.IPublisherDocumentFactory
+  commentId: T:PublisherStudio.Services.IPublisherDocumentFactory
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.IPublisherDocumentFactory.html
+  name: IPublisherDocumentFactory
+  nameWithType: IPublisherDocumentFactory
+  fullName: PublisherStudio.Services.IPublisherDocumentFactory
+- uid: PublisherStudio.Services.PictureEditorStateService.StartNew*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.StartNew
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_StartNew_System_Int32_System_Int32_System_Boolean_
+  name: StartNew
+  nameWithType: PictureEditorStateService.StartNew
+  fullName: PublisherStudio.Services.PictureEditorStateService.StartNew
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.Services.PictureEditorStateService.StartFromDocument*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.StartFromDocument
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_StartFromDocument_PublisherStudio_BusinessObjects_PictureDocument_
+  name: StartFromDocument
+  nameWithType: PictureEditorStateService.StartFromDocument
+  fullName: PublisherStudio.Services.PictureEditorStateService.StartFromDocument
+- uid: PublisherStudio.BusinessObjects.PictureDocument
+  commentId: T:PublisherStudio.BusinessObjects.PictureDocument
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PictureDocument.html
+  name: PictureDocument
+  nameWithType: PictureDocument
+  fullName: PublisherStudio.BusinessObjects.PictureDocument
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.Services.PictureEditorStateService.StartFromRaster*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.StartFromRaster
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_StartFromRaster_System_String_System_String_System_Int32_System_Int32_
+  name: StartFromRaster
+  nameWithType: PictureEditorStateService.StartFromRaster
+  fullName: PublisherStudio.Services.PictureEditorStateService.StartFromRaster
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.Services.PictureEditorStateService.CloneDocument*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.CloneDocument
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_CloneDocument
+  name: CloneDocument
+  nameWithType: PictureEditorStateService.CloneDocument
+  fullName: PublisherStudio.Services.PictureEditorStateService.CloneDocument
+- uid: PublisherStudio.Services.PictureEditorStateService.SetDocumentName*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.SetDocumentName
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_SetDocumentName_System_String_
+  name: SetDocumentName
+  nameWithType: PictureEditorStateService.SetDocumentName
+  fullName: PublisherStudio.Services.PictureEditorStateService.SetDocumentName
+- uid: PublisherStudio.Services.PictureEditorStateService.SetDocumentSize*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.SetDocumentSize
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_SetDocumentSize_System_Int32_System_Int32_
+  name: SetDocumentSize
+  nameWithType: PictureEditorStateService.SetDocumentSize
+  fullName: PublisherStudio.Services.PictureEditorStateService.SetDocumentSize
+- uid: PublisherStudio.Services.PictureEditorStateService.SetBackground*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.SetBackground
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_SetBackground_System_String_
+  name: SetBackground
+  nameWithType: PictureEditorStateService.SetBackground
+  fullName: PublisherStudio.Services.PictureEditorStateService.SetBackground
+- uid: PublisherStudio.Services.PictureEditorStateService.SetZoom*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.SetZoom
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_SetZoom_System_Double_
+  name: SetZoom
+  nameWithType: PictureEditorStateService.SetZoom
+  fullName: PublisherStudio.Services.PictureEditorStateService.SetZoom
+- uid: System.Double
+  commentId: T:System.Double
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.double
+  name: double
+  nameWithType: double
+  fullName: double
+  nameWithType.vb: Double
+  fullName.vb: Double
+  name.vb: Double
+- uid: PublisherStudio.Services.PictureEditorStateService.SetGrid*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.SetGrid
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_SetGrid_System_Boolean_
+  name: SetGrid
+  nameWithType: PictureEditorStateService.SetGrid
+  fullName: PublisherStudio.Services.PictureEditorStateService.SetGrid
+- uid: PublisherStudio.Services.PictureEditorStateService.SetSnap*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.SetSnap
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_SetSnap_System_Boolean_
+  name: SetSnap
+  nameWithType: PictureEditorStateService.SetSnap
+  fullName: PublisherStudio.Services.PictureEditorStateService.SetSnap
+- uid: PublisherStudio.Services.PictureEditorStateService.SetGridSpacing*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.SetGridSpacing
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_SetGridSpacing_System_Int32_
+  name: SetGridSpacing
+  nameWithType: PictureEditorStateService.SetGridSpacing
+  fullName: PublisherStudio.Services.PictureEditorStateService.SetGridSpacing
+- uid: PublisherStudio.Services.PictureEditorStateService.SelectLayer*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.SelectLayer
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_SelectLayer_System_Nullable_System_Guid__
+  name: SelectLayer
+  nameWithType: PictureEditorStateService.SelectLayer
+  fullName: PublisherStudio.Services.PictureEditorStateService.SelectLayer
+- uid: System.Nullable{System.Guid}
+  commentId: T:System.Nullable{System.Guid}
+  parent: System
+  definition: System.Nullable`1
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid?
+  nameWithType: Guid?
+  fullName: System.Guid?
+  spec.csharp:
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: '?'
+  spec.vb:
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: '?'
+- uid: System.Nullable`1
+  commentId: T:System.Nullable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  name: Nullable<T>
+  nameWithType: Nullable<T>
+  fullName: System.Nullable<T>
+  nameWithType.vb: Nullable(Of T)
+  fullName.vb: System.Nullable(Of T)
+  name.vb: Nullable(Of T)
+  spec.csharp:
+  - uid: System.Nullable`1
+    name: Nullable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Nullable`1
+    name: Nullable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: PublisherStudio.Services.PictureEditorStateService.AddRaster*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.AddRaster
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_AddRaster_System_String_System_String_System_Int32_System_Int32_System_Nullable_System_Double__System_Nullable_System_Double__
+  name: AddRaster
+  nameWithType: PictureEditorStateService.AddRaster
+  fullName: PublisherStudio.Services.PictureEditorStateService.AddRaster
+- uid: System.Nullable{System.Double}
+  commentId: T:System.Nullable{System.Double}
+  parent: System
+  definition: System.Nullable`1
+  href: https://learn.microsoft.com/dotnet/api/system.double
+  name: double?
+  nameWithType: double?
+  fullName: double?
+  nameWithType.vb: Double?
+  fullName.vb: Double?
+  name.vb: Double?
+  spec.csharp:
+  - uid: System.Double
+    name: double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: '?'
+  spec.vb:
+  - uid: System.Double
+    name: Double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: '?'
+- uid: PublisherStudio.BusinessObjects.RasterPictureLayer
+  commentId: T:PublisherStudio.BusinessObjects.RasterPictureLayer
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.RasterPictureLayer.html
+  name: RasterPictureLayer
+  nameWithType: RasterPictureLayer
+  fullName: PublisherStudio.BusinessObjects.RasterPictureLayer
+- uid: PublisherStudio.Services.PictureEditorStateService.AddImportedLayers*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.AddImportedLayers
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_AddImportedLayers_PublisherStudio_BusinessObjects_PictureDocument_System_String_System_Nullable_System_Double__System_Nullable_System_Double__
+  name: AddImportedLayers
+  nameWithType: PictureEditorStateService.AddImportedLayers
+  fullName: PublisherStudio.Services.PictureEditorStateService.AddImportedLayers
+- uid: PublisherStudio.Services.PictureEditorStateService.ReplaceRaster*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.ReplaceRaster
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_ReplaceRaster_System_Guid_System_String_
+  name: ReplaceRaster
+  nameWithType: PictureEditorStateService.ReplaceRaster
+  fullName: PublisherStudio.Services.PictureEditorStateService.ReplaceRaster
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: PublisherStudio.Services.PictureEditorStateService.AddText*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.AddText
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_AddText
+  name: AddText
+  nameWithType: PictureEditorStateService.AddText
+  fullName: PublisherStudio.Services.PictureEditorStateService.AddText
+- uid: PublisherStudio.BusinessObjects.TextPictureLayer
+  commentId: T:PublisherStudio.BusinessObjects.TextPictureLayer
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.TextPictureLayer.html
+  name: TextPictureLayer
+  nameWithType: TextPictureLayer
+  fullName: PublisherStudio.BusinessObjects.TextPictureLayer
+- uid: PublisherStudio.Services.PictureEditorStateService.AddShape*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.AddShape
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_AddShape_PublisherStudio_BusinessObjects_PictureShapeKind_
+  name: AddShape
+  nameWithType: PictureEditorStateService.AddShape
+  fullName: PublisherStudio.Services.PictureEditorStateService.AddShape
+- uid: PublisherStudio.BusinessObjects.PictureShapeKind
+  commentId: T:PublisherStudio.BusinessObjects.PictureShapeKind
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PictureShapeKind.html
+  name: PictureShapeKind
+  nameWithType: PictureShapeKind
+  fullName: PublisherStudio.BusinessObjects.PictureShapeKind
+- uid: PublisherStudio.BusinessObjects.ShapePictureLayer
+  commentId: T:PublisherStudio.BusinessObjects.ShapePictureLayer
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ShapePictureLayer.html
+  name: ShapePictureLayer
+  nameWithType: ShapePictureLayer
+  fullName: PublisherStudio.BusinessObjects.ShapePictureLayer
+- uid: PublisherStudio.Services.PictureEditorStateService.AddShapeAt*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.AddShapeAt
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_AddShapeAt_PublisherStudio_BusinessObjects_PictureShapeKind_System_Double_System_Double_System_Double_System_Double_System_Double_
+  name: AddShapeAt
+  nameWithType: PictureEditorStateService.AddShapeAt
+  fullName: PublisherStudio.Services.PictureEditorStateService.AddShapeAt
+- uid: PublisherStudio.Services.PictureEditorStateService.AddPath*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.AddPath
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_AddPath_System_Collections_Generic_IReadOnlyList_PublisherStudio_BusinessObjects_PicturePoint__System_String_System_Double_System_Boolean_System_Boolean_
+  name: AddPath
+  nameWithType: PictureEditorStateService.AddPath
+  fullName: PublisherStudio.Services.PictureEditorStateService.AddPath
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PicturePoint}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<PicturePoint>
+  nameWithType: IReadOnlyList<PicturePoint>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.PicturePoint>
+  nameWithType.vb: IReadOnlyList(Of PicturePoint)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.PicturePoint)
+  name.vb: IReadOnlyList(Of PicturePoint)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.PicturePoint
+    name: PicturePoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PicturePoint.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.PicturePoint
+    name: PicturePoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PicturePoint.html
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: PublisherStudio.Services.PictureEditorStateService.AddAreaFill*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.AddAreaFill
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_AddAreaFill_System_String_System_Collections_Generic_IReadOnlyList_PublisherStudio_BusinessObjects_PicturePoint__System_String_System_String_System_Boolean_
+  name: AddAreaFill
+  nameWithType: PictureEditorStateService.AddAreaFill
+  fullName: PublisherStudio.Services.PictureEditorStateService.AddAreaFill
+- uid: PublisherStudio.Services.PictureEditorStateService.AddFill*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.AddFill
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_AddFill_PublisherStudio_BusinessObjects_PictureFillKind_
+  name: AddFill
+  nameWithType: PictureEditorStateService.AddFill
+  fullName: PublisherStudio.Services.PictureEditorStateService.AddFill
+- uid: PublisherStudio.BusinessObjects.PictureFillKind
+  commentId: T:PublisherStudio.BusinessObjects.PictureFillKind
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PictureFillKind.html
+  name: PictureFillKind
+  nameWithType: PictureFillKind
+  fullName: PublisherStudio.BusinessObjects.PictureFillKind
+- uid: PublisherStudio.BusinessObjects.FillPictureLayer
+  commentId: T:PublisherStudio.BusinessObjects.FillPictureLayer
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.FillPictureLayer.html
+  name: FillPictureLayer
+  nameWithType: FillPictureLayer
+  fullName: PublisherStudio.BusinessObjects.FillPictureLayer
+- uid: PublisherStudio.Services.PictureEditorStateService.AddRender*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.AddRender
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_AddRender_PublisherStudio_BusinessObjects_PictureRenderKind_
+  name: AddRender
+  nameWithType: PictureEditorStateService.AddRender
+  fullName: PublisherStudio.Services.PictureEditorStateService.AddRender
+- uid: PublisherStudio.BusinessObjects.PictureRenderKind
+  commentId: T:PublisherStudio.BusinessObjects.PictureRenderKind
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PictureRenderKind.html
+  name: PictureRenderKind
+  nameWithType: PictureRenderKind
+  fullName: PublisherStudio.BusinessObjects.PictureRenderKind
+- uid: PublisherStudio.BusinessObjects.RenderPictureLayer
+  commentId: T:PublisherStudio.BusinessObjects.RenderPictureLayer
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.RenderPictureLayer.html
+  name: RenderPictureLayer
+  nameWithType: RenderPictureLayer
+  fullName: PublisherStudio.BusinessObjects.RenderPictureLayer
+- uid: PublisherStudio.Services.PictureEditorStateService.AddPaint*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.AddPaint
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_AddPaint_System_String_
+  name: AddPaint
+  nameWithType: PictureEditorStateService.AddPaint
+  fullName: PublisherStudio.Services.PictureEditorStateService.AddPaint
+- uid: PublisherStudio.BusinessObjects.PaintPictureLayer
+  commentId: T:PublisherStudio.BusinessObjects.PaintPictureLayer
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PaintPictureLayer.html
+  name: PaintPictureLayer
+  nameWithType: PaintPictureLayer
+  fullName: PublisherStudio.BusinessObjects.PaintPictureLayer
+- uid: PublisherStudio.Services.PictureEditorStateService.AddStroke*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.AddStroke
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_AddStroke_PublisherStudio_BusinessObjects_PictureStrokeKind_System_Collections_Generic_IReadOnlyList_PublisherStudio_BusinessObjects_PicturePoint__System_String_System_Double_System_Double_System_Double_
+  name: AddStroke
+  nameWithType: PictureEditorStateService.AddStroke
+  fullName: PublisherStudio.Services.PictureEditorStateService.AddStroke
+- uid: PublisherStudio.BusinessObjects.PictureStrokeKind
+  commentId: T:PublisherStudio.BusinessObjects.PictureStrokeKind
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PictureStrokeKind.html
+  name: PictureStrokeKind
+  nameWithType: PictureStrokeKind
+  fullName: PublisherStudio.BusinessObjects.PictureStrokeKind
+- uid: PublisherStudio.Services.PictureEditorStateService.ClearSelectedPaint*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.ClearSelectedPaint
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_ClearSelectedPaint
+  name: ClearSelectedPaint
+  nameWithType: PictureEditorStateService.ClearSelectedPaint
+  fullName: PublisherStudio.Services.PictureEditorStateService.ClearSelectedPaint
+- uid: PublisherStudio.Services.PictureEditorStateService.DeleteSelected*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.DeleteSelected
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_DeleteSelected
+  name: DeleteSelected
+  nameWithType: PictureEditorStateService.DeleteSelected
+  fullName: PublisherStudio.Services.PictureEditorStateService.DeleteSelected
+- uid: PublisherStudio.Services.PictureEditorStateService.CopySelected*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.CopySelected
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_CopySelected
+  name: CopySelected
+  nameWithType: PictureEditorStateService.CopySelected
+  fullName: PublisherStudio.Services.PictureEditorStateService.CopySelected
+- uid: PublisherStudio.Services.PictureEditorStateService.CopySelectedRegion*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.CopySelectedRegion
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_CopySelectedRegion_System_Collections_Generic_IReadOnlyList_PublisherStudio_BusinessObjects_PicturePoint__System_Boolean_
+  name: CopySelectedRegion
+  nameWithType: PictureEditorStateService.CopySelectedRegion
+  fullName: PublisherStudio.Services.PictureEditorStateService.CopySelectedRegion
+- uid: PublisherStudio.Services.PictureEditorStateService.ApplySelectedClip*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.ApplySelectedClip
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_ApplySelectedClip_System_Collections_Generic_IReadOnlyList_PublisherStudio_BusinessObjects_PicturePoint__System_Boolean_
+  name: ApplySelectedClip
+  nameWithType: PictureEditorStateService.ApplySelectedClip
+  fullName: PublisherStudio.Services.PictureEditorStateService.ApplySelectedClip
+- uid: PublisherStudio.Services.PictureEditorStateService.ClearSelectedClip*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.ClearSelectedClip
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_ClearSelectedClip
+  name: ClearSelectedClip
+  nameWithType: PictureEditorStateService.ClearSelectedClip
+  fullName: PublisherStudio.Services.PictureEditorStateService.ClearSelectedClip
+- uid: PublisherStudio.Services.PictureEditorStateService.Paste*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.Paste
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_Paste
+  name: Paste
+  nameWithType: PictureEditorStateService.Paste
+  fullName: PublisherStudio.Services.PictureEditorStateService.Paste
+- uid: PublisherStudio.Services.PictureEditorStateService.DuplicateSelected*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.DuplicateSelected
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_DuplicateSelected
+  name: DuplicateSelected
+  nameWithType: PictureEditorStateService.DuplicateSelected
+  fullName: PublisherStudio.Services.PictureEditorStateService.DuplicateSelected
+- uid: PublisherStudio.Services.PictureEditorStateService.CenterSelected*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.CenterSelected
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_CenterSelected
+  name: CenterSelected
+  nameWithType: PictureEditorStateService.CenterSelected
+  fullName: PublisherStudio.Services.PictureEditorStateService.CenterSelected
+- uid: PublisherStudio.Services.PictureEditorStateService.FitSelectedToCanvas*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.FitSelectedToCanvas
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_FitSelectedToCanvas
+  name: FitSelectedToCanvas
+  nameWithType: PictureEditorStateService.FitSelectedToCanvas
+  fullName: PublisherStudio.Services.PictureEditorStateService.FitSelectedToCanvas
+- uid: PublisherStudio.Services.PictureEditorStateService.MoveSelectedLayer*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.MoveSelectedLayer
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_MoveSelectedLayer_System_Int32_
+  name: MoveSelectedLayer
+  nameWithType: PictureEditorStateService.MoveSelectedLayer
+  fullName: PublisherStudio.Services.PictureEditorStateService.MoveSelectedLayer
+- uid: PublisherStudio.Services.PictureEditorStateService.BringSelectedToFront*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.BringSelectedToFront
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_BringSelectedToFront
+  name: BringSelectedToFront
+  nameWithType: PictureEditorStateService.BringSelectedToFront
+  fullName: PublisherStudio.Services.PictureEditorStateService.BringSelectedToFront
+- uid: PublisherStudio.Services.PictureEditorStateService.SendSelectedToBack*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.SendSelectedToBack
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_SendSelectedToBack
+  name: SendSelectedToBack
+  nameWithType: PictureEditorStateService.SendSelectedToBack
+  fullName: PublisherStudio.Services.PictureEditorStateService.SendSelectedToBack
+- uid: PublisherStudio.Services.PictureEditorStateService.ToggleVisibility*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.ToggleVisibility
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_ToggleVisibility_System_Guid_
+  name: ToggleVisibility
+  nameWithType: PictureEditorStateService.ToggleVisibility
+  fullName: PublisherStudio.Services.PictureEditorStateService.ToggleVisibility
+- uid: PublisherStudio.Services.PictureEditorStateService.ToggleLock*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.ToggleLock
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_ToggleLock_System_Guid_
+  name: ToggleLock
+  nameWithType: PictureEditorStateService.ToggleLock
+  fullName: PublisherStudio.Services.PictureEditorStateService.ToggleLock
+- uid: PublisherStudio.Services.PictureEditorStateService.CommitTransform*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.CommitTransform
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_CommitTransform_System_Guid_System_Double_System_Double_System_Double_System_Double_System_Double_
+  name: CommitTransform
+  nameWithType: PictureEditorStateService.CommitTransform
+  fullName: PublisherStudio.Services.PictureEditorStateService.CommitTransform
+- uid: PublisherStudio.Services.PictureEditorStateService.UpdateSelected*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.UpdateSelected
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_UpdateSelected_System_Action_PublisherStudio_BusinessObjects_PictureLayer__System_Boolean_System_Boolean_
+  name: UpdateSelected
+  nameWithType: PictureEditorStateService.UpdateSelected
+  fullName: PublisherStudio.Services.PictureEditorStateService.UpdateSelected
+- uid: System.Action{PublisherStudio.BusinessObjects.PictureLayer}
+  commentId: T:System.Action{PublisherStudio.BusinessObjects.PictureLayer}
+  parent: System
+  definition: System.Action`1
+  href: https://learn.microsoft.com/dotnet/api/system.action-1
+  name: Action<PictureLayer>
+  nameWithType: Action<PictureLayer>
+  fullName: System.Action<PublisherStudio.BusinessObjects.PictureLayer>
+  nameWithType.vb: Action(Of PictureLayer)
+  fullName.vb: System.Action(Of PublisherStudio.BusinessObjects.PictureLayer)
+  name.vb: Action(Of PictureLayer)
+  spec.csharp:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.PictureLayer
+    name: PictureLayer
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PictureLayer.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.PictureLayer
+    name: PictureLayer
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PictureLayer.html
+  - name: )
+- uid: System.Action`1
+  commentId: T:System.Action`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.action-1
+  name: Action<T>
+  nameWithType: Action<T>
+  fullName: System.Action<T>
+  nameWithType.vb: Action(Of T)
+  fullName.vb: System.Action(Of T)
+  name.vb: Action(Of T)
+  spec.csharp:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: PublisherStudio.Services.PictureEditorStateService.UpdateSelectedLive*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.UpdateSelectedLive
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_UpdateSelectedLive_System_String_System_Action_PublisherStudio_BusinessObjects_PictureLayer__
+  name: UpdateSelectedLive
+  nameWithType: PictureEditorStateService.UpdateSelectedLive
+  fullName: PublisherStudio.Services.PictureEditorStateService.UpdateSelectedLive
+- uid: PublisherStudio.Services.PictureEditorStateService.EndLiveEdit*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.EndLiveEdit
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_EndLiveEdit
+  name: EndLiveEdit
+  nameWithType: PictureEditorStateService.EndLiveEdit
+  fullName: PublisherStudio.Services.PictureEditorStateService.EndLiveEdit
+- uid: PublisherStudio.Services.PictureEditorStateService.Undo*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.Undo
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_Undo
+  name: Undo
+  nameWithType: PictureEditorStateService.Undo
+  fullName: PublisherStudio.Services.PictureEditorStateService.Undo
+- uid: PublisherStudio.Services.PictureEditorStateService.Redo*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.Redo
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_Redo
+  name: Redo
+  nameWithType: PictureEditorStateService.Redo
+  fullName: PublisherStudio.Services.PictureEditorStateService.Redo
+- uid: PublisherStudio.Services.PictureEditorStateService.Document*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.Document
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_Document
+  name: Document
+  nameWithType: PictureEditorStateService.Document
+  fullName: PublisherStudio.Services.PictureEditorStateService.Document
+- uid: PublisherStudio.Services.PictureEditorStateService.SelectedLayerId*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.SelectedLayerId
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_SelectedLayerId
+  name: SelectedLayerId
+  nameWithType: PictureEditorStateService.SelectedLayerId
+  fullName: PublisherStudio.Services.PictureEditorStateService.SelectedLayerId
+- uid: PublisherStudio.Services.PictureEditorStateService.SelectedLayer*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.SelectedLayer
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_SelectedLayer
+  name: SelectedLayer
+  nameWithType: PictureEditorStateService.SelectedLayer
+  fullName: PublisherStudio.Services.PictureEditorStateService.SelectedLayer
+- uid: PublisherStudio.BusinessObjects.PictureLayer
+  commentId: T:PublisherStudio.BusinessObjects.PictureLayer
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PictureLayer.html
+  name: PictureLayer
+  nameWithType: PictureLayer
+  fullName: PublisherStudio.BusinessObjects.PictureLayer
+- uid: PublisherStudio.Services.PictureEditorStateService.CanUndo*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.CanUndo
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_CanUndo
+  name: CanUndo
+  nameWithType: PictureEditorStateService.CanUndo
+  fullName: PublisherStudio.Services.PictureEditorStateService.CanUndo
+- uid: PublisherStudio.Services.PictureEditorStateService.CanRedo*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.CanRedo
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_CanRedo
+  name: CanRedo
+  nameWithType: PictureEditorStateService.CanRedo
+  fullName: PublisherStudio.Services.PictureEditorStateService.CanRedo
+- uid: PublisherStudio.Services.PictureEditorStateService.CanPaste*
+  commentId: Overload:PublisherStudio.Services.PictureEditorStateService.CanPaste
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html#PublisherStudio_Services_PictureEditorStateService_CanPaste
+  name: CanPaste
+  nameWithType: PictureEditorStateService.CanPaste
+  fullName: PublisherStudio.Services.PictureEditorStateService.CanPaste
+- uid: System.Action
+  commentId: T:System.Action
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.action
+  name: Action
+  nameWithType: Action
+  fullName: System.Action

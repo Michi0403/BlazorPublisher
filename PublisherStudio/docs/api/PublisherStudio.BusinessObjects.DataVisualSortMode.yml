@@ -1,0 +1,153 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.DataVisualSortMode
+  commentId: T:PublisherStudio.BusinessObjects.DataVisualSortMode
+  id: DataVisualSortMode
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.DataVisualSortMode.ArgumentAscending
+  - PublisherStudio.BusinessObjects.DataVisualSortMode.ArgumentDescending
+  - PublisherStudio.BusinessObjects.DataVisualSortMode.DataOrder
+  - PublisherStudio.BusinessObjects.DataVisualSortMode.ValueAscending
+  - PublisherStudio.BusinessObjects.DataVisualSortMode.ValueDescending
+  langs:
+  - csharp
+  - vb
+  name: DataVisualSortMode
+  nameWithType: DataVisualSortMode
+  fullName: PublisherStudio.BusinessObjects.DataVisualSortMode
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported data visual sort mode values.
+  example: []
+  syntax:
+    content: public enum DataVisualSortMode
+    content.vb: Public Enum DataVisualSortMode
+- uid: PublisherStudio.BusinessObjects.DataVisualSortMode.DataOrder
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualSortMode.DataOrder
+  id: DataOrder
+  parent: PublisherStudio.BusinessObjects.DataVisualSortMode
+  langs:
+  - csharp
+  - vb
+  name: DataOrder
+  nameWithType: DataVisualSortMode.DataOrder
+  fullName: PublisherStudio.BusinessObjects.DataVisualSortMode.DataOrder
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: DataOrder = 0
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualSortMode
+- uid: PublisherStudio.BusinessObjects.DataVisualSortMode.ArgumentAscending
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualSortMode.ArgumentAscending
+  id: ArgumentAscending
+  parent: PublisherStudio.BusinessObjects.DataVisualSortMode
+  langs:
+  - csharp
+  - vb
+  name: ArgumentAscending
+  nameWithType: DataVisualSortMode.ArgumentAscending
+  fullName: PublisherStudio.BusinessObjects.DataVisualSortMode.ArgumentAscending
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: ArgumentAscending = 1
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualSortMode
+- uid: PublisherStudio.BusinessObjects.DataVisualSortMode.ArgumentDescending
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualSortMode.ArgumentDescending
+  id: ArgumentDescending
+  parent: PublisherStudio.BusinessObjects.DataVisualSortMode
+  langs:
+  - csharp
+  - vb
+  name: ArgumentDescending
+  nameWithType: DataVisualSortMode.ArgumentDescending
+  fullName: PublisherStudio.BusinessObjects.DataVisualSortMode.ArgumentDescending
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: ArgumentDescending = 2
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualSortMode
+- uid: PublisherStudio.BusinessObjects.DataVisualSortMode.ValueAscending
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualSortMode.ValueAscending
+  id: ValueAscending
+  parent: PublisherStudio.BusinessObjects.DataVisualSortMode
+  langs:
+  - csharp
+  - vb
+  name: ValueAscending
+  nameWithType: DataVisualSortMode.ValueAscending
+  fullName: PublisherStudio.BusinessObjects.DataVisualSortMode.ValueAscending
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: ValueAscending = 3
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualSortMode
+- uid: PublisherStudio.BusinessObjects.DataVisualSortMode.ValueDescending
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualSortMode.ValueDescending
+  id: ValueDescending
+  parent: PublisherStudio.BusinessObjects.DataVisualSortMode
+  langs:
+  - csharp
+  - vb
+  name: ValueDescending
+  nameWithType: DataVisualSortMode.ValueDescending
+  fullName: PublisherStudio.BusinessObjects.DataVisualSortMode.ValueDescending
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: ValueDescending = 4
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualSortMode
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.DataVisualSortMode
+  commentId: T:PublisherStudio.BusinessObjects.DataVisualSortMode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualSortMode.html
+  name: DataVisualSortMode
+  nameWithType: DataVisualSortMode
+  fullName: PublisherStudio.BusinessObjects.DataVisualSortMode

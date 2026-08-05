@@ -1,12 +1,21 @@
-namespace PublisherStudio.Services.VideoStudio.Export;
+﻿namespace PublisherStudio.Services.VideoStudio.Export;
 
+/// <summary>
+/// Defines the browser runtime template service contract.
+/// </summary>
 public interface IBrowserRuntimeTemplateService
 {
     string CreateBlobRuntime(string payload);
 }
 
+/// <summary>
+/// Provides browser runtime template service operations.
+/// </summary>
 public sealed class BrowserRuntimeTemplateService : IBrowserRuntimeTemplateService
 {
+    /// <summary>
+    /// Creates blob runtime.
+    /// </summary>
     public string CreateBlobRuntime(string payload) => """
 (() => {
   const config = __PUBLISHERSTUDIO_BLOB_RUNTIME_PAYLOAD__;

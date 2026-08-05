@@ -1,19 +1,31 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.OpenScad;
 
+/// <summary>
+/// Provides open scad catalog service operations.
+/// </summary>
 public sealed class OpenScadCatalogService : IOpenScadCatalogService
 {
     private readonly IReadOnlyList<OpenScadNodeDefinition> _definitions;
     private readonly IReadOnlyDictionary<string, OpenScadNodeDefinition> _byKind;
 
+    /// <summary>
+    /// Opens scad catalog service.
+    /// </summary>
     public OpenScadCatalogService()
     {
         _definitions = BuildDefinitions();
         _byKind = _definitions.ToDictionary(definition => definition.Kind, StringComparer.OrdinalIgnoreCase);
     }
 
+    /// <summary>
+    /// Gets definitions.
+    /// </summary>
     public IReadOnlyList<OpenScadNodeDefinition> GetDefinitions() => _definitions;
+    /// <summary>
+    /// Runs the find operation.
+    /// </summary>
     public OpenScadNodeDefinition? Find(string kind) => _byKind.GetValueOrDefault(kind ?? string.Empty);
 
     private IReadOnlyList<OpenScadNodeDefinition> BuildDefinitions()

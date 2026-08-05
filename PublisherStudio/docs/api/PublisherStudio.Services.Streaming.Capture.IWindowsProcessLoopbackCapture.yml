@@ -1,0 +1,135 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackCapture
+  commentId: T:PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackCapture
+  id: IWindowsProcessLoopbackCapture
+  parent: PublisherStudio.Services.Streaming.Capture
+  children:
+  - PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackCapture.Start
+  langs:
+  - csharp
+  - vb
+  name: IWindowsProcessLoopbackCapture
+  nameWithType: IWindowsProcessLoopbackCapture
+  fullName: PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackCapture
+  type: Interface
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Capture
+  summary: Defines the windows process loopback capture contract.
+  example: []
+  syntax:
+    content: 'public interface IWindowsProcessLoopbackCapture : IDisposable'
+    content.vb: Public Interface IWindowsProcessLoopbackCapture Inherits IDisposable
+  inheritedMembers:
+  - System.IDisposable.Dispose
+- uid: PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackCapture.Start
+  commentId: M:PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackCapture.Start
+  id: Start
+  parent: PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackCapture
+  langs:
+  - csharp
+  - vb
+  name: Start()
+  nameWithType: IWindowsProcessLoopbackCapture.Start()
+  fullName: PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackCapture.Start()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Capture
+  syntax:
+    content: void Start()
+    content.vb: Sub Start()
+  overload: PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackCapture.Start*
+references:
+- uid: PublisherStudio.Services.Streaming.Capture
+  commentId: N:PublisherStudio.Services.Streaming.Capture
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Capture
+  nameWithType: PublisherStudio.Services.Streaming.Capture
+  fullName: PublisherStudio.Services.Streaming.Capture
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Capture
+    name: Capture
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Capture.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Capture
+    name: Capture
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Capture.html
+- uid: System.IDisposable.Dispose
+  commentId: M:System.IDisposable.Dispose
+  parent: System.IDisposable
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.idisposable.dispose
+  name: Dispose()
+  nameWithType: IDisposable.Dispose()
+  fullName: System.IDisposable.Dispose()
+  spec.csharp:
+  - uid: System.IDisposable.Dispose
+    name: Dispose
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.idisposable.dispose
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.IDisposable.Dispose
+    name: Dispose
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.idisposable.dispose
+  - name: (
+  - name: )
+- uid: System.IDisposable
+  commentId: T:System.IDisposable
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.idisposable
+  name: IDisposable
+  nameWithType: IDisposable
+  fullName: System.IDisposable
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackCapture.Start*
+  commentId: Overload:PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackCapture.Start
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackCapture.html#PublisherStudio_Services_Streaming_Capture_IWindowsProcessLoopbackCapture_Start
+  name: Start
+  nameWithType: IWindowsProcessLoopbackCapture.Start
+  fullName: PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackCapture.Start

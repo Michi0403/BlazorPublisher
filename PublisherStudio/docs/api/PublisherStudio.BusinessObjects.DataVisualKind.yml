@@ -1,0 +1,324 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.DataVisualKind
+  commentId: T:PublisherStudio.BusinessObjects.DataVisualKind
+  id: DataVisualKind
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.DataVisualKind.BarGauge
+  - PublisherStudio.BusinessObjects.DataVisualKind.CartesianChart
+  - PublisherStudio.BusinessObjects.DataVisualKind.CircularGauge
+  - PublisherStudio.BusinessObjects.DataVisualKind.DataTable
+  - PublisherStudio.BusinessObjects.DataVisualKind.Funnel
+  - PublisherStudio.BusinessObjects.DataVisualKind.KpiProgress
+  - PublisherStudio.BusinessObjects.DataVisualKind.LinearGauge
+  - PublisherStudio.BusinessObjects.DataVisualKind.PieChart
+  - PublisherStudio.BusinessObjects.DataVisualKind.PolarChart
+  - PublisherStudio.BusinessObjects.DataVisualKind.Pyramid
+  - PublisherStudio.BusinessObjects.DataVisualKind.RangeSelector
+  - PublisherStudio.BusinessObjects.DataVisualKind.Sankey
+  - PublisherStudio.BusinessObjects.DataVisualKind.Sparkline
+  - PublisherStudio.BusinessObjects.DataVisualKind.TreeMap
+  langs:
+  - csharp
+  - vb
+  name: DataVisualKind
+  nameWithType: DataVisualKind
+  fullName: PublisherStudio.BusinessObjects.DataVisualKind
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported data visual kind values.
+  example: []
+  syntax:
+    content: public enum DataVisualKind
+    content.vb: Public Enum DataVisualKind
+- uid: PublisherStudio.BusinessObjects.DataVisualKind.CartesianChart
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualKind.CartesianChart
+  id: CartesianChart
+  parent: PublisherStudio.BusinessObjects.DataVisualKind
+  langs:
+  - csharp
+  - vb
+  name: CartesianChart
+  nameWithType: DataVisualKind.CartesianChart
+  fullName: PublisherStudio.BusinessObjects.DataVisualKind.CartesianChart
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: CartesianChart = 0
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualKind
+- uid: PublisherStudio.BusinessObjects.DataVisualKind.PieChart
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualKind.PieChart
+  id: PieChart
+  parent: PublisherStudio.BusinessObjects.DataVisualKind
+  langs:
+  - csharp
+  - vb
+  name: PieChart
+  nameWithType: DataVisualKind.PieChart
+  fullName: PublisherStudio.BusinessObjects.DataVisualKind.PieChart
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: PieChart = 1
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualKind
+- uid: PublisherStudio.BusinessObjects.DataVisualKind.PolarChart
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualKind.PolarChart
+  id: PolarChart
+  parent: PublisherStudio.BusinessObjects.DataVisualKind
+  langs:
+  - csharp
+  - vb
+  name: PolarChart
+  nameWithType: DataVisualKind.PolarChart
+  fullName: PublisherStudio.BusinessObjects.DataVisualKind.PolarChart
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: PolarChart = 2
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualKind
+- uid: PublisherStudio.BusinessObjects.DataVisualKind.Sparkline
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualKind.Sparkline
+  id: Sparkline
+  parent: PublisherStudio.BusinessObjects.DataVisualKind
+  langs:
+  - csharp
+  - vb
+  name: Sparkline
+  nameWithType: DataVisualKind.Sparkline
+  fullName: PublisherStudio.BusinessObjects.DataVisualKind.Sparkline
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Sparkline = 3
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualKind
+- uid: PublisherStudio.BusinessObjects.DataVisualKind.BarGauge
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualKind.BarGauge
+  id: BarGauge
+  parent: PublisherStudio.BusinessObjects.DataVisualKind
+  langs:
+  - csharp
+  - vb
+  name: BarGauge
+  nameWithType: DataVisualKind.BarGauge
+  fullName: PublisherStudio.BusinessObjects.DataVisualKind.BarGauge
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: BarGauge = 4
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualKind
+- uid: PublisherStudio.BusinessObjects.DataVisualKind.CircularGauge
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualKind.CircularGauge
+  id: CircularGauge
+  parent: PublisherStudio.BusinessObjects.DataVisualKind
+  langs:
+  - csharp
+  - vb
+  name: CircularGauge
+  nameWithType: DataVisualKind.CircularGauge
+  fullName: PublisherStudio.BusinessObjects.DataVisualKind.CircularGauge
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: CircularGauge = 5
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualKind
+- uid: PublisherStudio.BusinessObjects.DataVisualKind.LinearGauge
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualKind.LinearGauge
+  id: LinearGauge
+  parent: PublisherStudio.BusinessObjects.DataVisualKind
+  langs:
+  - csharp
+  - vb
+  name: LinearGauge
+  nameWithType: DataVisualKind.LinearGauge
+  fullName: PublisherStudio.BusinessObjects.DataVisualKind.LinearGauge
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: LinearGauge = 6
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualKind
+- uid: PublisherStudio.BusinessObjects.DataVisualKind.RangeSelector
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualKind.RangeSelector
+  id: RangeSelector
+  parent: PublisherStudio.BusinessObjects.DataVisualKind
+  langs:
+  - csharp
+  - vb
+  name: RangeSelector
+  nameWithType: DataVisualKind.RangeSelector
+  fullName: PublisherStudio.BusinessObjects.DataVisualKind.RangeSelector
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: RangeSelector = 7
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualKind
+- uid: PublisherStudio.BusinessObjects.DataVisualKind.Sankey
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualKind.Sankey
+  id: Sankey
+  parent: PublisherStudio.BusinessObjects.DataVisualKind
+  langs:
+  - csharp
+  - vb
+  name: Sankey
+  nameWithType: DataVisualKind.Sankey
+  fullName: PublisherStudio.BusinessObjects.DataVisualKind.Sankey
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Sankey = 8
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualKind
+- uid: PublisherStudio.BusinessObjects.DataVisualKind.Funnel
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualKind.Funnel
+  id: Funnel
+  parent: PublisherStudio.BusinessObjects.DataVisualKind
+  langs:
+  - csharp
+  - vb
+  name: Funnel
+  nameWithType: DataVisualKind.Funnel
+  fullName: PublisherStudio.BusinessObjects.DataVisualKind.Funnel
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Funnel = 9
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualKind
+- uid: PublisherStudio.BusinessObjects.DataVisualKind.Pyramid
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualKind.Pyramid
+  id: Pyramid
+  parent: PublisherStudio.BusinessObjects.DataVisualKind
+  langs:
+  - csharp
+  - vb
+  name: Pyramid
+  nameWithType: DataVisualKind.Pyramid
+  fullName: PublisherStudio.BusinessObjects.DataVisualKind.Pyramid
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Pyramid = 10
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualKind
+- uid: PublisherStudio.BusinessObjects.DataVisualKind.TreeMap
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualKind.TreeMap
+  id: TreeMap
+  parent: PublisherStudio.BusinessObjects.DataVisualKind
+  langs:
+  - csharp
+  - vb
+  name: TreeMap
+  nameWithType: DataVisualKind.TreeMap
+  fullName: PublisherStudio.BusinessObjects.DataVisualKind.TreeMap
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: TreeMap = 11
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualKind
+- uid: PublisherStudio.BusinessObjects.DataVisualKind.DataTable
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualKind.DataTable
+  id: DataTable
+  parent: PublisherStudio.BusinessObjects.DataVisualKind
+  langs:
+  - csharp
+  - vb
+  name: DataTable
+  nameWithType: DataVisualKind.DataTable
+  fullName: PublisherStudio.BusinessObjects.DataVisualKind.DataTable
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: DataTable = 12
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualKind
+- uid: PublisherStudio.BusinessObjects.DataVisualKind.KpiProgress
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualKind.KpiProgress
+  id: KpiProgress
+  parent: PublisherStudio.BusinessObjects.DataVisualKind
+  langs:
+  - csharp
+  - vb
+  name: KpiProgress
+  nameWithType: DataVisualKind.KpiProgress
+  fullName: PublisherStudio.BusinessObjects.DataVisualKind.KpiProgress
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: KpiProgress = 13
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualKind
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.DataVisualKind
+  commentId: T:PublisherStudio.BusinessObjects.DataVisualKind
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualKind.html
+  name: DataVisualKind
+  nameWithType: DataVisualKind
+  fullName: PublisherStudio.BusinessObjects.DataVisualKind

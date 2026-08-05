@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Security.Cryptography;
@@ -7,6 +7,9 @@ using TextEncoding = global::System.Text.Encoding;
 
 namespace PublisherStudio.Services.Streaming.Lan;
 
+/// <summary>
+/// Represents a rtsp LAN server.
+/// </summary>
 public sealed class RtspLanServer : IAsyncDisposable
 {
     private readonly TcpListener _listener;
@@ -18,6 +21,9 @@ public sealed class RtspLanServer : IAsyncDisposable
     private Task? _relayTask;
     private readonly string _accessToken;
 
+    /// <summary>
+    /// Runs the rtsp LAN server operation.
+    /// </summary>
     public RtspLanServer(IPAddress bindAddress, int port, string? accessToken = null)
     {
         _accessToken = accessToken?.Trim() ?? string.Empty;
@@ -26,10 +32,22 @@ public sealed class RtspLanServer : IAsyncDisposable
         RtpInputPort = ((IPEndPoint)_rtpInput.Client.LocalEndPoint!).Port;
     }
 
+    /// <summary>
+    /// Gets rtp input port.
+    /// </summary>
     public int RtpInputPort { get; }
+    /// <summary>
+    /// Gets or sets status.
+    /// </summary>
     public string Status { get; private set; } = "stopped";
+    /// <summary>
+    /// Gets or sets last error.
+    /// </summary>
     public string LastError { get; private set; } = string.Empty;
 
+    /// <summary>
+    /// Runs the start operation.
+    /// </summary>
     public void Start()
     {
         if (_acceptTask is not null) return;
@@ -228,6 +246,9 @@ public sealed class RtspLanServer : IAsyncDisposable
         return TextEncoding.ASCII.GetBytes(builder.ToString());
     }
 
+    /// <summary>
+    /// Runs the dispose async operation.
+    /// </summary>
     public async ValueTask DisposeAsync()
     {
         _cancellation.Cancel();
@@ -258,12 +279,30 @@ public sealed class RtspLanServer : IAsyncDisposable
         private Task? _sender;
         private int _disposed;
 
+        /// <summary>
+        /// Runs the rtsp client operation.
+        /// </summary>
         public RtspClient(TcpClient client) { _client = client; Stream = client.GetStream(); }
+        /// <summary>
+        /// Gets stream.
+        /// </summary>
         public NetworkStream Stream { get; }
+        /// <summary>
+        /// Gets or sets playing.
+        /// </summary>
         public bool Playing { get; set; }
+        /// <summary>
+        /// Gets or sets rtp channel.
+        /// </summary>
         public int RtpChannel { get; set; }
+        /// <summary>
+        /// Gets disconnected.
+        /// </summary>
         public CancellationToken Disconnected => _disconnected.Token;
 
+        /// <summary>
+        /// Starts sender.
+        /// </summary>
         public void StartSender(CancellationToken cancellationToken) => _sender = Task.Run(async () =>
         {
             try
@@ -279,11 +318,17 @@ public sealed class RtspLanServer : IAsyncDisposable
             catch { _disconnected.Cancel(); }
         }, cancellationToken);
 
+        /// <summary>
+        /// Runs the enqueue operation.
+        /// </summary>
         public void Enqueue(byte[] packet)
         {
             if (Volatile.Read(ref _disposed) == 0) _rtp.Writer.TryWrite(packet);
         }
 
+        /// <summary>
+        /// Runs the send control async operation.
+        /// </summary>
         public async Task SendControlAsync(byte[] payload, CancellationToken cancellationToken)
         {
             await _controlSend.WaitAsync(cancellationToken);
@@ -291,6 +336,9 @@ public sealed class RtspLanServer : IAsyncDisposable
             finally { _controlSend.Release(); }
         }
 
+        /// <summary>
+        /// Runs the dispose async operation.
+        /// </summary>
         public async ValueTask DisposeAsync()
         {
             if (Interlocked.Exchange(ref _disposed, 1) != 0) return;

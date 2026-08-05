@@ -1,12 +1,18 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Automation;
 
+/// <summary>
+/// Provides user input automation service operations.
+/// </summary>
 public sealed class UserInputAutomationService(ILogger<UserInputAutomationService> logger) : IUserInputAutomationService
 {
     private readonly ConcurrentDictionary<Guid, BrowserAutomationCommand> _commands = new();
 
+    /// <summary>
+    /// Runs the enqueue operation.
+    /// </summary>
     public BrowserAutomationCommand Enqueue(BrowserAutomationCommand command)
     {
         ArgumentNullException.ThrowIfNull(command);
@@ -19,9 +25,15 @@ public sealed class UserInputAutomationService(ILogger<UserInputAutomationServic
         return command;
     }
 
+    /// <summary>
+    /// Gets all.
+    /// </summary>
     public IReadOnlyList<BrowserAutomationCommand> GetAll() =>
         _commands.Values.OrderByDescending(command => command.CreatedUtc).Take(500).ToList().AsReadOnly();
 
+    /// <summary>
+    /// Runs the claim pending operation.
+    /// </summary>
     public IReadOnlyList<BrowserAutomationCommand> ClaimPending(int maximum = 25)
     {
         var claimed = new List<BrowserAutomationCommand>();
@@ -37,6 +49,9 @@ public sealed class UserInputAutomationService(ILogger<UserInputAutomationServic
         return claimed.AsReadOnly();
     }
 
+    /// <summary>
+    /// Runs the complete operation.
+    /// </summary>
     public bool Complete(Guid id, AutomationCompletion completion)
     {
         if (!_commands.TryGetValue(id, out var command)) return false;
@@ -49,6 +64,9 @@ public sealed class UserInputAutomationService(ILogger<UserInputAutomationServic
         return true;
     }
 
+    /// <summary>
+    /// Determines whether cel.
+    /// </summary>
     public bool Cancel(Guid id)
     {
         if (!_commands.TryGetValue(id, out var command)) return false;
@@ -70,10 +88,16 @@ public sealed class UserInputAutomationService(ILogger<UserInputAutomationServic
     }
 }
 
+/// <summary>
+/// Provides screenshot capture service operations.
+/// </summary>
 public sealed class ScreenshotCaptureService(ILogger<ScreenshotCaptureService> logger) : IScreenshotCaptureService
 {
     private readonly ConcurrentDictionary<Guid, BrowserScreenshotRequest> _requests = new();
 
+    /// <summary>
+    /// Runs the enqueue operation.
+    /// </summary>
     public BrowserScreenshotRequest Enqueue(BrowserScreenshotRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -86,9 +110,15 @@ public sealed class ScreenshotCaptureService(ILogger<ScreenshotCaptureService> l
         return request;
     }
 
+    /// <summary>
+    /// Gets all.
+    /// </summary>
     public IReadOnlyList<BrowserScreenshotRequest> GetAll() =>
         _requests.Values.OrderByDescending(request => request.CreatedUtc).Take(100).ToList().AsReadOnly();
 
+    /// <summary>
+    /// Runs the claim pending operation.
+    /// </summary>
     public IReadOnlyList<BrowserScreenshotRequest> ClaimPending(int maximum = 5)
     {
         var claimed = new List<BrowserScreenshotRequest>();
@@ -104,6 +134,9 @@ public sealed class ScreenshotCaptureService(ILogger<ScreenshotCaptureService> l
         return claimed.AsReadOnly();
     }
 
+    /// <summary>
+    /// Runs the complete operation.
+    /// </summary>
     public bool Complete(Guid id, ScreenshotCompletion completion)
     {
         if (!_requests.TryGetValue(id, out var request)) return false;
@@ -118,8 +151,14 @@ public sealed class ScreenshotCaptureService(ILogger<ScreenshotCaptureService> l
         return true;
     }
 
+    /// <summary>
+    /// Attempts to get.
+    /// </summary>
     public bool TryGet(Guid id, out BrowserScreenshotRequest request) => _requests.TryGetValue(id, out request!);
 
+    /// <summary>
+    /// Determines whether cel.
+    /// </summary>
     public bool Cancel(Guid id)
     {
         if (!_requests.TryGetValue(id, out var request)) return false;

@@ -1,0 +1,424 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.GuideLine
+  commentId: T:PublisherStudio.BusinessObjects.GuideLine
+  id: GuideLine
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.GuideLine.#ctor
+  - PublisherStudio.BusinessObjects.GuideLine.Id
+  - PublisherStudio.BusinessObjects.GuideLine.Orientation
+  - PublisherStudio.BusinessObjects.GuideLine.PositionMm
+  langs:
+  - csharp
+  - vb
+  name: GuideLine
+  nameWithType: GuideLine
+  fullName: PublisherStudio.BusinessObjects.GuideLine
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents a guide line.
+  example: []
+  syntax:
+    content: public sealed class GuideLine
+    content.vb: Public NotInheritable Class GuideLine
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.BusinessObjects.GuideLine.#ctor
+  commentId: M:PublisherStudio.BusinessObjects.GuideLine.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.BusinessObjects.GuideLine
+  langs:
+  - csharp
+  - vb
+  name: GuideLine()
+  nameWithType: GuideLine.GuideLine()
+  fullName: PublisherStudio.BusinessObjects.GuideLine.GuideLine()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public GuideLine()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.BusinessObjects.GuideLine.#ctor*
+  nameWithType.vb: GuideLine.New()
+  fullName.vb: PublisherStudio.BusinessObjects.GuideLine.New()
+  name.vb: New()
+- uid: PublisherStudio.BusinessObjects.GuideLine.Id
+  commentId: P:PublisherStudio.BusinessObjects.GuideLine.Id
+  id: Id
+  parent: PublisherStudio.BusinessObjects.GuideLine
+  langs:
+  - csharp
+  - vb
+  name: Id
+  nameWithType: GuideLine.Id
+  fullName: PublisherStudio.BusinessObjects.GuideLine.Id
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets the stable identifier.
+  example: []
+  syntax:
+    content: public Guid Id { get; set; }
+    parameters: []
+    return:
+      type: System.Guid
+    content.vb: Public Property Id As Guid
+  overload: PublisherStudio.BusinessObjects.GuideLine.Id*
+- uid: PublisherStudio.BusinessObjects.GuideLine.Orientation
+  commentId: P:PublisherStudio.BusinessObjects.GuideLine.Orientation
+  id: Orientation
+  parent: PublisherStudio.BusinessObjects.GuideLine
+  langs:
+  - csharp
+  - vb
+  name: Orientation
+  nameWithType: GuideLine.Orientation
+  fullName: PublisherStudio.BusinessObjects.GuideLine.Orientation
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets orientation.
+  example: []
+  syntax:
+    content: public GuideOrientation Orientation { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.GuideOrientation
+    content.vb: Public Property Orientation As GuideOrientation
+  overload: PublisherStudio.BusinessObjects.GuideLine.Orientation*
+- uid: PublisherStudio.BusinessObjects.GuideLine.PositionMm
+  commentId: P:PublisherStudio.BusinessObjects.GuideLine.PositionMm
+  id: PositionMm
+  parent: PublisherStudio.BusinessObjects.GuideLine
+  langs:
+  - csharp
+  - vb
+  name: PositionMm
+  nameWithType: GuideLine.PositionMm
+  fullName: PublisherStudio.BusinessObjects.GuideLine.PositionMm
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets position millimetres.
+  example: []
+  syntax:
+    content: public double PositionMm { get; set; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property PositionMm As Double
+  overload: PublisherStudio.BusinessObjects.GuideLine.PositionMm*
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.BusinessObjects.GuideLine.#ctor*
+  commentId: Overload:PublisherStudio.BusinessObjects.GuideLine.#ctor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.GuideLine.html#PublisherStudio_BusinessObjects_GuideLine__ctor
+  name: GuideLine
+  nameWithType: GuideLine.GuideLine
+  fullName: PublisherStudio.BusinessObjects.GuideLine.GuideLine
+  nameWithType.vb: GuideLine.New
+  fullName.vb: PublisherStudio.BusinessObjects.GuideLine.New
+  name.vb: New
+- uid: PublisherStudio.BusinessObjects.GuideLine.Id*
+  commentId: Overload:PublisherStudio.BusinessObjects.GuideLine.Id
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.GuideLine.html#PublisherStudio_BusinessObjects_GuideLine_Id
+  name: Id
+  nameWithType: GuideLine.Id
+  fullName: PublisherStudio.BusinessObjects.GuideLine.Id
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: PublisherStudio.BusinessObjects.GuideLine.Orientation*
+  commentId: Overload:PublisherStudio.BusinessObjects.GuideLine.Orientation
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.GuideLine.html#PublisherStudio_BusinessObjects_GuideLine_Orientation
+  name: Orientation
+  nameWithType: GuideLine.Orientation
+  fullName: PublisherStudio.BusinessObjects.GuideLine.Orientation
+- uid: PublisherStudio.BusinessObjects.GuideOrientation
+  commentId: T:PublisherStudio.BusinessObjects.GuideOrientation
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.GuideOrientation.html
+  name: GuideOrientation
+  nameWithType: GuideOrientation
+  fullName: PublisherStudio.BusinessObjects.GuideOrientation
+- uid: PublisherStudio.BusinessObjects.GuideLine.PositionMm*
+  commentId: Overload:PublisherStudio.BusinessObjects.GuideLine.PositionMm
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.GuideLine.html#PublisherStudio_BusinessObjects_GuideLine_PositionMm
+  name: PositionMm
+  nameWithType: GuideLine.PositionMm
+  fullName: PublisherStudio.BusinessObjects.GuideLine.PositionMm
+- uid: System.Double
+  commentId: T:System.Double
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.double
+  name: double
+  nameWithType: double
+  fullName: double
+  nameWithType.vb: Double
+  fullName.vb: Double
+  name.vb: Double

@@ -1,0 +1,153 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationWebResponseFormat
+  commentId: T:PublisherStudio.BusinessObjects.PublicationWebResponseFormat
+  id: PublicationWebResponseFormat
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationWebResponseFormat.Auto
+  - PublisherStudio.BusinessObjects.PublicationWebResponseFormat.DelimitedText
+  - PublisherStudio.BusinessObjects.PublicationWebResponseFormat.Json
+  - PublisherStudio.BusinessObjects.PublicationWebResponseFormat.Text
+  - PublisherStudio.BusinessObjects.PublicationWebResponseFormat.Xml
+  langs:
+  - csharp
+  - vb
+  name: PublicationWebResponseFormat
+  nameWithType: PublicationWebResponseFormat
+  fullName: PublisherStudio.BusinessObjects.PublicationWebResponseFormat
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication web response format values.
+  example: []
+  syntax:
+    content: public enum PublicationWebResponseFormat
+    content.vb: Public Enum PublicationWebResponseFormat
+- uid: PublisherStudio.BusinessObjects.PublicationWebResponseFormat.Auto
+  commentId: F:PublisherStudio.BusinessObjects.PublicationWebResponseFormat.Auto
+  id: Auto
+  parent: PublisherStudio.BusinessObjects.PublicationWebResponseFormat
+  langs:
+  - csharp
+  - vb
+  name: Auto
+  nameWithType: PublicationWebResponseFormat.Auto
+  fullName: PublisherStudio.BusinessObjects.PublicationWebResponseFormat.Auto
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Auto = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationWebResponseFormat
+- uid: PublisherStudio.BusinessObjects.PublicationWebResponseFormat.Json
+  commentId: F:PublisherStudio.BusinessObjects.PublicationWebResponseFormat.Json
+  id: Json
+  parent: PublisherStudio.BusinessObjects.PublicationWebResponseFormat
+  langs:
+  - csharp
+  - vb
+  name: Json
+  nameWithType: PublicationWebResponseFormat.Json
+  fullName: PublisherStudio.BusinessObjects.PublicationWebResponseFormat.Json
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Json = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationWebResponseFormat
+- uid: PublisherStudio.BusinessObjects.PublicationWebResponseFormat.DelimitedText
+  commentId: F:PublisherStudio.BusinessObjects.PublicationWebResponseFormat.DelimitedText
+  id: DelimitedText
+  parent: PublisherStudio.BusinessObjects.PublicationWebResponseFormat
+  langs:
+  - csharp
+  - vb
+  name: DelimitedText
+  nameWithType: PublicationWebResponseFormat.DelimitedText
+  fullName: PublisherStudio.BusinessObjects.PublicationWebResponseFormat.DelimitedText
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: DelimitedText = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationWebResponseFormat
+- uid: PublisherStudio.BusinessObjects.PublicationWebResponseFormat.Xml
+  commentId: F:PublisherStudio.BusinessObjects.PublicationWebResponseFormat.Xml
+  id: Xml
+  parent: PublisherStudio.BusinessObjects.PublicationWebResponseFormat
+  langs:
+  - csharp
+  - vb
+  name: Xml
+  nameWithType: PublicationWebResponseFormat.Xml
+  fullName: PublisherStudio.BusinessObjects.PublicationWebResponseFormat.Xml
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Xml = 3
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationWebResponseFormat
+- uid: PublisherStudio.BusinessObjects.PublicationWebResponseFormat.Text
+  commentId: F:PublisherStudio.BusinessObjects.PublicationWebResponseFormat.Text
+  id: Text
+  parent: PublisherStudio.BusinessObjects.PublicationWebResponseFormat
+  langs:
+  - csharp
+  - vb
+  name: Text
+  nameWithType: PublicationWebResponseFormat.Text
+  fullName: PublisherStudio.BusinessObjects.PublicationWebResponseFormat.Text
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Text = 4
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationWebResponseFormat
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationWebResponseFormat
+  commentId: T:PublisherStudio.BusinessObjects.PublicationWebResponseFormat
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationWebResponseFormat.html
+  name: PublicationWebResponseFormat
+  nameWithType: PublicationWebResponseFormat
+  fullName: PublisherStudio.BusinessObjects.PublicationWebResponseFormat

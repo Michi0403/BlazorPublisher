@@ -1,0 +1,846 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore
+  commentId: T:PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore
+  id: StreamingProfileStore
+  parent: PublisherStudio.Services.Streaming.Profiles
+  children:
+  - PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.#ctor(Microsoft.AspNetCore.DataProtection.IDataProtectionProvider)
+  - PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.DeleteProviderAsync(System.Guid,System.Threading.CancellationToken)
+  - PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.LoadAsync(System.Threading.CancellationToken)
+  - PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.ResolveChatSecretAsync(System.Guid,System.Threading.CancellationToken)
+  - PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.ResolveSecretAsync(System.Guid,System.Threading.CancellationToken)
+  - PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.SaveMachineOptionsAsync(PublisherStudio.BusinessObjects.StreamingMachineSettings,System.Threading.CancellationToken)
+  - PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.SaveProviderAsync(PublisherStudio.BusinessObjects.StreamingProviderProfile,System.Threading.CancellationToken)
+  langs:
+  - csharp
+  - vb
+  name: StreamingProfileStore
+  nameWithType: StreamingProfileStore
+  fullName: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Profiles
+  summary: Provides streaming profile store operations.
+  example: []
+  syntax:
+    content: public sealed class StreamingProfileStore
+    content.vb: Public NotInheritable Class StreamingProfileStore
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.#ctor(Microsoft.AspNetCore.DataProtection.IDataProtectionProvider)
+  commentId: M:PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.#ctor(Microsoft.AspNetCore.DataProtection.IDataProtectionProvider)
+  id: '#ctor(Microsoft.AspNetCore.DataProtection.IDataProtectionProvider)'
+  parent: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore
+  langs:
+  - csharp
+  - vb
+  name: StreamingProfileStore(IDataProtectionProvider)
+  nameWithType: StreamingProfileStore.StreamingProfileStore(IDataProtectionProvider)
+  fullName: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.StreamingProfileStore(Microsoft.AspNetCore.DataProtection.IDataProtectionProvider)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Profiles
+  summary: Runs the streaming profile store operation.
+  example: []
+  syntax:
+    content: public StreamingProfileStore(IDataProtectionProvider protectionProvider)
+    parameters:
+    - id: protectionProvider
+      type: Microsoft.AspNetCore.DataProtection.IDataProtectionProvider
+    content.vb: Public Sub New(protectionProvider As IDataProtectionProvider)
+  overload: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.#ctor*
+  nameWithType.vb: StreamingProfileStore.New(IDataProtectionProvider)
+  fullName.vb: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.New(Microsoft.AspNetCore.DataProtection.IDataProtectionProvider)
+  name.vb: New(IDataProtectionProvider)
+- uid: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.LoadAsync(System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.LoadAsync(System.Threading.CancellationToken)
+  id: LoadAsync(System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore
+  langs:
+  - csharp
+  - vb
+  name: LoadAsync(CancellationToken)
+  nameWithType: StreamingProfileStore.LoadAsync(CancellationToken)
+  fullName: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.LoadAsync(System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Profiles
+  summary: Loads async.
+  example: []
+  syntax:
+    content: public Task<StreamingMachineSettings> LoadAsync(CancellationToken cancellationToken = default)
+    parameters:
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.StreamingMachineSettings}
+    content.vb: Public Function LoadAsync(cancellationToken As CancellationToken = Nothing) As Task(Of StreamingMachineSettings)
+  overload: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.LoadAsync*
+- uid: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.SaveProviderAsync(PublisherStudio.BusinessObjects.StreamingProviderProfile,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.SaveProviderAsync(PublisherStudio.BusinessObjects.StreamingProviderProfile,System.Threading.CancellationToken)
+  id: SaveProviderAsync(PublisherStudio.BusinessObjects.StreamingProviderProfile,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore
+  langs:
+  - csharp
+  - vb
+  name: SaveProviderAsync(StreamingProviderProfile, CancellationToken)
+  nameWithType: StreamingProfileStore.SaveProviderAsync(StreamingProviderProfile, CancellationToken)
+  fullName: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.SaveProviderAsync(PublisherStudio.BusinessObjects.StreamingProviderProfile, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Profiles
+  summary: Saves provider async.
+  example: []
+  syntax:
+    content: public Task<StreamingProviderProfile> SaveProviderAsync(StreamingProviderProfile profile, CancellationToken cancellationToken = default)
+    parameters:
+    - id: profile
+      type: PublisherStudio.BusinessObjects.StreamingProviderProfile
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.StreamingProviderProfile}
+    content.vb: Public Function SaveProviderAsync(profile As StreamingProviderProfile, cancellationToken As CancellationToken = Nothing) As Task(Of StreamingProviderProfile)
+  overload: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.SaveProviderAsync*
+- uid: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.DeleteProviderAsync(System.Guid,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.DeleteProviderAsync(System.Guid,System.Threading.CancellationToken)
+  id: DeleteProviderAsync(System.Guid,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore
+  langs:
+  - csharp
+  - vb
+  name: DeleteProviderAsync(Guid, CancellationToken)
+  nameWithType: StreamingProfileStore.DeleteProviderAsync(Guid, CancellationToken)
+  fullName: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.DeleteProviderAsync(System.Guid, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Profiles
+  summary: Deletes provider async.
+  example: []
+  syntax:
+    content: public Task DeleteProviderAsync(Guid id, CancellationToken cancellationToken = default)
+    parameters:
+    - id: id
+      type: System.Guid
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task
+    content.vb: Public Function DeleteProviderAsync(id As Guid, cancellationToken As CancellationToken = Nothing) As Task
+  overload: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.DeleteProviderAsync*
+- uid: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.SaveMachineOptionsAsync(PublisherStudio.BusinessObjects.StreamingMachineSettings,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.SaveMachineOptionsAsync(PublisherStudio.BusinessObjects.StreamingMachineSettings,System.Threading.CancellationToken)
+  id: SaveMachineOptionsAsync(PublisherStudio.BusinessObjects.StreamingMachineSettings,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore
+  langs:
+  - csharp
+  - vb
+  name: SaveMachineOptionsAsync(StreamingMachineSettings, CancellationToken)
+  nameWithType: StreamingProfileStore.SaveMachineOptionsAsync(StreamingMachineSettings, CancellationToken)
+  fullName: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.SaveMachineOptionsAsync(PublisherStudio.BusinessObjects.StreamingMachineSettings, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Profiles
+  summary: Saves machine options async.
+  example: []
+  syntax:
+    content: public Task SaveMachineOptionsAsync(StreamingMachineSettings settings, CancellationToken cancellationToken = default)
+    parameters:
+    - id: settings
+      type: PublisherStudio.BusinessObjects.StreamingMachineSettings
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task
+    content.vb: Public Function SaveMachineOptionsAsync(settings As StreamingMachineSettings, cancellationToken As CancellationToken = Nothing) As Task
+  overload: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.SaveMachineOptionsAsync*
+- uid: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.ResolveSecretAsync(System.Guid,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.ResolveSecretAsync(System.Guid,System.Threading.CancellationToken)
+  id: ResolveSecretAsync(System.Guid,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore
+  langs:
+  - csharp
+  - vb
+  name: ResolveSecretAsync(Guid, CancellationToken)
+  nameWithType: StreamingProfileStore.ResolveSecretAsync(Guid, CancellationToken)
+  fullName: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.ResolveSecretAsync(System.Guid, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Profiles
+  summary: Resolves secret async.
+  example: []
+  syntax:
+    content: public Task<string?> ResolveSecretAsync(Guid profileId, CancellationToken cancellationToken = default)
+    parameters:
+    - id: profileId
+      type: System.Guid
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{System.String}
+    content.vb: Public Function ResolveSecretAsync(profileId As Guid, cancellationToken As CancellationToken = Nothing) As Task(Of String)
+  overload: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.ResolveSecretAsync*
+- uid: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.ResolveChatSecretAsync(System.Guid,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.ResolveChatSecretAsync(System.Guid,System.Threading.CancellationToken)
+  id: ResolveChatSecretAsync(System.Guid,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore
+  langs:
+  - csharp
+  - vb
+  name: ResolveChatSecretAsync(Guid, CancellationToken)
+  nameWithType: StreamingProfileStore.ResolveChatSecretAsync(Guid, CancellationToken)
+  fullName: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.ResolveChatSecretAsync(System.Guid, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Profiles
+  summary: Resolves chat secret async.
+  example: []
+  syntax:
+    content: public Task<string?> ResolveChatSecretAsync(Guid profileId, CancellationToken cancellationToken = default)
+    parameters:
+    - id: profileId
+      type: System.Guid
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{System.String}
+    content.vb: Public Function ResolveChatSecretAsync(profileId As Guid, cancellationToken As CancellationToken = Nothing) As Task(Of String)
+  overload: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.ResolveChatSecretAsync*
+references:
+- uid: PublisherStudio.Services.Streaming.Profiles
+  commentId: N:PublisherStudio.Services.Streaming.Profiles
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Profiles
+  nameWithType: PublisherStudio.Services.Streaming.Profiles
+  fullName: PublisherStudio.Services.Streaming.Profiles
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Profiles
+    name: Profiles
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Profiles.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Profiles
+    name: Profiles
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Profiles.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.#ctor*
+  commentId: Overload:PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.html#PublisherStudio_Services_Streaming_Profiles_StreamingProfileStore__ctor_Microsoft_AspNetCore_DataProtection_IDataProtectionProvider_
+  name: StreamingProfileStore
+  nameWithType: StreamingProfileStore.StreamingProfileStore
+  fullName: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.StreamingProfileStore
+  nameWithType.vb: StreamingProfileStore.New
+  fullName.vb: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.New
+  name.vb: New
+- uid: Microsoft.AspNetCore.DataProtection.IDataProtectionProvider
+  commentId: T:Microsoft.AspNetCore.DataProtection.IDataProtectionProvider
+  parent: Microsoft.AspNetCore.DataProtection
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.dataprotection.idataprotectionprovider
+  name: IDataProtectionProvider
+  nameWithType: IDataProtectionProvider
+  fullName: Microsoft.AspNetCore.DataProtection.IDataProtectionProvider
+- uid: Microsoft.AspNetCore.DataProtection
+  commentId: N:Microsoft.AspNetCore.DataProtection
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.AspNetCore.DataProtection
+  nameWithType: Microsoft.AspNetCore.DataProtection
+  fullName: Microsoft.AspNetCore.DataProtection
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.AspNetCore
+    name: AspNetCore
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore
+  - name: .
+  - uid: Microsoft.AspNetCore.DataProtection
+    name: DataProtection
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.dataprotection
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.AspNetCore
+    name: AspNetCore
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore
+  - name: .
+  - uid: Microsoft.AspNetCore.DataProtection
+    name: DataProtection
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.dataprotection
+- uid: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.LoadAsync*
+  commentId: Overload:PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.LoadAsync
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.html#PublisherStudio_Services_Streaming_Profiles_StreamingProfileStore_LoadAsync_System_Threading_CancellationToken_
+  name: LoadAsync
+  nameWithType: StreamingProfileStore.LoadAsync
+  fullName: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.LoadAsync
+- uid: System.Threading.CancellationToken
+  commentId: T:System.Threading.CancellationToken
+  parent: System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  name: CancellationToken
+  nameWithType: CancellationToken
+  fullName: System.Threading.CancellationToken
+- uid: System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.StreamingMachineSettings}
+  commentId: T:System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.StreamingMachineSettings}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<StreamingMachineSettings>
+  nameWithType: Task<StreamingMachineSettings>
+  fullName: System.Threading.Tasks.Task<PublisherStudio.BusinessObjects.StreamingMachineSettings>
+  nameWithType.vb: Task(Of StreamingMachineSettings)
+  fullName.vb: System.Threading.Tasks.Task(Of PublisherStudio.BusinessObjects.StreamingMachineSettings)
+  name.vb: Task(Of StreamingMachineSettings)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.StreamingMachineSettings
+    name: StreamingMachineSettings
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.StreamingMachineSettings.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.StreamingMachineSettings
+    name: StreamingMachineSettings
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.StreamingMachineSettings.html
+  - name: )
+- uid: System.Threading
+  commentId: N:System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading
+  nameWithType: System.Threading
+  fullName: System.Threading
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+- uid: System.Threading.Tasks.Task`1
+  commentId: T:System.Threading.Tasks.Task`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<TResult>
+  nameWithType: Task<TResult>
+  fullName: System.Threading.Tasks.Task<TResult>
+  nameWithType.vb: Task(Of TResult)
+  fullName.vb: System.Threading.Tasks.Task(Of TResult)
+  name.vb: Task(Of TResult)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - name: TResult
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TResult
+  - name: )
+- uid: System.Threading.Tasks
+  commentId: N:System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading.Tasks
+  nameWithType: System.Threading.Tasks
+  fullName: System.Threading.Tasks
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+- uid: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.SaveProviderAsync*
+  commentId: Overload:PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.SaveProviderAsync
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.html#PublisherStudio_Services_Streaming_Profiles_StreamingProfileStore_SaveProviderAsync_PublisherStudio_BusinessObjects_StreamingProviderProfile_System_Threading_CancellationToken_
+  name: SaveProviderAsync
+  nameWithType: StreamingProfileStore.SaveProviderAsync
+  fullName: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.SaveProviderAsync
+- uid: PublisherStudio.BusinessObjects.StreamingProviderProfile
+  commentId: T:PublisherStudio.BusinessObjects.StreamingProviderProfile
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.StreamingProviderProfile.html
+  name: StreamingProviderProfile
+  nameWithType: StreamingProviderProfile
+  fullName: PublisherStudio.BusinessObjects.StreamingProviderProfile
+- uid: System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.StreamingProviderProfile}
+  commentId: T:System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.StreamingProviderProfile}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<StreamingProviderProfile>
+  nameWithType: Task<StreamingProviderProfile>
+  fullName: System.Threading.Tasks.Task<PublisherStudio.BusinessObjects.StreamingProviderProfile>
+  nameWithType.vb: Task(Of StreamingProviderProfile)
+  fullName.vb: System.Threading.Tasks.Task(Of PublisherStudio.BusinessObjects.StreamingProviderProfile)
+  name.vb: Task(Of StreamingProviderProfile)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.StreamingProviderProfile
+    name: StreamingProviderProfile
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.StreamingProviderProfile.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.StreamingProviderProfile
+    name: StreamingProviderProfile
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.StreamingProviderProfile.html
+  - name: )
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.DeleteProviderAsync*
+  commentId: Overload:PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.DeleteProviderAsync
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.html#PublisherStudio_Services_Streaming_Profiles_StreamingProfileStore_DeleteProviderAsync_System_Guid_System_Threading_CancellationToken_
+  name: DeleteProviderAsync
+  nameWithType: StreamingProfileStore.DeleteProviderAsync
+  fullName: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.DeleteProviderAsync
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: System.Threading.Tasks.Task
+  commentId: T:System.Threading.Tasks.Task
+  parent: System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task
+  name: Task
+  nameWithType: Task
+  fullName: System.Threading.Tasks.Task
+- uid: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.SaveMachineOptionsAsync*
+  commentId: Overload:PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.SaveMachineOptionsAsync
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.html#PublisherStudio_Services_Streaming_Profiles_StreamingProfileStore_SaveMachineOptionsAsync_PublisherStudio_BusinessObjects_StreamingMachineSettings_System_Threading_CancellationToken_
+  name: SaveMachineOptionsAsync
+  nameWithType: StreamingProfileStore.SaveMachineOptionsAsync
+  fullName: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.SaveMachineOptionsAsync
+- uid: PublisherStudio.BusinessObjects.StreamingMachineSettings
+  commentId: T:PublisherStudio.BusinessObjects.StreamingMachineSettings
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.StreamingMachineSettings.html
+  name: StreamingMachineSettings
+  nameWithType: StreamingMachineSettings
+  fullName: PublisherStudio.BusinessObjects.StreamingMachineSettings
+- uid: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.ResolveSecretAsync*
+  commentId: Overload:PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.ResolveSecretAsync
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.html#PublisherStudio_Services_Streaming_Profiles_StreamingProfileStore_ResolveSecretAsync_System_Guid_System_Threading_CancellationToken_
+  name: ResolveSecretAsync
+  nameWithType: StreamingProfileStore.ResolveSecretAsync
+  fullName: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.ResolveSecretAsync
+- uid: System.Threading.Tasks.Task{System.String}
+  commentId: T:System.Threading.Tasks.Task{System.String}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<string>
+  nameWithType: Task<string>
+  fullName: System.Threading.Tasks.Task<string>
+  nameWithType.vb: Task(Of String)
+  fullName.vb: System.Threading.Tasks.Task(Of String)
+  name.vb: Task(Of String)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.ResolveChatSecretAsync*
+  commentId: Overload:PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.ResolveChatSecretAsync
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.html#PublisherStudio_Services_Streaming_Profiles_StreamingProfileStore_ResolveChatSecretAsync_System_Guid_System_Threading_CancellationToken_
+  name: ResolveChatSecretAsync
+  nameWithType: StreamingProfileStore.ResolveChatSecretAsync
+  fullName: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.ResolveChatSecretAsync

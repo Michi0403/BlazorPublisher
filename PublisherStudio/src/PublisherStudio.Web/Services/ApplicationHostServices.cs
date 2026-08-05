@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -6,17 +6,26 @@ using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Services;
 
+/// <summary>
+/// Defines the application port resolver contract.
+/// </summary>
 public interface IApplicationPortResolver
 {
     int Resolve(IReadOnlyList<string> args);
 }
 
+/// <summary>
+/// Provides application port resolver operations.
+/// </summary>
 public sealed class ApplicationPortResolver(
     ISystemVariableStoreService systemVariables,
     ILogger<ApplicationPortResolver>? logger = null) : IApplicationPortResolver
 {
     private readonly ILogger<ApplicationPortResolver> logger = logger ?? NullLogger<ApplicationPortResolver>.Instance;
 
+    /// <summary>
+    /// Runs the resolve operation.
+    /// </summary>
     public int Resolve(IReadOnlyList<string> args)
     {
         try
@@ -50,6 +59,9 @@ public sealed class ApplicationPortResolver(
 }
 
 
+/// <summary>
+/// Defines the runtime endpoint state contract.
+/// </summary>
 public interface IRuntimeEndpointState
 {
     string BaseUrl { get; }
@@ -57,6 +69,9 @@ public interface IRuntimeEndpointState
     void Clear();
 }
 
+/// <summary>
+/// Represents a runtime endpoint state.
+/// </summary>
 public sealed class RuntimeEndpointState(ILogger<RuntimeEndpointState> logger) : IRuntimeEndpointState
 {
     private readonly System.Threading.Lock sync = new();
@@ -82,6 +97,9 @@ public sealed class RuntimeEndpointState(ILogger<RuntimeEndpointState> logger) :
         }
     }
 
+    /// <summary>
+    /// Sets base URL.
+    /// </summary>
     public void SetBaseUrl(string baseUrl)
     {
         try
@@ -97,6 +115,9 @@ public sealed class RuntimeEndpointState(ILogger<RuntimeEndpointState> logger) :
         }
     }
 
+    /// <summary>
+    /// Runs the clear operation.
+    /// </summary>
     public void Clear()
     {
         try
@@ -112,12 +133,18 @@ public sealed class RuntimeEndpointState(ILogger<RuntimeEndpointState> logger) :
     }
 }
 
+/// <summary>
+/// Defines the runtime endpoint writer contract.
+/// </summary>
 public interface IRuntimeEndpointWriter
 {
     void Write(WebApplication app);
     void DeleteOwnedEndpoint();
 }
 
+/// <summary>
+/// Provides runtime endpoint writer operations.
+/// </summary>
 public sealed class RuntimeEndpointWriter : IRuntimeEndpointWriter
 {
     private readonly ILogger<RuntimeEndpointWriter> logger;
@@ -126,6 +153,9 @@ public sealed class RuntimeEndpointWriter : IRuntimeEndpointWriter
     private readonly string _runtimeFilePath;
     private readonly IRuntimeEndpointState _runtimeEndpointState;
 
+    /// <summary>
+    /// Runs the runtime endpoint writer operation.
+    /// </summary>
     public RuntimeEndpointWriter(
         ISystemVariableStoreService systemVariables,
         IRuntimeEndpointState runtimeEndpointState,
@@ -140,6 +170,9 @@ public sealed class RuntimeEndpointWriter : IRuntimeEndpointWriter
         _runtimeFilePath = Path.Combine(_runtimeDirectory, systemVariables.RuntimeEndpointFileName);
     }
 
+    /// <summary>
+    /// Runs the write operation.
+    /// </summary>
     public void Write(WebApplication app)
     {
         try
@@ -167,6 +200,9 @@ public sealed class RuntimeEndpointWriter : IRuntimeEndpointWriter
         }
     }
 
+    /// <summary>
+    /// Deletes owned endpoint.
+    /// </summary>
     public void DeleteOwnedEndpoint()
     {
         try

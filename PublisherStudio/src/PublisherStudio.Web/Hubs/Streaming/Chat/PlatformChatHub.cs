@@ -1,4 +1,4 @@
-using System.Net.WebSockets;
+﻿using System.Net.WebSockets;
 
 namespace PublisherStudio.Hubs.Streaming.Chat;
 
@@ -8,8 +8,14 @@ namespace PublisherStudio.Hubs.Streaming.Chat;
 /// </summary>
 public sealed class PlatformChatHub(StreamingChatUseCases useCases)
 {
+    /// <summary>
+    /// Determines whether open.
+    /// </summary>
     public bool CanOpen(Guid sessionId) => useCases.CanOpen(sessionId);
 
+    /// <summary>
+    /// Runs the run subscriber async operation.
+    /// </summary>
     public Task<bool> RunSubscriberAsync(
         Guid sessionId,
         Guid outputId,

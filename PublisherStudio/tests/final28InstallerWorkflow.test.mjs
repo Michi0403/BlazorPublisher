@@ -6,49 +6,55 @@ import test from 'node:test';
 const root = path.resolve(import.meta.dirname, '..');
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 const installerRoot = 'src/PublisherStudio.InstallerConsole';
-const launchers = [
-  'Default.cmd', 'Install.cmd', 'Update.cmd', 'Start.cmd', 'Start-NoBrowser.cmd',
-  'Check-FFmpeg.cmd', 'Install-FFmpeg.cmd', 'Uninstall.cmd',
-];
+const launchers = ['Install.cmd', 'Update.cmd', 'Start.cmd'];
 
-test('double-click invokes a preservation-first default update and FFmpeg routine', () => {
+test('double-click follows the LocalGPT-aligned AppData install, update, shortcut, and start routine', () => {
   const program = read(`${installerRoot}/Program.cs`);
   const parse = program.slice(program.indexOf('public static CliOptions Parse(string[] args)'));
-  const block = parse.match(/if \(argsList\.Count == 0\)[\s\S]*?return options;/)[0];
+  const block = parse.slice(parse.indexOf('if (argsList.Count == 0)'), parse.indexOf('for (var i = 0; i < argsList.Count; i++)'));
   for (const marker of [
-    'UpdateBlazorPublisher = true',
-    'StartBlazorPublisher = true',
-    'InstallFfmpeg = true',
-    'DesktopShortcuts = true',
-    'StartMenuShortcuts = true',
+    'argsList.Add("--install-publisherstudio")',
+    'argsList.Add("--update-publisherstudio")',
+    'argsList.Add("--install-ffmpeg")',
+    'argsList.Add("--start-publisherstudio")',
+    'argsList.Add("--shortcuts")',
   ]) assert.ok(block.includes(marker), marker);
   assert.doesNotMatch(block, /ForceDelete|--force-delete/);
-  assert.doesNotMatch(program, /The setup help will be shown\./);
-  assert.match(program, /Running the default preservation-first install and update routine\./);
+  assert.match(program, /Path\.Combine\(localAppData, "PublisherStudio"\)/);
+  assert.doesNotMatch(program, /Path\.Combine\(localAppData, "Programs", "PublisherStudio"\)/);
+  assert.match(program, /Running the default install, update, shortcut, and start routine\./);
+  assert.match(program, /ExtractZipWithFallback\(zipPath, targetPath, logger\)/);
+  assert.match(program, /ExtractZipWithFallback\(setupZipPath, targetPath, logger\)/);
+  assert.match(program, /TryStartDetachedSetup\(args\)/);
 });
 
-test('installer launchers, mirrors, shortcuts and Visual Studio profiles stay synchronized', () => {
+test('only the mandatory Install, Update, Start, and folder shortcuts are maintained', () => {
   const program = read(`${installerRoot}/Program.cs`);
   for (const launcher of launchers) {
     const projectLauncher = read(`${installerRoot}/${launcher}`);
     assert.equal(projectLauncher, read(`installer-launchers/${launcher}`), launcher);
-    if (launcher !== 'Uninstall.cmd') assert.doesNotMatch(projectLauncher, /--force-delete/);
+    assert.doesNotMatch(projectLauncher, /--force-delete/);
     assert.ok(program.includes(`"${launcher}"`), launcher);
   }
-  const defaultLauncher = read(`${installerRoot}/Default.cmd`);
-  for (const marker of ['SETUP_EXE', 'SETUP_REPAIR', '.incoming', 'move /y', ':setup_repair_failed']) assert.ok(defaultLauncher.includes(marker), marker);
-  assert.match(defaultLauncher, /call "%SETUP_EXE%"\s*$/m);
+  for (const obsolete of ['Default.cmd', 'Start-NoBrowser.cmd', 'Check-FFmpeg.cmd', 'Install-FFmpeg.cmd', 'Uninstall.cmd']) {
+    assert.equal(fs.existsSync(path.join(root, installerRoot, obsolete)), false, obsolete);
+    assert.equal(fs.existsSync(path.join(root, 'installer-launchers', obsolete)), false, obsolete);
+  }
+  for (const marker of ['PublisherStudio Folder.lnk', 'PublisherStudio Install.url', 'PublisherStudio Update.url', 'PublisherStudio Start.url']) {
+    assert.ok(program.includes(marker), marker);
+  }
   const profiles = JSON.parse(read(`${installerRoot}/Properties/launchSettings.json`)).profiles;
-  assert.ok(profiles['BlazorPublisher Default Install and Update']);
-  assert.ok(Object.keys(profiles).length >= launchers.length);
+  assert.deepEqual(Object.keys(profiles).sort(), ['PublisherStudio Install', 'PublisherStudio Start', 'PublisherStudio Update']);
 });
 
-test('builds deploy and enforce the complete setup workflow', () => {
+test('release archives use the same wrapper extraction contract as LocalGPT', () => {
   const project = read(`${installerRoot}/PublisherStudio.InstallerConsole.csproj`);
   const release = read('Build-Release.ps1');
-  const development = read('Build-LocalDevelopment.ps1');
-  const allRuntimes = read('Build-AllRuntimes.ps1');
-  assert.match(project, /<None Update="\*\.cmd" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" \/>/);
-  for (const launcher of launchers) assert.ok(release.includes(`"${launcher}"`), launcher);
-  assert.match(project, /<None Update="\*\.cmd" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" \/>/);
+  for (const launcher of launchers) {
+    assert.ok(project.includes(`<None Update="${launcher}" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />`), launcher);
+    assert.ok(release.includes(`"${launcher}"`), launcher);
+  }
+  assert.match(release, /Compress-Archive -Path \$appFolder -DestinationPath \$appZip/);
+  assert.match(release, /Compress-Archive -Path \$setupFolder -DestinationPath \$setupZip/);
+  assert.doesNotMatch(release, /Write-ReleaseManifest|Write-BootstrapRepairManifest|PublisherStudio\.Setup\.repair\.exe/);
 });

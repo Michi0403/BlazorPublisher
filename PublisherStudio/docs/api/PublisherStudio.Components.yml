@@ -1,0 +1,239 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Components
+  commentId: N:PublisherStudio.Components
+  id: Components
+  parent: PublisherStudio
+  children:
+  - PublisherStudio.Components.App
+  - PublisherStudio.Components.Editor
+  - PublisherStudio.Components.Layout
+  - PublisherStudio.Components.OrganicApprovalBar
+  - PublisherStudio.Components.OrganicPlugins
+  - PublisherStudio.Components.Pages
+  - PublisherStudio.Components.Routes
+  - PublisherStudio.Components.Shared
+  - PublisherStudio.Components._Imports
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.Components
+  nameWithType: PublisherStudio.Components
+  fullName: PublisherStudio.Components
+  type: Namespace
+  assemblies:
+  - PublisherStudio.Web
+references:
+- uid: PublisherStudio.Components.Editor
+  commentId: N:PublisherStudio.Components.Editor
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Components.Editor
+  nameWithType: PublisherStudio.Components.Editor
+  fullName: PublisherStudio.Components.Editor
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Components
+    name: Components
+    isExternal: true
+    href: PublisherStudio.Components.html
+  - name: .
+  - uid: PublisherStudio.Components.Editor
+    name: Editor
+    isExternal: true
+    href: PublisherStudio.Components.Editor.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Components
+    name: Components
+    isExternal: true
+    href: PublisherStudio.Components.html
+  - name: .
+  - uid: PublisherStudio.Components.Editor
+    name: Editor
+    isExternal: true
+    href: PublisherStudio.Components.Editor.html
+- uid: PublisherStudio.Components.Layout
+  commentId: N:PublisherStudio.Components.Layout
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Components.Layout
+  nameWithType: PublisherStudio.Components.Layout
+  fullName: PublisherStudio.Components.Layout
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Components
+    name: Components
+    isExternal: true
+    href: PublisherStudio.Components.html
+  - name: .
+  - uid: PublisherStudio.Components.Layout
+    name: Layout
+    isExternal: true
+    href: PublisherStudio.Components.Layout.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Components
+    name: Components
+    isExternal: true
+    href: PublisherStudio.Components.html
+  - name: .
+  - uid: PublisherStudio.Components.Layout
+    name: Layout
+    isExternal: true
+    href: PublisherStudio.Components.Layout.html
+- uid: PublisherStudio.Components.OrganicPlugins
+  commentId: N:PublisherStudio.Components.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Components.OrganicPlugins
+  nameWithType: PublisherStudio.Components.OrganicPlugins
+  fullName: PublisherStudio.Components.OrganicPlugins
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Components
+    name: Components
+    isExternal: true
+    href: PublisherStudio.Components.html
+  - name: .
+  - uid: PublisherStudio.Components.OrganicPlugins
+    name: OrganicPlugins
+    isExternal: true
+    href: PublisherStudio.Components.OrganicPlugins.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Components
+    name: Components
+    isExternal: true
+    href: PublisherStudio.Components.html
+  - name: .
+  - uid: PublisherStudio.Components.OrganicPlugins
+    name: OrganicPlugins
+    isExternal: true
+    href: PublisherStudio.Components.OrganicPlugins.html
+- uid: PublisherStudio.Components.Pages
+  commentId: N:PublisherStudio.Components.Pages
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Components.Pages
+  nameWithType: PublisherStudio.Components.Pages
+  fullName: PublisherStudio.Components.Pages
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Components
+    name: Components
+    isExternal: true
+    href: PublisherStudio.Components.html
+  - name: .
+  - uid: PublisherStudio.Components.Pages
+    name: Pages
+    isExternal: true
+    href: PublisherStudio.Components.Pages.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Components
+    name: Components
+    isExternal: true
+    href: PublisherStudio.Components.html
+  - name: .
+  - uid: PublisherStudio.Components.Pages
+    name: Pages
+    isExternal: true
+    href: PublisherStudio.Components.Pages.html
+- uid: PublisherStudio.Components.Shared
+  commentId: N:PublisherStudio.Components.Shared
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Components.Shared
+  nameWithType: PublisherStudio.Components.Shared
+  fullName: PublisherStudio.Components.Shared
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Components
+    name: Components
+    isExternal: true
+    href: PublisherStudio.Components.html
+  - name: .
+  - uid: PublisherStudio.Components.Shared
+    name: Shared
+    isExternal: true
+    href: PublisherStudio.Components.Shared.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Components
+    name: Components
+    isExternal: true
+    href: PublisherStudio.Components.html
+  - name: .
+  - uid: PublisherStudio.Components.Shared
+    name: Shared
+    isExternal: true
+    href: PublisherStudio.Components.Shared.html
+- uid: PublisherStudio.Components.App
+  commentId: T:PublisherStudio.Components.App
+  isExternal: true
+  href: PublisherStudio.Components.App.html
+  name: App
+  nameWithType: App
+  fullName: PublisherStudio.Components.App
+- uid: PublisherStudio.Components.OrganicApprovalBar
+  commentId: T:PublisherStudio.Components.OrganicApprovalBar
+  isExternal: true
+  href: PublisherStudio.Components.OrganicApprovalBar.html
+  name: OrganicApprovalBar
+  nameWithType: OrganicApprovalBar
+  fullName: PublisherStudio.Components.OrganicApprovalBar
+- uid: PublisherStudio.Components.Routes
+  commentId: T:PublisherStudio.Components.Routes
+  isExternal: true
+  href: PublisherStudio.Components.Routes.html
+  name: Routes
+  nameWithType: Routes
+  fullName: PublisherStudio.Components.Routes
+- uid: PublisherStudio.Components._Imports
+  commentId: T:PublisherStudio.Components._Imports
+  isExternal: true
+  href: PublisherStudio.Components._Imports.html
+  name: _Imports
+  nameWithType: _Imports
+  fullName: PublisherStudio.Components._Imports

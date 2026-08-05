@@ -1,14 +1,20 @@
-using System.Net.WebSockets;
+﻿using System.Net.WebSockets;
 using Microsoft.AspNetCore.Mvc;
 
 namespace PublisherStudio.Controllers.Streaming.UseCases;
 
+/// <summary>
+/// Provides native capture controller operations.
+/// </summary>
 [ApiController]
 [Route("api/mediahost/native-captures")]
 public sealed class NativeCaptureController(NativeCaptureUseCases useCases) : ControllerBase
 {
     private readonly NativeCaptureUseCases _useCases = useCases;
 
+    /// <summary>
+    /// Runs the create operation.
+    /// </summary>
     [HttpPost]
     public IActionResult Create([FromBody] NativeCaptureRequest request)
     {
@@ -23,6 +29,9 @@ public sealed class NativeCaptureController(NativeCaptureUseCases useCases) : Co
         }
     }
 
+    /// <summary>
+    /// Runs the stream operation.
+    /// </summary>
     [HttpGet("{captureId:guid}/websocket")]
     public async Task Stream(Guid captureId)
     {
@@ -56,6 +65,9 @@ public sealed class NativeCaptureController(NativeCaptureUseCases useCases) : Co
         }
     }
 
+    /// <summary>
+    /// Runs the stop operation.
+    /// </summary>
     [HttpDelete("{captureId:guid}")]
     public IActionResult Stop(Guid captureId) =>
         _useCases.Stop(captureId) ? NoContent() : NotFound();

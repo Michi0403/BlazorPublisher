@@ -1,0 +1,134 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection
+  commentId: T:PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection
+  id: PublicationBarcodeErrorCorrection
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection.H
+  - PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection.L
+  - PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection.M
+  - PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection.Q
+  langs:
+  - csharp
+  - vb
+  name: PublicationBarcodeErrorCorrection
+  nameWithType: PublicationBarcodeErrorCorrection
+  fullName: PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication barcode error correction values.
+  example: []
+  syntax:
+    content: public enum PublicationBarcodeErrorCorrection
+    content.vb: Public Enum PublicationBarcodeErrorCorrection
+- uid: PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection.L
+  commentId: F:PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection.L
+  id: L
+  parent: PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection
+  langs:
+  - csharp
+  - vb
+  name: L
+  nameWithType: PublicationBarcodeErrorCorrection.L
+  fullName: PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection.L
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: L = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection
+- uid: PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection.M
+  commentId: F:PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection.M
+  id: M
+  parent: PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection
+  langs:
+  - csharp
+  - vb
+  name: M
+  nameWithType: PublicationBarcodeErrorCorrection.M
+  fullName: PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection.M
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: M = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection
+- uid: PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection.Q
+  commentId: F:PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection.Q
+  id: Q
+  parent: PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection
+  langs:
+  - csharp
+  - vb
+  name: Q
+  nameWithType: PublicationBarcodeErrorCorrection.Q
+  fullName: PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection.Q
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Q = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection
+- uid: PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection.H
+  commentId: F:PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection.H
+  id: H
+  parent: PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection
+  langs:
+  - csharp
+  - vb
+  name: H
+  nameWithType: PublicationBarcodeErrorCorrection.H
+  fullName: PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection.H
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: H = 3
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection
+  commentId: T:PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection.html
+  name: PublicationBarcodeErrorCorrection
+  nameWithType: PublicationBarcodeErrorCorrection
+  fullName: PublisherStudio.BusinessObjects.PublicationBarcodeErrorCorrection

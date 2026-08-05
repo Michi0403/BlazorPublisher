@@ -1,4 +1,4 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.MediaStudio.UseCases;
 
@@ -13,6 +13,9 @@ public sealed class MediaTimelineEditService(
 {
     private double MinimumSourceLength => runtimePolicy.MinimumMediaSourceLength;
 
+    /// <summary>
+    /// Runs the normalize operation.
+    /// </summary>
     public List<PublicationMediaSegment> Normalize(IEnumerable<PublicationMediaSegment>? source, bool video)
     {
         try
@@ -70,6 +73,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Runs the clone video project operation.
+    /// </summary>
     public VideoProjectDocument CloneVideoProject(VideoProjectDocument? source)
     {
         try
@@ -129,6 +135,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Creates track projection.
+    /// </summary>
     public List<PublicationMediaSegment> CreateTrackProjection(VideoProjectDocument project, Guid trackId)
     {
         try
@@ -184,6 +193,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Runs the replace track projection operation.
+    /// </summary>
     public void ReplaceTrackProjection(VideoProjectDocument project, Guid trackId, IEnumerable<PublicationMediaSegment> projection)
     {
         try
@@ -212,6 +224,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Creates default video layer.
+    /// </summary>
     public VideoEffectLayer CreateDefaultVideoLayer(string? name = null) {
         try
         {
@@ -233,6 +248,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Normalizes video layers.
+    /// </summary>
     public List<VideoEffectLayer> NormalizeVideoLayers(
         IEnumerable<VideoEffectLayer>? source,
         double minimumSeconds,
@@ -260,6 +278,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Runs the timeline length operation.
+    /// </summary>
     public double TimelineLength(IReadOnlyList<PublicationMediaSegment> segments, double playbackRate)
         {
             try
@@ -274,6 +295,9 @@ public sealed class MediaTimelineEditService(
             }
         }
 
+    /// <summary>
+    /// Runs the segment index at operation.
+    /// </summary>
     public int SegmentIndexAt(IReadOnlyList<PublicationMediaSegment> segments, double playbackRate, double timelineSeconds)
     {
         try
@@ -298,6 +322,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Runs the segment timeline start operation.
+    /// </summary>
     public double SegmentTimelineStart(IReadOnlyList<PublicationMediaSegment> segments, int index, double playbackRate)
         {
             try
@@ -312,6 +339,9 @@ public sealed class MediaTimelineEditService(
             }
         }
 
+    /// <summary>
+    /// Runs the source position at operation.
+    /// </summary>
     public double SourcePositionAt(IReadOnlyList<PublicationMediaSegment> segments, int index, double playbackRate, double timelineSeconds)
     {
         try
@@ -332,6 +362,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Runs the split at operation.
+    /// </summary>
     public Guid? SplitAt(List<PublicationMediaSegment> segments, double playbackRate, double timelineSeconds)
     {
         try
@@ -367,6 +400,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Runs the insert at operation.
+    /// </summary>
     public Guid InsertAt(
         List<PublicationMediaSegment> segments,
         double playbackRate,
@@ -437,6 +473,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Determines whether merge boundary.
+    /// </summary>
     public bool CanMergeBoundary(IReadOnlyList<PublicationMediaSegment> segments, int rightIndex)
     {
         try
@@ -459,6 +498,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Runs the merge boundary operation.
+    /// </summary>
     public bool MergeBoundary(List<PublicationMediaSegment> segments, int rightIndex)
     {
         try
@@ -484,6 +526,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Runs the clone operation.
+    /// </summary>
     public PublicationMediaSegment Clone(PublicationMediaSegment segment) {
         try
         {
@@ -563,6 +608,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Runs the duplicate operation.
+    /// </summary>
     public PublicationMediaSegment Duplicate(PublicationMediaSegment segment)
     {
         try
@@ -589,6 +637,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Runs the clone video layer operation.
+    /// </summary>
     public VideoEffectLayer CloneVideoLayer(VideoEffectLayer layer) {
         try
         {
@@ -626,6 +677,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Creates filter.
+    /// </summary>
     public VideoEffectFilter CreateFilter(VideoEffectFilterKind kind) {
         try
         {

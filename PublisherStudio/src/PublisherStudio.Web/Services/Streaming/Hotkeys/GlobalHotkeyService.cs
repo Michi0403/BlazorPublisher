@@ -1,7 +1,10 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 
 namespace PublisherStudio.Services.Streaming.Hotkeys;
 
+/// <summary>
+/// Provides global hotkey service operations.
+/// </summary>
 public sealed class GlobalHotkeyService(
     IWindowsHotkeyNativeService nativeService,
     ILogger<GlobalHotkeyService> logger) : IDisposable
@@ -23,6 +26,9 @@ public sealed class GlobalHotkeyService(
     private uint _threadId;
     private int _nextNativeId = 100;
 
+    /// <summary>
+    /// Starts async.
+    /// </summary>
     public Task StartAsync(CancellationToken cancellationToken)
     {
         if (!OperatingSystem.IsWindows() || !nativeService.IsAvailable) return Task.CompletedTask;
@@ -32,6 +38,9 @@ public sealed class GlobalHotkeyService(
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Stops async.
+    /// </summary>
     public Task StopAsync(CancellationToken cancellationToken)
     {
         if (_thread is null) return Task.CompletedTask;
@@ -40,6 +49,9 @@ public sealed class GlobalHotkeyService(
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Runs the configure operation.
+    /// </summary>
     public void Configure(Guid sessionId, IEnumerable<MediaHotkey> hotkeys)
     {
         if (!OperatingSystem.IsWindows() || !nativeService.IsAvailable) return;
@@ -57,6 +69,9 @@ public sealed class GlobalHotkeyService(
         });
     }
 
+    /// <summary>
+    /// Runs the remove operation.
+    /// </summary>
     public void Remove(Guid sessionId)
     {
         if (!OperatingSystem.IsWindows() || !nativeService.IsAvailable) return;
@@ -64,6 +79,9 @@ public sealed class GlobalHotkeyService(
         _events.TryRemove(sessionId, out _);
     }
 
+    /// <summary>
+    /// Runs the drain operation.
+    /// </summary>
     public IReadOnlyList<MediaHostHotkeyEvent> Drain(Guid sessionId)
     {
         if (!_events.TryGetValue(sessionId, out var queue)) return [];
@@ -156,6 +174,9 @@ public sealed class GlobalHotkeyService(
         return virtualKey != 0;
     }
 
+    /// <summary>
+    /// Runs the dispose operation.
+    /// </summary>
     public void Dispose()
     {
         try { StopAsync(CancellationToken.None).GetAwaiter().GetResult(); } catch { }

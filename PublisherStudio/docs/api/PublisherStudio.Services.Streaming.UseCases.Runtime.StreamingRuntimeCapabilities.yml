@@ -1,0 +1,782 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities
+  commentId: T:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities
+  id: StreamingRuntimeCapabilities
+  parent: PublisherStudio.Services.Streaming.UseCases.Runtime
+  children:
+  - PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.#ctor
+  - PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.BrowserAudioMix
+  - PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.BrowserCapture
+  - PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.BrowserWindowAudioFallback
+  - PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.DeviceTimestamps
+  - PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.GlobalHotkeys
+  - PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.HardwareEncoderProbe
+  - PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.NativeCameraCapture
+  - PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.NativeDeviceDiscovery
+  - PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Note
+  - PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.ProcessAudioLoopback
+  - PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Recording
+  - PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Transports
+  - PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Version
+  langs:
+  - csharp
+  - vb
+  name: StreamingRuntimeCapabilities
+  nameWithType: StreamingRuntimeCapabilities
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Runtime
+  summary: Represents a streaming runtime capabilities.
+  example: []
+  syntax:
+    content: public sealed class StreamingRuntimeCapabilities
+    content.vb: Public NotInheritable Class StreamingRuntimeCapabilities
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.#ctor
+  commentId: M:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities
+  langs:
+  - csharp
+  - vb
+  name: StreamingRuntimeCapabilities()
+  nameWithType: StreamingRuntimeCapabilities.StreamingRuntimeCapabilities()
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.StreamingRuntimeCapabilities()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Runtime
+  syntax:
+    content: public StreamingRuntimeCapabilities()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.#ctor*
+  nameWithType.vb: StreamingRuntimeCapabilities.New()
+  fullName.vb: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.New()
+  name.vb: New()
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Version
+  commentId: P:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Version
+  id: Version
+  parent: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities
+  langs:
+  - csharp
+  - vb
+  name: Version
+  nameWithType: StreamingRuntimeCapabilities.Version
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Version
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Runtime
+  summary: Gets or sets the version.
+  example: []
+  syntax:
+    content: public string Version { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Version As String
+  overload: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Version*
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.BrowserCapture
+  commentId: P:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.BrowserCapture
+  id: BrowserCapture
+  parent: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities
+  langs:
+  - csharp
+  - vb
+  name: BrowserCapture
+  nameWithType: StreamingRuntimeCapabilities.BrowserCapture
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.BrowserCapture
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Runtime
+  summary: Gets or sets browser capture.
+  example: []
+  syntax:
+    content: public bool BrowserCapture { get; init; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property BrowserCapture As Boolean
+  overload: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.BrowserCapture*
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.BrowserAudioMix
+  commentId: P:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.BrowserAudioMix
+  id: BrowserAudioMix
+  parent: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities
+  langs:
+  - csharp
+  - vb
+  name: BrowserAudioMix
+  nameWithType: StreamingRuntimeCapabilities.BrowserAudioMix
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.BrowserAudioMix
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Runtime
+  summary: Gets or sets browser audio mix.
+  example: []
+  syntax:
+    content: public bool BrowserAudioMix { get; init; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property BrowserAudioMix As Boolean
+  overload: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.BrowserAudioMix*
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.NativeDeviceDiscovery
+  commentId: P:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.NativeDeviceDiscovery
+  id: NativeDeviceDiscovery
+  parent: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities
+  langs:
+  - csharp
+  - vb
+  name: NativeDeviceDiscovery
+  nameWithType: StreamingRuntimeCapabilities.NativeDeviceDiscovery
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.NativeDeviceDiscovery
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Runtime
+  summary: Gets or sets native device discovery.
+  example: []
+  syntax:
+    content: public bool NativeDeviceDiscovery { get; init; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property NativeDeviceDiscovery As Boolean
+  overload: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.NativeDeviceDiscovery*
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.NativeCameraCapture
+  commentId: P:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.NativeCameraCapture
+  id: NativeCameraCapture
+  parent: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities
+  langs:
+  - csharp
+  - vb
+  name: NativeCameraCapture
+  nameWithType: StreamingRuntimeCapabilities.NativeCameraCapture
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.NativeCameraCapture
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Runtime
+  summary: Gets or sets native camera capture.
+  example: []
+  syntax:
+    content: public bool NativeCameraCapture { get; init; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property NativeCameraCapture As Boolean
+  overload: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.NativeCameraCapture*
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.ProcessAudioLoopback
+  commentId: P:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.ProcessAudioLoopback
+  id: ProcessAudioLoopback
+  parent: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities
+  langs:
+  - csharp
+  - vb
+  name: ProcessAudioLoopback
+  nameWithType: StreamingRuntimeCapabilities.ProcessAudioLoopback
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.ProcessAudioLoopback
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Runtime
+  summary: Gets or sets process audio loopback.
+  example: []
+  syntax:
+    content: public bool ProcessAudioLoopback { get; init; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property ProcessAudioLoopback As Boolean
+  overload: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.ProcessAudioLoopback*
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.BrowserWindowAudioFallback
+  commentId: P:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.BrowserWindowAudioFallback
+  id: BrowserWindowAudioFallback
+  parent: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities
+  langs:
+  - csharp
+  - vb
+  name: BrowserWindowAudioFallback
+  nameWithType: StreamingRuntimeCapabilities.BrowserWindowAudioFallback
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.BrowserWindowAudioFallback
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Runtime
+  summary: Gets or sets browser window audio fallback.
+  example: []
+  syntax:
+    content: public bool BrowserWindowAudioFallback { get; init; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property BrowserWindowAudioFallback As Boolean
+  overload: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.BrowserWindowAudioFallback*
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.DeviceTimestamps
+  commentId: P:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.DeviceTimestamps
+  id: DeviceTimestamps
+  parent: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities
+  langs:
+  - csharp
+  - vb
+  name: DeviceTimestamps
+  nameWithType: StreamingRuntimeCapabilities.DeviceTimestamps
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.DeviceTimestamps
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Runtime
+  summary: Gets or sets device timestamps.
+  example: []
+  syntax:
+    content: public bool DeviceTimestamps { get; init; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property DeviceTimestamps As Boolean
+  overload: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.DeviceTimestamps*
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.GlobalHotkeys
+  commentId: P:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.GlobalHotkeys
+  id: GlobalHotkeys
+  parent: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities
+  langs:
+  - csharp
+  - vb
+  name: GlobalHotkeys
+  nameWithType: StreamingRuntimeCapabilities.GlobalHotkeys
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.GlobalHotkeys
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Runtime
+  summary: Gets or sets global hotkeys.
+  example: []
+  syntax:
+    content: public bool GlobalHotkeys { get; init; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property GlobalHotkeys As Boolean
+  overload: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.GlobalHotkeys*
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Recording
+  commentId: P:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Recording
+  id: Recording
+  parent: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities
+  langs:
+  - csharp
+  - vb
+  name: Recording
+  nameWithType: StreamingRuntimeCapabilities.Recording
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Recording
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Runtime
+  summary: Gets or sets recording.
+  example: []
+  syntax:
+    content: public bool Recording { get; init; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property Recording As Boolean
+  overload: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Recording*
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Transports
+  commentId: P:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Transports
+  id: Transports
+  parent: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities
+  langs:
+  - csharp
+  - vb
+  name: Transports
+  nameWithType: StreamingRuntimeCapabilities.Transports
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Transports
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Runtime
+  summary: Gets or sets transports.
+  example: []
+  syntax:
+    content: public string[] Transports { get; init; }
+    parameters: []
+    return:
+      type: System.String[]
+    content.vb: Public Property Transports As String()
+  overload: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Transports*
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.HardwareEncoderProbe
+  commentId: P:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.HardwareEncoderProbe
+  id: HardwareEncoderProbe
+  parent: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities
+  langs:
+  - csharp
+  - vb
+  name: HardwareEncoderProbe
+  nameWithType: StreamingRuntimeCapabilities.HardwareEncoderProbe
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.HardwareEncoderProbe
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Runtime
+  summary: Gets or sets hardware encoder probe.
+  example: []
+  syntax:
+    content: public bool HardwareEncoderProbe { get; init; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property HardwareEncoderProbe As Boolean
+  overload: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.HardwareEncoderProbe*
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Note
+  commentId: P:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Note
+  id: Note
+  parent: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities
+  langs:
+  - csharp
+  - vb
+  name: Note
+  nameWithType: StreamingRuntimeCapabilities.Note
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Note
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Runtime
+  summary: Gets or sets note.
+  example: []
+  syntax:
+    content: public string Note { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Note As String
+  overload: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Note*
+references:
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime
+  commentId: N:PublisherStudio.Services.Streaming.UseCases.Runtime
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.UseCases.Runtime
+  nameWithType: PublisherStudio.Services.Streaming.UseCases.Runtime
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases.Runtime
+    name: Runtime
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Runtime.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases.Runtime
+    name: Runtime
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Runtime.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.#ctor*
+  commentId: Overload:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.html#PublisherStudio_Services_Streaming_UseCases_Runtime_StreamingRuntimeCapabilities__ctor
+  name: StreamingRuntimeCapabilities
+  nameWithType: StreamingRuntimeCapabilities.StreamingRuntimeCapabilities
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.StreamingRuntimeCapabilities
+  nameWithType.vb: StreamingRuntimeCapabilities.New
+  fullName.vb: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.New
+  name.vb: New
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Version*
+  commentId: Overload:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Version
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.html#PublisherStudio_Services_Streaming_UseCases_Runtime_StreamingRuntimeCapabilities_Version
+  name: Version
+  nameWithType: StreamingRuntimeCapabilities.Version
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Version
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.BrowserCapture*
+  commentId: Overload:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.BrowserCapture
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.html#PublisherStudio_Services_Streaming_UseCases_Runtime_StreamingRuntimeCapabilities_BrowserCapture
+  name: BrowserCapture
+  nameWithType: StreamingRuntimeCapabilities.BrowserCapture
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.BrowserCapture
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.BrowserAudioMix*
+  commentId: Overload:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.BrowserAudioMix
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.html#PublisherStudio_Services_Streaming_UseCases_Runtime_StreamingRuntimeCapabilities_BrowserAudioMix
+  name: BrowserAudioMix
+  nameWithType: StreamingRuntimeCapabilities.BrowserAudioMix
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.BrowserAudioMix
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.NativeDeviceDiscovery*
+  commentId: Overload:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.NativeDeviceDiscovery
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.html#PublisherStudio_Services_Streaming_UseCases_Runtime_StreamingRuntimeCapabilities_NativeDeviceDiscovery
+  name: NativeDeviceDiscovery
+  nameWithType: StreamingRuntimeCapabilities.NativeDeviceDiscovery
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.NativeDeviceDiscovery
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.NativeCameraCapture*
+  commentId: Overload:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.NativeCameraCapture
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.html#PublisherStudio_Services_Streaming_UseCases_Runtime_StreamingRuntimeCapabilities_NativeCameraCapture
+  name: NativeCameraCapture
+  nameWithType: StreamingRuntimeCapabilities.NativeCameraCapture
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.NativeCameraCapture
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.ProcessAudioLoopback*
+  commentId: Overload:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.ProcessAudioLoopback
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.html#PublisherStudio_Services_Streaming_UseCases_Runtime_StreamingRuntimeCapabilities_ProcessAudioLoopback
+  name: ProcessAudioLoopback
+  nameWithType: StreamingRuntimeCapabilities.ProcessAudioLoopback
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.ProcessAudioLoopback
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.BrowserWindowAudioFallback*
+  commentId: Overload:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.BrowserWindowAudioFallback
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.html#PublisherStudio_Services_Streaming_UseCases_Runtime_StreamingRuntimeCapabilities_BrowserWindowAudioFallback
+  name: BrowserWindowAudioFallback
+  nameWithType: StreamingRuntimeCapabilities.BrowserWindowAudioFallback
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.BrowserWindowAudioFallback
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.DeviceTimestamps*
+  commentId: Overload:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.DeviceTimestamps
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.html#PublisherStudio_Services_Streaming_UseCases_Runtime_StreamingRuntimeCapabilities_DeviceTimestamps
+  name: DeviceTimestamps
+  nameWithType: StreamingRuntimeCapabilities.DeviceTimestamps
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.DeviceTimestamps
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.GlobalHotkeys*
+  commentId: Overload:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.GlobalHotkeys
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.html#PublisherStudio_Services_Streaming_UseCases_Runtime_StreamingRuntimeCapabilities_GlobalHotkeys
+  name: GlobalHotkeys
+  nameWithType: StreamingRuntimeCapabilities.GlobalHotkeys
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.GlobalHotkeys
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Recording*
+  commentId: Overload:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Recording
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.html#PublisherStudio_Services_Streaming_UseCases_Runtime_StreamingRuntimeCapabilities_Recording
+  name: Recording
+  nameWithType: StreamingRuntimeCapabilities.Recording
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Recording
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Transports*
+  commentId: Overload:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Transports
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.html#PublisherStudio_Services_Streaming_UseCases_Runtime_StreamingRuntimeCapabilities_Transports
+  name: Transports
+  nameWithType: StreamingRuntimeCapabilities.Transports
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Transports
+- uid: System.String[]
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string[]
+  nameWithType: string[]
+  fullName: string[]
+  nameWithType.vb: String()
+  fullName.vb: String()
+  name.vb: String()
+  spec.csharp:
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '['
+  - name: ']'
+  spec.vb:
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: (
+  - name: )
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.HardwareEncoderProbe*
+  commentId: Overload:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.HardwareEncoderProbe
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.html#PublisherStudio_Services_Streaming_UseCases_Runtime_StreamingRuntimeCapabilities_HardwareEncoderProbe
+  name: HardwareEncoderProbe
+  nameWithType: StreamingRuntimeCapabilities.HardwareEncoderProbe
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.HardwareEncoderProbe
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Note*
+  commentId: Overload:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Note
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.html#PublisherStudio_Services_Streaming_UseCases_Runtime_StreamingRuntimeCapabilities_Note
+  name: Note
+  nameWithType: StreamingRuntimeCapabilities.Note
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.Note

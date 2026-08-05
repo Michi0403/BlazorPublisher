@@ -1,0 +1,677 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry
+  commentId: T:PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry
+  id: NativeCaptureRegistry
+  parent: PublisherStudio.Services.Streaming.Capture
+  children:
+  - PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.#ctor(PublisherStudio.Services.Streaming.Capture.INativeCaptureSessionFactory,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry})
+  - PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.Create(PublisherStudio.BusinessObjects.Streaming.NativeCaptureRequest)
+  - PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.Dispose
+  - PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.Stop(System.Guid)
+  - PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.TryGet(System.Guid,PublisherStudio.Services.Streaming.Capture.NativeCaptureSession@)
+  langs:
+  - csharp
+  - vb
+  name: NativeCaptureRegistry
+  nameWithType: NativeCaptureRegistry
+  fullName: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Capture
+  summary: Provides native capture registry operations.
+  example: []
+  syntax:
+    content: 'public sealed class NativeCaptureRegistry : IDisposable'
+    content.vb: Public NotInheritable Class NativeCaptureRegistry Implements IDisposable
+  inheritance:
+  - System.Object
+  implements:
+  - System.IDisposable
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.#ctor(PublisherStudio.Services.Streaming.Capture.INativeCaptureSessionFactory,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry})
+  commentId: M:PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.#ctor(PublisherStudio.Services.Streaming.Capture.INativeCaptureSessionFactory,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry})
+  id: '#ctor(PublisherStudio.Services.Streaming.Capture.INativeCaptureSessionFactory,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry})'
+  parent: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry
+  langs:
+  - csharp
+  - vb
+  name: NativeCaptureRegistry(INativeCaptureSessionFactory, ILogger<NativeCaptureRegistry>)
+  nameWithType: NativeCaptureRegistry.NativeCaptureRegistry(INativeCaptureSessionFactory, ILogger<NativeCaptureRegistry>)
+  fullName: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.NativeCaptureRegistry(PublisherStudio.Services.Streaming.Capture.INativeCaptureSessionFactory, Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Capture
+  summary: Provides native capture registry operations.
+  example: []
+  syntax:
+    content: public NativeCaptureRegistry(INativeCaptureSessionFactory sessionFactory, ILogger<NativeCaptureRegistry> logger)
+    parameters:
+    - id: sessionFactory
+      type: PublisherStudio.Services.Streaming.Capture.INativeCaptureSessionFactory
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry}
+    content.vb: Public Sub New(sessionFactory As INativeCaptureSessionFactory, logger As ILogger(Of NativeCaptureRegistry))
+  overload: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.#ctor*
+  nameWithType.vb: NativeCaptureRegistry.New(INativeCaptureSessionFactory, ILogger(Of NativeCaptureRegistry))
+  fullName.vb: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.New(PublisherStudio.Services.Streaming.Capture.INativeCaptureSessionFactory, Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry))
+  name.vb: New(INativeCaptureSessionFactory, ILogger(Of NativeCaptureRegistry))
+- uid: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.Create(PublisherStudio.BusinessObjects.Streaming.NativeCaptureRequest)
+  commentId: M:PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.Create(PublisherStudio.BusinessObjects.Streaming.NativeCaptureRequest)
+  id: Create(PublisherStudio.BusinessObjects.Streaming.NativeCaptureRequest)
+  parent: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry
+  langs:
+  - csharp
+  - vb
+  name: Create(NativeCaptureRequest)
+  nameWithType: NativeCaptureRegistry.Create(NativeCaptureRequest)
+  fullName: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.Create(PublisherStudio.BusinessObjects.Streaming.NativeCaptureRequest)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Capture
+  summary: Runs the create operation.
+  example: []
+  syntax:
+    content: public NativeCaptureSession Create(NativeCaptureRequest request)
+    parameters:
+    - id: request
+      type: PublisherStudio.BusinessObjects.Streaming.NativeCaptureRequest
+    return:
+      type: PublisherStudio.Services.Streaming.Capture.NativeCaptureSession
+    content.vb: Public Function Create(request As NativeCaptureRequest) As NativeCaptureSession
+  overload: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.Create*
+- uid: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.TryGet(System.Guid,PublisherStudio.Services.Streaming.Capture.NativeCaptureSession@)
+  commentId: M:PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.TryGet(System.Guid,PublisherStudio.Services.Streaming.Capture.NativeCaptureSession@)
+  id: TryGet(System.Guid,PublisherStudio.Services.Streaming.Capture.NativeCaptureSession@)
+  parent: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry
+  langs:
+  - csharp
+  - vb
+  name: TryGet(Guid, out NativeCaptureSession)
+  nameWithType: NativeCaptureRegistry.TryGet(Guid, out NativeCaptureSession)
+  fullName: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.TryGet(System.Guid, out PublisherStudio.Services.Streaming.Capture.NativeCaptureSession)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Capture
+  summary: Attempts to get.
+  example: []
+  syntax:
+    content: public bool TryGet(Guid id, out NativeCaptureSession session)
+    parameters:
+    - id: id
+      type: System.Guid
+    - id: session
+      type: PublisherStudio.Services.Streaming.Capture.NativeCaptureSession
+    return:
+      type: System.Boolean
+    content.vb: Public Function TryGet(id As Guid, session As NativeCaptureSession) As Boolean
+  overload: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.TryGet*
+  nameWithType.vb: NativeCaptureRegistry.TryGet(Guid, NativeCaptureSession)
+  fullName.vb: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.TryGet(System.Guid, PublisherStudio.Services.Streaming.Capture.NativeCaptureSession)
+  name.vb: TryGet(Guid, NativeCaptureSession)
+- uid: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.Stop(System.Guid)
+  commentId: M:PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.Stop(System.Guid)
+  id: Stop(System.Guid)
+  parent: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry
+  langs:
+  - csharp
+  - vb
+  name: Stop(Guid)
+  nameWithType: NativeCaptureRegistry.Stop(Guid)
+  fullName: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.Stop(System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Capture
+  summary: Runs the stop operation.
+  example: []
+  syntax:
+    content: public bool Stop(Guid id)
+    parameters:
+    - id: id
+      type: System.Guid
+    return:
+      type: System.Boolean
+    content.vb: Public Function [Stop](id As Guid) As Boolean
+  overload: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.Stop*
+- uid: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.Dispose
+  commentId: M:PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.Dispose
+  id: Dispose
+  parent: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry
+  langs:
+  - csharp
+  - vb
+  name: Dispose()
+  nameWithType: NativeCaptureRegistry.Dispose()
+  fullName: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.Dispose()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Capture
+  summary: Runs the dispose operation.
+  example: []
+  syntax:
+    content: public void Dispose()
+    content.vb: Public Sub Dispose()
+  overload: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.Dispose*
+  implements:
+  - System.IDisposable.Dispose
+references:
+- uid: PublisherStudio.Services.Streaming.Capture
+  commentId: N:PublisherStudio.Services.Streaming.Capture
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Capture
+  nameWithType: PublisherStudio.Services.Streaming.Capture
+  fullName: PublisherStudio.Services.Streaming.Capture
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Capture
+    name: Capture
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Capture.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Capture
+    name: Capture
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Capture.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.IDisposable
+  commentId: T:System.IDisposable
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.idisposable
+  name: IDisposable
+  nameWithType: IDisposable
+  fullName: System.IDisposable
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.#ctor*
+  commentId: Overload:PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.html#PublisherStudio_Services_Streaming_Capture_NativeCaptureRegistry__ctor_PublisherStudio_Services_Streaming_Capture_INativeCaptureSessionFactory_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_Streaming_Capture_NativeCaptureRegistry__
+  name: NativeCaptureRegistry
+  nameWithType: NativeCaptureRegistry.NativeCaptureRegistry
+  fullName: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.NativeCaptureRegistry
+  nameWithType.vb: NativeCaptureRegistry.New
+  fullName.vb: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.New
+  name.vb: New
+- uid: PublisherStudio.Services.Streaming.Capture.INativeCaptureSessionFactory
+  commentId: T:PublisherStudio.Services.Streaming.Capture.INativeCaptureSessionFactory
+  parent: PublisherStudio.Services.Streaming.Capture
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Capture.INativeCaptureSessionFactory.html
+  name: INativeCaptureSessionFactory
+  nameWithType: INativeCaptureSessionFactory
+  fullName: PublisherStudio.Services.Streaming.Capture.INativeCaptureSessionFactory
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<NativeCaptureRegistry>
+  nameWithType: ILogger<NativeCaptureRegistry>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry>
+  nameWithType.vb: ILogger(Of NativeCaptureRegistry)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry)
+  name.vb: ILogger(Of NativeCaptureRegistry)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry
+    name: NativeCaptureRegistry
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry
+    name: NativeCaptureRegistry
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.html
+  - name: )
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.Create*
+  commentId: Overload:PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.Create
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.html#PublisherStudio_Services_Streaming_Capture_NativeCaptureRegistry_Create_PublisherStudio_BusinessObjects_Streaming_NativeCaptureRequest_
+  name: Create
+  nameWithType: NativeCaptureRegistry.Create
+  fullName: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.Create
+- uid: PublisherStudio.BusinessObjects.Streaming.NativeCaptureRequest
+  commentId: T:PublisherStudio.BusinessObjects.Streaming.NativeCaptureRequest
+  parent: PublisherStudio.BusinessObjects.Streaming
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.Streaming.NativeCaptureRequest.html
+  name: NativeCaptureRequest
+  nameWithType: NativeCaptureRequest
+  fullName: PublisherStudio.BusinessObjects.Streaming.NativeCaptureRequest
+- uid: PublisherStudio.Services.Streaming.Capture.NativeCaptureSession
+  commentId: T:PublisherStudio.Services.Streaming.Capture.NativeCaptureSession
+  parent: PublisherStudio.Services.Streaming.Capture
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Capture.NativeCaptureSession.html
+  name: NativeCaptureSession
+  nameWithType: NativeCaptureSession
+  fullName: PublisherStudio.Services.Streaming.Capture.NativeCaptureSession
+- uid: PublisherStudio.BusinessObjects.Streaming
+  commentId: N:PublisherStudio.BusinessObjects.Streaming
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects.Streaming
+  nameWithType: PublisherStudio.BusinessObjects.Streaming
+  fullName: PublisherStudio.BusinessObjects.Streaming
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.Streaming.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.Streaming.html
+- uid: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.TryGet*
+  commentId: Overload:PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.TryGet
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.html#PublisherStudio_Services_Streaming_Capture_NativeCaptureRegistry_TryGet_System_Guid_PublisherStudio_Services_Streaming_Capture_NativeCaptureSession__
+  name: TryGet
+  nameWithType: NativeCaptureRegistry.TryGet
+  fullName: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.TryGet
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.Stop*
+  commentId: Overload:PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.Stop
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.html#PublisherStudio_Services_Streaming_Capture_NativeCaptureRegistry_Stop_System_Guid_
+  name: Stop
+  nameWithType: NativeCaptureRegistry.Stop
+  fullName: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.Stop
+- uid: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.Dispose*
+  commentId: Overload:PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.Dispose
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.html#PublisherStudio_Services_Streaming_Capture_NativeCaptureRegistry_Dispose
+  name: Dispose
+  nameWithType: NativeCaptureRegistry.Dispose
+  fullName: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.Dispose
+- uid: System.IDisposable.Dispose
+  commentId: M:System.IDisposable.Dispose
+  parent: System.IDisposable
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.idisposable.dispose
+  name: Dispose()
+  nameWithType: IDisposable.Dispose()
+  fullName: System.IDisposable.Dispose()
+  spec.csharp:
+  - uid: System.IDisposable.Dispose
+    name: Dispose
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.idisposable.dispose
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.IDisposable.Dispose
+    name: Dispose
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.idisposable.dispose
+  - name: (
+  - name: )

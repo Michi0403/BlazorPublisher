@@ -1,4 +1,4 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services;
 using PublisherStudio.Services.Automation;
 using PublisherStudio.Services.MediaConversion;
@@ -9,10 +9,16 @@ using System.Text.Json;
 
 namespace PublisherStudio.Services.OrganicPlugins;
 
+/// <summary>
+/// Provides organic capability catalog operations.
+/// </summary>
 public sealed class OrganicCapabilityCatalog(
     IMediaConversionService mediaConversion,
     ILogger<OrganicCapabilityCatalog> logger) : IOrganicCapabilityCatalog
 {
+    /// <summary>
+    /// Gets capabilities async.
+    /// </summary>
     public async Task<IReadOnlyList<OrganicCapabilityDescriptor>> GetCapabilitiesAsync(CancellationToken cancellationToken = default)
     {
         var media = await mediaConversion.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false);
@@ -37,6 +43,9 @@ public sealed class OrganicCapabilityCatalog(
         return capabilities;
     }
 
+    /// <summary>
+    /// Gets skills async.
+    /// </summary>
     public async Task<IReadOnlyList<OrganicSkillDescriptor>> GetSkillsAsync(CancellationToken cancellationToken = default)
     {
         var capabilities = await GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false);
@@ -60,6 +69,9 @@ public sealed class OrganicCapabilityCatalog(
             .ToList();
     }
 
+    /// <summary>
+    /// Gets UI features async.
+    /// </summary>
     public Task<IReadOnlyList<OrganicUiFeatureDescriptor>> GetUiFeaturesAsync(CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyList<OrganicUiFeatureDescriptor>>
         ([
@@ -72,6 +84,9 @@ public sealed class OrganicCapabilityCatalog(
             new() { Key = "publisherstudio.security", DisplayName = "Secure 1-Wire link", State = OrganicUiFeatureState.Enabled, RequiredCapabilityKeys = [] }
         ]);
 
+    /// <summary>
+    /// Gets hardware async.
+    /// </summary>
     public Task<IReadOnlyList<OrganicHardwareDescriptor>> GetHardwareAsync(CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyList<OrganicHardwareDescriptor>>
         ([
@@ -197,6 +212,9 @@ public sealed class OrganicCapabilityCatalog(
     };
 }
 
+/// <summary>
+/// Represents an organic work executor.
+/// </summary>
 public sealed class OrganicWorkExecutor(
     IOrganicPluginProtocolCodec codec,
     IUserInputAutomationService input,
@@ -209,6 +227,9 @@ public sealed class OrganicWorkExecutor(
     IRecurringScreenReaderService recurringScreenReader,
     ILogger<OrganicWorkExecutor> logger) : IOrganicWorkExecutor
 {
+    /// <summary>
+    /// Runs the execute async operation.
+    /// </summary>
     public async Task<string> ExecuteAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default)
     {
         var parameters = ReadParameters(envelope);
@@ -428,6 +449,9 @@ public sealed class OrganicWorkExecutor(
     private bool GetBoolean(JsonElement root, string name, bool fallback) => root.ValueKind == JsonValueKind.Object && root.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.True or JsonValueKind.False ? value.GetBoolean() : fallback;
 }
 
+/// <summary>
+/// Represents an organic work coordinator.
+/// </summary>
 public sealed class OrganicWorkCoordinator(
     IOrganicPluginProtocolCodec codec,
     IOrganicPermissionStore permissions,
@@ -437,11 +461,23 @@ public sealed class OrganicWorkCoordinator(
 {
     private readonly ConcurrentDictionary<Guid, OrganicPluginWorkItem> work = new();
     private readonly ConcurrentDictionary<string, SemaphoreSlim> workflowGates = new(StringComparer.Ordinal);
+    /// <summary>
+    /// Occurs when changed.
+    /// </summary>
     public event Action? Changed;
 
+    /// <summary>
+    /// Gets work.
+    /// </summary>
     public IReadOnlyList<OrganicPluginWorkItem> GetWork() => work.Values.OrderByDescending(item => item.CreatedUtc).Take(250).ToList();
+    /// <summary>
+    /// Runs the get operation.
+    /// </summary>
     public OrganicPluginWorkItem? Get(Guid id) => work.GetValueOrDefault(id);
 
+    /// <summary>
+    /// Runs the receive async operation.
+    /// </summary>
     public async Task<OrganicPluginWorkItem> ReceiveAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default)
     {
         var advertised = (await capabilityCatalog.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false))
@@ -500,6 +536,9 @@ public sealed class OrganicWorkCoordinator(
         return item;
     }
 
+    /// <summary>
+    /// Runs the approve async operation.
+    /// </summary>
     public async Task<OrganicPluginWorkItem?> ApproveAsync(Guid id, CancellationToken cancellationToken = default)
     {
         if (!work.TryGetValue(id, out var item) || item.Status != OrganicWorkStatus.PendingApproval) return item;
@@ -511,6 +550,9 @@ public sealed class OrganicWorkCoordinator(
         return item;
     }
 
+    /// <summary>
+    /// Updates interaction value.
+    /// </summary>
     public bool UpdateInteractionValue(Guid id, string value)
     {
         if (!work.TryGetValue(id, out var item) || item.Status != OrganicWorkStatus.PendingApproval)
@@ -537,6 +579,9 @@ public sealed class OrganicWorkCoordinator(
         return envelope.RequiresHumanInteractionOnTargetSystem ? OrganicInteractionEditor.ConfirmationOnly : OrganicInteractionEditor.None;
     }
 
+    /// <summary>
+    /// Runs the decline operation.
+    /// </summary>
     public bool Decline(Guid id, string reason)
     {
         if (!work.TryGetValue(id, out var item) || item.Status != OrganicWorkStatus.PendingApproval) return false;

@@ -1,0 +1,153 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationAnimationDirection
+  commentId: T:PublisherStudio.BusinessObjects.PublicationAnimationDirection
+  id: PublicationAnimationDirection
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationAnimationDirection.Down
+  - PublisherStudio.BusinessObjects.PublicationAnimationDirection.Left
+  - PublisherStudio.BusinessObjects.PublicationAnimationDirection.None
+  - PublisherStudio.BusinessObjects.PublicationAnimationDirection.Right
+  - PublisherStudio.BusinessObjects.PublicationAnimationDirection.Up
+  langs:
+  - csharp
+  - vb
+  name: PublicationAnimationDirection
+  nameWithType: PublicationAnimationDirection
+  fullName: PublisherStudio.BusinessObjects.PublicationAnimationDirection
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication animation direction values.
+  example: []
+  syntax:
+    content: public enum PublicationAnimationDirection
+    content.vb: Public Enum PublicationAnimationDirection
+- uid: PublisherStudio.BusinessObjects.PublicationAnimationDirection.None
+  commentId: F:PublisherStudio.BusinessObjects.PublicationAnimationDirection.None
+  id: None
+  parent: PublisherStudio.BusinessObjects.PublicationAnimationDirection
+  langs:
+  - csharp
+  - vb
+  name: None
+  nameWithType: PublicationAnimationDirection.None
+  fullName: PublisherStudio.BusinessObjects.PublicationAnimationDirection.None
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: None = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationAnimationDirection
+- uid: PublisherStudio.BusinessObjects.PublicationAnimationDirection.Left
+  commentId: F:PublisherStudio.BusinessObjects.PublicationAnimationDirection.Left
+  id: Left
+  parent: PublisherStudio.BusinessObjects.PublicationAnimationDirection
+  langs:
+  - csharp
+  - vb
+  name: Left
+  nameWithType: PublicationAnimationDirection.Left
+  fullName: PublisherStudio.BusinessObjects.PublicationAnimationDirection.Left
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Left = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationAnimationDirection
+- uid: PublisherStudio.BusinessObjects.PublicationAnimationDirection.Right
+  commentId: F:PublisherStudio.BusinessObjects.PublicationAnimationDirection.Right
+  id: Right
+  parent: PublisherStudio.BusinessObjects.PublicationAnimationDirection
+  langs:
+  - csharp
+  - vb
+  name: Right
+  nameWithType: PublicationAnimationDirection.Right
+  fullName: PublisherStudio.BusinessObjects.PublicationAnimationDirection.Right
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Right = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationAnimationDirection
+- uid: PublisherStudio.BusinessObjects.PublicationAnimationDirection.Up
+  commentId: F:PublisherStudio.BusinessObjects.PublicationAnimationDirection.Up
+  id: Up
+  parent: PublisherStudio.BusinessObjects.PublicationAnimationDirection
+  langs:
+  - csharp
+  - vb
+  name: Up
+  nameWithType: PublicationAnimationDirection.Up
+  fullName: PublisherStudio.BusinessObjects.PublicationAnimationDirection.Up
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Up = 3
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationAnimationDirection
+- uid: PublisherStudio.BusinessObjects.PublicationAnimationDirection.Down
+  commentId: F:PublisherStudio.BusinessObjects.PublicationAnimationDirection.Down
+  id: Down
+  parent: PublisherStudio.BusinessObjects.PublicationAnimationDirection
+  langs:
+  - csharp
+  - vb
+  name: Down
+  nameWithType: PublicationAnimationDirection.Down
+  fullName: PublisherStudio.BusinessObjects.PublicationAnimationDirection.Down
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Down = 4
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationAnimationDirection
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationAnimationDirection
+  commentId: T:PublisherStudio.BusinessObjects.PublicationAnimationDirection
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationAnimationDirection.html
+  name: PublicationAnimationDirection
+  nameWithType: PublicationAnimationDirection
+  fullName: PublisherStudio.BusinessObjects.PublicationAnimationDirection

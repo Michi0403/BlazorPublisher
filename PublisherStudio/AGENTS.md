@@ -164,3 +164,18 @@ The checklist must cover, where applicable:
 - a regression test for every crash, race, unreachable command or stacking defect fixed by the release.
 
 A visual feature is not release-complete merely because its renderer looks correct. It is complete only when it remains operable through the shared object-layer structure and the supported input families, and when failures do not tear down the Blazor circuit.
+
+## LocalGPT-aligned installer and release deployment
+
+PublisherStudio uses the maintained LocalGPT deployment contract with PublisherStudio names and without LocalGPT-only Ollama or learning-base actions.
+
+- The one canonical product root is `%LOCALAPPDATA%\PublisherStudio`.
+- Never route PublisherStudio through `%LOCALAPPDATA%\Programs`, the former `%LOCALAPPDATA%\BlazorPublisher` root, or a second compatibility root.
+- Application and setup release ZIPs retain their runtime wrapper directories, such as `winx64` and `setupwinx64`, and both archives extract into the same product root.
+- A no-argument setup run performs install/update, FFmpeg preparation, Desktop and Start Menu shortcut creation, and application start. It must remain a one-click operation.
+- The maintained launcher files are exactly `Install.cmd`, `Update.cmd`, and `Start.cmd`. Shortcut provisioning adds those three actions plus a direct PublisherStudio folder entry to both Desktop and Start Menu.
+- Setup may continue from a temporary copy when replacing the installed setup executable. Do not introduce a second repair executable, custom release manifest, ownership ledger, transactional deployment dialect, or whole-directory replacement workflow.
+- Normal install and update extraction must not delete the product root. Whole-root deletion remains explicit through `--force-delete` only.
+- Former `--*-blazorpublisher` switches may remain input aliases for old shortcuts, but all maintained files, messages, profiles, tests, and documentation use PublisherStudio names.
+- `Build-Release.ps1`, publish profiles, installer guards, launch profiles, repository tests, and public documentation must enforce this same contract. A conflicting repository instruction is a defect and must be replaced, not allow-listed.
+

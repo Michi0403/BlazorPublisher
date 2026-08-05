@@ -1,0 +1,415 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.WordArtPathPoint
+  commentId: T:PublisherStudio.BusinessObjects.WordArtPathPoint
+  id: WordArtPathPoint
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.WordArtPathPoint.#ctor
+  - PublisherStudio.BusinessObjects.WordArtPathPoint.Clone
+  - PublisherStudio.BusinessObjects.WordArtPathPoint.X
+  - PublisherStudio.BusinessObjects.WordArtPathPoint.Y
+  langs:
+  - csharp
+  - vb
+  name: WordArtPathPoint
+  nameWithType: WordArtPathPoint
+  fullName: PublisherStudio.BusinessObjects.WordArtPathPoint
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents a word art path point.
+  example: []
+  syntax:
+    content: public sealed class WordArtPathPoint
+    content.vb: Public NotInheritable Class WordArtPathPoint
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.BusinessObjects.WordArtPathPoint.Clone
+  commentId: M:PublisherStudio.BusinessObjects.WordArtPathPoint.Clone
+  id: Clone
+  parent: PublisherStudio.BusinessObjects.WordArtPathPoint
+  langs:
+  - csharp
+  - vb
+  name: Clone()
+  nameWithType: WordArtPathPoint.Clone()
+  fullName: PublisherStudio.BusinessObjects.WordArtPathPoint.Clone()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Runs the clone operation.
+  example: []
+  syntax:
+    content: public WordArtPathPoint Clone()
+    return:
+      type: PublisherStudio.BusinessObjects.WordArtPathPoint
+    content.vb: Public Function Clone() As WordArtPathPoint
+  overload: PublisherStudio.BusinessObjects.WordArtPathPoint.Clone*
+- uid: PublisherStudio.BusinessObjects.WordArtPathPoint.#ctor
+  commentId: M:PublisherStudio.BusinessObjects.WordArtPathPoint.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.BusinessObjects.WordArtPathPoint
+  langs:
+  - csharp
+  - vb
+  name: WordArtPathPoint()
+  nameWithType: WordArtPathPoint.WordArtPathPoint()
+  fullName: PublisherStudio.BusinessObjects.WordArtPathPoint.WordArtPathPoint()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public WordArtPathPoint()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.BusinessObjects.WordArtPathPoint.#ctor*
+  nameWithType.vb: WordArtPathPoint.New()
+  fullName.vb: PublisherStudio.BusinessObjects.WordArtPathPoint.New()
+  name.vb: New()
+- uid: PublisherStudio.BusinessObjects.WordArtPathPoint.X
+  commentId: P:PublisherStudio.BusinessObjects.WordArtPathPoint.X
+  id: X
+  parent: PublisherStudio.BusinessObjects.WordArtPathPoint
+  langs:
+  - csharp
+  - vb
+  name: X
+  nameWithType: WordArtPathPoint.X
+  fullName: PublisherStudio.BusinessObjects.WordArtPathPoint.X
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets horizontal position.
+  example: []
+  syntax:
+    content: public double X { get; set; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property X As Double
+  overload: PublisherStudio.BusinessObjects.WordArtPathPoint.X*
+- uid: PublisherStudio.BusinessObjects.WordArtPathPoint.Y
+  commentId: P:PublisherStudio.BusinessObjects.WordArtPathPoint.Y
+  id: Y
+  parent: PublisherStudio.BusinessObjects.WordArtPathPoint
+  langs:
+  - csharp
+  - vb
+  name: Y
+  nameWithType: WordArtPathPoint.Y
+  fullName: PublisherStudio.BusinessObjects.WordArtPathPoint.Y
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets vertical position.
+  example: []
+  syntax:
+    content: public double Y { get; set; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property Y As Double
+  overload: PublisherStudio.BusinessObjects.WordArtPathPoint.Y*
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.BusinessObjects.WordArtPathPoint.Clone*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtPathPoint.Clone
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtPathPoint.html#PublisherStudio_BusinessObjects_WordArtPathPoint_Clone
+  name: Clone
+  nameWithType: WordArtPathPoint.Clone
+  fullName: PublisherStudio.BusinessObjects.WordArtPathPoint.Clone
+- uid: PublisherStudio.BusinessObjects.WordArtPathPoint
+  commentId: T:PublisherStudio.BusinessObjects.WordArtPathPoint
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtPathPoint.html
+  name: WordArtPathPoint
+  nameWithType: WordArtPathPoint
+  fullName: PublisherStudio.BusinessObjects.WordArtPathPoint
+- uid: PublisherStudio.BusinessObjects.WordArtPathPoint.#ctor*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtPathPoint.#ctor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtPathPoint.html#PublisherStudio_BusinessObjects_WordArtPathPoint__ctor
+  name: WordArtPathPoint
+  nameWithType: WordArtPathPoint.WordArtPathPoint
+  fullName: PublisherStudio.BusinessObjects.WordArtPathPoint.WordArtPathPoint
+  nameWithType.vb: WordArtPathPoint.New
+  fullName.vb: PublisherStudio.BusinessObjects.WordArtPathPoint.New
+  name.vb: New
+- uid: PublisherStudio.BusinessObjects.WordArtPathPoint.X*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtPathPoint.X
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtPathPoint.html#PublisherStudio_BusinessObjects_WordArtPathPoint_X
+  name: X
+  nameWithType: WordArtPathPoint.X
+  fullName: PublisherStudio.BusinessObjects.WordArtPathPoint.X
+- uid: System.Double
+  commentId: T:System.Double
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.double
+  name: double
+  nameWithType: double
+  fullName: double
+  nameWithType.vb: Double
+  fullName.vb: Double
+  name.vb: Double
+- uid: PublisherStudio.BusinessObjects.WordArtPathPoint.Y*
+  commentId: Overload:PublisherStudio.BusinessObjects.WordArtPathPoint.Y
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtPathPoint.html#PublisherStudio_BusinessObjects_WordArtPathPoint_Y
+  name: Y
+  nameWithType: WordArtPathPoint.Y
+  fullName: PublisherStudio.BusinessObjects.WordArtPathPoint.Y

@@ -1,0 +1,92 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime
+  commentId: N:PublisherStudio.Services.Streaming.UseCases.Runtime
+  id: Runtime
+  parent: PublisherStudio.Services.Streaming.UseCases
+  children:
+  - PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities
+  - PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeUseCases
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.Services.Streaming.UseCases.Runtime
+  nameWithType: PublisherStudio.Services.Streaming.UseCases.Runtime
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime
+  type: Namespace
+  assemblies:
+  - PublisherStudio.Web
+references:
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities
+  commentId: T:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities
+  parent: PublisherStudio.Services.Streaming.UseCases.Runtime
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities.html
+  name: StreamingRuntimeCapabilities
+  nameWithType: StreamingRuntimeCapabilities
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeCapabilities
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeUseCases
+  commentId: T:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeUseCases
+  parent: PublisherStudio.Services.Streaming.UseCases.Runtime
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeUseCases.html
+  name: StreamingRuntimeUseCases
+  nameWithType: StreamingRuntimeUseCases
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeUseCases
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime
+  commentId: N:PublisherStudio.Services.Streaming.UseCases.Runtime
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.UseCases.Runtime
+  nameWithType: PublisherStudio.Services.Streaming.UseCases.Runtime
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases.Runtime
+    name: Runtime
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Runtime.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases.Runtime
+    name: Runtime
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Runtime.html

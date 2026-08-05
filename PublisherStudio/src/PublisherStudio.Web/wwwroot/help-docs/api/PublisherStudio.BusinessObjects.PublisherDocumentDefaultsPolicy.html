@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html class="publisherstudio-kawaii-docs" lang="en">
+  <head>
+    <meta charset="utf-8">
+      <title>Class PublisherDocumentDefaultsPolicy | PublisherStudio Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class PublisherDocumentDefaultsPolicy | PublisherStudio Documentation ">
+      
+      <meta name="description" content="Represents a publisher document defaults policy.">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  <link rel="stylesheet" href="../styles/publisherstudio-kawaii.css?v=6186303f7e28" data-publisherstudio-kawaii-style="true" />
+</head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="PublisherStudio">
+            PublisherStudio
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy">
+
+
+
+  <h1 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy" class="text-break">
+Class PublisherDocumentDefaultsPolicy  
+  </h1><aside class="publisherstudio-api-neko-note" role="note"><span class="publisherstudio-api-neko-mascot" aria-hidden="true">&#x1F431;&#x2009;&#x1F436;</span><span><strong>Neko & Puppy type guide</strong> · Tiny paws, tidy details: constructors, properties, methods, and events stay cuddled up with the type that owns them, nya~ woof!</span></aside>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="PublisherStudio.html">PublisherStudio</a>.<a class="xref" href="PublisherStudio.BusinessObjects.html">BusinessObjects</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>PublisherStudio.Web.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Represents a publisher document defaults policy.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed record PublisherDocumentDefaultsPolicy : IEquatable&lt;PublisherDocumentDefaultsPolicy&gt;</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">PublisherDocumentDefaultsPolicy</span></div>
+    </dd>
+  </dl>
+
+  <dl class="typelist implements">
+    <dt>Implements</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.iequatable-1">IEquatable</a>&lt;<a class="xref" href="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.html">PublisherDocumentDefaultsPolicy</a>&gt;</div>
+    </dd>
+  </dl>
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <section class="publisherstudio-api-member-panel publisherstudio-api-member-panel--constructors" data-member-kind="Constructors" style="--publisherstudio-api-accent:#a855f7;" role="region" aria-labelledby="constructors"><h2 class="section" id="constructors"><span class="publisherstudio-api-member-icon" aria-hidden="true">&#x2728;</span>Constructors
+<span class="publisherstudio-api-member-count" aria-label="1 item">1</span></h2><div class="publisherstudio-api-member-panel-body">
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy__ctor_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.#ctor*"></a>
+
+  <section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy__ctor" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.#ctor">
+  PublisherDocumentDefaultsPolicy()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public PublisherDocumentDefaultsPolicy()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </div></section></div></section><section class="publisherstudio-api-member-panel publisherstudio-api-member-panel--properties" data-member-kind="Properties" style="--publisherstudio-api-accent:#06b6d4;" role="region" aria-labelledby="properties"><h2 class="section" id="properties"><span class="publisherstudio-api-member-icon" aria-hidden="true">&#x1F43E;</span>Properties
+<span class="publisherstudio-api-member-count" aria-label="37 items">37</span></h2><div class="publisherstudio-api-member-panel-body">
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_AccentFill_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.AccentFill*"></a>
+
+  <section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_AccentFill" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.AccentFill">
+  AccentFill
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets accent fill.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string AccentFill { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_AccentHeight_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.AccentHeight*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_AccentHeight" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.AccentHeight">
+  AccentHeight
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets accent height.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double AccentHeight { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_AccentName_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.AccentName*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_AccentName" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.AccentName">
+  AccentName
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets accent name.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string AccentName { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_AccentStroke_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.AccentStroke*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_AccentStroke" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.AccentStroke">
+  AccentStroke
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets accent stroke.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string AccentStroke { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_AccentWidth_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.AccentWidth*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_AccentWidth" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.AccentWidth">
+  AccentWidth
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets accent width.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double AccentWidth { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_AccentX_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.AccentX*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_AccentX" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.AccentX">
+  AccentX
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets accent horizontal position.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double AccentX { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_AccentY_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.AccentY*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_AccentY" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.AccentY">
+  AccentY
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets accent vertical position.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double AccentY { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PageBackground_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PageBackground*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PageBackground" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PageBackground">
+  PageBackground
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets page background.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string PageBackground { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PageHeightMillimeters_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PageHeightMillimeters*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PageHeightMillimeters" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PageHeightMillimeters">
+  PageHeightMillimeters
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets page height millimeters.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double PageHeightMillimeters { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PageName_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PageName*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PageName" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PageName">
+  PageName
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets page name.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string PageName { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PagePresets_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PagePresets*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PagePresets" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PagePresets">
+  PagePresets
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets page presets.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public List&lt;PagePreset&gt; PagePresets { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1">List</a>&lt;<a class="xref" href="PublisherStudio.BusinessObjects.PagePreset.html">PagePreset</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PageWidthMillimeters_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PageWidthMillimeters*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PageWidthMillimeters" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PageWidthMillimeters">
+  PageWidthMillimeters
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets page width millimeters.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double PageWidthMillimeters { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PictureFormatVersion_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PictureFormatVersion*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PictureFormatVersion" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PictureFormatVersion">
+  PictureFormatVersion
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets picture format version.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string PictureFormatVersion { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PictureGridSpacingPixels_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PictureGridSpacingPixels*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PictureGridSpacingPixels" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PictureGridSpacingPixels">
+  PictureGridSpacingPixels
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets picture grid spacing pixels.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int PictureGridSpacingPixels { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PictureHeightPixels_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PictureHeightPixels*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PictureHeightPixels" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PictureHeightPixels">
+  PictureHeightPixels
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets picture height pixels.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int PictureHeightPixels { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PictureMaximumDimension_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PictureMaximumDimension*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PictureMaximumDimension" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PictureMaximumDimension">
+  PictureMaximumDimension
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets picture maximum dimension.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int PictureMaximumDimension { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PictureMinimumDimension_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PictureMinimumDimension*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PictureMinimumDimension" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PictureMinimumDimension">
+  PictureMinimumDimension
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets picture minimum dimension.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int PictureMinimumDimension { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PictureName_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PictureName*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PictureName" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PictureName">
+  PictureName
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets picture name.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string PictureName { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PictureOpaqueBackground_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PictureOpaqueBackground*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PictureOpaqueBackground" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PictureOpaqueBackground">
+  PictureOpaqueBackground
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets picture opaque background.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string PictureOpaqueBackground { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PictureTransparentBackground_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PictureTransparentBackground*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PictureTransparentBackground" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PictureTransparentBackground">
+  PictureTransparentBackground
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets picture transparent background.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string PictureTransparentBackground { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PictureWidthPixels_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PictureWidthPixels*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PictureWidthPixels" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PictureWidthPixels">
+  PictureWidthPixels
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets picture width pixels.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int PictureWidthPixels { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PictureZoom_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PictureZoom*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PictureZoom" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PictureZoom">
+  PictureZoom
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets picture zoom.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double PictureZoom { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PublicationFormatVersion_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PublicationFormatVersion*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PublicationFormatVersion" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PublicationFormatVersion">
+  PublicationFormatVersion
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets publication format version.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string PublicationFormatVersion { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PublicationName_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PublicationName*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PublicationName" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PublicationName">
+  PublicationName
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets publication name.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string PublicationName { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PublicationZoom_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PublicationZoom*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PublicationZoom" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.PublicationZoom">
+  PublicationZoom
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets publication zoom.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double PublicationZoom { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_StoryMarginBottomMillimeters_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.StoryMarginBottomMillimeters*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_StoryMarginBottomMillimeters" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.StoryMarginBottomMillimeters">
+  StoryMarginBottomMillimeters
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets story margin bottom millimeters.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double StoryMarginBottomMillimeters { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_StoryMarginLeftMillimeters_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.StoryMarginLeftMillimeters*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_StoryMarginLeftMillimeters" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.StoryMarginLeftMillimeters">
+  StoryMarginLeftMillimeters
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets story margin left millimeters.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double StoryMarginLeftMillimeters { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_StoryMarginRightMillimeters_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.StoryMarginRightMillimeters*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_StoryMarginRightMillimeters" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.StoryMarginRightMillimeters">
+  StoryMarginRightMillimeters
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets story margin right millimeters.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double StoryMarginRightMillimeters { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_StoryMarginTopMillimeters_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.StoryMarginTopMillimeters*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_StoryMarginTopMillimeters" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.StoryMarginTopMillimeters">
+  StoryMarginTopMillimeters
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets story margin top millimeters.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double StoryMarginTopMillimeters { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_StoryPageHeightMillimeters_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.StoryPageHeightMillimeters*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_StoryPageHeightMillimeters" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.StoryPageHeightMillimeters">
+  StoryPageHeightMillimeters
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets story page height millimeters.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double StoryPageHeightMillimeters { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_StoryPageWidthMillimeters_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.StoryPageWidthMillimeters*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_StoryPageWidthMillimeters" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.StoryPageWidthMillimeters">
+  StoryPageWidthMillimeters
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets story page width millimeters.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double StoryPageWidthMillimeters { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_TitleHeight_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.TitleHeight*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_TitleHeight" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.TitleHeight">
+  TitleHeight
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets title height.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double TitleHeight { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_TitleName_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.TitleName*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_TitleName" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.TitleName">
+  TitleName
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets title name.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string TitleName { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_TitlePreviewHtml_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.TitlePreviewHtml*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_TitlePreviewHtml" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.TitlePreviewHtml">
+  TitlePreviewHtml
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets title preview HTML.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string TitlePreviewHtml { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_TitleWidth_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.TitleWidth*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_TitleWidth" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.TitleWidth">
+  TitleWidth
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets title width.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double TitleWidth { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_TitleX_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.TitleX*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_TitleX" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.TitleX">
+  TitleX
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets title horizontal position.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double TitleX { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_TitleY_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.TitleY*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_TitleY" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.TitleY">
+  TitleY
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets title vertical position.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double TitleY { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  </div></section></div></section><section class="publisherstudio-api-member-panel publisherstudio-api-member-panel--methods" data-member-kind="Methods" style="--publisherstudio-api-accent:#3b82f6;" role="region" aria-labelledby="methods"><h2 class="section" id="methods"><span class="publisherstudio-api-member-icon" aria-hidden="true">&#x2699;&#xFE0F;</span>Methods
+<span class="publisherstudio-api-member-count" aria-label="4 items">4</span></h2><div class="publisherstudio-api-member-panel-body">
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_Equals_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.Equals*"></a>
+
+  <section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_Equals_PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.Equals(PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy)">
+  Equals(PublisherDocumentDefaultsPolicy?)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool Equals(PublisherDocumentDefaultsPolicy? other)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>other</code> <a class="xref" href="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.html">PublisherDocumentDefaultsPolicy</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_Equals_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.Equals*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_Equals_System_Object_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.Equals(System.Object)">
+  Equals(object?)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override bool Equals(object? obj)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>obj</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_GetHashCode_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.GetHashCode*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_GetHashCode" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.GetHashCode">
+  GetHashCode()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override int GetHashCode()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_ToString_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.ToString*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_ToString" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.ToString">
+  ToString()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override string ToString()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  </div></section></div></section><section class="publisherstudio-api-member-panel publisherstudio-api-member-panel--operators" data-member-kind="Operators" style="--publisherstudio-api-accent:#f97316;" role="region" aria-labelledby="operators"><h2 class="section" id="operators"><span class="publisherstudio-api-member-icon" aria-hidden="true">&#x2797;</span>Operators
+<span class="publisherstudio-api-member-count" aria-label="2 items">2</span></h2><div class="publisherstudio-api-member-panel-body">
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_op_Equality_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.op_Equality*"></a>
+
+  <section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_op_Equality_PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.op_Equality(PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy,PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy)">
+  operator ==(PublisherDocumentDefaultsPolicy?, PublisherDocumentDefaultsPolicy?)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static bool operator ==(PublisherDocumentDefaultsPolicy? left, PublisherDocumentDefaultsPolicy? right)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>left</code> <a class="xref" href="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.html">PublisherDocumentDefaultsPolicy</a></dt>
+    <dd></dd>
+    <dt><code>right</code> <a class="xref" href="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.html">PublisherDocumentDefaultsPolicy</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_op_Inequality_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.op_Inequality*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_op_Inequality_PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_PublisherStudio_BusinessObjects_PublisherDocumentDefaultsPolicy_" data-uid="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.op_Inequality(PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy,PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy)">
+  operator !=(PublisherDocumentDefaultsPolicy?, PublisherDocumentDefaultsPolicy?)
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static bool operator !=(PublisherDocumentDefaultsPolicy? left, PublisherDocumentDefaultsPolicy? right)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>left</code> <a class="xref" href="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.html">PublisherDocumentDefaultsPolicy</a></dt>
+    <dd></dd>
+    <dt><code>right</code> <a class="xref" href="PublisherStudio.BusinessObjects.PublisherDocumentDefaultsPolicy.html">PublisherDocumentDefaultsPolicy</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+</div></section>
+</div></section></article>
+
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          PublisherStudio 2.1.1 · generated documentation
+        </div>
+      </div>
+    </footer>
+  <script type="module" src="../styles/publisherstudio-kawaii.js?v=2cbe66e9efd7" data-publisherstudio-kawaii-script="true"></script>
+</body>
+</html>

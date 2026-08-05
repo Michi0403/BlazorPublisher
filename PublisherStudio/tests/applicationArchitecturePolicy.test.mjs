@@ -16,7 +16,7 @@ test('architecture policies use zero debt baselines and preserve legal bootstrap
   assert.deepEqual(JSON.parse(read('build/method-diagnostics-baseline.json')), []);
   assert.deepEqual(JSON.parse(read('build/runtime-value-ownership-baseline.json')), []);
 
-  const policy = read('docs/SAFE_STATIC_RUNTIME_AND_DIAGNOSTICS_POLICY.md');
+  const policy = read('docs/articles/architecture.md');
   assert.match(policy, /Program\.cs/);
   assert.match(policy, /P\/Invoke and native exports belong behind injected lifetime services/);
   assert.match(policy, /Records, DTOs, constructors/);

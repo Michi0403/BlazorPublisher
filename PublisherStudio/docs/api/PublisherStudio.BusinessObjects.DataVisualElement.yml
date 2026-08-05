@@ -1,0 +1,1673 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.DataVisualElement
+  commentId: T:PublisherStudio.BusinessObjects.DataVisualElement
+  id: DataVisualElement
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.DataVisualElement.#ctor
+  - PublisherStudio.BusinessObjects.DataVisualElement.AggregationMode
+  - PublisherStudio.BusinessObjects.DataVisualElement.ArgumentField
+  - PublisherStudio.BusinessObjects.DataVisualElement.ArgumentMode
+  - PublisherStudio.BusinessObjects.DataVisualElement.Background
+  - PublisherStudio.BusinessObjects.DataVisualElement.BorderColor
+  - PublisherStudio.BusinessObjects.DataVisualElement.BorderWidthMm
+  - PublisherStudio.BusinessObjects.DataVisualElement.CartesianStyle
+  - PublisherStudio.BusinessObjects.DataVisualElement.CloseValueField
+  - PublisherStudio.BusinessObjects.DataVisualElement.DataObjectId
+  - PublisherStudio.BusinessObjects.DataVisualElement.HighValueField
+  - PublisherStudio.BusinessObjects.DataVisualElement.Kind
+  - PublisherStudio.BusinessObjects.DataVisualElement.LowValueField
+  - PublisherStudio.BusinessObjects.DataVisualElement.MaximumValue
+  - PublisherStudio.BusinessObjects.DataVisualElement.MinimumValue
+  - PublisherStudio.BusinessObjects.DataVisualElement.OpenValueField
+  - PublisherStudio.BusinessObjects.DataVisualElement.ParentField
+  - PublisherStudio.BusinessObjects.DataVisualElement.PieStyle
+  - PublisherStudio.BusinessObjects.DataVisualElement.PolarStyle
+  - PublisherStudio.BusinessObjects.DataVisualElement.RowLimit
+  - PublisherStudio.BusinessObjects.DataVisualElement.SeriesField
+  - PublisherStudio.BusinessObjects.DataVisualElement.ShowLabels
+  - PublisherStudio.BusinessObjects.DataVisualElement.ShowLegend
+  - PublisherStudio.BusinessObjects.DataVisualElement.ShowTitle
+  - PublisherStudio.BusinessObjects.DataVisualElement.SizeField
+  - PublisherStudio.BusinessObjects.DataVisualElement.SortMode
+  - PublisherStudio.BusinessObjects.DataVisualElement.SparklineStyle
+  - PublisherStudio.BusinessObjects.DataVisualElement.TableShowFilterRow
+  - PublisherStudio.BusinessObjects.DataVisualElement.TableShowHeader
+  - PublisherStudio.BusinessObjects.DataVisualElement.TargetField
+  - PublisherStudio.BusinessObjects.DataVisualElement.Title
+  - PublisherStudio.BusinessObjects.DataVisualElement.ValueFields
+  - PublisherStudio.BusinessObjects.DataVisualElement.VisualKind
+  langs:
+  - csharp
+  - vb
+  name: DataVisualElement
+  nameWithType: DataVisualElement
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents a data visual element.
+  example: []
+  syntax:
+    content: 'public sealed class DataVisualElement : PublicationElement'
+    content.vb: Public NotInheritable Class DataVisualElement Inherits PublicationElement
+  inheritance:
+  - System.Object
+  - PublisherStudio.BusinessObjects.PublicationElement
+  inheritedMembers:
+  - PublisherStudio.BusinessObjects.PublicationElement.Id
+  - PublisherStudio.BusinessObjects.PublicationElement.Name
+  - PublisherStudio.BusinessObjects.PublicationElement.X
+  - PublisherStudio.BusinessObjects.PublicationElement.Y
+  - PublisherStudio.BusinessObjects.PublicationElement.Width
+  - PublisherStudio.BusinessObjects.PublicationElement.Height
+  - PublisherStudio.BusinessObjects.PublicationElement.Rotation
+  - PublisherStudio.BusinessObjects.PublicationElement.ZIndex
+  - PublisherStudio.BusinessObjects.PublicationElement.Visible
+  - PublisherStudio.BusinessObjects.PublicationElement.Locked
+  - PublisherStudio.BusinessObjects.PublicationElement.HiddenAtPresentationStart
+  - PublisherStudio.BusinessObjects.PublicationElement.GroupId
+  - PublisherStudio.BusinessObjects.PublicationElement.Animations
+  - PublisherStudio.BusinessObjects.PublicationElement.Interaction
+  - PublisherStudio.BusinessObjects.PublicationElement.ConnectorPorts
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.#ctor
+  commentId: M:PublisherStudio.BusinessObjects.DataVisualElement.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: DataVisualElement()
+  nameWithType: DataVisualElement.DataVisualElement()
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.DataVisualElement()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public DataVisualElement()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.#ctor*
+  nameWithType.vb: DataVisualElement.New()
+  fullName.vb: PublisherStudio.BusinessObjects.DataVisualElement.New()
+  name.vb: New()
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.Kind
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.Kind
+  id: Kind
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: Kind
+  nameWithType: DataVisualElement.Kind
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.Kind
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets kind.
+  example: []
+  syntax:
+    content: public override PublicationElementKind Kind { get; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationElementKind
+    content.vb: Public Overrides ReadOnly Property Kind As PublicationElementKind
+  overridden: PublisherStudio.BusinessObjects.PublicationElement.Kind
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.Kind*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.DataObjectId
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.DataObjectId
+  id: DataObjectId
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: DataObjectId
+  nameWithType: DataVisualElement.DataObjectId
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.DataObjectId
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets data object identifier.
+  example: []
+  syntax:
+    content: public Guid DataObjectId { get; set; }
+    parameters: []
+    return:
+      type: System.Guid
+    content.vb: Public Property DataObjectId As Guid
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.DataObjectId*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.VisualKind
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.VisualKind
+  id: VisualKind
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: VisualKind
+  nameWithType: DataVisualElement.VisualKind
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.VisualKind
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets visual kind.
+  example: []
+  syntax:
+    content: public DataVisualKind VisualKind { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualKind
+    content.vb: Public Property VisualKind As DataVisualKind
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.VisualKind*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.CartesianStyle
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.CartesianStyle
+  id: CartesianStyle
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: CartesianStyle
+  nameWithType: DataVisualElement.CartesianStyle
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.CartesianStyle
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets cartesian style.
+  example: []
+  syntax:
+    content: public CartesianChartStyle CartesianStyle { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.CartesianChartStyle
+    content.vb: Public Property CartesianStyle As CartesianChartStyle
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.CartesianStyle*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.PieStyle
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.PieStyle
+  id: PieStyle
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: PieStyle
+  nameWithType: DataVisualElement.PieStyle
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.PieStyle
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets pie style.
+  example: []
+  syntax:
+    content: public PieChartStyle PieStyle { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.PieChartStyle
+    content.vb: Public Property PieStyle As PieChartStyle
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.PieStyle*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.PolarStyle
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.PolarStyle
+  id: PolarStyle
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: PolarStyle
+  nameWithType: DataVisualElement.PolarStyle
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.PolarStyle
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets polar style.
+  example: []
+  syntax:
+    content: public PolarChartStyle PolarStyle { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.PolarChartStyle
+    content.vb: Public Property PolarStyle As PolarChartStyle
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.PolarStyle*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.SparklineStyle
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.SparklineStyle
+  id: SparklineStyle
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: SparklineStyle
+  nameWithType: DataVisualElement.SparklineStyle
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.SparklineStyle
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets sparkline style.
+  example: []
+  syntax:
+    content: public SparklineChartStyle SparklineStyle { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.SparklineChartStyle
+    content.vb: Public Property SparklineStyle As SparklineChartStyle
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.SparklineStyle*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.Title
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.Title
+  id: Title
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: Title
+  nameWithType: DataVisualElement.Title
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.Title
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets title.
+  example: []
+  syntax:
+    content: public string Title { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Title As String
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.Title*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.ArgumentField
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.ArgumentField
+  id: ArgumentField
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: ArgumentField
+  nameWithType: DataVisualElement.ArgumentField
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.ArgumentField
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets argument field.
+  example: []
+  syntax:
+    content: public string ArgumentField { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property ArgumentField As String
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.ArgumentField*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.SeriesField
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.SeriesField
+  id: SeriesField
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: SeriesField
+  nameWithType: DataVisualElement.SeriesField
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.SeriesField
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets series field.
+  example: []
+  syntax:
+    content: public string SeriesField { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property SeriesField As String
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.SeriesField*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.ArgumentMode
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.ArgumentMode
+  id: ArgumentMode
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: ArgumentMode
+  nameWithType: DataVisualElement.ArgumentMode
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.ArgumentMode
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets argument mode.
+  example: []
+  syntax:
+    content: public DataVisualArgumentMode ArgumentMode { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualArgumentMode
+    content.vb: Public Property ArgumentMode As DataVisualArgumentMode
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.ArgumentMode*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.AggregationMode
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.AggregationMode
+  id: AggregationMode
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: AggregationMode
+  nameWithType: DataVisualElement.AggregationMode
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.AggregationMode
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets aggregation mode.
+  example: []
+  syntax:
+    content: public DataVisualAggregationMode AggregationMode { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualAggregationMode
+    content.vb: Public Property AggregationMode As DataVisualAggregationMode
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.AggregationMode*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.SortMode
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.SortMode
+  id: SortMode
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: SortMode
+  nameWithType: DataVisualElement.SortMode
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.SortMode
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets sort mode.
+  example: []
+  syntax:
+    content: public DataVisualSortMode SortMode { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualSortMode
+    content.vb: Public Property SortMode As DataVisualSortMode
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.SortMode*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.ValueFields
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.ValueFields
+  id: ValueFields
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: ValueFields
+  nameWithType: DataVisualElement.ValueFields
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.ValueFields
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets value fields.
+  example: []
+  syntax:
+    content: public List<string> ValueFields { get; set; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.List{System.String}
+    content.vb: Public Property ValueFields As List(Of String)
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.ValueFields*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.LowValueField
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.LowValueField
+  id: LowValueField
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: LowValueField
+  nameWithType: DataVisualElement.LowValueField
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.LowValueField
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets low value field.
+  example: []
+  syntax:
+    content: public string LowValueField { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property LowValueField As String
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.LowValueField*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.HighValueField
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.HighValueField
+  id: HighValueField
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: HighValueField
+  nameWithType: DataVisualElement.HighValueField
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.HighValueField
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets high value field.
+  example: []
+  syntax:
+    content: public string HighValueField { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property HighValueField As String
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.HighValueField*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.OpenValueField
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.OpenValueField
+  id: OpenValueField
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: OpenValueField
+  nameWithType: DataVisualElement.OpenValueField
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.OpenValueField
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets open value field.
+  example: []
+  syntax:
+    content: public string OpenValueField { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property OpenValueField As String
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.OpenValueField*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.CloseValueField
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.CloseValueField
+  id: CloseValueField
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: CloseValueField
+  nameWithType: DataVisualElement.CloseValueField
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.CloseValueField
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets close value field.
+  example: []
+  syntax:
+    content: public string CloseValueField { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property CloseValueField As String
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.CloseValueField*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.SizeField
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.SizeField
+  id: SizeField
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: SizeField
+  nameWithType: DataVisualElement.SizeField
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.SizeField
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets size field.
+  example: []
+  syntax:
+    content: public string SizeField { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property SizeField As String
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.SizeField*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.TargetField
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.TargetField
+  id: TargetField
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: TargetField
+  nameWithType: DataVisualElement.TargetField
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.TargetField
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets target field.
+  example: []
+  syntax:
+    content: public string TargetField { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property TargetField As String
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.TargetField*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.ParentField
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.ParentField
+  id: ParentField
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: ParentField
+  nameWithType: DataVisualElement.ParentField
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.ParentField
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets parent field.
+  example: []
+  syntax:
+    content: public string ParentField { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property ParentField As String
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.ParentField*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.ShowLegend
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.ShowLegend
+  id: ShowLegend
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: ShowLegend
+  nameWithType: DataVisualElement.ShowLegend
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.ShowLegend
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets show legend.
+  example: []
+  syntax:
+    content: public bool ShowLegend { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property ShowLegend As Boolean
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.ShowLegend*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.ShowLabels
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.ShowLabels
+  id: ShowLabels
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: ShowLabels
+  nameWithType: DataVisualElement.ShowLabels
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.ShowLabels
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets show labels.
+  example: []
+  syntax:
+    content: public bool ShowLabels { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property ShowLabels As Boolean
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.ShowLabels*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.ShowTitle
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.ShowTitle
+  id: ShowTitle
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: ShowTitle
+  nameWithType: DataVisualElement.ShowTitle
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.ShowTitle
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets show title.
+  example: []
+  syntax:
+    content: public bool ShowTitle { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property ShowTitle As Boolean
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.ShowTitle*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.TableShowHeader
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.TableShowHeader
+  id: TableShowHeader
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: TableShowHeader
+  nameWithType: DataVisualElement.TableShowHeader
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.TableShowHeader
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets table show header.
+  example: []
+  syntax:
+    content: public bool TableShowHeader { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property TableShowHeader As Boolean
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.TableShowHeader*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.TableShowFilterRow
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.TableShowFilterRow
+  id: TableShowFilterRow
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: TableShowFilterRow
+  nameWithType: DataVisualElement.TableShowFilterRow
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.TableShowFilterRow
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets table show filter row.
+  example: []
+  syntax:
+    content: public bool TableShowFilterRow { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property TableShowFilterRow As Boolean
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.TableShowFilterRow*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.RowLimit
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.RowLimit
+  id: RowLimit
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: RowLimit
+  nameWithType: DataVisualElement.RowLimit
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.RowLimit
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets row limit.
+  example: []
+  syntax:
+    content: public int RowLimit { get; set; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property RowLimit As Integer
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.RowLimit*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.MinimumValue
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.MinimumValue
+  id: MinimumValue
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: MinimumValue
+  nameWithType: DataVisualElement.MinimumValue
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.MinimumValue
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets minimum value.
+  example: []
+  syntax:
+    content: public double MinimumValue { get; set; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property MinimumValue As Double
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.MinimumValue*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.MaximumValue
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.MaximumValue
+  id: MaximumValue
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: MaximumValue
+  nameWithType: DataVisualElement.MaximumValue
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.MaximumValue
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets maximum value.
+  example: []
+  syntax:
+    content: public double MaximumValue { get; set; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property MaximumValue As Double
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.MaximumValue*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.Background
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.Background
+  id: Background
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: Background
+  nameWithType: DataVisualElement.Background
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.Background
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets background.
+  example: []
+  syntax:
+    content: public string Background { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Background As String
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.Background*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.BorderColor
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.BorderColor
+  id: BorderColor
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: BorderColor
+  nameWithType: DataVisualElement.BorderColor
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.BorderColor
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets border color.
+  example: []
+  syntax:
+    content: public string BorderColor { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property BorderColor As String
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.BorderColor*
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.BorderWidthMm
+  commentId: P:PublisherStudio.BusinessObjects.DataVisualElement.BorderWidthMm
+  id: BorderWidthMm
+  parent: PublisherStudio.BusinessObjects.DataVisualElement
+  langs:
+  - csharp
+  - vb
+  name: BorderWidthMm
+  nameWithType: DataVisualElement.BorderWidthMm
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.BorderWidthMm
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets border width millimetres.
+  example: []
+  syntax:
+    content: public double BorderWidthMm { get; set; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property BorderWidthMm As Double
+  overload: PublisherStudio.BusinessObjects.DataVisualElement.BorderWidthMm*
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: PublisherStudio.BusinessObjects.PublicationElement
+  commentId: T:PublisherStudio.BusinessObjects.PublicationElement
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html
+  name: PublicationElement
+  nameWithType: PublicationElement
+  fullName: PublisherStudio.BusinessObjects.PublicationElement
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Id
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Id
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Id
+  name: Id
+  nameWithType: PublicationElement.Id
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Id
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Name
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Name
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Name
+  name: Name
+  nameWithType: PublicationElement.Name
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Name
+- uid: PublisherStudio.BusinessObjects.PublicationElement.X
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.X
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_X
+  name: X
+  nameWithType: PublicationElement.X
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.X
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Y
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Y
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Y
+  name: Y
+  nameWithType: PublicationElement.Y
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Y
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Width
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Width
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Width
+  name: Width
+  nameWithType: PublicationElement.Width
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Width
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Height
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Height
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Height
+  name: Height
+  nameWithType: PublicationElement.Height
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Height
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Rotation
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Rotation
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Rotation
+  name: Rotation
+  nameWithType: PublicationElement.Rotation
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Rotation
+- uid: PublisherStudio.BusinessObjects.PublicationElement.ZIndex
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.ZIndex
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_ZIndex
+  name: ZIndex
+  nameWithType: PublicationElement.ZIndex
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.ZIndex
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Visible
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Visible
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Visible
+  name: Visible
+  nameWithType: PublicationElement.Visible
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Visible
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Locked
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Locked
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Locked
+  name: Locked
+  nameWithType: PublicationElement.Locked
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Locked
+- uid: PublisherStudio.BusinessObjects.PublicationElement.HiddenAtPresentationStart
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.HiddenAtPresentationStart
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_HiddenAtPresentationStart
+  name: HiddenAtPresentationStart
+  nameWithType: PublicationElement.HiddenAtPresentationStart
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.HiddenAtPresentationStart
+- uid: PublisherStudio.BusinessObjects.PublicationElement.GroupId
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.GroupId
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_GroupId
+  name: GroupId
+  nameWithType: PublicationElement.GroupId
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.GroupId
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Animations
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Animations
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Animations
+  name: Animations
+  nameWithType: PublicationElement.Animations
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Animations
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Interaction
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Interaction
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Interaction
+  name: Interaction
+  nameWithType: PublicationElement.Interaction
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Interaction
+- uid: PublisherStudio.BusinessObjects.PublicationElement.ConnectorPorts
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.ConnectorPorts
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_ConnectorPorts
+  name: ConnectorPorts
+  nameWithType: PublicationElement.ConnectorPorts
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.ConnectorPorts
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.#ctor*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.#ctor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement__ctor
+  name: DataVisualElement
+  nameWithType: DataVisualElement.DataVisualElement
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.DataVisualElement
+  nameWithType.vb: DataVisualElement.New
+  fullName.vb: PublisherStudio.BusinessObjects.DataVisualElement.New
+  name.vb: New
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Kind
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Kind
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Kind
+  name: Kind
+  nameWithType: PublicationElement.Kind
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Kind
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.Kind*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.Kind
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_Kind
+  name: Kind
+  nameWithType: DataVisualElement.Kind
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.Kind
+- uid: PublisherStudio.BusinessObjects.PublicationElementKind
+  commentId: T:PublisherStudio.BusinessObjects.PublicationElementKind
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElementKind.html
+  name: PublicationElementKind
+  nameWithType: PublicationElementKind
+  fullName: PublisherStudio.BusinessObjects.PublicationElementKind
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.DataObjectId*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.DataObjectId
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_DataObjectId
+  name: DataObjectId
+  nameWithType: DataVisualElement.DataObjectId
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.DataObjectId
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.VisualKind*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.VisualKind
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_VisualKind
+  name: VisualKind
+  nameWithType: DataVisualElement.VisualKind
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.VisualKind
+- uid: PublisherStudio.BusinessObjects.DataVisualKind
+  commentId: T:PublisherStudio.BusinessObjects.DataVisualKind
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualKind.html
+  name: DataVisualKind
+  nameWithType: DataVisualKind
+  fullName: PublisherStudio.BusinessObjects.DataVisualKind
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.CartesianStyle*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.CartesianStyle
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_CartesianStyle
+  name: CartesianStyle
+  nameWithType: DataVisualElement.CartesianStyle
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.CartesianStyle
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle
+  commentId: T:PublisherStudio.BusinessObjects.CartesianChartStyle
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.CartesianChartStyle.html
+  name: CartesianChartStyle
+  nameWithType: CartesianChartStyle
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.PieStyle*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.PieStyle
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_PieStyle
+  name: PieStyle
+  nameWithType: DataVisualElement.PieStyle
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.PieStyle
+- uid: PublisherStudio.BusinessObjects.PieChartStyle
+  commentId: T:PublisherStudio.BusinessObjects.PieChartStyle
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PieChartStyle.html
+  name: PieChartStyle
+  nameWithType: PieChartStyle
+  fullName: PublisherStudio.BusinessObjects.PieChartStyle
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.PolarStyle*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.PolarStyle
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_PolarStyle
+  name: PolarStyle
+  nameWithType: DataVisualElement.PolarStyle
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.PolarStyle
+- uid: PublisherStudio.BusinessObjects.PolarChartStyle
+  commentId: T:PublisherStudio.BusinessObjects.PolarChartStyle
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PolarChartStyle.html
+  name: PolarChartStyle
+  nameWithType: PolarChartStyle
+  fullName: PublisherStudio.BusinessObjects.PolarChartStyle
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.SparklineStyle*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.SparklineStyle
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_SparklineStyle
+  name: SparklineStyle
+  nameWithType: DataVisualElement.SparklineStyle
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.SparklineStyle
+- uid: PublisherStudio.BusinessObjects.SparklineChartStyle
+  commentId: T:PublisherStudio.BusinessObjects.SparklineChartStyle
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.SparklineChartStyle.html
+  name: SparklineChartStyle
+  nameWithType: SparklineChartStyle
+  fullName: PublisherStudio.BusinessObjects.SparklineChartStyle
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.Title*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.Title
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_Title
+  name: Title
+  nameWithType: DataVisualElement.Title
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.Title
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.ArgumentField*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.ArgumentField
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_ArgumentField
+  name: ArgumentField
+  nameWithType: DataVisualElement.ArgumentField
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.ArgumentField
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.SeriesField*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.SeriesField
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_SeriesField
+  name: SeriesField
+  nameWithType: DataVisualElement.SeriesField
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.SeriesField
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.ArgumentMode*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.ArgumentMode
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_ArgumentMode
+  name: ArgumentMode
+  nameWithType: DataVisualElement.ArgumentMode
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.ArgumentMode
+- uid: PublisherStudio.BusinessObjects.DataVisualArgumentMode
+  commentId: T:PublisherStudio.BusinessObjects.DataVisualArgumentMode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualArgumentMode.html
+  name: DataVisualArgumentMode
+  nameWithType: DataVisualArgumentMode
+  fullName: PublisherStudio.BusinessObjects.DataVisualArgumentMode
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.AggregationMode*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.AggregationMode
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_AggregationMode
+  name: AggregationMode
+  nameWithType: DataVisualElement.AggregationMode
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.AggregationMode
+- uid: PublisherStudio.BusinessObjects.DataVisualAggregationMode
+  commentId: T:PublisherStudio.BusinessObjects.DataVisualAggregationMode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualAggregationMode.html
+  name: DataVisualAggregationMode
+  nameWithType: DataVisualAggregationMode
+  fullName: PublisherStudio.BusinessObjects.DataVisualAggregationMode
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.SortMode*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.SortMode
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_SortMode
+  name: SortMode
+  nameWithType: DataVisualElement.SortMode
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.SortMode
+- uid: PublisherStudio.BusinessObjects.DataVisualSortMode
+  commentId: T:PublisherStudio.BusinessObjects.DataVisualSortMode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualSortMode.html
+  name: DataVisualSortMode
+  nameWithType: DataVisualSortMode
+  fullName: PublisherStudio.BusinessObjects.DataVisualSortMode
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.ValueFields*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.ValueFields
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_ValueFields
+  name: ValueFields
+  nameWithType: DataVisualElement.ValueFields
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.ValueFields
+- uid: System.Collections.Generic.List{System.String}
+  commentId: T:System.Collections.Generic.List{System.String}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.List`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<string>
+  nameWithType: List<string>
+  fullName: System.Collections.Generic.List<string>
+  nameWithType.vb: List(Of String)
+  fullName.vb: System.Collections.Generic.List(Of String)
+  name.vb: List(Of String)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: System.Collections.Generic.List`1
+  commentId: T:System.Collections.Generic.List`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<T>
+  nameWithType: List<T>
+  fullName: System.Collections.Generic.List<T>
+  nameWithType.vb: List(Of T)
+  fullName.vb: System.Collections.Generic.List(Of T)
+  name.vb: List(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.LowValueField*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.LowValueField
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_LowValueField
+  name: LowValueField
+  nameWithType: DataVisualElement.LowValueField
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.LowValueField
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.HighValueField*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.HighValueField
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_HighValueField
+  name: HighValueField
+  nameWithType: DataVisualElement.HighValueField
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.HighValueField
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.OpenValueField*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.OpenValueField
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_OpenValueField
+  name: OpenValueField
+  nameWithType: DataVisualElement.OpenValueField
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.OpenValueField
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.CloseValueField*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.CloseValueField
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_CloseValueField
+  name: CloseValueField
+  nameWithType: DataVisualElement.CloseValueField
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.CloseValueField
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.SizeField*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.SizeField
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_SizeField
+  name: SizeField
+  nameWithType: DataVisualElement.SizeField
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.SizeField
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.TargetField*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.TargetField
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_TargetField
+  name: TargetField
+  nameWithType: DataVisualElement.TargetField
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.TargetField
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.ParentField*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.ParentField
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_ParentField
+  name: ParentField
+  nameWithType: DataVisualElement.ParentField
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.ParentField
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.ShowLegend*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.ShowLegend
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_ShowLegend
+  name: ShowLegend
+  nameWithType: DataVisualElement.ShowLegend
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.ShowLegend
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.ShowLabels*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.ShowLabels
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_ShowLabels
+  name: ShowLabels
+  nameWithType: DataVisualElement.ShowLabels
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.ShowLabels
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.ShowTitle*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.ShowTitle
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_ShowTitle
+  name: ShowTitle
+  nameWithType: DataVisualElement.ShowTitle
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.ShowTitle
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.TableShowHeader*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.TableShowHeader
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_TableShowHeader
+  name: TableShowHeader
+  nameWithType: DataVisualElement.TableShowHeader
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.TableShowHeader
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.TableShowFilterRow*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.TableShowFilterRow
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_TableShowFilterRow
+  name: TableShowFilterRow
+  nameWithType: DataVisualElement.TableShowFilterRow
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.TableShowFilterRow
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.RowLimit*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.RowLimit
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_RowLimit
+  name: RowLimit
+  nameWithType: DataVisualElement.RowLimit
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.RowLimit
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.MinimumValue*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.MinimumValue
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_MinimumValue
+  name: MinimumValue
+  nameWithType: DataVisualElement.MinimumValue
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.MinimumValue
+- uid: System.Double
+  commentId: T:System.Double
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.double
+  name: double
+  nameWithType: double
+  fullName: double
+  nameWithType.vb: Double
+  fullName.vb: Double
+  name.vb: Double
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.MaximumValue*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.MaximumValue
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_MaximumValue
+  name: MaximumValue
+  nameWithType: DataVisualElement.MaximumValue
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.MaximumValue
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.Background*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.Background
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_Background
+  name: Background
+  nameWithType: DataVisualElement.Background
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.Background
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.BorderColor*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.BorderColor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_BorderColor
+  name: BorderColor
+  nameWithType: DataVisualElement.BorderColor
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.BorderColor
+- uid: PublisherStudio.BusinessObjects.DataVisualElement.BorderWidthMm*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataVisualElement.BorderWidthMm
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html#PublisherStudio_BusinessObjects_DataVisualElement_BorderWidthMm
+  name: BorderWidthMm
+  nameWithType: DataVisualElement.BorderWidthMm
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement.BorderWidthMm

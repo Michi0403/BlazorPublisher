@@ -1,0 +1,115 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.SignalGesture
+  commentId: T:PublisherStudio.BusinessObjects.SignalGesture
+  id: SignalGesture
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.SignalGesture.Click
+  - PublisherStudio.BusinessObjects.SignalGesture.Hover
+  - PublisherStudio.BusinessObjects.SignalGesture.None
+  langs:
+  - csharp
+  - vb
+  name: SignalGesture
+  nameWithType: SignalGesture
+  fullName: PublisherStudio.BusinessObjects.SignalGesture
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported signal gesture values.
+  example: []
+  syntax:
+    content: public enum SignalGesture
+    content.vb: Public Enum SignalGesture
+- uid: PublisherStudio.BusinessObjects.SignalGesture.None
+  commentId: F:PublisherStudio.BusinessObjects.SignalGesture.None
+  id: None
+  parent: PublisherStudio.BusinessObjects.SignalGesture
+  langs:
+  - csharp
+  - vb
+  name: None
+  nameWithType: SignalGesture.None
+  fullName: PublisherStudio.BusinessObjects.SignalGesture.None
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: None = 0
+    return:
+      type: PublisherStudio.BusinessObjects.SignalGesture
+- uid: PublisherStudio.BusinessObjects.SignalGesture.Click
+  commentId: F:PublisherStudio.BusinessObjects.SignalGesture.Click
+  id: Click
+  parent: PublisherStudio.BusinessObjects.SignalGesture
+  langs:
+  - csharp
+  - vb
+  name: Click
+  nameWithType: SignalGesture.Click
+  fullName: PublisherStudio.BusinessObjects.SignalGesture.Click
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Click = 1
+    return:
+      type: PublisherStudio.BusinessObjects.SignalGesture
+- uid: PublisherStudio.BusinessObjects.SignalGesture.Hover
+  commentId: F:PublisherStudio.BusinessObjects.SignalGesture.Hover
+  id: Hover
+  parent: PublisherStudio.BusinessObjects.SignalGesture
+  langs:
+  - csharp
+  - vb
+  name: Hover
+  nameWithType: SignalGesture.Hover
+  fullName: PublisherStudio.BusinessObjects.SignalGesture.Hover
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Hover = 2
+    return:
+      type: PublisherStudio.BusinessObjects.SignalGesture
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.SignalGesture
+  commentId: T:PublisherStudio.BusinessObjects.SignalGesture
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.SignalGesture.html
+  name: SignalGesture
+  nameWithType: SignalGesture
+  fullName: PublisherStudio.BusinessObjects.SignalGesture

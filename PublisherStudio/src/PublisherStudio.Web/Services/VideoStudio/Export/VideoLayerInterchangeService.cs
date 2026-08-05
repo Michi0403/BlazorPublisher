@@ -1,9 +1,12 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.OpenScad;
 
 namespace PublisherStudio.Services.VideoStudio.Export;
 
+/// <summary>
+/// Defines the video layer interchange service contract.
+/// </summary>
 public interface IVideoLayerInterchangeService
 {
     VideoEffectLayer CreateDefaultBlobLayer(string? name = null);
@@ -21,6 +24,9 @@ public sealed class VideoLayerInterchangeService(
     IOpenScadVideoLayerAdapter openScad,
     IBrowserRuntimeTemplateService browserRuntime) : IVideoLayerInterchangeService
 {
+    /// <summary>
+    /// Creates default blob layer.
+    /// </summary>
     public VideoEffectLayer CreateDefaultBlobLayer(string? name = null)
     {
         var layer = new VideoEffectLayer
@@ -58,8 +64,14 @@ public sealed class VideoLayerInterchangeService(
         return layer;
     }
 
+    /// <summary>
+    /// Creates open scad.
+    /// </summary>
     public string CreateOpenScad(VideoEffectLayer layer) => openScad.CreateScript(layer);
 
+    /// <summary>
+    /// Creates mainframe insert.
+    /// </summary>
     public VideoLayerMainframeInsertRequest CreateMainframeInsert(VideoEffectLayer layer)
     {
         ArgumentNullException.ThrowIfNull(layer);

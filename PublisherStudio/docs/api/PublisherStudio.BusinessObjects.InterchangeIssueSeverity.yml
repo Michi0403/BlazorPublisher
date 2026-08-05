@@ -1,0 +1,115 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.InterchangeIssueSeverity
+  commentId: T:PublisherStudio.BusinessObjects.InterchangeIssueSeverity
+  id: InterchangeIssueSeverity
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.InterchangeIssueSeverity.Information
+  - PublisherStudio.BusinessObjects.InterchangeIssueSeverity.Loss
+  - PublisherStudio.BusinessObjects.InterchangeIssueSeverity.Warning
+  langs:
+  - csharp
+  - vb
+  name: InterchangeIssueSeverity
+  nameWithType: InterchangeIssueSeverity
+  fullName: PublisherStudio.BusinessObjects.InterchangeIssueSeverity
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported interchange issue severity values.
+  example: []
+  syntax:
+    content: public enum InterchangeIssueSeverity
+    content.vb: Public Enum InterchangeIssueSeverity
+- uid: PublisherStudio.BusinessObjects.InterchangeIssueSeverity.Information
+  commentId: F:PublisherStudio.BusinessObjects.InterchangeIssueSeverity.Information
+  id: Information
+  parent: PublisherStudio.BusinessObjects.InterchangeIssueSeverity
+  langs:
+  - csharp
+  - vb
+  name: Information
+  nameWithType: InterchangeIssueSeverity.Information
+  fullName: PublisherStudio.BusinessObjects.InterchangeIssueSeverity.Information
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Information = 0
+    return:
+      type: PublisherStudio.BusinessObjects.InterchangeIssueSeverity
+- uid: PublisherStudio.BusinessObjects.InterchangeIssueSeverity.Warning
+  commentId: F:PublisherStudio.BusinessObjects.InterchangeIssueSeverity.Warning
+  id: Warning
+  parent: PublisherStudio.BusinessObjects.InterchangeIssueSeverity
+  langs:
+  - csharp
+  - vb
+  name: Warning
+  nameWithType: InterchangeIssueSeverity.Warning
+  fullName: PublisherStudio.BusinessObjects.InterchangeIssueSeverity.Warning
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Warning = 1
+    return:
+      type: PublisherStudio.BusinessObjects.InterchangeIssueSeverity
+- uid: PublisherStudio.BusinessObjects.InterchangeIssueSeverity.Loss
+  commentId: F:PublisherStudio.BusinessObjects.InterchangeIssueSeverity.Loss
+  id: Loss
+  parent: PublisherStudio.BusinessObjects.InterchangeIssueSeverity
+  langs:
+  - csharp
+  - vb
+  name: Loss
+  nameWithType: InterchangeIssueSeverity.Loss
+  fullName: PublisherStudio.BusinessObjects.InterchangeIssueSeverity.Loss
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Loss = 2
+    return:
+      type: PublisherStudio.BusinessObjects.InterchangeIssueSeverity
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.InterchangeIssueSeverity
+  commentId: T:PublisherStudio.BusinessObjects.InterchangeIssueSeverity
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.InterchangeIssueSeverity.html
+  name: InterchangeIssueSeverity
+  nameWithType: InterchangeIssueSeverity
+  fullName: PublisherStudio.BusinessObjects.InterchangeIssueSeverity

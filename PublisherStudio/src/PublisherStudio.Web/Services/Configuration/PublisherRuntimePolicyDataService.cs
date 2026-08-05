@@ -1,14 +1,20 @@
-using System.Collections.Frozen;
+﻿using System.Collections.Frozen;
 using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Configuration;
 
+/// <summary>
+/// Provides publisher runtime policy data service operations.
+/// </summary>
 public sealed class PublisherRuntimePolicyDataService : IPublisherRuntimePolicyDataService
 {
     private readonly PublisherRuntimePolicyOptions options;
     private readonly FrozenDictionary<PublisherRuntimeCollection, string[]> collections;
     private readonly ILogger<PublisherRuntimePolicyDataService> logger;
 
+    /// <summary>
+    /// Publishes er runtime policy data service.
+    /// </summary>
     public PublisherRuntimePolicyDataService(
         PublisherRuntimePolicyOptions options,
         ILogger<PublisherRuntimePolicyDataService> logger)
@@ -33,33 +39,114 @@ public sealed class PublisherRuntimePolicyDataService : IPublisherRuntimePolicyD
         }
     }
 
+    /// <summary>
+    /// Gets spreadsheet session lifetime.
+    /// </summary>
     public TimeSpan SpreadsheetSessionLifetime => TimeSpan.FromHours(options.SpreadsheetSessionLifetimeHours);
+    /// <summary>
+    /// Gets audio client interface identifier.
+    /// </summary>
     public Guid AudioClientInterfaceId => Guid.Parse(options.AudioClientInterfaceId);
+    /// <summary>
+    /// Gets audio capture client interface identifier.
+    /// </summary>
     public Guid AudioCaptureClientInterfaceId => Guid.Parse(options.AudioCaptureClientInterfaceId);
+    /// <summary>
+    /// Gets twitch validation interval.
+    /// </summary>
     public TimeSpan TwitchValidationInterval => TimeSpan.FromMinutes(options.TwitchValidationIntervalMinutes);
+    /// <summary>
+    /// Gets twitch refresh safety window.
+    /// </summary>
     public TimeSpan TwitchRefreshSafetyWindow => TimeSpan.FromMinutes(options.TwitchRefreshSafetyWindowMinutes);
+    /// <summary>
+    /// Gets minimum media source length.
+    /// </summary>
     public double MinimumMediaSourceLength => options.MinimumMediaSourceLength;
+    /// <summary>
+    /// Gets word art view width.
+    /// </summary>
     public double WordArtViewWidth => options.WordArtViewWidth;
+    /// <summary>
+    /// Gets word art view height.
+    /// </summary>
     public double WordArtViewHeight => options.WordArtViewHeight;
+    /// <summary>
+    /// Gets base pixels per millimeter.
+    /// </summary>
     public double BasePixelsPerMillimeter => options.BasePixelsPerMillimeter;
+    /// <summary>
+    /// Gets default editor viewport width.
+    /// </summary>
     public int DefaultEditorViewportWidth => options.DefaultEditorViewportWidth;
+    /// <summary>
+    /// Gets audio sample rate.
+    /// </summary>
     public int AudioSampleRate => options.AudioSampleRate;
+    /// <summary>
+    /// Gets maximum video archive entries.
+    /// </summary>
     public int MaximumVideoArchiveEntries => options.MaximumVideoArchiveEntries;
+    /// <summary>
+    /// Gets maximum notification messages.
+    /// </summary>
     public int MaximumNotificationMessages => options.MaximumNotificationMessages;
+    /// <summary>
+    /// Gets installer download attempts.
+    /// </summary>
     public int InstallerDownloadAttempts => options.InstallerDownloadAttempts;
+    /// <summary>
+    /// Gets installer move attempts.
+    /// </summary>
     public int InstallerMoveAttempts => options.InstallerMoveAttempts;
+    /// <summary>
+    /// Gets organic protocol version.
+    /// </summary>
     public string OrganicProtocolVersion => options.OrganicProtocolVersion;
+    /// <summary>
+    /// Gets organic security schema version.
+    /// </summary>
     public int OrganicSecuritySchemaVersion => options.OrganicSecuritySchemaVersion;
+    /// <summary>
+    /// Gets organic totp period seconds.
+    /// </summary>
     public int OrganicTotpPeriodSeconds => options.OrganicTotpPeriodSeconds;
+    /// <summary>
+    /// Gets organic totp alphabet.
+    /// </summary>
     public string OrganicTotpAlphabet => options.OrganicTotpAlphabet;
+    /// <summary>
+    /// Gets FFmpeg environment variable.
+    /// </summary>
     public string FfmpegEnvironmentVariable => options.FfmpegEnvironmentVariable;
+    /// <summary>
+    /// Gets twitch endpoints.
+    /// </summary>
     public PublisherTwitchEndpointPolicy TwitchEndpoints => options.TwitchEndpoints;
+    /// <summary>
+    /// Gets native interop.
+    /// </summary>
     public PublisherNativeInteropPolicy NativeInterop => options.NativeInterop;
+    /// <summary>
+    /// Gets picture studio.
+    /// </summary>
     public PublisherPictureStudioPolicy PictureStudio => options.PictureStudio;
+    /// <summary>
+    /// Gets document defaults.
+    /// </summary>
     public PublisherDocumentDefaultsPolicy DocumentDefaults => options.DocumentDefaults;
+    /// <summary>
+    /// Gets media session defaults.
+    /// </summary>
     public PublisherMediaSessionDefaultsPolicy MediaSessionDefaults => options.MediaSessionDefaults;
+    /// <summary>
+    /// Gets media conversion presets.
+    /// </summary>
     public IReadOnlyList<MediaConversionPreset> MediaConversionPresets => options.MediaConversionPresets;
 
+    /// <summary>
+    /// Gets collection.
+    /// </summary>
     public IReadOnlyList<string> GetCollection(PublisherRuntimeCollection collection)
     {
         try
@@ -76,6 +163,9 @@ public sealed class PublisherRuntimePolicyDataService : IPublisherRuntimePolicyD
         }
     }
 
+    /// <summary>
+    /// Gets snapshot.
+    /// </summary>
     public PublisherRuntimePolicySnapshot GetSnapshot()
     {
         try

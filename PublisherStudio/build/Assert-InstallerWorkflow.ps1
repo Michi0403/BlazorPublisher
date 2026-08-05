@@ -11,106 +11,93 @@ function Fail([string]$Message) {
 }
 
 $program = Get-Content -LiteralPath (Join-Path $installerRoot 'Program.cs') -Raw
-if ($program.Contains('The setup help will be shown.')) {
-    Fail 'The installer startup message still claims the removed help-only no-command behavior.'
+foreach ($required in @(
+    'Path.Combine(localAppData, "PublisherStudio")',
+    'ExtractZipWithFallback(zipPath, targetPath, logger)',
+    'ExtractZipWithFallback(setupZipPath, targetPath, logger)',
+    'PublisherStudio app and setup/bootstrap files now reside',
+    'Running the default install, update, shortcut, and start routine.',
+    'TryStartDetachedSetup(args)'
+)) {
+    if (-not $program.Contains($required)) { Fail "Program.cs is missing the LocalGPT-aligned deployment contract: $required" }
 }
-if (-not $program.Contains('Running the default preservation-first install and update routine.')) {
-    Fail 'The installer startup message must announce the active no-command install/update routine.'
+foreach ($forbidden in @(
+    'Path.Combine(localAppData, "Programs", "PublisherStudio")',
+    'PublisherStudioInstallLayout',
+    'PublisherStudioDeploymentService',
+    'PublisherStudioReleaseManifest',
+    'preservation-first'
+)) {
+    if ($program.Contains($forbidden)) { Fail "Program.cs still contains the superseded installer contract: $forbidden" }
 }
+
 $parseStart = $program.IndexOf('public static CliOptions Parse(string[] args)', [StringComparison]::Ordinal)
 if ($parseStart -lt 0) { Fail 'CliOptions.Parse was not found.' }
 $parseText = $program.Substring($parseStart)
 $defaultStart = $parseText.IndexOf('if (argsList.Count == 0)', [StringComparison]::Ordinal)
-$returnIndex = $parseText.IndexOf('return options;', $defaultStart, [StringComparison]::Ordinal)
-if ($defaultStart -lt 0 -or $returnIndex -lt 0) { Fail 'The no-command workflow was not found.' }
-$defaultBlock = $parseText.Substring($defaultStart, ($returnIndex - $defaultStart) + 'return options;'.Length)
+$loopIndex = $parseText.IndexOf('for (var i = 0; i < argsList.Count; i++)', $defaultStart, [StringComparison]::Ordinal)
+if ($defaultStart -lt 0 -or $loopIndex -lt 0) { Fail 'The no-command workflow was not found.' }
+$defaultBlock = $parseText.Substring($defaultStart, $loopIndex - $defaultStart)
 foreach ($required in @(
-    'UpdateBlazorPublisher = true',
-    'StartBlazorPublisher = true',
-    'InstallFfmpeg = true',
-    'DesktopShortcuts = true',
-    'StartMenuShortcuts = true'
+    'argsList.Add("--install-publisherstudio")',
+    'argsList.Add("--update-publisherstudio")',
+    'argsList.Add("--install-ffmpeg")',
+    'argsList.Add("--start-publisherstudio")',
+    'argsList.Add("--shortcuts")'
 )) {
     if (-not $defaultBlock.Contains($required)) { Fail "The default workflow is missing $required." }
 }
-if ($defaultBlock.Contains('ForceDelete') -or $defaultBlock.Contains('argsList.Add("--force-delete")')) {
-    Fail 'The no-command workflow may not delete the LocalAppData installation.'
+if ($defaultBlock.Contains('ForceDelete') -or $defaultBlock.Contains('--force-delete')) {
+    Fail 'The no-command workflow may not delete the PublisherStudio AppData installation.'
 }
 
-$launchers = @(
-    'Default.cmd',
-    'Install.cmd',
-    'Update.cmd',
-    'Start.cmd',
-    'Start-NoBrowser.cmd',
-    'Check-FFmpeg.cmd',
-    'Install-FFmpeg.cmd',
-    'Uninstall.cmd'
-)
+$launchers = @('Install.cmd', 'Update.cmd', 'Start.cmd')
 foreach ($launcher in $launchers) {
     $projectPath = Join-Path $installerRoot $launcher
     $mirrorPath = Join-Path $launcherMirrorRoot $launcher
     if (-not (Test-Path -LiteralPath $projectPath -PathType Leaf)) { Fail "Missing installer launcher $launcher." }
     if (-not (Test-Path -LiteralPath $mirrorPath -PathType Leaf)) { Fail "Missing release-launcher mirror $launcher." }
-
     $projectContent = Get-Content -LiteralPath $projectPath -Raw
     $mirrorContent = Get-Content -LiteralPath $mirrorPath -Raw
     if ($projectContent -ne $mirrorContent) { Fail "$launcher differs between the installer project and installer-launchers mirror." }
-    if ($launcher -ne 'Uninstall.cmd' -and $projectContent.Contains('--force-delete')) {
-        Fail "$launcher may not delete the LocalAppData installation."
-    }
-    if (-not $program.Contains('"' + $launcher + '"')) {
-        Fail "Shortcut provisioning is missing $launcher."
-    }
+    if ($projectContent.Contains('--force-delete')) { Fail "$launcher may not delete the PublisherStudio AppData installation." }
+    if (-not $program.Contains('"' + $launcher + '"')) { Fail "Shortcut provisioning is missing $launcher." }
 }
 
-$defaultLauncher = Get-Content -LiteralPath (Join-Path $installerRoot 'Default.cmd') -Raw
-foreach ($required in @(
-    'set "SETUP_EXE=%~dp0PublisherStudio.Setup.exe"',
-    'set "SETUP_REPAIR=%~dp0PublisherStudio.Setup.repair.exe"',
-    'copy /b /y "%SETUP_REPAIR%" "%SETUP_EXE%.incoming"',
-    'move /y "%SETUP_EXE%.incoming" "%SETUP_EXE%"',
-    'call "%SETUP_EXE%"',
-    ':setup_repair_failed'
-)) {
-    if (-not $defaultLauncher.Contains($required)) {
-        Fail "Default.cmd is missing the launcher-repair contract: $required"
-    }
-}
-if ($defaultLauncher.Contains('call "%SETUP_EXE%" --')) {
-    Fail 'Default.cmd must invoke the setup executable without command-line arguments after promoting any staged repair.'
+$obsoleteLaunchers = @('Default.cmd', 'Start-NoBrowser.cmd', 'Check-FFmpeg.cmd', 'Install-FFmpeg.cmd', 'Uninstall.cmd')
+foreach ($launcher in $obsoleteLaunchers) {
+    if (Test-Path -LiteralPath (Join-Path $installerRoot $launcher)) { Fail "Obsolete installer launcher still exists: $launcher" }
+    if (Test-Path -LiteralPath (Join-Path $launcherMirrorRoot $launcher)) { Fail "Obsolete release-launcher mirror still exists: $launcher" }
 }
 
 $launchSettingsPath = Join-Path $installerRoot 'Properties\launchSettings.json'
 $launchSettings = Get-Content -LiteralPath $launchSettingsPath -Raw | ConvertFrom-Json
 $launchProfileNames = @($launchSettings.profiles.PSObject.Properties | ForEach-Object { $_.Name })
-$requiredLaunchProfiles = @(
-    'BlazorPublisher Default Install and Update',
-    'BlazorPublisher Install Preserving Data',
-    'BlazorPublisher Update Preserving Data',
-    'BlazorPublisher Start',
-    'BlazorPublisher Start without Browser',
-    'BlazorPublisher Check FFmpeg',
-    'BlazorPublisher Install FFmpeg',
-    'BlazorPublisher Uninstall Preview',
-    'BlazorPublisher Uninstall Explicit Delete'
-)
+$requiredLaunchProfiles = @('PublisherStudio Install', 'PublisherStudio Update', 'PublisherStudio Start')
 foreach ($profileName in $requiredLaunchProfiles) {
-    if ($launchProfileNames -notcontains $profileName) {
-        Fail "Visual Studio launch profile is missing: $profileName"
-    }
+    if ($launchProfileNames -notcontains $profileName) { Fail "Visual Studio launch profile is missing: $profileName" }
 }
+if ($launchProfileNames.Count -ne 3) { Fail 'Visual Studio launch profiles must expose only Install, Update, and Start.' }
 
 $project = Get-Content -LiteralPath (Join-Path $installerRoot 'PublisherStudio.InstallerConsole.csproj') -Raw
-if (-not $project.Contains('<None Update="*.cmd" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />')) {
-    Fail 'The installer project must deploy every maintained command launcher.'
+foreach ($launcher in $launchers) {
+    if (-not $project.Contains('<None Update="' + $launcher + '" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />')) {
+        Fail "The installer project does not deploy $launcher."
+    }
 }
 
 $release = Get-Content -LiteralPath (Join-Path $root 'Build-Release.ps1') -Raw
 foreach ($launcher in $launchers) {
-    if (-not $release.Contains('"' + $launcher + '"')) {
-        Fail "Build-Release.ps1 does not validate deployed launcher $launcher."
-    }
+    if (-not $release.Contains('"' + $launcher + '"')) { Fail "Build-Release.ps1 does not validate deployed launcher $launcher." }
+}
+foreach ($required in @(
+    'Compress-Archive -Path $appFolder -DestinationPath $appZip',
+    'Compress-Archive -Path $setupFolder -DestinationPath $setupZip'
+)) {
+    if (-not $release.Contains($required)) { Fail "Build-Release.ps1 is missing the LocalGPT-aligned archive operation: $required" }
+}
+foreach ($forbidden in @('Write-ReleaseManifest', 'Write-BootstrapRepairManifest', 'PublisherStudio.Setup.repair.exe', 'publisherstudio-bootstrap-repair.json')) {
+    if ($release.Contains($forbidden)) { Fail "Build-Release.ps1 still enforces the superseded repair-manifest flow: $forbidden" }
 }
 
-Write-Host 'PublisherStudio installer workflow validation passed. Double-click runs the preservation-first default update/install routine, FFmpeg is checked, and all launchers are synchronized.'
+Write-Host 'PublisherStudio installer workflow validation passed. Double-click installs or updates under LOCALAPPDATA\PublisherStudio, creates the mandatory shortcuts, and starts the application.'

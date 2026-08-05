@@ -131,5 +131,22 @@ if (-not $webProject.Contains('win-x64;win-x86;win-arm64;linux-x64;linux-arm64;o
 if ($release -match 'PublishSingleFile=true|IncludeNativeLibrariesForSelfExtract=true|EnableCompressionInSingleFile=true') {
     Fail 'Build-Release.ps1 must consume the reviewed profiles instead of overriding their application/setup packaging policies.'
 }
+foreach ($required in @(
+    'Compress-Archive -Path $appFolder -DestinationPath $appZip',
+    'Compress-Archive -Path $setupFolder -DestinationPath $setupZip',
+    'Assert-ReleaseArchiveLayout -ArchivePath $appZip',
+    'Assert-ReleaseArchiveLayout -ArchivePath $setupZip'
+)) {
+    if (-not $release.Contains($required)) { Fail "Build-Release.ps1 is missing the LocalGPT-aligned archive contract: $required" }
+}
+foreach ($forbidden in @(
+    'Write-ReleaseManifest',
+    'Write-BootstrapRepairManifest',
+    'New-ReleaseArchive',
+    'PublisherStudio.Setup.repair.exe',
+    'publisherstudio-bootstrap-repair.json'
+)) {
+    if ($release.Contains($forbidden)) { Fail "Build-Release.ps1 still contains the superseded custom deployment contract: $forbidden" }
+}
 
-Write-Host 'Publish configuration validation passed for 7 multi-file application profiles, 7 standalone setup profiles and the synchronized scripted release lane.'
+Write-Host 'Publish configuration validation passed for 7 multi-file application profiles, 7 standalone setup profiles and the LocalGPT-aligned scripted release lane.'

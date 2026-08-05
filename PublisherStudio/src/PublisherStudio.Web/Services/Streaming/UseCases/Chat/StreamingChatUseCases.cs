@@ -1,4 +1,4 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 using System.Net.WebSockets;
 
 namespace PublisherStudio.Services.Streaming.UseCases.Chat;
@@ -13,6 +13,9 @@ public sealed class StreamingChatUseCases(
 {
     private readonly MediaSessionRegistry _sessions = sessions;
 
+    /// <summary>
+    /// Determines whether open.
+    /// </summary>
     public bool CanOpen(Guid sessionId) {
         try
         {
@@ -26,6 +29,9 @@ public sealed class StreamingChatUseCases(
         }
     }
 
+    /// <summary>
+    /// Runs the run subscriber async operation.
+    /// </summary>
     public async Task<bool> RunSubscriberAsync(
         Guid sessionId,
         Guid outputId,
@@ -47,6 +53,9 @@ public sealed class StreamingChatUseCases(
         }
     }
 
+    /// <summary>
+    /// Runs the send async operation.
+    /// </summary>
     public async Task<StreamingChatSendResult> SendAsync(
         Guid sessionId,
         Guid outputId,

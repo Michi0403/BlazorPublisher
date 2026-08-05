@@ -1,9 +1,12 @@
-using PublisherStudio.Hubs.Streaming.Chat;
+﻿using PublisherStudio.Hubs.Streaming.Chat;
 using System.Net.WebSockets;
 using Microsoft.AspNetCore.Mvc;
 
 namespace PublisherStudio.Controllers.Streaming.UseCases;
 
+/// <summary>
+/// Provides streaming chat controller operations.
+/// </summary>
 [ApiController]
 [Route("api/mediahost/sessions/{sessionId:guid}/chat")]
 public sealed class StreamingChatController(StreamingChatUseCases useCases, PlatformChatHub hub) : ControllerBase
@@ -11,6 +14,9 @@ public sealed class StreamingChatController(StreamingChatUseCases useCases, Plat
     private readonly StreamingChatUseCases _useCases = useCases;
     private readonly PlatformChatHub _hub = hub;
 
+    /// <summary>
+    /// Runs the subscribe operation.
+    /// </summary>
     [HttpGet("{outputId:guid}/websocket")]
     public async Task Subscribe(Guid sessionId, Guid outputId)
     {
@@ -28,6 +34,9 @@ public sealed class StreamingChatController(StreamingChatUseCases useCases, Plat
             try { await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Chat subscription ended", CancellationToken.None); } catch { }
     }
 
+    /// <summary>
+    /// Runs the send operation.
+    /// </summary>
     [HttpPost("{outputId:guid}/send")]
     public async Task<IActionResult> Send(
         Guid sessionId,

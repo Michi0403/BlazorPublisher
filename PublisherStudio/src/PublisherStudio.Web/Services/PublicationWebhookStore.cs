@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 
 namespace PublisherStudio.Services;
 
@@ -12,18 +12,27 @@ public sealed class PublicationWebhookStore
     private readonly ConcurrentDictionary<Guid, string> _tokens = new();
     private readonly ConcurrentDictionary<Guid, WebhookPayload> _payloads = new();
 
+    /// <summary>
+    /// Runs the register operation.
+    /// </summary>
     public void Register(Guid bindingId, string token)
     {
         if (bindingId == Guid.Empty || string.IsNullOrWhiteSpace(token)) return;
         _tokens[bindingId] = token.Trim();
     }
 
+    /// <summary>
+    /// Runs the unregister operation.
+    /// </summary>
     public void Unregister(Guid bindingId)
     {
         _tokens.TryRemove(bindingId, out _);
         _payloads.TryRemove(bindingId, out _);
     }
 
+    /// <summary>
+    /// Attempts to put.
+    /// </summary>
     public bool TryPut(Guid bindingId, string token, string content, string contentType)
     {
         if (!_tokens.TryGetValue(bindingId, out var expected)
@@ -32,10 +41,19 @@ public sealed class PublicationWebhookStore
         return true;
     }
 
+    /// <summary>
+    /// Attempts to get.
+    /// </summary>
     public bool TryGet(Guid bindingId, out WebhookPayload payload)
         => _payloads.TryGetValue(bindingId, out payload!);
 
+    /// <summary>
+    /// Determines whether registered.
+    /// </summary>
     public bool IsRegistered(Guid bindingId) => _tokens.ContainsKey(bindingId);
 }
 
+/// <summary>
+/// Represents a webhook payload.
+/// </summary>
 public sealed record WebhookPayload(string Content, string ContentType, DateTimeOffset ReceivedUtc);

@@ -1,4 +1,4 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Configuration;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -7,6 +7,9 @@ using System.Threading.Channels;
 
 namespace PublisherStudio.Services.Streaming.Encoding;
 
+/// <summary>
+/// Represents an encoder orchestrator.
+/// </summary>
 public sealed class EncoderOrchestrator(
     FfmpegLocator ffmpegLocator,
     FfmpegEncoderResolver encoderResolver,
@@ -14,6 +17,9 @@ public sealed class EncoderOrchestrator(
     ILoggerFactory loggerFactory,
     ILogger<EncoderOrchestrator> logger)
 {
+    /// <summary>
+    /// Runs the attach operation.
+    /// </summary>
     public void Attach(MediaSession session, Guid? inputId)
     {
         try
@@ -35,6 +41,9 @@ public sealed class EncoderOrchestrator(
         }
     }
 
+    /// <summary>
+    /// Runs the stop operation.
+    /// </summary>
     public void Stop(MediaSession session)
     {
         try
@@ -52,6 +61,9 @@ public sealed class EncoderOrchestrator(
     }
 }
 
+/// <summary>
+/// Provides encoder session service operations.
+/// </summary>
 public sealed class EncoderSessionService : IDisposable
 {
     private readonly MediaSession _session;
@@ -71,6 +83,9 @@ public sealed class EncoderSessionService : IDisposable
     private readonly List<string> _recordingPatterns = [];
     private bool _disposed;
 
+    /// <summary>
+    /// Runs the encoder session service operation.
+    /// </summary>
     public EncoderSessionService(
         MediaSession session,
         FfmpegLocator ffmpegLocator,
@@ -86,9 +101,18 @@ public sealed class EncoderSessionService : IDisposable
         _videoEncoders = _encoderResolver.Resolve(session.FfmpegPath, session.HardwareEncoder);
     }
 
+    /// <summary>
+    /// Gets or sets status.
+    /// </summary>
     public string Status { get; private set; } = "waiting-for-renderer";
+    /// <summary>
+    /// Gets or sets last error.
+    /// </summary>
     public string LastError { get; private set; } = string.Empty;
 
+    /// <summary>
+    /// Runs the start operation.
+    /// </summary>
     public void Start()
     {
         try
@@ -105,6 +129,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the notify ingest operation.
+    /// </summary>
     public void NotifyIngest(Guid? inputId)
     {
         try
@@ -141,6 +168,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the push chunk operation.
+    /// </summary>
     public void PushChunk(Guid? inputId, ReadOnlySpan<byte> chunk)
     {
         try
@@ -171,6 +201,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Sets output.
+    /// </summary>
     public void SetOutput(Guid outputId, bool enabled)
     {
         try
@@ -193,6 +226,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Sets recording.
+    /// </summary>
     public void SetRecording(bool enabled)
     {
         try
@@ -887,6 +923,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the dispose operation.
+    /// </summary>
     public void Dispose()
     {
         try
@@ -988,6 +1027,9 @@ public sealed class EncoderSessionService : IDisposable
         private int completed;
         private int aborting;
 
+        /// <summary>
+        /// Runs the pipeline input writer operation.
+        /// </summary>
         public PipelineInputWriter(
             Process process,
             string key,
@@ -1018,6 +1060,9 @@ public sealed class EncoderSessionService : IDisposable
             }
         }
 
+        /// <summary>
+        /// Attempts to write.
+        /// </summary>
         public bool TryWrite(byte[] payload)
         {
             try
@@ -1033,6 +1078,9 @@ public sealed class EncoderSessionService : IDisposable
             }
         }
 
+        /// <summary>
+        /// Runs the abort for backpressure operation.
+        /// </summary>
         public void AbortForBackpressure()
         {
             try
@@ -1065,6 +1113,9 @@ public sealed class EncoderSessionService : IDisposable
             }
         }
 
+        /// <summary>
+        /// Runs the complete operation.
+        /// </summary>
         public void Complete()
         {
             try
@@ -1083,6 +1134,9 @@ public sealed class EncoderSessionService : IDisposable
             }
         }
 
+        /// <summary>
+        /// Runs the wait operation.
+        /// </summary>
         public void Wait(TimeSpan timeout)
         {
             try
@@ -1144,6 +1198,9 @@ public sealed class EncoderSessionService : IDisposable
             }
         }
 
+        /// <summary>
+        /// Runs the dispose operation.
+        /// </summary>
         public void Dispose()
         {
             try
@@ -1175,8 +1232,14 @@ public sealed class EncoderSessionService : IDisposable
         int AudioCodec);
 }
 
+/// <summary>
+/// Represents a FFmpeg video encoder.
+/// </summary>
 public sealed record FfmpegVideoEncoder(string Name, IReadOnlyList<string> Options);
 
+/// <summary>
+/// Represents a FFmpeg encoder set.
+/// </summary>
 public sealed class FfmpegEncoderSet(
     FfmpegVideoEncoder h264,
     FfmpegVideoEncoder hevc,
@@ -1187,6 +1250,9 @@ public sealed class FfmpegEncoderSet(
     private readonly FfmpegVideoEncoder hevcEncoder = hevc;
     private readonly FfmpegVideoEncoder av1Encoder = av1;
 
+    /// <summary>
+    /// Runs the for codec operation.
+    /// </summary>
     public FfmpegVideoEncoder ForCodec(int codec)
     {
         try
@@ -1207,6 +1273,9 @@ public sealed class FfmpegEncoderSet(
     }
 }
 
+/// <summary>
+/// Provides FFmpeg encoder resolver operations.
+/// </summary>
 public sealed class FfmpegEncoderResolver(
     FfmpegLocator ffmpegLocator,
     ILogger<FfmpegEncoderResolver> logger)
@@ -1214,6 +1283,9 @@ public sealed class FfmpegEncoderResolver(
     private readonly ConcurrentDictionary<string, HashSet<string>> Cache = new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, bool> HardwareProbeCache = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// Runs the resolve operation.
+    /// </summary>
     public FfmpegEncoderSet Resolve(string configuredPath, int preference)
     {
         try
@@ -1452,36 +1524,120 @@ public sealed class FfmpegEncoderResolver(
     }
 }
 
+/// <summary>
+/// Represents a media output definition.
+/// </summary>
 public sealed class MediaOutputDefinition
 {
+    /// <summary>
+    /// Gets or sets output identifier.
+    /// </summary>
     public Guid OutputId { get; set; }
+    /// <summary>
+    /// Gets or sets the display name.
+    /// </summary>
     public string Name { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets provider.
+    /// </summary>
     public int Provider { get; set; }
+    /// <summary>
+    /// Gets or sets transport.
+    /// </summary>
     public int Transport { get; set; }
+    /// <summary>
+    /// Gets or sets endpoint.
+    /// </summary>
     public string Endpoint { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets channel identifier.
+    /// </summary>
     public string ChannelId { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets account name.
+    /// </summary>
     public string AccountName { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets secret.
+    /// </summary>
     public string Secret { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets chat enabled.
+    /// </summary>
     public bool ChatEnabled { get; set; }
+    /// <summary>
+    /// Gets or sets chat secret.
+    /// </summary>
     public string ChatSecret { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets test mode.
+    /// </summary>
     public bool TestMode { get; set; }
+    /// <summary>
+    /// Gets or sets width.
+    /// </summary>
     public int Width { get; set; }
+    /// <summary>
+    /// Gets or sets height.
+    /// </summary>
     public int Height { get; set; }
+    /// <summary>
+    /// Gets or sets frame rate.
+    /// </summary>
     public int FrameRate { get; set; }
+    /// <summary>
+    /// Gets or sets video bitrate kbps.
+    /// </summary>
     public int VideoBitrateKbps { get; set; }
+    /// <summary>
+    /// Gets or sets audio bitrate kbps.
+    /// </summary>
     public int AudioBitrateKbps { get; set; }
+    /// <summary>
+    /// Gets or sets key frame interval seconds.
+    /// </summary>
     public int KeyFrameIntervalSeconds { get; set; }
+    /// <summary>
+    /// Gets or sets video codec.
+    /// </summary>
     public int VideoCodec { get; set; }
+    /// <summary>
+    /// Gets or sets audio codec.
+    /// </summary>
     public int AudioCodec { get; set; }
 }
 
+/// <summary>
+/// Represents a media recording definition.
+/// </summary>
 public sealed class MediaRecordingDefinition
 {
+    /// <summary>
+    /// Gets or sets whether the feature is enabled.
+    /// </summary>
     public bool Enabled { get; set; }
+    /// <summary>
+    /// Gets or sets destination directory.
+    /// </summary>
     public string DestinationDirectory { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets variant.
+    /// </summary>
     public int Variant { get; set; }
+    /// <summary>
+    /// Gets or sets selected output identifiers.
+    /// </summary>
     public HashSet<Guid> SelectedOutputIds { get; set; } = [];
+    /// <summary>
+    /// Gets or sets container.
+    /// </summary>
     public string Container { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets segment seconds.
+    /// </summary>
     public int SegmentSeconds { get; set; }
+    /// <summary>
+    /// Gets or sets remux to mp4 after stop.
+    /// </summary>
     public bool RemuxToMp4AfterStop { get; set; }
 }

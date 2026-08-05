@@ -1,0 +1,172 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PictureBlendMode
+  commentId: T:PublisherStudio.BusinessObjects.PictureBlendMode
+  id: PictureBlendMode
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PictureBlendMode.Darken
+  - PublisherStudio.BusinessObjects.PictureBlendMode.Lighten
+  - PublisherStudio.BusinessObjects.PictureBlendMode.Multiply
+  - PublisherStudio.BusinessObjects.PictureBlendMode.Normal
+  - PublisherStudio.BusinessObjects.PictureBlendMode.Overlay
+  - PublisherStudio.BusinessObjects.PictureBlendMode.Screen
+  langs:
+  - csharp
+  - vb
+  name: PictureBlendMode
+  nameWithType: PictureBlendMode
+  fullName: PublisherStudio.BusinessObjects.PictureBlendMode
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported picture blend mode values.
+  example: []
+  syntax:
+    content: public enum PictureBlendMode
+    content.vb: Public Enum PictureBlendMode
+- uid: PublisherStudio.BusinessObjects.PictureBlendMode.Normal
+  commentId: F:PublisherStudio.BusinessObjects.PictureBlendMode.Normal
+  id: Normal
+  parent: PublisherStudio.BusinessObjects.PictureBlendMode
+  langs:
+  - csharp
+  - vb
+  name: Normal
+  nameWithType: PictureBlendMode.Normal
+  fullName: PublisherStudio.BusinessObjects.PictureBlendMode.Normal
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Normal = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PictureBlendMode
+- uid: PublisherStudio.BusinessObjects.PictureBlendMode.Multiply
+  commentId: F:PublisherStudio.BusinessObjects.PictureBlendMode.Multiply
+  id: Multiply
+  parent: PublisherStudio.BusinessObjects.PictureBlendMode
+  langs:
+  - csharp
+  - vb
+  name: Multiply
+  nameWithType: PictureBlendMode.Multiply
+  fullName: PublisherStudio.BusinessObjects.PictureBlendMode.Multiply
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Multiply = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PictureBlendMode
+- uid: PublisherStudio.BusinessObjects.PictureBlendMode.Screen
+  commentId: F:PublisherStudio.BusinessObjects.PictureBlendMode.Screen
+  id: Screen
+  parent: PublisherStudio.BusinessObjects.PictureBlendMode
+  langs:
+  - csharp
+  - vb
+  name: Screen
+  nameWithType: PictureBlendMode.Screen
+  fullName: PublisherStudio.BusinessObjects.PictureBlendMode.Screen
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Screen = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PictureBlendMode
+- uid: PublisherStudio.BusinessObjects.PictureBlendMode.Overlay
+  commentId: F:PublisherStudio.BusinessObjects.PictureBlendMode.Overlay
+  id: Overlay
+  parent: PublisherStudio.BusinessObjects.PictureBlendMode
+  langs:
+  - csharp
+  - vb
+  name: Overlay
+  nameWithType: PictureBlendMode.Overlay
+  fullName: PublisherStudio.BusinessObjects.PictureBlendMode.Overlay
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Overlay = 3
+    return:
+      type: PublisherStudio.BusinessObjects.PictureBlendMode
+- uid: PublisherStudio.BusinessObjects.PictureBlendMode.Darken
+  commentId: F:PublisherStudio.BusinessObjects.PictureBlendMode.Darken
+  id: Darken
+  parent: PublisherStudio.BusinessObjects.PictureBlendMode
+  langs:
+  - csharp
+  - vb
+  name: Darken
+  nameWithType: PictureBlendMode.Darken
+  fullName: PublisherStudio.BusinessObjects.PictureBlendMode.Darken
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Darken = 4
+    return:
+      type: PublisherStudio.BusinessObjects.PictureBlendMode
+- uid: PublisherStudio.BusinessObjects.PictureBlendMode.Lighten
+  commentId: F:PublisherStudio.BusinessObjects.PictureBlendMode.Lighten
+  id: Lighten
+  parent: PublisherStudio.BusinessObjects.PictureBlendMode
+  langs:
+  - csharp
+  - vb
+  name: Lighten
+  nameWithType: PictureBlendMode.Lighten
+  fullName: PublisherStudio.BusinessObjects.PictureBlendMode.Lighten
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Lighten = 5
+    return:
+      type: PublisherStudio.BusinessObjects.PictureBlendMode
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PictureBlendMode
+  commentId: T:PublisherStudio.BusinessObjects.PictureBlendMode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PictureBlendMode.html
+  name: PictureBlendMode
+  nameWithType: PictureBlendMode
+  fullName: PublisherStudio.BusinessObjects.PictureBlendMode

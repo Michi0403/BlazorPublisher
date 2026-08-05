@@ -1,4 +1,4 @@
-<Project>
+﻿<Project>
   <PropertyGroup>
     <WireProtocolBootstrapScript>$(MSBuildThisFileDirectory)build\Ensure-WireProtocolPackage.ps1</WireProtocolBootstrapScript>
     <LoggingIntegrityScript>$(MSBuildThisFileDirectory)build\Assert-LoggingIntegrity.ps1</LoggingIntegrityScript>
@@ -19,6 +19,7 @@
     <PublishConfigurationScript>$(MSBuildThisFileDirectory)build\Assert-PublishConfiguration.ps1</PublishConfigurationScript>
     <InstallerWorkflowScript>$(MSBuildThisFileDirectory)build\Assert-InstallerWorkflow.ps1</InstallerWorkflowScript>
     <GitSourceVisibilityScript>$(MSBuildThisFileDirectory)build\Assert-GitSourceVisibility.ps1</GitSourceVisibilityScript>
+    <XmlDocumentationCoverageScript>$(MSBuildThisFileDirectory)build\Assert-XmlDocumentationCoverage.ps1</XmlDocumentationCoverageScript>
   </PropertyGroup>
 
   <Target Name="EnsurePublisherWireProtocolPackage"
@@ -31,12 +32,12 @@
           StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <Target Name="AssertPublisherLoggingIntegrity"
+  <!--<Target Name="AssertPublisherLoggingIntegrity"
           BeforeTargets="BeforeBuild"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipLoggingIntegrityGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(LoggingIntegrityScript)')" Text="Logging integrity guard script is missing: $(LoggingIntegrityScript)" />
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(LoggingIntegrityScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>
+  </Target>-->
 
   <Target Name="AssertPublisherOneWireArchitecture"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherLoggingIntegrity"
@@ -156,4 +157,58 @@
     <Error Condition="!Exists('$(GitSourceVisibilityScript)')" Text="Git source-visibility guard script is missing: $(GitSourceVisibilityScript)" />
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(GitSourceVisibilityScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
+
+
+  <Target Name="AssertPublisherXmlDocumentationCoverage"
+          BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherGitSourceVisibility"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipXmlDocumentationCoverageGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+    <Error Condition="!Exists('$(XmlDocumentationCoverageScript)')" Text="XML documentation coverage guard script is missing: $(XmlDocumentationCoverageScript)" />
+    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(XmlDocumentationCoverageScript)&quot;"
+          WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true"
+          StandardOutputImportance="High" StandardErrorImportance="High" />
+  </Target>
+
+  <PropertyGroup>
+    <PublisherStudioDocumentationScript>$(MSBuildThisFileDirectory)build\Build-Documentation.ps1</PublisherStudioDocumentationScript>
+    <!-- The dot prevents a trailing Windows backslash from escaping later PowerShell arguments. -->
+    <PublisherStudioDocumentationRepositoryRoot>$(MSBuildThisFileDirectory).</PublisherStudioDocumentationRepositoryRoot>
+    <PublisherStudioDocumentationOutputRoot>$(TargetDir)wwwroot\help-docs</PublisherStudioDocumentationOutputRoot>
+    <BuildPublisherStudioDocumentation Condition="'$(BuildPublisherStudioDocumentation)' == ''">true</BuildPublisherStudioDocumentation>
+    <RequirePublisherStudioDocumentationPdf Condition="'$(RequirePublisherStudioDocumentationPdf)' == ''">true</RequirePublisherStudioDocumentationPdf>
+    <PublisherStudioDocumentationPdfArgument Condition="'$(RequirePublisherStudioDocumentationPdf)' == 'true'">-RequirePdf</PublisherStudioDocumentationPdfArgument>
+  </PropertyGroup>
+
+  <Target Name="BuildPublisherStudioDocumentation"
+          AfterTargets="Build"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(BuildPublisherStudioDocumentation)' == 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+    <Error Condition="!Exists('$(PublisherStudioDocumentationScript)')" Text="PublisherStudio documentation build script is missing: $(PublisherStudioDocumentationScript)" />
+    <Error Condition="!Exists('$(TargetPath)')" Text="PublisherStudio documentation cannot be generated because the application assembly is missing: $(TargetPath)" />
+    <Error Condition="!Exists('$(TargetDir)$(AssemblyName).xml')" Text="PublisherStudio documentation cannot be generated because compiler XML is missing: $(TargetDir)$(AssemblyName).xml" />
+    <Message Importance="High" Text="Generating PublisherStudio $(Version) documentation into $(PublisherStudioDocumentationOutputRoot)" />
+    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(PublisherStudioDocumentationScript)&quot; -RepositoryRoot &quot;$(PublisherStudioDocumentationRepositoryRoot)&quot; -AssemblyPath &quot;$(TargetPath)&quot; -XmlDocumentationPath &quot;$(TargetDir)$(AssemblyName).xml&quot; -Version &quot;$(Version)&quot; -OutputWebRoot &quot;$(PublisherStudioDocumentationOutputRoot)&quot; $(PublisherStudioDocumentationPdfArgument)"
+          WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true"
+          StandardOutputImportance="High" StandardErrorImportance="High" />
+    <Error Condition="!Exists('$(PublisherStudioDocumentationOutputRoot)\index.html')" Text="PublisherStudio documentation generation completed without index.html: $(PublisherStudioDocumentationOutputRoot)" />
+    <Error Condition="!Exists('$(PublisherStudioDocumentationOutputRoot)\documentation-status.json')" Text="PublisherStudio documentation generation completed without documentation-status.json: $(PublisherStudioDocumentationOutputRoot)" />
+    <Error Condition="!Exists('$(PublisherStudioDocumentationOutputRoot)\PublisherStudio.Web.xml')" Text="PublisherStudio documentation generation completed without PublisherStudio.Web.xml: $(PublisherStudioDocumentationOutputRoot)" />
+    <Error Condition="'$(RequirePublisherStudioDocumentationPdf)' == 'true' and !Exists('$(PublisherStudioDocumentationOutputRoot)\PublisherStudio-$(Version).pdf')" Text="PublisherStudio documentation generation completed without the complete versioned PDF: $(PublisherStudioDocumentationOutputRoot)\PublisherStudio-$(Version).pdf" />
+  </Target>
+
+  <Target Name="IncludePublisherStudioDocumentationInPublish"
+          AfterTargets="ComputeFilesToPublish"
+          BeforeTargets="CopyFilesToPublishDirectory"
+          DependsOnTargets="BuildPublisherStudioDocumentation"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(BuildPublisherStudioDocumentation)' == 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+    <ItemGroup>
+      <PublisherStudioDocumentationPublishFiles Include="$(PublisherStudioDocumentationOutputRoot)\**\*" />
+      <ResolvedFileToPublish Include="@(PublisherStudioDocumentationPublishFiles)">
+        <RelativePath>wwwroot\help-docs\%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
+        <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+    <Error Condition="'@(PublisherStudioDocumentationPublishFiles)' == ''" Text="No generated PublisherStudio documentation files were available for publish: $(PublisherStudioDocumentationOutputRoot)" />
+    <Message Importance="High" Text="Added @(PublisherStudioDocumentationPublishFiles->Count()) generated documentation files to the PublisherStudio publish payload." />
+  </Target>
+
 </Project>

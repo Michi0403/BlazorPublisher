@@ -1,0 +1,96 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationPanelLayoutMode
+  commentId: T:PublisherStudio.BusinessObjects.PublicationPanelLayoutMode
+  id: PublicationPanelLayoutMode
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationPanelLayoutMode.FixedCanvas
+  - PublisherStudio.BusinessObjects.PublicationPanelLayoutMode.Responsive
+  langs:
+  - csharp
+  - vb
+  name: PublicationPanelLayoutMode
+  nameWithType: PublicationPanelLayoutMode
+  fullName: PublisherStudio.BusinessObjects.PublicationPanelLayoutMode
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication panel layout mode values.
+  example: []
+  syntax:
+    content: public enum PublicationPanelLayoutMode
+    content.vb: Public Enum PublicationPanelLayoutMode
+- uid: PublisherStudio.BusinessObjects.PublicationPanelLayoutMode.FixedCanvas
+  commentId: F:PublisherStudio.BusinessObjects.PublicationPanelLayoutMode.FixedCanvas
+  id: FixedCanvas
+  parent: PublisherStudio.BusinessObjects.PublicationPanelLayoutMode
+  langs:
+  - csharp
+  - vb
+  name: FixedCanvas
+  nameWithType: PublicationPanelLayoutMode.FixedCanvas
+  fullName: PublisherStudio.BusinessObjects.PublicationPanelLayoutMode.FixedCanvas
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: FixedCanvas = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationPanelLayoutMode
+- uid: PublisherStudio.BusinessObjects.PublicationPanelLayoutMode.Responsive
+  commentId: F:PublisherStudio.BusinessObjects.PublicationPanelLayoutMode.Responsive
+  id: Responsive
+  parent: PublisherStudio.BusinessObjects.PublicationPanelLayoutMode
+  langs:
+  - csharp
+  - vb
+  name: Responsive
+  nameWithType: PublicationPanelLayoutMode.Responsive
+  fullName: PublisherStudio.BusinessObjects.PublicationPanelLayoutMode.Responsive
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Responsive = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationPanelLayoutMode
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationPanelLayoutMode
+  commentId: T:PublisherStudio.BusinessObjects.PublicationPanelLayoutMode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationPanelLayoutMode.html
+  name: PublicationPanelLayoutMode
+  nameWithType: PublicationPanelLayoutMode
+  fullName: PublisherStudio.BusinessObjects.PublicationPanelLayoutMode

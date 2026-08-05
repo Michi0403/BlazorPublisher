@@ -1,10 +1,16 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.OrganicPlugins;
 
+/// <summary>
+/// Represents an organic transport security policy.
+/// </summary>
 public sealed class OrganicTransportSecurityPolicy(
     ILogger<OrganicTransportSecurityPolicy> logger) : IOrganicTransportSecurityPolicy
 {
+    /// <summary>
+    /// Runs the requires protected transport operation.
+    /// </summary>
     public bool RequiresProtectedTransport(OrganicWireMessageType messageType)
     {
         try
@@ -31,6 +37,9 @@ public sealed class OrganicTransportSecurityPolicy(
         }
     }
 
+    /// <summary>
+    /// Determines whether protected.
+    /// </summary>
     public bool IsProtected(OrganicWireEnvelope envelope)
     {
         try

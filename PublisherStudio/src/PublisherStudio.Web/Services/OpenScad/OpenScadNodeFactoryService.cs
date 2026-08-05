@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json;
 using PublisherStudio.BusinessObjects;
 
@@ -7,6 +7,9 @@ namespace PublisherStudio.Services.OpenScad;
 /// <summary>Creates catalog-backed nodes with typed defaults for property panels and future visual builders.</summary>
 public sealed class OpenScadNodeFactoryService(IOpenScadCatalogService catalog) : IOpenScadNodeFactoryService
 {
+    /// <summary>
+    /// Runs the create operation.
+    /// </summary>
     public OpenScadNode Create(string kind)
     {
         var definition = catalog.Find(kind) ?? throw new ArgumentException($"Unknown OpenSCAD node kind '{kind}'.", nameof(kind));

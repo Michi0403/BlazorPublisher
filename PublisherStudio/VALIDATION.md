@@ -1,26 +1,26 @@
-# PublisherStudio 2.0.5 validation status
+# PublisherStudio 2.1.1 validation
 
-PublisherStudio 2.0.5 is a narrow Windows build and release-script correction based on the preservation-first installer recovery and the service-owned 2.0.4 compiler repair.
+The source package is validated structurally in this environment. The final Windows build and one-click installation remain the release authority.
 
-Validated in this environment:
+## Completed source checks
 
-- Application, setup, browser runtime and npm package versions are aligned at 2.0.5.
-- Wire protocol package remains independently pinned to 2.1.1.
-- 100 source-contract tests pass.
-- One additional test requires the intentionally omitted licensed/generated `wwwroot/vendor/devextreme-dist/js/dx.all.js` asset.
-- Architecture policy passes in static, methods, runtime, structure and combined modes.
-- The Python architecture-audit unit suite passes 4 of 4 tests.
-- `SpreadsheetDocumentService` has one DI constructor and no primary/secondary-constructor conflict.
-- The release script contains no unbraced variable immediately followed by a colon.
-- The six reported deterministic services are explicitly classified as exception-transparent pure helpers and remain DI-owned instance services.
-- JavaScript diagnostics hashes, JSON/XML structure, archive paths and active version surfaces are validated.
+- Repository contract tests cover the LocalGPT-aligned installer, application architecture, documentation, localization, streaming, editors, and release workflow.
+- Architecture audit passes in combined PublisherStudio mode.
+- XML documentation coverage protects maintained public and protected C# declarations.
+- English and German localization catalogs have matching keys.
+- JSON, XML/MSBuild, YAML, JavaScript, Python, and Markdown link checks pass.
+- The installer contract fixes the root to `%LOCALAPPDATA%\PublisherStudio`, extracts application and setup wrappers into that root, and maintains only Install, Update, Start, and Folder shortcuts.
+- GitHub Pages extraction and the Kawaii system/dark/light documentation theme remain covered.
 
-Not executable in this environment:
+## Required Windows checks
 
-- .NET 10 compilation and analyzers.
-- Windows PowerShell 5.1 build/release targets.
-- DevExpress licensed asset preparation.
-- Windows installer self-replacement and publish workflows.
-- Live camera, screen capture and process-loopback tests.
-
-The package therefore remains UNVERIFIED until the maintainer runs the native Windows build and runtime tests.
+1. Run `Prepare-DevExpressAssets.cmd`.
+2. Run `Build-LocalDevelopment.cmd` with every guard enabled.
+3. Confirm `bin/Debug/net10.0/wwwroot/help-docs/index.html`, `documentation-status.json`, `PublisherStudio.Web.xml`, and `PublisherStudio-2.1.1.pdf` exist.
+4. Run `Build-Release.cmd` and `Build-AllRuntimes.cmd`.
+5. Delete or rename any test installation, then double-click the published `PublisherStudio.Setup.exe` with no arguments.
+6. Confirm the only product root is `%LOCALAPPDATA%\PublisherStudio` and that the application and setup runtime wrappers are both present there.
+7. Confirm Desktop and Start Menu contain working PublisherStudio Install, Update, Start, and Folder entries.
+8. Run Update while setup is installed, confirm the temporary-copy handoff replaces setup successfully, and confirm the application starts on `http://127.0.0.1:58071`.
+9. Open `/help`, HTML documentation, API reference, and PDF; test system, dark, and light modes at 100% zoom without horizontal page scrollbars.
+10. Publish a GitHub release and run **Publish shipped PublisherStudio documentation** with GitHub Pages set to **GitHub Actions**.

@@ -1,0 +1,606 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService
+  commentId: T:PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService
+  id: IPolygonGeometryService
+  parent: PublisherStudio.Services.VideoStudio.Export
+  children:
+  - PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Clone(PublisherStudio.BusinessObjects.MediaFramePoint)
+  - PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Distance(System.Double,System.Double)
+  - PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.FullFrame
+  - PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Normalize(System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.MediaFramePoint})
+  - PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Number(System.Double)
+  - PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Resample(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.MediaFramePoint},System.Int32)
+  - PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.ToOpenScadPoints(System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.MediaFramePoint})
+  langs:
+  - csharp
+  - vb
+  name: IPolygonGeometryService
+  nameWithType: IPolygonGeometryService
+  fullName: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService
+  type: Interface
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.VideoStudio.Export
+  summary: Defines the polygon geometry service contract.
+  example: []
+  syntax:
+    content: public interface IPolygonGeometryService
+    content.vb: Public Interface IPolygonGeometryService
+  derivedClasses:
+  - PublisherStudio.Services.VideoStudio.Export.PolygonGeometryService
+- uid: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Normalize(System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.MediaFramePoint})
+  commentId: M:PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Normalize(System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.MediaFramePoint})
+  id: Normalize(System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.MediaFramePoint})
+  parent: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService
+  langs:
+  - csharp
+  - vb
+  name: Normalize(IEnumerable<MediaFramePoint>?)
+  nameWithType: IPolygonGeometryService.Normalize(IEnumerable<MediaFramePoint>?)
+  fullName: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Normalize(System.Collections.Generic.IEnumerable<PublisherStudio.BusinessObjects.MediaFramePoint>?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.VideoStudio.Export
+  syntax:
+    content: List<MediaFramePoint> Normalize(IEnumerable<MediaFramePoint>? points)
+    parameters:
+    - id: points
+      type: System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.MediaFramePoint}
+    return:
+      type: System.Collections.Generic.List{PublisherStudio.BusinessObjects.MediaFramePoint}
+    content.vb: Function Normalize(points As IEnumerable(Of MediaFramePoint)) As List(Of MediaFramePoint)
+  overload: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Normalize*
+  nameWithType.vb: IPolygonGeometryService.Normalize(IEnumerable(Of MediaFramePoint))
+  fullName.vb: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Normalize(System.Collections.Generic.IEnumerable(Of PublisherStudio.BusinessObjects.MediaFramePoint))
+  name.vb: Normalize(IEnumerable(Of MediaFramePoint))
+- uid: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.FullFrame
+  commentId: M:PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.FullFrame
+  id: FullFrame
+  parent: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService
+  langs:
+  - csharp
+  - vb
+  name: FullFrame()
+  nameWithType: IPolygonGeometryService.FullFrame()
+  fullName: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.FullFrame()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.VideoStudio.Export
+  syntax:
+    content: List<MediaFramePoint> FullFrame()
+    return:
+      type: System.Collections.Generic.List{PublisherStudio.BusinessObjects.MediaFramePoint}
+    content.vb: Function FullFrame() As List(Of MediaFramePoint)
+  overload: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.FullFrame*
+- uid: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Resample(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.MediaFramePoint},System.Int32)
+  commentId: M:PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Resample(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.MediaFramePoint},System.Int32)
+  id: Resample(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.MediaFramePoint},System.Int32)
+  parent: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService
+  langs:
+  - csharp
+  - vb
+  name: Resample(IReadOnlyList<MediaFramePoint>, int)
+  nameWithType: IPolygonGeometryService.Resample(IReadOnlyList<MediaFramePoint>, int)
+  fullName: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Resample(System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.MediaFramePoint>, int)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.VideoStudio.Export
+  syntax:
+    content: List<MediaFramePoint> Resample(IReadOnlyList<MediaFramePoint> points, int count)
+    parameters:
+    - id: points
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.MediaFramePoint}
+    - id: count
+      type: System.Int32
+    return:
+      type: System.Collections.Generic.List{PublisherStudio.BusinessObjects.MediaFramePoint}
+    content.vb: Function Resample(points As IReadOnlyList(Of MediaFramePoint), count As Integer) As List(Of MediaFramePoint)
+  overload: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Resample*
+  nameWithType.vb: IPolygonGeometryService.Resample(IReadOnlyList(Of MediaFramePoint), Integer)
+  fullName.vb: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Resample(System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.MediaFramePoint), Integer)
+  name.vb: Resample(IReadOnlyList(Of MediaFramePoint), Integer)
+- uid: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Clone(PublisherStudio.BusinessObjects.MediaFramePoint)
+  commentId: M:PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Clone(PublisherStudio.BusinessObjects.MediaFramePoint)
+  id: Clone(PublisherStudio.BusinessObjects.MediaFramePoint)
+  parent: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService
+  langs:
+  - csharp
+  - vb
+  name: Clone(MediaFramePoint)
+  nameWithType: IPolygonGeometryService.Clone(MediaFramePoint)
+  fullName: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Clone(PublisherStudio.BusinessObjects.MediaFramePoint)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.VideoStudio.Export
+  syntax:
+    content: MediaFramePoint Clone(MediaFramePoint point)
+    parameters:
+    - id: point
+      type: PublisherStudio.BusinessObjects.MediaFramePoint
+    return:
+      type: PublisherStudio.BusinessObjects.MediaFramePoint
+    content.vb: Function Clone(point As MediaFramePoint) As MediaFramePoint
+  overload: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Clone*
+- uid: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Distance(System.Double,System.Double)
+  commentId: M:PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Distance(System.Double,System.Double)
+  id: Distance(System.Double,System.Double)
+  parent: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService
+  langs:
+  - csharp
+  - vb
+  name: Distance(double, double)
+  nameWithType: IPolygonGeometryService.Distance(double, double)
+  fullName: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Distance(double, double)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.VideoStudio.Export
+  syntax:
+    content: double Distance(double deltaX, double deltaY)
+    parameters:
+    - id: deltaX
+      type: System.Double
+    - id: deltaY
+      type: System.Double
+    return:
+      type: System.Double
+    content.vb: Function Distance(deltaX As Double, deltaY As Double) As Double
+  overload: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Distance*
+  nameWithType.vb: IPolygonGeometryService.Distance(Double, Double)
+  fullName.vb: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Distance(Double, Double)
+  name.vb: Distance(Double, Double)
+- uid: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.ToOpenScadPoints(System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.MediaFramePoint})
+  commentId: M:PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.ToOpenScadPoints(System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.MediaFramePoint})
+  id: ToOpenScadPoints(System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.MediaFramePoint})
+  parent: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService
+  langs:
+  - csharp
+  - vb
+  name: ToOpenScadPoints(IEnumerable<MediaFramePoint>)
+  nameWithType: IPolygonGeometryService.ToOpenScadPoints(IEnumerable<MediaFramePoint>)
+  fullName: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.ToOpenScadPoints(System.Collections.Generic.IEnumerable<PublisherStudio.BusinessObjects.MediaFramePoint>)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.VideoStudio.Export
+  syntax:
+    content: string ToOpenScadPoints(IEnumerable<MediaFramePoint> points)
+    parameters:
+    - id: points
+      type: System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.MediaFramePoint}
+    return:
+      type: System.String
+    content.vb: Function ToOpenScadPoints(points As IEnumerable(Of MediaFramePoint)) As String
+  overload: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.ToOpenScadPoints*
+  nameWithType.vb: IPolygonGeometryService.ToOpenScadPoints(IEnumerable(Of MediaFramePoint))
+  fullName.vb: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.ToOpenScadPoints(System.Collections.Generic.IEnumerable(Of PublisherStudio.BusinessObjects.MediaFramePoint))
+  name.vb: ToOpenScadPoints(IEnumerable(Of MediaFramePoint))
+- uid: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Number(System.Double)
+  commentId: M:PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Number(System.Double)
+  id: Number(System.Double)
+  parent: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService
+  langs:
+  - csharp
+  - vb
+  name: Number(double)
+  nameWithType: IPolygonGeometryService.Number(double)
+  fullName: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Number(double)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.VideoStudio.Export
+  syntax:
+    content: string Number(double value)
+    parameters:
+    - id: value
+      type: System.Double
+    return:
+      type: System.String
+    content.vb: Function Number(value As Double) As String
+  overload: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Number*
+  nameWithType.vb: IPolygonGeometryService.Number(Double)
+  fullName.vb: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Number(Double)
+  name.vb: Number(Double)
+references:
+- uid: PublisherStudio.Services.VideoStudio.Export
+  commentId: N:PublisherStudio.Services.VideoStudio.Export
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.VideoStudio.Export
+  nameWithType: PublisherStudio.Services.VideoStudio.Export
+  fullName: PublisherStudio.Services.VideoStudio.Export
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio
+    name: VideoStudio
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio.Export
+    name: Export
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.Export.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio
+    name: VideoStudio
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio.Export
+    name: Export
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.Export.html
+- uid: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Normalize*
+  commentId: Overload:PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Normalize
+  isExternal: true
+  href: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.html#PublisherStudio_Services_VideoStudio_Export_IPolygonGeometryService_Normalize_System_Collections_Generic_IEnumerable_PublisherStudio_BusinessObjects_MediaFramePoint__
+  name: Normalize
+  nameWithType: IPolygonGeometryService.Normalize
+  fullName: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Normalize
+- uid: System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.MediaFramePoint}
+  commentId: T:System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.MediaFramePoint}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IEnumerable`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  name: IEnumerable<MediaFramePoint>
+  nameWithType: IEnumerable<MediaFramePoint>
+  fullName: System.Collections.Generic.IEnumerable<PublisherStudio.BusinessObjects.MediaFramePoint>
+  nameWithType.vb: IEnumerable(Of MediaFramePoint)
+  fullName.vb: System.Collections.Generic.IEnumerable(Of PublisherStudio.BusinessObjects.MediaFramePoint)
+  name.vb: IEnumerable(Of MediaFramePoint)
+  spec.csharp:
+  - uid: System.Collections.Generic.IEnumerable`1
+    name: IEnumerable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.MediaFramePoint
+    name: MediaFramePoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaFramePoint.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IEnumerable`1
+    name: IEnumerable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.MediaFramePoint
+    name: MediaFramePoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaFramePoint.html
+  - name: )
+- uid: System.Collections.Generic.List{PublisherStudio.BusinessObjects.MediaFramePoint}
+  commentId: T:System.Collections.Generic.List{PublisherStudio.BusinessObjects.MediaFramePoint}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.List`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<MediaFramePoint>
+  nameWithType: List<MediaFramePoint>
+  fullName: System.Collections.Generic.List<PublisherStudio.BusinessObjects.MediaFramePoint>
+  nameWithType.vb: List(Of MediaFramePoint)
+  fullName.vb: System.Collections.Generic.List(Of PublisherStudio.BusinessObjects.MediaFramePoint)
+  name.vb: List(Of MediaFramePoint)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.MediaFramePoint
+    name: MediaFramePoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaFramePoint.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.MediaFramePoint
+    name: MediaFramePoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaFramePoint.html
+  - name: )
+- uid: System.Collections.Generic.IEnumerable`1
+  commentId: T:System.Collections.Generic.IEnumerable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  name: IEnumerable<T>
+  nameWithType: IEnumerable<T>
+  fullName: System.Collections.Generic.IEnumerable<T>
+  nameWithType.vb: IEnumerable(Of T)
+  fullName.vb: System.Collections.Generic.IEnumerable(Of T)
+  name.vb: IEnumerable(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IEnumerable`1
+    name: IEnumerable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IEnumerable`1
+    name: IEnumerable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: System.Collections.Generic.List`1
+  commentId: T:System.Collections.Generic.List`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<T>
+  nameWithType: List<T>
+  fullName: System.Collections.Generic.List<T>
+  nameWithType.vb: List(Of T)
+  fullName.vb: System.Collections.Generic.List(Of T)
+  name.vb: List(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.FullFrame*
+  commentId: Overload:PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.FullFrame
+  isExternal: true
+  href: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.html#PublisherStudio_Services_VideoStudio_Export_IPolygonGeometryService_FullFrame
+  name: FullFrame
+  nameWithType: IPolygonGeometryService.FullFrame
+  fullName: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.FullFrame
+- uid: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Resample*
+  commentId: Overload:PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Resample
+  isExternal: true
+  href: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.html#PublisherStudio_Services_VideoStudio_Export_IPolygonGeometryService_Resample_System_Collections_Generic_IReadOnlyList_PublisherStudio_BusinessObjects_MediaFramePoint__System_Int32_
+  name: Resample
+  nameWithType: IPolygonGeometryService.Resample
+  fullName: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Resample
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.MediaFramePoint}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.MediaFramePoint}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<MediaFramePoint>
+  nameWithType: IReadOnlyList<MediaFramePoint>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.MediaFramePoint>
+  nameWithType.vb: IReadOnlyList(Of MediaFramePoint)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.MediaFramePoint)
+  name.vb: IReadOnlyList(Of MediaFramePoint)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.MediaFramePoint
+    name: MediaFramePoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaFramePoint.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.MediaFramePoint
+    name: MediaFramePoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaFramePoint.html
+  - name: )
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Clone*
+  commentId: Overload:PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Clone
+  isExternal: true
+  href: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.html#PublisherStudio_Services_VideoStudio_Export_IPolygonGeometryService_Clone_PublisherStudio_BusinessObjects_MediaFramePoint_
+  name: Clone
+  nameWithType: IPolygonGeometryService.Clone
+  fullName: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Clone
+- uid: PublisherStudio.BusinessObjects.MediaFramePoint
+  commentId: T:PublisherStudio.BusinessObjects.MediaFramePoint
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaFramePoint.html
+  name: MediaFramePoint
+  nameWithType: MediaFramePoint
+  fullName: PublisherStudio.BusinessObjects.MediaFramePoint
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Distance*
+  commentId: Overload:PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Distance
+  isExternal: true
+  href: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.html#PublisherStudio_Services_VideoStudio_Export_IPolygonGeometryService_Distance_System_Double_System_Double_
+  name: Distance
+  nameWithType: IPolygonGeometryService.Distance
+  fullName: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Distance
+- uid: System.Double
+  commentId: T:System.Double
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.double
+  name: double
+  nameWithType: double
+  fullName: double
+  nameWithType.vb: Double
+  fullName.vb: Double
+  name.vb: Double
+- uid: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.ToOpenScadPoints*
+  commentId: Overload:PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.ToOpenScadPoints
+  isExternal: true
+  href: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.html#PublisherStudio_Services_VideoStudio_Export_IPolygonGeometryService_ToOpenScadPoints_System_Collections_Generic_IEnumerable_PublisherStudio_BusinessObjects_MediaFramePoint__
+  name: ToOpenScadPoints
+  nameWithType: IPolygonGeometryService.ToOpenScadPoints
+  fullName: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.ToOpenScadPoints
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Number*
+  commentId: Overload:PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Number
+  isExternal: true
+  href: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.html#PublisherStudio_Services_VideoStudio_Export_IPolygonGeometryService_Number_System_Double_
+  name: Number
+  nameWithType: IPolygonGeometryService.Number
+  fullName: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.Number

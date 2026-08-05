@@ -1,0 +1,684 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.OpenScad.OpenScadDocumentService
+  commentId: T:PublisherStudio.Services.OpenScad.OpenScadDocumentService
+  id: OpenScadDocumentService
+  parent: PublisherStudio.Services.OpenScad
+  children:
+  - PublisherStudio.Services.OpenScad.OpenScadDocumentService.#ctor(PublisherStudio.Services.OpenScad.IOpenScadCatalogService,PublisherStudio.Services.OpenScad.IOpenScadValueFormatter,System.Collections.Generic.IEnumerable{PublisherStudio.Services.OpenScad.IOpenScadNodeRenderer})
+  - PublisherStudio.Services.OpenScad.OpenScadDocumentService.CreateExampleDocument
+  - PublisherStudio.Services.OpenScad.OpenScadDocumentService.Generate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  - PublisherStudio.Services.OpenScad.OpenScadDocumentService.Validate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  langs:
+  - csharp
+  - vb
+  name: OpenScadDocumentService
+  nameWithType: OpenScadDocumentService
+  fullName: PublisherStudio.Services.OpenScad.OpenScadDocumentService
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OpenScad
+  summary: Provides open scad document service operations.
+  example: []
+  syntax:
+    content: 'public sealed class OpenScadDocumentService : IOpenScadDocumentService'
+    content.vb: Public NotInheritable Class OpenScadDocumentService Implements IOpenScadDocumentService
+  inheritance:
+  - System.Object
+  implements:
+  - PublisherStudio.Services.OpenScad.IOpenScadDocumentService
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.OpenScad.OpenScadDocumentService.#ctor(PublisherStudio.Services.OpenScad.IOpenScadCatalogService,PublisherStudio.Services.OpenScad.IOpenScadValueFormatter,System.Collections.Generic.IEnumerable{PublisherStudio.Services.OpenScad.IOpenScadNodeRenderer})
+  commentId: M:PublisherStudio.Services.OpenScad.OpenScadDocumentService.#ctor(PublisherStudio.Services.OpenScad.IOpenScadCatalogService,PublisherStudio.Services.OpenScad.IOpenScadValueFormatter,System.Collections.Generic.IEnumerable{PublisherStudio.Services.OpenScad.IOpenScadNodeRenderer})
+  id: '#ctor(PublisherStudio.Services.OpenScad.IOpenScadCatalogService,PublisherStudio.Services.OpenScad.IOpenScadValueFormatter,System.Collections.Generic.IEnumerable{PublisherStudio.Services.OpenScad.IOpenScadNodeRenderer})'
+  parent: PublisherStudio.Services.OpenScad.OpenScadDocumentService
+  langs:
+  - csharp
+  - vb
+  name: OpenScadDocumentService(IOpenScadCatalogService, IOpenScadValueFormatter, IEnumerable<IOpenScadNodeRenderer>)
+  nameWithType: OpenScadDocumentService.OpenScadDocumentService(IOpenScadCatalogService, IOpenScadValueFormatter, IEnumerable<IOpenScadNodeRenderer>)
+  fullName: PublisherStudio.Services.OpenScad.OpenScadDocumentService.OpenScadDocumentService(PublisherStudio.Services.OpenScad.IOpenScadCatalogService, PublisherStudio.Services.OpenScad.IOpenScadValueFormatter, System.Collections.Generic.IEnumerable<PublisherStudio.Services.OpenScad.IOpenScadNodeRenderer>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OpenScad
+  summary: Provides open scad document service operations.
+  example: []
+  syntax:
+    content: public OpenScadDocumentService(IOpenScadCatalogService catalog, IOpenScadValueFormatter values, IEnumerable<IOpenScadNodeRenderer> renderers)
+    parameters:
+    - id: catalog
+      type: PublisherStudio.Services.OpenScad.IOpenScadCatalogService
+    - id: values
+      type: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter
+    - id: renderers
+      type: System.Collections.Generic.IEnumerable{PublisherStudio.Services.OpenScad.IOpenScadNodeRenderer}
+    content.vb: Public Sub New(catalog As IOpenScadCatalogService, values As IOpenScadValueFormatter, renderers As IEnumerable(Of IOpenScadNodeRenderer))
+  overload: PublisherStudio.Services.OpenScad.OpenScadDocumentService.#ctor*
+  nameWithType.vb: OpenScadDocumentService.New(IOpenScadCatalogService, IOpenScadValueFormatter, IEnumerable(Of IOpenScadNodeRenderer))
+  fullName.vb: PublisherStudio.Services.OpenScad.OpenScadDocumentService.New(PublisherStudio.Services.OpenScad.IOpenScadCatalogService, PublisherStudio.Services.OpenScad.IOpenScadValueFormatter, System.Collections.Generic.IEnumerable(Of PublisherStudio.Services.OpenScad.IOpenScadNodeRenderer))
+  name.vb: New(IOpenScadCatalogService, IOpenScadValueFormatter, IEnumerable(Of IOpenScadNodeRenderer))
+- uid: PublisherStudio.Services.OpenScad.OpenScadDocumentService.Validate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  commentId: M:PublisherStudio.Services.OpenScad.OpenScadDocumentService.Validate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  id: Validate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  parent: PublisherStudio.Services.OpenScad.OpenScadDocumentService
+  langs:
+  - csharp
+  - vb
+  name: Validate(OpenScadDocument)
+  nameWithType: OpenScadDocumentService.Validate(OpenScadDocument)
+  fullName: PublisherStudio.Services.OpenScad.OpenScadDocumentService.Validate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OpenScad
+  summary: Runs the validate operation.
+  example: []
+  syntax:
+    content: public OpenScadValidationResult Validate(OpenScadDocument document)
+    parameters:
+    - id: document
+      type: PublisherStudio.BusinessObjects.OpenScadDocument
+    return:
+      type: PublisherStudio.BusinessObjects.OpenScadValidationResult
+    content.vb: Public Function Validate(document As OpenScadDocument) As OpenScadValidationResult
+  overload: PublisherStudio.Services.OpenScad.OpenScadDocumentService.Validate*
+  implements:
+  - PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Validate(PublisherStudio.BusinessObjects.OpenScadDocument)
+- uid: PublisherStudio.Services.OpenScad.OpenScadDocumentService.Generate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  commentId: M:PublisherStudio.Services.OpenScad.OpenScadDocumentService.Generate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  id: Generate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  parent: PublisherStudio.Services.OpenScad.OpenScadDocumentService
+  langs:
+  - csharp
+  - vb
+  name: Generate(OpenScadDocument)
+  nameWithType: OpenScadDocumentService.Generate(OpenScadDocument)
+  fullName: PublisherStudio.Services.OpenScad.OpenScadDocumentService.Generate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OpenScad
+  summary: Runs the generate operation.
+  example: []
+  syntax:
+    content: public OpenScadGenerationResult Generate(OpenScadDocument document)
+    parameters:
+    - id: document
+      type: PublisherStudio.BusinessObjects.OpenScadDocument
+    return:
+      type: PublisherStudio.BusinessObjects.OpenScadGenerationResult
+    content.vb: Public Function Generate(document As OpenScadDocument) As OpenScadGenerationResult
+  overload: PublisherStudio.Services.OpenScad.OpenScadDocumentService.Generate*
+  implements:
+  - PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Generate(PublisherStudio.BusinessObjects.OpenScadDocument)
+- uid: PublisherStudio.Services.OpenScad.OpenScadDocumentService.CreateExampleDocument
+  commentId: M:PublisherStudio.Services.OpenScad.OpenScadDocumentService.CreateExampleDocument
+  id: CreateExampleDocument
+  parent: PublisherStudio.Services.OpenScad.OpenScadDocumentService
+  langs:
+  - csharp
+  - vb
+  name: CreateExampleDocument()
+  nameWithType: OpenScadDocumentService.CreateExampleDocument()
+  fullName: PublisherStudio.Services.OpenScad.OpenScadDocumentService.CreateExampleDocument()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OpenScad
+  summary: Creates example document.
+  example: []
+  syntax:
+    content: public OpenScadDocument CreateExampleDocument()
+    return:
+      type: PublisherStudio.BusinessObjects.OpenScadDocument
+    content.vb: Public Function CreateExampleDocument() As OpenScadDocument
+  overload: PublisherStudio.Services.OpenScad.OpenScadDocumentService.CreateExampleDocument*
+  implements:
+  - PublisherStudio.Services.OpenScad.IOpenScadDocumentService.CreateExampleDocument
+references:
+- uid: PublisherStudio.Services.OpenScad
+  commentId: N:PublisherStudio.Services.OpenScad
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.OpenScad
+  nameWithType: PublisherStudio.Services.OpenScad
+  fullName: PublisherStudio.Services.OpenScad
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OpenScad
+    name: OpenScad
+    isExternal: true
+    href: PublisherStudio.Services.OpenScad.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OpenScad
+    name: OpenScad
+    isExternal: true
+    href: PublisherStudio.Services.OpenScad.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: PublisherStudio.Services.OpenScad.IOpenScadDocumentService
+  commentId: T:PublisherStudio.Services.OpenScad.IOpenScadDocumentService
+  parent: PublisherStudio.Services.OpenScad
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.html
+  name: IOpenScadDocumentService
+  nameWithType: IOpenScadDocumentService
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadDocumentService
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.OpenScad.OpenScadDocumentService.#ctor*
+  commentId: Overload:PublisherStudio.Services.OpenScad.OpenScadDocumentService.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.OpenScadDocumentService.html#PublisherStudio_Services_OpenScad_OpenScadDocumentService__ctor_PublisherStudio_Services_OpenScad_IOpenScadCatalogService_PublisherStudio_Services_OpenScad_IOpenScadValueFormatter_System_Collections_Generic_IEnumerable_PublisherStudio_Services_OpenScad_IOpenScadNodeRenderer__
+  name: OpenScadDocumentService
+  nameWithType: OpenScadDocumentService.OpenScadDocumentService
+  fullName: PublisherStudio.Services.OpenScad.OpenScadDocumentService.OpenScadDocumentService
+  nameWithType.vb: OpenScadDocumentService.New
+  fullName.vb: PublisherStudio.Services.OpenScad.OpenScadDocumentService.New
+  name.vb: New
+- uid: PublisherStudio.Services.OpenScad.IOpenScadCatalogService
+  commentId: T:PublisherStudio.Services.OpenScad.IOpenScadCatalogService
+  parent: PublisherStudio.Services.OpenScad
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.IOpenScadCatalogService.html
+  name: IOpenScadCatalogService
+  nameWithType: IOpenScadCatalogService
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadCatalogService
+- uid: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter
+  commentId: T:PublisherStudio.Services.OpenScad.IOpenScadValueFormatter
+  parent: PublisherStudio.Services.OpenScad
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.html
+  name: IOpenScadValueFormatter
+  nameWithType: IOpenScadValueFormatter
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter
+- uid: System.Collections.Generic.IEnumerable{PublisherStudio.Services.OpenScad.IOpenScadNodeRenderer}
+  commentId: T:System.Collections.Generic.IEnumerable{PublisherStudio.Services.OpenScad.IOpenScadNodeRenderer}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IEnumerable`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  name: IEnumerable<IOpenScadNodeRenderer>
+  nameWithType: IEnumerable<IOpenScadNodeRenderer>
+  fullName: System.Collections.Generic.IEnumerable<PublisherStudio.Services.OpenScad.IOpenScadNodeRenderer>
+  nameWithType.vb: IEnumerable(Of IOpenScadNodeRenderer)
+  fullName.vb: System.Collections.Generic.IEnumerable(Of PublisherStudio.Services.OpenScad.IOpenScadNodeRenderer)
+  name.vb: IEnumerable(Of IOpenScadNodeRenderer)
+  spec.csharp:
+  - uid: System.Collections.Generic.IEnumerable`1
+    name: IEnumerable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  - name: <
+  - uid: PublisherStudio.Services.OpenScad.IOpenScadNodeRenderer
+    name: IOpenScadNodeRenderer
+    isExternal: true
+    href: PublisherStudio.Services.OpenScad.IOpenScadNodeRenderer.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IEnumerable`1
+    name: IEnumerable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.OpenScad.IOpenScadNodeRenderer
+    name: IOpenScadNodeRenderer
+    isExternal: true
+    href: PublisherStudio.Services.OpenScad.IOpenScadNodeRenderer.html
+  - name: )
+- uid: System.Collections.Generic.IEnumerable`1
+  commentId: T:System.Collections.Generic.IEnumerable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  name: IEnumerable<T>
+  nameWithType: IEnumerable<T>
+  fullName: System.Collections.Generic.IEnumerable<T>
+  nameWithType.vb: IEnumerable(Of T)
+  fullName.vb: System.Collections.Generic.IEnumerable(Of T)
+  name.vb: IEnumerable(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IEnumerable`1
+    name: IEnumerable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IEnumerable`1
+    name: IEnumerable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: PublisherStudio.Services.OpenScad.OpenScadDocumentService.Validate*
+  commentId: Overload:PublisherStudio.Services.OpenScad.OpenScadDocumentService.Validate
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.OpenScadDocumentService.html#PublisherStudio_Services_OpenScad_OpenScadDocumentService_Validate_PublisherStudio_BusinessObjects_OpenScadDocument_
+  name: Validate
+  nameWithType: OpenScadDocumentService.Validate
+  fullName: PublisherStudio.Services.OpenScad.OpenScadDocumentService.Validate
+- uid: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Validate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  commentId: M:PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Validate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  parent: PublisherStudio.Services.OpenScad.IOpenScadDocumentService
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.html#PublisherStudio_Services_OpenScad_IOpenScadDocumentService_Validate_PublisherStudio_BusinessObjects_OpenScadDocument_
+  name: Validate(OpenScadDocument)
+  nameWithType: IOpenScadDocumentService.Validate(OpenScadDocument)
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Validate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  spec.csharp:
+  - uid: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Validate(PublisherStudio.BusinessObjects.OpenScadDocument)
+    name: Validate
+    isExternal: true
+    href: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.html#PublisherStudio_Services_OpenScad_IOpenScadDocumentService_Validate_PublisherStudio_BusinessObjects_OpenScadDocument_
+  - name: (
+  - uid: PublisherStudio.BusinessObjects.OpenScadDocument
+    name: OpenScadDocument
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.OpenScadDocument.html
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Validate(PublisherStudio.BusinessObjects.OpenScadDocument)
+    name: Validate
+    isExternal: true
+    href: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.html#PublisherStudio_Services_OpenScad_IOpenScadDocumentService_Validate_PublisherStudio_BusinessObjects_OpenScadDocument_
+  - name: (
+  - uid: PublisherStudio.BusinessObjects.OpenScadDocument
+    name: OpenScadDocument
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.OpenScadDocument.html
+  - name: )
+- uid: PublisherStudio.BusinessObjects.OpenScadDocument
+  commentId: T:PublisherStudio.BusinessObjects.OpenScadDocument
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OpenScadDocument.html
+  name: OpenScadDocument
+  nameWithType: OpenScadDocument
+  fullName: PublisherStudio.BusinessObjects.OpenScadDocument
+- uid: PublisherStudio.BusinessObjects.OpenScadValidationResult
+  commentId: T:PublisherStudio.BusinessObjects.OpenScadValidationResult
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OpenScadValidationResult.html
+  name: OpenScadValidationResult
+  nameWithType: OpenScadValidationResult
+  fullName: PublisherStudio.BusinessObjects.OpenScadValidationResult
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.Services.OpenScad.OpenScadDocumentService.Generate*
+  commentId: Overload:PublisherStudio.Services.OpenScad.OpenScadDocumentService.Generate
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.OpenScadDocumentService.html#PublisherStudio_Services_OpenScad_OpenScadDocumentService_Generate_PublisherStudio_BusinessObjects_OpenScadDocument_
+  name: Generate
+  nameWithType: OpenScadDocumentService.Generate
+  fullName: PublisherStudio.Services.OpenScad.OpenScadDocumentService.Generate
+- uid: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Generate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  commentId: M:PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Generate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  parent: PublisherStudio.Services.OpenScad.IOpenScadDocumentService
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.html#PublisherStudio_Services_OpenScad_IOpenScadDocumentService_Generate_PublisherStudio_BusinessObjects_OpenScadDocument_
+  name: Generate(OpenScadDocument)
+  nameWithType: IOpenScadDocumentService.Generate(OpenScadDocument)
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Generate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  spec.csharp:
+  - uid: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Generate(PublisherStudio.BusinessObjects.OpenScadDocument)
+    name: Generate
+    isExternal: true
+    href: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.html#PublisherStudio_Services_OpenScad_IOpenScadDocumentService_Generate_PublisherStudio_BusinessObjects_OpenScadDocument_
+  - name: (
+  - uid: PublisherStudio.BusinessObjects.OpenScadDocument
+    name: OpenScadDocument
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.OpenScadDocument.html
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Generate(PublisherStudio.BusinessObjects.OpenScadDocument)
+    name: Generate
+    isExternal: true
+    href: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.html#PublisherStudio_Services_OpenScad_IOpenScadDocumentService_Generate_PublisherStudio_BusinessObjects_OpenScadDocument_
+  - name: (
+  - uid: PublisherStudio.BusinessObjects.OpenScadDocument
+    name: OpenScadDocument
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.OpenScadDocument.html
+  - name: )
+- uid: PublisherStudio.BusinessObjects.OpenScadGenerationResult
+  commentId: T:PublisherStudio.BusinessObjects.OpenScadGenerationResult
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OpenScadGenerationResult.html
+  name: OpenScadGenerationResult
+  nameWithType: OpenScadGenerationResult
+  fullName: PublisherStudio.BusinessObjects.OpenScadGenerationResult
+- uid: PublisherStudio.Services.OpenScad.OpenScadDocumentService.CreateExampleDocument*
+  commentId: Overload:PublisherStudio.Services.OpenScad.OpenScadDocumentService.CreateExampleDocument
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.OpenScadDocumentService.html#PublisherStudio_Services_OpenScad_OpenScadDocumentService_CreateExampleDocument
+  name: CreateExampleDocument
+  nameWithType: OpenScadDocumentService.CreateExampleDocument
+  fullName: PublisherStudio.Services.OpenScad.OpenScadDocumentService.CreateExampleDocument
+- uid: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.CreateExampleDocument
+  commentId: M:PublisherStudio.Services.OpenScad.IOpenScadDocumentService.CreateExampleDocument
+  parent: PublisherStudio.Services.OpenScad.IOpenScadDocumentService
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.html#PublisherStudio_Services_OpenScad_IOpenScadDocumentService_CreateExampleDocument
+  name: CreateExampleDocument()
+  nameWithType: IOpenScadDocumentService.CreateExampleDocument()
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.CreateExampleDocument()
+  spec.csharp:
+  - uid: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.CreateExampleDocument
+    name: CreateExampleDocument
+    isExternal: true
+    href: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.html#PublisherStudio_Services_OpenScad_IOpenScadDocumentService_CreateExampleDocument
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.CreateExampleDocument
+    name: CreateExampleDocument
+    isExternal: true
+    href: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.html#PublisherStudio_Services_OpenScad_IOpenScadDocumentService_CreateExampleDocument
+  - name: (
+  - name: )

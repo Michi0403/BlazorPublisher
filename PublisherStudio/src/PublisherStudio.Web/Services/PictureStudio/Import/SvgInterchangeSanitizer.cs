@@ -1,9 +1,12 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Xml;
 using System.Xml.Linq;
 
 namespace PublisherStudio.Services.PictureStudio.Import;
 
+/// <summary>
+/// Represents a SVG interchange sanitizer.
+/// </summary>
 public sealed class SvgInterchangeSanitizer(ILogger<SvgInterchangeSanitizer> logger)
 {
     private readonly HashSet<string> RemovedElements = new(StringComparer.OrdinalIgnoreCase)
@@ -11,6 +14,9 @@ public sealed class SvgInterchangeSanitizer(ILogger<SvgInterchangeSanitizer> log
         "script", "foreignObject", "iframe", "object", "embed", "audio", "video", "canvas"
     };
 
+    /// <summary>
+    /// Runs the sanitize operation.
+    /// </summary>
     public string Sanitize(string svg)
     {
         try
@@ -77,6 +83,9 @@ public sealed class SvgInterchangeSanitizer(ILogger<SvgInterchangeSanitizer> log
         }
     }
 
+    /// <summary>
+    /// Reads viewport.
+    /// </summary>
     public (double Width, double Height, double MinX, double MinY) ReadViewport(string svg)
     {
         var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null };
@@ -96,6 +105,9 @@ public sealed class SvgInterchangeSanitizer(ILogger<SvgInterchangeSanitizer> log
         return (width, height, minX, minY);
     }
 
+    /// <summary>
+    /// Parses length.
+    /// </summary>
     public double ParseLength(string? value, double fallback = 0)
     {
         try

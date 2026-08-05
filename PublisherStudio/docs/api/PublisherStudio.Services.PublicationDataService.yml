@@ -1,0 +1,1628 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.PublicationDataService
+  commentId: T:PublisherStudio.Services.PublicationDataService
+  id: PublicationDataService
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.PublicationDataService.#ctor(PublisherStudio.Services.IPublicationGridRowFactory,PublisherStudio.Services.PublicationMediaData,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationDataService})
+  - PublisherStudio.Services.PublicationDataService.BuildBubblePoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  - PublisherStudio.Services.PublicationDataService.BuildChartPoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  - PublisherStudio.Services.PublicationDataService.BuildClientVisualConfiguration(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  - PublisherStudio.Services.PublicationDataService.BuildFinancialPoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  - PublisherStudio.Services.PublicationDataService.BuildGridRows(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  - PublisherStudio.Services.PublicationDataService.BuildPiePoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  - PublisherStudio.Services.PublicationDataService.BuildRangePoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  - PublisherStudio.Services.PublicationDataService.BuildSankeyPoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  - PublisherStudio.Services.PublicationDataService.BuildSparkPoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  - PublisherStudio.Services.PublicationDataService.BuildTreeMapPoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  - PublisherStudio.Services.PublicationDataService.Clone(PublisherStudio.BusinessObjects.PublicationDataObject)
+  - PublisherStudio.Services.PublicationDataService.CreateSample(System.String)
+  - PublisherStudio.Services.PublicationDataService.EnsureBuiltInObjects(PublisherStudio.BusinessObjects.PublicationDocument)
+  - PublisherStudio.Services.PublicationDataService.GridColumns(PublisherStudio.BusinessObjects.PublicationDataObject)
+  - PublisherStudio.Services.PublicationDataService.Normalize(PublisherStudio.BusinessObjects.PublicationDocument)
+  - PublisherStudio.Services.PublicationDataService.ParseInto(PublisherStudio.BusinessObjects.PublicationDataObject)
+  - PublisherStudio.Services.PublicationDataService.ResolveColumns(PublisherStudio.BusinessObjects.PublicationDataObject)
+  - PublisherStudio.Services.PublicationDataService.ResolveRows(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.PublicationDataObject,System.Guid)
+  langs:
+  - csharp
+  - vb
+  name: PublicationDataService
+  nameWithType: PublicationDataService
+  fullName: PublisherStudio.Services.PublicationDataService
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Provides publication data service operations.
+  example: []
+  syntax:
+    content: public sealed class PublicationDataService
+    content.vb: Public NotInheritable Class PublicationDataService
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.PublicationDataService.#ctor(PublisherStudio.Services.IPublicationGridRowFactory,PublisherStudio.Services.PublicationMediaData,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationDataService})
+  commentId: M:PublisherStudio.Services.PublicationDataService.#ctor(PublisherStudio.Services.IPublicationGridRowFactory,PublisherStudio.Services.PublicationMediaData,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationDataService})
+  id: '#ctor(PublisherStudio.Services.IPublicationGridRowFactory,PublisherStudio.Services.PublicationMediaData,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationDataService})'
+  parent: PublisherStudio.Services.PublicationDataService
+  langs:
+  - csharp
+  - vb
+  name: PublicationDataService(IPublicationGridRowFactory, PublicationMediaData, ILogger<PublicationDataService>)
+  nameWithType: PublicationDataService.PublicationDataService(IPublicationGridRowFactory, PublicationMediaData, ILogger<PublicationDataService>)
+  fullName: PublisherStudio.Services.PublicationDataService.PublicationDataService(PublisherStudio.Services.IPublicationGridRowFactory, PublisherStudio.Services.PublicationMediaData, Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.PublicationDataService>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Provides publication data service operations.
+  example: []
+  syntax:
+    content: public PublicationDataService(IPublicationGridRowFactory gridRows, PublicationMediaData mediaData, ILogger<PublicationDataService> logger)
+    parameters:
+    - id: gridRows
+      type: PublisherStudio.Services.IPublicationGridRowFactory
+    - id: mediaData
+      type: PublisherStudio.Services.PublicationMediaData
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationDataService}
+    content.vb: Public Sub New(gridRows As IPublicationGridRowFactory, mediaData As PublicationMediaData, logger As ILogger(Of PublicationDataService))
+  overload: PublisherStudio.Services.PublicationDataService.#ctor*
+  nameWithType.vb: PublicationDataService.New(IPublicationGridRowFactory, PublicationMediaData, ILogger(Of PublicationDataService))
+  fullName.vb: PublisherStudio.Services.PublicationDataService.New(PublisherStudio.Services.IPublicationGridRowFactory, PublisherStudio.Services.PublicationMediaData, Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.PublicationDataService))
+  name.vb: New(IPublicationGridRowFactory, PublicationMediaData, ILogger(Of PublicationDataService))
+- uid: PublisherStudio.Services.PublicationDataService.CreateSample(System.String)
+  commentId: M:PublisherStudio.Services.PublicationDataService.CreateSample(System.String)
+  id: CreateSample(System.String)
+  parent: PublisherStudio.Services.PublicationDataService
+  langs:
+  - csharp
+  - vb
+  name: CreateSample(string)
+  nameWithType: PublicationDataService.CreateSample(string)
+  fullName: PublisherStudio.Services.PublicationDataService.CreateSample(string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Creates sample.
+  example: []
+  syntax:
+    content: public PublicationDataObject CreateSample(string name = "Quarterly Sales")
+    parameters:
+    - id: name
+      type: System.String
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationDataObject
+    content.vb: Public Function CreateSample(name As String = "Quarterly Sales") As PublicationDataObject
+  overload: PublisherStudio.Services.PublicationDataService.CreateSample*
+  nameWithType.vb: PublicationDataService.CreateSample(String)
+  fullName.vb: PublisherStudio.Services.PublicationDataService.CreateSample(String)
+  name.vb: CreateSample(String)
+- uid: PublisherStudio.Services.PublicationDataService.Clone(PublisherStudio.BusinessObjects.PublicationDataObject)
+  commentId: M:PublisherStudio.Services.PublicationDataService.Clone(PublisherStudio.BusinessObjects.PublicationDataObject)
+  id: Clone(PublisherStudio.BusinessObjects.PublicationDataObject)
+  parent: PublisherStudio.Services.PublicationDataService
+  langs:
+  - csharp
+  - vb
+  name: Clone(PublicationDataObject)
+  nameWithType: PublicationDataService.Clone(PublicationDataObject)
+  fullName: PublisherStudio.Services.PublicationDataService.Clone(PublisherStudio.BusinessObjects.PublicationDataObject)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the clone operation.
+  example: []
+  syntax:
+    content: public PublicationDataObject Clone(PublicationDataObject source)
+    parameters:
+    - id: source
+      type: PublisherStudio.BusinessObjects.PublicationDataObject
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationDataObject
+    content.vb: Public Function Clone(source As PublicationDataObject) As PublicationDataObject
+  overload: PublisherStudio.Services.PublicationDataService.Clone*
+- uid: PublisherStudio.Services.PublicationDataService.Normalize(PublisherStudio.BusinessObjects.PublicationDocument)
+  commentId: M:PublisherStudio.Services.PublicationDataService.Normalize(PublisherStudio.BusinessObjects.PublicationDocument)
+  id: Normalize(PublisherStudio.BusinessObjects.PublicationDocument)
+  parent: PublisherStudio.Services.PublicationDataService
+  langs:
+  - csharp
+  - vb
+  name: Normalize(PublicationDocument)
+  nameWithType: PublicationDataService.Normalize(PublicationDocument)
+  fullName: PublisherStudio.Services.PublicationDataService.Normalize(PublisherStudio.BusinessObjects.PublicationDocument)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the normalize operation.
+  example: []
+  syntax:
+    content: public void Normalize(PublicationDocument document)
+    parameters:
+    - id: document
+      type: PublisherStudio.BusinessObjects.PublicationDocument
+    content.vb: Public Sub Normalize(document As PublicationDocument)
+  overload: PublisherStudio.Services.PublicationDataService.Normalize*
+- uid: PublisherStudio.Services.PublicationDataService.ParseInto(PublisherStudio.BusinessObjects.PublicationDataObject)
+  commentId: M:PublisherStudio.Services.PublicationDataService.ParseInto(PublisherStudio.BusinessObjects.PublicationDataObject)
+  id: ParseInto(PublisherStudio.BusinessObjects.PublicationDataObject)
+  parent: PublisherStudio.Services.PublicationDataService
+  langs:
+  - csharp
+  - vb
+  name: ParseInto(PublicationDataObject)
+  nameWithType: PublicationDataService.ParseInto(PublicationDataObject)
+  fullName: PublisherStudio.Services.PublicationDataService.ParseInto(PublisherStudio.BusinessObjects.PublicationDataObject)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Parses into.
+  example: []
+  syntax:
+    content: public void ParseInto(PublicationDataObject data)
+    parameters:
+    - id: data
+      type: PublisherStudio.BusinessObjects.PublicationDataObject
+    content.vb: Public Sub ParseInto(data As PublicationDataObject)
+  overload: PublisherStudio.Services.PublicationDataService.ParseInto*
+- uid: PublisherStudio.Services.PublicationDataService.ResolveRows(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.PublicationDataObject,System.Guid)
+  commentId: M:PublisherStudio.Services.PublicationDataService.ResolveRows(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.PublicationDataObject,System.Guid)
+  id: ResolveRows(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.PublicationDataObject,System.Guid)
+  parent: PublisherStudio.Services.PublicationDataService
+  langs:
+  - csharp
+  - vb
+  name: ResolveRows(PublicationDocument, PublicationDataObject?, Guid)
+  nameWithType: PublicationDataService.ResolveRows(PublicationDocument, PublicationDataObject?, Guid)
+  fullName: PublisherStudio.Services.PublicationDataService.ResolveRows(PublisherStudio.BusinessObjects.PublicationDocument, PublisherStudio.BusinessObjects.PublicationDataObject?, System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Resolves rows.
+  example: []
+  syntax:
+    content: public IReadOnlyList<PublicationDataRow> ResolveRows(PublicationDocument document, PublicationDataObject? data, Guid currentPageId)
+    parameters:
+    - id: document
+      type: PublisherStudio.BusinessObjects.PublicationDocument
+    - id: data
+      type: PublisherStudio.BusinessObjects.PublicationDataObject
+    - id: currentPageId
+      type: System.Guid
+    return:
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationDataRow}
+    content.vb: Public Function ResolveRows(document As PublicationDocument, data As PublicationDataObject, currentPageId As Guid) As IReadOnlyList(Of PublicationDataRow)
+  overload: PublisherStudio.Services.PublicationDataService.ResolveRows*
+  nameWithType.vb: PublicationDataService.ResolveRows(PublicationDocument, PublicationDataObject, Guid)
+  fullName.vb: PublisherStudio.Services.PublicationDataService.ResolveRows(PublisherStudio.BusinessObjects.PublicationDocument, PublisherStudio.BusinessObjects.PublicationDataObject, System.Guid)
+  name.vb: ResolveRows(PublicationDocument, PublicationDataObject, Guid)
+- uid: PublisherStudio.Services.PublicationDataService.ResolveColumns(PublisherStudio.BusinessObjects.PublicationDataObject)
+  commentId: M:PublisherStudio.Services.PublicationDataService.ResolveColumns(PublisherStudio.BusinessObjects.PublicationDataObject)
+  id: ResolveColumns(PublisherStudio.BusinessObjects.PublicationDataObject)
+  parent: PublisherStudio.Services.PublicationDataService
+  langs:
+  - csharp
+  - vb
+  name: ResolveColumns(PublicationDataObject?)
+  nameWithType: PublicationDataService.ResolveColumns(PublicationDataObject?)
+  fullName: PublisherStudio.Services.PublicationDataService.ResolveColumns(PublisherStudio.BusinessObjects.PublicationDataObject?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Resolves columns.
+  example: []
+  syntax:
+    content: public IReadOnlyList<PublicationDataColumn> ResolveColumns(PublicationDataObject? data)
+    parameters:
+    - id: data
+      type: PublisherStudio.BusinessObjects.PublicationDataObject
+    return:
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationDataColumn}
+    content.vb: Public Function ResolveColumns(data As PublicationDataObject) As IReadOnlyList(Of PublicationDataColumn)
+  overload: PublisherStudio.Services.PublicationDataService.ResolveColumns*
+  nameWithType.vb: PublicationDataService.ResolveColumns(PublicationDataObject)
+  fullName.vb: PublisherStudio.Services.PublicationDataService.ResolveColumns(PublisherStudio.BusinessObjects.PublicationDataObject)
+  name.vb: ResolveColumns(PublicationDataObject)
+- uid: PublisherStudio.Services.PublicationDataService.EnsureBuiltInObjects(PublisherStudio.BusinessObjects.PublicationDocument)
+  commentId: M:PublisherStudio.Services.PublicationDataService.EnsureBuiltInObjects(PublisherStudio.BusinessObjects.PublicationDocument)
+  id: EnsureBuiltInObjects(PublisherStudio.BusinessObjects.PublicationDocument)
+  parent: PublisherStudio.Services.PublicationDataService
+  langs:
+  - csharp
+  - vb
+  name: EnsureBuiltInObjects(PublicationDocument)
+  nameWithType: PublicationDataService.EnsureBuiltInObjects(PublicationDocument)
+  fullName: PublisherStudio.Services.PublicationDataService.EnsureBuiltInObjects(PublisherStudio.BusinessObjects.PublicationDocument)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Ensures built in objects.
+  example: []
+  syntax:
+    content: public void EnsureBuiltInObjects(PublicationDocument document)
+    parameters:
+    - id: document
+      type: PublisherStudio.BusinessObjects.PublicationDocument
+    content.vb: Public Sub EnsureBuiltInObjects(document As PublicationDocument)
+  overload: PublisherStudio.Services.PublicationDataService.EnsureBuiltInObjects*
+- uid: PublisherStudio.Services.PublicationDataService.BuildChartPoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  commentId: M:PublisherStudio.Services.PublicationDataService.BuildChartPoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  id: BuildChartPoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  parent: PublisherStudio.Services.PublicationDataService
+  langs:
+  - csharp
+  - vb
+  name: BuildChartPoints(PublicationDocument, DataVisualElement, Guid)
+  nameWithType: PublicationDataService.BuildChartPoints(PublicationDocument, DataVisualElement, Guid)
+  fullName: PublisherStudio.Services.PublicationDataService.BuildChartPoints(PublisherStudio.BusinessObjects.PublicationDocument, PublisherStudio.BusinessObjects.DataVisualElement, System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Builds chart points.
+  example: []
+  syntax:
+    content: public IReadOnlyList<DataChartPoint> BuildChartPoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
+    parameters:
+    - id: document
+      type: PublisherStudio.BusinessObjects.PublicationDocument
+    - id: item
+      type: PublisherStudio.BusinessObjects.DataVisualElement
+    - id: currentPageId
+      type: System.Guid
+    return:
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.DataChartPoint}
+    content.vb: Public Function BuildChartPoints(document As PublicationDocument, item As DataVisualElement, currentPageId As Guid) As IReadOnlyList(Of DataChartPoint)
+  overload: PublisherStudio.Services.PublicationDataService.BuildChartPoints*
+- uid: PublisherStudio.Services.PublicationDataService.BuildPiePoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  commentId: M:PublisherStudio.Services.PublicationDataService.BuildPiePoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  id: BuildPiePoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  parent: PublisherStudio.Services.PublicationDataService
+  langs:
+  - csharp
+  - vb
+  name: BuildPiePoints(PublicationDocument, DataVisualElement, Guid)
+  nameWithType: PublicationDataService.BuildPiePoints(PublicationDocument, DataVisualElement, Guid)
+  fullName: PublisherStudio.Services.PublicationDataService.BuildPiePoints(PublisherStudio.BusinessObjects.PublicationDocument, PublisherStudio.BusinessObjects.DataVisualElement, System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Builds pie points.
+  example: []
+  syntax:
+    content: public IReadOnlyList<DataPiePoint> BuildPiePoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
+    parameters:
+    - id: document
+      type: PublisherStudio.BusinessObjects.PublicationDocument
+    - id: item
+      type: PublisherStudio.BusinessObjects.DataVisualElement
+    - id: currentPageId
+      type: System.Guid
+    return:
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.DataPiePoint}
+    content.vb: Public Function BuildPiePoints(document As PublicationDocument, item As DataVisualElement, currentPageId As Guid) As IReadOnlyList(Of DataPiePoint)
+  overload: PublisherStudio.Services.PublicationDataService.BuildPiePoints*
+- uid: PublisherStudio.Services.PublicationDataService.BuildSparkPoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  commentId: M:PublisherStudio.Services.PublicationDataService.BuildSparkPoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  id: BuildSparkPoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  parent: PublisherStudio.Services.PublicationDataService
+  langs:
+  - csharp
+  - vb
+  name: BuildSparkPoints(PublicationDocument, DataVisualElement, Guid)
+  nameWithType: PublicationDataService.BuildSparkPoints(PublicationDocument, DataVisualElement, Guid)
+  fullName: PublisherStudio.Services.PublicationDataService.BuildSparkPoints(PublisherStudio.BusinessObjects.PublicationDocument, PublisherStudio.BusinessObjects.DataVisualElement, System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Builds spark points.
+  example: []
+  syntax:
+    content: public IReadOnlyList<DataSparkPoint> BuildSparkPoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
+    parameters:
+    - id: document
+      type: PublisherStudio.BusinessObjects.PublicationDocument
+    - id: item
+      type: PublisherStudio.BusinessObjects.DataVisualElement
+    - id: currentPageId
+      type: System.Guid
+    return:
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.DataSparkPoint}
+    content.vb: Public Function BuildSparkPoints(document As PublicationDocument, item As DataVisualElement, currentPageId As Guid) As IReadOnlyList(Of DataSparkPoint)
+  overload: PublisherStudio.Services.PublicationDataService.BuildSparkPoints*
+- uid: PublisherStudio.Services.PublicationDataService.BuildRangePoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  commentId: M:PublisherStudio.Services.PublicationDataService.BuildRangePoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  id: BuildRangePoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  parent: PublisherStudio.Services.PublicationDataService
+  langs:
+  - csharp
+  - vb
+  name: BuildRangePoints(PublicationDocument, DataVisualElement, Guid)
+  nameWithType: PublicationDataService.BuildRangePoints(PublicationDocument, DataVisualElement, Guid)
+  fullName: PublisherStudio.Services.PublicationDataService.BuildRangePoints(PublisherStudio.BusinessObjects.PublicationDocument, PublisherStudio.BusinessObjects.DataVisualElement, System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Builds range points.
+  example: []
+  syntax:
+    content: public IReadOnlyList<DataRangePoint> BuildRangePoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
+    parameters:
+    - id: document
+      type: PublisherStudio.BusinessObjects.PublicationDocument
+    - id: item
+      type: PublisherStudio.BusinessObjects.DataVisualElement
+    - id: currentPageId
+      type: System.Guid
+    return:
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.DataRangePoint}
+    content.vb: Public Function BuildRangePoints(document As PublicationDocument, item As DataVisualElement, currentPageId As Guid) As IReadOnlyList(Of DataRangePoint)
+  overload: PublisherStudio.Services.PublicationDataService.BuildRangePoints*
+- uid: PublisherStudio.Services.PublicationDataService.BuildBubblePoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  commentId: M:PublisherStudio.Services.PublicationDataService.BuildBubblePoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  id: BuildBubblePoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  parent: PublisherStudio.Services.PublicationDataService
+  langs:
+  - csharp
+  - vb
+  name: BuildBubblePoints(PublicationDocument, DataVisualElement, Guid)
+  nameWithType: PublicationDataService.BuildBubblePoints(PublicationDocument, DataVisualElement, Guid)
+  fullName: PublisherStudio.Services.PublicationDataService.BuildBubblePoints(PublisherStudio.BusinessObjects.PublicationDocument, PublisherStudio.BusinessObjects.DataVisualElement, System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Builds bubble points.
+  example: []
+  syntax:
+    content: public IReadOnlyList<DataBubblePoint> BuildBubblePoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
+    parameters:
+    - id: document
+      type: PublisherStudio.BusinessObjects.PublicationDocument
+    - id: item
+      type: PublisherStudio.BusinessObjects.DataVisualElement
+    - id: currentPageId
+      type: System.Guid
+    return:
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.DataBubblePoint}
+    content.vb: Public Function BuildBubblePoints(document As PublicationDocument, item As DataVisualElement, currentPageId As Guid) As IReadOnlyList(Of DataBubblePoint)
+  overload: PublisherStudio.Services.PublicationDataService.BuildBubblePoints*
+- uid: PublisherStudio.Services.PublicationDataService.BuildFinancialPoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  commentId: M:PublisherStudio.Services.PublicationDataService.BuildFinancialPoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  id: BuildFinancialPoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  parent: PublisherStudio.Services.PublicationDataService
+  langs:
+  - csharp
+  - vb
+  name: BuildFinancialPoints(PublicationDocument, DataVisualElement, Guid)
+  nameWithType: PublicationDataService.BuildFinancialPoints(PublicationDocument, DataVisualElement, Guid)
+  fullName: PublisherStudio.Services.PublicationDataService.BuildFinancialPoints(PublisherStudio.BusinessObjects.PublicationDocument, PublisherStudio.BusinessObjects.DataVisualElement, System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Builds financial points.
+  example: []
+  syntax:
+    content: public IReadOnlyList<DataFinancialPoint> BuildFinancialPoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
+    parameters:
+    - id: document
+      type: PublisherStudio.BusinessObjects.PublicationDocument
+    - id: item
+      type: PublisherStudio.BusinessObjects.DataVisualElement
+    - id: currentPageId
+      type: System.Guid
+    return:
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.DataFinancialPoint}
+    content.vb: Public Function BuildFinancialPoints(document As PublicationDocument, item As DataVisualElement, currentPageId As Guid) As IReadOnlyList(Of DataFinancialPoint)
+  overload: PublisherStudio.Services.PublicationDataService.BuildFinancialPoints*
+- uid: PublisherStudio.Services.PublicationDataService.BuildSankeyPoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  commentId: M:PublisherStudio.Services.PublicationDataService.BuildSankeyPoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  id: BuildSankeyPoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  parent: PublisherStudio.Services.PublicationDataService
+  langs:
+  - csharp
+  - vb
+  name: BuildSankeyPoints(PublicationDocument, DataVisualElement, Guid)
+  nameWithType: PublicationDataService.BuildSankeyPoints(PublicationDocument, DataVisualElement, Guid)
+  fullName: PublisherStudio.Services.PublicationDataService.BuildSankeyPoints(PublisherStudio.BusinessObjects.PublicationDocument, PublisherStudio.BusinessObjects.DataVisualElement, System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Builds sankey points.
+  example: []
+  syntax:
+    content: public IReadOnlyList<DataSankeyPoint> BuildSankeyPoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
+    parameters:
+    - id: document
+      type: PublisherStudio.BusinessObjects.PublicationDocument
+    - id: item
+      type: PublisherStudio.BusinessObjects.DataVisualElement
+    - id: currentPageId
+      type: System.Guid
+    return:
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.DataSankeyPoint}
+    content.vb: Public Function BuildSankeyPoints(document As PublicationDocument, item As DataVisualElement, currentPageId As Guid) As IReadOnlyList(Of DataSankeyPoint)
+  overload: PublisherStudio.Services.PublicationDataService.BuildSankeyPoints*
+- uid: PublisherStudio.Services.PublicationDataService.BuildTreeMapPoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  commentId: M:PublisherStudio.Services.PublicationDataService.BuildTreeMapPoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  id: BuildTreeMapPoints(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  parent: PublisherStudio.Services.PublicationDataService
+  langs:
+  - csharp
+  - vb
+  name: BuildTreeMapPoints(PublicationDocument, DataVisualElement, Guid)
+  nameWithType: PublicationDataService.BuildTreeMapPoints(PublicationDocument, DataVisualElement, Guid)
+  fullName: PublisherStudio.Services.PublicationDataService.BuildTreeMapPoints(PublisherStudio.BusinessObjects.PublicationDocument, PublisherStudio.BusinessObjects.DataVisualElement, System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Builds tree map points.
+  example: []
+  syntax:
+    content: public IReadOnlyList<DataTreeMapPoint> BuildTreeMapPoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
+    parameters:
+    - id: document
+      type: PublisherStudio.BusinessObjects.PublicationDocument
+    - id: item
+      type: PublisherStudio.BusinessObjects.DataVisualElement
+    - id: currentPageId
+      type: System.Guid
+    return:
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.DataTreeMapPoint}
+    content.vb: Public Function BuildTreeMapPoints(document As PublicationDocument, item As DataVisualElement, currentPageId As Guid) As IReadOnlyList(Of DataTreeMapPoint)
+  overload: PublisherStudio.Services.PublicationDataService.BuildTreeMapPoints*
+- uid: PublisherStudio.Services.PublicationDataService.BuildClientVisualConfiguration(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  commentId: M:PublisherStudio.Services.PublicationDataService.BuildClientVisualConfiguration(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  id: BuildClientVisualConfiguration(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  parent: PublisherStudio.Services.PublicationDataService
+  langs:
+  - csharp
+  - vb
+  name: BuildClientVisualConfiguration(PublicationDocument, DataVisualElement, Guid)
+  nameWithType: PublicationDataService.BuildClientVisualConfiguration(PublicationDocument, DataVisualElement, Guid)
+  fullName: PublisherStudio.Services.PublicationDataService.BuildClientVisualConfiguration(PublisherStudio.BusinessObjects.PublicationDocument, PublisherStudio.BusinessObjects.DataVisualElement, System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Builds client visual configuration.
+  example: []
+  syntax:
+    content: public object BuildClientVisualConfiguration(PublicationDocument document, DataVisualElement item, Guid currentPageId)
+    parameters:
+    - id: document
+      type: PublisherStudio.BusinessObjects.PublicationDocument
+    - id: item
+      type: PublisherStudio.BusinessObjects.DataVisualElement
+    - id: currentPageId
+      type: System.Guid
+    return:
+      type: System.Object
+    content.vb: Public Function BuildClientVisualConfiguration(document As PublicationDocument, item As DataVisualElement, currentPageId As Guid) As Object
+  overload: PublisherStudio.Services.PublicationDataService.BuildClientVisualConfiguration*
+- uid: PublisherStudio.Services.PublicationDataService.GridColumns(PublisherStudio.BusinessObjects.PublicationDataObject)
+  commentId: M:PublisherStudio.Services.PublicationDataService.GridColumns(PublisherStudio.BusinessObjects.PublicationDataObject)
+  id: GridColumns(PublisherStudio.BusinessObjects.PublicationDataObject)
+  parent: PublisherStudio.Services.PublicationDataService
+  langs:
+  - csharp
+  - vb
+  name: GridColumns(PublicationDataObject?)
+  nameWithType: PublicationDataService.GridColumns(PublicationDataObject?)
+  fullName: PublisherStudio.Services.PublicationDataService.GridColumns(PublisherStudio.BusinessObjects.PublicationDataObject?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the grid columns operation.
+  example: []
+  syntax:
+    content: public IReadOnlyList<string> GridColumns(PublicationDataObject? data)
+    parameters:
+    - id: data
+      type: PublisherStudio.BusinessObjects.PublicationDataObject
+    return:
+      type: System.Collections.Generic.IReadOnlyList{System.String}
+    content.vb: Public Function GridColumns(data As PublicationDataObject) As IReadOnlyList(Of String)
+  overload: PublisherStudio.Services.PublicationDataService.GridColumns*
+  nameWithType.vb: PublicationDataService.GridColumns(PublicationDataObject)
+  fullName.vb: PublisherStudio.Services.PublicationDataService.GridColumns(PublisherStudio.BusinessObjects.PublicationDataObject)
+  name.vb: GridColumns(PublicationDataObject)
+- uid: PublisherStudio.Services.PublicationDataService.BuildGridRows(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  commentId: M:PublisherStudio.Services.PublicationDataService.BuildGridRows(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  id: BuildGridRows(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.BusinessObjects.DataVisualElement,System.Guid)
+  parent: PublisherStudio.Services.PublicationDataService
+  langs:
+  - csharp
+  - vb
+  name: BuildGridRows(PublicationDocument, DataVisualElement, Guid)
+  nameWithType: PublicationDataService.BuildGridRows(PublicationDocument, DataVisualElement, Guid)
+  fullName: PublisherStudio.Services.PublicationDataService.BuildGridRows(PublisherStudio.BusinessObjects.PublicationDocument, PublisherStudio.BusinessObjects.DataVisualElement, System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Builds grid rows.
+  example: []
+  syntax:
+    content: public IReadOnlyList<PublicationGridRow> BuildGridRows(PublicationDocument document, DataVisualElement item, Guid currentPageId)
+    parameters:
+    - id: document
+      type: PublisherStudio.BusinessObjects.PublicationDocument
+    - id: item
+      type: PublisherStudio.BusinessObjects.DataVisualElement
+    - id: currentPageId
+      type: System.Guid
+    return:
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationGridRow}
+    content.vb: Public Function BuildGridRows(document As PublicationDocument, item As DataVisualElement, currentPageId As Guid) As IReadOnlyList(Of PublicationGridRow)
+  overload: PublisherStudio.Services.PublicationDataService.BuildGridRows*
+references:
+- uid: PublisherStudio.Services
+  commentId: N:PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services
+  nameWithType: PublisherStudio.Services
+  fullName: PublisherStudio.Services
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.PublicationDataService.#ctor*
+  commentId: Overload:PublisherStudio.Services.PublicationDataService.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.PublicationDataService.html#PublisherStudio_Services_PublicationDataService__ctor_PublisherStudio_Services_IPublicationGridRowFactory_PublisherStudio_Services_PublicationMediaData_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_PublicationDataService__
+  name: PublicationDataService
+  nameWithType: PublicationDataService.PublicationDataService
+  fullName: PublisherStudio.Services.PublicationDataService.PublicationDataService
+  nameWithType.vb: PublicationDataService.New
+  fullName.vb: PublisherStudio.Services.PublicationDataService.New
+  name.vb: New
+- uid: PublisherStudio.Services.IPublicationGridRowFactory
+  commentId: T:PublisherStudio.Services.IPublicationGridRowFactory
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.IPublicationGridRowFactory.html
+  name: IPublicationGridRowFactory
+  nameWithType: IPublicationGridRowFactory
+  fullName: PublisherStudio.Services.IPublicationGridRowFactory
+- uid: PublisherStudio.Services.PublicationMediaData
+  commentId: T:PublisherStudio.Services.PublicationMediaData
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.PublicationMediaData.html
+  name: PublicationMediaData
+  nameWithType: PublicationMediaData
+  fullName: PublisherStudio.Services.PublicationMediaData
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationDataService}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationDataService}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<PublicationDataService>
+  nameWithType: ILogger<PublicationDataService>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.PublicationDataService>
+  nameWithType.vb: ILogger(Of PublicationDataService)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.PublicationDataService)
+  name.vb: ILogger(Of PublicationDataService)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.PublicationDataService
+    name: PublicationDataService
+    isExternal: true
+    href: PublisherStudio.Services.PublicationDataService.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.PublicationDataService
+    name: PublicationDataService
+    isExternal: true
+    href: PublisherStudio.Services.PublicationDataService.html
+  - name: )
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: PublisherStudio.Services.PublicationDataService.CreateSample*
+  commentId: Overload:PublisherStudio.Services.PublicationDataService.CreateSample
+  isExternal: true
+  href: PublisherStudio.Services.PublicationDataService.html#PublisherStudio_Services_PublicationDataService_CreateSample_System_String_
+  name: CreateSample
+  nameWithType: PublicationDataService.CreateSample
+  fullName: PublisherStudio.Services.PublicationDataService.CreateSample
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.BusinessObjects.PublicationDataObject
+  commentId: T:PublisherStudio.BusinessObjects.PublicationDataObject
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationDataObject.html
+  name: PublicationDataObject
+  nameWithType: PublicationDataObject
+  fullName: PublisherStudio.BusinessObjects.PublicationDataObject
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.Services.PublicationDataService.Clone*
+  commentId: Overload:PublisherStudio.Services.PublicationDataService.Clone
+  isExternal: true
+  href: PublisherStudio.Services.PublicationDataService.html#PublisherStudio_Services_PublicationDataService_Clone_PublisherStudio_BusinessObjects_PublicationDataObject_
+  name: Clone
+  nameWithType: PublicationDataService.Clone
+  fullName: PublisherStudio.Services.PublicationDataService.Clone
+- uid: PublisherStudio.Services.PublicationDataService.Normalize*
+  commentId: Overload:PublisherStudio.Services.PublicationDataService.Normalize
+  isExternal: true
+  href: PublisherStudio.Services.PublicationDataService.html#PublisherStudio_Services_PublicationDataService_Normalize_PublisherStudio_BusinessObjects_PublicationDocument_
+  name: Normalize
+  nameWithType: PublicationDataService.Normalize
+  fullName: PublisherStudio.Services.PublicationDataService.Normalize
+- uid: PublisherStudio.BusinessObjects.PublicationDocument
+  commentId: T:PublisherStudio.BusinessObjects.PublicationDocument
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationDocument.html
+  name: PublicationDocument
+  nameWithType: PublicationDocument
+  fullName: PublisherStudio.BusinessObjects.PublicationDocument
+- uid: PublisherStudio.Services.PublicationDataService.ParseInto*
+  commentId: Overload:PublisherStudio.Services.PublicationDataService.ParseInto
+  isExternal: true
+  href: PublisherStudio.Services.PublicationDataService.html#PublisherStudio_Services_PublicationDataService_ParseInto_PublisherStudio_BusinessObjects_PublicationDataObject_
+  name: ParseInto
+  nameWithType: PublicationDataService.ParseInto
+  fullName: PublisherStudio.Services.PublicationDataService.ParseInto
+- uid: PublisherStudio.Services.PublicationDataService.ResolveRows*
+  commentId: Overload:PublisherStudio.Services.PublicationDataService.ResolveRows
+  isExternal: true
+  href: PublisherStudio.Services.PublicationDataService.html#PublisherStudio_Services_PublicationDataService_ResolveRows_PublisherStudio_BusinessObjects_PublicationDocument_PublisherStudio_BusinessObjects_PublicationDataObject_System_Guid_
+  name: ResolveRows
+  nameWithType: PublicationDataService.ResolveRows
+  fullName: PublisherStudio.Services.PublicationDataService.ResolveRows
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationDataRow}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationDataRow}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<PublicationDataRow>
+  nameWithType: IReadOnlyList<PublicationDataRow>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.PublicationDataRow>
+  nameWithType.vb: IReadOnlyList(Of PublicationDataRow)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.PublicationDataRow)
+  name.vb: IReadOnlyList(Of PublicationDataRow)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.PublicationDataRow
+    name: PublicationDataRow
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublicationDataRow.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.PublicationDataRow
+    name: PublicationDataRow
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublicationDataRow.html
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: PublisherStudio.Services.PublicationDataService.ResolveColumns*
+  commentId: Overload:PublisherStudio.Services.PublicationDataService.ResolveColumns
+  isExternal: true
+  href: PublisherStudio.Services.PublicationDataService.html#PublisherStudio_Services_PublicationDataService_ResolveColumns_PublisherStudio_BusinessObjects_PublicationDataObject_
+  name: ResolveColumns
+  nameWithType: PublicationDataService.ResolveColumns
+  fullName: PublisherStudio.Services.PublicationDataService.ResolveColumns
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationDataColumn}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationDataColumn}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<PublicationDataColumn>
+  nameWithType: IReadOnlyList<PublicationDataColumn>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.PublicationDataColumn>
+  nameWithType.vb: IReadOnlyList(Of PublicationDataColumn)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.PublicationDataColumn)
+  name.vb: IReadOnlyList(Of PublicationDataColumn)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.PublicationDataColumn
+    name: PublicationDataColumn
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublicationDataColumn.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.PublicationDataColumn
+    name: PublicationDataColumn
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublicationDataColumn.html
+  - name: )
+- uid: PublisherStudio.Services.PublicationDataService.EnsureBuiltInObjects*
+  commentId: Overload:PublisherStudio.Services.PublicationDataService.EnsureBuiltInObjects
+  isExternal: true
+  href: PublisherStudio.Services.PublicationDataService.html#PublisherStudio_Services_PublicationDataService_EnsureBuiltInObjects_PublisherStudio_BusinessObjects_PublicationDocument_
+  name: EnsureBuiltInObjects
+  nameWithType: PublicationDataService.EnsureBuiltInObjects
+  fullName: PublisherStudio.Services.PublicationDataService.EnsureBuiltInObjects
+- uid: PublisherStudio.Services.PublicationDataService.BuildChartPoints*
+  commentId: Overload:PublisherStudio.Services.PublicationDataService.BuildChartPoints
+  isExternal: true
+  href: PublisherStudio.Services.PublicationDataService.html#PublisherStudio_Services_PublicationDataService_BuildChartPoints_PublisherStudio_BusinessObjects_PublicationDocument_PublisherStudio_BusinessObjects_DataVisualElement_System_Guid_
+  name: BuildChartPoints
+  nameWithType: PublicationDataService.BuildChartPoints
+  fullName: PublisherStudio.Services.PublicationDataService.BuildChartPoints
+- uid: PublisherStudio.BusinessObjects.DataVisualElement
+  commentId: T:PublisherStudio.BusinessObjects.DataVisualElement
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualElement.html
+  name: DataVisualElement
+  nameWithType: DataVisualElement
+  fullName: PublisherStudio.BusinessObjects.DataVisualElement
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.DataChartPoint}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.DataChartPoint}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<DataChartPoint>
+  nameWithType: IReadOnlyList<DataChartPoint>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.DataChartPoint>
+  nameWithType.vb: IReadOnlyList(Of DataChartPoint)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.DataChartPoint)
+  name.vb: IReadOnlyList(Of DataChartPoint)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.DataChartPoint
+    name: DataChartPoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.DataChartPoint.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.DataChartPoint
+    name: DataChartPoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.DataChartPoint.html
+  - name: )
+- uid: PublisherStudio.Services.PublicationDataService.BuildPiePoints*
+  commentId: Overload:PublisherStudio.Services.PublicationDataService.BuildPiePoints
+  isExternal: true
+  href: PublisherStudio.Services.PublicationDataService.html#PublisherStudio_Services_PublicationDataService_BuildPiePoints_PublisherStudio_BusinessObjects_PublicationDocument_PublisherStudio_BusinessObjects_DataVisualElement_System_Guid_
+  name: BuildPiePoints
+  nameWithType: PublicationDataService.BuildPiePoints
+  fullName: PublisherStudio.Services.PublicationDataService.BuildPiePoints
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.DataPiePoint}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.DataPiePoint}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<DataPiePoint>
+  nameWithType: IReadOnlyList<DataPiePoint>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.DataPiePoint>
+  nameWithType.vb: IReadOnlyList(Of DataPiePoint)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.DataPiePoint)
+  name.vb: IReadOnlyList(Of DataPiePoint)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.DataPiePoint
+    name: DataPiePoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.DataPiePoint.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.DataPiePoint
+    name: DataPiePoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.DataPiePoint.html
+  - name: )
+- uid: PublisherStudio.Services.PublicationDataService.BuildSparkPoints*
+  commentId: Overload:PublisherStudio.Services.PublicationDataService.BuildSparkPoints
+  isExternal: true
+  href: PublisherStudio.Services.PublicationDataService.html#PublisherStudio_Services_PublicationDataService_BuildSparkPoints_PublisherStudio_BusinessObjects_PublicationDocument_PublisherStudio_BusinessObjects_DataVisualElement_System_Guid_
+  name: BuildSparkPoints
+  nameWithType: PublicationDataService.BuildSparkPoints
+  fullName: PublisherStudio.Services.PublicationDataService.BuildSparkPoints
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.DataSparkPoint}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.DataSparkPoint}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<DataSparkPoint>
+  nameWithType: IReadOnlyList<DataSparkPoint>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.DataSparkPoint>
+  nameWithType.vb: IReadOnlyList(Of DataSparkPoint)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.DataSparkPoint)
+  name.vb: IReadOnlyList(Of DataSparkPoint)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.DataSparkPoint
+    name: DataSparkPoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.DataSparkPoint.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.DataSparkPoint
+    name: DataSparkPoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.DataSparkPoint.html
+  - name: )
+- uid: PublisherStudio.Services.PublicationDataService.BuildRangePoints*
+  commentId: Overload:PublisherStudio.Services.PublicationDataService.BuildRangePoints
+  isExternal: true
+  href: PublisherStudio.Services.PublicationDataService.html#PublisherStudio_Services_PublicationDataService_BuildRangePoints_PublisherStudio_BusinessObjects_PublicationDocument_PublisherStudio_BusinessObjects_DataVisualElement_System_Guid_
+  name: BuildRangePoints
+  nameWithType: PublicationDataService.BuildRangePoints
+  fullName: PublisherStudio.Services.PublicationDataService.BuildRangePoints
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.DataRangePoint}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.DataRangePoint}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<DataRangePoint>
+  nameWithType: IReadOnlyList<DataRangePoint>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.DataRangePoint>
+  nameWithType.vb: IReadOnlyList(Of DataRangePoint)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.DataRangePoint)
+  name.vb: IReadOnlyList(Of DataRangePoint)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.DataRangePoint
+    name: DataRangePoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.DataRangePoint.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.DataRangePoint
+    name: DataRangePoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.DataRangePoint.html
+  - name: )
+- uid: PublisherStudio.Services.PublicationDataService.BuildBubblePoints*
+  commentId: Overload:PublisherStudio.Services.PublicationDataService.BuildBubblePoints
+  isExternal: true
+  href: PublisherStudio.Services.PublicationDataService.html#PublisherStudio_Services_PublicationDataService_BuildBubblePoints_PublisherStudio_BusinessObjects_PublicationDocument_PublisherStudio_BusinessObjects_DataVisualElement_System_Guid_
+  name: BuildBubblePoints
+  nameWithType: PublicationDataService.BuildBubblePoints
+  fullName: PublisherStudio.Services.PublicationDataService.BuildBubblePoints
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.DataBubblePoint}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.DataBubblePoint}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<DataBubblePoint>
+  nameWithType: IReadOnlyList<DataBubblePoint>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.DataBubblePoint>
+  nameWithType.vb: IReadOnlyList(Of DataBubblePoint)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.DataBubblePoint)
+  name.vb: IReadOnlyList(Of DataBubblePoint)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.DataBubblePoint
+    name: DataBubblePoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.DataBubblePoint.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.DataBubblePoint
+    name: DataBubblePoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.DataBubblePoint.html
+  - name: )
+- uid: PublisherStudio.Services.PublicationDataService.BuildFinancialPoints*
+  commentId: Overload:PublisherStudio.Services.PublicationDataService.BuildFinancialPoints
+  isExternal: true
+  href: PublisherStudio.Services.PublicationDataService.html#PublisherStudio_Services_PublicationDataService_BuildFinancialPoints_PublisherStudio_BusinessObjects_PublicationDocument_PublisherStudio_BusinessObjects_DataVisualElement_System_Guid_
+  name: BuildFinancialPoints
+  nameWithType: PublicationDataService.BuildFinancialPoints
+  fullName: PublisherStudio.Services.PublicationDataService.BuildFinancialPoints
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.DataFinancialPoint}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.DataFinancialPoint}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<DataFinancialPoint>
+  nameWithType: IReadOnlyList<DataFinancialPoint>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.DataFinancialPoint>
+  nameWithType.vb: IReadOnlyList(Of DataFinancialPoint)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.DataFinancialPoint)
+  name.vb: IReadOnlyList(Of DataFinancialPoint)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.DataFinancialPoint
+    name: DataFinancialPoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.DataFinancialPoint.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.DataFinancialPoint
+    name: DataFinancialPoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.DataFinancialPoint.html
+  - name: )
+- uid: PublisherStudio.Services.PublicationDataService.BuildSankeyPoints*
+  commentId: Overload:PublisherStudio.Services.PublicationDataService.BuildSankeyPoints
+  isExternal: true
+  href: PublisherStudio.Services.PublicationDataService.html#PublisherStudio_Services_PublicationDataService_BuildSankeyPoints_PublisherStudio_BusinessObjects_PublicationDocument_PublisherStudio_BusinessObjects_DataVisualElement_System_Guid_
+  name: BuildSankeyPoints
+  nameWithType: PublicationDataService.BuildSankeyPoints
+  fullName: PublisherStudio.Services.PublicationDataService.BuildSankeyPoints
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.DataSankeyPoint}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.DataSankeyPoint}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<DataSankeyPoint>
+  nameWithType: IReadOnlyList<DataSankeyPoint>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.DataSankeyPoint>
+  nameWithType.vb: IReadOnlyList(Of DataSankeyPoint)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.DataSankeyPoint)
+  name.vb: IReadOnlyList(Of DataSankeyPoint)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.DataSankeyPoint
+    name: DataSankeyPoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.DataSankeyPoint.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.DataSankeyPoint
+    name: DataSankeyPoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.DataSankeyPoint.html
+  - name: )
+- uid: PublisherStudio.Services.PublicationDataService.BuildTreeMapPoints*
+  commentId: Overload:PublisherStudio.Services.PublicationDataService.BuildTreeMapPoints
+  isExternal: true
+  href: PublisherStudio.Services.PublicationDataService.html#PublisherStudio_Services_PublicationDataService_BuildTreeMapPoints_PublisherStudio_BusinessObjects_PublicationDocument_PublisherStudio_BusinessObjects_DataVisualElement_System_Guid_
+  name: BuildTreeMapPoints
+  nameWithType: PublicationDataService.BuildTreeMapPoints
+  fullName: PublisherStudio.Services.PublicationDataService.BuildTreeMapPoints
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.DataTreeMapPoint}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.DataTreeMapPoint}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<DataTreeMapPoint>
+  nameWithType: IReadOnlyList<DataTreeMapPoint>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.DataTreeMapPoint>
+  nameWithType.vb: IReadOnlyList(Of DataTreeMapPoint)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.DataTreeMapPoint)
+  name.vb: IReadOnlyList(Of DataTreeMapPoint)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.DataTreeMapPoint
+    name: DataTreeMapPoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.DataTreeMapPoint.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.DataTreeMapPoint
+    name: DataTreeMapPoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.DataTreeMapPoint.html
+  - name: )
+- uid: PublisherStudio.Services.PublicationDataService.BuildClientVisualConfiguration*
+  commentId: Overload:PublisherStudio.Services.PublicationDataService.BuildClientVisualConfiguration
+  isExternal: true
+  href: PublisherStudio.Services.PublicationDataService.html#PublisherStudio_Services_PublicationDataService_BuildClientVisualConfiguration_PublisherStudio_BusinessObjects_PublicationDocument_PublisherStudio_BusinessObjects_DataVisualElement_System_Guid_
+  name: BuildClientVisualConfiguration
+  nameWithType: PublicationDataService.BuildClientVisualConfiguration
+  fullName: PublisherStudio.Services.PublicationDataService.BuildClientVisualConfiguration
+- uid: PublisherStudio.Services.PublicationDataService.GridColumns*
+  commentId: Overload:PublisherStudio.Services.PublicationDataService.GridColumns
+  isExternal: true
+  href: PublisherStudio.Services.PublicationDataService.html#PublisherStudio_Services_PublicationDataService_GridColumns_PublisherStudio_BusinessObjects_PublicationDataObject_
+  name: GridColumns
+  nameWithType: PublicationDataService.GridColumns
+  fullName: PublisherStudio.Services.PublicationDataService.GridColumns
+- uid: System.Collections.Generic.IReadOnlyList{System.String}
+  commentId: T:System.Collections.Generic.IReadOnlyList{System.String}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<string>
+  nameWithType: IReadOnlyList<string>
+  fullName: System.Collections.Generic.IReadOnlyList<string>
+  nameWithType.vb: IReadOnlyList(Of String)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of String)
+  name.vb: IReadOnlyList(Of String)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: PublisherStudio.Services.PublicationDataService.BuildGridRows*
+  commentId: Overload:PublisherStudio.Services.PublicationDataService.BuildGridRows
+  isExternal: true
+  href: PublisherStudio.Services.PublicationDataService.html#PublisherStudio_Services_PublicationDataService_BuildGridRows_PublisherStudio_BusinessObjects_PublicationDocument_PublisherStudio_BusinessObjects_DataVisualElement_System_Guid_
+  name: BuildGridRows
+  nameWithType: PublicationDataService.BuildGridRows
+  fullName: PublisherStudio.Services.PublicationDataService.BuildGridRows
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationGridRow}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationGridRow}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<PublicationGridRow>
+  nameWithType: IReadOnlyList<PublicationGridRow>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.PublicationGridRow>
+  nameWithType.vb: IReadOnlyList(Of PublicationGridRow)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.PublicationGridRow)
+  name.vb: IReadOnlyList(Of PublicationGridRow)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.PublicationGridRow
+    name: PublicationGridRow
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublicationGridRow.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.PublicationGridRow
+    name: PublicationGridRow
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublicationGridRow.html
+  - name: )

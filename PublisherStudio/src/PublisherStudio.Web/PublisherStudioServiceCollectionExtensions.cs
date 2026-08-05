@@ -1,4 +1,4 @@
-using PublisherStudio.Controllers;
+﻿using PublisherStudio.Controllers;
 using PublisherStudio.Diagnostics;
 using PublisherStudio.BusinessObjects;
 using PublisherStudio.HostedServices.Streaming;
@@ -6,6 +6,7 @@ using PublisherStudio.HostedServices.OrganicPlugins;
 using PublisherStudio.Services.Automation;
 using PublisherStudio.Services.CodeEditing;
 using PublisherStudio.Services.Configuration;
+using PublisherStudio.Services.Documentation;
 using PublisherStudio.Services.MediaConversion;
 using PublisherStudio.Services.MediaStudio.UseCases;
 using PublisherStudio.Services.OpenScad;
@@ -23,8 +24,14 @@ using PublisherStudio.Services.Streaming.Metadata;
 
 namespace PublisherStudio.Services;
 
+/// <summary>
+/// Represents a publisher studio service collection extensions.
+/// </summary>
 public static class PublisherStudioServiceCollectionExtensions
 {
+    /// <summary>
+    /// Adds publisher studio application.
+    /// </summary>
     public static IServiceCollection AddPublisherStudioApplication(this IServiceCollection services, IConfiguration configuration, ILogger logger)
     {
         try
@@ -107,6 +114,7 @@ public static class PublisherStudioServiceCollectionExtensions
         AddSingleton<IScreenshotCaptureService, ScreenshotCaptureService>(services);
         AddSingleton<IApplicationPathService, ApplicationPathService>(services);
         AddSingleton<IFileLocalizationService, FileLocalizationService>(services);
+        AddSingleton<IPublisherDocumentationCatalogService, PublisherDocumentationCatalogService>(services);
         AddSingleton<IRenderExportCatalogService, RenderExportCatalogService>(services);
         AddSingleton<ICodeLanguageService, CodeLanguageService>(services);
         AddSingleton<ICodeFormattingService, CodeFormattingService>(services);

@@ -1,15 +1,21 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
 using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Services.CodeEditing;
 
+/// <summary>
+/// Provides code formatting service operations.
+/// </summary>
 public sealed class CodeFormattingService(
     ICodeLanguageService languages,
     IPublisherRuntimePatternService runtimePatterns,
     ILogger<CodeFormattingService> logger) : ICodeFormattingService
 {
+    /// <summary>
+    /// Runs the format operation.
+    /// </summary>
     public CodeTextResult Format(CodeTextRequest request)
     {
         try
@@ -41,6 +47,9 @@ public sealed class CodeFormattingService(
         }
     }
 
+    /// <summary>
+    /// Runs the toggle comment operation.
+    /// </summary>
     public CodeTextResult ToggleComment(CodeCommentRequest request)
     {
         try
@@ -74,6 +83,9 @@ public sealed class CodeFormattingService(
         }
     }
 
+    /// <summary>
+    /// Runs the analyze operation.
+    /// </summary>
     public CodeTextResult Analyze(CodeTextRequest request)
     {
         try

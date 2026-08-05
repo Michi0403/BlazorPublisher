@@ -1,0 +1,935 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services
+  commentId: N:PublisherStudio.Services
+  id: Services
+  parent: PublisherStudio
+  children:
+  - PublisherStudio.Services.ApplicationPortResolver
+  - PublisherStudio.Services.Automation
+  - PublisherStudio.Services.CodeEditing
+  - PublisherStudio.Services.Configuration
+  - PublisherStudio.Services.ConnectorGeometry
+  - PublisherStudio.Services.Documentation
+  - PublisherStudio.Services.EditorStateService
+  - PublisherStudio.Services.IApplicationPortResolver
+  - PublisherStudio.Services.IPagePresetCatalog
+  - PublisherStudio.Services.IPublicationGridRowFactory
+  - PublisherStudio.Services.IPublicationMarkupService
+  - PublisherStudio.Services.IPublisherDocumentFactory
+  - PublisherStudio.Services.IRuntimeEndpointState
+  - PublisherStudio.Services.IRuntimeEndpointWriter
+  - PublisherStudio.Services.IStoryPageLayoutService
+  - PublisherStudio.Services.LiveDataColumn
+  - PublisherStudio.Services.LiveDataObjectSnapshot
+  - PublisherStudio.Services.LiveElementSnapshot
+  - PublisherStudio.Services.LivePageSnapshot
+  - PublisherStudio.Services.LivePublicationSnapshot
+  - PublisherStudio.Services.LivePublicationSummary
+  - PublisherStudio.Services.MediaConversion
+  - PublisherStudio.Services.MediaStudio.UseCases
+  - PublisherStudio.Services.OpenScad
+  - PublisherStudio.Services.OrganicPlugins
+  - PublisherStudio.Services.PagePresetCatalog
+  - PublisherStudio.Services.PanelStudioTextService
+  - PublisherStudio.Services.Panels
+  - PublisherStudio.Services.PictureDocumentService
+  - PublisherStudio.Services.PictureEditorStateService
+  - PublisherStudio.Services.PictureStudio.Import
+  - PublisherStudio.Services.Publication
+  - PublisherStudio.Services.PublicationAnimationData
+  - PublisherStudio.Services.PublicationComponentService
+  - PublisherStudio.Services.PublicationDataService
+  - PublisherStudio.Services.PublicationElementTraversal
+  - PublisherStudio.Services.PublicationFileService
+  - PublisherStudio.Services.PublicationGridRowFactory
+  - PublisherStudio.Services.PublicationLiveDataRegistry
+  - PublisherStudio.Services.PublicationMarkupService
+  - PublisherStudio.Services.PublicationMediaAssetStore
+  - PublisherStudio.Services.PublicationMediaData
+  - PublisherStudio.Services.PublicationRecoveryService
+  - PublisherStudio.Services.PublicationRecoverySnapshot
+  - PublisherStudio.Services.PublicationWebDataService
+  - PublisherStudio.Services.PublicationWebhookStore
+  - PublisherStudio.Services.PublisherDocumentFactory
+  - PublisherStudio.Services.PublisherStudioServiceCollectionExtensions
+  - PublisherStudio.Services.RichTextDocumentFactory
+  - PublisherStudio.Services.RuntimeEndpointState
+  - PublisherStudio.Services.RuntimeEndpointWriter
+  - PublisherStudio.Services.SpreadsheetDocumentService
+  - PublisherStudio.Services.SpreadsheetEditorSession
+  - PublisherStudio.Services.SpreadsheetSessionStore
+  - PublisherStudio.Services.StoryPageLayoutService
+  - PublisherStudio.Services.Streaming
+  - PublisherStudio.Services.SystemFontCatalog
+  - PublisherStudio.Services.UserExperience
+  - PublisherStudio.Services.VideoStudio
+  - PublisherStudio.Services.WebhookPayload
+  - PublisherStudio.Services.WordArtPathGeometry
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.Services
+  nameWithType: PublisherStudio.Services
+  fullName: PublisherStudio.Services
+  type: Namespace
+  assemblies:
+  - PublisherStudio.Web
+references:
+- uid: PublisherStudio.Services.Automation
+  commentId: N:PublisherStudio.Services.Automation
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Automation
+  nameWithType: PublisherStudio.Services.Automation
+  fullName: PublisherStudio.Services.Automation
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Automation
+    name: Automation
+    isExternal: true
+    href: PublisherStudio.Services.Automation.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Automation
+    name: Automation
+    isExternal: true
+    href: PublisherStudio.Services.Automation.html
+- uid: PublisherStudio.Services.CodeEditing
+  commentId: N:PublisherStudio.Services.CodeEditing
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.CodeEditing
+  nameWithType: PublisherStudio.Services.CodeEditing
+  fullName: PublisherStudio.Services.CodeEditing
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.CodeEditing
+    name: CodeEditing
+    isExternal: true
+    href: PublisherStudio.Services.CodeEditing.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.CodeEditing
+    name: CodeEditing
+    isExternal: true
+    href: PublisherStudio.Services.CodeEditing.html
+- uid: PublisherStudio.Services.Configuration
+  commentId: N:PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Configuration
+  nameWithType: PublisherStudio.Services.Configuration
+  fullName: PublisherStudio.Services.Configuration
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+- uid: PublisherStudio.Services.Documentation
+  commentId: N:PublisherStudio.Services.Documentation
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Documentation
+  nameWithType: PublisherStudio.Services.Documentation
+  fullName: PublisherStudio.Services.Documentation
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Documentation
+    name: Documentation
+    isExternal: true
+    href: PublisherStudio.Services.Documentation.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Documentation
+    name: Documentation
+    isExternal: true
+    href: PublisherStudio.Services.Documentation.html
+- uid: PublisherStudio.Services.MediaConversion
+  commentId: N:PublisherStudio.Services.MediaConversion
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.MediaConversion
+  nameWithType: PublisherStudio.Services.MediaConversion
+  fullName: PublisherStudio.Services.MediaConversion
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.MediaConversion
+    name: MediaConversion
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.MediaConversion
+    name: MediaConversion
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.html
+- uid: PublisherStudio.Services.OpenScad
+  commentId: N:PublisherStudio.Services.OpenScad
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.OpenScad
+  nameWithType: PublisherStudio.Services.OpenScad
+  fullName: PublisherStudio.Services.OpenScad
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OpenScad
+    name: OpenScad
+    isExternal: true
+    href: PublisherStudio.Services.OpenScad.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OpenScad
+    name: OpenScad
+    isExternal: true
+    href: PublisherStudio.Services.OpenScad.html
+- uid: PublisherStudio.Services.OrganicPlugins
+  commentId: N:PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.OrganicPlugins
+  nameWithType: PublisherStudio.Services.OrganicPlugins
+  fullName: PublisherStudio.Services.OrganicPlugins
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OrganicPlugins
+    name: OrganicPlugins
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OrganicPlugins
+    name: OrganicPlugins
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.html
+- uid: PublisherStudio.Services.Panels
+  commentId: N:PublisherStudio.Services.Panels
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Panels
+  nameWithType: PublisherStudio.Services.Panels
+  fullName: PublisherStudio.Services.Panels
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Panels
+    name: Panels
+    isExternal: true
+    href: PublisherStudio.Services.Panels.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Panels
+    name: Panels
+    isExternal: true
+    href: PublisherStudio.Services.Panels.html
+- uid: PublisherStudio.Services.Publication
+  commentId: N:PublisherStudio.Services.Publication
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Publication
+  nameWithType: PublisherStudio.Services.Publication
+  fullName: PublisherStudio.Services.Publication
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Publication
+    name: Publication
+    isExternal: true
+    href: PublisherStudio.Services.Publication.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Publication
+    name: Publication
+    isExternal: true
+    href: PublisherStudio.Services.Publication.html
+- uid: PublisherStudio.Services.Streaming
+  isExternal: true
+- uid: PublisherStudio.Services.UserExperience
+  commentId: N:PublisherStudio.Services.UserExperience
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.UserExperience
+  nameWithType: PublisherStudio.Services.UserExperience
+  fullName: PublisherStudio.Services.UserExperience
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.UserExperience
+    name: UserExperience
+    isExternal: true
+    href: PublisherStudio.Services.UserExperience.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.UserExperience
+    name: UserExperience
+    isExternal: true
+    href: PublisherStudio.Services.UserExperience.html
+- uid: PublisherStudio.Services.VideoStudio
+  isExternal: true
+- uid: PublisherStudio.Services.ApplicationPortResolver
+  commentId: T:PublisherStudio.Services.ApplicationPortResolver
+  isExternal: true
+  href: PublisherStudio.Services.ApplicationPortResolver.html
+  name: ApplicationPortResolver
+  nameWithType: ApplicationPortResolver
+  fullName: PublisherStudio.Services.ApplicationPortResolver
+- uid: PublisherStudio.Services.ConnectorGeometry
+  commentId: T:PublisherStudio.Services.ConnectorGeometry
+  isExternal: true
+  href: PublisherStudio.Services.ConnectorGeometry.html
+  name: ConnectorGeometry
+  nameWithType: ConnectorGeometry
+  fullName: PublisherStudio.Services.ConnectorGeometry
+- uid: PublisherStudio.Services.EditorStateService
+  commentId: T:PublisherStudio.Services.EditorStateService
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.EditorStateService.html
+  name: EditorStateService
+  nameWithType: EditorStateService
+  fullName: PublisherStudio.Services.EditorStateService
+- uid: PublisherStudio.Services.IApplicationPortResolver
+  commentId: T:PublisherStudio.Services.IApplicationPortResolver
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.IApplicationPortResolver.html
+  name: IApplicationPortResolver
+  nameWithType: IApplicationPortResolver
+  fullName: PublisherStudio.Services.IApplicationPortResolver
+- uid: PublisherStudio.Services.IPagePresetCatalog
+  commentId: T:PublisherStudio.Services.IPagePresetCatalog
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.IPagePresetCatalog.html
+  name: IPagePresetCatalog
+  nameWithType: IPagePresetCatalog
+  fullName: PublisherStudio.Services.IPagePresetCatalog
+- uid: PublisherStudio.Services.IPublicationGridRowFactory
+  commentId: T:PublisherStudio.Services.IPublicationGridRowFactory
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.IPublicationGridRowFactory.html
+  name: IPublicationGridRowFactory
+  nameWithType: IPublicationGridRowFactory
+  fullName: PublisherStudio.Services.IPublicationGridRowFactory
+- uid: PublisherStudio.Services.IPublicationMarkupService
+  commentId: T:PublisherStudio.Services.IPublicationMarkupService
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.IPublicationMarkupService.html
+  name: IPublicationMarkupService
+  nameWithType: IPublicationMarkupService
+  fullName: PublisherStudio.Services.IPublicationMarkupService
+- uid: PublisherStudio.Services.IPublisherDocumentFactory
+  commentId: T:PublisherStudio.Services.IPublisherDocumentFactory
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.IPublisherDocumentFactory.html
+  name: IPublisherDocumentFactory
+  nameWithType: IPublisherDocumentFactory
+  fullName: PublisherStudio.Services.IPublisherDocumentFactory
+- uid: PublisherStudio.Services.IRuntimeEndpointState
+  commentId: T:PublisherStudio.Services.IRuntimeEndpointState
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.IRuntimeEndpointState.html
+  name: IRuntimeEndpointState
+  nameWithType: IRuntimeEndpointState
+  fullName: PublisherStudio.Services.IRuntimeEndpointState
+- uid: PublisherStudio.Services.IRuntimeEndpointWriter
+  commentId: T:PublisherStudio.Services.IRuntimeEndpointWriter
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.IRuntimeEndpointWriter.html
+  name: IRuntimeEndpointWriter
+  nameWithType: IRuntimeEndpointWriter
+  fullName: PublisherStudio.Services.IRuntimeEndpointWriter
+- uid: PublisherStudio.Services.IStoryPageLayoutService
+  commentId: T:PublisherStudio.Services.IStoryPageLayoutService
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.IStoryPageLayoutService.html
+  name: IStoryPageLayoutService
+  nameWithType: IStoryPageLayoutService
+  fullName: PublisherStudio.Services.IStoryPageLayoutService
+- uid: PublisherStudio.Services.LiveDataColumn
+  commentId: T:PublisherStudio.Services.LiveDataColumn
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.LiveDataColumn.html
+  name: LiveDataColumn
+  nameWithType: LiveDataColumn
+  fullName: PublisherStudio.Services.LiveDataColumn
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot
+  commentId: T:PublisherStudio.Services.LiveDataObjectSnapshot
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.LiveDataObjectSnapshot.html
+  name: LiveDataObjectSnapshot
+  nameWithType: LiveDataObjectSnapshot
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot
+- uid: PublisherStudio.Services.LiveElementSnapshot
+  commentId: T:PublisherStudio.Services.LiveElementSnapshot
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.LiveElementSnapshot.html
+  name: LiveElementSnapshot
+  nameWithType: LiveElementSnapshot
+  fullName: PublisherStudio.Services.LiveElementSnapshot
+- uid: PublisherStudio.Services.LivePageSnapshot
+  commentId: T:PublisherStudio.Services.LivePageSnapshot
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.LivePageSnapshot.html
+  name: LivePageSnapshot
+  nameWithType: LivePageSnapshot
+  fullName: PublisherStudio.Services.LivePageSnapshot
+- uid: PublisherStudio.Services.LivePublicationSnapshot
+  commentId: T:PublisherStudio.Services.LivePublicationSnapshot
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.LivePublicationSnapshot.html
+  name: LivePublicationSnapshot
+  nameWithType: LivePublicationSnapshot
+  fullName: PublisherStudio.Services.LivePublicationSnapshot
+- uid: PublisherStudio.Services.LivePublicationSummary
+  commentId: T:PublisherStudio.Services.LivePublicationSummary
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.LivePublicationSummary.html
+  name: LivePublicationSummary
+  nameWithType: LivePublicationSummary
+  fullName: PublisherStudio.Services.LivePublicationSummary
+- uid: PublisherStudio.Services.PagePresetCatalog
+  commentId: T:PublisherStudio.Services.PagePresetCatalog
+  isExternal: true
+  href: PublisherStudio.Services.PagePresetCatalog.html
+  name: PagePresetCatalog
+  nameWithType: PagePresetCatalog
+  fullName: PublisherStudio.Services.PagePresetCatalog
+- uid: PublisherStudio.Services.PanelStudioTextService
+  commentId: T:PublisherStudio.Services.PanelStudioTextService
+  isExternal: true
+  href: PublisherStudio.Services.PanelStudioTextService.html
+  name: PanelStudioTextService
+  nameWithType: PanelStudioTextService
+  fullName: PublisherStudio.Services.PanelStudioTextService
+- uid: PublisherStudio.Services.PictureDocumentService
+  commentId: T:PublisherStudio.Services.PictureDocumentService
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.PictureDocumentService.html
+  name: PictureDocumentService
+  nameWithType: PictureDocumentService
+  fullName: PublisherStudio.Services.PictureDocumentService
+- uid: PublisherStudio.Services.PictureEditorStateService
+  commentId: T:PublisherStudio.Services.PictureEditorStateService
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.PictureEditorStateService.html
+  name: PictureEditorStateService
+  nameWithType: PictureEditorStateService
+  fullName: PublisherStudio.Services.PictureEditorStateService
+- uid: PublisherStudio.Services.PublicationAnimationData
+  commentId: T:PublisherStudio.Services.PublicationAnimationData
+  isExternal: true
+  href: PublisherStudio.Services.PublicationAnimationData.html
+  name: PublicationAnimationData
+  nameWithType: PublicationAnimationData
+  fullName: PublisherStudio.Services.PublicationAnimationData
+- uid: PublisherStudio.Services.PublicationComponentService
+  commentId: T:PublisherStudio.Services.PublicationComponentService
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.PublicationComponentService.html
+  name: PublicationComponentService
+  nameWithType: PublicationComponentService
+  fullName: PublisherStudio.Services.PublicationComponentService
+- uid: PublisherStudio.Services.PublicationDataService
+  commentId: T:PublisherStudio.Services.PublicationDataService
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.PublicationDataService.html
+  name: PublicationDataService
+  nameWithType: PublicationDataService
+  fullName: PublisherStudio.Services.PublicationDataService
+- uid: PublisherStudio.Services.PublicationElementTraversal
+  commentId: T:PublisherStudio.Services.PublicationElementTraversal
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.PublicationElementTraversal.html
+  name: PublicationElementTraversal
+  nameWithType: PublicationElementTraversal
+  fullName: PublisherStudio.Services.PublicationElementTraversal
+- uid: PublisherStudio.Services.PublicationFileService
+  commentId: T:PublisherStudio.Services.PublicationFileService
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.PublicationFileService.html
+  name: PublicationFileService
+  nameWithType: PublicationFileService
+  fullName: PublisherStudio.Services.PublicationFileService
+- uid: PublisherStudio.Services.PublicationGridRowFactory
+  commentId: T:PublisherStudio.Services.PublicationGridRowFactory
+  isExternal: true
+  href: PublisherStudio.Services.PublicationGridRowFactory.html
+  name: PublicationGridRowFactory
+  nameWithType: PublicationGridRowFactory
+  fullName: PublisherStudio.Services.PublicationGridRowFactory
+- uid: PublisherStudio.Services.PublicationLiveDataRegistry
+  commentId: T:PublisherStudio.Services.PublicationLiveDataRegistry
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.PublicationLiveDataRegistry.html
+  name: PublicationLiveDataRegistry
+  nameWithType: PublicationLiveDataRegistry
+  fullName: PublisherStudio.Services.PublicationLiveDataRegistry
+- uid: PublisherStudio.Services.PublicationMarkupService
+  commentId: T:PublisherStudio.Services.PublicationMarkupService
+  isExternal: true
+  href: PublisherStudio.Services.PublicationMarkupService.html
+  name: PublicationMarkupService
+  nameWithType: PublicationMarkupService
+  fullName: PublisherStudio.Services.PublicationMarkupService
+- uid: PublisherStudio.Services.PublicationMediaAssetStore
+  commentId: T:PublisherStudio.Services.PublicationMediaAssetStore
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.PublicationMediaAssetStore.html
+  name: PublicationMediaAssetStore
+  nameWithType: PublicationMediaAssetStore
+  fullName: PublisherStudio.Services.PublicationMediaAssetStore
+- uid: PublisherStudio.Services.PublicationMediaData
+  commentId: T:PublisherStudio.Services.PublicationMediaData
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.PublicationMediaData.html
+  name: PublicationMediaData
+  nameWithType: PublicationMediaData
+  fullName: PublisherStudio.Services.PublicationMediaData
+- uid: PublisherStudio.Services.PublicationRecoveryService
+  commentId: T:PublisherStudio.Services.PublicationRecoveryService
+  isExternal: true
+  href: PublisherStudio.Services.PublicationRecoveryService.html
+  name: PublicationRecoveryService
+  nameWithType: PublicationRecoveryService
+  fullName: PublisherStudio.Services.PublicationRecoveryService
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot
+  commentId: T:PublisherStudio.Services.PublicationRecoverySnapshot
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.PublicationRecoverySnapshot.html
+  name: PublicationRecoverySnapshot
+  nameWithType: PublicationRecoverySnapshot
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot
+- uid: PublisherStudio.Services.PublicationWebDataService
+  commentId: T:PublisherStudio.Services.PublicationWebDataService
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.PublicationWebDataService.html
+  name: PublicationWebDataService
+  nameWithType: PublicationWebDataService
+  fullName: PublisherStudio.Services.PublicationWebDataService
+- uid: PublisherStudio.Services.PublicationWebhookStore
+  commentId: T:PublisherStudio.Services.PublicationWebhookStore
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.PublicationWebhookStore.html
+  name: PublicationWebhookStore
+  nameWithType: PublicationWebhookStore
+  fullName: PublisherStudio.Services.PublicationWebhookStore
+- uid: PublisherStudio.Services.PublisherDocumentFactory
+  commentId: T:PublisherStudio.Services.PublisherDocumentFactory
+  isExternal: true
+  href: PublisherStudio.Services.PublisherDocumentFactory.html
+  name: PublisherDocumentFactory
+  nameWithType: PublisherDocumentFactory
+  fullName: PublisherStudio.Services.PublisherDocumentFactory
+- uid: PublisherStudio.Services.PublisherStudioServiceCollectionExtensions
+  commentId: T:PublisherStudio.Services.PublisherStudioServiceCollectionExtensions
+  isExternal: true
+  href: PublisherStudio.Services.PublisherStudioServiceCollectionExtensions.html
+  name: PublisherStudioServiceCollectionExtensions
+  nameWithType: PublisherStudioServiceCollectionExtensions
+  fullName: PublisherStudio.Services.PublisherStudioServiceCollectionExtensions
+- uid: PublisherStudio.Services.RichTextDocumentFactory
+  commentId: T:PublisherStudio.Services.RichTextDocumentFactory
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.RichTextDocumentFactory.html
+  name: RichTextDocumentFactory
+  nameWithType: RichTextDocumentFactory
+  fullName: PublisherStudio.Services.RichTextDocumentFactory
+- uid: PublisherStudio.Services.RuntimeEndpointState
+  commentId: T:PublisherStudio.Services.RuntimeEndpointState
+  isExternal: true
+  href: PublisherStudio.Services.RuntimeEndpointState.html
+  name: RuntimeEndpointState
+  nameWithType: RuntimeEndpointState
+  fullName: PublisherStudio.Services.RuntimeEndpointState
+- uid: PublisherStudio.Services.RuntimeEndpointWriter
+  commentId: T:PublisherStudio.Services.RuntimeEndpointWriter
+  isExternal: true
+  href: PublisherStudio.Services.RuntimeEndpointWriter.html
+  name: RuntimeEndpointWriter
+  nameWithType: RuntimeEndpointWriter
+  fullName: PublisherStudio.Services.RuntimeEndpointWriter
+- uid: PublisherStudio.Services.SpreadsheetDocumentService
+  commentId: T:PublisherStudio.Services.SpreadsheetDocumentService
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.SpreadsheetDocumentService.html
+  name: SpreadsheetDocumentService
+  nameWithType: SpreadsheetDocumentService
+  fullName: PublisherStudio.Services.SpreadsheetDocumentService
+- uid: PublisherStudio.Services.SpreadsheetEditorSession
+  commentId: T:PublisherStudio.Services.SpreadsheetEditorSession
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.SpreadsheetEditorSession.html
+  name: SpreadsheetEditorSession
+  nameWithType: SpreadsheetEditorSession
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession
+- uid: PublisherStudio.Services.SpreadsheetSessionStore
+  commentId: T:PublisherStudio.Services.SpreadsheetSessionStore
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.SpreadsheetSessionStore.html
+  name: SpreadsheetSessionStore
+  nameWithType: SpreadsheetSessionStore
+  fullName: PublisherStudio.Services.SpreadsheetSessionStore
+- uid: PublisherStudio.Services.StoryPageLayoutService
+  commentId: T:PublisherStudio.Services.StoryPageLayoutService
+  isExternal: true
+  href: PublisherStudio.Services.StoryPageLayoutService.html
+  name: StoryPageLayoutService
+  nameWithType: StoryPageLayoutService
+  fullName: PublisherStudio.Services.StoryPageLayoutService
+- uid: PublisherStudio.Services.SystemFontCatalog
+  commentId: T:PublisherStudio.Services.SystemFontCatalog
+  isExternal: true
+  href: PublisherStudio.Services.SystemFontCatalog.html
+  name: SystemFontCatalog
+  nameWithType: SystemFontCatalog
+  fullName: PublisherStudio.Services.SystemFontCatalog
+- uid: PublisherStudio.Services.WebhookPayload
+  commentId: T:PublisherStudio.Services.WebhookPayload
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.WebhookPayload.html
+  name: WebhookPayload
+  nameWithType: WebhookPayload
+  fullName: PublisherStudio.Services.WebhookPayload
+- uid: PublisherStudio.Services.WordArtPathGeometry
+  commentId: T:PublisherStudio.Services.WordArtPathGeometry
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.WordArtPathGeometry.html
+  name: WordArtPathGeometry
+  nameWithType: WordArtPathGeometry
+  fullName: PublisherStudio.Services.WordArtPathGeometry
+- uid: PublisherStudio.Services.MediaStudio.UseCases
+  commentId: N:PublisherStudio.Services.MediaStudio.UseCases
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.MediaStudio.UseCases
+  nameWithType: PublisherStudio.Services.MediaStudio.UseCases
+  fullName: PublisherStudio.Services.MediaStudio.UseCases
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.MediaStudio
+    name: MediaStudio
+    isExternal: true
+    href: PublisherStudio.Services.MediaStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.MediaStudio.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.MediaStudio.UseCases.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.MediaStudio
+    name: MediaStudio
+    isExternal: true
+    href: PublisherStudio.Services.MediaStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.MediaStudio.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.MediaStudio.UseCases.html
+- uid: PublisherStudio.Services.PictureStudio.Import
+  commentId: N:PublisherStudio.Services.PictureStudio.Import
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.PictureStudio.Import
+  nameWithType: PublisherStudio.Services.PictureStudio.Import
+  fullName: PublisherStudio.Services.PictureStudio.Import
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.PictureStudio
+    name: PictureStudio
+    isExternal: true
+    href: PublisherStudio.Services.PictureStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.PictureStudio.Import
+    name: Import
+    isExternal: true
+    href: PublisherStudio.Services.PictureStudio.Import.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.PictureStudio
+    name: PictureStudio
+    isExternal: true
+    href: PublisherStudio.Services.PictureStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.PictureStudio.Import
+    name: Import
+    isExternal: true
+    href: PublisherStudio.Services.PictureStudio.Import.html
+- uid: PublisherStudio.Services
+  commentId: N:PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services
+  nameWithType: PublisherStudio.Services
+  fullName: PublisherStudio.Services
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html

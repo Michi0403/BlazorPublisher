@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Net.Http.Headers;
 using System.Text;
 using PublisherStudio.BusinessObjects;
@@ -19,6 +19,9 @@ public sealed class PublicationWebDataService
     private readonly ILogger<PublicationWebDataService> logger;
     private readonly ConcurrentDictionary<Guid, SemaphoreSlim> _bindingLocks = new();
 
+    /// <summary>
+    /// Runs the publication web data service operation.
+    /// </summary>
     public PublicationWebDataService(
         IHttpClientFactory httpClientFactory,
         PublicationWebhookStore webhooks,
@@ -42,6 +45,9 @@ public sealed class PublicationWebDataService
         }
     }
 
+    /// <summary>
+    /// Runs the refresh async operation.
+    /// </summary>
     public async Task RefreshAsync(PublicationDataObject dataObject, CancellationToken cancellationToken = default)
     {
         try
@@ -125,6 +131,9 @@ public sealed class PublicationWebDataService
         }
     }
 
+    /// <summary>
+    /// Determines whether due.
+    /// </summary>
     public bool IsDue(PublicationDataObject dataObject, DateTimeOffset now)
     {
         try

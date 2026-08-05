@@ -1,0 +1,362 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.SignalCompletionAction
+  commentId: T:PublisherStudio.BusinessObjects.SignalCompletionAction
+  id: SignalCompletionAction
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.SignalCompletionAction.AddCssClass
+  - PublisherStudio.BusinessObjects.SignalCompletionAction.Click
+  - PublisherStudio.BusinessObjects.SignalCompletionAction.Hide
+  - PublisherStudio.BusinessObjects.SignalCompletionAction.Highlight
+  - PublisherStudio.BusinessObjects.SignalCompletionAction.Hover
+  - PublisherStudio.BusinessObjects.SignalCompletionAction.None
+  - PublisherStudio.BusinessObjects.SignalCompletionAction.PauseMedia
+  - PublisherStudio.BusinessObjects.SignalCompletionAction.PlayMedia
+  - PublisherStudio.BusinessObjects.SignalCompletionAction.RemoveCssClass
+  - PublisherStudio.BusinessObjects.SignalCompletionAction.ReplayAnimation
+  - PublisherStudio.BusinessObjects.SignalCompletionAction.RunSignal
+  - PublisherStudio.BusinessObjects.SignalCompletionAction.SetOpacity
+  - PublisherStudio.BusinessObjects.SignalCompletionAction.Show
+  - PublisherStudio.BusinessObjects.SignalCompletionAction.ToggleCssClass
+  - PublisherStudio.BusinessObjects.SignalCompletionAction.ToggleMediaPlayback
+  - PublisherStudio.BusinessObjects.SignalCompletionAction.ToggleVisibility
+  langs:
+  - csharp
+  - vb
+  name: SignalCompletionAction
+  nameWithType: SignalCompletionAction
+  fullName: PublisherStudio.BusinessObjects.SignalCompletionAction
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported signal completion action values.
+  example: []
+  syntax:
+    content: public enum SignalCompletionAction
+    content.vb: Public Enum SignalCompletionAction
+- uid: PublisherStudio.BusinessObjects.SignalCompletionAction.None
+  commentId: F:PublisherStudio.BusinessObjects.SignalCompletionAction.None
+  id: None
+  parent: PublisherStudio.BusinessObjects.SignalCompletionAction
+  langs:
+  - csharp
+  - vb
+  name: None
+  nameWithType: SignalCompletionAction.None
+  fullName: PublisherStudio.BusinessObjects.SignalCompletionAction.None
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: None = 0
+    return:
+      type: PublisherStudio.BusinessObjects.SignalCompletionAction
+- uid: PublisherStudio.BusinessObjects.SignalCompletionAction.Click
+  commentId: F:PublisherStudio.BusinessObjects.SignalCompletionAction.Click
+  id: Click
+  parent: PublisherStudio.BusinessObjects.SignalCompletionAction
+  langs:
+  - csharp
+  - vb
+  name: Click
+  nameWithType: SignalCompletionAction.Click
+  fullName: PublisherStudio.BusinessObjects.SignalCompletionAction.Click
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Click = 1
+    return:
+      type: PublisherStudio.BusinessObjects.SignalCompletionAction
+- uid: PublisherStudio.BusinessObjects.SignalCompletionAction.Hover
+  commentId: F:PublisherStudio.BusinessObjects.SignalCompletionAction.Hover
+  id: Hover
+  parent: PublisherStudio.BusinessObjects.SignalCompletionAction
+  langs:
+  - csharp
+  - vb
+  name: Hover
+  nameWithType: SignalCompletionAction.Hover
+  fullName: PublisherStudio.BusinessObjects.SignalCompletionAction.Hover
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Hover = 2
+    return:
+      type: PublisherStudio.BusinessObjects.SignalCompletionAction
+- uid: PublisherStudio.BusinessObjects.SignalCompletionAction.Show
+  commentId: F:PublisherStudio.BusinessObjects.SignalCompletionAction.Show
+  id: Show
+  parent: PublisherStudio.BusinessObjects.SignalCompletionAction
+  langs:
+  - csharp
+  - vb
+  name: Show
+  nameWithType: SignalCompletionAction.Show
+  fullName: PublisherStudio.BusinessObjects.SignalCompletionAction.Show
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Show = 3
+    return:
+      type: PublisherStudio.BusinessObjects.SignalCompletionAction
+- uid: PublisherStudio.BusinessObjects.SignalCompletionAction.Hide
+  commentId: F:PublisherStudio.BusinessObjects.SignalCompletionAction.Hide
+  id: Hide
+  parent: PublisherStudio.BusinessObjects.SignalCompletionAction
+  langs:
+  - csharp
+  - vb
+  name: Hide
+  nameWithType: SignalCompletionAction.Hide
+  fullName: PublisherStudio.BusinessObjects.SignalCompletionAction.Hide
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Hide = 4
+    return:
+      type: PublisherStudio.BusinessObjects.SignalCompletionAction
+- uid: PublisherStudio.BusinessObjects.SignalCompletionAction.ToggleVisibility
+  commentId: F:PublisherStudio.BusinessObjects.SignalCompletionAction.ToggleVisibility
+  id: ToggleVisibility
+  parent: PublisherStudio.BusinessObjects.SignalCompletionAction
+  langs:
+  - csharp
+  - vb
+  name: ToggleVisibility
+  nameWithType: SignalCompletionAction.ToggleVisibility
+  fullName: PublisherStudio.BusinessObjects.SignalCompletionAction.ToggleVisibility
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: ToggleVisibility = 5
+    return:
+      type: PublisherStudio.BusinessObjects.SignalCompletionAction
+- uid: PublisherStudio.BusinessObjects.SignalCompletionAction.SetOpacity
+  commentId: F:PublisherStudio.BusinessObjects.SignalCompletionAction.SetOpacity
+  id: SetOpacity
+  parent: PublisherStudio.BusinessObjects.SignalCompletionAction
+  langs:
+  - csharp
+  - vb
+  name: SetOpacity
+  nameWithType: SignalCompletionAction.SetOpacity
+  fullName: PublisherStudio.BusinessObjects.SignalCompletionAction.SetOpacity
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: SetOpacity = 6
+    return:
+      type: PublisherStudio.BusinessObjects.SignalCompletionAction
+- uid: PublisherStudio.BusinessObjects.SignalCompletionAction.ReplayAnimation
+  commentId: F:PublisherStudio.BusinessObjects.SignalCompletionAction.ReplayAnimation
+  id: ReplayAnimation
+  parent: PublisherStudio.BusinessObjects.SignalCompletionAction
+  langs:
+  - csharp
+  - vb
+  name: ReplayAnimation
+  nameWithType: SignalCompletionAction.ReplayAnimation
+  fullName: PublisherStudio.BusinessObjects.SignalCompletionAction.ReplayAnimation
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: ReplayAnimation = 7
+    return:
+      type: PublisherStudio.BusinessObjects.SignalCompletionAction
+- uid: PublisherStudio.BusinessObjects.SignalCompletionAction.PlayMedia
+  commentId: F:PublisherStudio.BusinessObjects.SignalCompletionAction.PlayMedia
+  id: PlayMedia
+  parent: PublisherStudio.BusinessObjects.SignalCompletionAction
+  langs:
+  - csharp
+  - vb
+  name: PlayMedia
+  nameWithType: SignalCompletionAction.PlayMedia
+  fullName: PublisherStudio.BusinessObjects.SignalCompletionAction.PlayMedia
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: PlayMedia = 8
+    return:
+      type: PublisherStudio.BusinessObjects.SignalCompletionAction
+- uid: PublisherStudio.BusinessObjects.SignalCompletionAction.PauseMedia
+  commentId: F:PublisherStudio.BusinessObjects.SignalCompletionAction.PauseMedia
+  id: PauseMedia
+  parent: PublisherStudio.BusinessObjects.SignalCompletionAction
+  langs:
+  - csharp
+  - vb
+  name: PauseMedia
+  nameWithType: SignalCompletionAction.PauseMedia
+  fullName: PublisherStudio.BusinessObjects.SignalCompletionAction.PauseMedia
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: PauseMedia = 9
+    return:
+      type: PublisherStudio.BusinessObjects.SignalCompletionAction
+- uid: PublisherStudio.BusinessObjects.SignalCompletionAction.ToggleMediaPlayback
+  commentId: F:PublisherStudio.BusinessObjects.SignalCompletionAction.ToggleMediaPlayback
+  id: ToggleMediaPlayback
+  parent: PublisherStudio.BusinessObjects.SignalCompletionAction
+  langs:
+  - csharp
+  - vb
+  name: ToggleMediaPlayback
+  nameWithType: SignalCompletionAction.ToggleMediaPlayback
+  fullName: PublisherStudio.BusinessObjects.SignalCompletionAction.ToggleMediaPlayback
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: ToggleMediaPlayback = 10
+    return:
+      type: PublisherStudio.BusinessObjects.SignalCompletionAction
+- uid: PublisherStudio.BusinessObjects.SignalCompletionAction.Highlight
+  commentId: F:PublisherStudio.BusinessObjects.SignalCompletionAction.Highlight
+  id: Highlight
+  parent: PublisherStudio.BusinessObjects.SignalCompletionAction
+  langs:
+  - csharp
+  - vb
+  name: Highlight
+  nameWithType: SignalCompletionAction.Highlight
+  fullName: PublisherStudio.BusinessObjects.SignalCompletionAction.Highlight
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Highlight = 11
+    return:
+      type: PublisherStudio.BusinessObjects.SignalCompletionAction
+- uid: PublisherStudio.BusinessObjects.SignalCompletionAction.AddCssClass
+  commentId: F:PublisherStudio.BusinessObjects.SignalCompletionAction.AddCssClass
+  id: AddCssClass
+  parent: PublisherStudio.BusinessObjects.SignalCompletionAction
+  langs:
+  - csharp
+  - vb
+  name: AddCssClass
+  nameWithType: SignalCompletionAction.AddCssClass
+  fullName: PublisherStudio.BusinessObjects.SignalCompletionAction.AddCssClass
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: AddCssClass = 12
+    return:
+      type: PublisherStudio.BusinessObjects.SignalCompletionAction
+- uid: PublisherStudio.BusinessObjects.SignalCompletionAction.RemoveCssClass
+  commentId: F:PublisherStudio.BusinessObjects.SignalCompletionAction.RemoveCssClass
+  id: RemoveCssClass
+  parent: PublisherStudio.BusinessObjects.SignalCompletionAction
+  langs:
+  - csharp
+  - vb
+  name: RemoveCssClass
+  nameWithType: SignalCompletionAction.RemoveCssClass
+  fullName: PublisherStudio.BusinessObjects.SignalCompletionAction.RemoveCssClass
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: RemoveCssClass = 13
+    return:
+      type: PublisherStudio.BusinessObjects.SignalCompletionAction
+- uid: PublisherStudio.BusinessObjects.SignalCompletionAction.ToggleCssClass
+  commentId: F:PublisherStudio.BusinessObjects.SignalCompletionAction.ToggleCssClass
+  id: ToggleCssClass
+  parent: PublisherStudio.BusinessObjects.SignalCompletionAction
+  langs:
+  - csharp
+  - vb
+  name: ToggleCssClass
+  nameWithType: SignalCompletionAction.ToggleCssClass
+  fullName: PublisherStudio.BusinessObjects.SignalCompletionAction.ToggleCssClass
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: ToggleCssClass = 14
+    return:
+      type: PublisherStudio.BusinessObjects.SignalCompletionAction
+- uid: PublisherStudio.BusinessObjects.SignalCompletionAction.RunSignal
+  commentId: F:PublisherStudio.BusinessObjects.SignalCompletionAction.RunSignal
+  id: RunSignal
+  parent: PublisherStudio.BusinessObjects.SignalCompletionAction
+  langs:
+  - csharp
+  - vb
+  name: RunSignal
+  nameWithType: SignalCompletionAction.RunSignal
+  fullName: PublisherStudio.BusinessObjects.SignalCompletionAction.RunSignal
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: RunSignal = 15
+    return:
+      type: PublisherStudio.BusinessObjects.SignalCompletionAction
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.SignalCompletionAction
+  commentId: T:PublisherStudio.BusinessObjects.SignalCompletionAction
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.SignalCompletionAction.html
+  name: SignalCompletionAction
+  nameWithType: SignalCompletionAction
+  fullName: PublisherStudio.BusinessObjects.SignalCompletionAction

@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 
 namespace PublisherStudio.Services.Streaming.UseCases.Lan;
 
@@ -9,6 +9,9 @@ public sealed class StreamingLanUseCases(MediaSessionRegistry sessions)
 {
     private readonly MediaSessionRegistry _sessions = sessions;
 
+    /// <summary>
+    /// Gets status.
+    /// </summary>
     public StreamingLanStatus? GetStatus(Guid sessionId)
     {
         if (!_sessions.TryGet(sessionId, out var session)) return null;
@@ -25,6 +28,9 @@ public sealed class StreamingLanUseCases(MediaSessionRegistry sessions)
         };
     }
 
+    /// <summary>
+    /// Resolves asset.
+    /// </summary>
     public StreamingAsset? ResolveAsset(Guid sessionId, string? asset)
     {
         if (!_sessions.TryGet(sessionId, out var session) || string.IsNullOrWhiteSpace(session.HlsDirectory)) return null;
@@ -43,6 +49,9 @@ public sealed class StreamingLanUseCases(MediaSessionRegistry sessions)
         return new StreamingAsset(candidate, contentType);
     }
 
+    /// <summary>
+    /// Builds watch page.
+    /// </summary>
     public string? BuildWatchPage(Guid sessionId)
     {
         if (!_sessions.TryGet(sessionId, out var session) || !session.LanEnabled) return null;
@@ -54,16 +63,46 @@ public sealed class StreamingLanUseCases(MediaSessionRegistry sessions)
     }
 }
 
+/// <summary>
+/// Represents a streaming LAN status.
+/// </summary>
 public sealed class StreamingLanStatus
 {
+    /// <summary>
+    /// Gets or sets session identifier.
+    /// </summary>
     public Guid SessionId { get; init; }
+    /// <summary>
+    /// Gets or sets whether the feature is enabled.
+    /// </summary>
     public bool Enabled { get; init; }
+    /// <summary>
+    /// Gets or sets status.
+    /// </summary>
     public string Status { get; init; } = string.Empty;
+    /// <summary>
+    /// Gets or sets error.
+    /// </summary>
     public string Error { get; init; } = string.Empty;
+    /// <summary>
+    /// Gets or sets browser URL.
+    /// </summary>
     public string? BrowserUrl { get; init; }
+    /// <summary>
+    /// Gets or sets hls URL.
+    /// </summary>
     public string? HlsUrl { get; init; }
+    /// <summary>
+    /// Gets or sets rtsp URL.
+    /// </summary>
     public string? RtspUrl { get; init; }
+    /// <summary>
+    /// Gets or sets access token.
+    /// </summary>
     public string? AccessToken { get; init; }
 }
 
+/// <summary>
+/// Represents a streaming asset.
+/// </summary>
 public sealed record StreamingAsset(string Path, string ContentType);

@@ -1,0 +1,707 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.StoryPageLayoutService
+  commentId: T:PublisherStudio.Services.StoryPageLayoutService
+  id: StoryPageLayoutService
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.StoryPageLayoutService.#ctor(PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.StoryPageLayoutService})
+  - PublisherStudio.Services.StoryPageLayoutService.GetDefault
+  - PublisherStudio.Services.StoryPageLayoutService.Normalize(System.Double,System.Double,System.Double,System.Double,System.Double,System.Double)
+  langs:
+  - csharp
+  - vb
+  name: StoryPageLayoutService
+  nameWithType: StoryPageLayoutService
+  fullName: PublisherStudio.Services.StoryPageLayoutService
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Provides story page layout service operations.
+  example: []
+  syntax:
+    content: 'public sealed class StoryPageLayoutService : IStoryPageLayoutService'
+    content.vb: Public NotInheritable Class StoryPageLayoutService Implements IStoryPageLayoutService
+  inheritance:
+  - System.Object
+  implements:
+  - PublisherStudio.Services.IStoryPageLayoutService
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.StoryPageLayoutService.#ctor(PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.StoryPageLayoutService})
+  commentId: M:PublisherStudio.Services.StoryPageLayoutService.#ctor(PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.StoryPageLayoutService})
+  id: '#ctor(PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.StoryPageLayoutService})'
+  parent: PublisherStudio.Services.StoryPageLayoutService
+  langs:
+  - csharp
+  - vb
+  name: StoryPageLayoutService(IPublisherRuntimePolicyDataService, ILogger<StoryPageLayoutService>)
+  nameWithType: StoryPageLayoutService.StoryPageLayoutService(IPublisherRuntimePolicyDataService, ILogger<StoryPageLayoutService>)
+  fullName: PublisherStudio.Services.StoryPageLayoutService.StoryPageLayoutService(PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService, Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.StoryPageLayoutService>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Provides story page layout service operations.
+  example: []
+  syntax:
+    content: public StoryPageLayoutService(IPublisherRuntimePolicyDataService runtimePolicy, ILogger<StoryPageLayoutService> logger)
+    parameters:
+    - id: runtimePolicy
+      type: PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.StoryPageLayoutService}
+    content.vb: Public Sub New(runtimePolicy As IPublisherRuntimePolicyDataService, logger As ILogger(Of StoryPageLayoutService))
+  overload: PublisherStudio.Services.StoryPageLayoutService.#ctor*
+  nameWithType.vb: StoryPageLayoutService.New(IPublisherRuntimePolicyDataService, ILogger(Of StoryPageLayoutService))
+  fullName.vb: PublisherStudio.Services.StoryPageLayoutService.New(PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService, Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.StoryPageLayoutService))
+  name.vb: New(IPublisherRuntimePolicyDataService, ILogger(Of StoryPageLayoutService))
+- uid: PublisherStudio.Services.StoryPageLayoutService.GetDefault
+  commentId: M:PublisherStudio.Services.StoryPageLayoutService.GetDefault
+  id: GetDefault
+  parent: PublisherStudio.Services.StoryPageLayoutService
+  langs:
+  - csharp
+  - vb
+  name: GetDefault()
+  nameWithType: StoryPageLayoutService.GetDefault()
+  fullName: PublisherStudio.Services.StoryPageLayoutService.GetDefault()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Gets default.
+  example: []
+  syntax:
+    content: public StoryPageLayout GetDefault()
+    return:
+      type: PublisherStudio.BusinessObjects.StoryPageLayout
+    content.vb: Public Function GetDefault() As StoryPageLayout
+  overload: PublisherStudio.Services.StoryPageLayoutService.GetDefault*
+  implements:
+  - PublisherStudio.Services.IStoryPageLayoutService.GetDefault
+- uid: PublisherStudio.Services.StoryPageLayoutService.Normalize(System.Double,System.Double,System.Double,System.Double,System.Double,System.Double)
+  commentId: M:PublisherStudio.Services.StoryPageLayoutService.Normalize(System.Double,System.Double,System.Double,System.Double,System.Double,System.Double)
+  id: Normalize(System.Double,System.Double,System.Double,System.Double,System.Double,System.Double)
+  parent: PublisherStudio.Services.StoryPageLayoutService
+  langs:
+  - csharp
+  - vb
+  name: Normalize(double, double, double, double, double, double)
+  nameWithType: StoryPageLayoutService.Normalize(double, double, double, double, double, double)
+  fullName: PublisherStudio.Services.StoryPageLayoutService.Normalize(double, double, double, double, double, double)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the normalize operation.
+  example: []
+  syntax:
+    content: public StoryPageLayout Normalize(double pageWidthMm, double pageHeightMm, double marginTopMm, double marginRightMm, double marginBottomMm, double marginLeftMm)
+    parameters:
+    - id: pageWidthMm
+      type: System.Double
+    - id: pageHeightMm
+      type: System.Double
+    - id: marginTopMm
+      type: System.Double
+    - id: marginRightMm
+      type: System.Double
+    - id: marginBottomMm
+      type: System.Double
+    - id: marginLeftMm
+      type: System.Double
+    return:
+      type: PublisherStudio.BusinessObjects.StoryPageLayout
+    content.vb: Public Function Normalize(pageWidthMm As Double, pageHeightMm As Double, marginTopMm As Double, marginRightMm As Double, marginBottomMm As Double, marginLeftMm As Double) As StoryPageLayout
+  overload: PublisherStudio.Services.StoryPageLayoutService.Normalize*
+  implements:
+  - PublisherStudio.Services.IStoryPageLayoutService.Normalize(System.Double,System.Double,System.Double,System.Double,System.Double,System.Double)
+  nameWithType.vb: StoryPageLayoutService.Normalize(Double, Double, Double, Double, Double, Double)
+  fullName.vb: PublisherStudio.Services.StoryPageLayoutService.Normalize(Double, Double, Double, Double, Double, Double)
+  name.vb: Normalize(Double, Double, Double, Double, Double, Double)
+references:
+- uid: PublisherStudio.Services
+  commentId: N:PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services
+  nameWithType: PublisherStudio.Services
+  fullName: PublisherStudio.Services
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: PublisherStudio.Services.IStoryPageLayoutService
+  commentId: T:PublisherStudio.Services.IStoryPageLayoutService
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.IStoryPageLayoutService.html
+  name: IStoryPageLayoutService
+  nameWithType: IStoryPageLayoutService
+  fullName: PublisherStudio.Services.IStoryPageLayoutService
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.StoryPageLayoutService.#ctor*
+  commentId: Overload:PublisherStudio.Services.StoryPageLayoutService.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.StoryPageLayoutService.html#PublisherStudio_Services_StoryPageLayoutService__ctor_PublisherStudio_Services_Configuration_IPublisherRuntimePolicyDataService_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_StoryPageLayoutService__
+  name: StoryPageLayoutService
+  nameWithType: StoryPageLayoutService.StoryPageLayoutService
+  fullName: PublisherStudio.Services.StoryPageLayoutService.StoryPageLayoutService
+  nameWithType.vb: StoryPageLayoutService.New
+  fullName.vb: PublisherStudio.Services.StoryPageLayoutService.New
+  name.vb: New
+- uid: PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService
+  commentId: T:PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService
+  parent: PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService.html
+  name: IPublisherRuntimePolicyDataService
+  nameWithType: IPublisherRuntimePolicyDataService
+  fullName: PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.StoryPageLayoutService}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.StoryPageLayoutService}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<StoryPageLayoutService>
+  nameWithType: ILogger<StoryPageLayoutService>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.StoryPageLayoutService>
+  nameWithType.vb: ILogger(Of StoryPageLayoutService)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.StoryPageLayoutService)
+  name.vb: ILogger(Of StoryPageLayoutService)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.StoryPageLayoutService
+    name: StoryPageLayoutService
+    isExternal: true
+    href: PublisherStudio.Services.StoryPageLayoutService.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.StoryPageLayoutService
+    name: StoryPageLayoutService
+    isExternal: true
+    href: PublisherStudio.Services.StoryPageLayoutService.html
+  - name: )
+- uid: PublisherStudio.Services.Configuration
+  commentId: N:PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Configuration
+  nameWithType: PublisherStudio.Services.Configuration
+  fullName: PublisherStudio.Services.Configuration
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: PublisherStudio.Services.StoryPageLayoutService.GetDefault*
+  commentId: Overload:PublisherStudio.Services.StoryPageLayoutService.GetDefault
+  isExternal: true
+  href: PublisherStudio.Services.StoryPageLayoutService.html#PublisherStudio_Services_StoryPageLayoutService_GetDefault
+  name: GetDefault
+  nameWithType: StoryPageLayoutService.GetDefault
+  fullName: PublisherStudio.Services.StoryPageLayoutService.GetDefault
+- uid: PublisherStudio.Services.IStoryPageLayoutService.GetDefault
+  commentId: M:PublisherStudio.Services.IStoryPageLayoutService.GetDefault
+  parent: PublisherStudio.Services.IStoryPageLayoutService
+  isExternal: true
+  href: PublisherStudio.Services.IStoryPageLayoutService.html#PublisherStudio_Services_IStoryPageLayoutService_GetDefault
+  name: GetDefault()
+  nameWithType: IStoryPageLayoutService.GetDefault()
+  fullName: PublisherStudio.Services.IStoryPageLayoutService.GetDefault()
+  spec.csharp:
+  - uid: PublisherStudio.Services.IStoryPageLayoutService.GetDefault
+    name: GetDefault
+    isExternal: true
+    href: PublisherStudio.Services.IStoryPageLayoutService.html#PublisherStudio_Services_IStoryPageLayoutService_GetDefault
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.IStoryPageLayoutService.GetDefault
+    name: GetDefault
+    isExternal: true
+    href: PublisherStudio.Services.IStoryPageLayoutService.html#PublisherStudio_Services_IStoryPageLayoutService_GetDefault
+  - name: (
+  - name: )
+- uid: PublisherStudio.BusinessObjects.StoryPageLayout
+  commentId: T:PublisherStudio.BusinessObjects.StoryPageLayout
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.StoryPageLayout.html
+  name: StoryPageLayout
+  nameWithType: StoryPageLayout
+  fullName: PublisherStudio.BusinessObjects.StoryPageLayout
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.Services.StoryPageLayoutService.Normalize*
+  commentId: Overload:PublisherStudio.Services.StoryPageLayoutService.Normalize
+  isExternal: true
+  href: PublisherStudio.Services.StoryPageLayoutService.html#PublisherStudio_Services_StoryPageLayoutService_Normalize_System_Double_System_Double_System_Double_System_Double_System_Double_System_Double_
+  name: Normalize
+  nameWithType: StoryPageLayoutService.Normalize
+  fullName: PublisherStudio.Services.StoryPageLayoutService.Normalize
+- uid: PublisherStudio.Services.IStoryPageLayoutService.Normalize(System.Double,System.Double,System.Double,System.Double,System.Double,System.Double)
+  commentId: M:PublisherStudio.Services.IStoryPageLayoutService.Normalize(System.Double,System.Double,System.Double,System.Double,System.Double,System.Double)
+  parent: PublisherStudio.Services.IStoryPageLayoutService
+  isExternal: true
+  href: PublisherStudio.Services.IStoryPageLayoutService.html#PublisherStudio_Services_IStoryPageLayoutService_Normalize_System_Double_System_Double_System_Double_System_Double_System_Double_System_Double_
+  name: Normalize(double, double, double, double, double, double)
+  nameWithType: IStoryPageLayoutService.Normalize(double, double, double, double, double, double)
+  fullName: PublisherStudio.Services.IStoryPageLayoutService.Normalize(double, double, double, double, double, double)
+  nameWithType.vb: IStoryPageLayoutService.Normalize(Double, Double, Double, Double, Double, Double)
+  fullName.vb: PublisherStudio.Services.IStoryPageLayoutService.Normalize(Double, Double, Double, Double, Double, Double)
+  name.vb: Normalize(Double, Double, Double, Double, Double, Double)
+  spec.csharp:
+  - uid: PublisherStudio.Services.IStoryPageLayoutService.Normalize(System.Double,System.Double,System.Double,System.Double,System.Double,System.Double)
+    name: Normalize
+    isExternal: true
+    href: PublisherStudio.Services.IStoryPageLayoutService.html#PublisherStudio_Services_IStoryPageLayoutService_Normalize_System_Double_System_Double_System_Double_System_Double_System_Double_System_Double_
+  - name: (
+  - uid: System.Double
+    name: double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: ','
+  - name: " "
+  - uid: System.Double
+    name: double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: ','
+  - name: " "
+  - uid: System.Double
+    name: double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: ','
+  - name: " "
+  - uid: System.Double
+    name: double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: ','
+  - name: " "
+  - uid: System.Double
+    name: double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: ','
+  - name: " "
+  - uid: System.Double
+    name: double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.IStoryPageLayoutService.Normalize(System.Double,System.Double,System.Double,System.Double,System.Double,System.Double)
+    name: Normalize
+    isExternal: true
+    href: PublisherStudio.Services.IStoryPageLayoutService.html#PublisherStudio_Services_IStoryPageLayoutService_Normalize_System_Double_System_Double_System_Double_System_Double_System_Double_System_Double_
+  - name: (
+  - uid: System.Double
+    name: Double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: ','
+  - name: " "
+  - uid: System.Double
+    name: Double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: ','
+  - name: " "
+  - uid: System.Double
+    name: Double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: ','
+  - name: " "
+  - uid: System.Double
+    name: Double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: ','
+  - name: " "
+  - uid: System.Double
+    name: Double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: ','
+  - name: " "
+  - uid: System.Double
+    name: Double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: )
+- uid: System.Double
+  commentId: T:System.Double
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.double
+  name: double
+  nameWithType: double
+  fullName: double
+  nameWithType.vb: Double
+  fullName.vb: Double
+  name.vb: Double

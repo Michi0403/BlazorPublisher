@@ -16,7 +16,6 @@ const installerProject = read('src/PublisherStudio.InstallerConsole/PublisherStu
 const installLauncher = read('src/PublisherStudio.InstallerConsole/Install.cmd');
 const updateLauncher = read('src/PublisherStudio.InstallerConsole/Update.cmd');
 const startLauncher = read('src/PublisherStudio.InstallerConsole/Start.cmd');
-const uninstallLauncher = read('src/PublisherStudio.InstallerConsole/Uninstall.cmd');
 assert.match(security, /using LocalGPT\.WireProtocol;/);
 assert.match(security, /ProtocolVersion\s*=\s*OneWireProtocol\.Version/);
 assert.match(globals, /global using LocalGPT\.WireProtocol;/);
@@ -27,13 +26,14 @@ assert.match(installer, /PublisherStudio is ready: \{url\}/);
 assert.match(installer, /PublisherStudio startup failed/);
 assert.match(installer, /PublisherStudio startup failed[\s\S]*throw;/);
 assert.doesNotMatch(installer, /Doomland|Your args to string|args were initially empty/);
-assert.match(installerProject, /<None Update="\*\.cmd" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" \/>/);
-assert.match(installLauncher, /--install-blazorpublisher --install-ffmpeg --start-blazorpublisher --port 58071 --shortcuts/);
+for (const launcher of ['Install.cmd', 'Update.cmd', 'Start.cmd']) {
+  assert.ok(installerProject.includes(`<None Update="${launcher}" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />`));
+}
+assert.match(installLauncher, /--install-publisherstudio --start-publisherstudio --shortcuts --port 58071/);
 assert.doesNotMatch(installLauncher, /--force-delete/);
-assert.match(updateLauncher, /--update-blazorpublisher --install-ffmpeg --start-blazorpublisher --port 58071 --shortcuts/);
+assert.match(updateLauncher, /--update-publisherstudio --start-publisherstudio --shortcuts --port 58071/);
 assert.doesNotMatch(updateLauncher, /--force-delete/);
-assert.match(startLauncher, /--start-blazorpublisher --port 58071/);
-assert.match(uninstallLauncher, /--uninstall --force-delete/);
+assert.match(startLauncher, /--start-publisherstudio --port 58071/);
 assert.doesNotMatch(installer, /Thread\.Sleep\(TimeSpan\.FromSeconds\(2\)\)/);
 assert.match(host, /systemVariables\.DefaultPort/);
 assert.equal(settings.PublisherStudio.SystemVariables['Application.DefaultPort'], '58071');

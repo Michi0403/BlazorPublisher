@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Net;
 using DevExpress.AspNetCore;
 using DevExpress.Blazor;
@@ -16,8 +16,14 @@ using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio;
 
+/// <summary>
+/// Represents a program.
+/// </summary>
 public static class Program
 {
+    /// <summary>
+    /// Runs the main operation.
+    /// </summary>
     public static async Task Main(string[] args)
     {
         await using var app = BuildWebApp(args);
@@ -34,6 +40,9 @@ public static class Program
         }
     }
 
+    /// <summary>
+    /// Builds web app.
+    /// </summary>
     public static WebApplication BuildWebApp(string[]? args = null)
     {
         var effectiveArgs = args ?? [];

@@ -1,0 +1,97 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Streaming.MediaHost
+  commentId: N:PublisherStudio.Services.Streaming.MediaHost
+  id: MediaHost
+  parent: PublisherStudio.Services.Streaming
+  children:
+  - PublisherStudio.Services.Streaming.MediaHost.MediaHostOutputRequest
+  - PublisherStudio.Services.Streaming.MediaHost.MediaHostSessionResponse
+  - PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest
+  - PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.Services.Streaming.MediaHost
+  nameWithType: PublisherStudio.Services.Streaming.MediaHost
+  fullName: PublisherStudio.Services.Streaming.MediaHost
+  type: Namespace
+  assemblies:
+  - PublisherStudio.Web
+references:
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostOutputRequest
+  commentId: T:PublisherStudio.Services.Streaming.MediaHost.MediaHostOutputRequest
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.MediaHostOutputRequest.html
+  name: MediaHostOutputRequest
+  nameWithType: MediaHostOutputRequest
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostOutputRequest
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostSessionResponse
+  commentId: T:PublisherStudio.Services.Streaming.MediaHost.MediaHostSessionResponse
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.MediaHostSessionResponse.html
+  name: MediaHostSessionResponse
+  nameWithType: MediaHostSessionResponse
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostSessionResponse
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest
+  commentId: T:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.html
+  name: MediaHostStartSessionRequest
+  nameWithType: MediaHostStartSessionRequest
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest
+- uid: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient
+  commentId: T:PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient
+  parent: PublisherStudio.Services.Streaming.MediaHost
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.html
+  name: StreamingMediaHostClient
+  nameWithType: StreamingMediaHostClient
+  fullName: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient
+- uid: PublisherStudio.Services.Streaming.MediaHost
+  commentId: N:PublisherStudio.Services.Streaming.MediaHost
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.MediaHost
+  nameWithType: PublisherStudio.Services.Streaming.MediaHost
+  fullName: PublisherStudio.Services.Streaming.MediaHost
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.MediaHost
+    name: MediaHost
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.MediaHost.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.MediaHost
+    name: MediaHost
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.MediaHost.html

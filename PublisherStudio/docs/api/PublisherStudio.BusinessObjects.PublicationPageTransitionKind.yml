@@ -1,0 +1,172 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationPageTransitionKind
+  commentId: T:PublisherStudio.BusinessObjects.PublicationPageTransitionKind
+  id: PublicationPageTransitionKind
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationPageTransitionKind.Fade
+  - PublisherStudio.BusinessObjects.PublicationPageTransitionKind.Flip
+  - PublisherStudio.BusinessObjects.PublicationPageTransitionKind.None
+  - PublisherStudio.BusinessObjects.PublicationPageTransitionKind.Push
+  - PublisherStudio.BusinessObjects.PublicationPageTransitionKind.Wipe
+  - PublisherStudio.BusinessObjects.PublicationPageTransitionKind.Zoom
+  langs:
+  - csharp
+  - vb
+  name: PublicationPageTransitionKind
+  nameWithType: PublicationPageTransitionKind
+  fullName: PublisherStudio.BusinessObjects.PublicationPageTransitionKind
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication page transition kind values.
+  example: []
+  syntax:
+    content: public enum PublicationPageTransitionKind
+    content.vb: Public Enum PublicationPageTransitionKind
+- uid: PublisherStudio.BusinessObjects.PublicationPageTransitionKind.None
+  commentId: F:PublisherStudio.BusinessObjects.PublicationPageTransitionKind.None
+  id: None
+  parent: PublisherStudio.BusinessObjects.PublicationPageTransitionKind
+  langs:
+  - csharp
+  - vb
+  name: None
+  nameWithType: PublicationPageTransitionKind.None
+  fullName: PublisherStudio.BusinessObjects.PublicationPageTransitionKind.None
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: None = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationPageTransitionKind
+- uid: PublisherStudio.BusinessObjects.PublicationPageTransitionKind.Fade
+  commentId: F:PublisherStudio.BusinessObjects.PublicationPageTransitionKind.Fade
+  id: Fade
+  parent: PublisherStudio.BusinessObjects.PublicationPageTransitionKind
+  langs:
+  - csharp
+  - vb
+  name: Fade
+  nameWithType: PublicationPageTransitionKind.Fade
+  fullName: PublisherStudio.BusinessObjects.PublicationPageTransitionKind.Fade
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Fade = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationPageTransitionKind
+- uid: PublisherStudio.BusinessObjects.PublicationPageTransitionKind.Push
+  commentId: F:PublisherStudio.BusinessObjects.PublicationPageTransitionKind.Push
+  id: Push
+  parent: PublisherStudio.BusinessObjects.PublicationPageTransitionKind
+  langs:
+  - csharp
+  - vb
+  name: Push
+  nameWithType: PublicationPageTransitionKind.Push
+  fullName: PublisherStudio.BusinessObjects.PublicationPageTransitionKind.Push
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Push = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationPageTransitionKind
+- uid: PublisherStudio.BusinessObjects.PublicationPageTransitionKind.Wipe
+  commentId: F:PublisherStudio.BusinessObjects.PublicationPageTransitionKind.Wipe
+  id: Wipe
+  parent: PublisherStudio.BusinessObjects.PublicationPageTransitionKind
+  langs:
+  - csharp
+  - vb
+  name: Wipe
+  nameWithType: PublicationPageTransitionKind.Wipe
+  fullName: PublisherStudio.BusinessObjects.PublicationPageTransitionKind.Wipe
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Wipe = 3
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationPageTransitionKind
+- uid: PublisherStudio.BusinessObjects.PublicationPageTransitionKind.Zoom
+  commentId: F:PublisherStudio.BusinessObjects.PublicationPageTransitionKind.Zoom
+  id: Zoom
+  parent: PublisherStudio.BusinessObjects.PublicationPageTransitionKind
+  langs:
+  - csharp
+  - vb
+  name: Zoom
+  nameWithType: PublicationPageTransitionKind.Zoom
+  fullName: PublisherStudio.BusinessObjects.PublicationPageTransitionKind.Zoom
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Zoom = 4
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationPageTransitionKind
+- uid: PublisherStudio.BusinessObjects.PublicationPageTransitionKind.Flip
+  commentId: F:PublisherStudio.BusinessObjects.PublicationPageTransitionKind.Flip
+  id: Flip
+  parent: PublisherStudio.BusinessObjects.PublicationPageTransitionKind
+  langs:
+  - csharp
+  - vb
+  name: Flip
+  nameWithType: PublicationPageTransitionKind.Flip
+  fullName: PublisherStudio.BusinessObjects.PublicationPageTransitionKind.Flip
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Flip = 5
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationPageTransitionKind
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationPageTransitionKind
+  commentId: T:PublisherStudio.BusinessObjects.PublicationPageTransitionKind
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationPageTransitionKind.html
+  name: PublicationPageTransitionKind
+  nameWithType: PublicationPageTransitionKind
+  fullName: PublisherStudio.BusinessObjects.PublicationPageTransitionKind

@@ -1,7 +1,10 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace PublisherStudio.Services.Streaming.Capture;
 
+/// <summary>
+/// Defines the windows process loopback native service contract.
+/// </summary>
 public interface IWindowsProcessLoopbackNativeService
 {
     bool IsAvailable { get; }
@@ -29,6 +32,9 @@ public sealed class WindowsProcessLoopbackNativeService : IWindowsProcessLoopbac
     private CoUninitializeDelegate? uninitializeApartment;
     private bool disposed;
 
+    /// <summary>
+    /// Runs the windows process loopback native service operation.
+    /// </summary>
     public WindowsProcessLoopbackNativeService(ILogger<WindowsProcessLoopbackNativeService> logger)
     {
         this.logger = logger;
@@ -55,8 +61,14 @@ public sealed class WindowsProcessLoopbackNativeService : IWindowsProcessLoopbac
         }
     }
 
+    /// <summary>
+    /// Gets or sets is available.
+    /// </summary>
     public bool IsAvailable { get; private set; }
 
+    /// <summary>
+    /// Runs the initialize multithreaded apartment operation.
+    /// </summary>
     public int InitializeMultithreadedApartment()
     {
         try
@@ -74,6 +86,9 @@ public sealed class WindowsProcessLoopbackNativeService : IWindowsProcessLoopbac
         }
     }
 
+    /// <summary>
+    /// Runs the uninitialize apartment operation.
+    /// </summary>
     public void UninitializeApartment()
     {
         try
@@ -89,6 +104,9 @@ public sealed class WindowsProcessLoopbackNativeService : IWindowsProcessLoopbac
         }
     }
 
+    /// <summary>
+    /// Runs the activate audio interface operation.
+    /// </summary>
     public int ActivateAudioInterface(
         string deviceInterfacePath,
         ref Guid interfaceId,
@@ -134,6 +152,9 @@ public sealed class WindowsProcessLoopbackNativeService : IWindowsProcessLoopbac
         }
     }
 
+    /// <summary>
+    /// Runs the dispose operation.
+    /// </summary>
     public void Dispose()
     {
         try

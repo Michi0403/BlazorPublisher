@@ -1,0 +1,700 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationMenuItem
+  commentId: T:PublisherStudio.BusinessObjects.PublicationMenuItem
+  id: PublicationMenuItem
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationMenuItem.#ctor
+  - PublisherStudio.BusinessObjects.PublicationMenuItem.Destination
+  - PublisherStudio.BusinessObjects.PublicationMenuItem.Enabled
+  - PublisherStudio.BusinessObjects.PublicationMenuItem.IconCssClass
+  - PublisherStudio.BusinessObjects.PublicationMenuItem.Id
+  - PublisherStudio.BusinessObjects.PublicationMenuItem.OpenInNewWindow
+  - PublisherStudio.BusinessObjects.PublicationMenuItem.ParentId
+  - PublisherStudio.BusinessObjects.PublicationMenuItem.TargetPageId
+  - PublisherStudio.BusinessObjects.PublicationMenuItem.Text
+  - PublisherStudio.BusinessObjects.PublicationMenuItem.Url
+  - PublisherStudio.BusinessObjects.PublicationMenuItem.Visible
+  langs:
+  - csharp
+  - vb
+  name: PublicationMenuItem
+  nameWithType: PublicationMenuItem
+  fullName: PublisherStudio.BusinessObjects.PublicationMenuItem
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents a publication menu item.
+  example: []
+  syntax:
+    content: public sealed class PublicationMenuItem
+    content.vb: Public NotInheritable Class PublicationMenuItem
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.BusinessObjects.PublicationMenuItem.#ctor
+  commentId: M:PublisherStudio.BusinessObjects.PublicationMenuItem.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.BusinessObjects.PublicationMenuItem
+  langs:
+  - csharp
+  - vb
+  name: PublicationMenuItem()
+  nameWithType: PublicationMenuItem.PublicationMenuItem()
+  fullName: PublisherStudio.BusinessObjects.PublicationMenuItem.PublicationMenuItem()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public PublicationMenuItem()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.BusinessObjects.PublicationMenuItem.#ctor*
+  nameWithType.vb: PublicationMenuItem.New()
+  fullName.vb: PublisherStudio.BusinessObjects.PublicationMenuItem.New()
+  name.vb: New()
+- uid: PublisherStudio.BusinessObjects.PublicationMenuItem.Id
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMenuItem.Id
+  id: Id
+  parent: PublisherStudio.BusinessObjects.PublicationMenuItem
+  langs:
+  - csharp
+  - vb
+  name: Id
+  nameWithType: PublicationMenuItem.Id
+  fullName: PublisherStudio.BusinessObjects.PublicationMenuItem.Id
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets the stable identifier.
+  example: []
+  syntax:
+    content: public Guid Id { get; set; }
+    parameters: []
+    return:
+      type: System.Guid
+    content.vb: Public Property Id As Guid
+  overload: PublisherStudio.BusinessObjects.PublicationMenuItem.Id*
+- uid: PublisherStudio.BusinessObjects.PublicationMenuItem.ParentId
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMenuItem.ParentId
+  id: ParentId
+  parent: PublisherStudio.BusinessObjects.PublicationMenuItem
+  langs:
+  - csharp
+  - vb
+  name: ParentId
+  nameWithType: PublicationMenuItem.ParentId
+  fullName: PublisherStudio.BusinessObjects.PublicationMenuItem.ParentId
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets parent identifier.
+  example: []
+  syntax:
+    content: public Guid? ParentId { get; set; }
+    parameters: []
+    return:
+      type: System.Nullable{System.Guid}
+    content.vb: Public Property ParentId As Guid?
+  overload: PublisherStudio.BusinessObjects.PublicationMenuItem.ParentId*
+- uid: PublisherStudio.BusinessObjects.PublicationMenuItem.Text
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMenuItem.Text
+  id: Text
+  parent: PublisherStudio.BusinessObjects.PublicationMenuItem
+  langs:
+  - csharp
+  - vb
+  name: Text
+  nameWithType: PublicationMenuItem.Text
+  fullName: PublisherStudio.BusinessObjects.PublicationMenuItem.Text
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets text.
+  example: []
+  syntax:
+    content: public string Text { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Text As String
+  overload: PublisherStudio.BusinessObjects.PublicationMenuItem.Text*
+- uid: PublisherStudio.BusinessObjects.PublicationMenuItem.Destination
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMenuItem.Destination
+  id: Destination
+  parent: PublisherStudio.BusinessObjects.PublicationMenuItem
+  langs:
+  - csharp
+  - vb
+  name: Destination
+  nameWithType: PublicationMenuItem.Destination
+  fullName: PublisherStudio.BusinessObjects.PublicationMenuItem.Destination
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets destination.
+  example: []
+  syntax:
+    content: public PublicationMenuDestinationKind Destination { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationMenuDestinationKind
+    content.vb: Public Property Destination As PublicationMenuDestinationKind
+  overload: PublisherStudio.BusinessObjects.PublicationMenuItem.Destination*
+- uid: PublisherStudio.BusinessObjects.PublicationMenuItem.TargetPageId
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMenuItem.TargetPageId
+  id: TargetPageId
+  parent: PublisherStudio.BusinessObjects.PublicationMenuItem
+  langs:
+  - csharp
+  - vb
+  name: TargetPageId
+  nameWithType: PublicationMenuItem.TargetPageId
+  fullName: PublisherStudio.BusinessObjects.PublicationMenuItem.TargetPageId
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets target page identifier.
+  example: []
+  syntax:
+    content: public Guid? TargetPageId { get; set; }
+    parameters: []
+    return:
+      type: System.Nullable{System.Guid}
+    content.vb: Public Property TargetPageId As Guid?
+  overload: PublisherStudio.BusinessObjects.PublicationMenuItem.TargetPageId*
+- uid: PublisherStudio.BusinessObjects.PublicationMenuItem.Url
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMenuItem.Url
+  id: Url
+  parent: PublisherStudio.BusinessObjects.PublicationMenuItem
+  langs:
+  - csharp
+  - vb
+  name: Url
+  nameWithType: PublicationMenuItem.Url
+  fullName: PublisherStudio.BusinessObjects.PublicationMenuItem.Url
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets URL.
+  example: []
+  syntax:
+    content: public string Url { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Url As String
+  overload: PublisherStudio.BusinessObjects.PublicationMenuItem.Url*
+- uid: PublisherStudio.BusinessObjects.PublicationMenuItem.OpenInNewWindow
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMenuItem.OpenInNewWindow
+  id: OpenInNewWindow
+  parent: PublisherStudio.BusinessObjects.PublicationMenuItem
+  langs:
+  - csharp
+  - vb
+  name: OpenInNewWindow
+  nameWithType: PublicationMenuItem.OpenInNewWindow
+  fullName: PublisherStudio.BusinessObjects.PublicationMenuItem.OpenInNewWindow
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets open in new window.
+  example: []
+  syntax:
+    content: public bool OpenInNewWindow { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property OpenInNewWindow As Boolean
+  overload: PublisherStudio.BusinessObjects.PublicationMenuItem.OpenInNewWindow*
+- uid: PublisherStudio.BusinessObjects.PublicationMenuItem.Enabled
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMenuItem.Enabled
+  id: Enabled
+  parent: PublisherStudio.BusinessObjects.PublicationMenuItem
+  langs:
+  - csharp
+  - vb
+  name: Enabled
+  nameWithType: PublicationMenuItem.Enabled
+  fullName: PublisherStudio.BusinessObjects.PublicationMenuItem.Enabled
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets whether the feature is enabled.
+  example: []
+  syntax:
+    content: public bool Enabled { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property Enabled As Boolean
+  overload: PublisherStudio.BusinessObjects.PublicationMenuItem.Enabled*
+- uid: PublisherStudio.BusinessObjects.PublicationMenuItem.Visible
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMenuItem.Visible
+  id: Visible
+  parent: PublisherStudio.BusinessObjects.PublicationMenuItem
+  langs:
+  - csharp
+  - vb
+  name: Visible
+  nameWithType: PublicationMenuItem.Visible
+  fullName: PublisherStudio.BusinessObjects.PublicationMenuItem.Visible
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets whether the item is visible.
+  example: []
+  syntax:
+    content: public bool Visible { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property Visible As Boolean
+  overload: PublisherStudio.BusinessObjects.PublicationMenuItem.Visible*
+- uid: PublisherStudio.BusinessObjects.PublicationMenuItem.IconCssClass
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMenuItem.IconCssClass
+  id: IconCssClass
+  parent: PublisherStudio.BusinessObjects.PublicationMenuItem
+  langs:
+  - csharp
+  - vb
+  name: IconCssClass
+  nameWithType: PublicationMenuItem.IconCssClass
+  fullName: PublisherStudio.BusinessObjects.PublicationMenuItem.IconCssClass
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets icon CSS class.
+  example: []
+  syntax:
+    content: public string IconCssClass { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property IconCssClass As String
+  overload: PublisherStudio.BusinessObjects.PublicationMenuItem.IconCssClass*
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.BusinessObjects.PublicationMenuItem.#ctor*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationMenuItem.#ctor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMenuItem.html#PublisherStudio_BusinessObjects_PublicationMenuItem__ctor
+  name: PublicationMenuItem
+  nameWithType: PublicationMenuItem.PublicationMenuItem
+  fullName: PublisherStudio.BusinessObjects.PublicationMenuItem.PublicationMenuItem
+  nameWithType.vb: PublicationMenuItem.New
+  fullName.vb: PublisherStudio.BusinessObjects.PublicationMenuItem.New
+  name.vb: New
+- uid: PublisherStudio.BusinessObjects.PublicationMenuItem.Id*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationMenuItem.Id
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMenuItem.html#PublisherStudio_BusinessObjects_PublicationMenuItem_Id
+  name: Id
+  nameWithType: PublicationMenuItem.Id
+  fullName: PublisherStudio.BusinessObjects.PublicationMenuItem.Id
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: PublisherStudio.BusinessObjects.PublicationMenuItem.ParentId*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationMenuItem.ParentId
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMenuItem.html#PublisherStudio_BusinessObjects_PublicationMenuItem_ParentId
+  name: ParentId
+  nameWithType: PublicationMenuItem.ParentId
+  fullName: PublisherStudio.BusinessObjects.PublicationMenuItem.ParentId
+- uid: System.Nullable{System.Guid}
+  commentId: T:System.Nullable{System.Guid}
+  parent: System
+  definition: System.Nullable`1
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid?
+  nameWithType: Guid?
+  fullName: System.Guid?
+  spec.csharp:
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: '?'
+  spec.vb:
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: '?'
+- uid: System.Nullable`1
+  commentId: T:System.Nullable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  name: Nullable<T>
+  nameWithType: Nullable<T>
+  fullName: System.Nullable<T>
+  nameWithType.vb: Nullable(Of T)
+  fullName.vb: System.Nullable(Of T)
+  name.vb: Nullable(Of T)
+  spec.csharp:
+  - uid: System.Nullable`1
+    name: Nullable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Nullable`1
+    name: Nullable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: PublisherStudio.BusinessObjects.PublicationMenuItem.Text*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationMenuItem.Text
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMenuItem.html#PublisherStudio_BusinessObjects_PublicationMenuItem_Text
+  name: Text
+  nameWithType: PublicationMenuItem.Text
+  fullName: PublisherStudio.BusinessObjects.PublicationMenuItem.Text
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.BusinessObjects.PublicationMenuItem.Destination*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationMenuItem.Destination
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMenuItem.html#PublisherStudio_BusinessObjects_PublicationMenuItem_Destination
+  name: Destination
+  nameWithType: PublicationMenuItem.Destination
+  fullName: PublisherStudio.BusinessObjects.PublicationMenuItem.Destination
+- uid: PublisherStudio.BusinessObjects.PublicationMenuDestinationKind
+  commentId: T:PublisherStudio.BusinessObjects.PublicationMenuDestinationKind
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMenuDestinationKind.html
+  name: PublicationMenuDestinationKind
+  nameWithType: PublicationMenuDestinationKind
+  fullName: PublisherStudio.BusinessObjects.PublicationMenuDestinationKind
+- uid: PublisherStudio.BusinessObjects.PublicationMenuItem.TargetPageId*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationMenuItem.TargetPageId
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMenuItem.html#PublisherStudio_BusinessObjects_PublicationMenuItem_TargetPageId
+  name: TargetPageId
+  nameWithType: PublicationMenuItem.TargetPageId
+  fullName: PublisherStudio.BusinessObjects.PublicationMenuItem.TargetPageId
+- uid: PublisherStudio.BusinessObjects.PublicationMenuItem.Url*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationMenuItem.Url
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMenuItem.html#PublisherStudio_BusinessObjects_PublicationMenuItem_Url
+  name: Url
+  nameWithType: PublicationMenuItem.Url
+  fullName: PublisherStudio.BusinessObjects.PublicationMenuItem.Url
+- uid: PublisherStudio.BusinessObjects.PublicationMenuItem.OpenInNewWindow*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationMenuItem.OpenInNewWindow
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMenuItem.html#PublisherStudio_BusinessObjects_PublicationMenuItem_OpenInNewWindow
+  name: OpenInNewWindow
+  nameWithType: PublicationMenuItem.OpenInNewWindow
+  fullName: PublisherStudio.BusinessObjects.PublicationMenuItem.OpenInNewWindow
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.BusinessObjects.PublicationMenuItem.Enabled*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationMenuItem.Enabled
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMenuItem.html#PublisherStudio_BusinessObjects_PublicationMenuItem_Enabled
+  name: Enabled
+  nameWithType: PublicationMenuItem.Enabled
+  fullName: PublisherStudio.BusinessObjects.PublicationMenuItem.Enabled
+- uid: PublisherStudio.BusinessObjects.PublicationMenuItem.Visible*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationMenuItem.Visible
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMenuItem.html#PublisherStudio_BusinessObjects_PublicationMenuItem_Visible
+  name: Visible
+  nameWithType: PublicationMenuItem.Visible
+  fullName: PublisherStudio.BusinessObjects.PublicationMenuItem.Visible
+- uid: PublisherStudio.BusinessObjects.PublicationMenuItem.IconCssClass*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationMenuItem.IconCssClass
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMenuItem.html#PublisherStudio_BusinessObjects_PublicationMenuItem_IconCssClass
+  name: IconCssClass
+  nameWithType: PublicationMenuItem.IconCssClass
+  fullName: PublisherStudio.BusinessObjects.PublicationMenuItem.IconCssClass

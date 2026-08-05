@@ -1,0 +1,153 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind
+  commentId: T:PublisherStudio.BusinessObjects.MediaTimelineTransitionKind
+  id: MediaTimelineTransitionKind
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.MediaTimelineTransitionKind.Cut
+  - PublisherStudio.BusinessObjects.MediaTimelineTransitionKind.Dissolve
+  - PublisherStudio.BusinessObjects.MediaTimelineTransitionKind.Fade
+  - PublisherStudio.BusinessObjects.MediaTimelineTransitionKind.Unknown
+  - PublisherStudio.BusinessObjects.MediaTimelineTransitionKind.Wipe
+  langs:
+  - csharp
+  - vb
+  name: MediaTimelineTransitionKind
+  nameWithType: MediaTimelineTransitionKind
+  fullName: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported media timeline transition kind values.
+  example: []
+  syntax:
+    content: public enum MediaTimelineTransitionKind
+    content.vb: Public Enum MediaTimelineTransitionKind
+- uid: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind.Cut
+  commentId: F:PublisherStudio.BusinessObjects.MediaTimelineTransitionKind.Cut
+  id: Cut
+  parent: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind
+  langs:
+  - csharp
+  - vb
+  name: Cut
+  nameWithType: MediaTimelineTransitionKind.Cut
+  fullName: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind.Cut
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Cut = 0
+    return:
+      type: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind
+- uid: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind.Dissolve
+  commentId: F:PublisherStudio.BusinessObjects.MediaTimelineTransitionKind.Dissolve
+  id: Dissolve
+  parent: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind
+  langs:
+  - csharp
+  - vb
+  name: Dissolve
+  nameWithType: MediaTimelineTransitionKind.Dissolve
+  fullName: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind.Dissolve
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Dissolve = 1
+    return:
+      type: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind
+- uid: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind.Wipe
+  commentId: F:PublisherStudio.BusinessObjects.MediaTimelineTransitionKind.Wipe
+  id: Wipe
+  parent: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind
+  langs:
+  - csharp
+  - vb
+  name: Wipe
+  nameWithType: MediaTimelineTransitionKind.Wipe
+  fullName: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind.Wipe
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Wipe = 2
+    return:
+      type: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind
+- uid: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind.Fade
+  commentId: F:PublisherStudio.BusinessObjects.MediaTimelineTransitionKind.Fade
+  id: Fade
+  parent: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind
+  langs:
+  - csharp
+  - vb
+  name: Fade
+  nameWithType: MediaTimelineTransitionKind.Fade
+  fullName: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind.Fade
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Fade = 3
+    return:
+      type: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind
+- uid: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind.Unknown
+  commentId: F:PublisherStudio.BusinessObjects.MediaTimelineTransitionKind.Unknown
+  id: Unknown
+  parent: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind
+  langs:
+  - csharp
+  - vb
+  name: Unknown
+  nameWithType: MediaTimelineTransitionKind.Unknown
+  fullName: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind.Unknown
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Unknown = 4
+    return:
+      type: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind
+  commentId: T:PublisherStudio.BusinessObjects.MediaTimelineTransitionKind
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind.html
+  name: MediaTimelineTransitionKind
+  nameWithType: MediaTimelineTransitionKind
+  fullName: PublisherStudio.BusinessObjects.MediaTimelineTransitionKind

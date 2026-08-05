@@ -1,0 +1,153 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod
+  commentId: T:PublisherStudio.BusinessObjects.PublicationComponentHttpMethod
+  id: PublicationComponentHttpMethod
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationComponentHttpMethod.Delete
+  - PublisherStudio.BusinessObjects.PublicationComponentHttpMethod.Get
+  - PublisherStudio.BusinessObjects.PublicationComponentHttpMethod.Patch
+  - PublisherStudio.BusinessObjects.PublicationComponentHttpMethod.Post
+  - PublisherStudio.BusinessObjects.PublicationComponentHttpMethod.Put
+  langs:
+  - csharp
+  - vb
+  name: PublicationComponentHttpMethod
+  nameWithType: PublicationComponentHttpMethod
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication component HTTP method values.
+  example: []
+  syntax:
+    content: public enum PublicationComponentHttpMethod
+    content.vb: Public Enum PublicationComponentHttpMethod
+- uid: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod.Get
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentHttpMethod.Get
+  id: Get
+  parent: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod
+  langs:
+  - csharp
+  - vb
+  name: Get
+  nameWithType: PublicationComponentHttpMethod.Get
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod.Get
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Get = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod
+- uid: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod.Post
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentHttpMethod.Post
+  id: Post
+  parent: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod
+  langs:
+  - csharp
+  - vb
+  name: Post
+  nameWithType: PublicationComponentHttpMethod.Post
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod.Post
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Post = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod
+- uid: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod.Put
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentHttpMethod.Put
+  id: Put
+  parent: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod
+  langs:
+  - csharp
+  - vb
+  name: Put
+  nameWithType: PublicationComponentHttpMethod.Put
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod.Put
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Put = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod
+- uid: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod.Patch
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentHttpMethod.Patch
+  id: Patch
+  parent: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod
+  langs:
+  - csharp
+  - vb
+  name: Patch
+  nameWithType: PublicationComponentHttpMethod.Patch
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod.Patch
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Patch = 3
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod
+- uid: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod.Delete
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentHttpMethod.Delete
+  id: Delete
+  parent: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod
+  langs:
+  - csharp
+  - vb
+  name: Delete
+  nameWithType: PublicationComponentHttpMethod.Delete
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod.Delete
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Delete = 4
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod
+  commentId: T:PublisherStudio.BusinessObjects.PublicationComponentHttpMethod
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod.html
+  name: PublicationComponentHttpMethod
+  nameWithType: PublicationComponentHttpMethod
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentHttpMethod

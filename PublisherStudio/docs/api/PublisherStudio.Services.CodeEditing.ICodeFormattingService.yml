@@ -1,0 +1,206 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.CodeEditing.ICodeFormattingService
+  commentId: T:PublisherStudio.Services.CodeEditing.ICodeFormattingService
+  id: ICodeFormattingService
+  parent: PublisherStudio.Services.CodeEditing
+  children:
+  - PublisherStudio.Services.CodeEditing.ICodeFormattingService.Analyze(PublisherStudio.BusinessObjects.CodeTextRequest)
+  - PublisherStudio.Services.CodeEditing.ICodeFormattingService.Format(PublisherStudio.BusinessObjects.CodeTextRequest)
+  - PublisherStudio.Services.CodeEditing.ICodeFormattingService.ToggleComment(PublisherStudio.BusinessObjects.CodeCommentRequest)
+  langs:
+  - csharp
+  - vb
+  name: ICodeFormattingService
+  nameWithType: ICodeFormattingService
+  fullName: PublisherStudio.Services.CodeEditing.ICodeFormattingService
+  type: Interface
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.CodeEditing
+  summary: Defines the code formatting service contract.
+  example: []
+  syntax:
+    content: public interface ICodeFormattingService
+    content.vb: Public Interface ICodeFormattingService
+  derivedClasses:
+  - PublisherStudio.Services.CodeEditing.CodeFormattingService
+- uid: PublisherStudio.Services.CodeEditing.ICodeFormattingService.Format(PublisherStudio.BusinessObjects.CodeTextRequest)
+  commentId: M:PublisherStudio.Services.CodeEditing.ICodeFormattingService.Format(PublisherStudio.BusinessObjects.CodeTextRequest)
+  id: Format(PublisherStudio.BusinessObjects.CodeTextRequest)
+  parent: PublisherStudio.Services.CodeEditing.ICodeFormattingService
+  langs:
+  - csharp
+  - vb
+  name: Format(CodeTextRequest)
+  nameWithType: ICodeFormattingService.Format(CodeTextRequest)
+  fullName: PublisherStudio.Services.CodeEditing.ICodeFormattingService.Format(PublisherStudio.BusinessObjects.CodeTextRequest)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.CodeEditing
+  syntax:
+    content: CodeTextResult Format(CodeTextRequest request)
+    parameters:
+    - id: request
+      type: PublisherStudio.BusinessObjects.CodeTextRequest
+    return:
+      type: PublisherStudio.BusinessObjects.CodeTextResult
+    content.vb: Function Format(request As CodeTextRequest) As CodeTextResult
+  overload: PublisherStudio.Services.CodeEditing.ICodeFormattingService.Format*
+- uid: PublisherStudio.Services.CodeEditing.ICodeFormattingService.ToggleComment(PublisherStudio.BusinessObjects.CodeCommentRequest)
+  commentId: M:PublisherStudio.Services.CodeEditing.ICodeFormattingService.ToggleComment(PublisherStudio.BusinessObjects.CodeCommentRequest)
+  id: ToggleComment(PublisherStudio.BusinessObjects.CodeCommentRequest)
+  parent: PublisherStudio.Services.CodeEditing.ICodeFormattingService
+  langs:
+  - csharp
+  - vb
+  name: ToggleComment(CodeCommentRequest)
+  nameWithType: ICodeFormattingService.ToggleComment(CodeCommentRequest)
+  fullName: PublisherStudio.Services.CodeEditing.ICodeFormattingService.ToggleComment(PublisherStudio.BusinessObjects.CodeCommentRequest)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.CodeEditing
+  syntax:
+    content: CodeTextResult ToggleComment(CodeCommentRequest request)
+    parameters:
+    - id: request
+      type: PublisherStudio.BusinessObjects.CodeCommentRequest
+    return:
+      type: PublisherStudio.BusinessObjects.CodeTextResult
+    content.vb: Function ToggleComment(request As CodeCommentRequest) As CodeTextResult
+  overload: PublisherStudio.Services.CodeEditing.ICodeFormattingService.ToggleComment*
+- uid: PublisherStudio.Services.CodeEditing.ICodeFormattingService.Analyze(PublisherStudio.BusinessObjects.CodeTextRequest)
+  commentId: M:PublisherStudio.Services.CodeEditing.ICodeFormattingService.Analyze(PublisherStudio.BusinessObjects.CodeTextRequest)
+  id: Analyze(PublisherStudio.BusinessObjects.CodeTextRequest)
+  parent: PublisherStudio.Services.CodeEditing.ICodeFormattingService
+  langs:
+  - csharp
+  - vb
+  name: Analyze(CodeTextRequest)
+  nameWithType: ICodeFormattingService.Analyze(CodeTextRequest)
+  fullName: PublisherStudio.Services.CodeEditing.ICodeFormattingService.Analyze(PublisherStudio.BusinessObjects.CodeTextRequest)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.CodeEditing
+  syntax:
+    content: CodeTextResult Analyze(CodeTextRequest request)
+    parameters:
+    - id: request
+      type: PublisherStudio.BusinessObjects.CodeTextRequest
+    return:
+      type: PublisherStudio.BusinessObjects.CodeTextResult
+    content.vb: Function Analyze(request As CodeTextRequest) As CodeTextResult
+  overload: PublisherStudio.Services.CodeEditing.ICodeFormattingService.Analyze*
+references:
+- uid: PublisherStudio.Services.CodeEditing
+  commentId: N:PublisherStudio.Services.CodeEditing
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.CodeEditing
+  nameWithType: PublisherStudio.Services.CodeEditing
+  fullName: PublisherStudio.Services.CodeEditing
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.CodeEditing
+    name: CodeEditing
+    isExternal: true
+    href: PublisherStudio.Services.CodeEditing.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.CodeEditing
+    name: CodeEditing
+    isExternal: true
+    href: PublisherStudio.Services.CodeEditing.html
+- uid: PublisherStudio.Services.CodeEditing.ICodeFormattingService.Format*
+  commentId: Overload:PublisherStudio.Services.CodeEditing.ICodeFormattingService.Format
+  isExternal: true
+  href: PublisherStudio.Services.CodeEditing.ICodeFormattingService.html#PublisherStudio_Services_CodeEditing_ICodeFormattingService_Format_PublisherStudio_BusinessObjects_CodeTextRequest_
+  name: Format
+  nameWithType: ICodeFormattingService.Format
+  fullName: PublisherStudio.Services.CodeEditing.ICodeFormattingService.Format
+- uid: PublisherStudio.BusinessObjects.CodeTextRequest
+  commentId: T:PublisherStudio.BusinessObjects.CodeTextRequest
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.CodeTextRequest.html
+  name: CodeTextRequest
+  nameWithType: CodeTextRequest
+  fullName: PublisherStudio.BusinessObjects.CodeTextRequest
+- uid: PublisherStudio.BusinessObjects.CodeTextResult
+  commentId: T:PublisherStudio.BusinessObjects.CodeTextResult
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.CodeTextResult.html
+  name: CodeTextResult
+  nameWithType: CodeTextResult
+  fullName: PublisherStudio.BusinessObjects.CodeTextResult
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.Services.CodeEditing.ICodeFormattingService.ToggleComment*
+  commentId: Overload:PublisherStudio.Services.CodeEditing.ICodeFormattingService.ToggleComment
+  isExternal: true
+  href: PublisherStudio.Services.CodeEditing.ICodeFormattingService.html#PublisherStudio_Services_CodeEditing_ICodeFormattingService_ToggleComment_PublisherStudio_BusinessObjects_CodeCommentRequest_
+  name: ToggleComment
+  nameWithType: ICodeFormattingService.ToggleComment
+  fullName: PublisherStudio.Services.CodeEditing.ICodeFormattingService.ToggleComment
+- uid: PublisherStudio.BusinessObjects.CodeCommentRequest
+  commentId: T:PublisherStudio.BusinessObjects.CodeCommentRequest
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.CodeCommentRequest.html
+  name: CodeCommentRequest
+  nameWithType: CodeCommentRequest
+  fullName: PublisherStudio.BusinessObjects.CodeCommentRequest
+- uid: PublisherStudio.Services.CodeEditing.ICodeFormattingService.Analyze*
+  commentId: Overload:PublisherStudio.Services.CodeEditing.ICodeFormattingService.Analyze
+  isExternal: true
+  href: PublisherStudio.Services.CodeEditing.ICodeFormattingService.html#PublisherStudio_Services_CodeEditing_ICodeFormattingService_Analyze_PublisherStudio_BusinessObjects_CodeTextRequest_
+  name: Analyze
+  nameWithType: ICodeFormattingService.Analyze
+  fullName: PublisherStudio.Services.CodeEditing.ICodeFormattingService.Analyze

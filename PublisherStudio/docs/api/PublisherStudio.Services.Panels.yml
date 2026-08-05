@@ -1,0 +1,63 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Panels
+  commentId: N:PublisherStudio.Services.Panels
+  id: Panels
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.Panels.PanelDocumentService
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.Services.Panels
+  nameWithType: PublisherStudio.Services.Panels
+  fullName: PublisherStudio.Services.Panels
+  type: Namespace
+  assemblies:
+  - PublisherStudio.Web
+references:
+- uid: PublisherStudio.Services.Panels.PanelDocumentService
+  commentId: T:PublisherStudio.Services.Panels.PanelDocumentService
+  parent: PublisherStudio.Services.Panels
+  isExternal: true
+  href: PublisherStudio.Services.Panels.PanelDocumentService.html
+  name: PanelDocumentService
+  nameWithType: PanelDocumentService
+  fullName: PublisherStudio.Services.Panels.PanelDocumentService
+- uid: PublisherStudio.Services.Panels
+  commentId: N:PublisherStudio.Services.Panels
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Panels
+  nameWithType: PublisherStudio.Services.Panels
+  fullName: PublisherStudio.Services.Panels
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Panels
+    name: Panels
+    isExternal: true
+    href: PublisherStudio.Services.Panels.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Panels
+    name: Panels
+    isExternal: true
+    href: PublisherStudio.Services.Panels.html

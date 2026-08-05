@@ -1,0 +1,811 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.PublicationMediaAssetStore
+  commentId: T:PublisherStudio.Services.PublicationMediaAssetStore
+  id: PublicationMediaAssetStore
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.PublicationMediaAssetStore.#ctor(PublisherStudio.Services.PublicationMediaData,PublisherStudio.Services.PublicationElementTraversal,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationMediaAssetStore})
+  - PublisherStudio.Services.PublicationMediaAssetStore.Copy(System.Guid,System.Guid)
+  - PublisherStudio.Services.PublicationMediaAssetStore.GetOrRegister(PublisherStudio.BusinessObjects.PublicationMediaElement)
+  - PublisherStudio.Services.PublicationMediaAssetStore.GetOrRegister(PublisherStudio.BusinessObjects.PublicationMediaSegment)
+  - PublisherStudio.Services.PublicationMediaAssetStore.Register(System.Guid,System.String,System.String)
+  - PublisherStudio.Services.PublicationMediaAssetStore.RegisterBytes(System.Guid,System.Byte[],System.String)
+  - PublisherStudio.Services.PublicationMediaAssetStore.RegisterDocument(PublisherStudio.BusinessObjects.PublicationDocument)
+  - PublisherStudio.Services.PublicationMediaAssetStore.Remove(System.Guid)
+  - PublisherStudio.Services.PublicationMediaAssetStore.TryGet(System.Guid,System.Byte[]@,System.String@,System.String@)
+  langs:
+  - csharp
+  - vb
+  name: PublicationMediaAssetStore
+  nameWithType: PublicationMediaAssetStore
+  fullName: PublisherStudio.Services.PublicationMediaAssetStore
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Keeps embedded publication media on the server and exposes it through a small ranged HTTP URL. This prevents multi-megabyte data URLs from being copied into every Blazor render batch. The original data URL remains in the document model so saved projects stay self-contained.
+  example: []
+  syntax:
+    content: public sealed class PublicationMediaAssetStore
+    content.vb: Public NotInheritable Class PublicationMediaAssetStore
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.PublicationMediaAssetStore.#ctor(PublisherStudio.Services.PublicationMediaData,PublisherStudio.Services.PublicationElementTraversal,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationMediaAssetStore})
+  commentId: M:PublisherStudio.Services.PublicationMediaAssetStore.#ctor(PublisherStudio.Services.PublicationMediaData,PublisherStudio.Services.PublicationElementTraversal,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationMediaAssetStore})
+  id: '#ctor(PublisherStudio.Services.PublicationMediaData,PublisherStudio.Services.PublicationElementTraversal,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationMediaAssetStore})'
+  parent: PublisherStudio.Services.PublicationMediaAssetStore
+  langs:
+  - csharp
+  - vb
+  name: PublicationMediaAssetStore(PublicationMediaData, PublicationElementTraversal, ILogger<PublicationMediaAssetStore>)
+  nameWithType: PublicationMediaAssetStore.PublicationMediaAssetStore(PublicationMediaData, PublicationElementTraversal, ILogger<PublicationMediaAssetStore>)
+  fullName: PublisherStudio.Services.PublicationMediaAssetStore.PublicationMediaAssetStore(PublisherStudio.Services.PublicationMediaData, PublisherStudio.Services.PublicationElementTraversal, Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.PublicationMediaAssetStore>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Keeps embedded publication media on the server and exposes it through a small ranged HTTP URL. This prevents multi-megabyte data URLs from being copied into every Blazor render batch. The original data URL remains in the document model so saved projects stay self-contained.
+  example: []
+  syntax:
+    content: public PublicationMediaAssetStore(PublicationMediaData mediaData, PublicationElementTraversal elementTraversal, ILogger<PublicationMediaAssetStore> logger)
+    parameters:
+    - id: mediaData
+      type: PublisherStudio.Services.PublicationMediaData
+    - id: elementTraversal
+      type: PublisherStudio.Services.PublicationElementTraversal
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationMediaAssetStore}
+    content.vb: Public Sub New(mediaData As PublicationMediaData, elementTraversal As PublicationElementTraversal, logger As ILogger(Of PublicationMediaAssetStore))
+  overload: PublisherStudio.Services.PublicationMediaAssetStore.#ctor*
+  nameWithType.vb: PublicationMediaAssetStore.New(PublicationMediaData, PublicationElementTraversal, ILogger(Of PublicationMediaAssetStore))
+  fullName.vb: PublisherStudio.Services.PublicationMediaAssetStore.New(PublisherStudio.Services.PublicationMediaData, PublisherStudio.Services.PublicationElementTraversal, Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.PublicationMediaAssetStore))
+  name.vb: New(PublicationMediaData, PublicationElementTraversal, ILogger(Of PublicationMediaAssetStore))
+- uid: PublisherStudio.Services.PublicationMediaAssetStore.GetOrRegister(PublisherStudio.BusinessObjects.PublicationMediaElement)
+  commentId: M:PublisherStudio.Services.PublicationMediaAssetStore.GetOrRegister(PublisherStudio.BusinessObjects.PublicationMediaElement)
+  id: GetOrRegister(PublisherStudio.BusinessObjects.PublicationMediaElement)
+  parent: PublisherStudio.Services.PublicationMediaAssetStore
+  langs:
+  - csharp
+  - vb
+  name: GetOrRegister(PublicationMediaElement)
+  nameWithType: PublicationMediaAssetStore.GetOrRegister(PublicationMediaElement)
+  fullName: PublisherStudio.Services.PublicationMediaAssetStore.GetOrRegister(PublisherStudio.BusinessObjects.PublicationMediaElement)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Gets or register.
+  example: []
+  syntax:
+    content: public string GetOrRegister(PublicationMediaElement media)
+    parameters:
+    - id: media
+      type: PublisherStudio.BusinessObjects.PublicationMediaElement
+    return:
+      type: System.String
+    content.vb: Public Function GetOrRegister(media As PublicationMediaElement) As String
+  overload: PublisherStudio.Services.PublicationMediaAssetStore.GetOrRegister*
+- uid: PublisherStudio.Services.PublicationMediaAssetStore.GetOrRegister(PublisherStudio.BusinessObjects.PublicationMediaSegment)
+  commentId: M:PublisherStudio.Services.PublicationMediaAssetStore.GetOrRegister(PublisherStudio.BusinessObjects.PublicationMediaSegment)
+  id: GetOrRegister(PublisherStudio.BusinessObjects.PublicationMediaSegment)
+  parent: PublisherStudio.Services.PublicationMediaAssetStore
+  langs:
+  - csharp
+  - vb
+  name: GetOrRegister(PublicationMediaSegment)
+  nameWithType: PublicationMediaAssetStore.GetOrRegister(PublicationMediaSegment)
+  fullName: PublisherStudio.Services.PublicationMediaAssetStore.GetOrRegister(PublisherStudio.BusinessObjects.PublicationMediaSegment)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Gets or register.
+  example: []
+  syntax:
+    content: public string GetOrRegister(PublicationMediaSegment segment)
+    parameters:
+    - id: segment
+      type: PublisherStudio.BusinessObjects.PublicationMediaSegment
+    return:
+      type: System.String
+    content.vb: Public Function GetOrRegister(segment As PublicationMediaSegment) As String
+  overload: PublisherStudio.Services.PublicationMediaAssetStore.GetOrRegister*
+- uid: PublisherStudio.Services.PublicationMediaAssetStore.Register(System.Guid,System.String,System.String)
+  commentId: M:PublisherStudio.Services.PublicationMediaAssetStore.Register(System.Guid,System.String,System.String)
+  id: Register(System.Guid,System.String,System.String)
+  parent: PublisherStudio.Services.PublicationMediaAssetStore
+  langs:
+  - csharp
+  - vb
+  name: Register(Guid, string?, string?)
+  nameWithType: PublicationMediaAssetStore.Register(Guid, string?, string?)
+  fullName: PublisherStudio.Services.PublicationMediaAssetStore.Register(System.Guid, string?, string?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the register operation.
+  example: []
+  syntax:
+    content: public string Register(Guid id, string? source, string? declaredMimeType)
+    parameters:
+    - id: id
+      type: System.Guid
+    - id: source
+      type: System.String
+    - id: declaredMimeType
+      type: System.String
+    return:
+      type: System.String
+    content.vb: Public Function Register(id As Guid, source As String, declaredMimeType As String) As String
+  overload: PublisherStudio.Services.PublicationMediaAssetStore.Register*
+  nameWithType.vb: PublicationMediaAssetStore.Register(Guid, String, String)
+  fullName.vb: PublisherStudio.Services.PublicationMediaAssetStore.Register(System.Guid, String, String)
+  name.vb: Register(Guid, String, String)
+- uid: PublisherStudio.Services.PublicationMediaAssetStore.RegisterBytes(System.Guid,System.Byte[],System.String)
+  commentId: M:PublisherStudio.Services.PublicationMediaAssetStore.RegisterBytes(System.Guid,System.Byte[],System.String)
+  id: RegisterBytes(System.Guid,System.Byte[],System.String)
+  parent: PublisherStudio.Services.PublicationMediaAssetStore
+  langs:
+  - csharp
+  - vb
+  name: RegisterBytes(Guid, byte[], string?)
+  nameWithType: PublicationMediaAssetStore.RegisterBytes(Guid, byte[], string?)
+  fullName: PublisherStudio.Services.PublicationMediaAssetStore.RegisterBytes(System.Guid, byte[], string?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Registers bytes.
+  example: []
+  syntax:
+    content: public string RegisterBytes(Guid id, byte[] bytes, string? mimeType)
+    parameters:
+    - id: id
+      type: System.Guid
+    - id: bytes
+      type: System.Byte[]
+    - id: mimeType
+      type: System.String
+    return:
+      type: System.String
+    content.vb: Public Function RegisterBytes(id As Guid, bytes As Byte(), mimeType As String) As String
+  overload: PublisherStudio.Services.PublicationMediaAssetStore.RegisterBytes*
+  nameWithType.vb: PublicationMediaAssetStore.RegisterBytes(Guid, Byte(), String)
+  fullName.vb: PublisherStudio.Services.PublicationMediaAssetStore.RegisterBytes(System.Guid, Byte(), String)
+  name.vb: RegisterBytes(Guid, Byte(), String)
+- uid: PublisherStudio.Services.PublicationMediaAssetStore.TryGet(System.Guid,System.Byte[]@,System.String@,System.String@)
+  commentId: M:PublisherStudio.Services.PublicationMediaAssetStore.TryGet(System.Guid,System.Byte[]@,System.String@,System.String@)
+  id: TryGet(System.Guid,System.Byte[]@,System.String@,System.String@)
+  parent: PublisherStudio.Services.PublicationMediaAssetStore
+  langs:
+  - csharp
+  - vb
+  name: TryGet(Guid, out byte[], out string, out string)
+  nameWithType: PublicationMediaAssetStore.TryGet(Guid, out byte[], out string, out string)
+  fullName: PublisherStudio.Services.PublicationMediaAssetStore.TryGet(System.Guid, out byte[], out string, out string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Attempts to get.
+  example: []
+  syntax:
+    content: public bool TryGet(Guid id, out byte[] bytes, out string mimeType, out string version)
+    parameters:
+    - id: id
+      type: System.Guid
+    - id: bytes
+      type: System.Byte[]
+    - id: mimeType
+      type: System.String
+    - id: version
+      type: System.String
+    return:
+      type: System.Boolean
+    content.vb: Public Function TryGet(id As Guid, bytes As Byte(), mimeType As String, version As String) As Boolean
+  overload: PublisherStudio.Services.PublicationMediaAssetStore.TryGet*
+  nameWithType.vb: PublicationMediaAssetStore.TryGet(Guid, Byte(), String, String)
+  fullName.vb: PublisherStudio.Services.PublicationMediaAssetStore.TryGet(System.Guid, Byte(), String, String)
+  name.vb: TryGet(Guid, Byte(), String, String)
+- uid: PublisherStudio.Services.PublicationMediaAssetStore.Copy(System.Guid,System.Guid)
+  commentId: M:PublisherStudio.Services.PublicationMediaAssetStore.Copy(System.Guid,System.Guid)
+  id: Copy(System.Guid,System.Guid)
+  parent: PublisherStudio.Services.PublicationMediaAssetStore
+  langs:
+  - csharp
+  - vb
+  name: Copy(Guid, Guid)
+  nameWithType: PublicationMediaAssetStore.Copy(Guid, Guid)
+  fullName: PublisherStudio.Services.PublicationMediaAssetStore.Copy(System.Guid, System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the copy operation.
+  example: []
+  syntax:
+    content: public bool Copy(Guid sourceId, Guid targetId)
+    parameters:
+    - id: sourceId
+      type: System.Guid
+    - id: targetId
+      type: System.Guid
+    return:
+      type: System.Boolean
+    content.vb: Public Function Copy(sourceId As Guid, targetId As Guid) As Boolean
+  overload: PublisherStudio.Services.PublicationMediaAssetStore.Copy*
+- uid: PublisherStudio.Services.PublicationMediaAssetStore.RegisterDocument(PublisherStudio.BusinessObjects.PublicationDocument)
+  commentId: M:PublisherStudio.Services.PublicationMediaAssetStore.RegisterDocument(PublisherStudio.BusinessObjects.PublicationDocument)
+  id: RegisterDocument(PublisherStudio.BusinessObjects.PublicationDocument)
+  parent: PublisherStudio.Services.PublicationMediaAssetStore
+  langs:
+  - csharp
+  - vb
+  name: RegisterDocument(PublicationDocument)
+  nameWithType: PublicationMediaAssetStore.RegisterDocument(PublicationDocument)
+  fullName: PublisherStudio.Services.PublicationMediaAssetStore.RegisterDocument(PublisherStudio.BusinessObjects.PublicationDocument)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Registers document.
+  example: []
+  syntax:
+    content: public void RegisterDocument(PublicationDocument document)
+    parameters:
+    - id: document
+      type: PublisherStudio.BusinessObjects.PublicationDocument
+    content.vb: Public Sub RegisterDocument(document As PublicationDocument)
+  overload: PublisherStudio.Services.PublicationMediaAssetStore.RegisterDocument*
+- uid: PublisherStudio.Services.PublicationMediaAssetStore.Remove(System.Guid)
+  commentId: M:PublisherStudio.Services.PublicationMediaAssetStore.Remove(System.Guid)
+  id: Remove(System.Guid)
+  parent: PublisherStudio.Services.PublicationMediaAssetStore
+  langs:
+  - csharp
+  - vb
+  name: Remove(Guid)
+  nameWithType: PublicationMediaAssetStore.Remove(Guid)
+  fullName: PublisherStudio.Services.PublicationMediaAssetStore.Remove(System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the remove operation.
+  example: []
+  syntax:
+    content: public void Remove(Guid id)
+    parameters:
+    - id: id
+      type: System.Guid
+    content.vb: Public Sub Remove(id As Guid)
+  overload: PublisherStudio.Services.PublicationMediaAssetStore.Remove*
+references:
+- uid: PublisherStudio.Services
+  commentId: N:PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services
+  nameWithType: PublisherStudio.Services
+  fullName: PublisherStudio.Services
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.PublicationMediaAssetStore.#ctor*
+  commentId: Overload:PublisherStudio.Services.PublicationMediaAssetStore.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.PublicationMediaAssetStore.html#PublisherStudio_Services_PublicationMediaAssetStore__ctor_PublisherStudio_Services_PublicationMediaData_PublisherStudio_Services_PublicationElementTraversal_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_PublicationMediaAssetStore__
+  name: PublicationMediaAssetStore
+  nameWithType: PublicationMediaAssetStore.PublicationMediaAssetStore
+  fullName: PublisherStudio.Services.PublicationMediaAssetStore.PublicationMediaAssetStore
+  nameWithType.vb: PublicationMediaAssetStore.New
+  fullName.vb: PublisherStudio.Services.PublicationMediaAssetStore.New
+  name.vb: New
+- uid: PublisherStudio.Services.PublicationMediaData
+  commentId: T:PublisherStudio.Services.PublicationMediaData
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.PublicationMediaData.html
+  name: PublicationMediaData
+  nameWithType: PublicationMediaData
+  fullName: PublisherStudio.Services.PublicationMediaData
+- uid: PublisherStudio.Services.PublicationElementTraversal
+  commentId: T:PublisherStudio.Services.PublicationElementTraversal
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.PublicationElementTraversal.html
+  name: PublicationElementTraversal
+  nameWithType: PublicationElementTraversal
+  fullName: PublisherStudio.Services.PublicationElementTraversal
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationMediaAssetStore}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationMediaAssetStore}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<PublicationMediaAssetStore>
+  nameWithType: ILogger<PublicationMediaAssetStore>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.PublicationMediaAssetStore>
+  nameWithType.vb: ILogger(Of PublicationMediaAssetStore)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.PublicationMediaAssetStore)
+  name.vb: ILogger(Of PublicationMediaAssetStore)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.PublicationMediaAssetStore
+    name: PublicationMediaAssetStore
+    isExternal: true
+    href: PublisherStudio.Services.PublicationMediaAssetStore.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.PublicationMediaAssetStore
+    name: PublicationMediaAssetStore
+    isExternal: true
+    href: PublisherStudio.Services.PublicationMediaAssetStore.html
+  - name: )
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: PublisherStudio.Services.PublicationMediaAssetStore.GetOrRegister*
+  commentId: Overload:PublisherStudio.Services.PublicationMediaAssetStore.GetOrRegister
+  isExternal: true
+  href: PublisherStudio.Services.PublicationMediaAssetStore.html#PublisherStudio_Services_PublicationMediaAssetStore_GetOrRegister_PublisherStudio_BusinessObjects_PublicationMediaElement_
+  name: GetOrRegister
+  nameWithType: PublicationMediaAssetStore.GetOrRegister
+  fullName: PublisherStudio.Services.PublicationMediaAssetStore.GetOrRegister
+- uid: PublisherStudio.BusinessObjects.PublicationMediaElement
+  commentId: T:PublisherStudio.BusinessObjects.PublicationMediaElement
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMediaElement.html
+  name: PublicationMediaElement
+  nameWithType: PublicationMediaElement
+  fullName: PublisherStudio.BusinessObjects.PublicationMediaElement
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationMediaSegment
+  commentId: T:PublisherStudio.BusinessObjects.PublicationMediaSegment
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMediaSegment.html
+  name: PublicationMediaSegment
+  nameWithType: PublicationMediaSegment
+  fullName: PublisherStudio.BusinessObjects.PublicationMediaSegment
+- uid: PublisherStudio.Services.PublicationMediaAssetStore.Register*
+  commentId: Overload:PublisherStudio.Services.PublicationMediaAssetStore.Register
+  isExternal: true
+  href: PublisherStudio.Services.PublicationMediaAssetStore.html#PublisherStudio_Services_PublicationMediaAssetStore_Register_System_Guid_System_String_System_String_
+  name: Register
+  nameWithType: PublicationMediaAssetStore.Register
+  fullName: PublisherStudio.Services.PublicationMediaAssetStore.Register
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: PublisherStudio.Services.PublicationMediaAssetStore.RegisterBytes*
+  commentId: Overload:PublisherStudio.Services.PublicationMediaAssetStore.RegisterBytes
+  isExternal: true
+  href: PublisherStudio.Services.PublicationMediaAssetStore.html#PublisherStudio_Services_PublicationMediaAssetStore_RegisterBytes_System_Guid_System_Byte___System_String_
+  name: RegisterBytes
+  nameWithType: PublicationMediaAssetStore.RegisterBytes
+  fullName: PublisherStudio.Services.PublicationMediaAssetStore.RegisterBytes
+- uid: System.Byte[]
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.byte
+  name: byte[]
+  nameWithType: byte[]
+  fullName: byte[]
+  nameWithType.vb: Byte()
+  fullName.vb: Byte()
+  name.vb: Byte()
+  spec.csharp:
+  - uid: System.Byte
+    name: byte
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.byte
+  - name: '['
+  - name: ']'
+  spec.vb:
+  - uid: System.Byte
+    name: Byte
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.byte
+  - name: (
+  - name: )
+- uid: PublisherStudio.Services.PublicationMediaAssetStore.TryGet*
+  commentId: Overload:PublisherStudio.Services.PublicationMediaAssetStore.TryGet
+  isExternal: true
+  href: PublisherStudio.Services.PublicationMediaAssetStore.html#PublisherStudio_Services_PublicationMediaAssetStore_TryGet_System_Guid_System_Byte____System_String__System_String__
+  name: TryGet
+  nameWithType: PublicationMediaAssetStore.TryGet
+  fullName: PublisherStudio.Services.PublicationMediaAssetStore.TryGet
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.Services.PublicationMediaAssetStore.Copy*
+  commentId: Overload:PublisherStudio.Services.PublicationMediaAssetStore.Copy
+  isExternal: true
+  href: PublisherStudio.Services.PublicationMediaAssetStore.html#PublisherStudio_Services_PublicationMediaAssetStore_Copy_System_Guid_System_Guid_
+  name: Copy
+  nameWithType: PublicationMediaAssetStore.Copy
+  fullName: PublisherStudio.Services.PublicationMediaAssetStore.Copy
+- uid: PublisherStudio.Services.PublicationMediaAssetStore.RegisterDocument*
+  commentId: Overload:PublisherStudio.Services.PublicationMediaAssetStore.RegisterDocument
+  isExternal: true
+  href: PublisherStudio.Services.PublicationMediaAssetStore.html#PublisherStudio_Services_PublicationMediaAssetStore_RegisterDocument_PublisherStudio_BusinessObjects_PublicationDocument_
+  name: RegisterDocument
+  nameWithType: PublicationMediaAssetStore.RegisterDocument
+  fullName: PublisherStudio.Services.PublicationMediaAssetStore.RegisterDocument
+- uid: PublisherStudio.BusinessObjects.PublicationDocument
+  commentId: T:PublisherStudio.BusinessObjects.PublicationDocument
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationDocument.html
+  name: PublicationDocument
+  nameWithType: PublicationDocument
+  fullName: PublisherStudio.BusinessObjects.PublicationDocument
+- uid: PublisherStudio.Services.PublicationMediaAssetStore.Remove*
+  commentId: Overload:PublisherStudio.Services.PublicationMediaAssetStore.Remove
+  isExternal: true
+  href: PublisherStudio.Services.PublicationMediaAssetStore.html#PublisherStudio_Services_PublicationMediaAssetStore_Remove_System_Guid_
+  name: Remove
+  nameWithType: PublicationMediaAssetStore.Remove
+  fullName: PublisherStudio.Services.PublicationMediaAssetStore.Remove

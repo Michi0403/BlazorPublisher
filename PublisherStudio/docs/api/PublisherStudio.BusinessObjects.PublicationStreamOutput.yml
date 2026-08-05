@@ -1,0 +1,873 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput
+  commentId: T:PublisherStudio.BusinessObjects.PublicationStreamOutput
+  id: PublicationStreamOutput
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationStreamOutput.#ctor
+  - PublisherStudio.BusinessObjects.PublicationStreamOutput.AudioBitrateKbps
+  - PublisherStudio.BusinessObjects.PublicationStreamOutput.AudioCodec
+  - PublisherStudio.BusinessObjects.PublicationStreamOutput.ChatChannel
+  - PublisherStudio.BusinessObjects.PublicationStreamOutput.Enabled
+  - PublisherStudio.BusinessObjects.PublicationStreamOutput.FrameRate
+  - PublisherStudio.BusinessObjects.PublicationStreamOutput.Height
+  - PublisherStudio.BusinessObjects.PublicationStreamOutput.Id
+  - PublisherStudio.BusinessObjects.PublicationStreamOutput.KeyFrameIntervalSeconds
+  - PublisherStudio.BusinessObjects.PublicationStreamOutput.Name
+  - PublisherStudio.BusinessObjects.PublicationStreamOutput.ProfileId
+  - PublisherStudio.BusinessObjects.PublicationStreamOutput.Provider
+  - PublisherStudio.BusinessObjects.PublicationStreamOutput.QualityPreset
+  - PublisherStudio.BusinessObjects.PublicationStreamOutput.UseProviderTestMode
+  - PublisherStudio.BusinessObjects.PublicationStreamOutput.VideoBitrateKbps
+  - PublisherStudio.BusinessObjects.PublicationStreamOutput.VideoCodec
+  - PublisherStudio.BusinessObjects.PublicationStreamOutput.Width
+  langs:
+  - csharp
+  - vb
+  name: PublicationStreamOutput
+  nameWithType: PublicationStreamOutput
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents a publication stream output.
+  example: []
+  syntax:
+    content: public sealed class PublicationStreamOutput
+    content.vb: Public NotInheritable Class PublicationStreamOutput
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.#ctor
+  commentId: M:PublisherStudio.BusinessObjects.PublicationStreamOutput.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.BusinessObjects.PublicationStreamOutput
+  langs:
+  - csharp
+  - vb
+  name: PublicationStreamOutput()
+  nameWithType: PublicationStreamOutput.PublicationStreamOutput()
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.PublicationStreamOutput()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public PublicationStreamOutput()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.BusinessObjects.PublicationStreamOutput.#ctor*
+  nameWithType.vb: PublicationStreamOutput.New()
+  fullName.vb: PublisherStudio.BusinessObjects.PublicationStreamOutput.New()
+  name.vb: New()
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.Id
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamOutput.Id
+  id: Id
+  parent: PublisherStudio.BusinessObjects.PublicationStreamOutput
+  langs:
+  - csharp
+  - vb
+  name: Id
+  nameWithType: PublicationStreamOutput.Id
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.Id
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets the stable identifier.
+  example: []
+  syntax:
+    content: public Guid Id { get; set; }
+    parameters: []
+    return:
+      type: System.Guid
+    content.vb: Public Property Id As Guid
+  overload: PublisherStudio.BusinessObjects.PublicationStreamOutput.Id*
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.ProfileId
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamOutput.ProfileId
+  id: ProfileId
+  parent: PublisherStudio.BusinessObjects.PublicationStreamOutput
+  langs:
+  - csharp
+  - vb
+  name: ProfileId
+  nameWithType: PublicationStreamOutput.ProfileId
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.ProfileId
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets profile identifier.
+  example: []
+  syntax:
+    content: public Guid ProfileId { get; set; }
+    parameters: []
+    return:
+      type: System.Guid
+    content.vb: Public Property ProfileId As Guid
+  overload: PublisherStudio.BusinessObjects.PublicationStreamOutput.ProfileId*
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.Name
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamOutput.Name
+  id: Name
+  parent: PublisherStudio.BusinessObjects.PublicationStreamOutput
+  langs:
+  - csharp
+  - vb
+  name: Name
+  nameWithType: PublicationStreamOutput.Name
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.Name
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets the display name.
+  example: []
+  syntax:
+    content: public string Name { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Name As String
+  overload: PublisherStudio.BusinessObjects.PublicationStreamOutput.Name*
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.Provider
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamOutput.Provider
+  id: Provider
+  parent: PublisherStudio.BusinessObjects.PublicationStreamOutput
+  langs:
+  - csharp
+  - vb
+  name: Provider
+  nameWithType: PublicationStreamOutput.Provider
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.Provider
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets provider.
+  example: []
+  syntax:
+    content: public PublicationStreamProvider Provider { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationStreamProvider
+    content.vb: Public Property Provider As PublicationStreamProvider
+  overload: PublisherStudio.BusinessObjects.PublicationStreamOutput.Provider*
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.Enabled
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamOutput.Enabled
+  id: Enabled
+  parent: PublisherStudio.BusinessObjects.PublicationStreamOutput
+  langs:
+  - csharp
+  - vb
+  name: Enabled
+  nameWithType: PublicationStreamOutput.Enabled
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.Enabled
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets whether the feature is enabled.
+  example: []
+  syntax:
+    content: public bool Enabled { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property Enabled As Boolean
+  overload: PublisherStudio.BusinessObjects.PublicationStreamOutput.Enabled*
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.UseProviderTestMode
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamOutput.UseProviderTestMode
+  id: UseProviderTestMode
+  parent: PublisherStudio.BusinessObjects.PublicationStreamOutput
+  langs:
+  - csharp
+  - vb
+  name: UseProviderTestMode
+  nameWithType: PublicationStreamOutput.UseProviderTestMode
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.UseProviderTestMode
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets use provider test mode.
+  example: []
+  syntax:
+    content: public bool UseProviderTestMode { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property UseProviderTestMode As Boolean
+  overload: PublisherStudio.BusinessObjects.PublicationStreamOutput.UseProviderTestMode*
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.QualityPreset
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamOutput.QualityPreset
+  id: QualityPreset
+  parent: PublisherStudio.BusinessObjects.PublicationStreamOutput
+  langs:
+  - csharp
+  - vb
+  name: QualityPreset
+  nameWithType: PublicationStreamOutput.QualityPreset
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.QualityPreset
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets quality preset.
+  example: []
+  syntax:
+    content: public PublicationStreamQualityPreset QualityPreset { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset
+    content.vb: Public Property QualityPreset As PublicationStreamQualityPreset
+  overload: PublisherStudio.BusinessObjects.PublicationStreamOutput.QualityPreset*
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.Width
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamOutput.Width
+  id: Width
+  parent: PublisherStudio.BusinessObjects.PublicationStreamOutput
+  langs:
+  - csharp
+  - vb
+  name: Width
+  nameWithType: PublicationStreamOutput.Width
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.Width
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets width.
+  example: []
+  syntax:
+    content: public int Width { get; set; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property Width As Integer
+  overload: PublisherStudio.BusinessObjects.PublicationStreamOutput.Width*
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.Height
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamOutput.Height
+  id: Height
+  parent: PublisherStudio.BusinessObjects.PublicationStreamOutput
+  langs:
+  - csharp
+  - vb
+  name: Height
+  nameWithType: PublicationStreamOutput.Height
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.Height
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets height.
+  example: []
+  syntax:
+    content: public int Height { get; set; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property Height As Integer
+  overload: PublisherStudio.BusinessObjects.PublicationStreamOutput.Height*
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.FrameRate
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamOutput.FrameRate
+  id: FrameRate
+  parent: PublisherStudio.BusinessObjects.PublicationStreamOutput
+  langs:
+  - csharp
+  - vb
+  name: FrameRate
+  nameWithType: PublicationStreamOutput.FrameRate
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.FrameRate
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets frame rate.
+  example: []
+  syntax:
+    content: public int FrameRate { get; set; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property FrameRate As Integer
+  overload: PublisherStudio.BusinessObjects.PublicationStreamOutput.FrameRate*
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.VideoBitrateKbps
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamOutput.VideoBitrateKbps
+  id: VideoBitrateKbps
+  parent: PublisherStudio.BusinessObjects.PublicationStreamOutput
+  langs:
+  - csharp
+  - vb
+  name: VideoBitrateKbps
+  nameWithType: PublicationStreamOutput.VideoBitrateKbps
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.VideoBitrateKbps
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets video bitrate kbps.
+  example: []
+  syntax:
+    content: public int VideoBitrateKbps { get; set; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property VideoBitrateKbps As Integer
+  overload: PublisherStudio.BusinessObjects.PublicationStreamOutput.VideoBitrateKbps*
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.AudioBitrateKbps
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamOutput.AudioBitrateKbps
+  id: AudioBitrateKbps
+  parent: PublisherStudio.BusinessObjects.PublicationStreamOutput
+  langs:
+  - csharp
+  - vb
+  name: AudioBitrateKbps
+  nameWithType: PublicationStreamOutput.AudioBitrateKbps
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.AudioBitrateKbps
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets audio bitrate kbps.
+  example: []
+  syntax:
+    content: public int AudioBitrateKbps { get; set; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property AudioBitrateKbps As Integer
+  overload: PublisherStudio.BusinessObjects.PublicationStreamOutput.AudioBitrateKbps*
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.KeyFrameIntervalSeconds
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamOutput.KeyFrameIntervalSeconds
+  id: KeyFrameIntervalSeconds
+  parent: PublisherStudio.BusinessObjects.PublicationStreamOutput
+  langs:
+  - csharp
+  - vb
+  name: KeyFrameIntervalSeconds
+  nameWithType: PublicationStreamOutput.KeyFrameIntervalSeconds
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.KeyFrameIntervalSeconds
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets key frame interval seconds.
+  example: []
+  syntax:
+    content: public int KeyFrameIntervalSeconds { get; set; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property KeyFrameIntervalSeconds As Integer
+  overload: PublisherStudio.BusinessObjects.PublicationStreamOutput.KeyFrameIntervalSeconds*
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.VideoCodec
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamOutput.VideoCodec
+  id: VideoCodec
+  parent: PublisherStudio.BusinessObjects.PublicationStreamOutput
+  langs:
+  - csharp
+  - vb
+  name: VideoCodec
+  nameWithType: PublicationStreamOutput.VideoCodec
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.VideoCodec
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets video codec.
+  example: []
+  syntax:
+    content: public PublicationStreamVideoCodec VideoCodec { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationStreamVideoCodec
+    content.vb: Public Property VideoCodec As PublicationStreamVideoCodec
+  overload: PublisherStudio.BusinessObjects.PublicationStreamOutput.VideoCodec*
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.AudioCodec
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamOutput.AudioCodec
+  id: AudioCodec
+  parent: PublisherStudio.BusinessObjects.PublicationStreamOutput
+  langs:
+  - csharp
+  - vb
+  name: AudioCodec
+  nameWithType: PublicationStreamOutput.AudioCodec
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.AudioCodec
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets audio codec.
+  example: []
+  syntax:
+    content: public PublicationStreamAudioCodec AudioCodec { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationStreamAudioCodec
+    content.vb: Public Property AudioCodec As PublicationStreamAudioCodec
+  overload: PublisherStudio.BusinessObjects.PublicationStreamOutput.AudioCodec*
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.ChatChannel
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamOutput.ChatChannel
+  id: ChatChannel
+  parent: PublisherStudio.BusinessObjects.PublicationStreamOutput
+  langs:
+  - csharp
+  - vb
+  name: ChatChannel
+  nameWithType: PublicationStreamOutput.ChatChannel
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.ChatChannel
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets chat channel.
+  example: []
+  syntax:
+    content: public string ChatChannel { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property ChatChannel As String
+  overload: PublisherStudio.BusinessObjects.PublicationStreamOutput.ChatChannel*
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.#ctor*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamOutput.#ctor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamOutput.html#PublisherStudio_BusinessObjects_PublicationStreamOutput__ctor
+  name: PublicationStreamOutput
+  nameWithType: PublicationStreamOutput.PublicationStreamOutput
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.PublicationStreamOutput
+  nameWithType.vb: PublicationStreamOutput.New
+  fullName.vb: PublisherStudio.BusinessObjects.PublicationStreamOutput.New
+  name.vb: New
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.Id*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamOutput.Id
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamOutput.html#PublisherStudio_BusinessObjects_PublicationStreamOutput_Id
+  name: Id
+  nameWithType: PublicationStreamOutput.Id
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.Id
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.ProfileId*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamOutput.ProfileId
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamOutput.html#PublisherStudio_BusinessObjects_PublicationStreamOutput_ProfileId
+  name: ProfileId
+  nameWithType: PublicationStreamOutput.ProfileId
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.ProfileId
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.Name*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamOutput.Name
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamOutput.html#PublisherStudio_BusinessObjects_PublicationStreamOutput_Name
+  name: Name
+  nameWithType: PublicationStreamOutput.Name
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.Name
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.Provider*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamOutput.Provider
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamOutput.html#PublisherStudio_BusinessObjects_PublicationStreamOutput_Provider
+  name: Provider
+  nameWithType: PublicationStreamOutput.Provider
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.Provider
+- uid: PublisherStudio.BusinessObjects.PublicationStreamProvider
+  commentId: T:PublisherStudio.BusinessObjects.PublicationStreamProvider
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamProvider.html
+  name: PublicationStreamProvider
+  nameWithType: PublicationStreamProvider
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamProvider
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.Enabled*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamOutput.Enabled
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamOutput.html#PublisherStudio_BusinessObjects_PublicationStreamOutput_Enabled
+  name: Enabled
+  nameWithType: PublicationStreamOutput.Enabled
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.Enabled
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.UseProviderTestMode*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamOutput.UseProviderTestMode
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamOutput.html#PublisherStudio_BusinessObjects_PublicationStreamOutput_UseProviderTestMode
+  name: UseProviderTestMode
+  nameWithType: PublicationStreamOutput.UseProviderTestMode
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.UseProviderTestMode
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.QualityPreset*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamOutput.QualityPreset
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamOutput.html#PublisherStudio_BusinessObjects_PublicationStreamOutput_QualityPreset
+  name: QualityPreset
+  nameWithType: PublicationStreamOutput.QualityPreset
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.QualityPreset
+- uid: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset
+  commentId: T:PublisherStudio.BusinessObjects.PublicationStreamQualityPreset
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset.html
+  name: PublicationStreamQualityPreset
+  nameWithType: PublicationStreamQualityPreset
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamQualityPreset
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.Width*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamOutput.Width
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamOutput.html#PublisherStudio_BusinessObjects_PublicationStreamOutput_Width
+  name: Width
+  nameWithType: PublicationStreamOutput.Width
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.Width
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.Height*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamOutput.Height
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamOutput.html#PublisherStudio_BusinessObjects_PublicationStreamOutput_Height
+  name: Height
+  nameWithType: PublicationStreamOutput.Height
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.Height
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.FrameRate*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamOutput.FrameRate
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamOutput.html#PublisherStudio_BusinessObjects_PublicationStreamOutput_FrameRate
+  name: FrameRate
+  nameWithType: PublicationStreamOutput.FrameRate
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.FrameRate
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.VideoBitrateKbps*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamOutput.VideoBitrateKbps
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamOutput.html#PublisherStudio_BusinessObjects_PublicationStreamOutput_VideoBitrateKbps
+  name: VideoBitrateKbps
+  nameWithType: PublicationStreamOutput.VideoBitrateKbps
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.VideoBitrateKbps
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.AudioBitrateKbps*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamOutput.AudioBitrateKbps
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamOutput.html#PublisherStudio_BusinessObjects_PublicationStreamOutput_AudioBitrateKbps
+  name: AudioBitrateKbps
+  nameWithType: PublicationStreamOutput.AudioBitrateKbps
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.AudioBitrateKbps
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.KeyFrameIntervalSeconds*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamOutput.KeyFrameIntervalSeconds
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamOutput.html#PublisherStudio_BusinessObjects_PublicationStreamOutput_KeyFrameIntervalSeconds
+  name: KeyFrameIntervalSeconds
+  nameWithType: PublicationStreamOutput.KeyFrameIntervalSeconds
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.KeyFrameIntervalSeconds
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.VideoCodec*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamOutput.VideoCodec
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamOutput.html#PublisherStudio_BusinessObjects_PublicationStreamOutput_VideoCodec
+  name: VideoCodec
+  nameWithType: PublicationStreamOutput.VideoCodec
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.VideoCodec
+- uid: PublisherStudio.BusinessObjects.PublicationStreamVideoCodec
+  commentId: T:PublisherStudio.BusinessObjects.PublicationStreamVideoCodec
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamVideoCodec.html
+  name: PublicationStreamVideoCodec
+  nameWithType: PublicationStreamVideoCodec
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamVideoCodec
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.AudioCodec*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamOutput.AudioCodec
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamOutput.html#PublisherStudio_BusinessObjects_PublicationStreamOutput_AudioCodec
+  name: AudioCodec
+  nameWithType: PublicationStreamOutput.AudioCodec
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.AudioCodec
+- uid: PublisherStudio.BusinessObjects.PublicationStreamAudioCodec
+  commentId: T:PublisherStudio.BusinessObjects.PublicationStreamAudioCodec
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamAudioCodec.html
+  name: PublicationStreamAudioCodec
+  nameWithType: PublicationStreamAudioCodec
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamAudioCodec
+- uid: PublisherStudio.BusinessObjects.PublicationStreamOutput.ChatChannel*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamOutput.ChatChannel
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamOutput.html#PublisherStudio_BusinessObjects_PublicationStreamOutput_ChatChannel
+  name: ChatChannel
+  nameWithType: PublicationStreamOutput.ChatChannel
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamOutput.ChatChannel

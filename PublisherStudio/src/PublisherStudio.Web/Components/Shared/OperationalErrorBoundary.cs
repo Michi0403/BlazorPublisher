@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using PublisherStudio.Services.UserExperience;
@@ -14,6 +14,9 @@ public sealed class OperationalErrorBoundary : ErrorBoundary
     [Inject] private ILogger<OperationalErrorBoundary> Logger { get; set; } = default!;
     [Inject] private IUserNotificationService Notifications { get; set; } = default!;
 
+    /// <summary>
+    /// Runs the on error async operation.
+    /// </summary>
     protected override Task OnErrorAsync(Exception exception)
     {
         if (exception is OperationCanceledException or TaskCanceledException or JSDisconnectedException)

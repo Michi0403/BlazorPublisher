@@ -1,4 +1,4 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 using System.Globalization;
 using System.Text;
 using PublisherStudio.Services.Configuration;
@@ -6,10 +6,16 @@ using PublisherStudio.Services.Configuration;
 // logging-policy: pure-helper
 namespace PublisherStudio.Services;
 
+/// <summary>
+/// Represents a word art path geometry.
+/// </summary>
 public sealed class WordArtPathGeometry(
     IPublisherRuntimePolicyDataService runtimePolicy,
     ILogger<WordArtPathGeometry> logger)
 {
+    /// <summary>
+    /// Creates preset.
+    /// </summary>
     public List<WordArtPathPoint> CreatePreset(string key)
     {
         logger.LogTrace("Creating WordArt path preset {PresetKey}.", key);
@@ -26,6 +32,9 @@ public sealed class WordArtPathGeometry(
         };
     }
 
+    /// <summary>
+    /// Runs the build operation.
+    /// </summary>
     public string Build(WordArtElement item)
     {
         if (item.Warp != WordArtWarp.Custom)
@@ -42,6 +51,9 @@ public sealed class WordArtPathGeometry(
         return Build(item.CustomPathPoints);
     }
 
+    /// <summary>
+    /// Runs the build operation.
+    /// </summary>
     public string Build(IReadOnlyList<WordArtPathPoint>? points)
     {
         var safe = Normalize(points);
@@ -70,6 +82,9 @@ public sealed class WordArtPathGeometry(
         return builder.ToString();
     }
 
+    /// <summary>
+    /// Runs the normalize operation.
+    /// </summary>
     public List<WordArtPathPoint> Normalize(IReadOnlyList<WordArtPathPoint>? points)
     {
         if (points is null || points.Count < 2)
@@ -88,9 +103,15 @@ public sealed class WordArtPathGeometry(
         return normalized.Count >= 2 ? normalized : CreatePreset("Straight");
     }
 
+    /// <summary>
+    /// Runs the reverse operation.
+    /// </summary>
     public List<WordArtPathPoint> Reverse(IReadOnlyList<WordArtPathPoint>? points) =>
         Normalize(points).AsEnumerable().Reverse().Select(point => point.Clone()).ToList();
 
+    /// <summary>
+    /// Runs the reduce operation.
+    /// </summary>
     public List<WordArtPathPoint> Reduce(IReadOnlyList<WordArtPathPoint>? points, int maximum = 10)
     {
         var normalized = Normalize(points);

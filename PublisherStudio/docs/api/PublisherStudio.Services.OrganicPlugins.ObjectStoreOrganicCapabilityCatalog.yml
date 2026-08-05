@@ -1,0 +1,1227 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog
+  commentId: T:PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog
+  id: ObjectStoreOrganicCapabilityCatalog
+  parent: PublisherStudio.Services.OrganicPlugins
+  children:
+  - PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.#ctor(PublisherStudio.Services.Configuration.IPublisherDxFunctionCatalogDataService,PublisherStudio.Services.OrganicPlugins.OrganicCapabilityCatalog,PublisherStudio.Services.MediaConversion.IMediaConversionService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog})
+  - PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetCapabilitiesAsync(System.Threading.CancellationToken)
+  - PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetHardwareAsync(System.Threading.CancellationToken)
+  - PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetSkillsAsync(System.Threading.CancellationToken)
+  - PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetUiFeaturesAsync(System.Threading.CancellationToken)
+  langs:
+  - csharp
+  - vb
+  name: ObjectStoreOrganicCapabilityCatalog
+  nameWithType: ObjectStoreOrganicCapabilityCatalog
+  fullName: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Runtime PublisherStudio capability catalog. DX function descriptors are loaded from the serializable object store and advertised through the shared WireLibrary contracts. The reviewed legacy catalog remains intact for its non-DX UI and hardware metadata only.
+  example: []
+  syntax:
+    content: 'public sealed class ObjectStoreOrganicCapabilityCatalog : IOrganicCapabilityCatalog, IOneWireCapabilityProvider'
+    content.vb: Public NotInheritable Class ObjectStoreOrganicCapabilityCatalog Implements IOrganicCapabilityCatalog, IOneWireCapabilityProvider
+  inheritance:
+  - System.Object
+  implements:
+  - PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog
+  - LocalGPT.WireProtocol.IOneWireCapabilityProvider
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.#ctor(PublisherStudio.Services.Configuration.IPublisherDxFunctionCatalogDataService,PublisherStudio.Services.OrganicPlugins.OrganicCapabilityCatalog,PublisherStudio.Services.MediaConversion.IMediaConversionService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog})
+  commentId: M:PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.#ctor(PublisherStudio.Services.Configuration.IPublisherDxFunctionCatalogDataService,PublisherStudio.Services.OrganicPlugins.OrganicCapabilityCatalog,PublisherStudio.Services.MediaConversion.IMediaConversionService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog})
+  id: '#ctor(PublisherStudio.Services.Configuration.IPublisherDxFunctionCatalogDataService,PublisherStudio.Services.OrganicPlugins.OrganicCapabilityCatalog,PublisherStudio.Services.MediaConversion.IMediaConversionService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog})'
+  parent: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog
+  langs:
+  - csharp
+  - vb
+  name: ObjectStoreOrganicCapabilityCatalog(IPublisherDxFunctionCatalogDataService, OrganicCapabilityCatalog, IMediaConversionService, ILogger<ObjectStoreOrganicCapabilityCatalog>)
+  nameWithType: ObjectStoreOrganicCapabilityCatalog.ObjectStoreOrganicCapabilityCatalog(IPublisherDxFunctionCatalogDataService, OrganicCapabilityCatalog, IMediaConversionService, ILogger<ObjectStoreOrganicCapabilityCatalog>)
+  fullName: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.ObjectStoreOrganicCapabilityCatalog(PublisherStudio.Services.Configuration.IPublisherDxFunctionCatalogDataService, PublisherStudio.Services.OrganicPlugins.OrganicCapabilityCatalog, PublisherStudio.Services.MediaConversion.IMediaConversionService, Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Runtime PublisherStudio capability catalog. DX function descriptors are loaded from the serializable object store and advertised through the shared WireLibrary contracts. The reviewed legacy catalog remains intact for its non-DX UI and hardware metadata only.
+  example: []
+  syntax:
+    content: public ObjectStoreOrganicCapabilityCatalog(IPublisherDxFunctionCatalogDataService functionCatalog, OrganicCapabilityCatalog legacyMetadataCatalog, IMediaConversionService mediaConversion, ILogger<ObjectStoreOrganicCapabilityCatalog> logger)
+    parameters:
+    - id: functionCatalog
+      type: PublisherStudio.Services.Configuration.IPublisherDxFunctionCatalogDataService
+    - id: legacyMetadataCatalog
+      type: PublisherStudio.Services.OrganicPlugins.OrganicCapabilityCatalog
+    - id: mediaConversion
+      type: PublisherStudio.Services.MediaConversion.IMediaConversionService
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog}
+    content.vb: Public Sub New(functionCatalog As IPublisherDxFunctionCatalogDataService, legacyMetadataCatalog As OrganicCapabilityCatalog, mediaConversion As IMediaConversionService, logger As ILogger(Of ObjectStoreOrganicCapabilityCatalog))
+  overload: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.#ctor*
+  nameWithType.vb: ObjectStoreOrganicCapabilityCatalog.New(IPublisherDxFunctionCatalogDataService, OrganicCapabilityCatalog, IMediaConversionService, ILogger(Of ObjectStoreOrganicCapabilityCatalog))
+  fullName.vb: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.New(PublisherStudio.Services.Configuration.IPublisherDxFunctionCatalogDataService, PublisherStudio.Services.OrganicPlugins.OrganicCapabilityCatalog, PublisherStudio.Services.MediaConversion.IMediaConversionService, Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog))
+  name.vb: New(IPublisherDxFunctionCatalogDataService, OrganicCapabilityCatalog, IMediaConversionService, ILogger(Of ObjectStoreOrganicCapabilityCatalog))
+- uid: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetCapabilitiesAsync(System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetCapabilitiesAsync(System.Threading.CancellationToken)
+  id: GetCapabilitiesAsync(System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog
+  langs:
+  - csharp
+  - vb
+  name: GetCapabilitiesAsync(CancellationToken)
+  nameWithType: ObjectStoreOrganicCapabilityCatalog.GetCapabilitiesAsync(CancellationToken)
+  fullName: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetCapabilitiesAsync(System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Gets capabilities async.
+  example: []
+  syntax:
+    content: public Task<IReadOnlyList<OneWireCapabilityDescriptor>> GetCapabilitiesAsync(CancellationToken cancellationToken = default)
+    parameters:
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{System.Collections.Generic.IReadOnlyList{LocalGPT.WireProtocol.OneWireCapabilityDescriptor}}
+    content.vb: Public Function GetCapabilitiesAsync(cancellationToken As CancellationToken = Nothing) As Task(Of IReadOnlyList(Of OneWireCapabilityDescriptor))
+  overload: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetCapabilitiesAsync*
+  implements:
+  - PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetCapabilitiesAsync(System.Threading.CancellationToken)
+  - LocalGPT.WireProtocol.IOneWireCapabilityProvider.GetCapabilitiesAsync(System.Threading.CancellationToken)
+- uid: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetSkillsAsync(System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetSkillsAsync(System.Threading.CancellationToken)
+  id: GetSkillsAsync(System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog
+  langs:
+  - csharp
+  - vb
+  name: GetSkillsAsync(CancellationToken)
+  nameWithType: ObjectStoreOrganicCapabilityCatalog.GetSkillsAsync(CancellationToken)
+  fullName: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetSkillsAsync(System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Gets skills async.
+  example: []
+  syntax:
+    content: public Task<IReadOnlyList<OneWireSkillDescriptor>> GetSkillsAsync(CancellationToken cancellationToken = default)
+    parameters:
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{System.Collections.Generic.IReadOnlyList{LocalGPT.WireProtocol.OneWireSkillDescriptor}}
+    content.vb: Public Function GetSkillsAsync(cancellationToken As CancellationToken = Nothing) As Task(Of IReadOnlyList(Of OneWireSkillDescriptor))
+  overload: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetSkillsAsync*
+  implements:
+  - PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetSkillsAsync(System.Threading.CancellationToken)
+  - LocalGPT.WireProtocol.IOneWireCapabilityProvider.GetSkillsAsync(System.Threading.CancellationToken)
+- uid: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetUiFeaturesAsync(System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetUiFeaturesAsync(System.Threading.CancellationToken)
+  id: GetUiFeaturesAsync(System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog
+  langs:
+  - csharp
+  - vb
+  name: GetUiFeaturesAsync(CancellationToken)
+  nameWithType: ObjectStoreOrganicCapabilityCatalog.GetUiFeaturesAsync(CancellationToken)
+  fullName: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetUiFeaturesAsync(System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Gets UI features async.
+  example: []
+  syntax:
+    content: public Task<IReadOnlyList<OneWireUiFeatureDescriptor>> GetUiFeaturesAsync(CancellationToken cancellationToken = default)
+    parameters:
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{System.Collections.Generic.IReadOnlyList{LocalGPT.WireProtocol.OneWireUiFeatureDescriptor}}
+    content.vb: Public Function GetUiFeaturesAsync(cancellationToken As CancellationToken = Nothing) As Task(Of IReadOnlyList(Of OneWireUiFeatureDescriptor))
+  overload: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetUiFeaturesAsync*
+  implements:
+  - PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetUiFeaturesAsync(System.Threading.CancellationToken)
+  - LocalGPT.WireProtocol.IOneWireCapabilityProvider.GetUiFeaturesAsync(System.Threading.CancellationToken)
+- uid: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetHardwareAsync(System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetHardwareAsync(System.Threading.CancellationToken)
+  id: GetHardwareAsync(System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog
+  langs:
+  - csharp
+  - vb
+  name: GetHardwareAsync(CancellationToken)
+  nameWithType: ObjectStoreOrganicCapabilityCatalog.GetHardwareAsync(CancellationToken)
+  fullName: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetHardwareAsync(System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Gets hardware async.
+  example: []
+  syntax:
+    content: public Task<IReadOnlyList<OneWireHardwareDescriptor>> GetHardwareAsync(CancellationToken cancellationToken = default)
+    parameters:
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{System.Collections.Generic.IReadOnlyList{LocalGPT.WireProtocol.OneWireHardwareDescriptor}}
+    content.vb: Public Function GetHardwareAsync(cancellationToken As CancellationToken = Nothing) As Task(Of IReadOnlyList(Of OneWireHardwareDescriptor))
+  overload: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetHardwareAsync*
+  implements:
+  - PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetHardwareAsync(System.Threading.CancellationToken)
+  - LocalGPT.WireProtocol.IOneWireCapabilityProvider.GetHardwareAsync(System.Threading.CancellationToken)
+references:
+- uid: PublisherStudio.Services.OrganicPlugins
+  commentId: N:PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.OrganicPlugins
+  nameWithType: PublisherStudio.Services.OrganicPlugins
+  fullName: PublisherStudio.Services.OrganicPlugins
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OrganicPlugins
+    name: OrganicPlugins
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OrganicPlugins
+    name: OrganicPlugins
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog
+  commentId: T:PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog
+  parent: PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.html
+  name: IOrganicCapabilityCatalog
+  nameWithType: IOrganicCapabilityCatalog
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog
+- uid: LocalGPT.WireProtocol.IOneWireCapabilityProvider
+  commentId: T:LocalGPT.WireProtocol.IOneWireCapabilityProvider
+  parent: LocalGPT.WireProtocol
+  isExternal: true
+  name: IOneWireCapabilityProvider
+  nameWithType: IOneWireCapabilityProvider
+  fullName: LocalGPT.WireProtocol.IOneWireCapabilityProvider
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: LocalGPT.WireProtocol
+  commentId: N:LocalGPT.WireProtocol
+  isExternal: true
+  name: LocalGPT.WireProtocol
+  nameWithType: LocalGPT.WireProtocol
+  fullName: LocalGPT.WireProtocol
+  spec.csharp:
+  - uid: LocalGPT
+    name: LocalGPT
+    isExternal: true
+  - name: .
+  - uid: LocalGPT.WireProtocol
+    name: WireProtocol
+    isExternal: true
+  spec.vb:
+  - uid: LocalGPT
+    name: LocalGPT
+    isExternal: true
+  - name: .
+  - uid: LocalGPT.WireProtocol
+    name: WireProtocol
+    isExternal: true
+- uid: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.#ctor*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.html#PublisherStudio_Services_OrganicPlugins_ObjectStoreOrganicCapabilityCatalog__ctor_PublisherStudio_Services_Configuration_IPublisherDxFunctionCatalogDataService_PublisherStudio_Services_OrganicPlugins_OrganicCapabilityCatalog_PublisherStudio_Services_MediaConversion_IMediaConversionService_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_OrganicPlugins_ObjectStoreOrganicCapabilityCatalog__
+  name: ObjectStoreOrganicCapabilityCatalog
+  nameWithType: ObjectStoreOrganicCapabilityCatalog.ObjectStoreOrganicCapabilityCatalog
+  fullName: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.ObjectStoreOrganicCapabilityCatalog
+  nameWithType.vb: ObjectStoreOrganicCapabilityCatalog.New
+  fullName.vb: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.New
+  name.vb: New
+- uid: PublisherStudio.Services.Configuration.IPublisherDxFunctionCatalogDataService
+  commentId: T:PublisherStudio.Services.Configuration.IPublisherDxFunctionCatalogDataService
+  parent: PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IPublisherDxFunctionCatalogDataService.html
+  name: IPublisherDxFunctionCatalogDataService
+  nameWithType: IPublisherDxFunctionCatalogDataService
+  fullName: PublisherStudio.Services.Configuration.IPublisherDxFunctionCatalogDataService
+- uid: PublisherStudio.Services.OrganicPlugins.OrganicCapabilityCatalog
+  commentId: T:PublisherStudio.Services.OrganicPlugins.OrganicCapabilityCatalog
+  parent: PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.OrganicCapabilityCatalog.html
+  name: OrganicCapabilityCatalog
+  nameWithType: OrganicCapabilityCatalog
+  fullName: PublisherStudio.Services.OrganicPlugins.OrganicCapabilityCatalog
+- uid: PublisherStudio.Services.MediaConversion.IMediaConversionService
+  commentId: T:PublisherStudio.Services.MediaConversion.IMediaConversionService
+  parent: PublisherStudio.Services.MediaConversion
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html
+  name: IMediaConversionService
+  nameWithType: IMediaConversionService
+  fullName: PublisherStudio.Services.MediaConversion.IMediaConversionService
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<ObjectStoreOrganicCapabilityCatalog>
+  nameWithType: ILogger<ObjectStoreOrganicCapabilityCatalog>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog>
+  nameWithType.vb: ILogger(Of ObjectStoreOrganicCapabilityCatalog)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog)
+  name.vb: ILogger(Of ObjectStoreOrganicCapabilityCatalog)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog
+    name: ObjectStoreOrganicCapabilityCatalog
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog
+    name: ObjectStoreOrganicCapabilityCatalog
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.html
+  - name: )
+- uid: PublisherStudio.Services.Configuration
+  commentId: N:PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Configuration
+  nameWithType: PublisherStudio.Services.Configuration
+  fullName: PublisherStudio.Services.Configuration
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+- uid: PublisherStudio.Services.MediaConversion
+  commentId: N:PublisherStudio.Services.MediaConversion
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.MediaConversion
+  nameWithType: PublisherStudio.Services.MediaConversion
+  fullName: PublisherStudio.Services.MediaConversion
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.MediaConversion
+    name: MediaConversion
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.MediaConversion
+    name: MediaConversion
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.html
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetCapabilitiesAsync*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetCapabilitiesAsync
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.html#PublisherStudio_Services_OrganicPlugins_ObjectStoreOrganicCapabilityCatalog_GetCapabilitiesAsync_System_Threading_CancellationToken_
+  name: GetCapabilitiesAsync
+  nameWithType: ObjectStoreOrganicCapabilityCatalog.GetCapabilitiesAsync
+  fullName: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetCapabilitiesAsync
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetCapabilitiesAsync(System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetCapabilitiesAsync(System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.html#PublisherStudio_Services_OrganicPlugins_IOrganicCapabilityCatalog_GetCapabilitiesAsync_System_Threading_CancellationToken_
+  name: GetCapabilitiesAsync(CancellationToken)
+  nameWithType: IOrganicCapabilityCatalog.GetCapabilitiesAsync(CancellationToken)
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetCapabilitiesAsync(System.Threading.CancellationToken)
+  spec.csharp:
+  - uid: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetCapabilitiesAsync(System.Threading.CancellationToken)
+    name: GetCapabilitiesAsync
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.html#PublisherStudio_Services_OrganicPlugins_IOrganicCapabilityCatalog_GetCapabilitiesAsync_System_Threading_CancellationToken_
+  - name: (
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetCapabilitiesAsync(System.Threading.CancellationToken)
+    name: GetCapabilitiesAsync
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.html#PublisherStudio_Services_OrganicPlugins_IOrganicCapabilityCatalog_GetCapabilitiesAsync_System_Threading_CancellationToken_
+  - name: (
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+- uid: LocalGPT.WireProtocol.IOneWireCapabilityProvider.GetCapabilitiesAsync(System.Threading.CancellationToken)
+  commentId: M:LocalGPT.WireProtocol.IOneWireCapabilityProvider.GetCapabilitiesAsync(System.Threading.CancellationToken)
+  parent: LocalGPT.WireProtocol.IOneWireCapabilityProvider
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  name: GetCapabilitiesAsync(CancellationToken)
+  nameWithType: IOneWireCapabilityProvider.GetCapabilitiesAsync(CancellationToken)
+  fullName: LocalGPT.WireProtocol.IOneWireCapabilityProvider.GetCapabilitiesAsync(System.Threading.CancellationToken)
+  spec.csharp:
+  - uid: LocalGPT.WireProtocol.IOneWireCapabilityProvider.GetCapabilitiesAsync(System.Threading.CancellationToken)
+    name: GetCapabilitiesAsync
+    isExternal: true
+  - name: (
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+  spec.vb:
+  - uid: LocalGPT.WireProtocol.IOneWireCapabilityProvider.GetCapabilitiesAsync(System.Threading.CancellationToken)
+    name: GetCapabilitiesAsync
+    isExternal: true
+  - name: (
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+- uid: System.Threading.CancellationToken
+  commentId: T:System.Threading.CancellationToken
+  parent: System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  name: CancellationToken
+  nameWithType: CancellationToken
+  fullName: System.Threading.CancellationToken
+- uid: System.Threading.Tasks.Task{System.Collections.Generic.IReadOnlyList{LocalGPT.WireProtocol.OneWireCapabilityDescriptor}}
+  commentId: T:System.Threading.Tasks.Task{System.Collections.Generic.IReadOnlyList{LocalGPT.WireProtocol.OneWireCapabilityDescriptor}}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<IReadOnlyList<OneWireCapabilityDescriptor>>
+  nameWithType: Task<IReadOnlyList<OneWireCapabilityDescriptor>>
+  fullName: System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LocalGPT.WireProtocol.OneWireCapabilityDescriptor>>
+  nameWithType.vb: Task(Of IReadOnlyList(Of OneWireCapabilityDescriptor))
+  fullName.vb: System.Threading.Tasks.Task(Of System.Collections.Generic.IReadOnlyList(Of LocalGPT.WireProtocol.OneWireCapabilityDescriptor))
+  name.vb: Task(Of IReadOnlyList(Of OneWireCapabilityDescriptor))
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: LocalGPT.WireProtocol.OneWireCapabilityDescriptor
+    name: OneWireCapabilityDescriptor
+    isExternal: true
+  - name: '>'
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: LocalGPT.WireProtocol.OneWireCapabilityDescriptor
+    name: OneWireCapabilityDescriptor
+    isExternal: true
+  - name: )
+  - name: )
+- uid: System.Threading
+  commentId: N:System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading
+  nameWithType: System.Threading
+  fullName: System.Threading
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+- uid: System.Threading.Tasks.Task`1
+  commentId: T:System.Threading.Tasks.Task`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<TResult>
+  nameWithType: Task<TResult>
+  fullName: System.Threading.Tasks.Task<TResult>
+  nameWithType.vb: Task(Of TResult)
+  fullName.vb: System.Threading.Tasks.Task(Of TResult)
+  name.vb: Task(Of TResult)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - name: TResult
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TResult
+  - name: )
+- uid: System.Threading.Tasks
+  commentId: N:System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading.Tasks
+  nameWithType: System.Threading.Tasks
+  fullName: System.Threading.Tasks
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+- uid: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetSkillsAsync*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetSkillsAsync
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.html#PublisherStudio_Services_OrganicPlugins_ObjectStoreOrganicCapabilityCatalog_GetSkillsAsync_System_Threading_CancellationToken_
+  name: GetSkillsAsync
+  nameWithType: ObjectStoreOrganicCapabilityCatalog.GetSkillsAsync
+  fullName: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetSkillsAsync
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetSkillsAsync(System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetSkillsAsync(System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.html#PublisherStudio_Services_OrganicPlugins_IOrganicCapabilityCatalog_GetSkillsAsync_System_Threading_CancellationToken_
+  name: GetSkillsAsync(CancellationToken)
+  nameWithType: IOrganicCapabilityCatalog.GetSkillsAsync(CancellationToken)
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetSkillsAsync(System.Threading.CancellationToken)
+  spec.csharp:
+  - uid: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetSkillsAsync(System.Threading.CancellationToken)
+    name: GetSkillsAsync
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.html#PublisherStudio_Services_OrganicPlugins_IOrganicCapabilityCatalog_GetSkillsAsync_System_Threading_CancellationToken_
+  - name: (
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetSkillsAsync(System.Threading.CancellationToken)
+    name: GetSkillsAsync
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.html#PublisherStudio_Services_OrganicPlugins_IOrganicCapabilityCatalog_GetSkillsAsync_System_Threading_CancellationToken_
+  - name: (
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+- uid: LocalGPT.WireProtocol.IOneWireCapabilityProvider.GetSkillsAsync(System.Threading.CancellationToken)
+  commentId: M:LocalGPT.WireProtocol.IOneWireCapabilityProvider.GetSkillsAsync(System.Threading.CancellationToken)
+  parent: LocalGPT.WireProtocol.IOneWireCapabilityProvider
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  name: GetSkillsAsync(CancellationToken)
+  nameWithType: IOneWireCapabilityProvider.GetSkillsAsync(CancellationToken)
+  fullName: LocalGPT.WireProtocol.IOneWireCapabilityProvider.GetSkillsAsync(System.Threading.CancellationToken)
+  spec.csharp:
+  - uid: LocalGPT.WireProtocol.IOneWireCapabilityProvider.GetSkillsAsync(System.Threading.CancellationToken)
+    name: GetSkillsAsync
+    isExternal: true
+  - name: (
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+  spec.vb:
+  - uid: LocalGPT.WireProtocol.IOneWireCapabilityProvider.GetSkillsAsync(System.Threading.CancellationToken)
+    name: GetSkillsAsync
+    isExternal: true
+  - name: (
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+- uid: System.Threading.Tasks.Task{System.Collections.Generic.IReadOnlyList{LocalGPT.WireProtocol.OneWireSkillDescriptor}}
+  commentId: T:System.Threading.Tasks.Task{System.Collections.Generic.IReadOnlyList{LocalGPT.WireProtocol.OneWireSkillDescriptor}}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<IReadOnlyList<OneWireSkillDescriptor>>
+  nameWithType: Task<IReadOnlyList<OneWireSkillDescriptor>>
+  fullName: System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LocalGPT.WireProtocol.OneWireSkillDescriptor>>
+  nameWithType.vb: Task(Of IReadOnlyList(Of OneWireSkillDescriptor))
+  fullName.vb: System.Threading.Tasks.Task(Of System.Collections.Generic.IReadOnlyList(Of LocalGPT.WireProtocol.OneWireSkillDescriptor))
+  name.vb: Task(Of IReadOnlyList(Of OneWireSkillDescriptor))
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: LocalGPT.WireProtocol.OneWireSkillDescriptor
+    name: OneWireSkillDescriptor
+    isExternal: true
+  - name: '>'
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: LocalGPT.WireProtocol.OneWireSkillDescriptor
+    name: OneWireSkillDescriptor
+    isExternal: true
+  - name: )
+  - name: )
+- uid: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetUiFeaturesAsync*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetUiFeaturesAsync
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.html#PublisherStudio_Services_OrganicPlugins_ObjectStoreOrganicCapabilityCatalog_GetUiFeaturesAsync_System_Threading_CancellationToken_
+  name: GetUiFeaturesAsync
+  nameWithType: ObjectStoreOrganicCapabilityCatalog.GetUiFeaturesAsync
+  fullName: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetUiFeaturesAsync
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetUiFeaturesAsync(System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetUiFeaturesAsync(System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.html#PublisherStudio_Services_OrganicPlugins_IOrganicCapabilityCatalog_GetUiFeaturesAsync_System_Threading_CancellationToken_
+  name: GetUiFeaturesAsync(CancellationToken)
+  nameWithType: IOrganicCapabilityCatalog.GetUiFeaturesAsync(CancellationToken)
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetUiFeaturesAsync(System.Threading.CancellationToken)
+  spec.csharp:
+  - uid: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetUiFeaturesAsync(System.Threading.CancellationToken)
+    name: GetUiFeaturesAsync
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.html#PublisherStudio_Services_OrganicPlugins_IOrganicCapabilityCatalog_GetUiFeaturesAsync_System_Threading_CancellationToken_
+  - name: (
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetUiFeaturesAsync(System.Threading.CancellationToken)
+    name: GetUiFeaturesAsync
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.html#PublisherStudio_Services_OrganicPlugins_IOrganicCapabilityCatalog_GetUiFeaturesAsync_System_Threading_CancellationToken_
+  - name: (
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+- uid: LocalGPT.WireProtocol.IOneWireCapabilityProvider.GetUiFeaturesAsync(System.Threading.CancellationToken)
+  commentId: M:LocalGPT.WireProtocol.IOneWireCapabilityProvider.GetUiFeaturesAsync(System.Threading.CancellationToken)
+  parent: LocalGPT.WireProtocol.IOneWireCapabilityProvider
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  name: GetUiFeaturesAsync(CancellationToken)
+  nameWithType: IOneWireCapabilityProvider.GetUiFeaturesAsync(CancellationToken)
+  fullName: LocalGPT.WireProtocol.IOneWireCapabilityProvider.GetUiFeaturesAsync(System.Threading.CancellationToken)
+  spec.csharp:
+  - uid: LocalGPT.WireProtocol.IOneWireCapabilityProvider.GetUiFeaturesAsync(System.Threading.CancellationToken)
+    name: GetUiFeaturesAsync
+    isExternal: true
+  - name: (
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+  spec.vb:
+  - uid: LocalGPT.WireProtocol.IOneWireCapabilityProvider.GetUiFeaturesAsync(System.Threading.CancellationToken)
+    name: GetUiFeaturesAsync
+    isExternal: true
+  - name: (
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+- uid: System.Threading.Tasks.Task{System.Collections.Generic.IReadOnlyList{LocalGPT.WireProtocol.OneWireUiFeatureDescriptor}}
+  commentId: T:System.Threading.Tasks.Task{System.Collections.Generic.IReadOnlyList{LocalGPT.WireProtocol.OneWireUiFeatureDescriptor}}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<IReadOnlyList<OneWireUiFeatureDescriptor>>
+  nameWithType: Task<IReadOnlyList<OneWireUiFeatureDescriptor>>
+  fullName: System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LocalGPT.WireProtocol.OneWireUiFeatureDescriptor>>
+  nameWithType.vb: Task(Of IReadOnlyList(Of OneWireUiFeatureDescriptor))
+  fullName.vb: System.Threading.Tasks.Task(Of System.Collections.Generic.IReadOnlyList(Of LocalGPT.WireProtocol.OneWireUiFeatureDescriptor))
+  name.vb: Task(Of IReadOnlyList(Of OneWireUiFeatureDescriptor))
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: LocalGPT.WireProtocol.OneWireUiFeatureDescriptor
+    name: OneWireUiFeatureDescriptor
+    isExternal: true
+  - name: '>'
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: LocalGPT.WireProtocol.OneWireUiFeatureDescriptor
+    name: OneWireUiFeatureDescriptor
+    isExternal: true
+  - name: )
+  - name: )
+- uid: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetHardwareAsync*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetHardwareAsync
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.html#PublisherStudio_Services_OrganicPlugins_ObjectStoreOrganicCapabilityCatalog_GetHardwareAsync_System_Threading_CancellationToken_
+  name: GetHardwareAsync
+  nameWithType: ObjectStoreOrganicCapabilityCatalog.GetHardwareAsync
+  fullName: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetHardwareAsync
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetHardwareAsync(System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetHardwareAsync(System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.html#PublisherStudio_Services_OrganicPlugins_IOrganicCapabilityCatalog_GetHardwareAsync_System_Threading_CancellationToken_
+  name: GetHardwareAsync(CancellationToken)
+  nameWithType: IOrganicCapabilityCatalog.GetHardwareAsync(CancellationToken)
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetHardwareAsync(System.Threading.CancellationToken)
+  spec.csharp:
+  - uid: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetHardwareAsync(System.Threading.CancellationToken)
+    name: GetHardwareAsync
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.html#PublisherStudio_Services_OrganicPlugins_IOrganicCapabilityCatalog_GetHardwareAsync_System_Threading_CancellationToken_
+  - name: (
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetHardwareAsync(System.Threading.CancellationToken)
+    name: GetHardwareAsync
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.html#PublisherStudio_Services_OrganicPlugins_IOrganicCapabilityCatalog_GetHardwareAsync_System_Threading_CancellationToken_
+  - name: (
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+- uid: LocalGPT.WireProtocol.IOneWireCapabilityProvider.GetHardwareAsync(System.Threading.CancellationToken)
+  commentId: M:LocalGPT.WireProtocol.IOneWireCapabilityProvider.GetHardwareAsync(System.Threading.CancellationToken)
+  parent: LocalGPT.WireProtocol.IOneWireCapabilityProvider
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  name: GetHardwareAsync(CancellationToken)
+  nameWithType: IOneWireCapabilityProvider.GetHardwareAsync(CancellationToken)
+  fullName: LocalGPT.WireProtocol.IOneWireCapabilityProvider.GetHardwareAsync(System.Threading.CancellationToken)
+  spec.csharp:
+  - uid: LocalGPT.WireProtocol.IOneWireCapabilityProvider.GetHardwareAsync(System.Threading.CancellationToken)
+    name: GetHardwareAsync
+    isExternal: true
+  - name: (
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+  spec.vb:
+  - uid: LocalGPT.WireProtocol.IOneWireCapabilityProvider.GetHardwareAsync(System.Threading.CancellationToken)
+    name: GetHardwareAsync
+    isExternal: true
+  - name: (
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+- uid: System.Threading.Tasks.Task{System.Collections.Generic.IReadOnlyList{LocalGPT.WireProtocol.OneWireHardwareDescriptor}}
+  commentId: T:System.Threading.Tasks.Task{System.Collections.Generic.IReadOnlyList{LocalGPT.WireProtocol.OneWireHardwareDescriptor}}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<IReadOnlyList<OneWireHardwareDescriptor>>
+  nameWithType: Task<IReadOnlyList<OneWireHardwareDescriptor>>
+  fullName: System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LocalGPT.WireProtocol.OneWireHardwareDescriptor>>
+  nameWithType.vb: Task(Of IReadOnlyList(Of OneWireHardwareDescriptor))
+  fullName.vb: System.Threading.Tasks.Task(Of System.Collections.Generic.IReadOnlyList(Of LocalGPT.WireProtocol.OneWireHardwareDescriptor))
+  name.vb: Task(Of IReadOnlyList(Of OneWireHardwareDescriptor))
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: LocalGPT.WireProtocol.OneWireHardwareDescriptor
+    name: OneWireHardwareDescriptor
+    isExternal: true
+  - name: '>'
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: LocalGPT.WireProtocol.OneWireHardwareDescriptor
+    name: OneWireHardwareDescriptor
+    isExternal: true
+  - name: )
+  - name: )

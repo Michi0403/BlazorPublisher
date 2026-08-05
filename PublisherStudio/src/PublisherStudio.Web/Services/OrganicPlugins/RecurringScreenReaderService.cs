@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 using PublisherStudio.BusinessObjects;
@@ -19,13 +19,22 @@ public sealed class RecurringScreenReaderService(
 {
     private sealed record Runtime(RecurringScreenReaderSession Session, CancellationTokenSource Cancellation, Task Loop);
     private readonly ConcurrentDictionary<Guid, Runtime> runtimes = new();
+    /// <summary>
+    /// Occurs when changed.
+    /// </summary>
     public event Action? Changed;
 
+    /// <summary>
+    /// Gets sessions.
+    /// </summary>
     public IReadOnlyList<RecurringScreenReaderSession> GetSessions() => runtimes.Values
         .Select(runtime => runtime.Session)
         .OrderByDescending(session => session.CreatedUtc)
         .ToList();
 
+    /// <summary>
+    /// Starts async.
+    /// </summary>
     public Task<RecurringScreenReaderSession> StartAsync(
         string peerId,
         string selector,
@@ -64,6 +73,9 @@ public sealed class RecurringScreenReaderService(
         return Task.FromResult(session);
     }
 
+    /// <summary>
+    /// Stops async.
+    /// </summary>
     public async Task<bool> StopAsync(Guid sessionId)
     {
         if (!runtimes.TryRemove(sessionId, out var runtime))
@@ -213,6 +225,9 @@ public sealed class RecurringScreenReaderService(
         throw new TimeoutException("The browser did not return the screenshot within 45 seconds. Ensure the PublisherStudio tab is open and screen capture is permitted.");
     }
 
+    /// <summary>
+    /// Runs the dispose async operation.
+    /// </summary>
     public async ValueTask DisposeAsync()
     {
         foreach (var id in runtimes.Keys.ToArray())

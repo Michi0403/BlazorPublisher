@@ -1,0 +1,12 @@
+﻿order: 200
+pdf: true
+pdfFileName: PublisherStudio-2.1.1.pdf
+pdfTocPage: true
+pdfCoverPage: pdf-cover.html
+pdfPrintBackground: true
+items:
+- name: PublisherStudio documentation
+  href: ../guide/toc.yml
+- name: API reference
+  href: ../api/toc.yml
+

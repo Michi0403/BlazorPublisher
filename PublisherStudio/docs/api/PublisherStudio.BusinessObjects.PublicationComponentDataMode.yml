@@ -1,0 +1,134 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationComponentDataMode
+  commentId: T:PublisherStudio.BusinessObjects.PublicationComponentDataMode
+  id: PublicationComponentDataMode
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationComponentDataMode.OData
+  - PublisherStudio.BusinessObjects.PublicationComponentDataMode.PublicationDataObject
+  - PublisherStudio.BusinessObjects.PublicationComponentDataMode.Rest
+  - PublisherStudio.BusinessObjects.PublicationComponentDataMode.StaticSnapshot
+  langs:
+  - csharp
+  - vb
+  name: PublicationComponentDataMode
+  nameWithType: PublicationComponentDataMode
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentDataMode
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication component data mode values.
+  example: []
+  syntax:
+    content: public enum PublicationComponentDataMode
+    content.vb: Public Enum PublicationComponentDataMode
+- uid: PublisherStudio.BusinessObjects.PublicationComponentDataMode.PublicationDataObject
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentDataMode.PublicationDataObject
+  id: PublicationDataObject
+  parent: PublisherStudio.BusinessObjects.PublicationComponentDataMode
+  langs:
+  - csharp
+  - vb
+  name: PublicationDataObject
+  nameWithType: PublicationComponentDataMode.PublicationDataObject
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentDataMode.PublicationDataObject
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: PublicationDataObject = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentDataMode
+- uid: PublisherStudio.BusinessObjects.PublicationComponentDataMode.StaticSnapshot
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentDataMode.StaticSnapshot
+  id: StaticSnapshot
+  parent: PublisherStudio.BusinessObjects.PublicationComponentDataMode
+  langs:
+  - csharp
+  - vb
+  name: StaticSnapshot
+  nameWithType: PublicationComponentDataMode.StaticSnapshot
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentDataMode.StaticSnapshot
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: StaticSnapshot = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentDataMode
+- uid: PublisherStudio.BusinessObjects.PublicationComponentDataMode.Rest
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentDataMode.Rest
+  id: Rest
+  parent: PublisherStudio.BusinessObjects.PublicationComponentDataMode
+  langs:
+  - csharp
+  - vb
+  name: Rest
+  nameWithType: PublicationComponentDataMode.Rest
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentDataMode.Rest
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Rest = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentDataMode
+- uid: PublisherStudio.BusinessObjects.PublicationComponentDataMode.OData
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentDataMode.OData
+  id: OData
+  parent: PublisherStudio.BusinessObjects.PublicationComponentDataMode
+  langs:
+  - csharp
+  - vb
+  name: OData
+  nameWithType: PublicationComponentDataMode.OData
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentDataMode.OData
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: OData = 3
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentDataMode
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationComponentDataMode
+  commentId: T:PublisherStudio.BusinessObjects.PublicationComponentDataMode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationComponentDataMode.html
+  name: PublicationComponentDataMode
+  nameWithType: PublicationComponentDataMode
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentDataMode

@@ -1,4 +1,4 @@
-using System.Buffers.Binary;
+﻿using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Text;
 
@@ -28,6 +28,9 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
         }
     }
 
+    /// <summary>
+    /// Runs the refresh operation.
+    /// </summary>
     public IReadOnlyList<string> Refresh()
     {
         try

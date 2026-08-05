@@ -1,0 +1,1061 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService
+  commentId: T:PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService
+  id: WindowsHotkeyNativeService
+  parent: PublisherStudio.Services.Streaming.Hotkeys
+  children:
+  - PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.#ctor(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService})
+  - PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.Dispose
+  - PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.IsAvailable
+  - PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.ReadMessage(PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage@)
+  - PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryInitializeMessageQueue(System.UInt32@)
+  - PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryPostThreadMessage(System.UInt32,System.UInt32,System.UIntPtr,System.IntPtr)
+  - PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryRegisterHotKey(System.IntPtr,System.Int32,System.UInt32,System.UInt32)
+  - PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryUnregisterHotKey(System.IntPtr,System.Int32)
+  langs:
+  - csharp
+  - vb
+  name: WindowsHotkeyNativeService
+  nameWithType: WindowsHotkeyNativeService
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Hotkeys
+  summary: Instance-owned user32/kernel32 binding used by the global-hotkey runtime. Native exports are resolved once per application lifetime so application code does not require static P/Invoke declarations.
+  example: []
+  syntax:
+    content: 'public sealed class WindowsHotkeyNativeService : IWindowsHotkeyNativeService, IDisposable'
+    content.vb: Public NotInheritable Class WindowsHotkeyNativeService Implements IWindowsHotkeyNativeService, IDisposable
+  inheritance:
+  - System.Object
+  implements:
+  - PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService
+  - System.IDisposable
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.#ctor(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService})
+  commentId: M:PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.#ctor(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService})
+  id: '#ctor(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService})'
+  parent: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService
+  langs:
+  - csharp
+  - vb
+  name: WindowsHotkeyNativeService(ILogger<WindowsHotkeyNativeService>)
+  nameWithType: WindowsHotkeyNativeService.WindowsHotkeyNativeService(ILogger<WindowsHotkeyNativeService>)
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.WindowsHotkeyNativeService(Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Hotkeys
+  summary: Runs the windows hotkey native service operation.
+  example: []
+  syntax:
+    content: public WindowsHotkeyNativeService(ILogger<WindowsHotkeyNativeService> logger)
+    parameters:
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService}
+    content.vb: Public Sub New(logger As ILogger(Of WindowsHotkeyNativeService))
+  overload: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.#ctor*
+  nameWithType.vb: WindowsHotkeyNativeService.New(ILogger(Of WindowsHotkeyNativeService))
+  fullName.vb: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.New(Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService))
+  name.vb: New(ILogger(Of WindowsHotkeyNativeService))
+- uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryInitializeMessageQueue(System.UInt32@)
+  commentId: M:PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryInitializeMessageQueue(System.UInt32@)
+  id: TryInitializeMessageQueue(System.UInt32@)
+  parent: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService
+  langs:
+  - csharp
+  - vb
+  name: TryInitializeMessageQueue(out uint)
+  nameWithType: WindowsHotkeyNativeService.TryInitializeMessageQueue(out uint)
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryInitializeMessageQueue(out uint)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Hotkeys
+  summary: Attempts to initialize message queue.
+  example: []
+  syntax:
+    content: public bool TryInitializeMessageQueue(out uint threadId)
+    parameters:
+    - id: threadId
+      type: System.UInt32
+    return:
+      type: System.Boolean
+    content.vb: Public Function TryInitializeMessageQueue(threadId As UInteger) As Boolean
+  overload: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryInitializeMessageQueue*
+  implements:
+  - PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryInitializeMessageQueue(System.UInt32@)
+  nameWithType.vb: WindowsHotkeyNativeService.TryInitializeMessageQueue(UInteger)
+  fullName.vb: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryInitializeMessageQueue(UInteger)
+  name.vb: TryInitializeMessageQueue(UInteger)
+- uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryRegisterHotKey(System.IntPtr,System.Int32,System.UInt32,System.UInt32)
+  commentId: M:PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryRegisterHotKey(System.IntPtr,System.Int32,System.UInt32,System.UInt32)
+  id: TryRegisterHotKey(System.IntPtr,System.Int32,System.UInt32,System.UInt32)
+  parent: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService
+  langs:
+  - csharp
+  - vb
+  name: TryRegisterHotKey(nint, int, uint, uint)
+  nameWithType: WindowsHotkeyNativeService.TryRegisterHotKey(nint, int, uint, uint)
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryRegisterHotKey(nint, int, uint, uint)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Hotkeys
+  summary: Attempts to register hot key.
+  example: []
+  syntax:
+    content: public bool TryRegisterHotKey(nint windowHandle, int id, uint modifiers, uint virtualKey)
+    parameters:
+    - id: windowHandle
+      type: System.IntPtr
+    - id: id
+      type: System.Int32
+    - id: modifiers
+      type: System.UInt32
+    - id: virtualKey
+      type: System.UInt32
+    return:
+      type: System.Boolean
+    content.vb: Public Function TryRegisterHotKey(windowHandle As IntPtr, id As Integer, modifiers As UInteger, virtualKey As UInteger) As Boolean
+  overload: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryRegisterHotKey*
+  implements:
+  - PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryRegisterHotKey(System.IntPtr,System.Int32,System.UInt32,System.UInt32)
+  nameWithType.vb: WindowsHotkeyNativeService.TryRegisterHotKey(IntPtr, Integer, UInteger, UInteger)
+  fullName.vb: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryRegisterHotKey(System.IntPtr, Integer, UInteger, UInteger)
+  name.vb: TryRegisterHotKey(IntPtr, Integer, UInteger, UInteger)
+- uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryUnregisterHotKey(System.IntPtr,System.Int32)
+  commentId: M:PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryUnregisterHotKey(System.IntPtr,System.Int32)
+  id: TryUnregisterHotKey(System.IntPtr,System.Int32)
+  parent: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService
+  langs:
+  - csharp
+  - vb
+  name: TryUnregisterHotKey(nint, int)
+  nameWithType: WindowsHotkeyNativeService.TryUnregisterHotKey(nint, int)
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryUnregisterHotKey(nint, int)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Hotkeys
+  summary: Attempts to unregister hot key.
+  example: []
+  syntax:
+    content: public bool TryUnregisterHotKey(nint windowHandle, int id)
+    parameters:
+    - id: windowHandle
+      type: System.IntPtr
+    - id: id
+      type: System.Int32
+    return:
+      type: System.Boolean
+    content.vb: Public Function TryUnregisterHotKey(windowHandle As IntPtr, id As Integer) As Boolean
+  overload: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryUnregisterHotKey*
+  implements:
+  - PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryUnregisterHotKey(System.IntPtr,System.Int32)
+  nameWithType.vb: WindowsHotkeyNativeService.TryUnregisterHotKey(IntPtr, Integer)
+  fullName.vb: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryUnregisterHotKey(System.IntPtr, Integer)
+  name.vb: TryUnregisterHotKey(IntPtr, Integer)
+- uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.ReadMessage(PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage@)
+  commentId: M:PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.ReadMessage(PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage@)
+  id: ReadMessage(PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage@)
+  parent: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService
+  langs:
+  - csharp
+  - vb
+  name: ReadMessage(out WindowsHotkeyNativeMessage)
+  nameWithType: WindowsHotkeyNativeService.ReadMessage(out WindowsHotkeyNativeMessage)
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.ReadMessage(out PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Hotkeys
+  summary: Reads message.
+  example: []
+  syntax:
+    content: public int ReadMessage(out WindowsHotkeyNativeMessage message)
+    parameters:
+    - id: message
+      type: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage
+    return:
+      type: System.Int32
+    content.vb: Public Function ReadMessage(message As WindowsHotkeyNativeMessage) As Integer
+  overload: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.ReadMessage*
+  implements:
+  - PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.ReadMessage(PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage@)
+  nameWithType.vb: WindowsHotkeyNativeService.ReadMessage(WindowsHotkeyNativeMessage)
+  fullName.vb: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.ReadMessage(PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage)
+  name.vb: ReadMessage(WindowsHotkeyNativeMessage)
+- uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryPostThreadMessage(System.UInt32,System.UInt32,System.UIntPtr,System.IntPtr)
+  commentId: M:PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryPostThreadMessage(System.UInt32,System.UInt32,System.UIntPtr,System.IntPtr)
+  id: TryPostThreadMessage(System.UInt32,System.UInt32,System.UIntPtr,System.IntPtr)
+  parent: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService
+  langs:
+  - csharp
+  - vb
+  name: TryPostThreadMessage(uint, uint, nuint, nint)
+  nameWithType: WindowsHotkeyNativeService.TryPostThreadMessage(uint, uint, nuint, nint)
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryPostThreadMessage(uint, uint, nuint, nint)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Hotkeys
+  summary: Attempts to post thread message.
+  example: []
+  syntax:
+    content: public bool TryPostThreadMessage(uint threadId, uint message, nuint wordParameter, nint longParameter)
+    parameters:
+    - id: threadId
+      type: System.UInt32
+    - id: message
+      type: System.UInt32
+    - id: wordParameter
+      type: System.UIntPtr
+    - id: longParameter
+      type: System.IntPtr
+    return:
+      type: System.Boolean
+    content.vb: Public Function TryPostThreadMessage(threadId As UInteger, message As UInteger, wordParameter As UIntPtr, longParameter As IntPtr) As Boolean
+  overload: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryPostThreadMessage*
+  implements:
+  - PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryPostThreadMessage(System.UInt32,System.UInt32,System.UIntPtr,System.IntPtr)
+  nameWithType.vb: WindowsHotkeyNativeService.TryPostThreadMessage(UInteger, UInteger, UIntPtr, IntPtr)
+  fullName.vb: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryPostThreadMessage(UInteger, UInteger, System.UIntPtr, System.IntPtr)
+  name.vb: TryPostThreadMessage(UInteger, UInteger, UIntPtr, IntPtr)
+- uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.Dispose
+  commentId: M:PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.Dispose
+  id: Dispose
+  parent: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService
+  langs:
+  - csharp
+  - vb
+  name: Dispose()
+  nameWithType: WindowsHotkeyNativeService.Dispose()
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.Dispose()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Hotkeys
+  summary: Runs the dispose operation.
+  example: []
+  syntax:
+    content: public void Dispose()
+    content.vb: Public Sub Dispose()
+  overload: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.Dispose*
+  implements:
+  - System.IDisposable.Dispose
+- uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.IsAvailable
+  commentId: P:PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.IsAvailable
+  id: IsAvailable
+  parent: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService
+  langs:
+  - csharp
+  - vb
+  name: IsAvailable
+  nameWithType: WindowsHotkeyNativeService.IsAvailable
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.IsAvailable
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Hotkeys
+  summary: Gets or sets is available.
+  example: []
+  syntax:
+    content: public bool IsAvailable { get; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public ReadOnly Property IsAvailable As Boolean
+  overload: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.IsAvailable*
+  implements:
+  - PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.IsAvailable
+references:
+- uid: PublisherStudio.Services.Streaming.Hotkeys
+  commentId: N:PublisherStudio.Services.Streaming.Hotkeys
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Hotkeys
+  nameWithType: PublisherStudio.Services.Streaming.Hotkeys
+  fullName: PublisherStudio.Services.Streaming.Hotkeys
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Hotkeys
+    name: Hotkeys
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Hotkeys.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Hotkeys
+    name: Hotkeys
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Hotkeys.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService
+  commentId: T:PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService
+  parent: PublisherStudio.Services.Streaming.Hotkeys
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.html
+  name: IWindowsHotkeyNativeService
+  nameWithType: IWindowsHotkeyNativeService
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService
+- uid: System.IDisposable
+  commentId: T:System.IDisposable
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.idisposable
+  name: IDisposable
+  nameWithType: IDisposable
+  fullName: System.IDisposable
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.#ctor*
+  commentId: Overload:PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.html#PublisherStudio_Services_Streaming_Hotkeys_WindowsHotkeyNativeService__ctor_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_Streaming_Hotkeys_WindowsHotkeyNativeService__
+  name: WindowsHotkeyNativeService
+  nameWithType: WindowsHotkeyNativeService.WindowsHotkeyNativeService
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.WindowsHotkeyNativeService
+  nameWithType.vb: WindowsHotkeyNativeService.New
+  fullName.vb: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.New
+  name.vb: New
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<WindowsHotkeyNativeService>
+  nameWithType: ILogger<WindowsHotkeyNativeService>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService>
+  nameWithType.vb: ILogger(Of WindowsHotkeyNativeService)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService)
+  name.vb: ILogger(Of WindowsHotkeyNativeService)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService
+    name: WindowsHotkeyNativeService
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService
+    name: WindowsHotkeyNativeService
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.html
+  - name: )
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryInitializeMessageQueue*
+  commentId: Overload:PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryInitializeMessageQueue
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.html#PublisherStudio_Services_Streaming_Hotkeys_WindowsHotkeyNativeService_TryInitializeMessageQueue_System_UInt32__
+  name: TryInitializeMessageQueue
+  nameWithType: WindowsHotkeyNativeService.TryInitializeMessageQueue
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryInitializeMessageQueue
+- uid: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryInitializeMessageQueue(System.UInt32@)
+  commentId: M:PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryInitializeMessageQueue(System.UInt32@)
+  parent: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.html#PublisherStudio_Services_Streaming_Hotkeys_IWindowsHotkeyNativeService_TryInitializeMessageQueue_System_UInt32__
+  name: TryInitializeMessageQueue(out uint)
+  nameWithType: IWindowsHotkeyNativeService.TryInitializeMessageQueue(out uint)
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryInitializeMessageQueue(out uint)
+  nameWithType.vb: IWindowsHotkeyNativeService.TryInitializeMessageQueue(UInteger)
+  fullName.vb: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryInitializeMessageQueue(UInteger)
+  name.vb: TryInitializeMessageQueue(UInteger)
+  spec.csharp:
+  - uid: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryInitializeMessageQueue(System.UInt32@)
+    name: TryInitializeMessageQueue
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.html#PublisherStudio_Services_Streaming_Hotkeys_IWindowsHotkeyNativeService_TryInitializeMessageQueue_System_UInt32__
+  - name: (
+  - name: out
+  - name: " "
+  - uid: System.UInt32
+    name: uint
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryInitializeMessageQueue(System.UInt32@)
+    name: TryInitializeMessageQueue
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.html#PublisherStudio_Services_Streaming_Hotkeys_IWindowsHotkeyNativeService_TryInitializeMessageQueue_System_UInt32__
+  - name: (
+  - uid: System.UInt32
+    name: UInteger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: )
+- uid: System.UInt32
+  commentId: T:System.UInt32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.uint32
+  name: uint
+  nameWithType: uint
+  fullName: uint
+  nameWithType.vb: UInteger
+  fullName.vb: UInteger
+  name.vb: UInteger
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryRegisterHotKey*
+  commentId: Overload:PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryRegisterHotKey
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.html#PublisherStudio_Services_Streaming_Hotkeys_WindowsHotkeyNativeService_TryRegisterHotKey_System_IntPtr_System_Int32_System_UInt32_System_UInt32_
+  name: TryRegisterHotKey
+  nameWithType: WindowsHotkeyNativeService.TryRegisterHotKey
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryRegisterHotKey
+- uid: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryRegisterHotKey(System.IntPtr,System.Int32,System.UInt32,System.UInt32)
+  commentId: M:PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryRegisterHotKey(System.IntPtr,System.Int32,System.UInt32,System.UInt32)
+  parent: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.html#PublisherStudio_Services_Streaming_Hotkeys_IWindowsHotkeyNativeService_TryRegisterHotKey_System_IntPtr_System_Int32_System_UInt32_System_UInt32_
+  name: TryRegisterHotKey(nint, int, uint, uint)
+  nameWithType: IWindowsHotkeyNativeService.TryRegisterHotKey(nint, int, uint, uint)
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryRegisterHotKey(nint, int, uint, uint)
+  nameWithType.vb: IWindowsHotkeyNativeService.TryRegisterHotKey(IntPtr, Integer, UInteger, UInteger)
+  fullName.vb: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryRegisterHotKey(System.IntPtr, Integer, UInteger, UInteger)
+  name.vb: TryRegisterHotKey(IntPtr, Integer, UInteger, UInteger)
+  spec.csharp:
+  - uid: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryRegisterHotKey(System.IntPtr,System.Int32,System.UInt32,System.UInt32)
+    name: TryRegisterHotKey
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.html#PublisherStudio_Services_Streaming_Hotkeys_IWindowsHotkeyNativeService_TryRegisterHotKey_System_IntPtr_System_Int32_System_UInt32_System_UInt32_
+  - name: (
+  - uid: System.IntPtr
+    name: nint
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.intptr
+  - name: ','
+  - name: " "
+  - uid: System.Int32
+    name: int
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.int32
+  - name: ','
+  - name: " "
+  - uid: System.UInt32
+    name: uint
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: ','
+  - name: " "
+  - uid: System.UInt32
+    name: uint
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryRegisterHotKey(System.IntPtr,System.Int32,System.UInt32,System.UInt32)
+    name: TryRegisterHotKey
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.html#PublisherStudio_Services_Streaming_Hotkeys_IWindowsHotkeyNativeService_TryRegisterHotKey_System_IntPtr_System_Int32_System_UInt32_System_UInt32_
+  - name: (
+  - uid: System.IntPtr
+    name: IntPtr
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.intptr
+  - name: ','
+  - name: " "
+  - uid: System.Int32
+    name: Integer
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.int32
+  - name: ','
+  - name: " "
+  - uid: System.UInt32
+    name: UInteger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: ','
+  - name: " "
+  - uid: System.UInt32
+    name: UInteger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: )
+- uid: System.IntPtr
+  commentId: T:System.IntPtr
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.intptr
+  name: nint
+  nameWithType: nint
+  fullName: nint
+  nameWithType.vb: IntPtr
+  fullName.vb: System.IntPtr
+  name.vb: IntPtr
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryUnregisterHotKey*
+  commentId: Overload:PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryUnregisterHotKey
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.html#PublisherStudio_Services_Streaming_Hotkeys_WindowsHotkeyNativeService_TryUnregisterHotKey_System_IntPtr_System_Int32_
+  name: TryUnregisterHotKey
+  nameWithType: WindowsHotkeyNativeService.TryUnregisterHotKey
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryUnregisterHotKey
+- uid: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryUnregisterHotKey(System.IntPtr,System.Int32)
+  commentId: M:PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryUnregisterHotKey(System.IntPtr,System.Int32)
+  parent: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.html#PublisherStudio_Services_Streaming_Hotkeys_IWindowsHotkeyNativeService_TryUnregisterHotKey_System_IntPtr_System_Int32_
+  name: TryUnregisterHotKey(nint, int)
+  nameWithType: IWindowsHotkeyNativeService.TryUnregisterHotKey(nint, int)
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryUnregisterHotKey(nint, int)
+  nameWithType.vb: IWindowsHotkeyNativeService.TryUnregisterHotKey(IntPtr, Integer)
+  fullName.vb: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryUnregisterHotKey(System.IntPtr, Integer)
+  name.vb: TryUnregisterHotKey(IntPtr, Integer)
+  spec.csharp:
+  - uid: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryUnregisterHotKey(System.IntPtr,System.Int32)
+    name: TryUnregisterHotKey
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.html#PublisherStudio_Services_Streaming_Hotkeys_IWindowsHotkeyNativeService_TryUnregisterHotKey_System_IntPtr_System_Int32_
+  - name: (
+  - uid: System.IntPtr
+    name: nint
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.intptr
+  - name: ','
+  - name: " "
+  - uid: System.Int32
+    name: int
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.int32
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryUnregisterHotKey(System.IntPtr,System.Int32)
+    name: TryUnregisterHotKey
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.html#PublisherStudio_Services_Streaming_Hotkeys_IWindowsHotkeyNativeService_TryUnregisterHotKey_System_IntPtr_System_Int32_
+  - name: (
+  - uid: System.IntPtr
+    name: IntPtr
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.intptr
+  - name: ','
+  - name: " "
+  - uid: System.Int32
+    name: Integer
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.int32
+  - name: )
+- uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.ReadMessage*
+  commentId: Overload:PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.ReadMessage
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.html#PublisherStudio_Services_Streaming_Hotkeys_WindowsHotkeyNativeService_ReadMessage_PublisherStudio_Services_Streaming_Hotkeys_WindowsHotkeyNativeMessage__
+  name: ReadMessage
+  nameWithType: WindowsHotkeyNativeService.ReadMessage
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.ReadMessage
+- uid: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.ReadMessage(PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage@)
+  commentId: M:PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.ReadMessage(PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage@)
+  parent: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.html#PublisherStudio_Services_Streaming_Hotkeys_IWindowsHotkeyNativeService_ReadMessage_PublisherStudio_Services_Streaming_Hotkeys_WindowsHotkeyNativeMessage__
+  name: ReadMessage(out WindowsHotkeyNativeMessage)
+  nameWithType: IWindowsHotkeyNativeService.ReadMessage(out WindowsHotkeyNativeMessage)
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.ReadMessage(out PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage)
+  nameWithType.vb: IWindowsHotkeyNativeService.ReadMessage(WindowsHotkeyNativeMessage)
+  fullName.vb: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.ReadMessage(PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage)
+  name.vb: ReadMessage(WindowsHotkeyNativeMessage)
+  spec.csharp:
+  - uid: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.ReadMessage(PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage@)
+    name: ReadMessage
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.html#PublisherStudio_Services_Streaming_Hotkeys_IWindowsHotkeyNativeService_ReadMessage_PublisherStudio_Services_Streaming_Hotkeys_WindowsHotkeyNativeMessage__
+  - name: (
+  - name: out
+  - name: " "
+  - uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage
+    name: WindowsHotkeyNativeMessage
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage.html
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.ReadMessage(PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage@)
+    name: ReadMessage
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.html#PublisherStudio_Services_Streaming_Hotkeys_IWindowsHotkeyNativeService_ReadMessage_PublisherStudio_Services_Streaming_Hotkeys_WindowsHotkeyNativeMessage__
+  - name: (
+  - uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage
+    name: WindowsHotkeyNativeMessage
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage.html
+  - name: )
+- uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage
+  commentId: T:PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage
+  parent: PublisherStudio.Services.Streaming.Hotkeys
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage.html
+  name: WindowsHotkeyNativeMessage
+  nameWithType: WindowsHotkeyNativeMessage
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage
+- uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryPostThreadMessage*
+  commentId: Overload:PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryPostThreadMessage
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.html#PublisherStudio_Services_Streaming_Hotkeys_WindowsHotkeyNativeService_TryPostThreadMessage_System_UInt32_System_UInt32_System_UIntPtr_System_IntPtr_
+  name: TryPostThreadMessage
+  nameWithType: WindowsHotkeyNativeService.TryPostThreadMessage
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.TryPostThreadMessage
+- uid: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryPostThreadMessage(System.UInt32,System.UInt32,System.UIntPtr,System.IntPtr)
+  commentId: M:PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryPostThreadMessage(System.UInt32,System.UInt32,System.UIntPtr,System.IntPtr)
+  parent: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.html#PublisherStudio_Services_Streaming_Hotkeys_IWindowsHotkeyNativeService_TryPostThreadMessage_System_UInt32_System_UInt32_System_UIntPtr_System_IntPtr_
+  name: TryPostThreadMessage(uint, uint, nuint, nint)
+  nameWithType: IWindowsHotkeyNativeService.TryPostThreadMessage(uint, uint, nuint, nint)
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryPostThreadMessage(uint, uint, nuint, nint)
+  nameWithType.vb: IWindowsHotkeyNativeService.TryPostThreadMessage(UInteger, UInteger, UIntPtr, IntPtr)
+  fullName.vb: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryPostThreadMessage(UInteger, UInteger, System.UIntPtr, System.IntPtr)
+  name.vb: TryPostThreadMessage(UInteger, UInteger, UIntPtr, IntPtr)
+  spec.csharp:
+  - uid: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryPostThreadMessage(System.UInt32,System.UInt32,System.UIntPtr,System.IntPtr)
+    name: TryPostThreadMessage
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.html#PublisherStudio_Services_Streaming_Hotkeys_IWindowsHotkeyNativeService_TryPostThreadMessage_System_UInt32_System_UInt32_System_UIntPtr_System_IntPtr_
+  - name: (
+  - uid: System.UInt32
+    name: uint
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: ','
+  - name: " "
+  - uid: System.UInt32
+    name: uint
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: ','
+  - name: " "
+  - uid: System.UIntPtr
+    name: nuint
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uintptr
+  - name: ','
+  - name: " "
+  - uid: System.IntPtr
+    name: nint
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.intptr
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.TryPostThreadMessage(System.UInt32,System.UInt32,System.UIntPtr,System.IntPtr)
+    name: TryPostThreadMessage
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.html#PublisherStudio_Services_Streaming_Hotkeys_IWindowsHotkeyNativeService_TryPostThreadMessage_System_UInt32_System_UInt32_System_UIntPtr_System_IntPtr_
+  - name: (
+  - uid: System.UInt32
+    name: UInteger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: ','
+  - name: " "
+  - uid: System.UInt32
+    name: UInteger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uint32
+  - name: ','
+  - name: " "
+  - uid: System.UIntPtr
+    name: UIntPtr
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uintptr
+  - name: ','
+  - name: " "
+  - uid: System.IntPtr
+    name: IntPtr
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.intptr
+  - name: )
+- uid: System.UIntPtr
+  commentId: T:System.UIntPtr
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.uintptr
+  name: nuint
+  nameWithType: nuint
+  fullName: nuint
+  nameWithType.vb: UIntPtr
+  fullName.vb: System.UIntPtr
+  name.vb: UIntPtr
+- uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.Dispose*
+  commentId: Overload:PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.Dispose
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.html#PublisherStudio_Services_Streaming_Hotkeys_WindowsHotkeyNativeService_Dispose
+  name: Dispose
+  nameWithType: WindowsHotkeyNativeService.Dispose
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.Dispose
+- uid: System.IDisposable.Dispose
+  commentId: M:System.IDisposable.Dispose
+  parent: System.IDisposable
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.idisposable.dispose
+  name: Dispose()
+  nameWithType: IDisposable.Dispose()
+  fullName: System.IDisposable.Dispose()
+  spec.csharp:
+  - uid: System.IDisposable.Dispose
+    name: Dispose
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.idisposable.dispose
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.IDisposable.Dispose
+    name: Dispose
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.idisposable.dispose
+  - name: (
+  - name: )
+- uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.IsAvailable*
+  commentId: Overload:PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.IsAvailable
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.html#PublisherStudio_Services_Streaming_Hotkeys_WindowsHotkeyNativeService_IsAvailable
+  name: IsAvailable
+  nameWithType: WindowsHotkeyNativeService.IsAvailable
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.IsAvailable
+- uid: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.IsAvailable
+  commentId: P:PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.IsAvailable
+  parent: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.html#PublisherStudio_Services_Streaming_Hotkeys_IWindowsHotkeyNativeService_IsAvailable
+  name: IsAvailable
+  nameWithType: IWindowsHotkeyNativeService.IsAvailable
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.IsAvailable

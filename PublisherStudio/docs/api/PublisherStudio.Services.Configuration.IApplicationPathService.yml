@@ -1,0 +1,245 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Configuration.IApplicationPathService
+  commentId: T:PublisherStudio.Services.Configuration.IApplicationPathService
+  id: IApplicationPathService
+  parent: PublisherStudio.Services.Configuration
+  children:
+  - PublisherStudio.Services.Configuration.IApplicationPathService.EnsureDirectories(PublisherStudio.BusinessObjects.PublisherStudioPathOptions)
+  - PublisherStudio.Services.Configuration.IApplicationPathService.GetDefaults
+  - PublisherStudio.Services.Configuration.IApplicationPathService.Resolve(PublisherStudio.BusinessObjects.PublisherStudioPathOptions)
+  - PublisherStudio.Services.Configuration.IApplicationPathService.ResolveMediaPath(System.String,PublisherStudio.BusinessObjects.PublisherStudioPathOptions)
+  langs:
+  - csharp
+  - vb
+  name: IApplicationPathService
+  nameWithType: IApplicationPathService
+  fullName: PublisherStudio.Services.Configuration.IApplicationPathService
+  type: Interface
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  summary: Defines the application path service contract.
+  example: []
+  syntax:
+    content: public interface IApplicationPathService
+    content.vb: Public Interface IApplicationPathService
+  derivedClasses:
+  - PublisherStudio.Services.Configuration.ApplicationPathService
+- uid: PublisherStudio.Services.Configuration.IApplicationPathService.GetDefaults
+  commentId: M:PublisherStudio.Services.Configuration.IApplicationPathService.GetDefaults
+  id: GetDefaults
+  parent: PublisherStudio.Services.Configuration.IApplicationPathService
+  langs:
+  - csharp
+  - vb
+  name: GetDefaults()
+  nameWithType: IApplicationPathService.GetDefaults()
+  fullName: PublisherStudio.Services.Configuration.IApplicationPathService.GetDefaults()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: PublisherStudioPathOptions GetDefaults()
+    return:
+      type: PublisherStudio.BusinessObjects.PublisherStudioPathOptions
+    content.vb: Function GetDefaults() As PublisherStudioPathOptions
+  overload: PublisherStudio.Services.Configuration.IApplicationPathService.GetDefaults*
+- uid: PublisherStudio.Services.Configuration.IApplicationPathService.Resolve(PublisherStudio.BusinessObjects.PublisherStudioPathOptions)
+  commentId: M:PublisherStudio.Services.Configuration.IApplicationPathService.Resolve(PublisherStudio.BusinessObjects.PublisherStudioPathOptions)
+  id: Resolve(PublisherStudio.BusinessObjects.PublisherStudioPathOptions)
+  parent: PublisherStudio.Services.Configuration.IApplicationPathService
+  langs:
+  - csharp
+  - vb
+  name: Resolve(PublisherStudioPathOptions?)
+  nameWithType: IApplicationPathService.Resolve(PublisherStudioPathOptions?)
+  fullName: PublisherStudio.Services.Configuration.IApplicationPathService.Resolve(PublisherStudio.BusinessObjects.PublisherStudioPathOptions?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: PublisherStudioPathOptions Resolve(PublisherStudioPathOptions? projectOverrides = null)
+    parameters:
+    - id: projectOverrides
+      type: PublisherStudio.BusinessObjects.PublisherStudioPathOptions
+    return:
+      type: PublisherStudio.BusinessObjects.PublisherStudioPathOptions
+    content.vb: Function Resolve(projectOverrides As PublisherStudioPathOptions = Nothing) As PublisherStudioPathOptions
+  overload: PublisherStudio.Services.Configuration.IApplicationPathService.Resolve*
+  nameWithType.vb: IApplicationPathService.Resolve(PublisherStudioPathOptions)
+  fullName.vb: PublisherStudio.Services.Configuration.IApplicationPathService.Resolve(PublisherStudio.BusinessObjects.PublisherStudioPathOptions)
+  name.vb: Resolve(PublisherStudioPathOptions)
+- uid: PublisherStudio.Services.Configuration.IApplicationPathService.ResolveMediaPath(System.String,PublisherStudio.BusinessObjects.PublisherStudioPathOptions)
+  commentId: M:PublisherStudio.Services.Configuration.IApplicationPathService.ResolveMediaPath(System.String,PublisherStudio.BusinessObjects.PublisherStudioPathOptions)
+  id: ResolveMediaPath(System.String,PublisherStudio.BusinessObjects.PublisherStudioPathOptions)
+  parent: PublisherStudio.Services.Configuration.IApplicationPathService
+  langs:
+  - csharp
+  - vb
+  name: ResolveMediaPath(string, PublisherStudioPathOptions?)
+  nameWithType: IApplicationPathService.ResolveMediaPath(string, PublisherStudioPathOptions?)
+  fullName: PublisherStudio.Services.Configuration.IApplicationPathService.ResolveMediaPath(string, PublisherStudio.BusinessObjects.PublisherStudioPathOptions?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: string ResolveMediaPath(string mediaKind, PublisherStudioPathOptions? projectOverrides = null)
+    parameters:
+    - id: mediaKind
+      type: System.String
+    - id: projectOverrides
+      type: PublisherStudio.BusinessObjects.PublisherStudioPathOptions
+    return:
+      type: System.String
+    content.vb: Function ResolveMediaPath(mediaKind As String, projectOverrides As PublisherStudioPathOptions = Nothing) As String
+  overload: PublisherStudio.Services.Configuration.IApplicationPathService.ResolveMediaPath*
+  nameWithType.vb: IApplicationPathService.ResolveMediaPath(String, PublisherStudioPathOptions)
+  fullName.vb: PublisherStudio.Services.Configuration.IApplicationPathService.ResolveMediaPath(String, PublisherStudio.BusinessObjects.PublisherStudioPathOptions)
+  name.vb: ResolveMediaPath(String, PublisherStudioPathOptions)
+- uid: PublisherStudio.Services.Configuration.IApplicationPathService.EnsureDirectories(PublisherStudio.BusinessObjects.PublisherStudioPathOptions)
+  commentId: M:PublisherStudio.Services.Configuration.IApplicationPathService.EnsureDirectories(PublisherStudio.BusinessObjects.PublisherStudioPathOptions)
+  id: EnsureDirectories(PublisherStudio.BusinessObjects.PublisherStudioPathOptions)
+  parent: PublisherStudio.Services.Configuration.IApplicationPathService
+  langs:
+  - csharp
+  - vb
+  name: EnsureDirectories(PublisherStudioPathOptions?)
+  nameWithType: IApplicationPathService.EnsureDirectories(PublisherStudioPathOptions?)
+  fullName: PublisherStudio.Services.Configuration.IApplicationPathService.EnsureDirectories(PublisherStudio.BusinessObjects.PublisherStudioPathOptions?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: void EnsureDirectories(PublisherStudioPathOptions? projectOverrides = null)
+    parameters:
+    - id: projectOverrides
+      type: PublisherStudio.BusinessObjects.PublisherStudioPathOptions
+    content.vb: Sub EnsureDirectories(projectOverrides As PublisherStudioPathOptions = Nothing)
+  overload: PublisherStudio.Services.Configuration.IApplicationPathService.EnsureDirectories*
+  nameWithType.vb: IApplicationPathService.EnsureDirectories(PublisherStudioPathOptions)
+  fullName.vb: PublisherStudio.Services.Configuration.IApplicationPathService.EnsureDirectories(PublisherStudio.BusinessObjects.PublisherStudioPathOptions)
+  name.vb: EnsureDirectories(PublisherStudioPathOptions)
+references:
+- uid: PublisherStudio.Services.Configuration
+  commentId: N:PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Configuration
+  nameWithType: PublisherStudio.Services.Configuration
+  fullName: PublisherStudio.Services.Configuration
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+- uid: PublisherStudio.Services.Configuration.IApplicationPathService.GetDefaults*
+  commentId: Overload:PublisherStudio.Services.Configuration.IApplicationPathService.GetDefaults
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IApplicationPathService.html#PublisherStudio_Services_Configuration_IApplicationPathService_GetDefaults
+  name: GetDefaults
+  nameWithType: IApplicationPathService.GetDefaults
+  fullName: PublisherStudio.Services.Configuration.IApplicationPathService.GetDefaults
+- uid: PublisherStudio.BusinessObjects.PublisherStudioPathOptions
+  commentId: T:PublisherStudio.BusinessObjects.PublisherStudioPathOptions
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherStudioPathOptions.html
+  name: PublisherStudioPathOptions
+  nameWithType: PublisherStudioPathOptions
+  fullName: PublisherStudio.BusinessObjects.PublisherStudioPathOptions
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.Services.Configuration.IApplicationPathService.Resolve*
+  commentId: Overload:PublisherStudio.Services.Configuration.IApplicationPathService.Resolve
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IApplicationPathService.html#PublisherStudio_Services_Configuration_IApplicationPathService_Resolve_PublisherStudio_BusinessObjects_PublisherStudioPathOptions_
+  name: Resolve
+  nameWithType: IApplicationPathService.Resolve
+  fullName: PublisherStudio.Services.Configuration.IApplicationPathService.Resolve
+- uid: PublisherStudio.Services.Configuration.IApplicationPathService.ResolveMediaPath*
+  commentId: Overload:PublisherStudio.Services.Configuration.IApplicationPathService.ResolveMediaPath
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IApplicationPathService.html#PublisherStudio_Services_Configuration_IApplicationPathService_ResolveMediaPath_System_String_PublisherStudio_BusinessObjects_PublisherStudioPathOptions_
+  name: ResolveMediaPath
+  nameWithType: IApplicationPathService.ResolveMediaPath
+  fullName: PublisherStudio.Services.Configuration.IApplicationPathService.ResolveMediaPath
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.Configuration.IApplicationPathService.EnsureDirectories*
+  commentId: Overload:PublisherStudio.Services.Configuration.IApplicationPathService.EnsureDirectories
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IApplicationPathService.html#PublisherStudio_Services_Configuration_IApplicationPathService_EnsureDirectories_PublisherStudio_BusinessObjects_PublisherStudioPathOptions_
+  name: EnsureDirectories
+  nameWithType: IApplicationPathService.EnsureDirectories
+  fullName: PublisherStudio.Services.Configuration.IApplicationPathService.EnsureDirectories

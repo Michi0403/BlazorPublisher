@@ -1,0 +1,972 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+  commentId: T:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+  id: PublisherPictureStudioPolicy
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.#ctor
+  - PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.CanvasHostId
+  - PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.CanvasId
+  - PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.Equals(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy)
+  - PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.Equals(System.Object)
+  - PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.GetHashCode
+  - PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.ImageDropInputId
+  - PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.ImageInputId
+  - PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.LayerDropInputId
+  - PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.LayeredInputId
+  - PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.MaximumDrawWidth
+  - PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.MinimumDrawWidth
+  - PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.StudioRootId
+  - PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.ToString
+  - PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.op_Equality(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy,PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy)
+  - PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.op_Inequality(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy,PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy)
+  langs:
+  - csharp
+  - vb
+  name: PublisherPictureStudioPolicy
+  nameWithType: PublisherPictureStudioPolicy
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents a publisher picture studio policy.
+  example: []
+  syntax:
+    content: 'public sealed record PublisherPictureStudioPolicy : IEquatable<PublisherPictureStudioPolicy>'
+    content.vb: Public NotInheritable Class PublisherPictureStudioPolicy Implements IEquatable(Of PublisherPictureStudioPolicy)
+  inheritance:
+  - System.Object
+  implements:
+  - System.IEquatable{PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy}
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.ToString
+  commentId: M:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.ToString
+  id: ToString
+  parent: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+  langs:
+  - csharp
+  - vb
+  name: ToString()
+  nameWithType: PublisherPictureStudioPolicy.ToString()
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.ToString()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  example: []
+  syntax:
+    content: public override string ToString()
+    return:
+      type: System.String
+    content.vb: Public Overrides Function ToString() As String
+  overridden: System.Object.ToString
+  overload: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.ToString*
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.op_Inequality(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy,PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy)
+  commentId: M:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.op_Inequality(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy,PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy)
+  id: op_Inequality(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy,PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy)
+  parent: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+  langs:
+  - csharp
+  - vb
+  name: operator !=(PublisherPictureStudioPolicy?, PublisherPictureStudioPolicy?)
+  nameWithType: PublisherPictureStudioPolicy.operator !=(PublisherPictureStudioPolicy?, PublisherPictureStudioPolicy?)
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.operator !=(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy?, PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy?)
+  type: Operator
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public static bool operator !=(PublisherPictureStudioPolicy? left, PublisherPictureStudioPolicy? right)
+    parameters:
+    - id: left
+      type: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+    - id: right
+      type: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+    return:
+      type: System.Boolean
+    content.vb: Public Shared Operator <>(left As PublisherPictureStudioPolicy, right As PublisherPictureStudioPolicy) As Boolean
+  overload: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.op_Inequality*
+  nameWithType.vb: PublisherPictureStudioPolicy.<>(PublisherPictureStudioPolicy, PublisherPictureStudioPolicy)
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.<>(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy, PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy)
+  name.vb: <>(PublisherPictureStudioPolicy, PublisherPictureStudioPolicy)
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.op_Equality(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy,PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy)
+  commentId: M:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.op_Equality(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy,PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy)
+  id: op_Equality(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy,PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy)
+  parent: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+  langs:
+  - csharp
+  - vb
+  name: operator ==(PublisherPictureStudioPolicy?, PublisherPictureStudioPolicy?)
+  nameWithType: PublisherPictureStudioPolicy.operator ==(PublisherPictureStudioPolicy?, PublisherPictureStudioPolicy?)
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.operator ==(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy?, PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy?)
+  type: Operator
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public static bool operator ==(PublisherPictureStudioPolicy? left, PublisherPictureStudioPolicy? right)
+    parameters:
+    - id: left
+      type: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+    - id: right
+      type: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+    return:
+      type: System.Boolean
+    content.vb: Public Shared Operator =(left As PublisherPictureStudioPolicy, right As PublisherPictureStudioPolicy) As Boolean
+  overload: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.op_Equality*
+  nameWithType.vb: PublisherPictureStudioPolicy.=(PublisherPictureStudioPolicy, PublisherPictureStudioPolicy)
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.=(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy, PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy)
+  name.vb: =(PublisherPictureStudioPolicy, PublisherPictureStudioPolicy)
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.GetHashCode
+  commentId: M:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.GetHashCode
+  id: GetHashCode
+  parent: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+  langs:
+  - csharp
+  - vb
+  name: GetHashCode()
+  nameWithType: PublisherPictureStudioPolicy.GetHashCode()
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.GetHashCode()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  example: []
+  syntax:
+    content: public override int GetHashCode()
+    return:
+      type: System.Int32
+    content.vb: Public Overrides Function GetHashCode() As Integer
+  overridden: System.Object.GetHashCode
+  overload: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.GetHashCode*
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.Equals(System.Object)
+  commentId: M:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.Equals(System.Object)
+  id: Equals(System.Object)
+  parent: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+  langs:
+  - csharp
+  - vb
+  name: Equals(object?)
+  nameWithType: PublisherPictureStudioPolicy.Equals(object?)
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.Equals(object?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  example: []
+  syntax:
+    content: public override bool Equals(object? obj)
+    parameters:
+    - id: obj
+      type: System.Object
+    return:
+      type: System.Boolean
+    content.vb: Public Overrides Function Equals(obj As Object) As Boolean
+  overridden: System.Object.Equals(System.Object)
+  overload: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.Equals*
+  nameWithType.vb: PublisherPictureStudioPolicy.Equals(Object)
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.Equals(Object)
+  name.vb: Equals(Object)
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.Equals(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy)
+  commentId: M:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.Equals(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy)
+  id: Equals(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy)
+  parent: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+  langs:
+  - csharp
+  - vb
+  name: Equals(PublisherPictureStudioPolicy?)
+  nameWithType: PublisherPictureStudioPolicy.Equals(PublisherPictureStudioPolicy?)
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.Equals(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  example: []
+  syntax:
+    content: public bool Equals(PublisherPictureStudioPolicy? other)
+    parameters:
+    - id: other
+      type: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+    return:
+      type: System.Boolean
+    content.vb: Public Function Equals(other As PublisherPictureStudioPolicy) As Boolean
+  overload: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.Equals*
+  implements:
+  - System.IEquatable{PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy}.Equals(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy)
+  nameWithType.vb: PublisherPictureStudioPolicy.Equals(PublisherPictureStudioPolicy)
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.Equals(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy)
+  name.vb: Equals(PublisherPictureStudioPolicy)
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.#ctor
+  commentId: M:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+  langs:
+  - csharp
+  - vb
+  name: PublisherPictureStudioPolicy()
+  nameWithType: PublisherPictureStudioPolicy.PublisherPictureStudioPolicy()
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.PublisherPictureStudioPolicy()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public PublisherPictureStudioPolicy()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.#ctor*
+  nameWithType.vb: PublisherPictureStudioPolicy.New()
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.New()
+  name.vb: New()
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.CanvasId
+  commentId: P:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.CanvasId
+  id: CanvasId
+  parent: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+  langs:
+  - csharp
+  - vb
+  name: CanvasId
+  nameWithType: PublisherPictureStudioPolicy.CanvasId
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.CanvasId
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets canvas identifier.
+  example: []
+  syntax:
+    content: public string CanvasId { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property CanvasId As String
+  overload: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.CanvasId*
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.CanvasHostId
+  commentId: P:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.CanvasHostId
+  id: CanvasHostId
+  parent: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+  langs:
+  - csharp
+  - vb
+  name: CanvasHostId
+  nameWithType: PublisherPictureStudioPolicy.CanvasHostId
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.CanvasHostId
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets canvas host identifier.
+  example: []
+  syntax:
+    content: public string CanvasHostId { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property CanvasHostId As String
+  overload: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.CanvasHostId*
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.StudioRootId
+  commentId: P:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.StudioRootId
+  id: StudioRootId
+  parent: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+  langs:
+  - csharp
+  - vb
+  name: StudioRootId
+  nameWithType: PublisherPictureStudioPolicy.StudioRootId
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.StudioRootId
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets studio root identifier.
+  example: []
+  syntax:
+    content: public string StudioRootId { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property StudioRootId As String
+  overload: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.StudioRootId*
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.ImageInputId
+  commentId: P:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.ImageInputId
+  id: ImageInputId
+  parent: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+  langs:
+  - csharp
+  - vb
+  name: ImageInputId
+  nameWithType: PublisherPictureStudioPolicy.ImageInputId
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.ImageInputId
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets image input identifier.
+  example: []
+  syntax:
+    content: public string ImageInputId { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property ImageInputId As String
+  overload: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.ImageInputId*
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.ImageDropInputId
+  commentId: P:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.ImageDropInputId
+  id: ImageDropInputId
+  parent: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+  langs:
+  - csharp
+  - vb
+  name: ImageDropInputId
+  nameWithType: PublisherPictureStudioPolicy.ImageDropInputId
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.ImageDropInputId
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets image drop input identifier.
+  example: []
+  syntax:
+    content: public string ImageDropInputId { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property ImageDropInputId As String
+  overload: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.ImageDropInputId*
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.LayeredInputId
+  commentId: P:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.LayeredInputId
+  id: LayeredInputId
+  parent: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+  langs:
+  - csharp
+  - vb
+  name: LayeredInputId
+  nameWithType: PublisherPictureStudioPolicy.LayeredInputId
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.LayeredInputId
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets layered input identifier.
+  example: []
+  syntax:
+    content: public string LayeredInputId { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property LayeredInputId As String
+  overload: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.LayeredInputId*
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.LayerDropInputId
+  commentId: P:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.LayerDropInputId
+  id: LayerDropInputId
+  parent: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+  langs:
+  - csharp
+  - vb
+  name: LayerDropInputId
+  nameWithType: PublisherPictureStudioPolicy.LayerDropInputId
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.LayerDropInputId
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets layer drop input identifier.
+  example: []
+  syntax:
+    content: public string LayerDropInputId { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property LayerDropInputId As String
+  overload: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.LayerDropInputId*
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.MinimumDrawWidth
+  commentId: P:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.MinimumDrawWidth
+  id: MinimumDrawWidth
+  parent: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+  langs:
+  - csharp
+  - vb
+  name: MinimumDrawWidth
+  nameWithType: PublisherPictureStudioPolicy.MinimumDrawWidth
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.MinimumDrawWidth
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets minimum draw width.
+  example: []
+  syntax:
+    content: public double MinimumDrawWidth { get; init; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property MinimumDrawWidth As Double
+  overload: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.MinimumDrawWidth*
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.MaximumDrawWidth
+  commentId: P:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.MaximumDrawWidth
+  id: MaximumDrawWidth
+  parent: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+  langs:
+  - csharp
+  - vb
+  name: MaximumDrawWidth
+  nameWithType: PublisherPictureStudioPolicy.MaximumDrawWidth
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.MaximumDrawWidth
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets maximum draw width.
+  example: []
+  syntax:
+    content: public double MaximumDrawWidth { get; init; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property MaximumDrawWidth As Double
+  overload: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.MaximumDrawWidth*
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.IEquatable{PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy}
+  commentId: T:System.IEquatable{PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy}
+  parent: System
+  definition: System.IEquatable`1
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<PublisherPictureStudioPolicy>
+  nameWithType: IEquatable<PublisherPictureStudioPolicy>
+  fullName: System.IEquatable<PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy>
+  nameWithType.vb: IEquatable(Of PublisherPictureStudioPolicy)
+  fullName.vb: System.IEquatable(Of PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy)
+  name.vb: IEquatable(Of PublisherPictureStudioPolicy)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+    name: PublisherPictureStudioPolicy
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.html
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+    name: PublisherPictureStudioPolicy
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.html
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: System.IEquatable`1
+  commentId: T:System.IEquatable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<T>
+  nameWithType: IEquatable<T>
+  fullName: System.IEquatable<T>
+  nameWithType.vb: IEquatable(Of T)
+  fullName.vb: System.IEquatable(Of T)
+  name.vb: IEquatable(Of T)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.ToString*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.ToString
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.html#PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy_ToString
+  name: ToString
+  nameWithType: PublisherPictureStudioPolicy.ToString
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.ToString
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.op_Inequality*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.op_Inequality
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.html#PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy_op_Inequality_PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy_PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy_
+  name: operator !=
+  nameWithType: PublisherPictureStudioPolicy.operator !=
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.operator !=
+  nameWithType.vb: PublisherPictureStudioPolicy.<>
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.<>
+  name.vb: <>
+  spec.csharp:
+  - name: operator
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.op_Inequality*
+    name: '!='
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.html#PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy_op_Inequality_PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy_PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy_
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+  commentId: T:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.html
+  name: PublisherPictureStudioPolicy
+  nameWithType: PublisherPictureStudioPolicy
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.op_Equality*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.op_Equality
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.html#PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy_op_Equality_PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy_PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy_
+  name: operator ==
+  nameWithType: PublisherPictureStudioPolicy.operator ==
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.operator ==
+  nameWithType.vb: PublisherPictureStudioPolicy.=
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.=
+  name.vb: =
+  spec.csharp:
+  - name: operator
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.op_Equality*
+    name: ==
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.html#PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy_op_Equality_PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy_PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy_
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.GetHashCode*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.GetHashCode
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.html#PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy_GetHashCode
+  name: GetHashCode
+  nameWithType: PublisherPictureStudioPolicy.GetHashCode
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.GetHashCode
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.Equals*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.Equals
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.html#PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy_Equals_System_Object_
+  name: Equals
+  nameWithType: PublisherPictureStudioPolicy.Equals
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.Equals
+- uid: System.IEquatable{PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy}.Equals(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy)
+  commentId: M:System.IEquatable{PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy}.Equals(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy)
+  parent: System.IEquatable{PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy}
+  definition: System.IEquatable`1.Equals(`0)
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  name: Equals(PublisherPictureStudioPolicy)
+  nameWithType: IEquatable<PublisherPictureStudioPolicy>.Equals(PublisherPictureStudioPolicy)
+  fullName: System.IEquatable<PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy>.Equals(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy)
+  nameWithType.vb: IEquatable(Of PublisherPictureStudioPolicy).Equals(PublisherPictureStudioPolicy)
+  fullName.vb: System.IEquatable(Of PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy).Equals(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy)
+  spec.csharp:
+  - uid: System.IEquatable{PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy}.Equals(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+    name: PublisherPictureStudioPolicy
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.html
+  - name: )
+  spec.vb:
+  - uid: System.IEquatable{PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy}.Equals(PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy
+    name: PublisherPictureStudioPolicy
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.html
+  - name: )
+- uid: System.IEquatable`1.Equals(`0)
+  commentId: M:System.IEquatable`1.Equals(`0)
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  name: Equals(T)
+  nameWithType: IEquatable<T>.Equals(T)
+  fullName: System.IEquatable<T>.Equals(T)
+  nameWithType.vb: IEquatable(Of T).Equals(T)
+  fullName.vb: System.IEquatable(Of T).Equals(T)
+  spec.csharp:
+  - uid: System.IEquatable`1.Equals(`0)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - name: T
+  - name: )
+  spec.vb:
+  - uid: System.IEquatable`1.Equals(`0)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - name: T
+  - name: )
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.#ctor*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.#ctor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.html#PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy__ctor
+  name: PublisherPictureStudioPolicy
+  nameWithType: PublisherPictureStudioPolicy.PublisherPictureStudioPolicy
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.PublisherPictureStudioPolicy
+  nameWithType.vb: PublisherPictureStudioPolicy.New
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.New
+  name.vb: New
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.CanvasId*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.CanvasId
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.html#PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy_CanvasId
+  name: CanvasId
+  nameWithType: PublisherPictureStudioPolicy.CanvasId
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.CanvasId
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.CanvasHostId*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.CanvasHostId
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.html#PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy_CanvasHostId
+  name: CanvasHostId
+  nameWithType: PublisherPictureStudioPolicy.CanvasHostId
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.CanvasHostId
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.StudioRootId*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.StudioRootId
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.html#PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy_StudioRootId
+  name: StudioRootId
+  nameWithType: PublisherPictureStudioPolicy.StudioRootId
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.StudioRootId
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.ImageInputId*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.ImageInputId
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.html#PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy_ImageInputId
+  name: ImageInputId
+  nameWithType: PublisherPictureStudioPolicy.ImageInputId
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.ImageInputId
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.ImageDropInputId*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.ImageDropInputId
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.html#PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy_ImageDropInputId
+  name: ImageDropInputId
+  nameWithType: PublisherPictureStudioPolicy.ImageDropInputId
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.ImageDropInputId
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.LayeredInputId*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.LayeredInputId
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.html#PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy_LayeredInputId
+  name: LayeredInputId
+  nameWithType: PublisherPictureStudioPolicy.LayeredInputId
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.LayeredInputId
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.LayerDropInputId*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.LayerDropInputId
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.html#PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy_LayerDropInputId
+  name: LayerDropInputId
+  nameWithType: PublisherPictureStudioPolicy.LayerDropInputId
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.LayerDropInputId
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.MinimumDrawWidth*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.MinimumDrawWidth
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.html#PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy_MinimumDrawWidth
+  name: MinimumDrawWidth
+  nameWithType: PublisherPictureStudioPolicy.MinimumDrawWidth
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.MinimumDrawWidth
+- uid: System.Double
+  commentId: T:System.Double
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.double
+  name: double
+  nameWithType: double
+  fullName: double
+  nameWithType.vb: Double
+  fullName.vb: Double
+  name.vb: Double
+- uid: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.MaximumDrawWidth*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.MaximumDrawWidth
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.html#PublisherStudio_BusinessObjects_PublisherPictureStudioPolicy_MaximumDrawWidth
+  name: MaximumDrawWidth
+  nameWithType: PublisherPictureStudioPolicy.MaximumDrawWidth
+  fullName: PublisherStudio.BusinessObjects.PublisherPictureStudioPolicy.MaximumDrawWidth

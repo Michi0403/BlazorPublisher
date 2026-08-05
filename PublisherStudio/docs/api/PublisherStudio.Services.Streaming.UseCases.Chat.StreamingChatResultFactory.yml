@@ -1,0 +1,728 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory
+  commentId: T:PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory
+  id: StreamingChatResultFactory
+  parent: PublisherStudio.Services.Streaming.UseCases.Chat
+  children:
+  - PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.#ctor(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory})
+  - PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateAccepted
+  - PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateFailure(System.String)
+  - PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateNotConfigured
+  - PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateNotFound
+  langs:
+  - csharp
+  - vb
+  name: StreamingChatResultFactory
+  nameWithType: StreamingChatResultFactory
+  fullName: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Chat
+  summary: Provides streaming chat result factory operations.
+  example: []
+  syntax:
+    content: 'public sealed class StreamingChatResultFactory : IStreamingChatResultFactory'
+    content.vb: Public NotInheritable Class StreamingChatResultFactory Implements IStreamingChatResultFactory
+  inheritance:
+  - System.Object
+  implements:
+  - PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.#ctor(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory})
+  commentId: M:PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.#ctor(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory})
+  id: '#ctor(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory})'
+  parent: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory
+  langs:
+  - csharp
+  - vb
+  name: StreamingChatResultFactory(ILogger<StreamingChatResultFactory>)
+  nameWithType: StreamingChatResultFactory.StreamingChatResultFactory(ILogger<StreamingChatResultFactory>)
+  fullName: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.StreamingChatResultFactory(Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Chat
+  summary: Provides streaming chat result factory operations.
+  example: []
+  syntax:
+    content: public StreamingChatResultFactory(ILogger<StreamingChatResultFactory> logger)
+    parameters:
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory}
+    content.vb: Public Sub New(logger As ILogger(Of StreamingChatResultFactory))
+  overload: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.#ctor*
+  nameWithType.vb: StreamingChatResultFactory.New(ILogger(Of StreamingChatResultFactory))
+  fullName.vb: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.New(Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory))
+  name.vb: New(ILogger(Of StreamingChatResultFactory))
+- uid: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateNotFound
+  commentId: M:PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateNotFound
+  id: CreateNotFound
+  parent: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory
+  langs:
+  - csharp
+  - vb
+  name: CreateNotFound()
+  nameWithType: StreamingChatResultFactory.CreateNotFound()
+  fullName: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateNotFound()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Chat
+  summary: Creates not found.
+  example: []
+  syntax:
+    content: public StreamingChatSendResult CreateNotFound()
+    return:
+      type: PublisherStudio.BusinessObjects.StreamingChatSendResult
+    content.vb: Public Function CreateNotFound() As StreamingChatSendResult
+  overload: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateNotFound*
+  implements:
+  - PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateNotFound
+- uid: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateAccepted
+  commentId: M:PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateAccepted
+  id: CreateAccepted
+  parent: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory
+  langs:
+  - csharp
+  - vb
+  name: CreateAccepted()
+  nameWithType: StreamingChatResultFactory.CreateAccepted()
+  fullName: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateAccepted()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Chat
+  summary: Creates accepted.
+  example: []
+  syntax:
+    content: public StreamingChatSendResult CreateAccepted()
+    return:
+      type: PublisherStudio.BusinessObjects.StreamingChatSendResult
+    content.vb: Public Function CreateAccepted() As StreamingChatSendResult
+  overload: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateAccepted*
+  implements:
+  - PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateAccepted
+- uid: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateNotConfigured
+  commentId: M:PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateNotConfigured
+  id: CreateNotConfigured
+  parent: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory
+  langs:
+  - csharp
+  - vb
+  name: CreateNotConfigured()
+  nameWithType: StreamingChatResultFactory.CreateNotConfigured()
+  fullName: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateNotConfigured()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Chat
+  summary: Creates not configured.
+  example: []
+  syntax:
+    content: public StreamingChatSendResult CreateNotConfigured()
+    return:
+      type: PublisherStudio.BusinessObjects.StreamingChatSendResult
+    content.vb: Public Function CreateNotConfigured() As StreamingChatSendResult
+  overload: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateNotConfigured*
+  implements:
+  - PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateNotConfigured
+- uid: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateFailure(System.String)
+  commentId: M:PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateFailure(System.String)
+  id: CreateFailure(System.String)
+  parent: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory
+  langs:
+  - csharp
+  - vb
+  name: CreateFailure(string)
+  nameWithType: StreamingChatResultFactory.CreateFailure(string)
+  fullName: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateFailure(string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.UseCases.Chat
+  summary: Creates failure.
+  example: []
+  syntax:
+    content: public StreamingChatSendResult CreateFailure(string error)
+    parameters:
+    - id: error
+      type: System.String
+    return:
+      type: PublisherStudio.BusinessObjects.StreamingChatSendResult
+    content.vb: Public Function CreateFailure([error] As String) As StreamingChatSendResult
+  overload: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateFailure*
+  implements:
+  - PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateFailure(System.String)
+  nameWithType.vb: StreamingChatResultFactory.CreateFailure(String)
+  fullName.vb: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateFailure(String)
+  name.vb: CreateFailure(String)
+references:
+- uid: PublisherStudio.Services.Streaming.UseCases.Chat
+  commentId: N:PublisherStudio.Services.Streaming.UseCases.Chat
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.UseCases.Chat
+  nameWithType: PublisherStudio.Services.Streaming.UseCases.Chat
+  fullName: PublisherStudio.Services.Streaming.UseCases.Chat
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases.Chat
+    name: Chat
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Chat.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases.Chat
+    name: Chat
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Chat.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory
+  commentId: T:PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory
+  parent: PublisherStudio.Services.Streaming.UseCases.Chat
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.html
+  name: IStreamingChatResultFactory
+  nameWithType: IStreamingChatResultFactory
+  fullName: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.#ctor*
+  commentId: Overload:PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.html#PublisherStudio_Services_Streaming_UseCases_Chat_StreamingChatResultFactory__ctor_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_Streaming_UseCases_Chat_StreamingChatResultFactory__
+  name: StreamingChatResultFactory
+  nameWithType: StreamingChatResultFactory.StreamingChatResultFactory
+  fullName: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.StreamingChatResultFactory
+  nameWithType.vb: StreamingChatResultFactory.New
+  fullName.vb: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.New
+  name.vb: New
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<StreamingChatResultFactory>
+  nameWithType: ILogger<StreamingChatResultFactory>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory>
+  nameWithType.vb: ILogger(Of StreamingChatResultFactory)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory)
+  name.vb: ILogger(Of StreamingChatResultFactory)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory
+    name: StreamingChatResultFactory
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory
+    name: StreamingChatResultFactory
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.html
+  - name: )
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateNotFound*
+  commentId: Overload:PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateNotFound
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.html#PublisherStudio_Services_Streaming_UseCases_Chat_StreamingChatResultFactory_CreateNotFound
+  name: CreateNotFound
+  nameWithType: StreamingChatResultFactory.CreateNotFound
+  fullName: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateNotFound
+- uid: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateNotFound
+  commentId: M:PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateNotFound
+  parent: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.html#PublisherStudio_Services_Streaming_UseCases_Chat_IStreamingChatResultFactory_CreateNotFound
+  name: CreateNotFound()
+  nameWithType: IStreamingChatResultFactory.CreateNotFound()
+  fullName: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateNotFound()
+  spec.csharp:
+  - uid: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateNotFound
+    name: CreateNotFound
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.html#PublisherStudio_Services_Streaming_UseCases_Chat_IStreamingChatResultFactory_CreateNotFound
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateNotFound
+    name: CreateNotFound
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.html#PublisherStudio_Services_Streaming_UseCases_Chat_IStreamingChatResultFactory_CreateNotFound
+  - name: (
+  - name: )
+- uid: PublisherStudio.BusinessObjects.StreamingChatSendResult
+  commentId: T:PublisherStudio.BusinessObjects.StreamingChatSendResult
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.StreamingChatSendResult.html
+  name: StreamingChatSendResult
+  nameWithType: StreamingChatSendResult
+  fullName: PublisherStudio.BusinessObjects.StreamingChatSendResult
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateAccepted*
+  commentId: Overload:PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateAccepted
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.html#PublisherStudio_Services_Streaming_UseCases_Chat_StreamingChatResultFactory_CreateAccepted
+  name: CreateAccepted
+  nameWithType: StreamingChatResultFactory.CreateAccepted
+  fullName: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateAccepted
+- uid: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateAccepted
+  commentId: M:PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateAccepted
+  parent: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.html#PublisherStudio_Services_Streaming_UseCases_Chat_IStreamingChatResultFactory_CreateAccepted
+  name: CreateAccepted()
+  nameWithType: IStreamingChatResultFactory.CreateAccepted()
+  fullName: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateAccepted()
+  spec.csharp:
+  - uid: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateAccepted
+    name: CreateAccepted
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.html#PublisherStudio_Services_Streaming_UseCases_Chat_IStreamingChatResultFactory_CreateAccepted
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateAccepted
+    name: CreateAccepted
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.html#PublisherStudio_Services_Streaming_UseCases_Chat_IStreamingChatResultFactory_CreateAccepted
+  - name: (
+  - name: )
+- uid: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateNotConfigured*
+  commentId: Overload:PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateNotConfigured
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.html#PublisherStudio_Services_Streaming_UseCases_Chat_StreamingChatResultFactory_CreateNotConfigured
+  name: CreateNotConfigured
+  nameWithType: StreamingChatResultFactory.CreateNotConfigured
+  fullName: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateNotConfigured
+- uid: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateNotConfigured
+  commentId: M:PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateNotConfigured
+  parent: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.html#PublisherStudio_Services_Streaming_UseCases_Chat_IStreamingChatResultFactory_CreateNotConfigured
+  name: CreateNotConfigured()
+  nameWithType: IStreamingChatResultFactory.CreateNotConfigured()
+  fullName: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateNotConfigured()
+  spec.csharp:
+  - uid: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateNotConfigured
+    name: CreateNotConfigured
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.html#PublisherStudio_Services_Streaming_UseCases_Chat_IStreamingChatResultFactory_CreateNotConfigured
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateNotConfigured
+    name: CreateNotConfigured
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.html#PublisherStudio_Services_Streaming_UseCases_Chat_IStreamingChatResultFactory_CreateNotConfigured
+  - name: (
+  - name: )
+- uid: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateFailure*
+  commentId: Overload:PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateFailure
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.html#PublisherStudio_Services_Streaming_UseCases_Chat_StreamingChatResultFactory_CreateFailure_System_String_
+  name: CreateFailure
+  nameWithType: StreamingChatResultFactory.CreateFailure
+  fullName: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.CreateFailure
+- uid: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateFailure(System.String)
+  commentId: M:PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateFailure(System.String)
+  parent: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.html#PublisherStudio_Services_Streaming_UseCases_Chat_IStreamingChatResultFactory_CreateFailure_System_String_
+  name: CreateFailure(string)
+  nameWithType: IStreamingChatResultFactory.CreateFailure(string)
+  fullName: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateFailure(string)
+  nameWithType.vb: IStreamingChatResultFactory.CreateFailure(String)
+  fullName.vb: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateFailure(String)
+  name.vb: CreateFailure(String)
+  spec.csharp:
+  - uid: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateFailure(System.String)
+    name: CreateFailure
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.html#PublisherStudio_Services_Streaming_UseCases_Chat_IStreamingChatResultFactory_CreateFailure_System_String_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.CreateFailure(System.String)
+    name: CreateFailure
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.html#PublisherStudio_Services_Streaming_UseCases_Chat_IStreamingChatResultFactory_CreateFailure_System_String_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String

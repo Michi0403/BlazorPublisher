@@ -1,10 +1,16 @@
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Configuration;
 
+/// <summary>
+/// Provides application path service operations.
+/// </summary>
 public sealed class ApplicationPathService(IOptions<PublisherStudioPathOptions> options, ILogger<ApplicationPathService> logger) : IApplicationPathService
 {
+    /// <summary>
+    /// Gets defaults.
+    /// </summary>
     public PublisherStudioPathOptions GetDefaults() {
         try
         {
@@ -18,6 +24,9 @@ public sealed class ApplicationPathService(IOptions<PublisherStudioPathOptions> 
         }
     }
 
+    /// <summary>
+    /// Runs the resolve operation.
+    /// </summary>
     public PublisherStudioPathOptions Resolve(PublisherStudioPathOptions? projectOverrides = null)
     {
         try
@@ -48,6 +57,9 @@ public sealed class ApplicationPathService(IOptions<PublisherStudioPathOptions> 
         }
     }
 
+    /// <summary>
+    /// Resolves media path.
+    /// </summary>
     public string ResolveMediaPath(string mediaKind, PublisherStudioPathOptions? projectOverrides = null)
     {
         try
@@ -73,6 +85,9 @@ public sealed class ApplicationPathService(IOptions<PublisherStudioPathOptions> 
         }
     }
 
+    /// <summary>
+    /// Ensures directories.
+    /// </summary>
     public void EnsureDirectories(PublisherStudioPathOptions? projectOverrides = null)
     {
         try

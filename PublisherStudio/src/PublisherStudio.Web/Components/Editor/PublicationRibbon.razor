@@ -1,4 +1,4 @@
-@namespace PublisherStudio.Components.Editor
+﻿@namespace PublisherStudio.Components.Editor
 @implements IDisposable
 @inject NavigationManager Navigation
 @inject ILocalGptConnectionService LocalGptConnection
@@ -612,6 +612,16 @@
             </DxRibbonItem>
         </DxRibbonGroup>
     </DxRibbonTab>
+
+    <DxRibbonTab Text="Help">
+        <DxRibbonGroup Text="Documentation" IconCssClass="pub-icon pub-icon-command">
+            <DxRibbonItem Text="Help and documentation" IconCssClass="pub-icon pub-icon-command" Click="OpenDocumentation" />
+            <DxRibbonItem Text="Open HTML guide" IconCssClass="pub-icon pub-icon-web" Click="OpenHtmlDocumentation" />
+            <DxRibbonItem Text="Open PDF book" IconCssClass="pub-icon pub-icon-print" Click="OpenPdfDocumentation" />
+            <DxRibbonItem Text="API reference" IconCssClass="pub-icon pub-icon-code" Click="OpenApiDocumentation" />
+        </DxRibbonGroup>
+    </DxRibbonTab>
+
 </DxRibbon>
 
 @code {
@@ -631,6 +641,11 @@
         .Any(item => string.Equals(item, teamKey, StringComparison.OrdinalIgnoreCase));
 
     private void OpenOrganicPlugins() => Navigation.NavigateTo("/organic-plugins");
+    private void OpenDocumentation() => Navigation.NavigateTo("/help");
+    private void OpenHtmlDocumentation() => Navigation.NavigateTo("/help-docs/index.html", forceLoad: true);
+    private void OpenPdfDocumentation() => Navigation.NavigateTo("/api/documentation/pdf", forceLoad: true);
+    private void OpenApiDocumentation() => Navigation.NavigateTo("/help-docs/api/index.html", forceLoad: true);
+
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
     [Parameter] public bool TimelineVisible { get; set; }
     [Parameter] public EventCallback OnNew { get; set; }

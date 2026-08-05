@@ -1,0 +1,134 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.DataVisualArgumentMode
+  commentId: T:PublisherStudio.BusinessObjects.DataVisualArgumentMode
+  id: DataVisualArgumentMode
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.DataVisualArgumentMode.Auto
+  - PublisherStudio.BusinessObjects.DataVisualArgumentMode.Continuous
+  - PublisherStudio.BusinessObjects.DataVisualArgumentMode.DateTime
+  - PublisherStudio.BusinessObjects.DataVisualArgumentMode.Discrete
+  langs:
+  - csharp
+  - vb
+  name: DataVisualArgumentMode
+  nameWithType: DataVisualArgumentMode
+  fullName: PublisherStudio.BusinessObjects.DataVisualArgumentMode
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported data visual argument mode values.
+  example: []
+  syntax:
+    content: public enum DataVisualArgumentMode
+    content.vb: Public Enum DataVisualArgumentMode
+- uid: PublisherStudio.BusinessObjects.DataVisualArgumentMode.Auto
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualArgumentMode.Auto
+  id: Auto
+  parent: PublisherStudio.BusinessObjects.DataVisualArgumentMode
+  langs:
+  - csharp
+  - vb
+  name: Auto
+  nameWithType: DataVisualArgumentMode.Auto
+  fullName: PublisherStudio.BusinessObjects.DataVisualArgumentMode.Auto
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Auto = 0
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualArgumentMode
+- uid: PublisherStudio.BusinessObjects.DataVisualArgumentMode.Discrete
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualArgumentMode.Discrete
+  id: Discrete
+  parent: PublisherStudio.BusinessObjects.DataVisualArgumentMode
+  langs:
+  - csharp
+  - vb
+  name: Discrete
+  nameWithType: DataVisualArgumentMode.Discrete
+  fullName: PublisherStudio.BusinessObjects.DataVisualArgumentMode.Discrete
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Discrete = 1
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualArgumentMode
+- uid: PublisherStudio.BusinessObjects.DataVisualArgumentMode.Continuous
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualArgumentMode.Continuous
+  id: Continuous
+  parent: PublisherStudio.BusinessObjects.DataVisualArgumentMode
+  langs:
+  - csharp
+  - vb
+  name: Continuous
+  nameWithType: DataVisualArgumentMode.Continuous
+  fullName: PublisherStudio.BusinessObjects.DataVisualArgumentMode.Continuous
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Continuous = 2
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualArgumentMode
+- uid: PublisherStudio.BusinessObjects.DataVisualArgumentMode.DateTime
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualArgumentMode.DateTime
+  id: DateTime
+  parent: PublisherStudio.BusinessObjects.DataVisualArgumentMode
+  langs:
+  - csharp
+  - vb
+  name: DateTime
+  nameWithType: DataVisualArgumentMode.DateTime
+  fullName: PublisherStudio.BusinessObjects.DataVisualArgumentMode.DateTime
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: DateTime = 3
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualArgumentMode
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.DataVisualArgumentMode
+  commentId: T:PublisherStudio.BusinessObjects.DataVisualArgumentMode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualArgumentMode.html
+  name: DataVisualArgumentMode
+  nameWithType: DataVisualArgumentMode
+  fullName: PublisherStudio.BusinessObjects.DataVisualArgumentMode

@@ -1,0 +1,835 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationStreamingSettings
+  commentId: T:PublisherStudio.BusinessObjects.PublicationStreamingSettings
+  id: PublicationStreamingSettings
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationStreamingSettings.#ctor
+  - PublisherStudio.BusinessObjects.PublicationStreamingSettings.FollowSelectedPage
+  - PublisherStudio.BusinessObjects.PublicationStreamingSettings.Hotkeys
+  - PublisherStudio.BusinessObjects.PublicationStreamingSettings.Lan
+  - PublisherStudio.BusinessObjects.PublicationStreamingSettings.MasterFrameRate
+  - PublisherStudio.BusinessObjects.PublicationStreamingSettings.MasterHeight
+  - PublisherStudio.BusinessObjects.PublicationStreamingSettings.MasterWidth
+  - PublisherStudio.BusinessObjects.PublicationStreamingSettings.Outputs
+  - PublisherStudio.BusinessObjects.PublicationStreamingSettings.PreferDeviceTimestamps
+  - PublisherStudio.BusinessObjects.PublicationStreamingSettings.ProgramPageId
+  - PublisherStudio.BusinessObjects.PublicationStreamingSettings.Recording
+  langs:
+  - csharp
+  - vb
+  name: PublicationStreamingSettings
+  nameWithType: PublicationStreamingSettings
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamingSettings
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents a publication streaming settings.
+  example: []
+  syntax:
+    content: public sealed class PublicationStreamingSettings
+    content.vb: Public NotInheritable Class PublicationStreamingSettings
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.BusinessObjects.PublicationStreamingSettings.#ctor
+  commentId: M:PublisherStudio.BusinessObjects.PublicationStreamingSettings.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.BusinessObjects.PublicationStreamingSettings
+  langs:
+  - csharp
+  - vb
+  name: PublicationStreamingSettings()
+  nameWithType: PublicationStreamingSettings.PublicationStreamingSettings()
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamingSettings.PublicationStreamingSettings()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public PublicationStreamingSettings()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.BusinessObjects.PublicationStreamingSettings.#ctor*
+  nameWithType.vb: PublicationStreamingSettings.New()
+  fullName.vb: PublisherStudio.BusinessObjects.PublicationStreamingSettings.New()
+  name.vb: New()
+- uid: PublisherStudio.BusinessObjects.PublicationStreamingSettings.FollowSelectedPage
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamingSettings.FollowSelectedPage
+  id: FollowSelectedPage
+  parent: PublisherStudio.BusinessObjects.PublicationStreamingSettings
+  langs:
+  - csharp
+  - vb
+  name: FollowSelectedPage
+  nameWithType: PublicationStreamingSettings.FollowSelectedPage
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamingSettings.FollowSelectedPage
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets follow selected page.
+  example: []
+  syntax:
+    content: public bool FollowSelectedPage { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property FollowSelectedPage As Boolean
+  overload: PublisherStudio.BusinessObjects.PublicationStreamingSettings.FollowSelectedPage*
+- uid: PublisherStudio.BusinessObjects.PublicationStreamingSettings.ProgramPageId
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamingSettings.ProgramPageId
+  id: ProgramPageId
+  parent: PublisherStudio.BusinessObjects.PublicationStreamingSettings
+  langs:
+  - csharp
+  - vb
+  name: ProgramPageId
+  nameWithType: PublicationStreamingSettings.ProgramPageId
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamingSettings.ProgramPageId
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets program page identifier.
+  example: []
+  syntax:
+    content: public Guid? ProgramPageId { get; set; }
+    parameters: []
+    return:
+      type: System.Nullable{System.Guid}
+    content.vb: Public Property ProgramPageId As Guid?
+  overload: PublisherStudio.BusinessObjects.PublicationStreamingSettings.ProgramPageId*
+- uid: PublisherStudio.BusinessObjects.PublicationStreamingSettings.Outputs
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamingSettings.Outputs
+  id: Outputs
+  parent: PublisherStudio.BusinessObjects.PublicationStreamingSettings
+  langs:
+  - csharp
+  - vb
+  name: Outputs
+  nameWithType: PublicationStreamingSettings.Outputs
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamingSettings.Outputs
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets outputs.
+  example: []
+  syntax:
+    content: public List<PublicationStreamOutput> Outputs { get; set; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationStreamOutput}
+    content.vb: Public Property Outputs As List(Of PublicationStreamOutput)
+  overload: PublisherStudio.BusinessObjects.PublicationStreamingSettings.Outputs*
+- uid: PublisherStudio.BusinessObjects.PublicationStreamingSettings.Recording
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamingSettings.Recording
+  id: Recording
+  parent: PublisherStudio.BusinessObjects.PublicationStreamingSettings
+  langs:
+  - csharp
+  - vb
+  name: Recording
+  nameWithType: PublicationStreamingSettings.Recording
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamingSettings.Recording
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets recording.
+  example: []
+  syntax:
+    content: public PublicationRecordingSettings Recording { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationRecordingSettings
+    content.vb: Public Property Recording As PublicationRecordingSettings
+  overload: PublisherStudio.BusinessObjects.PublicationStreamingSettings.Recording*
+- uid: PublisherStudio.BusinessObjects.PublicationStreamingSettings.Lan
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamingSettings.Lan
+  id: Lan
+  parent: PublisherStudio.BusinessObjects.PublicationStreamingSettings
+  langs:
+  - csharp
+  - vb
+  name: Lan
+  nameWithType: PublicationStreamingSettings.Lan
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamingSettings.Lan
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets LAN.
+  example: []
+  syntax:
+    content: public PublicationLanStreamingSettings Lan { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationLanStreamingSettings
+    content.vb: Public Property Lan As PublicationLanStreamingSettings
+  overload: PublisherStudio.BusinessObjects.PublicationStreamingSettings.Lan*
+- uid: PublisherStudio.BusinessObjects.PublicationStreamingSettings.Hotkeys
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamingSettings.Hotkeys
+  id: Hotkeys
+  parent: PublisherStudio.BusinessObjects.PublicationStreamingSettings
+  langs:
+  - csharp
+  - vb
+  name: Hotkeys
+  nameWithType: PublicationStreamingSettings.Hotkeys
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamingSettings.Hotkeys
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets hotkeys.
+  example: []
+  syntax:
+    content: public List<PublicationStreamingHotkey> Hotkeys { get; set; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationStreamingHotkey}
+    content.vb: Public Property Hotkeys As List(Of PublicationStreamingHotkey)
+  overload: PublisherStudio.BusinessObjects.PublicationStreamingSettings.Hotkeys*
+- uid: PublisherStudio.BusinessObjects.PublicationStreamingSettings.PreferDeviceTimestamps
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamingSettings.PreferDeviceTimestamps
+  id: PreferDeviceTimestamps
+  parent: PublisherStudio.BusinessObjects.PublicationStreamingSettings
+  langs:
+  - csharp
+  - vb
+  name: PreferDeviceTimestamps
+  nameWithType: PublicationStreamingSettings.PreferDeviceTimestamps
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamingSettings.PreferDeviceTimestamps
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets prefer device timestamps.
+  example: []
+  syntax:
+    content: public bool PreferDeviceTimestamps { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property PreferDeviceTimestamps As Boolean
+  overload: PublisherStudio.BusinessObjects.PublicationStreamingSettings.PreferDeviceTimestamps*
+- uid: PublisherStudio.BusinessObjects.PublicationStreamingSettings.MasterWidth
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamingSettings.MasterWidth
+  id: MasterWidth
+  parent: PublisherStudio.BusinessObjects.PublicationStreamingSettings
+  langs:
+  - csharp
+  - vb
+  name: MasterWidth
+  nameWithType: PublicationStreamingSettings.MasterWidth
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamingSettings.MasterWidth
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets master width.
+  example: []
+  syntax:
+    content: public int MasterWidth { get; set; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property MasterWidth As Integer
+  overload: PublisherStudio.BusinessObjects.PublicationStreamingSettings.MasterWidth*
+- uid: PublisherStudio.BusinessObjects.PublicationStreamingSettings.MasterHeight
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamingSettings.MasterHeight
+  id: MasterHeight
+  parent: PublisherStudio.BusinessObjects.PublicationStreamingSettings
+  langs:
+  - csharp
+  - vb
+  name: MasterHeight
+  nameWithType: PublicationStreamingSettings.MasterHeight
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamingSettings.MasterHeight
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets master height.
+  example: []
+  syntax:
+    content: public int MasterHeight { get; set; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property MasterHeight As Integer
+  overload: PublisherStudio.BusinessObjects.PublicationStreamingSettings.MasterHeight*
+- uid: PublisherStudio.BusinessObjects.PublicationStreamingSettings.MasterFrameRate
+  commentId: P:PublisherStudio.BusinessObjects.PublicationStreamingSettings.MasterFrameRate
+  id: MasterFrameRate
+  parent: PublisherStudio.BusinessObjects.PublicationStreamingSettings
+  langs:
+  - csharp
+  - vb
+  name: MasterFrameRate
+  nameWithType: PublicationStreamingSettings.MasterFrameRate
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamingSettings.MasterFrameRate
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets master frame rate.
+  example: []
+  syntax:
+    content: public int MasterFrameRate { get; set; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property MasterFrameRate As Integer
+  overload: PublisherStudio.BusinessObjects.PublicationStreamingSettings.MasterFrameRate*
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.BusinessObjects.PublicationStreamingSettings.#ctor*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamingSettings.#ctor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamingSettings.html#PublisherStudio_BusinessObjects_PublicationStreamingSettings__ctor
+  name: PublicationStreamingSettings
+  nameWithType: PublicationStreamingSettings.PublicationStreamingSettings
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamingSettings.PublicationStreamingSettings
+  nameWithType.vb: PublicationStreamingSettings.New
+  fullName.vb: PublisherStudio.BusinessObjects.PublicationStreamingSettings.New
+  name.vb: New
+- uid: PublisherStudio.BusinessObjects.PublicationStreamingSettings.FollowSelectedPage*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamingSettings.FollowSelectedPage
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamingSettings.html#PublisherStudio_BusinessObjects_PublicationStreamingSettings_FollowSelectedPage
+  name: FollowSelectedPage
+  nameWithType: PublicationStreamingSettings.FollowSelectedPage
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamingSettings.FollowSelectedPage
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.BusinessObjects.PublicationStreamingSettings.ProgramPageId*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamingSettings.ProgramPageId
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamingSettings.html#PublisherStudio_BusinessObjects_PublicationStreamingSettings_ProgramPageId
+  name: ProgramPageId
+  nameWithType: PublicationStreamingSettings.ProgramPageId
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamingSettings.ProgramPageId
+- uid: System.Nullable{System.Guid}
+  commentId: T:System.Nullable{System.Guid}
+  parent: System
+  definition: System.Nullable`1
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid?
+  nameWithType: Guid?
+  fullName: System.Guid?
+  spec.csharp:
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: '?'
+  spec.vb:
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: '?'
+- uid: System.Nullable`1
+  commentId: T:System.Nullable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  name: Nullable<T>
+  nameWithType: Nullable<T>
+  fullName: System.Nullable<T>
+  nameWithType.vb: Nullable(Of T)
+  fullName.vb: System.Nullable(Of T)
+  name.vb: Nullable(Of T)
+  spec.csharp:
+  - uid: System.Nullable`1
+    name: Nullable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Nullable`1
+    name: Nullable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: PublisherStudio.BusinessObjects.PublicationStreamingSettings.Outputs*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamingSettings.Outputs
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamingSettings.html#PublisherStudio_BusinessObjects_PublicationStreamingSettings_Outputs
+  name: Outputs
+  nameWithType: PublicationStreamingSettings.Outputs
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamingSettings.Outputs
+- uid: System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationStreamOutput}
+  commentId: T:System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationStreamOutput}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.List`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<PublicationStreamOutput>
+  nameWithType: List<PublicationStreamOutput>
+  fullName: System.Collections.Generic.List<PublisherStudio.BusinessObjects.PublicationStreamOutput>
+  nameWithType.vb: List(Of PublicationStreamOutput)
+  fullName.vb: System.Collections.Generic.List(Of PublisherStudio.BusinessObjects.PublicationStreamOutput)
+  name.vb: List(Of PublicationStreamOutput)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.PublicationStreamOutput
+    name: PublicationStreamOutput
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublicationStreamOutput.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.PublicationStreamOutput
+    name: PublicationStreamOutput
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublicationStreamOutput.html
+  - name: )
+- uid: System.Collections.Generic.List`1
+  commentId: T:System.Collections.Generic.List`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<T>
+  nameWithType: List<T>
+  fullName: System.Collections.Generic.List<T>
+  nameWithType.vb: List(Of T)
+  fullName.vb: System.Collections.Generic.List(Of T)
+  name.vb: List(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: PublisherStudio.BusinessObjects.PublicationStreamingSettings.Recording*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamingSettings.Recording
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamingSettings.html#PublisherStudio_BusinessObjects_PublicationStreamingSettings_Recording
+  name: Recording
+  nameWithType: PublicationStreamingSettings.Recording
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamingSettings.Recording
+- uid: PublisherStudio.BusinessObjects.PublicationRecordingSettings
+  commentId: T:PublisherStudio.BusinessObjects.PublicationRecordingSettings
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationRecordingSettings.html
+  name: PublicationRecordingSettings
+  nameWithType: PublicationRecordingSettings
+  fullName: PublisherStudio.BusinessObjects.PublicationRecordingSettings
+- uid: PublisherStudio.BusinessObjects.PublicationStreamingSettings.Lan*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamingSettings.Lan
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamingSettings.html#PublisherStudio_BusinessObjects_PublicationStreamingSettings_Lan
+  name: Lan
+  nameWithType: PublicationStreamingSettings.Lan
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamingSettings.Lan
+- uid: PublisherStudio.BusinessObjects.PublicationLanStreamingSettings
+  commentId: T:PublisherStudio.BusinessObjects.PublicationLanStreamingSettings
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationLanStreamingSettings.html
+  name: PublicationLanStreamingSettings
+  nameWithType: PublicationLanStreamingSettings
+  fullName: PublisherStudio.BusinessObjects.PublicationLanStreamingSettings
+- uid: PublisherStudio.BusinessObjects.PublicationStreamingSettings.Hotkeys*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamingSettings.Hotkeys
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamingSettings.html#PublisherStudio_BusinessObjects_PublicationStreamingSettings_Hotkeys
+  name: Hotkeys
+  nameWithType: PublicationStreamingSettings.Hotkeys
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamingSettings.Hotkeys
+- uid: System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationStreamingHotkey}
+  commentId: T:System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationStreamingHotkey}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.List`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<PublicationStreamingHotkey>
+  nameWithType: List<PublicationStreamingHotkey>
+  fullName: System.Collections.Generic.List<PublisherStudio.BusinessObjects.PublicationStreamingHotkey>
+  nameWithType.vb: List(Of PublicationStreamingHotkey)
+  fullName.vb: System.Collections.Generic.List(Of PublisherStudio.BusinessObjects.PublicationStreamingHotkey)
+  name.vb: List(Of PublicationStreamingHotkey)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.PublicationStreamingHotkey
+    name: PublicationStreamingHotkey
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublicationStreamingHotkey.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.PublicationStreamingHotkey
+    name: PublicationStreamingHotkey
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublicationStreamingHotkey.html
+  - name: )
+- uid: PublisherStudio.BusinessObjects.PublicationStreamingSettings.PreferDeviceTimestamps*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamingSettings.PreferDeviceTimestamps
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamingSettings.html#PublisherStudio_BusinessObjects_PublicationStreamingSettings_PreferDeviceTimestamps
+  name: PreferDeviceTimestamps
+  nameWithType: PublicationStreamingSettings.PreferDeviceTimestamps
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamingSettings.PreferDeviceTimestamps
+- uid: PublisherStudio.BusinessObjects.PublicationStreamingSettings.MasterWidth*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamingSettings.MasterWidth
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamingSettings.html#PublisherStudio_BusinessObjects_PublicationStreamingSettings_MasterWidth
+  name: MasterWidth
+  nameWithType: PublicationStreamingSettings.MasterWidth
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamingSettings.MasterWidth
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: PublisherStudio.BusinessObjects.PublicationStreamingSettings.MasterHeight*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamingSettings.MasterHeight
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamingSettings.html#PublisherStudio_BusinessObjects_PublicationStreamingSettings_MasterHeight
+  name: MasterHeight
+  nameWithType: PublicationStreamingSettings.MasterHeight
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamingSettings.MasterHeight
+- uid: PublisherStudio.BusinessObjects.PublicationStreamingSettings.MasterFrameRate*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationStreamingSettings.MasterFrameRate
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationStreamingSettings.html#PublisherStudio_BusinessObjects_PublicationStreamingSettings_MasterFrameRate
+  name: MasterFrameRate
+  nameWithType: PublicationStreamingSettings.MasterFrameRate
+  fullName: PublisherStudio.BusinessObjects.PublicationStreamingSettings.MasterFrameRate

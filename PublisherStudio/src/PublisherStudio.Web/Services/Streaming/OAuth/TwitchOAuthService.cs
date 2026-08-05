@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Sockets;
@@ -9,6 +9,9 @@ using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Services.Streaming.OAuth;
 
+/// <summary>
+/// Provides twitch OAuth service operations.
+/// </summary>
 public sealed class TwitchOAuthService
 {
     private const string DeviceAuthorizationUrl = "https://id.twitch.tv/oauth2/device";
@@ -26,6 +29,9 @@ public sealed class TwitchOAuthService
     private readonly IConfiguration _configuration;
     private readonly SemaphoreSlim _tokenGate = new(1, 1);
 
+    /// <summary>
+    /// Runs the twitch OAuth service operation.
+    /// </summary>
     public TwitchOAuthService(
         IHttpClientFactory httpClientFactory,
         StreamingProfileStore profiles,
@@ -38,14 +44,23 @@ public sealed class TwitchOAuthService
         _configuration = configuration;
     }
 
+    /// <summary>
+    /// Gets default client identifier.
+    /// </summary>
     public string DefaultClientId =>
         (_configuration["Twitch:ClientId"]
             ?? Environment.GetEnvironmentVariable("PUBLISHERSTUDIO_TWITCH_CLIENT_ID")
             ?? string.Empty).Trim();
 
+    /// <summary>
+    /// Resolves client identifier.
+    /// </summary>
     public string ResolveClientId(string? profileClientId) =>
         string.IsNullOrWhiteSpace(profileClientId) ? DefaultClientId : profileClientId.Trim();
 
+    /// <summary>
+    /// Starts device authorization async.
+    /// </summary>
     public async Task<TwitchDeviceAuthorization> StartDeviceAuthorizationAsync(
         string clientId,
         bool includeChat,
@@ -83,6 +98,9 @@ public sealed class TwitchOAuthService
         };
     }
 
+    /// <summary>
+    /// Runs the complete device authorization async operation.
+    /// </summary>
     public async Task<TwitchOAuthConnectionResult> CompleteDeviceAuthorizationAsync(
         Guid profileId,
         TwitchDeviceAuthorization authorization,
@@ -156,6 +174,9 @@ public sealed class TwitchOAuthService
         };
     }
 
+    /// <summary>
+    /// Runs the test ingest endpoints async operation.
+    /// </summary>
     public async Task<List<TwitchIngestCandidate>> TestIngestEndpointsAsync(CancellationToken cancellationToken = default)
     {
         var candidates = await GetIngestCandidatesAsync(cancellationToken);
@@ -190,6 +211,9 @@ public sealed class TwitchOAuthService
             .ToList();
     }
 
+    /// <summary>
+    /// Applies ingest candidate async.
+    /// </summary>
     public async Task<StreamingProviderProfile?> ApplyIngestCandidateAsync(
         Guid profileId,
         TwitchIngestCandidate candidate,
@@ -200,12 +224,21 @@ public sealed class TwitchOAuthService
         return (await _profiles.LoadAsync(cancellationToken)).Providers.FirstOrDefault(profile => profile.Id == profileId);
     }
 
+    /// <summary>
+    /// Ensures valid access token async.
+    /// </summary>
     public Task<string?> EnsureValidAccessTokenAsync(Guid profileId, CancellationToken cancellationToken = default) =>
         EnsureValidAccessTokenCoreAsync(profileId, forceValidation: false, cancellationToken: cancellationToken);
 
+    /// <summary>
+    /// Validates profile async.
+    /// </summary>
     public async Task<bool> ValidateProfileAsync(Guid profileId, CancellationToken cancellationToken = default) =>
         !string.IsNullOrWhiteSpace(await EnsureValidAccessTokenCoreAsync(profileId, forceValidation: true, cancellationToken: cancellationToken));
 
+    /// <summary>
+    /// Runs the disconnect async operation.
+    /// </summary>
     public async Task DisconnectAsync(Guid profileId, CancellationToken cancellationToken = default)
     {
         var credentials = await _profiles.ReadOAuthCredentialsAsync(profileId, cancellationToken);
@@ -518,52 +551,121 @@ public sealed class TwitchOAuthService
 
     private sealed class TwitchDeviceAuthorizationResponse
     {
+        /// <summary>
+        /// Gets or sets device code.
+        /// </summary>
         [JsonPropertyName("device_code")] public string DeviceCode { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets user code.
+        /// </summary>
         [JsonPropertyName("user_code")] public string UserCode { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets verification URI.
+        /// </summary>
         [JsonPropertyName("verification_uri")] public string VerificationUri { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets expires in.
+        /// </summary>
         [JsonPropertyName("expires_in")] public int ExpiresIn { get; set; }
+        /// <summary>
+        /// Gets or sets interval.
+        /// </summary>
         [JsonPropertyName("interval")] public int Interval { get; set; }
+        /// <summary>
+        /// Gets or sets message.
+        /// </summary>
         [JsonPropertyName("message")] public string Message { get; set; } = string.Empty;
     }
 
     private sealed class TwitchTokenResponse
     {
+        /// <summary>
+        /// Gets or sets access token.
+        /// </summary>
         [JsonPropertyName("access_token")] public string AccessToken { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets refresh token.
+        /// </summary>
         [JsonPropertyName("refresh_token")] public string RefreshToken { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets expires in.
+        /// </summary>
         [JsonPropertyName("expires_in")] public int ExpiresIn { get; set; }
+        /// <summary>
+        /// Gets or sets scope.
+        /// </summary>
         [JsonPropertyName("scope")] public string[] Scope { get; set; } = [];
+        /// <summary>
+        /// Gets or sets token type.
+        /// </summary>
         [JsonPropertyName("token_type")] public string TokenType { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets message.
+        /// </summary>
         [JsonPropertyName("message")] public string Message { get; set; } = string.Empty;
     }
 
     private sealed class TwitchValidationResponse
     {
+        /// <summary>
+        /// Gets or sets client identifier.
+        /// </summary>
         [JsonPropertyName("client_id")] public string ClientId { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets login.
+        /// </summary>
         [JsonPropertyName("login")] public string Login { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets scopes.
+        /// </summary>
         [JsonPropertyName("scopes")] public string[] Scopes { get; set; } = [];
+        /// <summary>
+        /// Gets or sets user identifier.
+        /// </summary>
         [JsonPropertyName("user_id")] public string UserId { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets expires in.
+        /// </summary>
         [JsonPropertyName("expires_in")] public int ExpiresIn { get; set; }
     }
 
     private sealed class TwitchStreamKeyResponse
     {
+        /// <summary>
+        /// Gets or sets data.
+        /// </summary>
         [JsonPropertyName("data")] public List<TwitchStreamKeyItem> Data { get; set; } = [];
+        /// <summary>
+        /// Gets or sets message.
+        /// </summary>
         [JsonPropertyName("message")] public string Message { get; set; } = string.Empty;
     }
 
     private sealed class TwitchStreamKeyItem
     {
+        /// <summary>
+        /// Gets or sets stream key.
+        /// </summary>
         [JsonPropertyName("stream_key")] public string StreamKey { get; set; } = string.Empty;
     }
 
     private sealed class TwitchIngestResponse
     {
+        /// <summary>
+        /// Gets or sets ingests.
+        /// </summary>
         [JsonPropertyName("ingests")] public List<TwitchIngestItem> Ingests { get; set; } = [];
     }
 
     private sealed class TwitchIngestItem
     {
+        /// <summary>
+        /// Gets or sets the display name.
+        /// </summary>
         [JsonPropertyName("name")] public string Name { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets URL template.
+        /// </summary>
         [JsonPropertyName("url_template")] public string UrlTemplate { get; set; } = string.Empty;
     }
 }

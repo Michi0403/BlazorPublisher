@@ -1,0 +1,115 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationVectorFeatureKind
+  commentId: T:PublisherStudio.BusinessObjects.PublicationVectorFeatureKind
+  id: PublicationVectorFeatureKind
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationVectorFeatureKind.Line
+  - PublisherStudio.BusinessObjects.PublicationVectorFeatureKind.Marker
+  - PublisherStudio.BusinessObjects.PublicationVectorFeatureKind.Polygon
+  langs:
+  - csharp
+  - vb
+  name: PublicationVectorFeatureKind
+  nameWithType: PublicationVectorFeatureKind
+  fullName: PublisherStudio.BusinessObjects.PublicationVectorFeatureKind
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication vector feature kind values.
+  example: []
+  syntax:
+    content: public enum PublicationVectorFeatureKind
+    content.vb: Public Enum PublicationVectorFeatureKind
+- uid: PublisherStudio.BusinessObjects.PublicationVectorFeatureKind.Marker
+  commentId: F:PublisherStudio.BusinessObjects.PublicationVectorFeatureKind.Marker
+  id: Marker
+  parent: PublisherStudio.BusinessObjects.PublicationVectorFeatureKind
+  langs:
+  - csharp
+  - vb
+  name: Marker
+  nameWithType: PublicationVectorFeatureKind.Marker
+  fullName: PublisherStudio.BusinessObjects.PublicationVectorFeatureKind.Marker
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Marker = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationVectorFeatureKind
+- uid: PublisherStudio.BusinessObjects.PublicationVectorFeatureKind.Line
+  commentId: F:PublisherStudio.BusinessObjects.PublicationVectorFeatureKind.Line
+  id: Line
+  parent: PublisherStudio.BusinessObjects.PublicationVectorFeatureKind
+  langs:
+  - csharp
+  - vb
+  name: Line
+  nameWithType: PublicationVectorFeatureKind.Line
+  fullName: PublisherStudio.BusinessObjects.PublicationVectorFeatureKind.Line
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Line = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationVectorFeatureKind
+- uid: PublisherStudio.BusinessObjects.PublicationVectorFeatureKind.Polygon
+  commentId: F:PublisherStudio.BusinessObjects.PublicationVectorFeatureKind.Polygon
+  id: Polygon
+  parent: PublisherStudio.BusinessObjects.PublicationVectorFeatureKind
+  langs:
+  - csharp
+  - vb
+  name: Polygon
+  nameWithType: PublicationVectorFeatureKind.Polygon
+  fullName: PublisherStudio.BusinessObjects.PublicationVectorFeatureKind.Polygon
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Polygon = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationVectorFeatureKind
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationVectorFeatureKind
+  commentId: T:PublisherStudio.BusinessObjects.PublicationVectorFeatureKind
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationVectorFeatureKind.html
+  name: PublicationVectorFeatureKind
+  nameWithType: PublicationVectorFeatureKind
+  fullName: PublisherStudio.BusinessObjects.PublicationVectorFeatureKind

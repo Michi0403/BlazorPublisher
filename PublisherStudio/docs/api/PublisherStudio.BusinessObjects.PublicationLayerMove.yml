@@ -1,0 +1,134 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationLayerMove
+  commentId: T:PublisherStudio.BusinessObjects.PublicationLayerMove
+  id: PublicationLayerMove
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationLayerMove.BringForward
+  - PublisherStudio.BusinessObjects.PublicationLayerMove.BringToFront
+  - PublisherStudio.BusinessObjects.PublicationLayerMove.SendBackward
+  - PublisherStudio.BusinessObjects.PublicationLayerMove.SendToBack
+  langs:
+  - csharp
+  - vb
+  name: PublicationLayerMove
+  nameWithType: PublicationLayerMove
+  fullName: PublisherStudio.BusinessObjects.PublicationLayerMove
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication layer move values.
+  example: []
+  syntax:
+    content: public enum PublicationLayerMove
+    content.vb: Public Enum PublicationLayerMove
+- uid: PublisherStudio.BusinessObjects.PublicationLayerMove.BringToFront
+  commentId: F:PublisherStudio.BusinessObjects.PublicationLayerMove.BringToFront
+  id: BringToFront
+  parent: PublisherStudio.BusinessObjects.PublicationLayerMove
+  langs:
+  - csharp
+  - vb
+  name: BringToFront
+  nameWithType: PublicationLayerMove.BringToFront
+  fullName: PublisherStudio.BusinessObjects.PublicationLayerMove.BringToFront
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: BringToFront = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationLayerMove
+- uid: PublisherStudio.BusinessObjects.PublicationLayerMove.BringForward
+  commentId: F:PublisherStudio.BusinessObjects.PublicationLayerMove.BringForward
+  id: BringForward
+  parent: PublisherStudio.BusinessObjects.PublicationLayerMove
+  langs:
+  - csharp
+  - vb
+  name: BringForward
+  nameWithType: PublicationLayerMove.BringForward
+  fullName: PublisherStudio.BusinessObjects.PublicationLayerMove.BringForward
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: BringForward = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationLayerMove
+- uid: PublisherStudio.BusinessObjects.PublicationLayerMove.SendBackward
+  commentId: F:PublisherStudio.BusinessObjects.PublicationLayerMove.SendBackward
+  id: SendBackward
+  parent: PublisherStudio.BusinessObjects.PublicationLayerMove
+  langs:
+  - csharp
+  - vb
+  name: SendBackward
+  nameWithType: PublicationLayerMove.SendBackward
+  fullName: PublisherStudio.BusinessObjects.PublicationLayerMove.SendBackward
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: SendBackward = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationLayerMove
+- uid: PublisherStudio.BusinessObjects.PublicationLayerMove.SendToBack
+  commentId: F:PublisherStudio.BusinessObjects.PublicationLayerMove.SendToBack
+  id: SendToBack
+  parent: PublisherStudio.BusinessObjects.PublicationLayerMove
+  langs:
+  - csharp
+  - vb
+  name: SendToBack
+  nameWithType: PublicationLayerMove.SendToBack
+  fullName: PublisherStudio.BusinessObjects.PublicationLayerMove.SendToBack
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: SendToBack = 3
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationLayerMove
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationLayerMove
+  commentId: T:PublisherStudio.BusinessObjects.PublicationLayerMove
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationLayerMove.html
+  name: PublicationLayerMove
+  nameWithType: PublicationLayerMove
+  fullName: PublisherStudio.BusinessObjects.PublicationLayerMove

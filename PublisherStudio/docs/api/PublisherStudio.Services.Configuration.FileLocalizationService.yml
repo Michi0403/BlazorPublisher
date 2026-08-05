@@ -1,0 +1,1097 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Configuration.FileLocalizationService
+  commentId: T:PublisherStudio.Services.Configuration.FileLocalizationService
+  id: FileLocalizationService
+  parent: PublisherStudio.Services.Configuration
+  children:
+  - PublisherStudio.Services.Configuration.FileLocalizationService.#ctor(Microsoft.AspNetCore.Hosting.IWebHostEnvironment,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Configuration.FileLocalizationService})
+  - PublisherStudio.Services.Configuration.FileLocalizationService.Get(System.String,System.String,System.String)
+  - PublisherStudio.Services.Configuration.FileLocalizationService.GetAvailableCultures
+  - PublisherStudio.Services.Configuration.FileLocalizationService.GetStrings(System.String)
+  - PublisherStudio.Services.Configuration.FileLocalizationService.SaveOverridesAsync(System.String,System.Collections.Generic.IReadOnlyDictionary{System.String,System.String},System.Threading.CancellationToken)
+  langs:
+  - csharp
+  - vb
+  name: FileLocalizationService
+  nameWithType: FileLocalizationService
+  fullName: PublisherStudio.Services.Configuration.FileLocalizationService
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  summary: Provides file localization service operations.
+  example: []
+  syntax:
+    content: 'public sealed class FileLocalizationService : IFileLocalizationService'
+    content.vb: Public NotInheritable Class FileLocalizationService Implements IFileLocalizationService
+  inheritance:
+  - System.Object
+  implements:
+  - PublisherStudio.Services.Configuration.IFileLocalizationService
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.Configuration.FileLocalizationService.#ctor(Microsoft.AspNetCore.Hosting.IWebHostEnvironment,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Configuration.FileLocalizationService})
+  commentId: M:PublisherStudio.Services.Configuration.FileLocalizationService.#ctor(Microsoft.AspNetCore.Hosting.IWebHostEnvironment,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Configuration.FileLocalizationService})
+  id: '#ctor(Microsoft.AspNetCore.Hosting.IWebHostEnvironment,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Configuration.FileLocalizationService})'
+  parent: PublisherStudio.Services.Configuration.FileLocalizationService
+  langs:
+  - csharp
+  - vb
+  name: FileLocalizationService(IWebHostEnvironment, ILogger<FileLocalizationService>)
+  nameWithType: FileLocalizationService.FileLocalizationService(IWebHostEnvironment, ILogger<FileLocalizationService>)
+  fullName: PublisherStudio.Services.Configuration.FileLocalizationService.FileLocalizationService(Microsoft.AspNetCore.Hosting.IWebHostEnvironment, Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.Configuration.FileLocalizationService>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  summary: Provides file localization service operations.
+  example: []
+  syntax:
+    content: public FileLocalizationService(IWebHostEnvironment environment, ILogger<FileLocalizationService> logger)
+    parameters:
+    - id: environment
+      type: Microsoft.AspNetCore.Hosting.IWebHostEnvironment
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Configuration.FileLocalizationService}
+    content.vb: Public Sub New(environment As IWebHostEnvironment, logger As ILogger(Of FileLocalizationService))
+  overload: PublisherStudio.Services.Configuration.FileLocalizationService.#ctor*
+  nameWithType.vb: FileLocalizationService.New(IWebHostEnvironment, ILogger(Of FileLocalizationService))
+  fullName.vb: PublisherStudio.Services.Configuration.FileLocalizationService.New(Microsoft.AspNetCore.Hosting.IWebHostEnvironment, Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.Configuration.FileLocalizationService))
+  name.vb: New(IWebHostEnvironment, ILogger(Of FileLocalizationService))
+- uid: PublisherStudio.Services.Configuration.FileLocalizationService.GetAvailableCultures
+  commentId: M:PublisherStudio.Services.Configuration.FileLocalizationService.GetAvailableCultures
+  id: GetAvailableCultures
+  parent: PublisherStudio.Services.Configuration.FileLocalizationService
+  langs:
+  - csharp
+  - vb
+  name: GetAvailableCultures()
+  nameWithType: FileLocalizationService.GetAvailableCultures()
+  fullName: PublisherStudio.Services.Configuration.FileLocalizationService.GetAvailableCultures()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  summary: Gets available cultures.
+  example: []
+  syntax:
+    content: public IReadOnlyList<string> GetAvailableCultures()
+    return:
+      type: System.Collections.Generic.IReadOnlyList{System.String}
+    content.vb: Public Function GetAvailableCultures() As IReadOnlyList(Of String)
+  overload: PublisherStudio.Services.Configuration.FileLocalizationService.GetAvailableCultures*
+  implements:
+  - PublisherStudio.Services.Configuration.IFileLocalizationService.GetAvailableCultures
+- uid: PublisherStudio.Services.Configuration.FileLocalizationService.GetStrings(System.String)
+  commentId: M:PublisherStudio.Services.Configuration.FileLocalizationService.GetStrings(System.String)
+  id: GetStrings(System.String)
+  parent: PublisherStudio.Services.Configuration.FileLocalizationService
+  langs:
+  - csharp
+  - vb
+  name: GetStrings(string?)
+  nameWithType: FileLocalizationService.GetStrings(string?)
+  fullName: PublisherStudio.Services.Configuration.FileLocalizationService.GetStrings(string?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  summary: Gets strings.
+  example: []
+  syntax:
+    content: public IReadOnlyDictionary<string, string> GetStrings(string? culture = null)
+    parameters:
+    - id: culture
+      type: System.String
+    return:
+      type: System.Collections.Generic.IReadOnlyDictionary{System.String,System.String}
+    content.vb: Public Function GetStrings(culture As String = Nothing) As IReadOnlyDictionary(Of String, String)
+  overload: PublisherStudio.Services.Configuration.FileLocalizationService.GetStrings*
+  implements:
+  - PublisherStudio.Services.Configuration.IFileLocalizationService.GetStrings(System.String)
+  nameWithType.vb: FileLocalizationService.GetStrings(String)
+  fullName.vb: PublisherStudio.Services.Configuration.FileLocalizationService.GetStrings(String)
+  name.vb: GetStrings(String)
+- uid: PublisherStudio.Services.Configuration.FileLocalizationService.Get(System.String,System.String,System.String)
+  commentId: M:PublisherStudio.Services.Configuration.FileLocalizationService.Get(System.String,System.String,System.String)
+  id: Get(System.String,System.String,System.String)
+  parent: PublisherStudio.Services.Configuration.FileLocalizationService
+  langs:
+  - csharp
+  - vb
+  name: Get(string, string?, string?)
+  nameWithType: FileLocalizationService.Get(string, string?, string?)
+  fullName: PublisherStudio.Services.Configuration.FileLocalizationService.Get(string, string?, string?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  summary: Runs the get operation.
+  example: []
+  syntax:
+    content: public string Get(string key, string? culture = null, string? fallback = null)
+    parameters:
+    - id: key
+      type: System.String
+    - id: culture
+      type: System.String
+    - id: fallback
+      type: System.String
+    return:
+      type: System.String
+    content.vb: Public Function [Get](key As String, culture As String = Nothing, fallback As String = Nothing) As String
+  overload: PublisherStudio.Services.Configuration.FileLocalizationService.Get*
+  implements:
+  - PublisherStudio.Services.Configuration.IFileLocalizationService.Get(System.String,System.String,System.String)
+  nameWithType.vb: FileLocalizationService.Get(String, String, String)
+  fullName.vb: PublisherStudio.Services.Configuration.FileLocalizationService.Get(String, String, String)
+  name.vb: Get(String, String, String)
+- uid: PublisherStudio.Services.Configuration.FileLocalizationService.SaveOverridesAsync(System.String,System.Collections.Generic.IReadOnlyDictionary{System.String,System.String},System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Configuration.FileLocalizationService.SaveOverridesAsync(System.String,System.Collections.Generic.IReadOnlyDictionary{System.String,System.String},System.Threading.CancellationToken)
+  id: SaveOverridesAsync(System.String,System.Collections.Generic.IReadOnlyDictionary{System.String,System.String},System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Configuration.FileLocalizationService
+  langs:
+  - csharp
+  - vb
+  name: SaveOverridesAsync(string, IReadOnlyDictionary<string, string>, CancellationToken)
+  nameWithType: FileLocalizationService.SaveOverridesAsync(string, IReadOnlyDictionary<string, string>, CancellationToken)
+  fullName: PublisherStudio.Services.Configuration.FileLocalizationService.SaveOverridesAsync(string, System.Collections.Generic.IReadOnlyDictionary<string, string>, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  summary: Saves overrides async.
+  example: []
+  syntax:
+    content: public Task SaveOverridesAsync(string culture, IReadOnlyDictionary<string, string> strings, CancellationToken cancellationToken = default)
+    parameters:
+    - id: culture
+      type: System.String
+    - id: strings
+      type: System.Collections.Generic.IReadOnlyDictionary{System.String,System.String}
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task
+    content.vb: Public Function SaveOverridesAsync(culture As String, strings As IReadOnlyDictionary(Of String, String), cancellationToken As CancellationToken = Nothing) As Task
+  overload: PublisherStudio.Services.Configuration.FileLocalizationService.SaveOverridesAsync*
+  implements:
+  - PublisherStudio.Services.Configuration.IFileLocalizationService.SaveOverridesAsync(System.String,System.Collections.Generic.IReadOnlyDictionary{System.String,System.String},System.Threading.CancellationToken)
+  nameWithType.vb: FileLocalizationService.SaveOverridesAsync(String, IReadOnlyDictionary(Of String, String), CancellationToken)
+  fullName.vb: PublisherStudio.Services.Configuration.FileLocalizationService.SaveOverridesAsync(String, System.Collections.Generic.IReadOnlyDictionary(Of String, String), System.Threading.CancellationToken)
+  name.vb: SaveOverridesAsync(String, IReadOnlyDictionary(Of String, String), CancellationToken)
+references:
+- uid: PublisherStudio.Services.Configuration
+  commentId: N:PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Configuration
+  nameWithType: PublisherStudio.Services.Configuration
+  fullName: PublisherStudio.Services.Configuration
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: PublisherStudio.Services.Configuration.IFileLocalizationService
+  commentId: T:PublisherStudio.Services.Configuration.IFileLocalizationService
+  parent: PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IFileLocalizationService.html
+  name: IFileLocalizationService
+  nameWithType: IFileLocalizationService
+  fullName: PublisherStudio.Services.Configuration.IFileLocalizationService
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.Configuration.FileLocalizationService.#ctor*
+  commentId: Overload:PublisherStudio.Services.Configuration.FileLocalizationService.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.FileLocalizationService.html#PublisherStudio_Services_Configuration_FileLocalizationService__ctor_Microsoft_AspNetCore_Hosting_IWebHostEnvironment_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_Configuration_FileLocalizationService__
+  name: FileLocalizationService
+  nameWithType: FileLocalizationService.FileLocalizationService
+  fullName: PublisherStudio.Services.Configuration.FileLocalizationService.FileLocalizationService
+  nameWithType.vb: FileLocalizationService.New
+  fullName.vb: PublisherStudio.Services.Configuration.FileLocalizationService.New
+  name.vb: New
+- uid: Microsoft.AspNetCore.Hosting.IWebHostEnvironment
+  commentId: T:Microsoft.AspNetCore.Hosting.IWebHostEnvironment
+  parent: Microsoft.AspNetCore.Hosting
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.hosting.iwebhostenvironment
+  name: IWebHostEnvironment
+  nameWithType: IWebHostEnvironment
+  fullName: Microsoft.AspNetCore.Hosting.IWebHostEnvironment
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Configuration.FileLocalizationService}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Configuration.FileLocalizationService}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<FileLocalizationService>
+  nameWithType: ILogger<FileLocalizationService>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.Configuration.FileLocalizationService>
+  nameWithType.vb: ILogger(Of FileLocalizationService)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.Configuration.FileLocalizationService)
+  name.vb: ILogger(Of FileLocalizationService)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.Configuration.FileLocalizationService
+    name: FileLocalizationService
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.FileLocalizationService.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.Configuration.FileLocalizationService
+    name: FileLocalizationService
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.FileLocalizationService.html
+  - name: )
+- uid: Microsoft.AspNetCore.Hosting
+  commentId: N:Microsoft.AspNetCore.Hosting
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.AspNetCore.Hosting
+  nameWithType: Microsoft.AspNetCore.Hosting
+  fullName: Microsoft.AspNetCore.Hosting
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.AspNetCore
+    name: AspNetCore
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore
+  - name: .
+  - uid: Microsoft.AspNetCore.Hosting
+    name: Hosting
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.hosting
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.AspNetCore
+    name: AspNetCore
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore
+  - name: .
+  - uid: Microsoft.AspNetCore.Hosting
+    name: Hosting
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.hosting
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: PublisherStudio.Services.Configuration.FileLocalizationService.GetAvailableCultures*
+  commentId: Overload:PublisherStudio.Services.Configuration.FileLocalizationService.GetAvailableCultures
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.FileLocalizationService.html#PublisherStudio_Services_Configuration_FileLocalizationService_GetAvailableCultures
+  name: GetAvailableCultures
+  nameWithType: FileLocalizationService.GetAvailableCultures
+  fullName: PublisherStudio.Services.Configuration.FileLocalizationService.GetAvailableCultures
+- uid: PublisherStudio.Services.Configuration.IFileLocalizationService.GetAvailableCultures
+  commentId: M:PublisherStudio.Services.Configuration.IFileLocalizationService.GetAvailableCultures
+  parent: PublisherStudio.Services.Configuration.IFileLocalizationService
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_GetAvailableCultures
+  name: GetAvailableCultures()
+  nameWithType: IFileLocalizationService.GetAvailableCultures()
+  fullName: PublisherStudio.Services.Configuration.IFileLocalizationService.GetAvailableCultures()
+  spec.csharp:
+  - uid: PublisherStudio.Services.Configuration.IFileLocalizationService.GetAvailableCultures
+    name: GetAvailableCultures
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_GetAvailableCultures
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.Configuration.IFileLocalizationService.GetAvailableCultures
+    name: GetAvailableCultures
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_GetAvailableCultures
+  - name: (
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList{System.String}
+  commentId: T:System.Collections.Generic.IReadOnlyList{System.String}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<string>
+  nameWithType: IReadOnlyList<string>
+  fullName: System.Collections.Generic.IReadOnlyList<string>
+  nameWithType.vb: IReadOnlyList(Of String)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of String)
+  name.vb: IReadOnlyList(Of String)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: PublisherStudio.Services.Configuration.FileLocalizationService.GetStrings*
+  commentId: Overload:PublisherStudio.Services.Configuration.FileLocalizationService.GetStrings
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.FileLocalizationService.html#PublisherStudio_Services_Configuration_FileLocalizationService_GetStrings_System_String_
+  name: GetStrings
+  nameWithType: FileLocalizationService.GetStrings
+  fullName: PublisherStudio.Services.Configuration.FileLocalizationService.GetStrings
+- uid: PublisherStudio.Services.Configuration.IFileLocalizationService.GetStrings(System.String)
+  commentId: M:PublisherStudio.Services.Configuration.IFileLocalizationService.GetStrings(System.String)
+  parent: PublisherStudio.Services.Configuration.IFileLocalizationService
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_GetStrings_System_String_
+  name: GetStrings(string)
+  nameWithType: IFileLocalizationService.GetStrings(string)
+  fullName: PublisherStudio.Services.Configuration.IFileLocalizationService.GetStrings(string)
+  nameWithType.vb: IFileLocalizationService.GetStrings(String)
+  fullName.vb: PublisherStudio.Services.Configuration.IFileLocalizationService.GetStrings(String)
+  name.vb: GetStrings(String)
+  spec.csharp:
+  - uid: PublisherStudio.Services.Configuration.IFileLocalizationService.GetStrings(System.String)
+    name: GetStrings
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_GetStrings_System_String_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.Configuration.IFileLocalizationService.GetStrings(System.String)
+    name: GetStrings
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_GetStrings_System_String_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System.Collections.Generic.IReadOnlyDictionary{System.String,System.String}
+  commentId: T:System.Collections.Generic.IReadOnlyDictionary{System.String,System.String}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyDictionary`2
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlydictionary-2
+  name: IReadOnlyDictionary<string, string>
+  nameWithType: IReadOnlyDictionary<string, string>
+  fullName: System.Collections.Generic.IReadOnlyDictionary<string, string>
+  nameWithType.vb: IReadOnlyDictionary(Of String, String)
+  fullName.vb: System.Collections.Generic.IReadOnlyDictionary(Of String, String)
+  name.vb: IReadOnlyDictionary(Of String, String)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyDictionary`2
+    name: IReadOnlyDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlydictionary-2
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyDictionary`2
+    name: IReadOnlyDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlydictionary-2
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyDictionary`2
+  commentId: T:System.Collections.Generic.IReadOnlyDictionary`2
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlydictionary-2
+  name: IReadOnlyDictionary<TKey, TValue>
+  nameWithType: IReadOnlyDictionary<TKey, TValue>
+  fullName: System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>
+  nameWithType.vb: IReadOnlyDictionary(Of TKey, TValue)
+  fullName.vb: System.Collections.Generic.IReadOnlyDictionary(Of TKey, TValue)
+  name.vb: IReadOnlyDictionary(Of TKey, TValue)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyDictionary`2
+    name: IReadOnlyDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlydictionary-2
+  - name: <
+  - name: TKey
+  - name: ','
+  - name: " "
+  - name: TValue
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyDictionary`2
+    name: IReadOnlyDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlydictionary-2
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TKey
+  - name: ','
+  - name: " "
+  - name: TValue
+  - name: )
+- uid: PublisherStudio.Services.Configuration.FileLocalizationService.Get*
+  commentId: Overload:PublisherStudio.Services.Configuration.FileLocalizationService.Get
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.FileLocalizationService.html#PublisherStudio_Services_Configuration_FileLocalizationService_Get_System_String_System_String_System_String_
+  name: Get
+  nameWithType: FileLocalizationService.Get
+  fullName: PublisherStudio.Services.Configuration.FileLocalizationService.Get
+- uid: PublisherStudio.Services.Configuration.IFileLocalizationService.Get(System.String,System.String,System.String)
+  commentId: M:PublisherStudio.Services.Configuration.IFileLocalizationService.Get(System.String,System.String,System.String)
+  parent: PublisherStudio.Services.Configuration.IFileLocalizationService
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_Get_System_String_System_String_System_String_
+  name: Get(string, string, string)
+  nameWithType: IFileLocalizationService.Get(string, string, string)
+  fullName: PublisherStudio.Services.Configuration.IFileLocalizationService.Get(string, string, string)
+  nameWithType.vb: IFileLocalizationService.Get(String, String, String)
+  fullName.vb: PublisherStudio.Services.Configuration.IFileLocalizationService.Get(String, String, String)
+  name.vb: Get(String, String, String)
+  spec.csharp:
+  - uid: PublisherStudio.Services.Configuration.IFileLocalizationService.Get(System.String,System.String,System.String)
+    name: Get
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_Get_System_String_System_String_System_String_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.Configuration.IFileLocalizationService.Get(System.String,System.String,System.String)
+    name: Get
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_Get_System_String_System_String_System_String_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: PublisherStudio.Services.Configuration.FileLocalizationService.SaveOverridesAsync*
+  commentId: Overload:PublisherStudio.Services.Configuration.FileLocalizationService.SaveOverridesAsync
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.FileLocalizationService.html#PublisherStudio_Services_Configuration_FileLocalizationService_SaveOverridesAsync_System_String_System_Collections_Generic_IReadOnlyDictionary_System_String_System_String__System_Threading_CancellationToken_
+  name: SaveOverridesAsync
+  nameWithType: FileLocalizationService.SaveOverridesAsync
+  fullName: PublisherStudio.Services.Configuration.FileLocalizationService.SaveOverridesAsync
+- uid: PublisherStudio.Services.Configuration.IFileLocalizationService.SaveOverridesAsync(System.String,System.Collections.Generic.IReadOnlyDictionary{System.String,System.String},System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Configuration.IFileLocalizationService.SaveOverridesAsync(System.String,System.Collections.Generic.IReadOnlyDictionary{System.String,System.String},System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Configuration.IFileLocalizationService
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_SaveOverridesAsync_System_String_System_Collections_Generic_IReadOnlyDictionary_System_String_System_String__System_Threading_CancellationToken_
+  name: SaveOverridesAsync(string, IReadOnlyDictionary<string, string>, CancellationToken)
+  nameWithType: IFileLocalizationService.SaveOverridesAsync(string, IReadOnlyDictionary<string, string>, CancellationToken)
+  fullName: PublisherStudio.Services.Configuration.IFileLocalizationService.SaveOverridesAsync(string, System.Collections.Generic.IReadOnlyDictionary<string, string>, System.Threading.CancellationToken)
+  nameWithType.vb: IFileLocalizationService.SaveOverridesAsync(String, IReadOnlyDictionary(Of String, String), CancellationToken)
+  fullName.vb: PublisherStudio.Services.Configuration.IFileLocalizationService.SaveOverridesAsync(String, System.Collections.Generic.IReadOnlyDictionary(Of String, String), System.Threading.CancellationToken)
+  name.vb: SaveOverridesAsync(String, IReadOnlyDictionary(Of String, String), CancellationToken)
+  spec.csharp:
+  - uid: PublisherStudio.Services.Configuration.IFileLocalizationService.SaveOverridesAsync(System.String,System.Collections.Generic.IReadOnlyDictionary{System.String,System.String},System.Threading.CancellationToken)
+    name: SaveOverridesAsync
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_SaveOverridesAsync_System_String_System_Collections_Generic_IReadOnlyDictionary_System_String_System_String__System_Threading_CancellationToken_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.Collections.Generic.IReadOnlyDictionary`2
+    name: IReadOnlyDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlydictionary-2
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  - name: ','
+  - name: " "
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.Configuration.IFileLocalizationService.SaveOverridesAsync(System.String,System.Collections.Generic.IReadOnlyDictionary{System.String,System.String},System.Threading.CancellationToken)
+    name: SaveOverridesAsync
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.IFileLocalizationService.html#PublisherStudio_Services_Configuration_IFileLocalizationService_SaveOverridesAsync_System_String_System_Collections_Generic_IReadOnlyDictionary_System_String_System_String__System_Threading_CancellationToken_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.Collections.Generic.IReadOnlyDictionary`2
+    name: IReadOnlyDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlydictionary-2
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  - name: ','
+  - name: " "
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+- uid: System.Threading.CancellationToken
+  commentId: T:System.Threading.CancellationToken
+  parent: System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  name: CancellationToken
+  nameWithType: CancellationToken
+  fullName: System.Threading.CancellationToken
+- uid: System.Threading.Tasks.Task
+  commentId: T:System.Threading.Tasks.Task
+  parent: System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task
+  name: Task
+  nameWithType: Task
+  fullName: System.Threading.Tasks.Task
+- uid: System.Threading
+  commentId: N:System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading
+  nameWithType: System.Threading
+  fullName: System.Threading
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+- uid: System.Threading.Tasks
+  commentId: N:System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading.Tasks
+  nameWithType: System.Threading.Tasks
+  fullName: System.Threading.Tasks
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks

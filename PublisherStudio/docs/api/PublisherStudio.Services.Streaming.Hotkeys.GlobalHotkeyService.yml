@@ -1,0 +1,918 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService
+  commentId: T:PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService
+  id: GlobalHotkeyService
+  parent: PublisherStudio.Services.Streaming.Hotkeys
+  children:
+  - PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.#ctor(PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService})
+  - PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Configure(System.Guid,System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.Streaming.MediaHotkey})
+  - PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Dispose
+  - PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Drain(System.Guid)
+  - PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Remove(System.Guid)
+  - PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.StartAsync(System.Threading.CancellationToken)
+  - PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.StopAsync(System.Threading.CancellationToken)
+  langs:
+  - csharp
+  - vb
+  name: GlobalHotkeyService
+  nameWithType: GlobalHotkeyService
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Hotkeys
+  summary: Provides global hotkey service operations.
+  example: []
+  syntax:
+    content: 'public sealed class GlobalHotkeyService : IDisposable'
+    content.vb: Public NotInheritable Class GlobalHotkeyService Implements IDisposable
+  inheritance:
+  - System.Object
+  implements:
+  - System.IDisposable
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.#ctor(PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService})
+  commentId: M:PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.#ctor(PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService})
+  id: '#ctor(PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService})'
+  parent: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService
+  langs:
+  - csharp
+  - vb
+  name: GlobalHotkeyService(IWindowsHotkeyNativeService, ILogger<GlobalHotkeyService>)
+  nameWithType: GlobalHotkeyService.GlobalHotkeyService(IWindowsHotkeyNativeService, ILogger<GlobalHotkeyService>)
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.GlobalHotkeyService(PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService, Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Hotkeys
+  summary: Provides global hotkey service operations.
+  example: []
+  syntax:
+    content: public GlobalHotkeyService(IWindowsHotkeyNativeService nativeService, ILogger<GlobalHotkeyService> logger)
+    parameters:
+    - id: nativeService
+      type: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService}
+    content.vb: Public Sub New(nativeService As IWindowsHotkeyNativeService, logger As ILogger(Of GlobalHotkeyService))
+  overload: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.#ctor*
+  nameWithType.vb: GlobalHotkeyService.New(IWindowsHotkeyNativeService, ILogger(Of GlobalHotkeyService))
+  fullName.vb: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.New(PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService, Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService))
+  name.vb: New(IWindowsHotkeyNativeService, ILogger(Of GlobalHotkeyService))
+- uid: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.StartAsync(System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.StartAsync(System.Threading.CancellationToken)
+  id: StartAsync(System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService
+  langs:
+  - csharp
+  - vb
+  name: StartAsync(CancellationToken)
+  nameWithType: GlobalHotkeyService.StartAsync(CancellationToken)
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.StartAsync(System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Hotkeys
+  summary: Starts async.
+  example: []
+  syntax:
+    content: public Task StartAsync(CancellationToken cancellationToken)
+    parameters:
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task
+    content.vb: Public Function StartAsync(cancellationToken As CancellationToken) As Task
+  overload: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.StartAsync*
+- uid: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.StopAsync(System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.StopAsync(System.Threading.CancellationToken)
+  id: StopAsync(System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService
+  langs:
+  - csharp
+  - vb
+  name: StopAsync(CancellationToken)
+  nameWithType: GlobalHotkeyService.StopAsync(CancellationToken)
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.StopAsync(System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Hotkeys
+  summary: Stops async.
+  example: []
+  syntax:
+    content: public Task StopAsync(CancellationToken cancellationToken)
+    parameters:
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task
+    content.vb: Public Function StopAsync(cancellationToken As CancellationToken) As Task
+  overload: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.StopAsync*
+- uid: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Configure(System.Guid,System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.Streaming.MediaHotkey})
+  commentId: M:PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Configure(System.Guid,System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.Streaming.MediaHotkey})
+  id: Configure(System.Guid,System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.Streaming.MediaHotkey})
+  parent: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService
+  langs:
+  - csharp
+  - vb
+  name: Configure(Guid, IEnumerable<MediaHotkey>)
+  nameWithType: GlobalHotkeyService.Configure(Guid, IEnumerable<MediaHotkey>)
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Configure(System.Guid, System.Collections.Generic.IEnumerable<PublisherStudio.BusinessObjects.Streaming.MediaHotkey>)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Hotkeys
+  summary: Runs the configure operation.
+  example: []
+  syntax:
+    content: public void Configure(Guid sessionId, IEnumerable<MediaHotkey> hotkeys)
+    parameters:
+    - id: sessionId
+      type: System.Guid
+    - id: hotkeys
+      type: System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.Streaming.MediaHotkey}
+    content.vb: Public Sub Configure(sessionId As Guid, hotkeys As IEnumerable(Of MediaHotkey))
+  overload: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Configure*
+  nameWithType.vb: GlobalHotkeyService.Configure(Guid, IEnumerable(Of MediaHotkey))
+  fullName.vb: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Configure(System.Guid, System.Collections.Generic.IEnumerable(Of PublisherStudio.BusinessObjects.Streaming.MediaHotkey))
+  name.vb: Configure(Guid, IEnumerable(Of MediaHotkey))
+- uid: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Remove(System.Guid)
+  commentId: M:PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Remove(System.Guid)
+  id: Remove(System.Guid)
+  parent: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService
+  langs:
+  - csharp
+  - vb
+  name: Remove(Guid)
+  nameWithType: GlobalHotkeyService.Remove(Guid)
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Remove(System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Hotkeys
+  summary: Runs the remove operation.
+  example: []
+  syntax:
+    content: public void Remove(Guid sessionId)
+    parameters:
+    - id: sessionId
+      type: System.Guid
+    content.vb: Public Sub Remove(sessionId As Guid)
+  overload: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Remove*
+- uid: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Drain(System.Guid)
+  commentId: M:PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Drain(System.Guid)
+  id: Drain(System.Guid)
+  parent: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService
+  langs:
+  - csharp
+  - vb
+  name: Drain(Guid)
+  nameWithType: GlobalHotkeyService.Drain(Guid)
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Drain(System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Hotkeys
+  summary: Runs the drain operation.
+  example: []
+  syntax:
+    content: public IReadOnlyList<MediaHostHotkeyEvent> Drain(Guid sessionId)
+    parameters:
+    - id: sessionId
+      type: System.Guid
+    return:
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.Streaming.MediaHostHotkeyEvent}
+    content.vb: Public Function Drain(sessionId As Guid) As IReadOnlyList(Of MediaHostHotkeyEvent)
+  overload: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Drain*
+- uid: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Dispose
+  commentId: M:PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Dispose
+  id: Dispose
+  parent: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService
+  langs:
+  - csharp
+  - vb
+  name: Dispose()
+  nameWithType: GlobalHotkeyService.Dispose()
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Dispose()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Hotkeys
+  summary: Runs the dispose operation.
+  example: []
+  syntax:
+    content: public void Dispose()
+    content.vb: Public Sub Dispose()
+  overload: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Dispose*
+  implements:
+  - System.IDisposable.Dispose
+references:
+- uid: PublisherStudio.Services.Streaming.Hotkeys
+  commentId: N:PublisherStudio.Services.Streaming.Hotkeys
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Hotkeys
+  nameWithType: PublisherStudio.Services.Streaming.Hotkeys
+  fullName: PublisherStudio.Services.Streaming.Hotkeys
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Hotkeys
+    name: Hotkeys
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Hotkeys.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Hotkeys
+    name: Hotkeys
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Hotkeys.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.IDisposable
+  commentId: T:System.IDisposable
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.idisposable
+  name: IDisposable
+  nameWithType: IDisposable
+  fullName: System.IDisposable
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.#ctor*
+  commentId: Overload:PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.html#PublisherStudio_Services_Streaming_Hotkeys_GlobalHotkeyService__ctor_PublisherStudio_Services_Streaming_Hotkeys_IWindowsHotkeyNativeService_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_Streaming_Hotkeys_GlobalHotkeyService__
+  name: GlobalHotkeyService
+  nameWithType: GlobalHotkeyService.GlobalHotkeyService
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.GlobalHotkeyService
+  nameWithType.vb: GlobalHotkeyService.New
+  fullName.vb: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.New
+  name.vb: New
+- uid: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService
+  commentId: T:PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService
+  parent: PublisherStudio.Services.Streaming.Hotkeys
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.html
+  name: IWindowsHotkeyNativeService
+  nameWithType: IWindowsHotkeyNativeService
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<GlobalHotkeyService>
+  nameWithType: ILogger<GlobalHotkeyService>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService>
+  nameWithType.vb: ILogger(Of GlobalHotkeyService)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService)
+  name.vb: ILogger(Of GlobalHotkeyService)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService
+    name: GlobalHotkeyService
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService
+    name: GlobalHotkeyService
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.html
+  - name: )
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.StartAsync*
+  commentId: Overload:PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.StartAsync
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.html#PublisherStudio_Services_Streaming_Hotkeys_GlobalHotkeyService_StartAsync_System_Threading_CancellationToken_
+  name: StartAsync
+  nameWithType: GlobalHotkeyService.StartAsync
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.StartAsync
+- uid: System.Threading.CancellationToken
+  commentId: T:System.Threading.CancellationToken
+  parent: System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  name: CancellationToken
+  nameWithType: CancellationToken
+  fullName: System.Threading.CancellationToken
+- uid: System.Threading.Tasks.Task
+  commentId: T:System.Threading.Tasks.Task
+  parent: System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task
+  name: Task
+  nameWithType: Task
+  fullName: System.Threading.Tasks.Task
+- uid: System.Threading
+  commentId: N:System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading
+  nameWithType: System.Threading
+  fullName: System.Threading
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+- uid: System.Threading.Tasks
+  commentId: N:System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading.Tasks
+  nameWithType: System.Threading.Tasks
+  fullName: System.Threading.Tasks
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+- uid: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.StopAsync*
+  commentId: Overload:PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.StopAsync
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.html#PublisherStudio_Services_Streaming_Hotkeys_GlobalHotkeyService_StopAsync_System_Threading_CancellationToken_
+  name: StopAsync
+  nameWithType: GlobalHotkeyService.StopAsync
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.StopAsync
+- uid: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Configure*
+  commentId: Overload:PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Configure
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.html#PublisherStudio_Services_Streaming_Hotkeys_GlobalHotkeyService_Configure_System_Guid_System_Collections_Generic_IEnumerable_PublisherStudio_BusinessObjects_Streaming_MediaHotkey__
+  name: Configure
+  nameWithType: GlobalHotkeyService.Configure
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Configure
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.Streaming.MediaHotkey}
+  commentId: T:System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.Streaming.MediaHotkey}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IEnumerable`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  name: IEnumerable<MediaHotkey>
+  nameWithType: IEnumerable<MediaHotkey>
+  fullName: System.Collections.Generic.IEnumerable<PublisherStudio.BusinessObjects.Streaming.MediaHotkey>
+  nameWithType.vb: IEnumerable(Of MediaHotkey)
+  fullName.vb: System.Collections.Generic.IEnumerable(Of PublisherStudio.BusinessObjects.Streaming.MediaHotkey)
+  name.vb: IEnumerable(Of MediaHotkey)
+  spec.csharp:
+  - uid: System.Collections.Generic.IEnumerable`1
+    name: IEnumerable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.Streaming.MediaHotkey
+    name: MediaHotkey
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.Streaming.MediaHotkey.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IEnumerable`1
+    name: IEnumerable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.Streaming.MediaHotkey
+    name: MediaHotkey
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.Streaming.MediaHotkey.html
+  - name: )
+- uid: System.Collections.Generic.IEnumerable`1
+  commentId: T:System.Collections.Generic.IEnumerable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  name: IEnumerable<T>
+  nameWithType: IEnumerable<T>
+  fullName: System.Collections.Generic.IEnumerable<T>
+  nameWithType.vb: IEnumerable(Of T)
+  fullName.vb: System.Collections.Generic.IEnumerable(Of T)
+  name.vb: IEnumerable(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IEnumerable`1
+    name: IEnumerable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IEnumerable`1
+    name: IEnumerable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Remove*
+  commentId: Overload:PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Remove
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.html#PublisherStudio_Services_Streaming_Hotkeys_GlobalHotkeyService_Remove_System_Guid_
+  name: Remove
+  nameWithType: GlobalHotkeyService.Remove
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Remove
+- uid: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Drain*
+  commentId: Overload:PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Drain
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.html#PublisherStudio_Services_Streaming_Hotkeys_GlobalHotkeyService_Drain_System_Guid_
+  name: Drain
+  nameWithType: GlobalHotkeyService.Drain
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Drain
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.Streaming.MediaHostHotkeyEvent}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.Streaming.MediaHostHotkeyEvent}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<MediaHostHotkeyEvent>
+  nameWithType: IReadOnlyList<MediaHostHotkeyEvent>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.Streaming.MediaHostHotkeyEvent>
+  nameWithType.vb: IReadOnlyList(Of MediaHostHotkeyEvent)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.Streaming.MediaHostHotkeyEvent)
+  name.vb: IReadOnlyList(Of MediaHostHotkeyEvent)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.Streaming.MediaHostHotkeyEvent
+    name: MediaHostHotkeyEvent
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.Streaming.MediaHostHotkeyEvent.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.Streaming.MediaHostHotkeyEvent
+    name: MediaHostHotkeyEvent
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.Streaming.MediaHostHotkeyEvent.html
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Dispose*
+  commentId: Overload:PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Dispose
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.html#PublisherStudio_Services_Streaming_Hotkeys_GlobalHotkeyService_Dispose
+  name: Dispose
+  nameWithType: GlobalHotkeyService.Dispose
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.Dispose
+- uid: System.IDisposable.Dispose
+  commentId: M:System.IDisposable.Dispose
+  parent: System.IDisposable
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.idisposable.dispose
+  name: Dispose()
+  nameWithType: IDisposable.Dispose()
+  fullName: System.IDisposable.Dispose()
+  spec.csharp:
+  - uid: System.IDisposable.Dispose
+    name: Dispose
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.idisposable.dispose
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.IDisposable.Dispose
+    name: Dispose
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.idisposable.dispose
+  - name: (
+  - name: )

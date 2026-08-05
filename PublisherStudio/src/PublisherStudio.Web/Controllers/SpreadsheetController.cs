@@ -1,4 +1,4 @@
-using DevExpress.AspNetCore.Spreadsheet;
+﻿using DevExpress.AspNetCore.Spreadsheet;
 using DevExpress.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using PublisherStudio.BusinessObjects;
@@ -7,6 +7,9 @@ using PublisherStudio.Services;
 
 namespace PublisherStudio.Controllers;
 
+/// <summary>
+/// Provides spreadsheet controller operations.
+/// </summary>
 [Route("spreadsheet")]
 [AutoValidateAntiforgeryToken]
 public sealed class SpreadsheetController : Controller
@@ -14,12 +17,18 @@ public sealed class SpreadsheetController : Controller
     private readonly SpreadsheetSessionStore _sessions;
     private readonly SpreadsheetDocumentService _documents;
 
+    /// <summary>
+    /// Runs the spreadsheet controller operation.
+    /// </summary>
     public SpreadsheetController(SpreadsheetSessionStore sessions, SpreadsheetDocumentService documents)
     {
         _sessions = sessions;
         _documents = documents;
     }
 
+    /// <summary>
+    /// Runs the editor operation.
+    /// </summary>
     [HttpGet("editor/{sessionId:guid}")]
     [IgnoreAntiforgeryToken]
     public IActionResult Editor(Guid sessionId)
@@ -35,10 +44,16 @@ public sealed class SpreadsheetController : Controller
         });
     }
 
+    /// <summary>
+    /// Runs the request handler operation.
+    /// </summary>
     [AcceptVerbs("GET", "POST")]
     [Route("request")]
     public IActionResult RequestHandler() => SpreadsheetRequestProcessor.GetResponse(HttpContext);
 
+    /// <summary>
+    /// Runs the open operation.
+    /// </summary>
     [HttpPost("open/{sessionId:guid}")]
     [DisableRequestSizeLimit]
     public async Task<IActionResult> Open(Guid sessionId, IFormFile? workbook, CancellationToken cancellationToken)
@@ -77,6 +92,9 @@ public sealed class SpreadsheetController : Controller
         }
     }
 
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     [HttpPost("new/{sessionId:guid}")]
     public IActionResult New(Guid sessionId)
     {
@@ -108,6 +126,9 @@ public sealed class SpreadsheetController : Controller
         }
     }
 
+    /// <summary>
+    /// Runs the save operation.
+    /// </summary>
     [HttpPost("save/{sessionId:guid}")]
     public IActionResult Save(Guid sessionId, SpreadsheetClientState spreadsheetState)
     {
@@ -140,6 +161,9 @@ public sealed class SpreadsheetController : Controller
         }
     }
 
+    /// <summary>
+    /// Runs the download operation.
+    /// </summary>
     [HttpGet("download/{sessionId:guid}")]
     [IgnoreAntiforgeryToken]
     public IActionResult Download(Guid sessionId)

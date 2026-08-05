@@ -1,10 +1,13 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Configuration;
 using PublisherStudio.Services.Streaming.Encoding;
 
 namespace PublisherStudio.Services.Streaming.Capture;
 
+/// <summary>
+/// Represents a discovered native media device info.
+/// </summary>
 public sealed record DiscoveredNativeMediaDeviceInfo(
     string Id,
     string Name,
@@ -13,11 +16,17 @@ public sealed record DiscoveredNativeMediaDeviceInfo(
     string? ProcessId = null,
     string? WindowTitle = null);
 
+/// <summary>
+/// Represents a native device discovery.
+/// </summary>
 public sealed class NativeDeviceDiscovery(
     FfmpegLocator ffmpegLocator,
     IPublisherRuntimePatternService runtimePatterns,
     ILogger<NativeDeviceDiscovery> logger)
 {
+    /// <summary>
+    /// Runs the discover async operation.
+    /// </summary>
     public async Task<IReadOnlyList<DiscoveredNativeMediaDeviceInfo>> DiscoverAsync(
         string? ffmpegPath,
         CancellationToken cancellationToken)

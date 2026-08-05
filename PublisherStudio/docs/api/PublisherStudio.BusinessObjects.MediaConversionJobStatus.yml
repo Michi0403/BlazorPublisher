@@ -1,0 +1,153 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.MediaConversionJobStatus
+  commentId: T:PublisherStudio.BusinessObjects.MediaConversionJobStatus
+  id: MediaConversionJobStatus
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.MediaConversionJobStatus.Cancelled
+  - PublisherStudio.BusinessObjects.MediaConversionJobStatus.Completed
+  - PublisherStudio.BusinessObjects.MediaConversionJobStatus.Failed
+  - PublisherStudio.BusinessObjects.MediaConversionJobStatus.Queued
+  - PublisherStudio.BusinessObjects.MediaConversionJobStatus.Running
+  langs:
+  - csharp
+  - vb
+  name: MediaConversionJobStatus
+  nameWithType: MediaConversionJobStatus
+  fullName: PublisherStudio.BusinessObjects.MediaConversionJobStatus
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported media conversion job status values.
+  example: []
+  syntax:
+    content: public enum MediaConversionJobStatus
+    content.vb: Public Enum MediaConversionJobStatus
+- uid: PublisherStudio.BusinessObjects.MediaConversionJobStatus.Queued
+  commentId: F:PublisherStudio.BusinessObjects.MediaConversionJobStatus.Queued
+  id: Queued
+  parent: PublisherStudio.BusinessObjects.MediaConversionJobStatus
+  langs:
+  - csharp
+  - vb
+  name: Queued
+  nameWithType: MediaConversionJobStatus.Queued
+  fullName: PublisherStudio.BusinessObjects.MediaConversionJobStatus.Queued
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Queued = 0
+    return:
+      type: PublisherStudio.BusinessObjects.MediaConversionJobStatus
+- uid: PublisherStudio.BusinessObjects.MediaConversionJobStatus.Running
+  commentId: F:PublisherStudio.BusinessObjects.MediaConversionJobStatus.Running
+  id: Running
+  parent: PublisherStudio.BusinessObjects.MediaConversionJobStatus
+  langs:
+  - csharp
+  - vb
+  name: Running
+  nameWithType: MediaConversionJobStatus.Running
+  fullName: PublisherStudio.BusinessObjects.MediaConversionJobStatus.Running
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Running = 1
+    return:
+      type: PublisherStudio.BusinessObjects.MediaConversionJobStatus
+- uid: PublisherStudio.BusinessObjects.MediaConversionJobStatus.Completed
+  commentId: F:PublisherStudio.BusinessObjects.MediaConversionJobStatus.Completed
+  id: Completed
+  parent: PublisherStudio.BusinessObjects.MediaConversionJobStatus
+  langs:
+  - csharp
+  - vb
+  name: Completed
+  nameWithType: MediaConversionJobStatus.Completed
+  fullName: PublisherStudio.BusinessObjects.MediaConversionJobStatus.Completed
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Completed = 2
+    return:
+      type: PublisherStudio.BusinessObjects.MediaConversionJobStatus
+- uid: PublisherStudio.BusinessObjects.MediaConversionJobStatus.Failed
+  commentId: F:PublisherStudio.BusinessObjects.MediaConversionJobStatus.Failed
+  id: Failed
+  parent: PublisherStudio.BusinessObjects.MediaConversionJobStatus
+  langs:
+  - csharp
+  - vb
+  name: Failed
+  nameWithType: MediaConversionJobStatus.Failed
+  fullName: PublisherStudio.BusinessObjects.MediaConversionJobStatus.Failed
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Failed = 3
+    return:
+      type: PublisherStudio.BusinessObjects.MediaConversionJobStatus
+- uid: PublisherStudio.BusinessObjects.MediaConversionJobStatus.Cancelled
+  commentId: F:PublisherStudio.BusinessObjects.MediaConversionJobStatus.Cancelled
+  id: Cancelled
+  parent: PublisherStudio.BusinessObjects.MediaConversionJobStatus
+  langs:
+  - csharp
+  - vb
+  name: Cancelled
+  nameWithType: MediaConversionJobStatus.Cancelled
+  fullName: PublisherStudio.BusinessObjects.MediaConversionJobStatus.Cancelled
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Cancelled = 4
+    return:
+      type: PublisherStudio.BusinessObjects.MediaConversionJobStatus
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.MediaConversionJobStatus
+  commentId: T:PublisherStudio.BusinessObjects.MediaConversionJobStatus
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaConversionJobStatus.html
+  name: MediaConversionJobStatus
+  nameWithType: MediaConversionJobStatus
+  fullName: PublisherStudio.BusinessObjects.MediaConversionJobStatus

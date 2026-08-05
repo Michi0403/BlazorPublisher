@@ -1,0 +1,172 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.MediaConversionTarget
+  commentId: T:PublisherStudio.BusinessObjects.MediaConversionTarget
+  id: MediaConversionTarget
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.MediaConversionTarget.Archive
+  - PublisherStudio.BusinessObjects.MediaConversionTarget.Custom
+  - PublisherStudio.BusinessObjects.MediaConversionTarget.GeneralWeb
+  - PublisherStudio.BusinessObjects.MediaConversionTarget.PublisherStudioWeb
+  - PublisherStudio.BusinessObjects.MediaConversionTarget.Streaming
+  - PublisherStudio.BusinessObjects.MediaConversionTarget.VideoEditing
+  langs:
+  - csharp
+  - vb
+  name: MediaConversionTarget
+  nameWithType: MediaConversionTarget
+  fullName: PublisherStudio.BusinessObjects.MediaConversionTarget
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported media conversion target values.
+  example: []
+  syntax:
+    content: public enum MediaConversionTarget
+    content.vb: Public Enum MediaConversionTarget
+- uid: PublisherStudio.BusinessObjects.MediaConversionTarget.PublisherStudioWeb
+  commentId: F:PublisherStudio.BusinessObjects.MediaConversionTarget.PublisherStudioWeb
+  id: PublisherStudioWeb
+  parent: PublisherStudio.BusinessObjects.MediaConversionTarget
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudioWeb
+  nameWithType: MediaConversionTarget.PublisherStudioWeb
+  fullName: PublisherStudio.BusinessObjects.MediaConversionTarget.PublisherStudioWeb
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: PublisherStudioWeb = 0
+    return:
+      type: PublisherStudio.BusinessObjects.MediaConversionTarget
+- uid: PublisherStudio.BusinessObjects.MediaConversionTarget.GeneralWeb
+  commentId: F:PublisherStudio.BusinessObjects.MediaConversionTarget.GeneralWeb
+  id: GeneralWeb
+  parent: PublisherStudio.BusinessObjects.MediaConversionTarget
+  langs:
+  - csharp
+  - vb
+  name: GeneralWeb
+  nameWithType: MediaConversionTarget.GeneralWeb
+  fullName: PublisherStudio.BusinessObjects.MediaConversionTarget.GeneralWeb
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: GeneralWeb = 1
+    return:
+      type: PublisherStudio.BusinessObjects.MediaConversionTarget
+- uid: PublisherStudio.BusinessObjects.MediaConversionTarget.VideoEditing
+  commentId: F:PublisherStudio.BusinessObjects.MediaConversionTarget.VideoEditing
+  id: VideoEditing
+  parent: PublisherStudio.BusinessObjects.MediaConversionTarget
+  langs:
+  - csharp
+  - vb
+  name: VideoEditing
+  nameWithType: MediaConversionTarget.VideoEditing
+  fullName: PublisherStudio.BusinessObjects.MediaConversionTarget.VideoEditing
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: VideoEditing = 2
+    return:
+      type: PublisherStudio.BusinessObjects.MediaConversionTarget
+- uid: PublisherStudio.BusinessObjects.MediaConversionTarget.Streaming
+  commentId: F:PublisherStudio.BusinessObjects.MediaConversionTarget.Streaming
+  id: Streaming
+  parent: PublisherStudio.BusinessObjects.MediaConversionTarget
+  langs:
+  - csharp
+  - vb
+  name: Streaming
+  nameWithType: MediaConversionTarget.Streaming
+  fullName: PublisherStudio.BusinessObjects.MediaConversionTarget.Streaming
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Streaming = 3
+    return:
+      type: PublisherStudio.BusinessObjects.MediaConversionTarget
+- uid: PublisherStudio.BusinessObjects.MediaConversionTarget.Archive
+  commentId: F:PublisherStudio.BusinessObjects.MediaConversionTarget.Archive
+  id: Archive
+  parent: PublisherStudio.BusinessObjects.MediaConversionTarget
+  langs:
+  - csharp
+  - vb
+  name: Archive
+  nameWithType: MediaConversionTarget.Archive
+  fullName: PublisherStudio.BusinessObjects.MediaConversionTarget.Archive
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Archive = 4
+    return:
+      type: PublisherStudio.BusinessObjects.MediaConversionTarget
+- uid: PublisherStudio.BusinessObjects.MediaConversionTarget.Custom
+  commentId: F:PublisherStudio.BusinessObjects.MediaConversionTarget.Custom
+  id: Custom
+  parent: PublisherStudio.BusinessObjects.MediaConversionTarget
+  langs:
+  - csharp
+  - vb
+  name: Custom
+  nameWithType: MediaConversionTarget.Custom
+  fullName: PublisherStudio.BusinessObjects.MediaConversionTarget.Custom
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Custom = 5
+    return:
+      type: PublisherStudio.BusinessObjects.MediaConversionTarget
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.MediaConversionTarget
+  commentId: T:PublisherStudio.BusinessObjects.MediaConversionTarget
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaConversionTarget.html
+  name: MediaConversionTarget
+  nameWithType: MediaConversionTarget
+  fullName: PublisherStudio.BusinessObjects.MediaConversionTarget

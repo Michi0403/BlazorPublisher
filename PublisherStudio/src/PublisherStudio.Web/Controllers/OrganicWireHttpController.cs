@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using PublisherStudio.Services.OrganicPlugins;
 using PublisherStudio.Services.Automation;
 using System.Security.Cryptography;
@@ -24,6 +24,9 @@ public sealed class OrganicWireHttpController(
     IApiSurfaceCatalogService apiSurfaces,
     ILogger<OrganicWireHttpController> logger) : ControllerBase
 {
+    /// <summary>
+    /// Runs the profile operation.
+    /// </summary>
     [HttpGet("profile")]
     public async Task<ActionResult<object>> Profile(CancellationToken cancellationToken)
     {
@@ -51,6 +54,9 @@ public sealed class OrganicWireHttpController(
         }
     }
 
+    /// <summary>
+    /// Runs the dispatch operation.
+    /// </summary>
     [HttpPost]
     [RequestSizeLimit(OrganicWireProtocol.MaximumMessageBytes)]
     public async Task<IActionResult> Dispatch([FromBody] JsonElement body, CancellationToken cancellationToken)
@@ -78,10 +84,10 @@ public sealed class OrganicWireHttpController(
                 throw new CryptographicException("The PublisherStudio HTTP/JSON response requires an MFA-verified peer before application data can be returned.");
             return Content(codec.Serialize(response), "application/json", Encoding.UTF8);
         }
-        catch (OperationCanceledException exception) when (cancellationToken.IsCancellationRequested)
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
 #if DEBUG
-            logger.LogInformation(exception, "Cancelled a PublisherStudio organic HTTP/JSON request at the caller's request in a Debug build.");
+            logger.LogInformation("Cancelled a PublisherStudio organic HTTP/JSON request at the caller's request in a Debug build.");
 #endif
             return StatusCode(499);
         }
@@ -97,6 +103,9 @@ public sealed class OrganicWireHttpController(
         }
     }
 
+    /// <summary>
+    /// Runs the work operation.
+    /// </summary>
     [HttpGet("work/{correlationId:guid}")]
     public async Task<IActionResult> Work(Guid correlationId, CancellationToken cancellationToken)
     {

@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using PublisherStudio.Services;
@@ -17,12 +17,18 @@ public sealed class WebDataController : ControllerBase
     private readonly PublicationLiveDataRegistry _registry;
     private readonly PublicationWebhookStore _webhooks;
 
+    /// <summary>
+    /// Runs the web data controller operation.
+    /// </summary>
     public WebDataController(PublicationLiveDataRegistry registry, PublicationWebhookStore webhooks)
     {
         _registry = registry;
         _webhooks = webhooks;
     }
 
+    /// <summary>
+    /// Runs the status operation.
+    /// </summary>
     [HttpGet("system/status")]
     public IActionResult Status()
     {
@@ -42,13 +48,22 @@ public sealed class WebDataController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Runs the publications operation.
+    /// </summary>
     [HttpGet("publications")]
     public IActionResult Publications() => Ok(_registry.Summaries());
 
+    /// <summary>
+    /// Runs the publication operation.
+    /// </summary>
     [HttpGet("publications/{documentId:guid}")]
     public IActionResult Publication(Guid documentId)
         => _registry.TryGet(documentId, out var publication) ? Ok(publication) : NotFound();
 
+    /// <summary>
+    /// Runs the data operation.
+    /// </summary>
     [HttpGet("publications/{documentId:guid}/data/{dataId:guid}")]
     public IActionResult Data(Guid documentId, Guid dataId)
     {
@@ -56,6 +71,9 @@ public sealed class WebDataController : ControllerBase
         return publication.DataObjects.TryGetValue(dataId, out var data) ? Ok(data) : NotFound();
     }
 
+    /// <summary>
+    /// Runs the rows operation.
+    /// </summary>
     [HttpGet("publications/{documentId:guid}/data/{dataId:guid}/rows")]
     public IActionResult Rows(Guid documentId, Guid dataId)
     {
@@ -63,17 +81,29 @@ public sealed class WebDataController : ControllerBase
         return publication.DataObjects.TryGetValue(dataId, out var data) ? Ok(data.Rows) : NotFound();
     }
 
+    /// <summary>
+    /// Runs the pages operation.
+    /// </summary>
     [HttpGet("publications/{documentId:guid}/pages")]
     public IActionResult Pages(Guid documentId)
         => _registry.TryGet(documentId, out var publication) ? Ok(publication.Pages) : NotFound();
 
+    /// <summary>
+    /// Exports rows.
+    /// </summary>
     // A tokenized, read-only CORS route lets a file:// or separately hosted HTML export
     // reconnect to the user's local monolith without exposing every open publication.
+    /// <summary>
+    /// Exports rows.
+    /// </summary>
     [HttpGet("exports/{documentId:guid}/data/{dataId:guid}/{token}/rows")]
     [EnableCors("PublisherExport")]
     public IActionResult ExportRows(Guid documentId, Guid dataId, string token)
         => _registry.TryGetExportRows(documentId, dataId, token, out var rows) ? Ok(rows) : NotFound();
 
+    /// <summary>
+    /// Runs the webhook operation.
+    /// </summary>
     [HttpPost("webhooks/{bindingId:guid}/{token}")]
     [HttpPut("webhooks/{bindingId:guid}/{token}")]
     [DisableRequestSizeLimit]
@@ -87,6 +117,9 @@ public sealed class WebDataController : ControllerBase
             : NotFound(new { message = "The webhook binding is unknown or its token is invalid." });
     }
 
+    /// <summary>
+    /// Runs the webhook status operation.
+    /// </summary>
     [HttpGet("webhooks/{bindingId:guid}/status")]
     public IActionResult WebhookStatus(Guid bindingId)
     {

@@ -1,0 +1,156 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Streaming.Sessions.IMediaSessionFactory
+  commentId: T:PublisherStudio.Services.Streaming.Sessions.IMediaSessionFactory
+  id: IMediaSessionFactory
+  parent: PublisherStudio.Services.Streaming.Sessions
+  children:
+  - PublisherStudio.Services.Streaming.Sessions.IMediaSessionFactory.Create(System.Text.Json.JsonElement)
+  langs:
+  - csharp
+  - vb
+  name: IMediaSessionFactory
+  nameWithType: IMediaSessionFactory
+  fullName: PublisherStudio.Services.Streaming.Sessions.IMediaSessionFactory
+  type: Interface
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Defines the media session factory contract.
+  example: []
+  syntax:
+    content: public interface IMediaSessionFactory
+    content.vb: Public Interface IMediaSessionFactory
+  derivedClasses:
+  - PublisherStudio.Services.Streaming.Sessions.MediaSessionFactory
+- uid: PublisherStudio.Services.Streaming.Sessions.IMediaSessionFactory.Create(System.Text.Json.JsonElement)
+  commentId: M:PublisherStudio.Services.Streaming.Sessions.IMediaSessionFactory.Create(System.Text.Json.JsonElement)
+  id: Create(System.Text.Json.JsonElement)
+  parent: PublisherStudio.Services.Streaming.Sessions.IMediaSessionFactory
+  langs:
+  - csharp
+  - vb
+  name: Create(JsonElement)
+  nameWithType: IMediaSessionFactory.Create(JsonElement)
+  fullName: PublisherStudio.Services.Streaming.Sessions.IMediaSessionFactory.Create(System.Text.Json.JsonElement)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  syntax:
+    content: MediaSession Create(JsonElement request)
+    parameters:
+    - id: request
+      type: System.Text.Json.JsonElement
+    return:
+      type: PublisherStudio.Services.Streaming.Sessions.MediaSession
+    content.vb: Function Create(request As JsonElement) As MediaSession
+  overload: PublisherStudio.Services.Streaming.Sessions.IMediaSessionFactory.Create*
+references:
+- uid: PublisherStudio.Services.Streaming.Sessions
+  commentId: N:PublisherStudio.Services.Streaming.Sessions
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Sessions
+  nameWithType: PublisherStudio.Services.Streaming.Sessions
+  fullName: PublisherStudio.Services.Streaming.Sessions
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Sessions
+    name: Sessions
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Sessions.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Sessions
+    name: Sessions
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Sessions.html
+- uid: PublisherStudio.Services.Streaming.Sessions.IMediaSessionFactory.Create*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.IMediaSessionFactory.Create
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.IMediaSessionFactory.html#PublisherStudio_Services_Streaming_Sessions_IMediaSessionFactory_Create_System_Text_Json_JsonElement_
+  name: Create
+  nameWithType: IMediaSessionFactory.Create
+  fullName: PublisherStudio.Services.Streaming.Sessions.IMediaSessionFactory.Create
+- uid: System.Text.Json.JsonElement
+  commentId: T:System.Text.Json.JsonElement
+  parent: System.Text.Json
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.text.json.jsonelement
+  name: JsonElement
+  nameWithType: JsonElement
+  fullName: System.Text.Json.JsonElement
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  commentId: T:PublisherStudio.Services.Streaming.Sessions.MediaSession
+  parent: PublisherStudio.Services.Streaming.Sessions
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html
+  name: MediaSession
+  nameWithType: MediaSession
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession
+- uid: System.Text.Json
+  commentId: N:System.Text.Json
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Text.Json
+  nameWithType: System.Text.Json
+  fullName: System.Text.Json
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Text
+    name: Text
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.text
+  - name: .
+  - uid: System.Text.Json
+    name: Json
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.text.json
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Text
+    name: Text
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.text
+  - name: .
+  - uid: System.Text.Json
+    name: Json
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.text.json

@@ -1,0 +1,134 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.MeasurementUnit
+  commentId: T:PublisherStudio.BusinessObjects.MeasurementUnit
+  id: MeasurementUnit
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.MeasurementUnit.Centimeter
+  - PublisherStudio.BusinessObjects.MeasurementUnit.Inch
+  - PublisherStudio.BusinessObjects.MeasurementUnit.Millimeter
+  - PublisherStudio.BusinessObjects.MeasurementUnit.Pixel
+  langs:
+  - csharp
+  - vb
+  name: MeasurementUnit
+  nameWithType: MeasurementUnit
+  fullName: PublisherStudio.BusinessObjects.MeasurementUnit
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported measurement unit values.
+  example: []
+  syntax:
+    content: public enum MeasurementUnit
+    content.vb: Public Enum MeasurementUnit
+- uid: PublisherStudio.BusinessObjects.MeasurementUnit.Millimeter
+  commentId: F:PublisherStudio.BusinessObjects.MeasurementUnit.Millimeter
+  id: Millimeter
+  parent: PublisherStudio.BusinessObjects.MeasurementUnit
+  langs:
+  - csharp
+  - vb
+  name: Millimeter
+  nameWithType: MeasurementUnit.Millimeter
+  fullName: PublisherStudio.BusinessObjects.MeasurementUnit.Millimeter
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Millimeter = 0
+    return:
+      type: PublisherStudio.BusinessObjects.MeasurementUnit
+- uid: PublisherStudio.BusinessObjects.MeasurementUnit.Centimeter
+  commentId: F:PublisherStudio.BusinessObjects.MeasurementUnit.Centimeter
+  id: Centimeter
+  parent: PublisherStudio.BusinessObjects.MeasurementUnit
+  langs:
+  - csharp
+  - vb
+  name: Centimeter
+  nameWithType: MeasurementUnit.Centimeter
+  fullName: PublisherStudio.BusinessObjects.MeasurementUnit.Centimeter
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Centimeter = 1
+    return:
+      type: PublisherStudio.BusinessObjects.MeasurementUnit
+- uid: PublisherStudio.BusinessObjects.MeasurementUnit.Inch
+  commentId: F:PublisherStudio.BusinessObjects.MeasurementUnit.Inch
+  id: Inch
+  parent: PublisherStudio.BusinessObjects.MeasurementUnit
+  langs:
+  - csharp
+  - vb
+  name: Inch
+  nameWithType: MeasurementUnit.Inch
+  fullName: PublisherStudio.BusinessObjects.MeasurementUnit.Inch
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Inch = 2
+    return:
+      type: PublisherStudio.BusinessObjects.MeasurementUnit
+- uid: PublisherStudio.BusinessObjects.MeasurementUnit.Pixel
+  commentId: F:PublisherStudio.BusinessObjects.MeasurementUnit.Pixel
+  id: Pixel
+  parent: PublisherStudio.BusinessObjects.MeasurementUnit
+  langs:
+  - csharp
+  - vb
+  name: Pixel
+  nameWithType: MeasurementUnit.Pixel
+  fullName: PublisherStudio.BusinessObjects.MeasurementUnit.Pixel
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Pixel = 3
+    return:
+      type: PublisherStudio.BusinessObjects.MeasurementUnit
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.MeasurementUnit
+  commentId: T:PublisherStudio.BusinessObjects.MeasurementUnit
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MeasurementUnit.html
+  name: MeasurementUnit
+  nameWithType: MeasurementUnit
+  fullName: PublisherStudio.BusinessObjects.MeasurementUnit

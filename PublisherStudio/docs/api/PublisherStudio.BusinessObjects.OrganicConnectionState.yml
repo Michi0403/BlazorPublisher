@@ -1,0 +1,984 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState
+  commentId: T:PublisherStudio.BusinessObjects.OrganicConnectionState
+  id: OrganicConnectionState
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.OrganicConnectionState.#ctor
+  - PublisherStudio.BusinessObjects.OrganicConnectionState.ConnectedUtc
+  - PublisherStudio.BusinessObjects.OrganicConnectionState.DisplayName
+  - PublisherStudio.BusinessObjects.OrganicConnectionState.GetUiFeatureState(System.String,LocalGPT.WireProtocol.OneWireUiFeatureState)
+  - PublisherStudio.BusinessObjects.OrganicConnectionState.HasCapability(System.String)
+  - PublisherStudio.BusinessObjects.OrganicConnectionState.IsConnected
+  - PublisherStudio.BusinessObjects.OrganicConnectionState.IsLinked
+  - PublisherStudio.BusinessObjects.OrganicConnectionState.LastError
+  - PublisherStudio.BusinessObjects.OrganicConnectionState.PeerId
+  - PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteCapabilities
+  - PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteHardware
+  - PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteSkills
+  - PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteUiFeatures
+  langs:
+  - csharp
+  - vb
+  name: OrganicConnectionState
+  nameWithType: OrganicConnectionState
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents an organic connection state.
+  example: []
+  syntax:
+    content: public sealed class OrganicConnectionState
+    content.vb: Public NotInheritable Class OrganicConnectionState
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.HasCapability(System.String)
+  commentId: M:PublisherStudio.BusinessObjects.OrganicConnectionState.HasCapability(System.String)
+  id: HasCapability(System.String)
+  parent: PublisherStudio.BusinessObjects.OrganicConnectionState
+  langs:
+  - csharp
+  - vb
+  name: HasCapability(string)
+  nameWithType: OrganicConnectionState.HasCapability(string)
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.HasCapability(string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Determines whether capability.
+  example: []
+  syntax:
+    content: public bool HasCapability(string key)
+    parameters:
+    - id: key
+      type: System.String
+    return:
+      type: System.Boolean
+    content.vb: Public Function HasCapability(key As String) As Boolean
+  overload: PublisherStudio.BusinessObjects.OrganicConnectionState.HasCapability*
+  nameWithType.vb: OrganicConnectionState.HasCapability(String)
+  fullName.vb: PublisherStudio.BusinessObjects.OrganicConnectionState.HasCapability(String)
+  name.vb: HasCapability(String)
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.GetUiFeatureState(System.String,LocalGPT.WireProtocol.OneWireUiFeatureState)
+  commentId: M:PublisherStudio.BusinessObjects.OrganicConnectionState.GetUiFeatureState(System.String,LocalGPT.WireProtocol.OneWireUiFeatureState)
+  id: GetUiFeatureState(System.String,LocalGPT.WireProtocol.OneWireUiFeatureState)
+  parent: PublisherStudio.BusinessObjects.OrganicConnectionState
+  langs:
+  - csharp
+  - vb
+  name: GetUiFeatureState(string, OneWireUiFeatureState)
+  nameWithType: OrganicConnectionState.GetUiFeatureState(string, OneWireUiFeatureState)
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.GetUiFeatureState(string, LocalGPT.WireProtocol.OneWireUiFeatureState)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets UI feature state.
+  example: []
+  syntax:
+    content: public OneWireUiFeatureState GetUiFeatureState(string key, OneWireUiFeatureState fallback = OneWireUiFeatureState.Hidden)
+    parameters:
+    - id: key
+      type: System.String
+    - id: fallback
+      type: LocalGPT.WireProtocol.OneWireUiFeatureState
+    return:
+      type: LocalGPT.WireProtocol.OneWireUiFeatureState
+    content.vb: Public Function GetUiFeatureState(key As String, fallback As OneWireUiFeatureState = OneWireUiFeatureState.Hidden) As OneWireUiFeatureState
+  overload: PublisherStudio.BusinessObjects.OrganicConnectionState.GetUiFeatureState*
+  nameWithType.vb: OrganicConnectionState.GetUiFeatureState(String, OneWireUiFeatureState)
+  fullName.vb: PublisherStudio.BusinessObjects.OrganicConnectionState.GetUiFeatureState(String, LocalGPT.WireProtocol.OneWireUiFeatureState)
+  name.vb: GetUiFeatureState(String, OneWireUiFeatureState)
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.#ctor
+  commentId: M:PublisherStudio.BusinessObjects.OrganicConnectionState.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.BusinessObjects.OrganicConnectionState
+  langs:
+  - csharp
+  - vb
+  name: OrganicConnectionState()
+  nameWithType: OrganicConnectionState.OrganicConnectionState()
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.OrganicConnectionState()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public OrganicConnectionState()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.BusinessObjects.OrganicConnectionState.#ctor*
+  nameWithType.vb: OrganicConnectionState.New()
+  fullName.vb: PublisherStudio.BusinessObjects.OrganicConnectionState.New()
+  name.vb: New()
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.IsConnected
+  commentId: P:PublisherStudio.BusinessObjects.OrganicConnectionState.IsConnected
+  id: IsConnected
+  parent: PublisherStudio.BusinessObjects.OrganicConnectionState
+  langs:
+  - csharp
+  - vb
+  name: IsConnected
+  nameWithType: OrganicConnectionState.IsConnected
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.IsConnected
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: True while the TCP transport is alive.
+  example: []
+  syntax:
+    content: public bool IsConnected { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property IsConnected As Boolean
+  overload: PublisherStudio.BusinessObjects.OrganicConnectionState.IsConnected*
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.IsLinked
+  commentId: P:PublisherStudio.BusinessObjects.OrganicConnectionState.IsLinked
+  id: IsLinked
+  parent: PublisherStudio.BusinessObjects.OrganicConnectionState
+  langs:
+  - csharp
+  - vb
+  name: IsLinked
+  nameWithType: OrganicConnectionState.IsLinked
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.IsLinked
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: 'True only after both frontends participated: PublisherStudio initiated the link and LocalGPT approved it.'
+  example: []
+  syntax:
+    content: public bool IsLinked { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property IsLinked As Boolean
+  overload: PublisherStudio.BusinessObjects.OrganicConnectionState.IsLinked*
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.PeerId
+  commentId: P:PublisherStudio.BusinessObjects.OrganicConnectionState.PeerId
+  id: PeerId
+  parent: PublisherStudio.BusinessObjects.OrganicConnectionState
+  langs:
+  - csharp
+  - vb
+  name: PeerId
+  nameWithType: OrganicConnectionState.PeerId
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.PeerId
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets peer identifier.
+  example: []
+  syntax:
+    content: public string PeerId { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property PeerId As String
+  overload: PublisherStudio.BusinessObjects.OrganicConnectionState.PeerId*
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.DisplayName
+  commentId: P:PublisherStudio.BusinessObjects.OrganicConnectionState.DisplayName
+  id: DisplayName
+  parent: PublisherStudio.BusinessObjects.OrganicConnectionState
+  langs:
+  - csharp
+  - vb
+  name: DisplayName
+  nameWithType: OrganicConnectionState.DisplayName
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.DisplayName
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets display name.
+  example: []
+  syntax:
+    content: public string DisplayName { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property DisplayName As String
+  overload: PublisherStudio.BusinessObjects.OrganicConnectionState.DisplayName*
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.ConnectedUtc
+  commentId: P:PublisherStudio.BusinessObjects.OrganicConnectionState.ConnectedUtc
+  id: ConnectedUtc
+  parent: PublisherStudio.BusinessObjects.OrganicConnectionState
+  langs:
+  - csharp
+  - vb
+  name: ConnectedUtc
+  nameWithType: OrganicConnectionState.ConnectedUtc
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.ConnectedUtc
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets connected UTC.
+  example: []
+  syntax:
+    content: public DateTimeOffset? ConnectedUtc { get; set; }
+    parameters: []
+    return:
+      type: System.Nullable{System.DateTimeOffset}
+    content.vb: Public Property ConnectedUtc As DateTimeOffset?
+  overload: PublisherStudio.BusinessObjects.OrganicConnectionState.ConnectedUtc*
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.LastError
+  commentId: P:PublisherStudio.BusinessObjects.OrganicConnectionState.LastError
+  id: LastError
+  parent: PublisherStudio.BusinessObjects.OrganicConnectionState
+  langs:
+  - csharp
+  - vb
+  name: LastError
+  nameWithType: OrganicConnectionState.LastError
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.LastError
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets last error.
+  example: []
+  syntax:
+    content: public string LastError { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property LastError As String
+  overload: PublisherStudio.BusinessObjects.OrganicConnectionState.LastError*
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteCapabilities
+  commentId: P:PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteCapabilities
+  id: RemoteCapabilities
+  parent: PublisherStudio.BusinessObjects.OrganicConnectionState
+  langs:
+  - csharp
+  - vb
+  name: RemoteCapabilities
+  nameWithType: OrganicConnectionState.RemoteCapabilities
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteCapabilities
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets remote capabilities.
+  example: []
+  syntax:
+    content: public List<OneWireCapabilityDescriptor> RemoteCapabilities { get; set; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.List{LocalGPT.WireProtocol.OneWireCapabilityDescriptor}
+    content.vb: Public Property RemoteCapabilities As List(Of OneWireCapabilityDescriptor)
+  overload: PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteCapabilities*
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteSkills
+  commentId: P:PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteSkills
+  id: RemoteSkills
+  parent: PublisherStudio.BusinessObjects.OrganicConnectionState
+  langs:
+  - csharp
+  - vb
+  name: RemoteSkills
+  nameWithType: OrganicConnectionState.RemoteSkills
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteSkills
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets remote skills.
+  example: []
+  syntax:
+    content: public List<OneWireSkillDescriptor> RemoteSkills { get; set; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.List{LocalGPT.WireProtocol.OneWireSkillDescriptor}
+    content.vb: Public Property RemoteSkills As List(Of OneWireSkillDescriptor)
+  overload: PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteSkills*
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteUiFeatures
+  commentId: P:PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteUiFeatures
+  id: RemoteUiFeatures
+  parent: PublisherStudio.BusinessObjects.OrganicConnectionState
+  langs:
+  - csharp
+  - vb
+  name: RemoteUiFeatures
+  nameWithType: OrganicConnectionState.RemoteUiFeatures
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteUiFeatures
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets remote UI features.
+  example: []
+  syntax:
+    content: public List<OneWireUiFeatureDescriptor> RemoteUiFeatures { get; set; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.List{LocalGPT.WireProtocol.OneWireUiFeatureDescriptor}
+    content.vb: Public Property RemoteUiFeatures As List(Of OneWireUiFeatureDescriptor)
+  overload: PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteUiFeatures*
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteHardware
+  commentId: P:PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteHardware
+  id: RemoteHardware
+  parent: PublisherStudio.BusinessObjects.OrganicConnectionState
+  langs:
+  - csharp
+  - vb
+  name: RemoteHardware
+  nameWithType: OrganicConnectionState.RemoteHardware
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteHardware
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets remote hardware.
+  example: []
+  syntax:
+    content: public List<OneWireHardwareDescriptor> RemoteHardware { get; set; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.List{LocalGPT.WireProtocol.OneWireHardwareDescriptor}
+    content.vb: Public Property RemoteHardware As List(Of OneWireHardwareDescriptor)
+  overload: PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteHardware*
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.HasCapability*
+  commentId: Overload:PublisherStudio.BusinessObjects.OrganicConnectionState.HasCapability
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OrganicConnectionState.html#PublisherStudio_BusinessObjects_OrganicConnectionState_HasCapability_System_String_
+  name: HasCapability
+  nameWithType: OrganicConnectionState.HasCapability
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.HasCapability
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.GetUiFeatureState*
+  commentId: Overload:PublisherStudio.BusinessObjects.OrganicConnectionState.GetUiFeatureState
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OrganicConnectionState.html#PublisherStudio_BusinessObjects_OrganicConnectionState_GetUiFeatureState_System_String_LocalGPT_WireProtocol_OneWireUiFeatureState_
+  name: GetUiFeatureState
+  nameWithType: OrganicConnectionState.GetUiFeatureState
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.GetUiFeatureState
+- uid: LocalGPT.WireProtocol.OneWireUiFeatureState
+  commentId: T:LocalGPT.WireProtocol.OneWireUiFeatureState
+  parent: LocalGPT.WireProtocol
+  isExternal: true
+  name: OneWireUiFeatureState
+  nameWithType: OneWireUiFeatureState
+  fullName: LocalGPT.WireProtocol.OneWireUiFeatureState
+- uid: LocalGPT.WireProtocol
+  commentId: N:LocalGPT.WireProtocol
+  isExternal: true
+  name: LocalGPT.WireProtocol
+  nameWithType: LocalGPT.WireProtocol
+  fullName: LocalGPT.WireProtocol
+  spec.csharp:
+  - uid: LocalGPT
+    name: LocalGPT
+    isExternal: true
+  - name: .
+  - uid: LocalGPT.WireProtocol
+    name: WireProtocol
+    isExternal: true
+  spec.vb:
+  - uid: LocalGPT
+    name: LocalGPT
+    isExternal: true
+  - name: .
+  - uid: LocalGPT.WireProtocol
+    name: WireProtocol
+    isExternal: true
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.#ctor*
+  commentId: Overload:PublisherStudio.BusinessObjects.OrganicConnectionState.#ctor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OrganicConnectionState.html#PublisherStudio_BusinessObjects_OrganicConnectionState__ctor
+  name: OrganicConnectionState
+  nameWithType: OrganicConnectionState.OrganicConnectionState
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.OrganicConnectionState
+  nameWithType.vb: OrganicConnectionState.New
+  fullName.vb: PublisherStudio.BusinessObjects.OrganicConnectionState.New
+  name.vb: New
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.IsConnected*
+  commentId: Overload:PublisherStudio.BusinessObjects.OrganicConnectionState.IsConnected
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OrganicConnectionState.html#PublisherStudio_BusinessObjects_OrganicConnectionState_IsConnected
+  name: IsConnected
+  nameWithType: OrganicConnectionState.IsConnected
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.IsConnected
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.IsLinked*
+  commentId: Overload:PublisherStudio.BusinessObjects.OrganicConnectionState.IsLinked
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OrganicConnectionState.html#PublisherStudio_BusinessObjects_OrganicConnectionState_IsLinked
+  name: IsLinked
+  nameWithType: OrganicConnectionState.IsLinked
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.IsLinked
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.PeerId*
+  commentId: Overload:PublisherStudio.BusinessObjects.OrganicConnectionState.PeerId
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OrganicConnectionState.html#PublisherStudio_BusinessObjects_OrganicConnectionState_PeerId
+  name: PeerId
+  nameWithType: OrganicConnectionState.PeerId
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.PeerId
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.DisplayName*
+  commentId: Overload:PublisherStudio.BusinessObjects.OrganicConnectionState.DisplayName
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OrganicConnectionState.html#PublisherStudio_BusinessObjects_OrganicConnectionState_DisplayName
+  name: DisplayName
+  nameWithType: OrganicConnectionState.DisplayName
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.DisplayName
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.ConnectedUtc*
+  commentId: Overload:PublisherStudio.BusinessObjects.OrganicConnectionState.ConnectedUtc
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OrganicConnectionState.html#PublisherStudio_BusinessObjects_OrganicConnectionState_ConnectedUtc
+  name: ConnectedUtc
+  nameWithType: OrganicConnectionState.ConnectedUtc
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.ConnectedUtc
+- uid: System.Nullable{System.DateTimeOffset}
+  commentId: T:System.Nullable{System.DateTimeOffset}
+  parent: System
+  definition: System.Nullable`1
+  href: https://learn.microsoft.com/dotnet/api/system.datetimeoffset
+  name: DateTimeOffset?
+  nameWithType: DateTimeOffset?
+  fullName: System.DateTimeOffset?
+  spec.csharp:
+  - uid: System.DateTimeOffset
+    name: DateTimeOffset
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.datetimeoffset
+  - name: '?'
+  spec.vb:
+  - uid: System.DateTimeOffset
+    name: DateTimeOffset
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.datetimeoffset
+  - name: '?'
+- uid: System.Nullable`1
+  commentId: T:System.Nullable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  name: Nullable<T>
+  nameWithType: Nullable<T>
+  fullName: System.Nullable<T>
+  nameWithType.vb: Nullable(Of T)
+  fullName.vb: System.Nullable(Of T)
+  name.vb: Nullable(Of T)
+  spec.csharp:
+  - uid: System.Nullable`1
+    name: Nullable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Nullable`1
+    name: Nullable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.LastError*
+  commentId: Overload:PublisherStudio.BusinessObjects.OrganicConnectionState.LastError
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OrganicConnectionState.html#PublisherStudio_BusinessObjects_OrganicConnectionState_LastError
+  name: LastError
+  nameWithType: OrganicConnectionState.LastError
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.LastError
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteCapabilities*
+  commentId: Overload:PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteCapabilities
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OrganicConnectionState.html#PublisherStudio_BusinessObjects_OrganicConnectionState_RemoteCapabilities
+  name: RemoteCapabilities
+  nameWithType: OrganicConnectionState.RemoteCapabilities
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteCapabilities
+- uid: System.Collections.Generic.List{LocalGPT.WireProtocol.OneWireCapabilityDescriptor}
+  commentId: T:System.Collections.Generic.List{LocalGPT.WireProtocol.OneWireCapabilityDescriptor}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.List`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<OneWireCapabilityDescriptor>
+  nameWithType: List<OneWireCapabilityDescriptor>
+  fullName: System.Collections.Generic.List<LocalGPT.WireProtocol.OneWireCapabilityDescriptor>
+  nameWithType.vb: List(Of OneWireCapabilityDescriptor)
+  fullName.vb: System.Collections.Generic.List(Of LocalGPT.WireProtocol.OneWireCapabilityDescriptor)
+  name.vb: List(Of OneWireCapabilityDescriptor)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: LocalGPT.WireProtocol.OneWireCapabilityDescriptor
+    name: OneWireCapabilityDescriptor
+    isExternal: true
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: LocalGPT.WireProtocol.OneWireCapabilityDescriptor
+    name: OneWireCapabilityDescriptor
+    isExternal: true
+  - name: )
+- uid: System.Collections.Generic.List`1
+  commentId: T:System.Collections.Generic.List`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<T>
+  nameWithType: List<T>
+  fullName: System.Collections.Generic.List<T>
+  nameWithType.vb: List(Of T)
+  fullName.vb: System.Collections.Generic.List(Of T)
+  name.vb: List(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteSkills*
+  commentId: Overload:PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteSkills
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OrganicConnectionState.html#PublisherStudio_BusinessObjects_OrganicConnectionState_RemoteSkills
+  name: RemoteSkills
+  nameWithType: OrganicConnectionState.RemoteSkills
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteSkills
+- uid: System.Collections.Generic.List{LocalGPT.WireProtocol.OneWireSkillDescriptor}
+  commentId: T:System.Collections.Generic.List{LocalGPT.WireProtocol.OneWireSkillDescriptor}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.List`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<OneWireSkillDescriptor>
+  nameWithType: List<OneWireSkillDescriptor>
+  fullName: System.Collections.Generic.List<LocalGPT.WireProtocol.OneWireSkillDescriptor>
+  nameWithType.vb: List(Of OneWireSkillDescriptor)
+  fullName.vb: System.Collections.Generic.List(Of LocalGPT.WireProtocol.OneWireSkillDescriptor)
+  name.vb: List(Of OneWireSkillDescriptor)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: LocalGPT.WireProtocol.OneWireSkillDescriptor
+    name: OneWireSkillDescriptor
+    isExternal: true
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: LocalGPT.WireProtocol.OneWireSkillDescriptor
+    name: OneWireSkillDescriptor
+    isExternal: true
+  - name: )
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteUiFeatures*
+  commentId: Overload:PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteUiFeatures
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OrganicConnectionState.html#PublisherStudio_BusinessObjects_OrganicConnectionState_RemoteUiFeatures
+  name: RemoteUiFeatures
+  nameWithType: OrganicConnectionState.RemoteUiFeatures
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteUiFeatures
+- uid: System.Collections.Generic.List{LocalGPT.WireProtocol.OneWireUiFeatureDescriptor}
+  commentId: T:System.Collections.Generic.List{LocalGPT.WireProtocol.OneWireUiFeatureDescriptor}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.List`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<OneWireUiFeatureDescriptor>
+  nameWithType: List<OneWireUiFeatureDescriptor>
+  fullName: System.Collections.Generic.List<LocalGPT.WireProtocol.OneWireUiFeatureDescriptor>
+  nameWithType.vb: List(Of OneWireUiFeatureDescriptor)
+  fullName.vb: System.Collections.Generic.List(Of LocalGPT.WireProtocol.OneWireUiFeatureDescriptor)
+  name.vb: List(Of OneWireUiFeatureDescriptor)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: LocalGPT.WireProtocol.OneWireUiFeatureDescriptor
+    name: OneWireUiFeatureDescriptor
+    isExternal: true
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: LocalGPT.WireProtocol.OneWireUiFeatureDescriptor
+    name: OneWireUiFeatureDescriptor
+    isExternal: true
+  - name: )
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteHardware*
+  commentId: Overload:PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteHardware
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OrganicConnectionState.html#PublisherStudio_BusinessObjects_OrganicConnectionState_RemoteHardware
+  name: RemoteHardware
+  nameWithType: OrganicConnectionState.RemoteHardware
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState.RemoteHardware
+- uid: System.Collections.Generic.List{LocalGPT.WireProtocol.OneWireHardwareDescriptor}
+  commentId: T:System.Collections.Generic.List{LocalGPT.WireProtocol.OneWireHardwareDescriptor}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.List`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<OneWireHardwareDescriptor>
+  nameWithType: List<OneWireHardwareDescriptor>
+  fullName: System.Collections.Generic.List<LocalGPT.WireProtocol.OneWireHardwareDescriptor>
+  nameWithType.vb: List(Of OneWireHardwareDescriptor)
+  fullName.vb: System.Collections.Generic.List(Of LocalGPT.WireProtocol.OneWireHardwareDescriptor)
+  name.vb: List(Of OneWireHardwareDescriptor)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: LocalGPT.WireProtocol.OneWireHardwareDescriptor
+    name: OneWireHardwareDescriptor
+    isExternal: true
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: LocalGPT.WireProtocol.OneWireHardwareDescriptor
+    name: OneWireHardwareDescriptor
+    isExternal: true
+  - name: )

@@ -1,0 +1,172 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationAnimationEasing
+  commentId: T:PublisherStudio.BusinessObjects.PublicationAnimationEasing
+  id: PublicationAnimationEasing
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationAnimationEasing.BackOut
+  - PublisherStudio.BusinessObjects.PublicationAnimationEasing.BounceOut
+  - PublisherStudio.BusinessObjects.PublicationAnimationEasing.EaseIn
+  - PublisherStudio.BusinessObjects.PublicationAnimationEasing.EaseInOut
+  - PublisherStudio.BusinessObjects.PublicationAnimationEasing.EaseOut
+  - PublisherStudio.BusinessObjects.PublicationAnimationEasing.Linear
+  langs:
+  - csharp
+  - vb
+  name: PublicationAnimationEasing
+  nameWithType: PublicationAnimationEasing
+  fullName: PublisherStudio.BusinessObjects.PublicationAnimationEasing
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication animation easing values.
+  example: []
+  syntax:
+    content: public enum PublicationAnimationEasing
+    content.vb: Public Enum PublicationAnimationEasing
+- uid: PublisherStudio.BusinessObjects.PublicationAnimationEasing.Linear
+  commentId: F:PublisherStudio.BusinessObjects.PublicationAnimationEasing.Linear
+  id: Linear
+  parent: PublisherStudio.BusinessObjects.PublicationAnimationEasing
+  langs:
+  - csharp
+  - vb
+  name: Linear
+  nameWithType: PublicationAnimationEasing.Linear
+  fullName: PublisherStudio.BusinessObjects.PublicationAnimationEasing.Linear
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Linear = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationAnimationEasing
+- uid: PublisherStudio.BusinessObjects.PublicationAnimationEasing.EaseIn
+  commentId: F:PublisherStudio.BusinessObjects.PublicationAnimationEasing.EaseIn
+  id: EaseIn
+  parent: PublisherStudio.BusinessObjects.PublicationAnimationEasing
+  langs:
+  - csharp
+  - vb
+  name: EaseIn
+  nameWithType: PublicationAnimationEasing.EaseIn
+  fullName: PublisherStudio.BusinessObjects.PublicationAnimationEasing.EaseIn
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: EaseIn = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationAnimationEasing
+- uid: PublisherStudio.BusinessObjects.PublicationAnimationEasing.EaseOut
+  commentId: F:PublisherStudio.BusinessObjects.PublicationAnimationEasing.EaseOut
+  id: EaseOut
+  parent: PublisherStudio.BusinessObjects.PublicationAnimationEasing
+  langs:
+  - csharp
+  - vb
+  name: EaseOut
+  nameWithType: PublicationAnimationEasing.EaseOut
+  fullName: PublisherStudio.BusinessObjects.PublicationAnimationEasing.EaseOut
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: EaseOut = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationAnimationEasing
+- uid: PublisherStudio.BusinessObjects.PublicationAnimationEasing.EaseInOut
+  commentId: F:PublisherStudio.BusinessObjects.PublicationAnimationEasing.EaseInOut
+  id: EaseInOut
+  parent: PublisherStudio.BusinessObjects.PublicationAnimationEasing
+  langs:
+  - csharp
+  - vb
+  name: EaseInOut
+  nameWithType: PublicationAnimationEasing.EaseInOut
+  fullName: PublisherStudio.BusinessObjects.PublicationAnimationEasing.EaseInOut
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: EaseInOut = 3
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationAnimationEasing
+- uid: PublisherStudio.BusinessObjects.PublicationAnimationEasing.BackOut
+  commentId: F:PublisherStudio.BusinessObjects.PublicationAnimationEasing.BackOut
+  id: BackOut
+  parent: PublisherStudio.BusinessObjects.PublicationAnimationEasing
+  langs:
+  - csharp
+  - vb
+  name: BackOut
+  nameWithType: PublicationAnimationEasing.BackOut
+  fullName: PublisherStudio.BusinessObjects.PublicationAnimationEasing.BackOut
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: BackOut = 4
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationAnimationEasing
+- uid: PublisherStudio.BusinessObjects.PublicationAnimationEasing.BounceOut
+  commentId: F:PublisherStudio.BusinessObjects.PublicationAnimationEasing.BounceOut
+  id: BounceOut
+  parent: PublisherStudio.BusinessObjects.PublicationAnimationEasing
+  langs:
+  - csharp
+  - vb
+  name: BounceOut
+  nameWithType: PublicationAnimationEasing.BounceOut
+  fullName: PublisherStudio.BusinessObjects.PublicationAnimationEasing.BounceOut
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: BounceOut = 5
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationAnimationEasing
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationAnimationEasing
+  commentId: T:PublisherStudio.BusinessObjects.PublicationAnimationEasing
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationAnimationEasing.html
+  name: PublicationAnimationEasing
+  nameWithType: PublicationAnimationEasing
+  fullName: PublisherStudio.BusinessObjects.PublicationAnimationEasing

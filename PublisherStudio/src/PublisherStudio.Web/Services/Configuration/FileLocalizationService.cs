@@ -1,9 +1,12 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Globalization;
 using System.Text.Json;
 
 namespace PublisherStudio.Services.Configuration;
 
+/// <summary>
+/// Provides file localization service operations.
+/// </summary>
 public sealed class FileLocalizationService(IWebHostEnvironment environment, ILogger<FileLocalizationService> logger) : IFileLocalizationService
 {
     private readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
@@ -11,6 +14,9 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
     private string LocalizationPath => Path.Combine(environment.ContentRootPath, "Localization");
     private string OverridePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PublisherStudio", "LocalizationOverrides");
 
+    /// <summary>
+    /// Gets available cultures.
+    /// </summary>
     public IReadOnlyList<string> GetAvailableCultures()
     {
         try
@@ -37,6 +43,9 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
         }
     }
 
+    /// <summary>
+    /// Gets strings.
+    /// </summary>
     public IReadOnlyDictionary<string, string> GetStrings(string? culture = null)
     {
         try
@@ -53,6 +62,9 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
         }
     }
 
+    /// <summary>
+    /// Runs the get operation.
+    /// </summary>
     public string Get(string key, string? culture = null, string? fallback = null)
     {
         try
@@ -75,6 +87,9 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
         }
     }
 
+    /// <summary>
+    /// Saves overrides async.
+    /// </summary>
     public async Task SaveOverridesAsync(string culture, IReadOnlyDictionary<string, string> strings, CancellationToken cancellationToken = default)
     {
         try

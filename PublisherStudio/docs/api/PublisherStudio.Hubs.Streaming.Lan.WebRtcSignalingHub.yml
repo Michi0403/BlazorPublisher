@@ -1,0 +1,663 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub
+  commentId: T:PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub
+  id: WebRtcSignalingHub
+  parent: PublisherStudio.Hubs.Streaming.Lan
+  children:
+  - PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.#ctor(PublisherStudio.Services.Streaming.UseCases.Ingest.StreamingIngestUseCases)
+  - PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.CanPublish(System.Guid)
+  - PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.RunPublisherAsync(System.Guid,System.Net.WebSockets.WebSocket,System.Threading.CancellationToken)
+  langs:
+  - csharp
+  - vb
+  name: WebRtcSignalingHub
+  nameWithType: WebRtcSignalingHub
+  fullName: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Hubs.Streaming.Lan
+  summary: WebSocket entry point for the renderer-side WebRTC signaling connection. Signaling state and session lookup remain reusable services; the hub exposes the persistent connection role.
+  example: []
+  syntax:
+    content: public sealed class WebRtcSignalingHub
+    content.vb: Public NotInheritable Class WebRtcSignalingHub
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.#ctor(PublisherStudio.Services.Streaming.UseCases.Ingest.StreamingIngestUseCases)
+  commentId: M:PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.#ctor(PublisherStudio.Services.Streaming.UseCases.Ingest.StreamingIngestUseCases)
+  id: '#ctor(PublisherStudio.Services.Streaming.UseCases.Ingest.StreamingIngestUseCases)'
+  parent: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub
+  langs:
+  - csharp
+  - vb
+  name: WebRtcSignalingHub(StreamingIngestUseCases)
+  nameWithType: WebRtcSignalingHub.WebRtcSignalingHub(StreamingIngestUseCases)
+  fullName: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.WebRtcSignalingHub(PublisherStudio.Services.Streaming.UseCases.Ingest.StreamingIngestUseCases)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Hubs.Streaming.Lan
+  summary: WebSocket entry point for the renderer-side WebRTC signaling connection. Signaling state and session lookup remain reusable services; the hub exposes the persistent connection role.
+  example: []
+  syntax:
+    content: public WebRtcSignalingHub(StreamingIngestUseCases useCases)
+    parameters:
+    - id: useCases
+      type: PublisherStudio.Services.Streaming.UseCases.Ingest.StreamingIngestUseCases
+    content.vb: Public Sub New(useCases As StreamingIngestUseCases)
+  overload: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.#ctor*
+  nameWithType.vb: WebRtcSignalingHub.New(StreamingIngestUseCases)
+  fullName.vb: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.New(PublisherStudio.Services.Streaming.UseCases.Ingest.StreamingIngestUseCases)
+  name.vb: New(StreamingIngestUseCases)
+- uid: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.CanPublish(System.Guid)
+  commentId: M:PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.CanPublish(System.Guid)
+  id: CanPublish(System.Guid)
+  parent: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub
+  langs:
+  - csharp
+  - vb
+  name: CanPublish(Guid)
+  nameWithType: WebRtcSignalingHub.CanPublish(Guid)
+  fullName: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.CanPublish(System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Hubs.Streaming.Lan
+  summary: Determines whether publish.
+  example: []
+  syntax:
+    content: public bool CanPublish(Guid sessionId)
+    parameters:
+    - id: sessionId
+      type: System.Guid
+    return:
+      type: System.Boolean
+    content.vb: Public Function CanPublish(sessionId As Guid) As Boolean
+  overload: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.CanPublish*
+- uid: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.RunPublisherAsync(System.Guid,System.Net.WebSockets.WebSocket,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.RunPublisherAsync(System.Guid,System.Net.WebSockets.WebSocket,System.Threading.CancellationToken)
+  id: RunPublisherAsync(System.Guid,System.Net.WebSockets.WebSocket,System.Threading.CancellationToken)
+  parent: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub
+  langs:
+  - csharp
+  - vb
+  name: RunPublisherAsync(Guid, WebSocket, CancellationToken)
+  nameWithType: WebRtcSignalingHub.RunPublisherAsync(Guid, WebSocket, CancellationToken)
+  fullName: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.RunPublisherAsync(System.Guid, System.Net.WebSockets.WebSocket, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Hubs.Streaming.Lan
+  summary: Runs the run publisher async operation.
+  example: []
+  syntax:
+    content: public Task<bool> RunPublisherAsync(Guid sessionId, WebSocket socket, CancellationToken cancellationToken)
+    parameters:
+    - id: sessionId
+      type: System.Guid
+    - id: socket
+      type: System.Net.WebSockets.WebSocket
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{System.Boolean}
+    content.vb: Public Function RunPublisherAsync(sessionId As Guid, socket As WebSocket, cancellationToken As CancellationToken) As Task(Of Boolean)
+  overload: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.RunPublisherAsync*
+references:
+- uid: PublisherStudio.Hubs.Streaming.Lan
+  commentId: N:PublisherStudio.Hubs.Streaming.Lan
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Hubs.Streaming.Lan
+  nameWithType: PublisherStudio.Hubs.Streaming.Lan
+  fullName: PublisherStudio.Hubs.Streaming.Lan
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Hubs
+    name: Hubs
+    isExternal: true
+    href: PublisherStudio.Hubs.html
+  - name: .
+  - uid: PublisherStudio.Hubs.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Hubs.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Hubs.Streaming.Lan
+    name: Lan
+    isExternal: true
+    href: PublisherStudio.Hubs.Streaming.Lan.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Hubs
+    name: Hubs
+    isExternal: true
+    href: PublisherStudio.Hubs.html
+  - name: .
+  - uid: PublisherStudio.Hubs.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Hubs.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Hubs.Streaming.Lan
+    name: Lan
+    isExternal: true
+    href: PublisherStudio.Hubs.Streaming.Lan.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.#ctor*
+  commentId: Overload:PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.#ctor
+  isExternal: true
+  href: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.html#PublisherStudio_Hubs_Streaming_Lan_WebRtcSignalingHub__ctor_PublisherStudio_Services_Streaming_UseCases_Ingest_StreamingIngestUseCases_
+  name: WebRtcSignalingHub
+  nameWithType: WebRtcSignalingHub.WebRtcSignalingHub
+  fullName: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.WebRtcSignalingHub
+  nameWithType.vb: WebRtcSignalingHub.New
+  fullName.vb: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.New
+  name.vb: New
+- uid: PublisherStudio.Services.Streaming.UseCases.Ingest.StreamingIngestUseCases
+  commentId: T:PublisherStudio.Services.Streaming.UseCases.Ingest.StreamingIngestUseCases
+  parent: PublisherStudio.Services.Streaming.UseCases.Ingest
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Ingest.StreamingIngestUseCases.html
+  name: StreamingIngestUseCases
+  nameWithType: StreamingIngestUseCases
+  fullName: PublisherStudio.Services.Streaming.UseCases.Ingest.StreamingIngestUseCases
+- uid: PublisherStudio.Services.Streaming.UseCases.Ingest
+  commentId: N:PublisherStudio.Services.Streaming.UseCases.Ingest
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.UseCases.Ingest
+  nameWithType: PublisherStudio.Services.Streaming.UseCases.Ingest
+  fullName: PublisherStudio.Services.Streaming.UseCases.Ingest
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases.Ingest
+    name: Ingest
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Ingest.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases.Ingest
+    name: Ingest
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Ingest.html
+- uid: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.CanPublish*
+  commentId: Overload:PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.CanPublish
+  isExternal: true
+  href: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.html#PublisherStudio_Hubs_Streaming_Lan_WebRtcSignalingHub_CanPublish_System_Guid_
+  name: CanPublish
+  nameWithType: WebRtcSignalingHub.CanPublish
+  fullName: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.CanPublish
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.RunPublisherAsync*
+  commentId: Overload:PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.RunPublisherAsync
+  isExternal: true
+  href: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.html#PublisherStudio_Hubs_Streaming_Lan_WebRtcSignalingHub_RunPublisherAsync_System_Guid_System_Net_WebSockets_WebSocket_System_Threading_CancellationToken_
+  name: RunPublisherAsync
+  nameWithType: WebRtcSignalingHub.RunPublisherAsync
+  fullName: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.RunPublisherAsync
+- uid: System.Net.WebSockets.WebSocket
+  commentId: T:System.Net.WebSockets.WebSocket
+  parent: System.Net.WebSockets
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.net.websockets.websocket
+  name: WebSocket
+  nameWithType: WebSocket
+  fullName: System.Net.WebSockets.WebSocket
+- uid: System.Threading.CancellationToken
+  commentId: T:System.Threading.CancellationToken
+  parent: System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  name: CancellationToken
+  nameWithType: CancellationToken
+  fullName: System.Threading.CancellationToken
+- uid: System.Threading.Tasks.Task{System.Boolean}
+  commentId: T:System.Threading.Tasks.Task{System.Boolean}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<bool>
+  nameWithType: Task<bool>
+  fullName: System.Threading.Tasks.Task<bool>
+  nameWithType.vb: Task(Of Boolean)
+  fullName.vb: System.Threading.Tasks.Task(Of Boolean)
+  name.vb: Task(Of Boolean)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: System.Boolean
+    name: bool
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.boolean
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Boolean
+    name: Boolean
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.boolean
+  - name: )
+- uid: System.Net.WebSockets
+  commentId: N:System.Net.WebSockets
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Net.WebSockets
+  nameWithType: System.Net.WebSockets
+  fullName: System.Net.WebSockets
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Net
+    name: Net
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.net
+  - name: .
+  - uid: System.Net.WebSockets
+    name: WebSockets
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.net.websockets
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Net
+    name: Net
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.net
+  - name: .
+  - uid: System.Net.WebSockets
+    name: WebSockets
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.net.websockets
+- uid: System.Threading
+  commentId: N:System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading
+  nameWithType: System.Threading
+  fullName: System.Threading
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+- uid: System.Threading.Tasks.Task`1
+  commentId: T:System.Threading.Tasks.Task`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<TResult>
+  nameWithType: Task<TResult>
+  fullName: System.Threading.Tasks.Task<TResult>
+  nameWithType.vb: Task(Of TResult)
+  fullName.vb: System.Threading.Tasks.Task(Of TResult)
+  name.vb: Task(Of TResult)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - name: TResult
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TResult
+  - name: )
+- uid: System.Threading.Tasks
+  commentId: N:System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading.Tasks
+  nameWithType: System.Threading.Tasks
+  fullName: System.Threading.Tasks
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks

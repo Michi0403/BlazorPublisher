@@ -1,0 +1,1062 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.VideoElement
+  commentId: T:PublisherStudio.BusinessObjects.VideoElement
+  id: VideoElement
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.VideoElement.#ctor
+  - PublisherStudio.BusinessObjects.VideoElement.AltText
+  - PublisherStudio.BusinessObjects.VideoElement.Background
+  - PublisherStudio.BusinessObjects.VideoElement.FitMode
+  - PublisherStudio.BusinessObjects.VideoElement.FitModeExplicit
+  - PublisherStudio.BusinessObjects.VideoElement.FrameClipPolygon
+  - PublisherStudio.BusinessObjects.VideoElement.Kind
+  - PublisherStudio.BusinessObjects.VideoElement.PosterDataUrl
+  - PublisherStudio.BusinessObjects.VideoElement.ShowControls
+  - PublisherStudio.BusinessObjects.VideoElement.VideoProject
+  langs:
+  - csharp
+  - vb
+  name: VideoElement
+  nameWithType: VideoElement
+  fullName: PublisherStudio.BusinessObjects.VideoElement
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents a video element.
+  example: []
+  syntax:
+    content: 'public sealed class VideoElement : PublicationMediaElement'
+    content.vb: Public NotInheritable Class VideoElement Inherits PublicationMediaElement
+  inheritance:
+  - System.Object
+  - PublisherStudio.BusinessObjects.PublicationElement
+  - PublisherStudio.BusinessObjects.PublicationMediaElement
+  inheritedMembers:
+  - PublisherStudio.BusinessObjects.PublicationMediaElement.DataUrl
+  - PublisherStudio.BusinessObjects.PublicationMediaElement.MimeType
+  - PublisherStudio.BusinessObjects.PublicationMediaElement.DurationSeconds
+  - PublisherStudio.BusinessObjects.PublicationMediaElement.TrimStartSeconds
+  - PublisherStudio.BusinessObjects.PublicationMediaElement.TrimEndSeconds
+  - PublisherStudio.BusinessObjects.PublicationMediaElement.TimelineStartSeconds
+  - PublisherStudio.BusinessObjects.PublicationMediaElement.Volume
+  - PublisherStudio.BusinessObjects.PublicationMediaElement.PlaybackRate
+  - PublisherStudio.BusinessObjects.PublicationMediaElement.FadeInSeconds
+  - PublisherStudio.BusinessObjects.PublicationMediaElement.FadeOutSeconds
+  - PublisherStudio.BusinessObjects.PublicationMediaElement.Muted
+  - PublisherStudio.BusinessObjects.PublicationMediaElement.Loop
+  - PublisherStudio.BusinessObjects.PublicationMediaElement.AutoPlay
+  - PublisherStudio.BusinessObjects.PublicationMediaElement.PlaybackTrigger
+  - PublisherStudio.BusinessObjects.PublicationMediaElement.WaveformSamples
+  - PublisherStudio.BusinessObjects.PublicationMediaElement.Segments
+  - PublisherStudio.BusinessObjects.PublicationMediaElement.EffectiveTrimEndSeconds
+  - PublisherStudio.BusinessObjects.PublicationMediaElement.EffectiveSegments
+  - PublisherStudio.BusinessObjects.PublicationMediaElement.TimelineLengthSeconds
+  - PublisherStudio.BusinessObjects.PublicationElement.Id
+  - PublisherStudio.BusinessObjects.PublicationElement.Name
+  - PublisherStudio.BusinessObjects.PublicationElement.X
+  - PublisherStudio.BusinessObjects.PublicationElement.Y
+  - PublisherStudio.BusinessObjects.PublicationElement.Width
+  - PublisherStudio.BusinessObjects.PublicationElement.Height
+  - PublisherStudio.BusinessObjects.PublicationElement.Rotation
+  - PublisherStudio.BusinessObjects.PublicationElement.ZIndex
+  - PublisherStudio.BusinessObjects.PublicationElement.Visible
+  - PublisherStudio.BusinessObjects.PublicationElement.Locked
+  - PublisherStudio.BusinessObjects.PublicationElement.HiddenAtPresentationStart
+  - PublisherStudio.BusinessObjects.PublicationElement.GroupId
+  - PublisherStudio.BusinessObjects.PublicationElement.Animations
+  - PublisherStudio.BusinessObjects.PublicationElement.Interaction
+  - PublisherStudio.BusinessObjects.PublicationElement.ConnectorPorts
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.BusinessObjects.VideoElement.#ctor
+  commentId: M:PublisherStudio.BusinessObjects.VideoElement.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.BusinessObjects.VideoElement
+  langs:
+  - csharp
+  - vb
+  name: VideoElement()
+  nameWithType: VideoElement.VideoElement()
+  fullName: PublisherStudio.BusinessObjects.VideoElement.VideoElement()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public VideoElement()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.BusinessObjects.VideoElement.#ctor*
+  nameWithType.vb: VideoElement.New()
+  fullName.vb: PublisherStudio.BusinessObjects.VideoElement.New()
+  name.vb: New()
+- uid: PublisherStudio.BusinessObjects.VideoElement.Kind
+  commentId: P:PublisherStudio.BusinessObjects.VideoElement.Kind
+  id: Kind
+  parent: PublisherStudio.BusinessObjects.VideoElement
+  langs:
+  - csharp
+  - vb
+  name: Kind
+  nameWithType: VideoElement.Kind
+  fullName: PublisherStudio.BusinessObjects.VideoElement.Kind
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets kind.
+  example: []
+  syntax:
+    content: public override PublicationElementKind Kind { get; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationElementKind
+    content.vb: Public Overrides ReadOnly Property Kind As PublicationElementKind
+  overridden: PublisherStudio.BusinessObjects.PublicationElement.Kind
+  overload: PublisherStudio.BusinessObjects.VideoElement.Kind*
+- uid: PublisherStudio.BusinessObjects.VideoElement.PosterDataUrl
+  commentId: P:PublisherStudio.BusinessObjects.VideoElement.PosterDataUrl
+  id: PosterDataUrl
+  parent: PublisherStudio.BusinessObjects.VideoElement
+  langs:
+  - csharp
+  - vb
+  name: PosterDataUrl
+  nameWithType: VideoElement.PosterDataUrl
+  fullName: PublisherStudio.BusinessObjects.VideoElement.PosterDataUrl
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets poster data URL.
+  example: []
+  syntax:
+    content: public string PosterDataUrl { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property PosterDataUrl As String
+  overload: PublisherStudio.BusinessObjects.VideoElement.PosterDataUrl*
+- uid: PublisherStudio.BusinessObjects.VideoElement.AltText
+  commentId: P:PublisherStudio.BusinessObjects.VideoElement.AltText
+  id: AltText
+  parent: PublisherStudio.BusinessObjects.VideoElement
+  langs:
+  - csharp
+  - vb
+  name: AltText
+  nameWithType: VideoElement.AltText
+  fullName: PublisherStudio.BusinessObjects.VideoElement.AltText
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets alt text.
+  example: []
+  syntax:
+    content: public string AltText { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property AltText As String
+  overload: PublisherStudio.BusinessObjects.VideoElement.AltText*
+- uid: PublisherStudio.BusinessObjects.VideoElement.ShowControls
+  commentId: P:PublisherStudio.BusinessObjects.VideoElement.ShowControls
+  id: ShowControls
+  parent: PublisherStudio.BusinessObjects.VideoElement
+  langs:
+  - csharp
+  - vb
+  name: ShowControls
+  nameWithType: VideoElement.ShowControls
+  fullName: PublisherStudio.BusinessObjects.VideoElement.ShowControls
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets show controls.
+  example: []
+  syntax:
+    content: public bool ShowControls { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property ShowControls As Boolean
+  overload: PublisherStudio.BusinessObjects.VideoElement.ShowControls*
+- uid: PublisherStudio.BusinessObjects.VideoElement.FitMode
+  commentId: P:PublisherStudio.BusinessObjects.VideoElement.FitMode
+  id: FitMode
+  parent: PublisherStudio.BusinessObjects.VideoElement
+  langs:
+  - csharp
+  - vb
+  name: FitMode
+  nameWithType: VideoElement.FitMode
+  fullName: PublisherStudio.BusinessObjects.VideoElement.FitMode
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets fit mode.
+  example: []
+  syntax:
+    content: public PublicationVideoFitMode FitMode { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationVideoFitMode
+    content.vb: Public Property FitMode As PublicationVideoFitMode
+  overload: PublisherStudio.BusinessObjects.VideoElement.FitMode*
+- uid: PublisherStudio.BusinessObjects.VideoElement.FitModeExplicit
+  commentId: P:PublisherStudio.BusinessObjects.VideoElement.FitModeExplicit
+  id: FitModeExplicit
+  parent: PublisherStudio.BusinessObjects.VideoElement
+  langs:
+  - csharp
+  - vb
+  name: FitModeExplicit
+  nameWithType: VideoElement.FitModeExplicit
+  fullName: PublisherStudio.BusinessObjects.VideoElement.FitModeExplicit
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets fit mode explicit.
+  example: []
+  syntax:
+    content: public bool FitModeExplicit { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property FitModeExplicit As Boolean
+  overload: PublisherStudio.BusinessObjects.VideoElement.FitModeExplicit*
+- uid: PublisherStudio.BusinessObjects.VideoElement.Background
+  commentId: P:PublisherStudio.BusinessObjects.VideoElement.Background
+  id: Background
+  parent: PublisherStudio.BusinessObjects.VideoElement
+  langs:
+  - csharp
+  - vb
+  name: Background
+  nameWithType: VideoElement.Background
+  fullName: PublisherStudio.BusinessObjects.VideoElement.Background
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets background.
+  example: []
+  syntax:
+    content: public string Background { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Background As String
+  overload: PublisherStudio.BusinessObjects.VideoElement.Background*
+- uid: PublisherStudio.BusinessObjects.VideoElement.VideoProject
+  commentId: P:PublisherStudio.BusinessObjects.VideoElement.VideoProject
+  id: VideoProject
+  parent: PublisherStudio.BusinessObjects.VideoElement
+  langs:
+  - csharp
+  - vb
+  name: VideoProject
+  nameWithType: VideoElement.VideoProject
+  fullName: PublisherStudio.BusinessObjects.VideoElement.VideoProject
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets video project.
+  example: []
+  syntax:
+    content: public VideoProjectDocument? VideoProject { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.VideoProjectDocument
+    content.vb: Public Property VideoProject As VideoProjectDocument
+  overload: PublisherStudio.BusinessObjects.VideoElement.VideoProject*
+- uid: PublisherStudio.BusinessObjects.VideoElement.FrameClipPolygon
+  commentId: P:PublisherStudio.BusinessObjects.VideoElement.FrameClipPolygon
+  id: FrameClipPolygon
+  parent: PublisherStudio.BusinessObjects.VideoElement
+  langs:
+  - csharp
+  - vb
+  name: FrameClipPolygon
+  nameWithType: VideoElement.FrameClipPolygon
+  fullName: PublisherStudio.BusinessObjects.VideoElement.FrameClipPolygon
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets frame clip polygon.
+  example: []
+  syntax:
+    content: public List<MediaFramePoint> FrameClipPolygon { get; set; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.List{PublisherStudio.BusinessObjects.MediaFramePoint}
+    content.vb: Public Property FrameClipPolygon As List(Of MediaFramePoint)
+  overload: PublisherStudio.BusinessObjects.VideoElement.FrameClipPolygon*
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: PublisherStudio.BusinessObjects.PublicationElement
+  commentId: T:PublisherStudio.BusinessObjects.PublicationElement
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html
+  name: PublicationElement
+  nameWithType: PublicationElement
+  fullName: PublisherStudio.BusinessObjects.PublicationElement
+- uid: PublisherStudio.BusinessObjects.PublicationMediaElement
+  commentId: T:PublisherStudio.BusinessObjects.PublicationMediaElement
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMediaElement.html
+  name: PublicationMediaElement
+  nameWithType: PublicationMediaElement
+  fullName: PublisherStudio.BusinessObjects.PublicationMediaElement
+- uid: PublisherStudio.BusinessObjects.PublicationMediaElement.DataUrl
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMediaElement.DataUrl
+  parent: PublisherStudio.BusinessObjects.PublicationMediaElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMediaElement.html#PublisherStudio_BusinessObjects_PublicationMediaElement_DataUrl
+  name: DataUrl
+  nameWithType: PublicationMediaElement.DataUrl
+  fullName: PublisherStudio.BusinessObjects.PublicationMediaElement.DataUrl
+- uid: PublisherStudio.BusinessObjects.PublicationMediaElement.MimeType
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMediaElement.MimeType
+  parent: PublisherStudio.BusinessObjects.PublicationMediaElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMediaElement.html#PublisherStudio_BusinessObjects_PublicationMediaElement_MimeType
+  name: MimeType
+  nameWithType: PublicationMediaElement.MimeType
+  fullName: PublisherStudio.BusinessObjects.PublicationMediaElement.MimeType
+- uid: PublisherStudio.BusinessObjects.PublicationMediaElement.DurationSeconds
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMediaElement.DurationSeconds
+  parent: PublisherStudio.BusinessObjects.PublicationMediaElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMediaElement.html#PublisherStudio_BusinessObjects_PublicationMediaElement_DurationSeconds
+  name: DurationSeconds
+  nameWithType: PublicationMediaElement.DurationSeconds
+  fullName: PublisherStudio.BusinessObjects.PublicationMediaElement.DurationSeconds
+- uid: PublisherStudio.BusinessObjects.PublicationMediaElement.TrimStartSeconds
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMediaElement.TrimStartSeconds
+  parent: PublisherStudio.BusinessObjects.PublicationMediaElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMediaElement.html#PublisherStudio_BusinessObjects_PublicationMediaElement_TrimStartSeconds
+  name: TrimStartSeconds
+  nameWithType: PublicationMediaElement.TrimStartSeconds
+  fullName: PublisherStudio.BusinessObjects.PublicationMediaElement.TrimStartSeconds
+- uid: PublisherStudio.BusinessObjects.PublicationMediaElement.TrimEndSeconds
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMediaElement.TrimEndSeconds
+  parent: PublisherStudio.BusinessObjects.PublicationMediaElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMediaElement.html#PublisherStudio_BusinessObjects_PublicationMediaElement_TrimEndSeconds
+  name: TrimEndSeconds
+  nameWithType: PublicationMediaElement.TrimEndSeconds
+  fullName: PublisherStudio.BusinessObjects.PublicationMediaElement.TrimEndSeconds
+- uid: PublisherStudio.BusinessObjects.PublicationMediaElement.TimelineStartSeconds
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMediaElement.TimelineStartSeconds
+  parent: PublisherStudio.BusinessObjects.PublicationMediaElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMediaElement.html#PublisherStudio_BusinessObjects_PublicationMediaElement_TimelineStartSeconds
+  name: TimelineStartSeconds
+  nameWithType: PublicationMediaElement.TimelineStartSeconds
+  fullName: PublisherStudio.BusinessObjects.PublicationMediaElement.TimelineStartSeconds
+- uid: PublisherStudio.BusinessObjects.PublicationMediaElement.Volume
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMediaElement.Volume
+  parent: PublisherStudio.BusinessObjects.PublicationMediaElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMediaElement.html#PublisherStudio_BusinessObjects_PublicationMediaElement_Volume
+  name: Volume
+  nameWithType: PublicationMediaElement.Volume
+  fullName: PublisherStudio.BusinessObjects.PublicationMediaElement.Volume
+- uid: PublisherStudio.BusinessObjects.PublicationMediaElement.PlaybackRate
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMediaElement.PlaybackRate
+  parent: PublisherStudio.BusinessObjects.PublicationMediaElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMediaElement.html#PublisherStudio_BusinessObjects_PublicationMediaElement_PlaybackRate
+  name: PlaybackRate
+  nameWithType: PublicationMediaElement.PlaybackRate
+  fullName: PublisherStudio.BusinessObjects.PublicationMediaElement.PlaybackRate
+- uid: PublisherStudio.BusinessObjects.PublicationMediaElement.FadeInSeconds
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMediaElement.FadeInSeconds
+  parent: PublisherStudio.BusinessObjects.PublicationMediaElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMediaElement.html#PublisherStudio_BusinessObjects_PublicationMediaElement_FadeInSeconds
+  name: FadeInSeconds
+  nameWithType: PublicationMediaElement.FadeInSeconds
+  fullName: PublisherStudio.BusinessObjects.PublicationMediaElement.FadeInSeconds
+- uid: PublisherStudio.BusinessObjects.PublicationMediaElement.FadeOutSeconds
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMediaElement.FadeOutSeconds
+  parent: PublisherStudio.BusinessObjects.PublicationMediaElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMediaElement.html#PublisherStudio_BusinessObjects_PublicationMediaElement_FadeOutSeconds
+  name: FadeOutSeconds
+  nameWithType: PublicationMediaElement.FadeOutSeconds
+  fullName: PublisherStudio.BusinessObjects.PublicationMediaElement.FadeOutSeconds
+- uid: PublisherStudio.BusinessObjects.PublicationMediaElement.Muted
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMediaElement.Muted
+  parent: PublisherStudio.BusinessObjects.PublicationMediaElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMediaElement.html#PublisherStudio_BusinessObjects_PublicationMediaElement_Muted
+  name: Muted
+  nameWithType: PublicationMediaElement.Muted
+  fullName: PublisherStudio.BusinessObjects.PublicationMediaElement.Muted
+- uid: PublisherStudio.BusinessObjects.PublicationMediaElement.Loop
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMediaElement.Loop
+  parent: PublisherStudio.BusinessObjects.PublicationMediaElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMediaElement.html#PublisherStudio_BusinessObjects_PublicationMediaElement_Loop
+  name: Loop
+  nameWithType: PublicationMediaElement.Loop
+  fullName: PublisherStudio.BusinessObjects.PublicationMediaElement.Loop
+- uid: PublisherStudio.BusinessObjects.PublicationMediaElement.AutoPlay
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMediaElement.AutoPlay
+  parent: PublisherStudio.BusinessObjects.PublicationMediaElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMediaElement.html#PublisherStudio_BusinessObjects_PublicationMediaElement_AutoPlay
+  name: AutoPlay
+  nameWithType: PublicationMediaElement.AutoPlay
+  fullName: PublisherStudio.BusinessObjects.PublicationMediaElement.AutoPlay
+- uid: PublisherStudio.BusinessObjects.PublicationMediaElement.PlaybackTrigger
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMediaElement.PlaybackTrigger
+  parent: PublisherStudio.BusinessObjects.PublicationMediaElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMediaElement.html#PublisherStudio_BusinessObjects_PublicationMediaElement_PlaybackTrigger
+  name: PlaybackTrigger
+  nameWithType: PublicationMediaElement.PlaybackTrigger
+  fullName: PublisherStudio.BusinessObjects.PublicationMediaElement.PlaybackTrigger
+- uid: PublisherStudio.BusinessObjects.PublicationMediaElement.WaveformSamples
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMediaElement.WaveformSamples
+  parent: PublisherStudio.BusinessObjects.PublicationMediaElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMediaElement.html#PublisherStudio_BusinessObjects_PublicationMediaElement_WaveformSamples
+  name: WaveformSamples
+  nameWithType: PublicationMediaElement.WaveformSamples
+  fullName: PublisherStudio.BusinessObjects.PublicationMediaElement.WaveformSamples
+- uid: PublisherStudio.BusinessObjects.PublicationMediaElement.Segments
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMediaElement.Segments
+  parent: PublisherStudio.BusinessObjects.PublicationMediaElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMediaElement.html#PublisherStudio_BusinessObjects_PublicationMediaElement_Segments
+  name: Segments
+  nameWithType: PublicationMediaElement.Segments
+  fullName: PublisherStudio.BusinessObjects.PublicationMediaElement.Segments
+- uid: PublisherStudio.BusinessObjects.PublicationMediaElement.EffectiveTrimEndSeconds
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMediaElement.EffectiveTrimEndSeconds
+  parent: PublisherStudio.BusinessObjects.PublicationMediaElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMediaElement.html#PublisherStudio_BusinessObjects_PublicationMediaElement_EffectiveTrimEndSeconds
+  name: EffectiveTrimEndSeconds
+  nameWithType: PublicationMediaElement.EffectiveTrimEndSeconds
+  fullName: PublisherStudio.BusinessObjects.PublicationMediaElement.EffectiveTrimEndSeconds
+- uid: PublisherStudio.BusinessObjects.PublicationMediaElement.EffectiveSegments
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMediaElement.EffectiveSegments
+  parent: PublisherStudio.BusinessObjects.PublicationMediaElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMediaElement.html#PublisherStudio_BusinessObjects_PublicationMediaElement_EffectiveSegments
+  name: EffectiveSegments
+  nameWithType: PublicationMediaElement.EffectiveSegments
+  fullName: PublisherStudio.BusinessObjects.PublicationMediaElement.EffectiveSegments
+- uid: PublisherStudio.BusinessObjects.PublicationMediaElement.TimelineLengthSeconds
+  commentId: P:PublisherStudio.BusinessObjects.PublicationMediaElement.TimelineLengthSeconds
+  parent: PublisherStudio.BusinessObjects.PublicationMediaElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMediaElement.html#PublisherStudio_BusinessObjects_PublicationMediaElement_TimelineLengthSeconds
+  name: TimelineLengthSeconds
+  nameWithType: PublicationMediaElement.TimelineLengthSeconds
+  fullName: PublisherStudio.BusinessObjects.PublicationMediaElement.TimelineLengthSeconds
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Id
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Id
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Id
+  name: Id
+  nameWithType: PublicationElement.Id
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Id
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Name
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Name
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Name
+  name: Name
+  nameWithType: PublicationElement.Name
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Name
+- uid: PublisherStudio.BusinessObjects.PublicationElement.X
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.X
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_X
+  name: X
+  nameWithType: PublicationElement.X
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.X
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Y
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Y
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Y
+  name: Y
+  nameWithType: PublicationElement.Y
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Y
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Width
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Width
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Width
+  name: Width
+  nameWithType: PublicationElement.Width
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Width
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Height
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Height
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Height
+  name: Height
+  nameWithType: PublicationElement.Height
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Height
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Rotation
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Rotation
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Rotation
+  name: Rotation
+  nameWithType: PublicationElement.Rotation
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Rotation
+- uid: PublisherStudio.BusinessObjects.PublicationElement.ZIndex
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.ZIndex
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_ZIndex
+  name: ZIndex
+  nameWithType: PublicationElement.ZIndex
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.ZIndex
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Visible
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Visible
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Visible
+  name: Visible
+  nameWithType: PublicationElement.Visible
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Visible
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Locked
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Locked
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Locked
+  name: Locked
+  nameWithType: PublicationElement.Locked
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Locked
+- uid: PublisherStudio.BusinessObjects.PublicationElement.HiddenAtPresentationStart
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.HiddenAtPresentationStart
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_HiddenAtPresentationStart
+  name: HiddenAtPresentationStart
+  nameWithType: PublicationElement.HiddenAtPresentationStart
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.HiddenAtPresentationStart
+- uid: PublisherStudio.BusinessObjects.PublicationElement.GroupId
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.GroupId
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_GroupId
+  name: GroupId
+  nameWithType: PublicationElement.GroupId
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.GroupId
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Animations
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Animations
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Animations
+  name: Animations
+  nameWithType: PublicationElement.Animations
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Animations
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Interaction
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Interaction
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Interaction
+  name: Interaction
+  nameWithType: PublicationElement.Interaction
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Interaction
+- uid: PublisherStudio.BusinessObjects.PublicationElement.ConnectorPorts
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.ConnectorPorts
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_ConnectorPorts
+  name: ConnectorPorts
+  nameWithType: PublicationElement.ConnectorPorts
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.ConnectorPorts
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.BusinessObjects.VideoElement.#ctor*
+  commentId: Overload:PublisherStudio.BusinessObjects.VideoElement.#ctor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.VideoElement.html#PublisherStudio_BusinessObjects_VideoElement__ctor
+  name: VideoElement
+  nameWithType: VideoElement.VideoElement
+  fullName: PublisherStudio.BusinessObjects.VideoElement.VideoElement
+  nameWithType.vb: VideoElement.New
+  fullName.vb: PublisherStudio.BusinessObjects.VideoElement.New
+  name.vb: New
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Kind
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Kind
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Kind
+  name: Kind
+  nameWithType: PublicationElement.Kind
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Kind
+- uid: PublisherStudio.BusinessObjects.VideoElement.Kind*
+  commentId: Overload:PublisherStudio.BusinessObjects.VideoElement.Kind
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.VideoElement.html#PublisherStudio_BusinessObjects_VideoElement_Kind
+  name: Kind
+  nameWithType: VideoElement.Kind
+  fullName: PublisherStudio.BusinessObjects.VideoElement.Kind
+- uid: PublisherStudio.BusinessObjects.PublicationElementKind
+  commentId: T:PublisherStudio.BusinessObjects.PublicationElementKind
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElementKind.html
+  name: PublicationElementKind
+  nameWithType: PublicationElementKind
+  fullName: PublisherStudio.BusinessObjects.PublicationElementKind
+- uid: PublisherStudio.BusinessObjects.VideoElement.PosterDataUrl*
+  commentId: Overload:PublisherStudio.BusinessObjects.VideoElement.PosterDataUrl
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.VideoElement.html#PublisherStudio_BusinessObjects_VideoElement_PosterDataUrl
+  name: PosterDataUrl
+  nameWithType: VideoElement.PosterDataUrl
+  fullName: PublisherStudio.BusinessObjects.VideoElement.PosterDataUrl
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.BusinessObjects.VideoElement.AltText*
+  commentId: Overload:PublisherStudio.BusinessObjects.VideoElement.AltText
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.VideoElement.html#PublisherStudio_BusinessObjects_VideoElement_AltText
+  name: AltText
+  nameWithType: VideoElement.AltText
+  fullName: PublisherStudio.BusinessObjects.VideoElement.AltText
+- uid: PublisherStudio.BusinessObjects.VideoElement.ShowControls*
+  commentId: Overload:PublisherStudio.BusinessObjects.VideoElement.ShowControls
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.VideoElement.html#PublisherStudio_BusinessObjects_VideoElement_ShowControls
+  name: ShowControls
+  nameWithType: VideoElement.ShowControls
+  fullName: PublisherStudio.BusinessObjects.VideoElement.ShowControls
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.BusinessObjects.VideoElement.FitMode*
+  commentId: Overload:PublisherStudio.BusinessObjects.VideoElement.FitMode
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.VideoElement.html#PublisherStudio_BusinessObjects_VideoElement_FitMode
+  name: FitMode
+  nameWithType: VideoElement.FitMode
+  fullName: PublisherStudio.BusinessObjects.VideoElement.FitMode
+- uid: PublisherStudio.BusinessObjects.PublicationVideoFitMode
+  commentId: T:PublisherStudio.BusinessObjects.PublicationVideoFitMode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationVideoFitMode.html
+  name: PublicationVideoFitMode
+  nameWithType: PublicationVideoFitMode
+  fullName: PublisherStudio.BusinessObjects.PublicationVideoFitMode
+- uid: PublisherStudio.BusinessObjects.VideoElement.FitModeExplicit*
+  commentId: Overload:PublisherStudio.BusinessObjects.VideoElement.FitModeExplicit
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.VideoElement.html#PublisherStudio_BusinessObjects_VideoElement_FitModeExplicit
+  name: FitModeExplicit
+  nameWithType: VideoElement.FitModeExplicit
+  fullName: PublisherStudio.BusinessObjects.VideoElement.FitModeExplicit
+- uid: PublisherStudio.BusinessObjects.VideoElement.Background*
+  commentId: Overload:PublisherStudio.BusinessObjects.VideoElement.Background
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.VideoElement.html#PublisherStudio_BusinessObjects_VideoElement_Background
+  name: Background
+  nameWithType: VideoElement.Background
+  fullName: PublisherStudio.BusinessObjects.VideoElement.Background
+- uid: PublisherStudio.BusinessObjects.VideoElement.VideoProject*
+  commentId: Overload:PublisherStudio.BusinessObjects.VideoElement.VideoProject
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.VideoElement.html#PublisherStudio_BusinessObjects_VideoElement_VideoProject
+  name: VideoProject
+  nameWithType: VideoElement.VideoProject
+  fullName: PublisherStudio.BusinessObjects.VideoElement.VideoProject
+- uid: PublisherStudio.BusinessObjects.VideoProjectDocument
+  commentId: T:PublisherStudio.BusinessObjects.VideoProjectDocument
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.VideoProjectDocument.html
+  name: VideoProjectDocument
+  nameWithType: VideoProjectDocument
+  fullName: PublisherStudio.BusinessObjects.VideoProjectDocument
+- uid: PublisherStudio.BusinessObjects.VideoElement.FrameClipPolygon*
+  commentId: Overload:PublisherStudio.BusinessObjects.VideoElement.FrameClipPolygon
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.VideoElement.html#PublisherStudio_BusinessObjects_VideoElement_FrameClipPolygon
+  name: FrameClipPolygon
+  nameWithType: VideoElement.FrameClipPolygon
+  fullName: PublisherStudio.BusinessObjects.VideoElement.FrameClipPolygon
+- uid: System.Collections.Generic.List{PublisherStudio.BusinessObjects.MediaFramePoint}
+  commentId: T:System.Collections.Generic.List{PublisherStudio.BusinessObjects.MediaFramePoint}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.List`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<MediaFramePoint>
+  nameWithType: List<MediaFramePoint>
+  fullName: System.Collections.Generic.List<PublisherStudio.BusinessObjects.MediaFramePoint>
+  nameWithType.vb: List(Of MediaFramePoint)
+  fullName.vb: System.Collections.Generic.List(Of PublisherStudio.BusinessObjects.MediaFramePoint)
+  name.vb: List(Of MediaFramePoint)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.MediaFramePoint
+    name: MediaFramePoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaFramePoint.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.MediaFramePoint
+    name: MediaFramePoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaFramePoint.html
+  - name: )
+- uid: System.Collections.Generic.List`1
+  commentId: T:System.Collections.Generic.List`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<T>
+  nameWithType: List<T>
+  fullName: System.Collections.Generic.List<T>
+  nameWithType.vb: List(Of T)
+  fullName.vb: System.Collections.Generic.List(Of T)
+  name.vb: List(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic

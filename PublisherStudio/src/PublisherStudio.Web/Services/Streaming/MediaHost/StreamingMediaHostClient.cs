@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Streaming.MediaHost;
@@ -20,6 +20,9 @@ public sealed class StreamingMediaHostClient(
     private readonly StreamingRuntimeUseCases _runtime = runtime;
     private readonly StreamingSessionUseCases _sessions = sessions;
 
+    /// <summary>
+    /// Runs the discover native devices async operation.
+    /// </summary>
     public async Task<List<PublisherStudio.BusinessObjects.NativeMediaDeviceInfo>> DiscoverNativeDevicesAsync(CancellationToken cancellationToken = default)
     {
         var settings = await _profiles.LoadAsync(cancellationToken);
@@ -27,8 +30,14 @@ public sealed class StreamingMediaHostClient(
         return devices.ToList();
     }
 
+    /// <summary>
+    /// Determines whether available async.
+    /// </summary>
     public Task<bool> IsAvailableAsync(CancellationToken cancellationToken = default) => Task.FromResult(true);
 
+    /// <summary>
+    /// Starts async.
+    /// </summary>
     public async Task<MediaHostSessionResponse?> StartAsync(PublicationDocument document, bool dryRun, CancellationToken cancellationToken = default)
     {
         var settings = await _profiles.LoadAsync(cancellationToken);
@@ -118,66 +127,195 @@ public sealed class StreamingMediaHostClient(
         }
     }
 
+    /// <summary>
+    /// Stops async.
+    /// </summary>
     public Task<bool> StopAsync(Guid sessionId, CancellationToken cancellationToken = default) =>
         Task.FromResult(_sessions.Stop(sessionId));
 
+    /// <summary>
+    /// Sets output enabled async.
+    /// </summary>
     public Task<bool> SetOutputEnabledAsync(Guid sessionId, Guid outputId, bool enabled, CancellationToken cancellationToken = default) =>
         Task.FromResult(_sessions.SetOutput(sessionId, outputId, enabled));
 
+    /// <summary>
+    /// Sets program page async.
+    /// </summary>
     public Task<bool> SetProgramPageAsync(Guid sessionId, Guid pageId, CancellationToken cancellationToken = default) =>
         Task.FromResult(_sessions.SetProgramPage(sessionId, pageId));
 
+    /// <summary>
+    /// Sets recording async.
+    /// </summary>
     public Task<bool> SetRecordingAsync(Guid sessionId, bool enabled, CancellationToken cancellationToken = default) =>
         Task.FromResult(_sessions.SetRecording(sessionId, enabled));
 
+    /// <summary>
+    /// Reads events async.
+    /// </summary>
     public Task<IReadOnlyList<MediaHostHotkeyEvent>> ReadEventsAsync(Guid sessionId, CancellationToken cancellationToken = default) =>
         Task.FromResult(_sessions.DrainEvents(sessionId));
 }
 
+/// <summary>
+/// Represents a media host start session request.
+/// </summary>
 public sealed class MediaHostStartSessionRequest
 {
+    /// <summary>
+    /// Gets or sets publication identifier.
+    /// </summary>
     public Guid PublicationId { get; set; }
+    /// <summary>
+    /// Gets or sets publication name.
+    /// </summary>
     public string PublicationName { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets dry run.
+    /// </summary>
     public bool DryRun { get; set; }
+    /// <summary>
+    /// Gets or sets master width.
+    /// </summary>
     public int MasterWidth { get; set; }
+    /// <summary>
+    /// Gets or sets master height.
+    /// </summary>
     public int MasterHeight { get; set; }
+    /// <summary>
+    /// Gets or sets master frame rate.
+    /// </summary>
     public int MasterFrameRate { get; set; }
+    /// <summary>
+    /// Gets or sets prefer device timestamps.
+    /// </summary>
     public bool PreferDeviceTimestamps { get; set; }
+    /// <summary>
+    /// Gets or sets FFmpeg path.
+    /// </summary>
     public string FfmpegPath { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets hardware encoder.
+    /// </summary>
     public StreamingHardwareEncoderPreference HardwareEncoder { get; set; } = StreamingHardwareEncoderPreference.Auto;
+    /// <summary>
+    /// Gets or sets outputs.
+    /// </summary>
     public List<MediaHostOutputRequest> Outputs { get; set; } = [];
+    /// <summary>
+    /// Gets or sets recording.
+    /// </summary>
     public PublicationRecordingSettings Recording { get; set; } = new();
+    /// <summary>
+    /// Gets or sets LAN.
+    /// </summary>
     public PublicationLanStreamingSettings Lan { get; set; } = new();
+    /// <summary>
+    /// Gets or sets hotkeys.
+    /// </summary>
     public List<PublicationStreamingHotkey> Hotkeys { get; set; } = [];
 }
 
+/// <summary>
+/// Represents a media host output request.
+/// </summary>
 public sealed class MediaHostOutputRequest
 {
+    /// <summary>
+    /// Gets or sets output identifier.
+    /// </summary>
     public Guid OutputId { get; set; }
+    /// <summary>
+    /// Gets or sets the display name.
+    /// </summary>
     public string Name { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets whether the feature is enabled.
+    /// </summary>
     public bool Enabled { get; set; } = true;
+    /// <summary>
+    /// Gets or sets provider.
+    /// </summary>
     public PublicationStreamProvider Provider { get; set; }
+    /// <summary>
+    /// Gets or sets transport.
+    /// </summary>
     public PublicationStreamTransport Transport { get; set; }
+    /// <summary>
+    /// Gets or sets endpoint.
+    /// </summary>
     public string Endpoint { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets channel identifier.
+    /// </summary>
     public string ChannelId { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets account name.
+    /// </summary>
     public string AccountName { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets secret.
+    /// </summary>
     public string Secret { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets chat enabled.
+    /// </summary>
     public bool ChatEnabled { get; set; }
+    /// <summary>
+    /// Gets or sets chat secret.
+    /// </summary>
     public string ChatSecret { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets test mode.
+    /// </summary>
     public bool TestMode { get; set; }
+    /// <summary>
+    /// Gets or sets width.
+    /// </summary>
     public int Width { get; set; }
+    /// <summary>
+    /// Gets or sets height.
+    /// </summary>
     public int Height { get; set; }
+    /// <summary>
+    /// Gets or sets frame rate.
+    /// </summary>
     public int FrameRate { get; set; }
+    /// <summary>
+    /// Gets or sets video bitrate kbps.
+    /// </summary>
     public int VideoBitrateKbps { get; set; }
+    /// <summary>
+    /// Gets or sets audio bitrate kbps.
+    /// </summary>
     public int AudioBitrateKbps { get; set; }
+    /// <summary>
+    /// Gets or sets key frame interval seconds.
+    /// </summary>
     public int KeyFrameIntervalSeconds { get; set; }
+    /// <summary>
+    /// Gets or sets video codec.
+    /// </summary>
     public PublicationStreamVideoCodec VideoCodec { get; set; }
+    /// <summary>
+    /// Gets or sets audio codec.
+    /// </summary>
     public PublicationStreamAudioCodec AudioCodec { get; set; }
 }
 
+/// <summary>
+/// Represents a media host session response.
+/// </summary>
 public sealed class MediaHostSessionResponse
 {
+    /// <summary>
+    /// Gets or sets session identifier.
+    /// </summary>
     public Guid SessionId { get; set; }
+    /// <summary>
+    /// Gets or sets status.
+    /// </summary>
     public string Status { get; set; } = string.Empty;
 }
 

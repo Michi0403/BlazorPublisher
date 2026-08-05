@@ -1,0 +1,96 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationComponentScope
+  commentId: T:PublisherStudio.BusinessObjects.PublicationComponentScope
+  id: PublicationComponentScope
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationComponentScope.Document
+  - PublisherStudio.BusinessObjects.PublicationComponentScope.Page
+  langs:
+  - csharp
+  - vb
+  name: PublicationComponentScope
+  nameWithType: PublicationComponentScope
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentScope
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication component scope values.
+  example: []
+  syntax:
+    content: public enum PublicationComponentScope
+    content.vb: Public Enum PublicationComponentScope
+- uid: PublisherStudio.BusinessObjects.PublicationComponentScope.Page
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentScope.Page
+  id: Page
+  parent: PublisherStudio.BusinessObjects.PublicationComponentScope
+  langs:
+  - csharp
+  - vb
+  name: Page
+  nameWithType: PublicationComponentScope.Page
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentScope.Page
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Page = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentScope
+- uid: PublisherStudio.BusinessObjects.PublicationComponentScope.Document
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentScope.Document
+  id: Document
+  parent: PublisherStudio.BusinessObjects.PublicationComponentScope
+  langs:
+  - csharp
+  - vb
+  name: Document
+  nameWithType: PublicationComponentScope.Document
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentScope.Document
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Document = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentScope
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationComponentScope
+  commentId: T:PublisherStudio.BusinessObjects.PublicationComponentScope
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationComponentScope.html
+  name: PublicationComponentScope
+  nameWithType: PublicationComponentScope
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentScope

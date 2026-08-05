@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
 using System.Net.WebSockets;
@@ -8,11 +8,17 @@ using PublisherStudio.Services.Streaming.Encoding;
 
 namespace PublisherStudio.Services.Streaming.Capture;
 
+/// <summary>
+/// Defines the native capture session factory contract.
+/// </summary>
 public interface INativeCaptureSessionFactory
 {
     NativeCaptureSession Create(NativeCaptureRequest request);
 }
 
+/// <summary>
+/// Provides native capture session factory operations.
+/// </summary>
 public sealed class NativeCaptureSessionFactory(
     IPublisherRuntimePolicyDataService runtimePolicy,
     FfmpegLocator ffmpegLocator,
@@ -20,6 +26,9 @@ public sealed class NativeCaptureSessionFactory(
     ILoggerFactory loggerFactory,
     ILogger<NativeCaptureSessionFactory> logger) : INativeCaptureSessionFactory
 {
+    /// <summary>
+    /// Runs the create operation.
+    /// </summary>
     public NativeCaptureSession Create(NativeCaptureRequest request)
     {
         try
@@ -40,12 +49,18 @@ public sealed class NativeCaptureSessionFactory(
     }
 }
 
+/// <summary>
+/// Provides native capture registry operations.
+/// </summary>
 public sealed class NativeCaptureRegistry(
     INativeCaptureSessionFactory sessionFactory,
     ILogger<NativeCaptureRegistry> logger) : IDisposable
 {
     private readonly ConcurrentDictionary<Guid, NativeCaptureSession> _captures = new();
 
+    /// <summary>
+    /// Runs the create operation.
+    /// </summary>
     public NativeCaptureSession Create(NativeCaptureRequest request)
     {
         try
@@ -73,6 +88,9 @@ public sealed class NativeCaptureRegistry(
         }
     }
 
+    /// <summary>
+    /// Attempts to get.
+    /// </summary>
     public bool TryGet(Guid id, out NativeCaptureSession session)
     {
         try
@@ -87,6 +105,9 @@ public sealed class NativeCaptureRegistry(
         }
     }
 
+    /// <summary>
+    /// Runs the stop operation.
+    /// </summary>
     public bool Stop(Guid id)
     {
         try
@@ -103,6 +124,9 @@ public sealed class NativeCaptureRegistry(
         }
     }
 
+    /// <summary>
+    /// Runs the dispose operation.
+    /// </summary>
     public void Dispose()
     {
         try
@@ -118,6 +142,9 @@ public sealed class NativeCaptureRegistry(
     }
 }
 
+/// <summary>
+/// Represents a native capture session.
+/// </summary>
 public sealed class NativeCaptureSession : IDisposable
 {
     private readonly IPublisherRuntimePolicyDataService _runtimePolicy;
@@ -133,6 +160,9 @@ public sealed class NativeCaptureSession : IDisposable
     private byte[] _initialization = [];
     private bool _disposed;
 
+    /// <summary>
+    /// Runs the native capture session operation.
+    /// </summary>
     public NativeCaptureSession(
         NativeCaptureRequest request,
         IPublisherRuntimePolicyDataService runtimePolicy,
@@ -154,12 +184,30 @@ public sealed class NativeCaptureSession : IDisposable
             : request.IncludeAudio ? "video/webm;codecs=vp9,opus" : "video/webm;codecs=vp9";
     }
 
+    /// <summary>
+    /// Gets the stable identifier.
+    /// </summary>
     public Guid Id { get; }
+    /// <summary>
+    /// Gets is audio only.
+    /// </summary>
     public bool IsAudioOnly { get; }
+    /// <summary>
+    /// Gets mime type.
+    /// </summary>
     public string MimeType { get; }
+    /// <summary>
+    /// Gets or sets status.
+    /// </summary>
     public string Status { get; private set; } = "created";
+    /// <summary>
+    /// Gets or sets last error.
+    /// </summary>
     public string LastError { get; private set; } = string.Empty;
 
+    /// <summary>
+    /// Runs the start operation.
+    /// </summary>
     public void Start()
     {
         try
@@ -208,6 +256,9 @@ public sealed class NativeCaptureSession : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the subscribe operation.
+    /// </summary>
     public (Guid Id, byte[] Initialization, ChannelReader<byte[]> Reader) Subscribe()
     {
         lock (_sync)
@@ -224,6 +275,9 @@ public sealed class NativeCaptureSession : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the unsubscribe operation.
+    /// </summary>
     public void Unsubscribe(Guid id)
     {
         try
@@ -419,6 +473,9 @@ public sealed class NativeCaptureSession : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the dispose operation.
+    /// </summary>
     public void Dispose()
     {
         try

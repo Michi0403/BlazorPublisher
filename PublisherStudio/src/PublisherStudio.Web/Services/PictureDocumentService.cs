@@ -1,9 +1,12 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services;
 
+/// <summary>
+/// Provides picture document service operations.
+/// </summary>
 public sealed class PictureDocumentService
 {
     private readonly JsonSerializerOptions _options = new(JsonSerializerDefaults.Web)
@@ -14,8 +17,14 @@ public sealed class PictureDocumentService
         Converters = { new JsonStringEnumConverter() }
     };
 
+    /// <summary>
+    /// Runs the serialize operation.
+    /// </summary>
     public string Serialize(PictureDocument document) => JsonSerializer.Serialize(document, _options);
 
+    /// <summary>
+    /// Runs the deserialize operation.
+    /// </summary>
     public PictureDocument Deserialize(string json)
     {
         var document = JsonSerializer.Deserialize<PictureDocument>(json, _options)
@@ -24,8 +33,14 @@ public sealed class PictureDocumentService
         return document;
     }
 
+    /// <summary>
+    /// Runs the clone operation.
+    /// </summary>
     public PictureDocument Clone(PictureDocument document) => Deserialize(Serialize(document));
 
+    /// <summary>
+    /// Adds raster layer.
+    /// </summary>
     public RasterPictureLayer AddRasterLayer(
         PictureDocument document,
         string dataUrl,
@@ -56,6 +71,9 @@ public sealed class PictureDocumentService
         return layer;
     }
 
+    /// <summary>
+    /// Runs the normalize operation.
+    /// </summary>
     public void Normalize(PictureDocument document)
     {
         document.FormatVersion = "1.4";

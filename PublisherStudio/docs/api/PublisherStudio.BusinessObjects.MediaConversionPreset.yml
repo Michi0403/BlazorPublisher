@@ -1,0 +1,1178 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset
+  commentId: T:PublisherStudio.BusinessObjects.MediaConversionPreset
+  id: MediaConversionPreset
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.MediaConversionPreset.#ctor(System.String,System.String,System.String,System.String,System.String,System.String,System.Boolean,System.Boolean,System.Collections.Generic.IReadOnlyList{System.String},System.Boolean,System.String)
+  - PublisherStudio.BusinessObjects.MediaConversionPreset.Available
+  - PublisherStudio.BusinessObjects.MediaConversionPreset.BrowserOriented
+  - PublisherStudio.BusinessObjects.MediaConversionPreset.Deconstruct(System.String@,System.String@,System.String@,System.String@,System.String@,System.String@,System.Boolean@,System.Boolean@,System.Collections.Generic.IReadOnlyList{System.String}@,System.Boolean@,System.String@)
+  - PublisherStudio.BusinessObjects.MediaConversionPreset.Description
+  - PublisherStudio.BusinessObjects.MediaConversionPreset.Equals(PublisherStudio.BusinessObjects.MediaConversionPreset)
+  - PublisherStudio.BusinessObjects.MediaConversionPreset.Equals(System.Object)
+  - PublisherStudio.BusinessObjects.MediaConversionPreset.GetHashCode
+  - PublisherStudio.BusinessObjects.MediaConversionPreset.Id
+  - PublisherStudio.BusinessObjects.MediaConversionPreset.InputKind
+  - PublisherStudio.BusinessObjects.MediaConversionPreset.Lossless
+  - PublisherStudio.BusinessObjects.MediaConversionPreset.Name
+  - PublisherStudio.BusinessObjects.MediaConversionPreset.OutputExtension
+  - PublisherStudio.BusinessObjects.MediaConversionPreset.OutputMimeType
+  - PublisherStudio.BusinessObjects.MediaConversionPreset.RequiredEncoders
+  - PublisherStudio.BusinessObjects.MediaConversionPreset.ToString
+  - PublisherStudio.BusinessObjects.MediaConversionPreset.UnavailableReason
+  - PublisherStudio.BusinessObjects.MediaConversionPreset.op_Equality(PublisherStudio.BusinessObjects.MediaConversionPreset,PublisherStudio.BusinessObjects.MediaConversionPreset)
+  - PublisherStudio.BusinessObjects.MediaConversionPreset.op_Inequality(PublisherStudio.BusinessObjects.MediaConversionPreset,PublisherStudio.BusinessObjects.MediaConversionPreset)
+  langs:
+  - csharp
+  - vb
+  name: MediaConversionPreset
+  nameWithType: MediaConversionPreset
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents a media conversion preset.
+  example: []
+  syntax:
+    content: 'public sealed record MediaConversionPreset : IEquatable<MediaConversionPreset>'
+    content.vb: Public NotInheritable Class MediaConversionPreset Implements IEquatable(Of MediaConversionPreset)
+  inheritance:
+  - System.Object
+  implements:
+  - System.IEquatable{PublisherStudio.BusinessObjects.MediaConversionPreset}
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.#ctor(System.String,System.String,System.String,System.String,System.String,System.String,System.Boolean,System.Boolean,System.Collections.Generic.IReadOnlyList{System.String},System.Boolean,System.String)
+  commentId: M:PublisherStudio.BusinessObjects.MediaConversionPreset.#ctor(System.String,System.String,System.String,System.String,System.String,System.String,System.Boolean,System.Boolean,System.Collections.Generic.IReadOnlyList{System.String},System.Boolean,System.String)
+  id: '#ctor(System.String,System.String,System.String,System.String,System.String,System.String,System.Boolean,System.Boolean,System.Collections.Generic.IReadOnlyList{System.String},System.Boolean,System.String)'
+  parent: PublisherStudio.BusinessObjects.MediaConversionPreset
+  langs:
+  - csharp
+  - vb
+  name: MediaConversionPreset(string, string, string, string, string, string, bool, bool, IReadOnlyList<string>, bool, string)
+  nameWithType: MediaConversionPreset.MediaConversionPreset(string, string, string, string, string, string, bool, bool, IReadOnlyList<string>, bool, string)
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.MediaConversionPreset(string, string, string, string, string, string, bool, bool, System.Collections.Generic.IReadOnlyList<string>, bool, string)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents a media conversion preset.
+  example: []
+  syntax:
+    content: public MediaConversionPreset(string Id, string Name, string Description, string InputKind, string OutputExtension, string OutputMimeType, bool Lossless, bool BrowserOriented, IReadOnlyList<string> RequiredEncoders, bool Available = true, string UnavailableReason = "")
+    parameters:
+    - id: Id
+      type: System.String
+    - id: Name
+      type: System.String
+    - id: Description
+      type: System.String
+    - id: InputKind
+      type: System.String
+    - id: OutputExtension
+      type: System.String
+    - id: OutputMimeType
+      type: System.String
+    - id: Lossless
+      type: System.Boolean
+    - id: BrowserOriented
+      type: System.Boolean
+    - id: RequiredEncoders
+      type: System.Collections.Generic.IReadOnlyList{System.String}
+    - id: Available
+      type: System.Boolean
+    - id: UnavailableReason
+      type: System.String
+    content.vb: Public Sub New(Id As String, Name As String, Description As String, InputKind As String, OutputExtension As String, OutputMimeType As String, Lossless As Boolean, BrowserOriented As Boolean, RequiredEncoders As IReadOnlyList(Of String), Available As Boolean = True, UnavailableReason As String = "")
+  overload: PublisherStudio.BusinessObjects.MediaConversionPreset.#ctor*
+  nameWithType.vb: MediaConversionPreset.New(String, String, String, String, String, String, Boolean, Boolean, IReadOnlyList(Of String), Boolean, String)
+  fullName.vb: PublisherStudio.BusinessObjects.MediaConversionPreset.New(String, String, String, String, String, String, Boolean, Boolean, System.Collections.Generic.IReadOnlyList(Of String), Boolean, String)
+  name.vb: New(String, String, String, String, String, String, Boolean, Boolean, IReadOnlyList(Of String), Boolean, String)
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.ToString
+  commentId: M:PublisherStudio.BusinessObjects.MediaConversionPreset.ToString
+  id: ToString
+  parent: PublisherStudio.BusinessObjects.MediaConversionPreset
+  langs:
+  - csharp
+  - vb
+  name: ToString()
+  nameWithType: MediaConversionPreset.ToString()
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.ToString()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  example: []
+  syntax:
+    content: public override string ToString()
+    return:
+      type: System.String
+    content.vb: Public Overrides Function ToString() As String
+  overridden: System.Object.ToString
+  overload: PublisherStudio.BusinessObjects.MediaConversionPreset.ToString*
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.op_Inequality(PublisherStudio.BusinessObjects.MediaConversionPreset,PublisherStudio.BusinessObjects.MediaConversionPreset)
+  commentId: M:PublisherStudio.BusinessObjects.MediaConversionPreset.op_Inequality(PublisherStudio.BusinessObjects.MediaConversionPreset,PublisherStudio.BusinessObjects.MediaConversionPreset)
+  id: op_Inequality(PublisherStudio.BusinessObjects.MediaConversionPreset,PublisherStudio.BusinessObjects.MediaConversionPreset)
+  parent: PublisherStudio.BusinessObjects.MediaConversionPreset
+  langs:
+  - csharp
+  - vb
+  name: operator !=(MediaConversionPreset?, MediaConversionPreset?)
+  nameWithType: MediaConversionPreset.operator !=(MediaConversionPreset?, MediaConversionPreset?)
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.operator !=(PublisherStudio.BusinessObjects.MediaConversionPreset?, PublisherStudio.BusinessObjects.MediaConversionPreset?)
+  type: Operator
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public static bool operator !=(MediaConversionPreset? left, MediaConversionPreset? right)
+    parameters:
+    - id: left
+      type: PublisherStudio.BusinessObjects.MediaConversionPreset
+    - id: right
+      type: PublisherStudio.BusinessObjects.MediaConversionPreset
+    return:
+      type: System.Boolean
+    content.vb: Public Shared Operator <>(left As MediaConversionPreset, right As MediaConversionPreset) As Boolean
+  overload: PublisherStudio.BusinessObjects.MediaConversionPreset.op_Inequality*
+  nameWithType.vb: MediaConversionPreset.<>(MediaConversionPreset, MediaConversionPreset)
+  fullName.vb: PublisherStudio.BusinessObjects.MediaConversionPreset.<>(PublisherStudio.BusinessObjects.MediaConversionPreset, PublisherStudio.BusinessObjects.MediaConversionPreset)
+  name.vb: <>(MediaConversionPreset, MediaConversionPreset)
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.op_Equality(PublisherStudio.BusinessObjects.MediaConversionPreset,PublisherStudio.BusinessObjects.MediaConversionPreset)
+  commentId: M:PublisherStudio.BusinessObjects.MediaConversionPreset.op_Equality(PublisherStudio.BusinessObjects.MediaConversionPreset,PublisherStudio.BusinessObjects.MediaConversionPreset)
+  id: op_Equality(PublisherStudio.BusinessObjects.MediaConversionPreset,PublisherStudio.BusinessObjects.MediaConversionPreset)
+  parent: PublisherStudio.BusinessObjects.MediaConversionPreset
+  langs:
+  - csharp
+  - vb
+  name: operator ==(MediaConversionPreset?, MediaConversionPreset?)
+  nameWithType: MediaConversionPreset.operator ==(MediaConversionPreset?, MediaConversionPreset?)
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.operator ==(PublisherStudio.BusinessObjects.MediaConversionPreset?, PublisherStudio.BusinessObjects.MediaConversionPreset?)
+  type: Operator
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public static bool operator ==(MediaConversionPreset? left, MediaConversionPreset? right)
+    parameters:
+    - id: left
+      type: PublisherStudio.BusinessObjects.MediaConversionPreset
+    - id: right
+      type: PublisherStudio.BusinessObjects.MediaConversionPreset
+    return:
+      type: System.Boolean
+    content.vb: Public Shared Operator =(left As MediaConversionPreset, right As MediaConversionPreset) As Boolean
+  overload: PublisherStudio.BusinessObjects.MediaConversionPreset.op_Equality*
+  nameWithType.vb: MediaConversionPreset.=(MediaConversionPreset, MediaConversionPreset)
+  fullName.vb: PublisherStudio.BusinessObjects.MediaConversionPreset.=(PublisherStudio.BusinessObjects.MediaConversionPreset, PublisherStudio.BusinessObjects.MediaConversionPreset)
+  name.vb: =(MediaConversionPreset, MediaConversionPreset)
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.GetHashCode
+  commentId: M:PublisherStudio.BusinessObjects.MediaConversionPreset.GetHashCode
+  id: GetHashCode
+  parent: PublisherStudio.BusinessObjects.MediaConversionPreset
+  langs:
+  - csharp
+  - vb
+  name: GetHashCode()
+  nameWithType: MediaConversionPreset.GetHashCode()
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.GetHashCode()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  example: []
+  syntax:
+    content: public override int GetHashCode()
+    return:
+      type: System.Int32
+    content.vb: Public Overrides Function GetHashCode() As Integer
+  overridden: System.Object.GetHashCode
+  overload: PublisherStudio.BusinessObjects.MediaConversionPreset.GetHashCode*
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.Equals(System.Object)
+  commentId: M:PublisherStudio.BusinessObjects.MediaConversionPreset.Equals(System.Object)
+  id: Equals(System.Object)
+  parent: PublisherStudio.BusinessObjects.MediaConversionPreset
+  langs:
+  - csharp
+  - vb
+  name: Equals(object?)
+  nameWithType: MediaConversionPreset.Equals(object?)
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.Equals(object?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  example: []
+  syntax:
+    content: public override bool Equals(object? obj)
+    parameters:
+    - id: obj
+      type: System.Object
+    return:
+      type: System.Boolean
+    content.vb: Public Overrides Function Equals(obj As Object) As Boolean
+  overridden: System.Object.Equals(System.Object)
+  overload: PublisherStudio.BusinessObjects.MediaConversionPreset.Equals*
+  nameWithType.vb: MediaConversionPreset.Equals(Object)
+  fullName.vb: PublisherStudio.BusinessObjects.MediaConversionPreset.Equals(Object)
+  name.vb: Equals(Object)
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.Equals(PublisherStudio.BusinessObjects.MediaConversionPreset)
+  commentId: M:PublisherStudio.BusinessObjects.MediaConversionPreset.Equals(PublisherStudio.BusinessObjects.MediaConversionPreset)
+  id: Equals(PublisherStudio.BusinessObjects.MediaConversionPreset)
+  parent: PublisherStudio.BusinessObjects.MediaConversionPreset
+  langs:
+  - csharp
+  - vb
+  name: Equals(MediaConversionPreset?)
+  nameWithType: MediaConversionPreset.Equals(MediaConversionPreset?)
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.Equals(PublisherStudio.BusinessObjects.MediaConversionPreset?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  example: []
+  syntax:
+    content: public bool Equals(MediaConversionPreset? other)
+    parameters:
+    - id: other
+      type: PublisherStudio.BusinessObjects.MediaConversionPreset
+    return:
+      type: System.Boolean
+    content.vb: Public Function Equals(other As MediaConversionPreset) As Boolean
+  overload: PublisherStudio.BusinessObjects.MediaConversionPreset.Equals*
+  implements:
+  - System.IEquatable{PublisherStudio.BusinessObjects.MediaConversionPreset}.Equals(PublisherStudio.BusinessObjects.MediaConversionPreset)
+  nameWithType.vb: MediaConversionPreset.Equals(MediaConversionPreset)
+  fullName.vb: PublisherStudio.BusinessObjects.MediaConversionPreset.Equals(PublisherStudio.BusinessObjects.MediaConversionPreset)
+  name.vb: Equals(MediaConversionPreset)
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.Deconstruct(System.String@,System.String@,System.String@,System.String@,System.String@,System.String@,System.Boolean@,System.Boolean@,System.Collections.Generic.IReadOnlyList{System.String}@,System.Boolean@,System.String@)
+  commentId: M:PublisherStudio.BusinessObjects.MediaConversionPreset.Deconstruct(System.String@,System.String@,System.String@,System.String@,System.String@,System.String@,System.Boolean@,System.Boolean@,System.Collections.Generic.IReadOnlyList{System.String}@,System.Boolean@,System.String@)
+  id: Deconstruct(System.String@,System.String@,System.String@,System.String@,System.String@,System.String@,System.Boolean@,System.Boolean@,System.Collections.Generic.IReadOnlyList{System.String}@,System.Boolean@,System.String@)
+  parent: PublisherStudio.BusinessObjects.MediaConversionPreset
+  langs:
+  - csharp
+  - vb
+  name: Deconstruct(out string, out string, out string, out string, out string, out string, out bool, out bool, out IReadOnlyList<string>, out bool, out string)
+  nameWithType: MediaConversionPreset.Deconstruct(out string, out string, out string, out string, out string, out string, out bool, out bool, out IReadOnlyList<string>, out bool, out string)
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.Deconstruct(out string, out string, out string, out string, out string, out string, out bool, out bool, out System.Collections.Generic.IReadOnlyList<string>, out bool, out string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public void Deconstruct(out string Id, out string Name, out string Description, out string InputKind, out string OutputExtension, out string OutputMimeType, out bool Lossless, out bool BrowserOriented, out IReadOnlyList<string> RequiredEncoders, out bool Available, out string UnavailableReason)
+    parameters:
+    - id: Id
+      type: System.String
+    - id: Name
+      type: System.String
+    - id: Description
+      type: System.String
+    - id: InputKind
+      type: System.String
+    - id: OutputExtension
+      type: System.String
+    - id: OutputMimeType
+      type: System.String
+    - id: Lossless
+      type: System.Boolean
+    - id: BrowserOriented
+      type: System.Boolean
+    - id: RequiredEncoders
+      type: System.Collections.Generic.IReadOnlyList{System.String}
+    - id: Available
+      type: System.Boolean
+    - id: UnavailableReason
+      type: System.String
+    content.vb: Public Sub Deconstruct(Id As String, Name As String, Description As String, InputKind As String, OutputExtension As String, OutputMimeType As String, Lossless As Boolean, BrowserOriented As Boolean, RequiredEncoders As IReadOnlyList(Of String), Available As Boolean, UnavailableReason As String)
+  overload: PublisherStudio.BusinessObjects.MediaConversionPreset.Deconstruct*
+  nameWithType.vb: MediaConversionPreset.Deconstruct(String, String, String, String, String, String, Boolean, Boolean, IReadOnlyList(Of String), Boolean, String)
+  fullName.vb: PublisherStudio.BusinessObjects.MediaConversionPreset.Deconstruct(String, String, String, String, String, String, Boolean, Boolean, System.Collections.Generic.IReadOnlyList(Of String), Boolean, String)
+  name.vb: Deconstruct(String, String, String, String, String, String, Boolean, Boolean, IReadOnlyList(Of String), Boolean, String)
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.Id
+  commentId: P:PublisherStudio.BusinessObjects.MediaConversionPreset.Id
+  id: Id
+  parent: PublisherStudio.BusinessObjects.MediaConversionPreset
+  langs:
+  - csharp
+  - vb
+  name: Id
+  nameWithType: MediaConversionPreset.Id
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.Id
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public string Id { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Id As String
+  overload: PublisherStudio.BusinessObjects.MediaConversionPreset.Id*
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.Name
+  commentId: P:PublisherStudio.BusinessObjects.MediaConversionPreset.Name
+  id: Name
+  parent: PublisherStudio.BusinessObjects.MediaConversionPreset
+  langs:
+  - csharp
+  - vb
+  name: Name
+  nameWithType: MediaConversionPreset.Name
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.Name
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public string Name { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Name As String
+  overload: PublisherStudio.BusinessObjects.MediaConversionPreset.Name*
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.Description
+  commentId: P:PublisherStudio.BusinessObjects.MediaConversionPreset.Description
+  id: Description
+  parent: PublisherStudio.BusinessObjects.MediaConversionPreset
+  langs:
+  - csharp
+  - vb
+  name: Description
+  nameWithType: MediaConversionPreset.Description
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.Description
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public string Description { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Description As String
+  overload: PublisherStudio.BusinessObjects.MediaConversionPreset.Description*
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.InputKind
+  commentId: P:PublisherStudio.BusinessObjects.MediaConversionPreset.InputKind
+  id: InputKind
+  parent: PublisherStudio.BusinessObjects.MediaConversionPreset
+  langs:
+  - csharp
+  - vb
+  name: InputKind
+  nameWithType: MediaConversionPreset.InputKind
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.InputKind
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public string InputKind { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property InputKind As String
+  overload: PublisherStudio.BusinessObjects.MediaConversionPreset.InputKind*
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.OutputExtension
+  commentId: P:PublisherStudio.BusinessObjects.MediaConversionPreset.OutputExtension
+  id: OutputExtension
+  parent: PublisherStudio.BusinessObjects.MediaConversionPreset
+  langs:
+  - csharp
+  - vb
+  name: OutputExtension
+  nameWithType: MediaConversionPreset.OutputExtension
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.OutputExtension
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public string OutputExtension { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property OutputExtension As String
+  overload: PublisherStudio.BusinessObjects.MediaConversionPreset.OutputExtension*
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.OutputMimeType
+  commentId: P:PublisherStudio.BusinessObjects.MediaConversionPreset.OutputMimeType
+  id: OutputMimeType
+  parent: PublisherStudio.BusinessObjects.MediaConversionPreset
+  langs:
+  - csharp
+  - vb
+  name: OutputMimeType
+  nameWithType: MediaConversionPreset.OutputMimeType
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.OutputMimeType
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public string OutputMimeType { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property OutputMimeType As String
+  overload: PublisherStudio.BusinessObjects.MediaConversionPreset.OutputMimeType*
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.Lossless
+  commentId: P:PublisherStudio.BusinessObjects.MediaConversionPreset.Lossless
+  id: Lossless
+  parent: PublisherStudio.BusinessObjects.MediaConversionPreset
+  langs:
+  - csharp
+  - vb
+  name: Lossless
+  nameWithType: MediaConversionPreset.Lossless
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.Lossless
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public bool Lossless { get; init; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property Lossless As Boolean
+  overload: PublisherStudio.BusinessObjects.MediaConversionPreset.Lossless*
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.BrowserOriented
+  commentId: P:PublisherStudio.BusinessObjects.MediaConversionPreset.BrowserOriented
+  id: BrowserOriented
+  parent: PublisherStudio.BusinessObjects.MediaConversionPreset
+  langs:
+  - csharp
+  - vb
+  name: BrowserOriented
+  nameWithType: MediaConversionPreset.BrowserOriented
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.BrowserOriented
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public bool BrowserOriented { get; init; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property BrowserOriented As Boolean
+  overload: PublisherStudio.BusinessObjects.MediaConversionPreset.BrowserOriented*
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.RequiredEncoders
+  commentId: P:PublisherStudio.BusinessObjects.MediaConversionPreset.RequiredEncoders
+  id: RequiredEncoders
+  parent: PublisherStudio.BusinessObjects.MediaConversionPreset
+  langs:
+  - csharp
+  - vb
+  name: RequiredEncoders
+  nameWithType: MediaConversionPreset.RequiredEncoders
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.RequiredEncoders
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public IReadOnlyList<string> RequiredEncoders { get; init; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.IReadOnlyList{System.String}
+    content.vb: Public Property RequiredEncoders As IReadOnlyList(Of String)
+  overload: PublisherStudio.BusinessObjects.MediaConversionPreset.RequiredEncoders*
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.Available
+  commentId: P:PublisherStudio.BusinessObjects.MediaConversionPreset.Available
+  id: Available
+  parent: PublisherStudio.BusinessObjects.MediaConversionPreset
+  langs:
+  - csharp
+  - vb
+  name: Available
+  nameWithType: MediaConversionPreset.Available
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.Available
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public bool Available { get; init; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property Available As Boolean
+  overload: PublisherStudio.BusinessObjects.MediaConversionPreset.Available*
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.UnavailableReason
+  commentId: P:PublisherStudio.BusinessObjects.MediaConversionPreset.UnavailableReason
+  id: UnavailableReason
+  parent: PublisherStudio.BusinessObjects.MediaConversionPreset
+  langs:
+  - csharp
+  - vb
+  name: UnavailableReason
+  nameWithType: MediaConversionPreset.UnavailableReason
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.UnavailableReason
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public string UnavailableReason { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property UnavailableReason As String
+  overload: PublisherStudio.BusinessObjects.MediaConversionPreset.UnavailableReason*
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.IEquatable{PublisherStudio.BusinessObjects.MediaConversionPreset}
+  commentId: T:System.IEquatable{PublisherStudio.BusinessObjects.MediaConversionPreset}
+  parent: System
+  definition: System.IEquatable`1
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<MediaConversionPreset>
+  nameWithType: IEquatable<MediaConversionPreset>
+  fullName: System.IEquatable<PublisherStudio.BusinessObjects.MediaConversionPreset>
+  nameWithType.vb: IEquatable(Of MediaConversionPreset)
+  fullName.vb: System.IEquatable(Of PublisherStudio.BusinessObjects.MediaConversionPreset)
+  name.vb: IEquatable(Of MediaConversionPreset)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.MediaConversionPreset
+    name: MediaConversionPreset
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaConversionPreset.html
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.MediaConversionPreset
+    name: MediaConversionPreset
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaConversionPreset.html
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: System.IEquatable`1
+  commentId: T:System.IEquatable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<T>
+  nameWithType: IEquatable<T>
+  fullName: System.IEquatable<T>
+  nameWithType.vb: IEquatable(Of T)
+  fullName.vb: System.IEquatable(Of T)
+  name.vb: IEquatable(Of T)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.#ctor*
+  commentId: Overload:PublisherStudio.BusinessObjects.MediaConversionPreset.#ctor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaConversionPreset.html#PublisherStudio_BusinessObjects_MediaConversionPreset__ctor_System_String_System_String_System_String_System_String_System_String_System_String_System_Boolean_System_Boolean_System_Collections_Generic_IReadOnlyList_System_String__System_Boolean_System_String_
+  name: MediaConversionPreset
+  nameWithType: MediaConversionPreset.MediaConversionPreset
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.MediaConversionPreset
+  nameWithType.vb: MediaConversionPreset.New
+  fullName.vb: PublisherStudio.BusinessObjects.MediaConversionPreset.New
+  name.vb: New
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: System.Collections.Generic.IReadOnlyList{System.String}
+  commentId: T:System.Collections.Generic.IReadOnlyList{System.String}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<string>
+  nameWithType: IReadOnlyList<string>
+  fullName: System.Collections.Generic.IReadOnlyList<string>
+  nameWithType.vb: IReadOnlyList(Of String)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of String)
+  name.vb: IReadOnlyList(Of String)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.ToString*
+  commentId: Overload:PublisherStudio.BusinessObjects.MediaConversionPreset.ToString
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaConversionPreset.html#PublisherStudio_BusinessObjects_MediaConversionPreset_ToString
+  name: ToString
+  nameWithType: MediaConversionPreset.ToString
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.ToString
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.op_Inequality*
+  commentId: Overload:PublisherStudio.BusinessObjects.MediaConversionPreset.op_Inequality
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaConversionPreset.html#PublisherStudio_BusinessObjects_MediaConversionPreset_op_Inequality_PublisherStudio_BusinessObjects_MediaConversionPreset_PublisherStudio_BusinessObjects_MediaConversionPreset_
+  name: operator !=
+  nameWithType: MediaConversionPreset.operator !=
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.operator !=
+  nameWithType.vb: MediaConversionPreset.<>
+  fullName.vb: PublisherStudio.BusinessObjects.MediaConversionPreset.<>
+  name.vb: <>
+  spec.csharp:
+  - name: operator
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.MediaConversionPreset.op_Inequality*
+    name: '!='
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaConversionPreset.html#PublisherStudio_BusinessObjects_MediaConversionPreset_op_Inequality_PublisherStudio_BusinessObjects_MediaConversionPreset_PublisherStudio_BusinessObjects_MediaConversionPreset_
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset
+  commentId: T:PublisherStudio.BusinessObjects.MediaConversionPreset
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaConversionPreset.html
+  name: MediaConversionPreset
+  nameWithType: MediaConversionPreset
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.op_Equality*
+  commentId: Overload:PublisherStudio.BusinessObjects.MediaConversionPreset.op_Equality
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaConversionPreset.html#PublisherStudio_BusinessObjects_MediaConversionPreset_op_Equality_PublisherStudio_BusinessObjects_MediaConversionPreset_PublisherStudio_BusinessObjects_MediaConversionPreset_
+  name: operator ==
+  nameWithType: MediaConversionPreset.operator ==
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.operator ==
+  nameWithType.vb: MediaConversionPreset.=
+  fullName.vb: PublisherStudio.BusinessObjects.MediaConversionPreset.=
+  name.vb: =
+  spec.csharp:
+  - name: operator
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.MediaConversionPreset.op_Equality*
+    name: ==
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaConversionPreset.html#PublisherStudio_BusinessObjects_MediaConversionPreset_op_Equality_PublisherStudio_BusinessObjects_MediaConversionPreset_PublisherStudio_BusinessObjects_MediaConversionPreset_
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.GetHashCode*
+  commentId: Overload:PublisherStudio.BusinessObjects.MediaConversionPreset.GetHashCode
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaConversionPreset.html#PublisherStudio_BusinessObjects_MediaConversionPreset_GetHashCode
+  name: GetHashCode
+  nameWithType: MediaConversionPreset.GetHashCode
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.GetHashCode
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.Equals*
+  commentId: Overload:PublisherStudio.BusinessObjects.MediaConversionPreset.Equals
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaConversionPreset.html#PublisherStudio_BusinessObjects_MediaConversionPreset_Equals_System_Object_
+  name: Equals
+  nameWithType: MediaConversionPreset.Equals
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.Equals
+- uid: System.IEquatable{PublisherStudio.BusinessObjects.MediaConversionPreset}.Equals(PublisherStudio.BusinessObjects.MediaConversionPreset)
+  commentId: M:System.IEquatable{PublisherStudio.BusinessObjects.MediaConversionPreset}.Equals(PublisherStudio.BusinessObjects.MediaConversionPreset)
+  parent: System.IEquatable{PublisherStudio.BusinessObjects.MediaConversionPreset}
+  definition: System.IEquatable`1.Equals(`0)
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  name: Equals(MediaConversionPreset)
+  nameWithType: IEquatable<MediaConversionPreset>.Equals(MediaConversionPreset)
+  fullName: System.IEquatable<PublisherStudio.BusinessObjects.MediaConversionPreset>.Equals(PublisherStudio.BusinessObjects.MediaConversionPreset)
+  nameWithType.vb: IEquatable(Of MediaConversionPreset).Equals(MediaConversionPreset)
+  fullName.vb: System.IEquatable(Of PublisherStudio.BusinessObjects.MediaConversionPreset).Equals(PublisherStudio.BusinessObjects.MediaConversionPreset)
+  spec.csharp:
+  - uid: System.IEquatable{PublisherStudio.BusinessObjects.MediaConversionPreset}.Equals(PublisherStudio.BusinessObjects.MediaConversionPreset)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - uid: PublisherStudio.BusinessObjects.MediaConversionPreset
+    name: MediaConversionPreset
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaConversionPreset.html
+  - name: )
+  spec.vb:
+  - uid: System.IEquatable{PublisherStudio.BusinessObjects.MediaConversionPreset}.Equals(PublisherStudio.BusinessObjects.MediaConversionPreset)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - uid: PublisherStudio.BusinessObjects.MediaConversionPreset
+    name: MediaConversionPreset
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaConversionPreset.html
+  - name: )
+- uid: System.IEquatable`1.Equals(`0)
+  commentId: M:System.IEquatable`1.Equals(`0)
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  name: Equals(T)
+  nameWithType: IEquatable<T>.Equals(T)
+  fullName: System.IEquatable<T>.Equals(T)
+  nameWithType.vb: IEquatable(Of T).Equals(T)
+  fullName.vb: System.IEquatable(Of T).Equals(T)
+  spec.csharp:
+  - uid: System.IEquatable`1.Equals(`0)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - name: T
+  - name: )
+  spec.vb:
+  - uid: System.IEquatable`1.Equals(`0)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - name: T
+  - name: )
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.Deconstruct*
+  commentId: Overload:PublisherStudio.BusinessObjects.MediaConversionPreset.Deconstruct
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaConversionPreset.html#PublisherStudio_BusinessObjects_MediaConversionPreset_Deconstruct_System_String__System_String__System_String__System_String__System_String__System_String__System_Boolean__System_Boolean__System_Collections_Generic_IReadOnlyList_System_String___System_Boolean__System_String__
+  name: Deconstruct
+  nameWithType: MediaConversionPreset.Deconstruct
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.Deconstruct
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.Id*
+  commentId: Overload:PublisherStudio.BusinessObjects.MediaConversionPreset.Id
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaConversionPreset.html#PublisherStudio_BusinessObjects_MediaConversionPreset_Id
+  name: Id
+  nameWithType: MediaConversionPreset.Id
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.Id
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.Name*
+  commentId: Overload:PublisherStudio.BusinessObjects.MediaConversionPreset.Name
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaConversionPreset.html#PublisherStudio_BusinessObjects_MediaConversionPreset_Name
+  name: Name
+  nameWithType: MediaConversionPreset.Name
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.Name
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.Description*
+  commentId: Overload:PublisherStudio.BusinessObjects.MediaConversionPreset.Description
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaConversionPreset.html#PublisherStudio_BusinessObjects_MediaConversionPreset_Description
+  name: Description
+  nameWithType: MediaConversionPreset.Description
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.Description
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.InputKind*
+  commentId: Overload:PublisherStudio.BusinessObjects.MediaConversionPreset.InputKind
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaConversionPreset.html#PublisherStudio_BusinessObjects_MediaConversionPreset_InputKind
+  name: InputKind
+  nameWithType: MediaConversionPreset.InputKind
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.InputKind
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.OutputExtension*
+  commentId: Overload:PublisherStudio.BusinessObjects.MediaConversionPreset.OutputExtension
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaConversionPreset.html#PublisherStudio_BusinessObjects_MediaConversionPreset_OutputExtension
+  name: OutputExtension
+  nameWithType: MediaConversionPreset.OutputExtension
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.OutputExtension
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.OutputMimeType*
+  commentId: Overload:PublisherStudio.BusinessObjects.MediaConversionPreset.OutputMimeType
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaConversionPreset.html#PublisherStudio_BusinessObjects_MediaConversionPreset_OutputMimeType
+  name: OutputMimeType
+  nameWithType: MediaConversionPreset.OutputMimeType
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.OutputMimeType
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.Lossless*
+  commentId: Overload:PublisherStudio.BusinessObjects.MediaConversionPreset.Lossless
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaConversionPreset.html#PublisherStudio_BusinessObjects_MediaConversionPreset_Lossless
+  name: Lossless
+  nameWithType: MediaConversionPreset.Lossless
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.Lossless
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.BrowserOriented*
+  commentId: Overload:PublisherStudio.BusinessObjects.MediaConversionPreset.BrowserOriented
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaConversionPreset.html#PublisherStudio_BusinessObjects_MediaConversionPreset_BrowserOriented
+  name: BrowserOriented
+  nameWithType: MediaConversionPreset.BrowserOriented
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.BrowserOriented
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.RequiredEncoders*
+  commentId: Overload:PublisherStudio.BusinessObjects.MediaConversionPreset.RequiredEncoders
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaConversionPreset.html#PublisherStudio_BusinessObjects_MediaConversionPreset_RequiredEncoders
+  name: RequiredEncoders
+  nameWithType: MediaConversionPreset.RequiredEncoders
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.RequiredEncoders
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.Available*
+  commentId: Overload:PublisherStudio.BusinessObjects.MediaConversionPreset.Available
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaConversionPreset.html#PublisherStudio_BusinessObjects_MediaConversionPreset_Available
+  name: Available
+  nameWithType: MediaConversionPreset.Available
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.Available
+- uid: PublisherStudio.BusinessObjects.MediaConversionPreset.UnavailableReason*
+  commentId: Overload:PublisherStudio.BusinessObjects.MediaConversionPreset.UnavailableReason
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaConversionPreset.html#PublisherStudio_BusinessObjects_MediaConversionPreset_UnavailableReason
+  name: UnavailableReason
+  nameWithType: MediaConversionPreset.UnavailableReason
+  fullName: PublisherStudio.BusinessObjects.MediaConversionPreset.UnavailableReason

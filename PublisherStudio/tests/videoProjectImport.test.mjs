@@ -20,7 +20,7 @@ const packageJson = JSON.parse(read('src/PublisherStudio.Web/package.json'));
 const lockJson = JSON.parse(read('src/PublisherStudio.Web/package-lock.json'));
 const webProject = read('src/PublisherStudio.Web/PublisherStudio.Web.csproj');
 const installerProject = read('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj');
-const doctrine = read('docs/architecture/video-project-import-doctrine.md');
+const doctrine = read('docs/articles/pictures-and-media.md');
 const appsettings = JSON.parse(read('src/PublisherStudio.Web/appsettings.json'));
 
 assert.match(models, /class VideoProjectDocument/);
@@ -77,11 +77,11 @@ assert.match(applicationComposition, /AddSingleton<VideoProjectImportService, Vi
 assert.match(interop, /\(otio\|otioz\|mlt\|kdenlive\|xges\|osp\|edl\)/);
 assert.match(interop, /actualKind === 'project'/);
 
-assert.equal(packageJson.version, '2.0.5');
-assert.equal(lockJson.version, '2.0.5');
-assert.equal(lockJson.packages[''].version, '2.0.5');
-assert.match(webProject, /<Version>2\.0\.5<\/Version>/);
-assert.match(installerProject, /<Version>2\.0\.5<\/Version>/);
+assert.equal(packageJson.version, '2.1.1');
+assert.equal(lockJson.version, '2.1.1');
+assert.equal(lockJson.packages[''].version, '2.1.1');
+assert.match(webProject, /<Version>2\.1\.1<\/Version>/);
+assert.match(installerProject, /<Version>2\.1\.1<\/Version>/);
 
 assert.match(doctrine, /OpenTimelineIO/);
 assert.match(doctrine, /MLT XML/);

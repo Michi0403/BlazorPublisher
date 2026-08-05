@@ -1,0 +1,530 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.PublicationRecoveryService
+  commentId: T:PublisherStudio.Services.PublicationRecoveryService
+  id: PublicationRecoveryService
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.PublicationRecoveryService.#ctor
+  - PublisherStudio.Services.PublicationRecoveryService.DeleteAsync(System.Guid,System.Threading.CancellationToken)
+  - PublisherStudio.Services.PublicationRecoveryService.SaveAsync(System.Guid,System.String,System.DateTimeOffset,System.String,System.Threading.CancellationToken)
+  - PublisherStudio.Services.PublicationRecoveryService.TryReadLatest
+  langs:
+  - csharp
+  - vb
+  name: PublicationRecoveryService
+  nameWithType: PublicationRecoveryService
+  fullName: PublisherStudio.Services.PublicationRecoveryService
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Writes an atomic local recovery copy for the offline-first desktop host. The normal publication file remains user-controlled; this store is only a crash/navigation safety net.
+  example: []
+  syntax:
+    content: public sealed class PublicationRecoveryService
+    content.vb: Public NotInheritable Class PublicationRecoveryService
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.PublicationRecoveryService.#ctor
+  commentId: M:PublisherStudio.Services.PublicationRecoveryService.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.Services.PublicationRecoveryService
+  langs:
+  - csharp
+  - vb
+  name: PublicationRecoveryService()
+  nameWithType: PublicationRecoveryService.PublicationRecoveryService()
+  fullName: PublisherStudio.Services.PublicationRecoveryService.PublicationRecoveryService()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the publication recovery service operation.
+  example: []
+  syntax:
+    content: public PublicationRecoveryService()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.Services.PublicationRecoveryService.#ctor*
+  nameWithType.vb: PublicationRecoveryService.New()
+  fullName.vb: PublisherStudio.Services.PublicationRecoveryService.New()
+  name.vb: New()
+- uid: PublisherStudio.Services.PublicationRecoveryService.SaveAsync(System.Guid,System.String,System.DateTimeOffset,System.String,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.PublicationRecoveryService.SaveAsync(System.Guid,System.String,System.DateTimeOffset,System.String,System.Threading.CancellationToken)
+  id: SaveAsync(System.Guid,System.String,System.DateTimeOffset,System.String,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.PublicationRecoveryService
+  langs:
+  - csharp
+  - vb
+  name: SaveAsync(Guid, string, DateTimeOffset, string, CancellationToken)
+  nameWithType: PublicationRecoveryService.SaveAsync(Guid, string, DateTimeOffset, string, CancellationToken)
+  fullName: PublisherStudio.Services.PublicationRecoveryService.SaveAsync(System.Guid, string, System.DateTimeOffset, string, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Saves async.
+  example: []
+  syntax:
+    content: public Task SaveAsync(Guid documentId, string documentName, DateTimeOffset modifiedUtc, string json, CancellationToken cancellationToken = default)
+    parameters:
+    - id: documentId
+      type: System.Guid
+    - id: documentName
+      type: System.String
+    - id: modifiedUtc
+      type: System.DateTimeOffset
+    - id: json
+      type: System.String
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task
+    content.vb: Public Function SaveAsync(documentId As Guid, documentName As String, modifiedUtc As DateTimeOffset, json As String, cancellationToken As CancellationToken = Nothing) As Task
+  overload: PublisherStudio.Services.PublicationRecoveryService.SaveAsync*
+  nameWithType.vb: PublicationRecoveryService.SaveAsync(Guid, String, DateTimeOffset, String, CancellationToken)
+  fullName.vb: PublisherStudio.Services.PublicationRecoveryService.SaveAsync(System.Guid, String, System.DateTimeOffset, String, System.Threading.CancellationToken)
+  name.vb: SaveAsync(Guid, String, DateTimeOffset, String, CancellationToken)
+- uid: PublisherStudio.Services.PublicationRecoveryService.TryReadLatest
+  commentId: M:PublisherStudio.Services.PublicationRecoveryService.TryReadLatest
+  id: TryReadLatest
+  parent: PublisherStudio.Services.PublicationRecoveryService
+  langs:
+  - csharp
+  - vb
+  name: TryReadLatest()
+  nameWithType: PublicationRecoveryService.TryReadLatest()
+  fullName: PublisherStudio.Services.PublicationRecoveryService.TryReadLatest()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Attempts to read latest.
+  example: []
+  syntax:
+    content: public PublicationRecoverySnapshot? TryReadLatest()
+    return:
+      type: PublisherStudio.Services.PublicationRecoverySnapshot
+    content.vb: Public Function TryReadLatest() As PublicationRecoverySnapshot
+  overload: PublisherStudio.Services.PublicationRecoveryService.TryReadLatest*
+- uid: PublisherStudio.Services.PublicationRecoveryService.DeleteAsync(System.Guid,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.PublicationRecoveryService.DeleteAsync(System.Guid,System.Threading.CancellationToken)
+  id: DeleteAsync(System.Guid,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.PublicationRecoveryService
+  langs:
+  - csharp
+  - vb
+  name: DeleteAsync(Guid, CancellationToken)
+  nameWithType: PublicationRecoveryService.DeleteAsync(Guid, CancellationToken)
+  fullName: PublisherStudio.Services.PublicationRecoveryService.DeleteAsync(System.Guid, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Deletes async.
+  example: []
+  syntax:
+    content: public Task DeleteAsync(Guid documentId, CancellationToken cancellationToken = default)
+    parameters:
+    - id: documentId
+      type: System.Guid
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task
+    content.vb: Public Function DeleteAsync(documentId As Guid, cancellationToken As CancellationToken = Nothing) As Task
+  overload: PublisherStudio.Services.PublicationRecoveryService.DeleteAsync*
+references:
+- uid: PublisherStudio.Services
+  commentId: N:PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services
+  nameWithType: PublisherStudio.Services
+  fullName: PublisherStudio.Services
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.PublicationRecoveryService.#ctor*
+  commentId: Overload:PublisherStudio.Services.PublicationRecoveryService.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.PublicationRecoveryService.html#PublisherStudio_Services_PublicationRecoveryService__ctor
+  name: PublicationRecoveryService
+  nameWithType: PublicationRecoveryService.PublicationRecoveryService
+  fullName: PublisherStudio.Services.PublicationRecoveryService.PublicationRecoveryService
+  nameWithType.vb: PublicationRecoveryService.New
+  fullName.vb: PublisherStudio.Services.PublicationRecoveryService.New
+  name.vb: New
+- uid: PublisherStudio.Services.PublicationRecoveryService.SaveAsync*
+  commentId: Overload:PublisherStudio.Services.PublicationRecoveryService.SaveAsync
+  isExternal: true
+  href: PublisherStudio.Services.PublicationRecoveryService.html#PublisherStudio_Services_PublicationRecoveryService_SaveAsync_System_Guid_System_String_System_DateTimeOffset_System_String_System_Threading_CancellationToken_
+  name: SaveAsync
+  nameWithType: PublicationRecoveryService.SaveAsync
+  fullName: PublisherStudio.Services.PublicationRecoveryService.SaveAsync
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System.DateTimeOffset
+  commentId: T:System.DateTimeOffset
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.datetimeoffset
+  name: DateTimeOffset
+  nameWithType: DateTimeOffset
+  fullName: System.DateTimeOffset
+- uid: System.Threading.CancellationToken
+  commentId: T:System.Threading.CancellationToken
+  parent: System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  name: CancellationToken
+  nameWithType: CancellationToken
+  fullName: System.Threading.CancellationToken
+- uid: System.Threading.Tasks.Task
+  commentId: T:System.Threading.Tasks.Task
+  parent: System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task
+  name: Task
+  nameWithType: Task
+  fullName: System.Threading.Tasks.Task
+- uid: System.Threading
+  commentId: N:System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading
+  nameWithType: System.Threading
+  fullName: System.Threading
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+- uid: System.Threading.Tasks
+  commentId: N:System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading.Tasks
+  nameWithType: System.Threading.Tasks
+  fullName: System.Threading.Tasks
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+- uid: PublisherStudio.Services.PublicationRecoveryService.TryReadLatest*
+  commentId: Overload:PublisherStudio.Services.PublicationRecoveryService.TryReadLatest
+  isExternal: true
+  href: PublisherStudio.Services.PublicationRecoveryService.html#PublisherStudio_Services_PublicationRecoveryService_TryReadLatest
+  name: TryReadLatest
+  nameWithType: PublicationRecoveryService.TryReadLatest
+  fullName: PublisherStudio.Services.PublicationRecoveryService.TryReadLatest
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot
+  commentId: T:PublisherStudio.Services.PublicationRecoverySnapshot
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.PublicationRecoverySnapshot.html
+  name: PublicationRecoverySnapshot
+  nameWithType: PublicationRecoverySnapshot
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot
+- uid: PublisherStudio.Services.PublicationRecoveryService.DeleteAsync*
+  commentId: Overload:PublisherStudio.Services.PublicationRecoveryService.DeleteAsync
+  isExternal: true
+  href: PublisherStudio.Services.PublicationRecoveryService.html#PublisherStudio_Services_PublicationRecoveryService_DeleteAsync_System_Guid_System_Threading_CancellationToken_
+  name: DeleteAsync
+  nameWithType: PublicationRecoveryService.DeleteAsync
+  fullName: PublisherStudio.Services.PublicationRecoveryService.DeleteAsync

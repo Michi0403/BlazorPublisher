@@ -1,0 +1,1126 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore
+  commentId: T:PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore
+  id: OrganicPermissionStore
+  parent: PublisherStudio.Services.OrganicPlugins
+  children:
+  - PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.#ctor(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore},PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec)
+  - PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Delete(System.String,System.String,System.String)
+  - PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.GetRules
+  - PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsAllowed(LocalGPT.WireProtocol.OneWireEnvelope)
+  - PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsCapabilityExposed(System.String,LocalGPT.WireProtocol.OneWireCapabilityDescriptor)
+  - PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsDenied(LocalGPT.WireProtocol.OneWireEnvelope)
+  - PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Resolve(System.String,System.String,System.String)
+  - PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Save(LocalGPT.WireProtocol.OneWirePermissionRule)
+  langs:
+  - csharp
+  - vb
+  name: OrganicPermissionStore
+  nameWithType: OrganicPermissionStore
+  fullName: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Provides organic permission store operations.
+  example: []
+  syntax:
+    content: 'public sealed class OrganicPermissionStore : IOrganicPermissionStore'
+    content.vb: Public NotInheritable Class OrganicPermissionStore Implements IOrganicPermissionStore
+  inheritance:
+  - System.Object
+  implements:
+  - PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.#ctor(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore},PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.#ctor(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore},PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec)
+  id: '#ctor(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore},PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec)'
+  parent: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore
+  langs:
+  - csharp
+  - vb
+  name: OrganicPermissionStore(ILogger<OrganicPermissionStore>, IOrganicPluginProtocolCodec)
+  nameWithType: OrganicPermissionStore.OrganicPermissionStore(ILogger<OrganicPermissionStore>, IOrganicPluginProtocolCodec)
+  fullName: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.OrganicPermissionStore(Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore>, PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Runs the organic permission store operation.
+  example: []
+  syntax:
+    content: public OrganicPermissionStore(ILogger<OrganicPermissionStore> logger, IOrganicPluginProtocolCodec codec)
+    parameters:
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore}
+    - id: codec
+      type: PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec
+    content.vb: Public Sub New(logger As ILogger(Of OrganicPermissionStore), codec As IOrganicPluginProtocolCodec)
+  overload: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.#ctor*
+  nameWithType.vb: OrganicPermissionStore.New(ILogger(Of OrganicPermissionStore), IOrganicPluginProtocolCodec)
+  fullName.vb: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.New(Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore), PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec)
+  name.vb: New(ILogger(Of OrganicPermissionStore), IOrganicPluginProtocolCodec)
+- uid: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.GetRules
+  commentId: M:PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.GetRules
+  id: GetRules
+  parent: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore
+  langs:
+  - csharp
+  - vb
+  name: GetRules()
+  nameWithType: OrganicPermissionStore.GetRules()
+  fullName: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.GetRules()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Gets rules.
+  example: []
+  syntax:
+    content: public IReadOnlyList<OneWirePermissionRule> GetRules()
+    return:
+      type: System.Collections.Generic.IReadOnlyList{LocalGPT.WireProtocol.OneWirePermissionRule}
+    content.vb: Public Function GetRules() As IReadOnlyList(Of OneWirePermissionRule)
+  overload: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.GetRules*
+  implements:
+  - PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.GetRules
+- uid: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Save(LocalGPT.WireProtocol.OneWirePermissionRule)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Save(LocalGPT.WireProtocol.OneWirePermissionRule)
+  id: Save(LocalGPT.WireProtocol.OneWirePermissionRule)
+  parent: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore
+  langs:
+  - csharp
+  - vb
+  name: Save(OneWirePermissionRule)
+  nameWithType: OrganicPermissionStore.Save(OneWirePermissionRule)
+  fullName: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Save(LocalGPT.WireProtocol.OneWirePermissionRule)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Runs the save operation.
+  example: []
+  syntax:
+    content: public OneWirePermissionRule Save(OneWirePermissionRule rule)
+    parameters:
+    - id: rule
+      type: LocalGPT.WireProtocol.OneWirePermissionRule
+    return:
+      type: LocalGPT.WireProtocol.OneWirePermissionRule
+    content.vb: Public Function Save(rule As OneWirePermissionRule) As OneWirePermissionRule
+  overload: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Save*
+  implements:
+  - PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.Save(LocalGPT.WireProtocol.OneWirePermissionRule)
+- uid: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Delete(System.String,System.String,System.String)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Delete(System.String,System.String,System.String)
+  id: Delete(System.String,System.String,System.String)
+  parent: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore
+  langs:
+  - csharp
+  - vb
+  name: Delete(string, string, string)
+  nameWithType: OrganicPermissionStore.Delete(string, string, string)
+  fullName: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Delete(string, string, string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Runs the delete operation.
+  example: []
+  syntax:
+    content: public bool Delete(string peerId, string capabilityKey, string organ)
+    parameters:
+    - id: peerId
+      type: System.String
+    - id: capabilityKey
+      type: System.String
+    - id: organ
+      type: System.String
+    return:
+      type: System.Boolean
+    content.vb: Public Function Delete(peerId As String, capabilityKey As String, organ As String) As Boolean
+  overload: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Delete*
+  implements:
+  - PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.Delete(System.String,System.String,System.String)
+  nameWithType.vb: OrganicPermissionStore.Delete(String, String, String)
+  fullName.vb: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Delete(String, String, String)
+  name.vb: Delete(String, String, String)
+- uid: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsAllowed(LocalGPT.WireProtocol.OneWireEnvelope)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsAllowed(LocalGPT.WireProtocol.OneWireEnvelope)
+  id: IsAllowed(LocalGPT.WireProtocol.OneWireEnvelope)
+  parent: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore
+  langs:
+  - csharp
+  - vb
+  name: IsAllowed(OneWireEnvelope)
+  nameWithType: OrganicPermissionStore.IsAllowed(OneWireEnvelope)
+  fullName: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsAllowed(LocalGPT.WireProtocol.OneWireEnvelope)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Determines whether allowed.
+  example: []
+  syntax:
+    content: public bool IsAllowed(OneWireEnvelope envelope)
+    parameters:
+    - id: envelope
+      type: LocalGPT.WireProtocol.OneWireEnvelope
+    return:
+      type: System.Boolean
+    content.vb: Public Function IsAllowed(envelope As OneWireEnvelope) As Boolean
+  overload: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsAllowed*
+  implements:
+  - PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.IsAllowed(LocalGPT.WireProtocol.OneWireEnvelope)
+- uid: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsDenied(LocalGPT.WireProtocol.OneWireEnvelope)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsDenied(LocalGPT.WireProtocol.OneWireEnvelope)
+  id: IsDenied(LocalGPT.WireProtocol.OneWireEnvelope)
+  parent: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore
+  langs:
+  - csharp
+  - vb
+  name: IsDenied(OneWireEnvelope)
+  nameWithType: OrganicPermissionStore.IsDenied(OneWireEnvelope)
+  fullName: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsDenied(LocalGPT.WireProtocol.OneWireEnvelope)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Determines whether denied.
+  example: []
+  syntax:
+    content: public bool IsDenied(OneWireEnvelope envelope)
+    parameters:
+    - id: envelope
+      type: LocalGPT.WireProtocol.OneWireEnvelope
+    return:
+      type: System.Boolean
+    content.vb: Public Function IsDenied(envelope As OneWireEnvelope) As Boolean
+  overload: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsDenied*
+  implements:
+  - PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.IsDenied(LocalGPT.WireProtocol.OneWireEnvelope)
+- uid: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsCapabilityExposed(System.String,LocalGPT.WireProtocol.OneWireCapabilityDescriptor)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsCapabilityExposed(System.String,LocalGPT.WireProtocol.OneWireCapabilityDescriptor)
+  id: IsCapabilityExposed(System.String,LocalGPT.WireProtocol.OneWireCapabilityDescriptor)
+  parent: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore
+  langs:
+  - csharp
+  - vb
+  name: IsCapabilityExposed(string, OneWireCapabilityDescriptor)
+  nameWithType: OrganicPermissionStore.IsCapabilityExposed(string, OneWireCapabilityDescriptor)
+  fullName: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsCapabilityExposed(string, LocalGPT.WireProtocol.OneWireCapabilityDescriptor)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Determines whether capability exposed.
+  example: []
+  syntax:
+    content: public bool IsCapabilityExposed(string peerId, OneWireCapabilityDescriptor capability)
+    parameters:
+    - id: peerId
+      type: System.String
+    - id: capability
+      type: LocalGPT.WireProtocol.OneWireCapabilityDescriptor
+    return:
+      type: System.Boolean
+    content.vb: Public Function IsCapabilityExposed(peerId As String, capability As OneWireCapabilityDescriptor) As Boolean
+  overload: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsCapabilityExposed*
+  implements:
+  - PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.IsCapabilityExposed(System.String,LocalGPT.WireProtocol.OneWireCapabilityDescriptor)
+  nameWithType.vb: OrganicPermissionStore.IsCapabilityExposed(String, OneWireCapabilityDescriptor)
+  fullName.vb: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsCapabilityExposed(String, LocalGPT.WireProtocol.OneWireCapabilityDescriptor)
+  name.vb: IsCapabilityExposed(String, OneWireCapabilityDescriptor)
+- uid: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Resolve(System.String,System.String,System.String)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Resolve(System.String,System.String,System.String)
+  id: Resolve(System.String,System.String,System.String)
+  parent: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore
+  langs:
+  - csharp
+  - vb
+  name: Resolve(string, string, string)
+  nameWithType: OrganicPermissionStore.Resolve(string, string, string)
+  fullName: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Resolve(string, string, string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Runs the resolve operation.
+  example: []
+  syntax:
+    content: public OneWirePermissionRule? Resolve(string peerId, string capabilityKey, string organ = "")
+    parameters:
+    - id: peerId
+      type: System.String
+    - id: capabilityKey
+      type: System.String
+    - id: organ
+      type: System.String
+    return:
+      type: LocalGPT.WireProtocol.OneWirePermissionRule
+    content.vb: Public Function Resolve(peerId As String, capabilityKey As String, organ As String = "") As OneWirePermissionRule
+  overload: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Resolve*
+  implements:
+  - PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.Resolve(System.String,System.String,System.String)
+  nameWithType.vb: OrganicPermissionStore.Resolve(String, String, String)
+  fullName.vb: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Resolve(String, String, String)
+  name.vb: Resolve(String, String, String)
+references:
+- uid: PublisherStudio.Services.OrganicPlugins
+  commentId: N:PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.OrganicPlugins
+  nameWithType: PublisherStudio.Services.OrganicPlugins
+  fullName: PublisherStudio.Services.OrganicPlugins
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OrganicPlugins
+    name: OrganicPlugins
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OrganicPlugins
+    name: OrganicPlugins
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore
+  commentId: T:PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore
+  parent: PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html
+  name: IOrganicPermissionStore
+  nameWithType: IOrganicPermissionStore
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.#ctor*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_OrganicPermissionStore__ctor_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_OrganicPlugins_OrganicPermissionStore__PublisherStudio_Services_OrganicPlugins_IOrganicPluginProtocolCodec_
+  name: OrganicPermissionStore
+  nameWithType: OrganicPermissionStore.OrganicPermissionStore
+  fullName: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.OrganicPermissionStore
+  nameWithType.vb: OrganicPermissionStore.New
+  fullName.vb: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.New
+  name.vb: New
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<OrganicPermissionStore>
+  nameWithType: ILogger<OrganicPermissionStore>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore>
+  nameWithType.vb: ILogger(Of OrganicPermissionStore)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore)
+  name.vb: ILogger(Of OrganicPermissionStore)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore
+    name: OrganicPermissionStore
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore
+    name: OrganicPermissionStore
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.html
+  - name: )
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec
+  commentId: T:PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec
+  parent: PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec.html
+  name: IOrganicPluginProtocolCodec
+  nameWithType: IOrganicPluginProtocolCodec
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.GetRules*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.GetRules
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_OrganicPermissionStore_GetRules
+  name: GetRules
+  nameWithType: OrganicPermissionStore.GetRules
+  fullName: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.GetRules
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.GetRules
+  commentId: M:PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.GetRules
+  parent: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicPermissionStore_GetRules
+  name: GetRules()
+  nameWithType: IOrganicPermissionStore.GetRules()
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.GetRules()
+  spec.csharp:
+  - uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.GetRules
+    name: GetRules
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicPermissionStore_GetRules
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.GetRules
+    name: GetRules
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicPermissionStore_GetRules
+  - name: (
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList{LocalGPT.WireProtocol.OneWirePermissionRule}
+  commentId: T:System.Collections.Generic.IReadOnlyList{LocalGPT.WireProtocol.OneWirePermissionRule}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<OneWirePermissionRule>
+  nameWithType: IReadOnlyList<OneWirePermissionRule>
+  fullName: System.Collections.Generic.IReadOnlyList<LocalGPT.WireProtocol.OneWirePermissionRule>
+  nameWithType.vb: IReadOnlyList(Of OneWirePermissionRule)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of LocalGPT.WireProtocol.OneWirePermissionRule)
+  name.vb: IReadOnlyList(Of OneWirePermissionRule)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: LocalGPT.WireProtocol.OneWirePermissionRule
+    name: OneWirePermissionRule
+    isExternal: true
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: LocalGPT.WireProtocol.OneWirePermissionRule
+    name: OneWirePermissionRule
+    isExternal: true
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Save*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Save
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_OrganicPermissionStore_Save_LocalGPT_WireProtocol_OneWirePermissionRule_
+  name: Save
+  nameWithType: OrganicPermissionStore.Save
+  fullName: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Save
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.Save(LocalGPT.WireProtocol.OneWirePermissionRule)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.Save(LocalGPT.WireProtocol.OneWirePermissionRule)
+  parent: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicPermissionStore_Save_LocalGPT_WireProtocol_OneWirePermissionRule_
+  name: Save(OneWirePermissionRule)
+  nameWithType: IOrganicPermissionStore.Save(OneWirePermissionRule)
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.Save(LocalGPT.WireProtocol.OneWirePermissionRule)
+  spec.csharp:
+  - uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.Save(LocalGPT.WireProtocol.OneWirePermissionRule)
+    name: Save
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicPermissionStore_Save_LocalGPT_WireProtocol_OneWirePermissionRule_
+  - name: (
+  - uid: LocalGPT.WireProtocol.OneWirePermissionRule
+    name: OneWirePermissionRule
+    isExternal: true
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.Save(LocalGPT.WireProtocol.OneWirePermissionRule)
+    name: Save
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicPermissionStore_Save_LocalGPT_WireProtocol_OneWirePermissionRule_
+  - name: (
+  - uid: LocalGPT.WireProtocol.OneWirePermissionRule
+    name: OneWirePermissionRule
+    isExternal: true
+  - name: )
+- uid: LocalGPT.WireProtocol.OneWirePermissionRule
+  commentId: T:LocalGPT.WireProtocol.OneWirePermissionRule
+  parent: LocalGPT.WireProtocol
+  isExternal: true
+  name: OneWirePermissionRule
+  nameWithType: OneWirePermissionRule
+  fullName: LocalGPT.WireProtocol.OneWirePermissionRule
+- uid: LocalGPT.WireProtocol
+  commentId: N:LocalGPT.WireProtocol
+  isExternal: true
+  name: LocalGPT.WireProtocol
+  nameWithType: LocalGPT.WireProtocol
+  fullName: LocalGPT.WireProtocol
+  spec.csharp:
+  - uid: LocalGPT
+    name: LocalGPT
+    isExternal: true
+  - name: .
+  - uid: LocalGPT.WireProtocol
+    name: WireProtocol
+    isExternal: true
+  spec.vb:
+  - uid: LocalGPT
+    name: LocalGPT
+    isExternal: true
+  - name: .
+  - uid: LocalGPT.WireProtocol
+    name: WireProtocol
+    isExternal: true
+- uid: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Delete*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Delete
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_OrganicPermissionStore_Delete_System_String_System_String_System_String_
+  name: Delete
+  nameWithType: OrganicPermissionStore.Delete
+  fullName: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Delete
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.Delete(System.String,System.String,System.String)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.Delete(System.String,System.String,System.String)
+  parent: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicPermissionStore_Delete_System_String_System_String_System_String_
+  name: Delete(string, string, string)
+  nameWithType: IOrganicPermissionStore.Delete(string, string, string)
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.Delete(string, string, string)
+  nameWithType.vb: IOrganicPermissionStore.Delete(String, String, String)
+  fullName.vb: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.Delete(String, String, String)
+  name.vb: Delete(String, String, String)
+  spec.csharp:
+  - uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.Delete(System.String,System.String,System.String)
+    name: Delete
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicPermissionStore_Delete_System_String_System_String_System_String_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.Delete(System.String,System.String,System.String)
+    name: Delete
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicPermissionStore_Delete_System_String_System_String_System_String_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsAllowed*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsAllowed
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_OrganicPermissionStore_IsAllowed_LocalGPT_WireProtocol_OneWireEnvelope_
+  name: IsAllowed
+  nameWithType: OrganicPermissionStore.IsAllowed
+  fullName: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsAllowed
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.IsAllowed(LocalGPT.WireProtocol.OneWireEnvelope)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.IsAllowed(LocalGPT.WireProtocol.OneWireEnvelope)
+  parent: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicPermissionStore_IsAllowed_LocalGPT_WireProtocol_OneWireEnvelope_
+  name: IsAllowed(OneWireEnvelope)
+  nameWithType: IOrganicPermissionStore.IsAllowed(OneWireEnvelope)
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.IsAllowed(LocalGPT.WireProtocol.OneWireEnvelope)
+  spec.csharp:
+  - uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.IsAllowed(LocalGPT.WireProtocol.OneWireEnvelope)
+    name: IsAllowed
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicPermissionStore_IsAllowed_LocalGPT_WireProtocol_OneWireEnvelope_
+  - name: (
+  - uid: LocalGPT.WireProtocol.OneWireEnvelope
+    name: OneWireEnvelope
+    isExternal: true
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.IsAllowed(LocalGPT.WireProtocol.OneWireEnvelope)
+    name: IsAllowed
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicPermissionStore_IsAllowed_LocalGPT_WireProtocol_OneWireEnvelope_
+  - name: (
+  - uid: LocalGPT.WireProtocol.OneWireEnvelope
+    name: OneWireEnvelope
+    isExternal: true
+  - name: )
+- uid: LocalGPT.WireProtocol.OneWireEnvelope
+  commentId: T:LocalGPT.WireProtocol.OneWireEnvelope
+  parent: LocalGPT.WireProtocol
+  isExternal: true
+  name: OneWireEnvelope
+  nameWithType: OneWireEnvelope
+  fullName: LocalGPT.WireProtocol.OneWireEnvelope
+- uid: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsDenied*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsDenied
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_OrganicPermissionStore_IsDenied_LocalGPT_WireProtocol_OneWireEnvelope_
+  name: IsDenied
+  nameWithType: OrganicPermissionStore.IsDenied
+  fullName: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsDenied
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.IsDenied(LocalGPT.WireProtocol.OneWireEnvelope)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.IsDenied(LocalGPT.WireProtocol.OneWireEnvelope)
+  parent: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicPermissionStore_IsDenied_LocalGPT_WireProtocol_OneWireEnvelope_
+  name: IsDenied(OneWireEnvelope)
+  nameWithType: IOrganicPermissionStore.IsDenied(OneWireEnvelope)
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.IsDenied(LocalGPT.WireProtocol.OneWireEnvelope)
+  spec.csharp:
+  - uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.IsDenied(LocalGPT.WireProtocol.OneWireEnvelope)
+    name: IsDenied
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicPermissionStore_IsDenied_LocalGPT_WireProtocol_OneWireEnvelope_
+  - name: (
+  - uid: LocalGPT.WireProtocol.OneWireEnvelope
+    name: OneWireEnvelope
+    isExternal: true
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.IsDenied(LocalGPT.WireProtocol.OneWireEnvelope)
+    name: IsDenied
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicPermissionStore_IsDenied_LocalGPT_WireProtocol_OneWireEnvelope_
+  - name: (
+  - uid: LocalGPT.WireProtocol.OneWireEnvelope
+    name: OneWireEnvelope
+    isExternal: true
+  - name: )
+- uid: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsCapabilityExposed*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsCapabilityExposed
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_OrganicPermissionStore_IsCapabilityExposed_System_String_LocalGPT_WireProtocol_OneWireCapabilityDescriptor_
+  name: IsCapabilityExposed
+  nameWithType: OrganicPermissionStore.IsCapabilityExposed
+  fullName: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.IsCapabilityExposed
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.IsCapabilityExposed(System.String,LocalGPT.WireProtocol.OneWireCapabilityDescriptor)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.IsCapabilityExposed(System.String,LocalGPT.WireProtocol.OneWireCapabilityDescriptor)
+  parent: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicPermissionStore_IsCapabilityExposed_System_String_LocalGPT_WireProtocol_OneWireCapabilityDescriptor_
+  name: IsCapabilityExposed(string, OneWireCapabilityDescriptor)
+  nameWithType: IOrganicPermissionStore.IsCapabilityExposed(string, OneWireCapabilityDescriptor)
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.IsCapabilityExposed(string, LocalGPT.WireProtocol.OneWireCapabilityDescriptor)
+  nameWithType.vb: IOrganicPermissionStore.IsCapabilityExposed(String, OneWireCapabilityDescriptor)
+  fullName.vb: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.IsCapabilityExposed(String, LocalGPT.WireProtocol.OneWireCapabilityDescriptor)
+  name.vb: IsCapabilityExposed(String, OneWireCapabilityDescriptor)
+  spec.csharp:
+  - uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.IsCapabilityExposed(System.String,LocalGPT.WireProtocol.OneWireCapabilityDescriptor)
+    name: IsCapabilityExposed
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicPermissionStore_IsCapabilityExposed_System_String_LocalGPT_WireProtocol_OneWireCapabilityDescriptor_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: LocalGPT.WireProtocol.OneWireCapabilityDescriptor
+    name: OneWireCapabilityDescriptor
+    isExternal: true
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.IsCapabilityExposed(System.String,LocalGPT.WireProtocol.OneWireCapabilityDescriptor)
+    name: IsCapabilityExposed
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicPermissionStore_IsCapabilityExposed_System_String_LocalGPT_WireProtocol_OneWireCapabilityDescriptor_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: LocalGPT.WireProtocol.OneWireCapabilityDescriptor
+    name: OneWireCapabilityDescriptor
+    isExternal: true
+  - name: )
+- uid: LocalGPT.WireProtocol.OneWireCapabilityDescriptor
+  commentId: T:LocalGPT.WireProtocol.OneWireCapabilityDescriptor
+  parent: LocalGPT.WireProtocol
+  isExternal: true
+  name: OneWireCapabilityDescriptor
+  nameWithType: OneWireCapabilityDescriptor
+  fullName: LocalGPT.WireProtocol.OneWireCapabilityDescriptor
+- uid: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Resolve*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Resolve
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_OrganicPermissionStore_Resolve_System_String_System_String_System_String_
+  name: Resolve
+  nameWithType: OrganicPermissionStore.Resolve
+  fullName: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Resolve
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.Resolve(System.String,System.String,System.String)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.Resolve(System.String,System.String,System.String)
+  parent: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicPermissionStore_Resolve_System_String_System_String_System_String_
+  name: Resolve(string, string, string)
+  nameWithType: IOrganicPermissionStore.Resolve(string, string, string)
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.Resolve(string, string, string)
+  nameWithType.vb: IOrganicPermissionStore.Resolve(String, String, String)
+  fullName.vb: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.Resolve(String, String, String)
+  name.vb: Resolve(String, String, String)
+  spec.csharp:
+  - uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.Resolve(System.String,System.String,System.String)
+    name: Resolve
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicPermissionStore_Resolve_System_String_System_String_System_String_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.Resolve(System.String,System.String,System.String)
+    name: Resolve
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicPermissionStore_Resolve_System_String_System_String_System_String_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )

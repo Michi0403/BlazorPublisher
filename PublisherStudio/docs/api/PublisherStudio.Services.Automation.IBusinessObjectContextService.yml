@@ -1,0 +1,125 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Automation.IBusinessObjectContextService
+  commentId: T:PublisherStudio.Services.Automation.IBusinessObjectContextService
+  id: IBusinessObjectContextService
+  parent: PublisherStudio.Services.Automation
+  children:
+  - PublisherStudio.Services.Automation.IBusinessObjectContextService.CreateSnapshot
+  langs:
+  - csharp
+  - vb
+  name: IBusinessObjectContextService
+  nameWithType: IBusinessObjectContextService
+  fullName: PublisherStudio.Services.Automation.IBusinessObjectContextService
+  type: Interface
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Automation
+  summary: Defines the business object context service contract.
+  example: []
+  syntax:
+    content: public interface IBusinessObjectContextService
+    content.vb: Public Interface IBusinessObjectContextService
+  derivedClasses:
+  - PublisherStudio.Services.Automation.BusinessObjectContextService
+- uid: PublisherStudio.Services.Automation.IBusinessObjectContextService.CreateSnapshot
+  commentId: M:PublisherStudio.Services.Automation.IBusinessObjectContextService.CreateSnapshot
+  id: CreateSnapshot
+  parent: PublisherStudio.Services.Automation.IBusinessObjectContextService
+  langs:
+  - csharp
+  - vb
+  name: CreateSnapshot()
+  nameWithType: IBusinessObjectContextService.CreateSnapshot()
+  fullName: PublisherStudio.Services.Automation.IBusinessObjectContextService.CreateSnapshot()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Automation
+  syntax:
+    content: BusinessObjectContextSnapshot CreateSnapshot()
+    return:
+      type: PublisherStudio.BusinessObjects.BusinessObjectContextSnapshot
+    content.vb: Function CreateSnapshot() As BusinessObjectContextSnapshot
+  overload: PublisherStudio.Services.Automation.IBusinessObjectContextService.CreateSnapshot*
+references:
+- uid: PublisherStudio.Services.Automation
+  commentId: N:PublisherStudio.Services.Automation
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Automation
+  nameWithType: PublisherStudio.Services.Automation
+  fullName: PublisherStudio.Services.Automation
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Automation
+    name: Automation
+    isExternal: true
+    href: PublisherStudio.Services.Automation.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Automation
+    name: Automation
+    isExternal: true
+    href: PublisherStudio.Services.Automation.html
+- uid: PublisherStudio.Services.Automation.IBusinessObjectContextService.CreateSnapshot*
+  commentId: Overload:PublisherStudio.Services.Automation.IBusinessObjectContextService.CreateSnapshot
+  isExternal: true
+  href: PublisherStudio.Services.Automation.IBusinessObjectContextService.html#PublisherStudio_Services_Automation_IBusinessObjectContextService_CreateSnapshot
+  name: CreateSnapshot
+  nameWithType: IBusinessObjectContextService.CreateSnapshot
+  fullName: PublisherStudio.Services.Automation.IBusinessObjectContextService.CreateSnapshot
+- uid: PublisherStudio.BusinessObjects.BusinessObjectContextSnapshot
+  commentId: T:PublisherStudio.BusinessObjects.BusinessObjectContextSnapshot
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.BusinessObjectContextSnapshot.html
+  name: BusinessObjectContextSnapshot
+  nameWithType: BusinessObjectContextSnapshot
+  fullName: PublisherStudio.BusinessObjects.BusinessObjectContextSnapshot
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html

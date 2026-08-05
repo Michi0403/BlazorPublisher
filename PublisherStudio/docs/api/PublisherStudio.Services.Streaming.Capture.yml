@@ -1,0 +1,160 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Streaming.Capture
+  commentId: N:PublisherStudio.Services.Streaming.Capture
+  id: Capture
+  parent: PublisherStudio.Services.Streaming
+  children:
+  - PublisherStudio.Services.Streaming.Capture.DiscoveredNativeMediaDeviceInfo
+  - PublisherStudio.Services.Streaming.Capture.INativeCaptureSessionFactory
+  - PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackCapture
+  - PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackCaptureFactory
+  - PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackNativeService
+  - PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry
+  - PublisherStudio.Services.Streaming.Capture.NativeCaptureSession
+  - PublisherStudio.Services.Streaming.Capture.NativeCaptureSessionFactory
+  - PublisherStudio.Services.Streaming.Capture.NativeDeviceDiscovery
+  - PublisherStudio.Services.Streaming.Capture.WindowsProcessLoopbackCaptureFactory
+  - PublisherStudio.Services.Streaming.Capture.WindowsProcessLoopbackNativeService
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.Services.Streaming.Capture
+  nameWithType: PublisherStudio.Services.Streaming.Capture
+  fullName: PublisherStudio.Services.Streaming.Capture
+  type: Namespace
+  assemblies:
+  - PublisherStudio.Web
+references:
+- uid: PublisherStudio.Services.Streaming.Capture.DiscoveredNativeMediaDeviceInfo
+  commentId: T:PublisherStudio.Services.Streaming.Capture.DiscoveredNativeMediaDeviceInfo
+  parent: PublisherStudio.Services.Streaming.Capture
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Capture.DiscoveredNativeMediaDeviceInfo.html
+  name: DiscoveredNativeMediaDeviceInfo
+  nameWithType: DiscoveredNativeMediaDeviceInfo
+  fullName: PublisherStudio.Services.Streaming.Capture.DiscoveredNativeMediaDeviceInfo
+- uid: PublisherStudio.Services.Streaming.Capture.INativeCaptureSessionFactory
+  commentId: T:PublisherStudio.Services.Streaming.Capture.INativeCaptureSessionFactory
+  parent: PublisherStudio.Services.Streaming.Capture
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Capture.INativeCaptureSessionFactory.html
+  name: INativeCaptureSessionFactory
+  nameWithType: INativeCaptureSessionFactory
+  fullName: PublisherStudio.Services.Streaming.Capture.INativeCaptureSessionFactory
+- uid: PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackCapture
+  commentId: T:PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackCapture
+  parent: PublisherStudio.Services.Streaming.Capture
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackCapture.html
+  name: IWindowsProcessLoopbackCapture
+  nameWithType: IWindowsProcessLoopbackCapture
+  fullName: PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackCapture
+- uid: PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackCaptureFactory
+  commentId: T:PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackCaptureFactory
+  parent: PublisherStudio.Services.Streaming.Capture
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackCaptureFactory.html
+  name: IWindowsProcessLoopbackCaptureFactory
+  nameWithType: IWindowsProcessLoopbackCaptureFactory
+  fullName: PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackCaptureFactory
+- uid: PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackNativeService
+  commentId: T:PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackNativeService
+  parent: PublisherStudio.Services.Streaming.Capture
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackNativeService.html
+  name: IWindowsProcessLoopbackNativeService
+  nameWithType: IWindowsProcessLoopbackNativeService
+  fullName: PublisherStudio.Services.Streaming.Capture.IWindowsProcessLoopbackNativeService
+- uid: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry
+  commentId: T:PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry
+  parent: PublisherStudio.Services.Streaming.Capture
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry.html
+  name: NativeCaptureRegistry
+  nameWithType: NativeCaptureRegistry
+  fullName: PublisherStudio.Services.Streaming.Capture.NativeCaptureRegistry
+- uid: PublisherStudio.Services.Streaming.Capture.NativeCaptureSession
+  commentId: T:PublisherStudio.Services.Streaming.Capture.NativeCaptureSession
+  parent: PublisherStudio.Services.Streaming.Capture
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Capture.NativeCaptureSession.html
+  name: NativeCaptureSession
+  nameWithType: NativeCaptureSession
+  fullName: PublisherStudio.Services.Streaming.Capture.NativeCaptureSession
+- uid: PublisherStudio.Services.Streaming.Capture.NativeCaptureSessionFactory
+  commentId: T:PublisherStudio.Services.Streaming.Capture.NativeCaptureSessionFactory
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Capture.NativeCaptureSessionFactory.html
+  name: NativeCaptureSessionFactory
+  nameWithType: NativeCaptureSessionFactory
+  fullName: PublisherStudio.Services.Streaming.Capture.NativeCaptureSessionFactory
+- uid: PublisherStudio.Services.Streaming.Capture.NativeDeviceDiscovery
+  commentId: T:PublisherStudio.Services.Streaming.Capture.NativeDeviceDiscovery
+  parent: PublisherStudio.Services.Streaming.Capture
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Capture.NativeDeviceDiscovery.html
+  name: NativeDeviceDiscovery
+  nameWithType: NativeDeviceDiscovery
+  fullName: PublisherStudio.Services.Streaming.Capture.NativeDeviceDiscovery
+- uid: PublisherStudio.Services.Streaming.Capture.WindowsProcessLoopbackCaptureFactory
+  commentId: T:PublisherStudio.Services.Streaming.Capture.WindowsProcessLoopbackCaptureFactory
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Capture.WindowsProcessLoopbackCaptureFactory.html
+  name: WindowsProcessLoopbackCaptureFactory
+  nameWithType: WindowsProcessLoopbackCaptureFactory
+  fullName: PublisherStudio.Services.Streaming.Capture.WindowsProcessLoopbackCaptureFactory
+- uid: PublisherStudio.Services.Streaming.Capture.WindowsProcessLoopbackNativeService
+  commentId: T:PublisherStudio.Services.Streaming.Capture.WindowsProcessLoopbackNativeService
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Capture.WindowsProcessLoopbackNativeService.html
+  name: WindowsProcessLoopbackNativeService
+  nameWithType: WindowsProcessLoopbackNativeService
+  fullName: PublisherStudio.Services.Streaming.Capture.WindowsProcessLoopbackNativeService
+- uid: PublisherStudio.Services.Streaming.Capture
+  commentId: N:PublisherStudio.Services.Streaming.Capture
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Capture
+  nameWithType: PublisherStudio.Services.Streaming.Capture
+  fullName: PublisherStudio.Services.Streaming.Capture
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Capture
+    name: Capture
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Capture.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Capture
+    name: Capture
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Capture.html

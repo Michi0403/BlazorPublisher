@@ -1,0 +1,1510 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService
+  commentId: T:PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService
+  id: LocalGptConnectionService
+  parent: PublisherStudio.Services.OrganicPlugins
+  children:
+  - PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.#ctor(PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry,PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec,PublisherStudio.Services.OrganicPlugins.IOrganicRuntimeSecurityService,PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog,PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore,PublisherStudio.Services.OrganicPlugins.IOrganicWorkCoordinator,PublisherStudio.Services.OrganicPlugins.IOrganicResultStore,PublisherStudio.Services.OrganicPlugins.IOrganicReplayGuard,PublisherStudio.Services.OrganicPlugins.IOrganicTransportSecurityPolicy,PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState,PublisherStudio.Services.OrganicPlugins.IOrganicWireEnvelopeFactory,PublisherStudio.Services.IRuntimeEndpointState,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService})
+  - PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.Changed
+  - PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.ConnectAsync(System.String,System.Threading.CancellationToken)
+  - PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.DisconnectAsync
+  - PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.DisposeAsync
+  - PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.SendCouncilRequestAsync(LocalGPT.WireProtocol.OneWireCouncilRequest,System.Threading.CancellationToken)
+  - PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.SendEnvelopeAsync(LocalGPT.WireProtocol.OneWireEnvelope,System.Threading.CancellationToken)
+  - PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.SendWorkResultAsync(PublisherStudio.BusinessObjects.OrganicPluginWorkItem,System.Threading.CancellationToken)
+  - PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.State
+  - PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.WaitForResultAsync(System.Guid,System.TimeSpan,System.Threading.CancellationToken)
+  langs:
+  - csharp
+  - vb
+  name: LocalGptConnectionService
+  nameWithType: LocalGptConnectionService
+  fullName: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Provides local gpt connection service operations.
+  example: []
+  syntax:
+    content: 'public sealed class LocalGptConnectionService : ILocalGptConnectionService, IAsyncDisposable'
+    content.vb: Public NotInheritable Class LocalGptConnectionService Implements ILocalGptConnectionService, IAsyncDisposable
+  inheritance:
+  - System.Object
+  implements:
+  - PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService
+  - System.IAsyncDisposable
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.#ctor(PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry,PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec,PublisherStudio.Services.OrganicPlugins.IOrganicRuntimeSecurityService,PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog,PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore,PublisherStudio.Services.OrganicPlugins.IOrganicWorkCoordinator,PublisherStudio.Services.OrganicPlugins.IOrganicResultStore,PublisherStudio.Services.OrganicPlugins.IOrganicReplayGuard,PublisherStudio.Services.OrganicPlugins.IOrganicTransportSecurityPolicy,PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState,PublisherStudio.Services.OrganicPlugins.IOrganicWireEnvelopeFactory,PublisherStudio.Services.IRuntimeEndpointState,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService})
+  commentId: M:PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.#ctor(PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry,PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec,PublisherStudio.Services.OrganicPlugins.IOrganicRuntimeSecurityService,PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog,PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore,PublisherStudio.Services.OrganicPlugins.IOrganicWorkCoordinator,PublisherStudio.Services.OrganicPlugins.IOrganicResultStore,PublisherStudio.Services.OrganicPlugins.IOrganicReplayGuard,PublisherStudio.Services.OrganicPlugins.IOrganicTransportSecurityPolicy,PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState,PublisherStudio.Services.OrganicPlugins.IOrganicWireEnvelopeFactory,PublisherStudio.Services.IRuntimeEndpointState,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService})
+  id: '#ctor(PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry,PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec,PublisherStudio.Services.OrganicPlugins.IOrganicRuntimeSecurityService,PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog,PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore,PublisherStudio.Services.OrganicPlugins.IOrganicWorkCoordinator,PublisherStudio.Services.OrganicPlugins.IOrganicResultStore,PublisherStudio.Services.OrganicPlugins.IOrganicReplayGuard,PublisherStudio.Services.OrganicPlugins.IOrganicTransportSecurityPolicy,PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState,PublisherStudio.Services.OrganicPlugins.IOrganicWireEnvelopeFactory,PublisherStudio.Services.IRuntimeEndpointState,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService})'
+  parent: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService
+  langs:
+  - csharp
+  - vb
+  name: LocalGptConnectionService(ILocalGptDiscoveryRegistry, IOrganicPluginProtocolCodec, IOrganicRuntimeSecurityService, IOrganicCapabilityCatalog, IOrganicPermissionStore, IOrganicWorkCoordinator, IOrganicResultStore, IOrganicReplayGuard, IOrganicTransportSecurityPolicy, IOrganicConnectionRuntimeState, IOrganicWireEnvelopeFactory, IRuntimeEndpointState, ILogger<LocalGptConnectionService>)
+  nameWithType: LocalGptConnectionService.LocalGptConnectionService(ILocalGptDiscoveryRegistry, IOrganicPluginProtocolCodec, IOrganicRuntimeSecurityService, IOrganicCapabilityCatalog, IOrganicPermissionStore, IOrganicWorkCoordinator, IOrganicResultStore, IOrganicReplayGuard, IOrganicTransportSecurityPolicy, IOrganicConnectionRuntimeState, IOrganicWireEnvelopeFactory, IRuntimeEndpointState, ILogger<LocalGptConnectionService>)
+  fullName: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.LocalGptConnectionService(PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry, PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec, PublisherStudio.Services.OrganicPlugins.IOrganicRuntimeSecurityService, PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog, PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore, PublisherStudio.Services.OrganicPlugins.IOrganicWorkCoordinator, PublisherStudio.Services.OrganicPlugins.IOrganicResultStore, PublisherStudio.Services.OrganicPlugins.IOrganicReplayGuard, PublisherStudio.Services.OrganicPlugins.IOrganicTransportSecurityPolicy, PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState, PublisherStudio.Services.OrganicPlugins.IOrganicWireEnvelopeFactory, PublisherStudio.Services.IRuntimeEndpointState, Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Provides local gpt connection service operations.
+  example: []
+  syntax:
+    content: public LocalGptConnectionService(ILocalGptDiscoveryRegistry discovery, IOrganicPluginProtocolCodec codec, IOrganicRuntimeSecurityService security, IOrganicCapabilityCatalog capabilities, IOrganicPermissionStore permissions, IOrganicWorkCoordinator work, IOrganicResultStore results, IOrganicReplayGuard replayGuard, IOrganicTransportSecurityPolicy transportSecurityPolicy, IOrganicConnectionRuntimeState runtimeState, IOrganicWireEnvelopeFactory envelopeFactory, IRuntimeEndpointState runtimeEndpointState, ILogger<LocalGptConnectionService> logger)
+    parameters:
+    - id: discovery
+      type: PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry
+    - id: codec
+      type: PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec
+    - id: security
+      type: PublisherStudio.Services.OrganicPlugins.IOrganicRuntimeSecurityService
+    - id: capabilities
+      type: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog
+    - id: permissions
+      type: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore
+    - id: work
+      type: PublisherStudio.Services.OrganicPlugins.IOrganicWorkCoordinator
+    - id: results
+      type: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore
+    - id: replayGuard
+      type: PublisherStudio.Services.OrganicPlugins.IOrganicReplayGuard
+    - id: transportSecurityPolicy
+      type: PublisherStudio.Services.OrganicPlugins.IOrganicTransportSecurityPolicy
+    - id: runtimeState
+      type: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState
+    - id: envelopeFactory
+      type: PublisherStudio.Services.OrganicPlugins.IOrganicWireEnvelopeFactory
+    - id: runtimeEndpointState
+      type: PublisherStudio.Services.IRuntimeEndpointState
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService}
+    content.vb: Public Sub New(discovery As ILocalGptDiscoveryRegistry, codec As IOrganicPluginProtocolCodec, security As IOrganicRuntimeSecurityService, capabilities As IOrganicCapabilityCatalog, permissions As IOrganicPermissionStore, work As IOrganicWorkCoordinator, results As IOrganicResultStore, replayGuard As IOrganicReplayGuard, transportSecurityPolicy As IOrganicTransportSecurityPolicy, runtimeState As IOrganicConnectionRuntimeState, envelopeFactory As IOrganicWireEnvelopeFactory, runtimeEndpointState As IRuntimeEndpointState, logger As ILogger(Of LocalGptConnectionService))
+  overload: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.#ctor*
+  nameWithType.vb: LocalGptConnectionService.New(ILocalGptDiscoveryRegistry, IOrganicPluginProtocolCodec, IOrganicRuntimeSecurityService, IOrganicCapabilityCatalog, IOrganicPermissionStore, IOrganicWorkCoordinator, IOrganicResultStore, IOrganicReplayGuard, IOrganicTransportSecurityPolicy, IOrganicConnectionRuntimeState, IOrganicWireEnvelopeFactory, IRuntimeEndpointState, ILogger(Of LocalGptConnectionService))
+  fullName.vb: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.New(PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry, PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec, PublisherStudio.Services.OrganicPlugins.IOrganicRuntimeSecurityService, PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog, PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore, PublisherStudio.Services.OrganicPlugins.IOrganicWorkCoordinator, PublisherStudio.Services.OrganicPlugins.IOrganicResultStore, PublisherStudio.Services.OrganicPlugins.IOrganicReplayGuard, PublisherStudio.Services.OrganicPlugins.IOrganicTransportSecurityPolicy, PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState, PublisherStudio.Services.OrganicPlugins.IOrganicWireEnvelopeFactory, PublisherStudio.Services.IRuntimeEndpointState, Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService))
+  name.vb: New(ILocalGptDiscoveryRegistry, IOrganicPluginProtocolCodec, IOrganicRuntimeSecurityService, IOrganicCapabilityCatalog, IOrganicPermissionStore, IOrganicWorkCoordinator, IOrganicResultStore, IOrganicReplayGuard, IOrganicTransportSecurityPolicy, IOrganicConnectionRuntimeState, IOrganicWireEnvelopeFactory, IRuntimeEndpointState, ILogger(Of LocalGptConnectionService))
+- uid: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.ConnectAsync(System.String,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.ConnectAsync(System.String,System.Threading.CancellationToken)
+  id: ConnectAsync(System.String,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService
+  langs:
+  - csharp
+  - vb
+  name: ConnectAsync(string, CancellationToken)
+  nameWithType: LocalGptConnectionService.ConnectAsync(string, CancellationToken)
+  fullName: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.ConnectAsync(string, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Runs the connect async operation.
+  example: []
+  syntax:
+    content: public Task<OrganicConnectionState> ConnectAsync(string requestedPeerId, CancellationToken cancellationToken = default)
+    parameters:
+    - id: requestedPeerId
+      type: System.String
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.OrganicConnectionState}
+    content.vb: Public Function ConnectAsync(requestedPeerId As String, cancellationToken As CancellationToken = Nothing) As Task(Of OrganicConnectionState)
+  overload: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.ConnectAsync*
+  implements:
+  - PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.ConnectAsync(System.String,System.Threading.CancellationToken)
+  nameWithType.vb: LocalGptConnectionService.ConnectAsync(String, CancellationToken)
+  fullName.vb: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.ConnectAsync(String, System.Threading.CancellationToken)
+  name.vb: ConnectAsync(String, CancellationToken)
+- uid: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.DisconnectAsync
+  commentId: M:PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.DisconnectAsync
+  id: DisconnectAsync
+  parent: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService
+  langs:
+  - csharp
+  - vb
+  name: DisconnectAsync()
+  nameWithType: LocalGptConnectionService.DisconnectAsync()
+  fullName: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.DisconnectAsync()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Runs the disconnect async operation.
+  example: []
+  syntax:
+    content: public Task DisconnectAsync()
+    return:
+      type: System.Threading.Tasks.Task
+    content.vb: Public Function DisconnectAsync() As Task
+  overload: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.DisconnectAsync*
+  implements:
+  - PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.DisconnectAsync
+- uid: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.SendCouncilRequestAsync(LocalGPT.WireProtocol.OneWireCouncilRequest,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.SendCouncilRequestAsync(LocalGPT.WireProtocol.OneWireCouncilRequest,System.Threading.CancellationToken)
+  id: SendCouncilRequestAsync(LocalGPT.WireProtocol.OneWireCouncilRequest,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService
+  langs:
+  - csharp
+  - vb
+  name: SendCouncilRequestAsync(OneWireCouncilRequest, CancellationToken)
+  nameWithType: LocalGptConnectionService.SendCouncilRequestAsync(OneWireCouncilRequest, CancellationToken)
+  fullName: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.SendCouncilRequestAsync(LocalGPT.WireProtocol.OneWireCouncilRequest, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Runs the send council request async operation.
+  example: []
+  syntax:
+    content: public Task<Guid> SendCouncilRequestAsync(OneWireCouncilRequest request, CancellationToken cancellationToken = default)
+    parameters:
+    - id: request
+      type: LocalGPT.WireProtocol.OneWireCouncilRequest
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{System.Guid}
+    content.vb: Public Function SendCouncilRequestAsync(request As OneWireCouncilRequest, cancellationToken As CancellationToken = Nothing) As Task(Of Guid)
+  overload: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.SendCouncilRequestAsync*
+  implements:
+  - PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.SendCouncilRequestAsync(LocalGPT.WireProtocol.OneWireCouncilRequest,System.Threading.CancellationToken)
+- uid: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.SendEnvelopeAsync(LocalGPT.WireProtocol.OneWireEnvelope,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.SendEnvelopeAsync(LocalGPT.WireProtocol.OneWireEnvelope,System.Threading.CancellationToken)
+  id: SendEnvelopeAsync(LocalGPT.WireProtocol.OneWireEnvelope,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService
+  langs:
+  - csharp
+  - vb
+  name: SendEnvelopeAsync(OneWireEnvelope, CancellationToken)
+  nameWithType: LocalGptConnectionService.SendEnvelopeAsync(OneWireEnvelope, CancellationToken)
+  fullName: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.SendEnvelopeAsync(LocalGPT.WireProtocol.OneWireEnvelope, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Runs the send envelope async operation.
+  example: []
+  syntax:
+    content: public Task<Guid> SendEnvelopeAsync(OneWireEnvelope envelope, CancellationToken cancellationToken = default)
+    parameters:
+    - id: envelope
+      type: LocalGPT.WireProtocol.OneWireEnvelope
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{System.Guid}
+    content.vb: Public Function SendEnvelopeAsync(envelope As OneWireEnvelope, cancellationToken As CancellationToken = Nothing) As Task(Of Guid)
+  overload: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.SendEnvelopeAsync*
+  implements:
+  - PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.SendEnvelopeAsync(LocalGPT.WireProtocol.OneWireEnvelope,System.Threading.CancellationToken)
+- uid: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.WaitForResultAsync(System.Guid,System.TimeSpan,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.WaitForResultAsync(System.Guid,System.TimeSpan,System.Threading.CancellationToken)
+  id: WaitForResultAsync(System.Guid,System.TimeSpan,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService
+  langs:
+  - csharp
+  - vb
+  name: WaitForResultAsync(Guid, TimeSpan, CancellationToken)
+  nameWithType: LocalGptConnectionService.WaitForResultAsync(Guid, TimeSpan, CancellationToken)
+  fullName: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.WaitForResultAsync(System.Guid, System.TimeSpan, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Runs the wait for result async operation.
+  example: []
+  syntax:
+    content: public Task<OneWireEnvelope> WaitForResultAsync(Guid correlationId, TimeSpan timeout, CancellationToken cancellationToken = default)
+    parameters:
+    - id: correlationId
+      type: System.Guid
+    - id: timeout
+      type: System.TimeSpan
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{LocalGPT.WireProtocol.OneWireEnvelope}
+    content.vb: Public Function WaitForResultAsync(correlationId As Guid, timeout As TimeSpan, cancellationToken As CancellationToken = Nothing) As Task(Of OneWireEnvelope)
+  overload: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.WaitForResultAsync*
+  implements:
+  - PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.WaitForResultAsync(System.Guid,System.TimeSpan,System.Threading.CancellationToken)
+- uid: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.SendWorkResultAsync(PublisherStudio.BusinessObjects.OrganicPluginWorkItem,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.SendWorkResultAsync(PublisherStudio.BusinessObjects.OrganicPluginWorkItem,System.Threading.CancellationToken)
+  id: SendWorkResultAsync(PublisherStudio.BusinessObjects.OrganicPluginWorkItem,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService
+  langs:
+  - csharp
+  - vb
+  name: SendWorkResultAsync(OrganicPluginWorkItem, CancellationToken)
+  nameWithType: LocalGptConnectionService.SendWorkResultAsync(OrganicPluginWorkItem, CancellationToken)
+  fullName: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.SendWorkResultAsync(PublisherStudio.BusinessObjects.OrganicPluginWorkItem, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Runs the send work result async operation.
+  example: []
+  syntax:
+    content: public Task SendWorkResultAsync(OrganicPluginWorkItem item, CancellationToken cancellationToken = default)
+    parameters:
+    - id: item
+      type: PublisherStudio.BusinessObjects.OrganicPluginWorkItem
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task
+    content.vb: Public Function SendWorkResultAsync(item As OrganicPluginWorkItem, cancellationToken As CancellationToken = Nothing) As Task
+  overload: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.SendWorkResultAsync*
+  implements:
+  - PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.SendWorkResultAsync(PublisherStudio.BusinessObjects.OrganicPluginWorkItem,System.Threading.CancellationToken)
+- uid: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.DisposeAsync
+  commentId: M:PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.DisposeAsync
+  id: DisposeAsync
+  parent: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService
+  langs:
+  - csharp
+  - vb
+  name: DisposeAsync()
+  nameWithType: LocalGptConnectionService.DisposeAsync()
+  fullName: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.DisposeAsync()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Runs the dispose async operation.
+  example: []
+  syntax:
+    content: public ValueTask DisposeAsync()
+    return:
+      type: System.Threading.Tasks.ValueTask
+    content.vb: Public Function DisposeAsync() As ValueTask
+  overload: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.DisposeAsync*
+  implements:
+  - System.IAsyncDisposable.DisposeAsync
+- uid: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.State
+  commentId: P:PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.State
+  id: State
+  parent: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService
+  langs:
+  - csharp
+  - vb
+  name: State
+  nameWithType: LocalGptConnectionService.State
+  fullName: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.State
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Gets state.
+  example: []
+  syntax:
+    content: public OrganicConnectionState State { get; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.OrganicConnectionState
+    content.vb: Public ReadOnly Property State As OrganicConnectionState
+  overload: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.State*
+  implements:
+  - PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.State
+- uid: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.Changed
+  commentId: E:PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.Changed
+  id: Changed
+  parent: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService
+  langs:
+  - csharp
+  - vb
+  name: Changed
+  nameWithType: LocalGptConnectionService.Changed
+  fullName: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.Changed
+  type: Event
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Occurs when changed.
+  example: []
+  syntax:
+    content: public event Action? Changed
+    return:
+      type: System.Action
+    content.vb: Public Event Changed As Action
+  implements:
+  - PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.Changed
+references:
+- uid: PublisherStudio.Services.OrganicPlugins
+  commentId: N:PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.OrganicPlugins
+  nameWithType: PublisherStudio.Services.OrganicPlugins
+  fullName: PublisherStudio.Services.OrganicPlugins
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OrganicPlugins
+    name: OrganicPlugins
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OrganicPlugins
+    name: OrganicPlugins
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService
+  commentId: T:PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService
+  parent: PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.html
+  name: ILocalGptConnectionService
+  nameWithType: ILocalGptConnectionService
+  fullName: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService
+- uid: System.IAsyncDisposable
+  commentId: T:System.IAsyncDisposable
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iasyncdisposable
+  name: IAsyncDisposable
+  nameWithType: IAsyncDisposable
+  fullName: System.IAsyncDisposable
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.#ctor*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_LocalGptConnectionService__ctor_PublisherStudio_Services_OrganicPlugins_ILocalGptDiscoveryRegistry_PublisherStudio_Services_OrganicPlugins_IOrganicPluginProtocolCodec_PublisherStudio_Services_OrganicPlugins_IOrganicRuntimeSecurityService_PublisherStudio_Services_OrganicPlugins_IOrganicCapabilityCatalog_PublisherStudio_Services_OrganicPlugins_IOrganicPermissionStore_PublisherStudio_Services_OrganicPlugins_IOrganicWorkCoordinator_PublisherStudio_Services_OrganicPlugins_IOrganicResultStore_PublisherStudio_Services_OrganicPlugins_IOrganicReplayGuard_PublisherStudio_Services_OrganicPlugins_IOrganicTransportSecurityPolicy_PublisherStudio_Services_OrganicPlugins_IOrganicConnectionRuntimeState_PublisherStudio_Services_OrganicPlugins_IOrganicWireEnvelopeFactory_PublisherStudio_Services_IRuntimeEndpointState_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_OrganicPlugins_LocalGptConnectionService__
+  name: LocalGptConnectionService
+  nameWithType: LocalGptConnectionService.LocalGptConnectionService
+  fullName: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.LocalGptConnectionService
+  nameWithType.vb: LocalGptConnectionService.New
+  fullName.vb: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.New
+  name.vb: New
+- uid: PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry
+  commentId: T:PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry
+  parent: PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry.html
+  name: ILocalGptDiscoveryRegistry
+  nameWithType: ILocalGptDiscoveryRegistry
+  fullName: PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec
+  commentId: T:PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec
+  parent: PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec.html
+  name: IOrganicPluginProtocolCodec
+  nameWithType: IOrganicPluginProtocolCodec
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicPluginProtocolCodec
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicRuntimeSecurityService
+  commentId: T:PublisherStudio.Services.OrganicPlugins.IOrganicRuntimeSecurityService
+  parent: PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicRuntimeSecurityService.html
+  name: IOrganicRuntimeSecurityService
+  nameWithType: IOrganicRuntimeSecurityService
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicRuntimeSecurityService
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog
+  commentId: T:PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog
+  parent: PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.html
+  name: IOrganicCapabilityCatalog
+  nameWithType: IOrganicCapabilityCatalog
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore
+  commentId: T:PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore
+  parent: PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html
+  name: IOrganicPermissionStore
+  nameWithType: IOrganicPermissionStore
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicWorkCoordinator
+  commentId: T:PublisherStudio.Services.OrganicPlugins.IOrganicWorkCoordinator
+  parent: PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicWorkCoordinator.html
+  name: IOrganicWorkCoordinator
+  nameWithType: IOrganicWorkCoordinator
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicWorkCoordinator
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore
+  commentId: T:PublisherStudio.Services.OrganicPlugins.IOrganicResultStore
+  parent: PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.html
+  name: IOrganicResultStore
+  nameWithType: IOrganicResultStore
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicReplayGuard
+  commentId: T:PublisherStudio.Services.OrganicPlugins.IOrganicReplayGuard
+  parent: PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicReplayGuard.html
+  name: IOrganicReplayGuard
+  nameWithType: IOrganicReplayGuard
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicReplayGuard
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicTransportSecurityPolicy
+  commentId: T:PublisherStudio.Services.OrganicPlugins.IOrganicTransportSecurityPolicy
+  parent: PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicTransportSecurityPolicy.html
+  name: IOrganicTransportSecurityPolicy
+  nameWithType: IOrganicTransportSecurityPolicy
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicTransportSecurityPolicy
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState
+  commentId: T:PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState
+  parent: PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.html
+  name: IOrganicConnectionRuntimeState
+  nameWithType: IOrganicConnectionRuntimeState
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicWireEnvelopeFactory
+  commentId: T:PublisherStudio.Services.OrganicPlugins.IOrganicWireEnvelopeFactory
+  parent: PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicWireEnvelopeFactory.html
+  name: IOrganicWireEnvelopeFactory
+  nameWithType: IOrganicWireEnvelopeFactory
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicWireEnvelopeFactory
+- uid: PublisherStudio.Services.IRuntimeEndpointState
+  commentId: T:PublisherStudio.Services.IRuntimeEndpointState
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.IRuntimeEndpointState.html
+  name: IRuntimeEndpointState
+  nameWithType: IRuntimeEndpointState
+  fullName: PublisherStudio.Services.IRuntimeEndpointState
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<LocalGptConnectionService>
+  nameWithType: ILogger<LocalGptConnectionService>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService>
+  nameWithType.vb: ILogger(Of LocalGptConnectionService)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService)
+  name.vb: ILogger(Of LocalGptConnectionService)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService
+    name: LocalGptConnectionService
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService
+    name: LocalGptConnectionService
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.html
+  - name: )
+- uid: PublisherStudio.Services
+  commentId: N:PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services
+  nameWithType: PublisherStudio.Services
+  fullName: PublisherStudio.Services
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.ConnectAsync*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.ConnectAsync
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_LocalGptConnectionService_ConnectAsync_System_String_System_Threading_CancellationToken_
+  name: ConnectAsync
+  nameWithType: LocalGptConnectionService.ConnectAsync
+  fullName: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.ConnectAsync
+- uid: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.ConnectAsync(System.String,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.ConnectAsync(System.String,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_ILocalGptConnectionService_ConnectAsync_System_String_System_Threading_CancellationToken_
+  name: ConnectAsync(string, CancellationToken)
+  nameWithType: ILocalGptConnectionService.ConnectAsync(string, CancellationToken)
+  fullName: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.ConnectAsync(string, System.Threading.CancellationToken)
+  nameWithType.vb: ILocalGptConnectionService.ConnectAsync(String, CancellationToken)
+  fullName.vb: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.ConnectAsync(String, System.Threading.CancellationToken)
+  name.vb: ConnectAsync(String, CancellationToken)
+  spec.csharp:
+  - uid: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.ConnectAsync(System.String,System.Threading.CancellationToken)
+    name: ConnectAsync
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_ILocalGptConnectionService_ConnectAsync_System_String_System_Threading_CancellationToken_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.ConnectAsync(System.String,System.Threading.CancellationToken)
+    name: ConnectAsync
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_ILocalGptConnectionService_ConnectAsync_System_String_System_Threading_CancellationToken_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System.Threading.CancellationToken
+  commentId: T:System.Threading.CancellationToken
+  parent: System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  name: CancellationToken
+  nameWithType: CancellationToken
+  fullName: System.Threading.CancellationToken
+- uid: System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.OrganicConnectionState}
+  commentId: T:System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.OrganicConnectionState}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<OrganicConnectionState>
+  nameWithType: Task<OrganicConnectionState>
+  fullName: System.Threading.Tasks.Task<PublisherStudio.BusinessObjects.OrganicConnectionState>
+  nameWithType.vb: Task(Of OrganicConnectionState)
+  fullName.vb: System.Threading.Tasks.Task(Of PublisherStudio.BusinessObjects.OrganicConnectionState)
+  name.vb: Task(Of OrganicConnectionState)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.OrganicConnectionState
+    name: OrganicConnectionState
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.OrganicConnectionState.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.OrganicConnectionState
+    name: OrganicConnectionState
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.OrganicConnectionState.html
+  - name: )
+- uid: System.Threading
+  commentId: N:System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading
+  nameWithType: System.Threading
+  fullName: System.Threading
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+- uid: System.Threading.Tasks.Task`1
+  commentId: T:System.Threading.Tasks.Task`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<TResult>
+  nameWithType: Task<TResult>
+  fullName: System.Threading.Tasks.Task<TResult>
+  nameWithType.vb: Task(Of TResult)
+  fullName.vb: System.Threading.Tasks.Task(Of TResult)
+  name.vb: Task(Of TResult)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - name: TResult
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TResult
+  - name: )
+- uid: System.Threading.Tasks
+  commentId: N:System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading.Tasks
+  nameWithType: System.Threading.Tasks
+  fullName: System.Threading.Tasks
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+- uid: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.DisconnectAsync*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.DisconnectAsync
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_LocalGptConnectionService_DisconnectAsync
+  name: DisconnectAsync
+  nameWithType: LocalGptConnectionService.DisconnectAsync
+  fullName: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.DisconnectAsync
+- uid: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.DisconnectAsync
+  commentId: M:PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.DisconnectAsync
+  parent: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_ILocalGptConnectionService_DisconnectAsync
+  name: DisconnectAsync()
+  nameWithType: ILocalGptConnectionService.DisconnectAsync()
+  fullName: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.DisconnectAsync()
+  spec.csharp:
+  - uid: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.DisconnectAsync
+    name: DisconnectAsync
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_ILocalGptConnectionService_DisconnectAsync
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.DisconnectAsync
+    name: DisconnectAsync
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_ILocalGptConnectionService_DisconnectAsync
+  - name: (
+  - name: )
+- uid: System.Threading.Tasks.Task
+  commentId: T:System.Threading.Tasks.Task
+  parent: System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task
+  name: Task
+  nameWithType: Task
+  fullName: System.Threading.Tasks.Task
+- uid: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.SendCouncilRequestAsync*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.SendCouncilRequestAsync
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_LocalGptConnectionService_SendCouncilRequestAsync_LocalGPT_WireProtocol_OneWireCouncilRequest_System_Threading_CancellationToken_
+  name: SendCouncilRequestAsync
+  nameWithType: LocalGptConnectionService.SendCouncilRequestAsync
+  fullName: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.SendCouncilRequestAsync
+- uid: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.SendCouncilRequestAsync(LocalGPT.WireProtocol.OneWireCouncilRequest,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.SendCouncilRequestAsync(LocalGPT.WireProtocol.OneWireCouncilRequest,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_ILocalGptConnectionService_SendCouncilRequestAsync_LocalGPT_WireProtocol_OneWireCouncilRequest_System_Threading_CancellationToken_
+  name: SendCouncilRequestAsync(OneWireCouncilRequest, CancellationToken)
+  nameWithType: ILocalGptConnectionService.SendCouncilRequestAsync(OneWireCouncilRequest, CancellationToken)
+  fullName: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.SendCouncilRequestAsync(LocalGPT.WireProtocol.OneWireCouncilRequest, System.Threading.CancellationToken)
+  spec.csharp:
+  - uid: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.SendCouncilRequestAsync(LocalGPT.WireProtocol.OneWireCouncilRequest,System.Threading.CancellationToken)
+    name: SendCouncilRequestAsync
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_ILocalGptConnectionService_SendCouncilRequestAsync_LocalGPT_WireProtocol_OneWireCouncilRequest_System_Threading_CancellationToken_
+  - name: (
+  - uid: LocalGPT.WireProtocol.OneWireCouncilRequest
+    name: OneWireCouncilRequest
+    isExternal: true
+  - name: ','
+  - name: " "
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.SendCouncilRequestAsync(LocalGPT.WireProtocol.OneWireCouncilRequest,System.Threading.CancellationToken)
+    name: SendCouncilRequestAsync
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_ILocalGptConnectionService_SendCouncilRequestAsync_LocalGPT_WireProtocol_OneWireCouncilRequest_System_Threading_CancellationToken_
+  - name: (
+  - uid: LocalGPT.WireProtocol.OneWireCouncilRequest
+    name: OneWireCouncilRequest
+    isExternal: true
+  - name: ','
+  - name: " "
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+- uid: LocalGPT.WireProtocol.OneWireCouncilRequest
+  commentId: T:LocalGPT.WireProtocol.OneWireCouncilRequest
+  parent: LocalGPT.WireProtocol
+  isExternal: true
+  name: OneWireCouncilRequest
+  nameWithType: OneWireCouncilRequest
+  fullName: LocalGPT.WireProtocol.OneWireCouncilRequest
+- uid: System.Threading.Tasks.Task{System.Guid}
+  commentId: T:System.Threading.Tasks.Task{System.Guid}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<Guid>
+  nameWithType: Task<Guid>
+  fullName: System.Threading.Tasks.Task<System.Guid>
+  nameWithType.vb: Task(Of Guid)
+  fullName.vb: System.Threading.Tasks.Task(Of System.Guid)
+  name.vb: Task(Of Guid)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: )
+- uid: LocalGPT.WireProtocol
+  commentId: N:LocalGPT.WireProtocol
+  isExternal: true
+  name: LocalGPT.WireProtocol
+  nameWithType: LocalGPT.WireProtocol
+  fullName: LocalGPT.WireProtocol
+  spec.csharp:
+  - uid: LocalGPT
+    name: LocalGPT
+    isExternal: true
+  - name: .
+  - uid: LocalGPT.WireProtocol
+    name: WireProtocol
+    isExternal: true
+  spec.vb:
+  - uid: LocalGPT
+    name: LocalGPT
+    isExternal: true
+  - name: .
+  - uid: LocalGPT.WireProtocol
+    name: WireProtocol
+    isExternal: true
+- uid: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.SendEnvelopeAsync*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.SendEnvelopeAsync
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_LocalGptConnectionService_SendEnvelopeAsync_LocalGPT_WireProtocol_OneWireEnvelope_System_Threading_CancellationToken_
+  name: SendEnvelopeAsync
+  nameWithType: LocalGptConnectionService.SendEnvelopeAsync
+  fullName: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.SendEnvelopeAsync
+- uid: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.SendEnvelopeAsync(LocalGPT.WireProtocol.OneWireEnvelope,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.SendEnvelopeAsync(LocalGPT.WireProtocol.OneWireEnvelope,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_ILocalGptConnectionService_SendEnvelopeAsync_LocalGPT_WireProtocol_OneWireEnvelope_System_Threading_CancellationToken_
+  name: SendEnvelopeAsync(OneWireEnvelope, CancellationToken)
+  nameWithType: ILocalGptConnectionService.SendEnvelopeAsync(OneWireEnvelope, CancellationToken)
+  fullName: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.SendEnvelopeAsync(LocalGPT.WireProtocol.OneWireEnvelope, System.Threading.CancellationToken)
+  spec.csharp:
+  - uid: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.SendEnvelopeAsync(LocalGPT.WireProtocol.OneWireEnvelope,System.Threading.CancellationToken)
+    name: SendEnvelopeAsync
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_ILocalGptConnectionService_SendEnvelopeAsync_LocalGPT_WireProtocol_OneWireEnvelope_System_Threading_CancellationToken_
+  - name: (
+  - uid: LocalGPT.WireProtocol.OneWireEnvelope
+    name: OneWireEnvelope
+    isExternal: true
+  - name: ','
+  - name: " "
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.SendEnvelopeAsync(LocalGPT.WireProtocol.OneWireEnvelope,System.Threading.CancellationToken)
+    name: SendEnvelopeAsync
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_ILocalGptConnectionService_SendEnvelopeAsync_LocalGPT_WireProtocol_OneWireEnvelope_System_Threading_CancellationToken_
+  - name: (
+  - uid: LocalGPT.WireProtocol.OneWireEnvelope
+    name: OneWireEnvelope
+    isExternal: true
+  - name: ','
+  - name: " "
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+- uid: LocalGPT.WireProtocol.OneWireEnvelope
+  commentId: T:LocalGPT.WireProtocol.OneWireEnvelope
+  parent: LocalGPT.WireProtocol
+  isExternal: true
+  name: OneWireEnvelope
+  nameWithType: OneWireEnvelope
+  fullName: LocalGPT.WireProtocol.OneWireEnvelope
+- uid: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.WaitForResultAsync*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.WaitForResultAsync
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_LocalGptConnectionService_WaitForResultAsync_System_Guid_System_TimeSpan_System_Threading_CancellationToken_
+  name: WaitForResultAsync
+  nameWithType: LocalGptConnectionService.WaitForResultAsync
+  fullName: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.WaitForResultAsync
+- uid: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.WaitForResultAsync(System.Guid,System.TimeSpan,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.WaitForResultAsync(System.Guid,System.TimeSpan,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_ILocalGptConnectionService_WaitForResultAsync_System_Guid_System_TimeSpan_System_Threading_CancellationToken_
+  name: WaitForResultAsync(Guid, TimeSpan, CancellationToken)
+  nameWithType: ILocalGptConnectionService.WaitForResultAsync(Guid, TimeSpan, CancellationToken)
+  fullName: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.WaitForResultAsync(System.Guid, System.TimeSpan, System.Threading.CancellationToken)
+  spec.csharp:
+  - uid: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.WaitForResultAsync(System.Guid,System.TimeSpan,System.Threading.CancellationToken)
+    name: WaitForResultAsync
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_ILocalGptConnectionService_WaitForResultAsync_System_Guid_System_TimeSpan_System_Threading_CancellationToken_
+  - name: (
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: ','
+  - name: " "
+  - uid: System.TimeSpan
+    name: TimeSpan
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.timespan
+  - name: ','
+  - name: " "
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.WaitForResultAsync(System.Guid,System.TimeSpan,System.Threading.CancellationToken)
+    name: WaitForResultAsync
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_ILocalGptConnectionService_WaitForResultAsync_System_Guid_System_TimeSpan_System_Threading_CancellationToken_
+  - name: (
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: ','
+  - name: " "
+  - uid: System.TimeSpan
+    name: TimeSpan
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.timespan
+  - name: ','
+  - name: " "
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: System.TimeSpan
+  commentId: T:System.TimeSpan
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.timespan
+  name: TimeSpan
+  nameWithType: TimeSpan
+  fullName: System.TimeSpan
+- uid: System.Threading.Tasks.Task{LocalGPT.WireProtocol.OneWireEnvelope}
+  commentId: T:System.Threading.Tasks.Task{LocalGPT.WireProtocol.OneWireEnvelope}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<OneWireEnvelope>
+  nameWithType: Task<OneWireEnvelope>
+  fullName: System.Threading.Tasks.Task<LocalGPT.WireProtocol.OneWireEnvelope>
+  nameWithType.vb: Task(Of OneWireEnvelope)
+  fullName.vb: System.Threading.Tasks.Task(Of LocalGPT.WireProtocol.OneWireEnvelope)
+  name.vb: Task(Of OneWireEnvelope)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: LocalGPT.WireProtocol.OneWireEnvelope
+    name: OneWireEnvelope
+    isExternal: true
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: LocalGPT.WireProtocol.OneWireEnvelope
+    name: OneWireEnvelope
+    isExternal: true
+  - name: )
+- uid: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.SendWorkResultAsync*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.SendWorkResultAsync
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_LocalGptConnectionService_SendWorkResultAsync_PublisherStudio_BusinessObjects_OrganicPluginWorkItem_System_Threading_CancellationToken_
+  name: SendWorkResultAsync
+  nameWithType: LocalGptConnectionService.SendWorkResultAsync
+  fullName: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.SendWorkResultAsync
+- uid: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.SendWorkResultAsync(PublisherStudio.BusinessObjects.OrganicPluginWorkItem,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.SendWorkResultAsync(PublisherStudio.BusinessObjects.OrganicPluginWorkItem,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_ILocalGptConnectionService_SendWorkResultAsync_PublisherStudio_BusinessObjects_OrganicPluginWorkItem_System_Threading_CancellationToken_
+  name: SendWorkResultAsync(OrganicPluginWorkItem, CancellationToken)
+  nameWithType: ILocalGptConnectionService.SendWorkResultAsync(OrganicPluginWorkItem, CancellationToken)
+  fullName: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.SendWorkResultAsync(PublisherStudio.BusinessObjects.OrganicPluginWorkItem, System.Threading.CancellationToken)
+  spec.csharp:
+  - uid: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.SendWorkResultAsync(PublisherStudio.BusinessObjects.OrganicPluginWorkItem,System.Threading.CancellationToken)
+    name: SendWorkResultAsync
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_ILocalGptConnectionService_SendWorkResultAsync_PublisherStudio_BusinessObjects_OrganicPluginWorkItem_System_Threading_CancellationToken_
+  - name: (
+  - uid: PublisherStudio.BusinessObjects.OrganicPluginWorkItem
+    name: OrganicPluginWorkItem
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.OrganicPluginWorkItem.html
+  - name: ','
+  - name: " "
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.SendWorkResultAsync(PublisherStudio.BusinessObjects.OrganicPluginWorkItem,System.Threading.CancellationToken)
+    name: SendWorkResultAsync
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_ILocalGptConnectionService_SendWorkResultAsync_PublisherStudio_BusinessObjects_OrganicPluginWorkItem_System_Threading_CancellationToken_
+  - name: (
+  - uid: PublisherStudio.BusinessObjects.OrganicPluginWorkItem
+    name: OrganicPluginWorkItem
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.OrganicPluginWorkItem.html
+  - name: ','
+  - name: " "
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+- uid: PublisherStudio.BusinessObjects.OrganicPluginWorkItem
+  commentId: T:PublisherStudio.BusinessObjects.OrganicPluginWorkItem
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OrganicPluginWorkItem.html
+  name: OrganicPluginWorkItem
+  nameWithType: OrganicPluginWorkItem
+  fullName: PublisherStudio.BusinessObjects.OrganicPluginWorkItem
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.DisposeAsync*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.DisposeAsync
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_LocalGptConnectionService_DisposeAsync
+  name: DisposeAsync
+  nameWithType: LocalGptConnectionService.DisposeAsync
+  fullName: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.DisposeAsync
+- uid: System.IAsyncDisposable.DisposeAsync
+  commentId: M:System.IAsyncDisposable.DisposeAsync
+  parent: System.IAsyncDisposable
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iasyncdisposable.disposeasync
+  name: DisposeAsync()
+  nameWithType: IAsyncDisposable.DisposeAsync()
+  fullName: System.IAsyncDisposable.DisposeAsync()
+  spec.csharp:
+  - uid: System.IAsyncDisposable.DisposeAsync
+    name: DisposeAsync
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iasyncdisposable.disposeasync
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.IAsyncDisposable.DisposeAsync
+    name: DisposeAsync
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iasyncdisposable.disposeasync
+  - name: (
+  - name: )
+- uid: System.Threading.Tasks.ValueTask
+  commentId: T:System.Threading.Tasks.ValueTask
+  parent: System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.valuetask
+  name: ValueTask
+  nameWithType: ValueTask
+  fullName: System.Threading.Tasks.ValueTask
+- uid: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.State*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.State
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_LocalGptConnectionService_State
+  name: State
+  nameWithType: LocalGptConnectionService.State
+  fullName: PublisherStudio.Services.OrganicPlugins.LocalGptConnectionService.State
+- uid: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.State
+  commentId: P:PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.State
+  parent: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_ILocalGptConnectionService_State
+  name: State
+  nameWithType: ILocalGptConnectionService.State
+  fullName: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.State
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionState
+  commentId: T:PublisherStudio.BusinessObjects.OrganicConnectionState
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OrganicConnectionState.html
+  name: OrganicConnectionState
+  nameWithType: OrganicConnectionState
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionState
+- uid: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.Changed
+  commentId: E:PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.Changed
+  parent: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.html#PublisherStudio_Services_OrganicPlugins_ILocalGptConnectionService_Changed
+  name: Changed
+  nameWithType: ILocalGptConnectionService.Changed
+  fullName: PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService.Changed
+- uid: System.Action
+  commentId: T:System.Action
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.action
+  name: Action
+  nameWithType: Action
+  fullName: System.Action

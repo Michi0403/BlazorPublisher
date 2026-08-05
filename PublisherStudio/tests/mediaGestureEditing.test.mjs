@@ -24,8 +24,8 @@ const editorState = read('src', 'PublisherStudio.Web', 'Services', 'EditorStateS
 const program = read('src', 'PublisherStudio.Web', 'Program.cs');
 const applicationComposition = read('src', 'PublisherStudio.Web', 'PublisherStudioServiceCollectionExtensions.cs');
 const agents = read('AGENTS.md');
-const architecture = read('docs', 'architecture', 'media-gesture-editing.md');
-const adr = read('docs', 'decisions', 'ADR-009-editor-gesture-and-z-order-ownership.md');
+const architecture = read('docs', 'articles', 'pictures-and-media.md');
+const adr = read('docs', 'articles', 'architecture.md');
 const css = read('src', 'PublisherStudio.Web', 'wwwroot', 'css', 'site.css');
 
 const pictureModule = await import(pathToFileURL(path.join(root, 'src', 'PublisherStudio.Web', 'wwwroot', 'js', 'pictureStudioInterop.js')).href);
@@ -159,6 +159,6 @@ assert.match(agents, /A gesture may have exactly one owner/);
 assert.match(agents, /Keyboard shortcuts must be scoped to the active Studio root/);
 assert.match(agents, /Every persisted visual edit must be covered in Mainframe preview, print\/PDF, raster\/SVG export, interactive HTML and standalone HTML/);
 assert.match(architecture, /Internal media sections and selection overlays never become page siblings or picture layers/);
-assert.match(adr, /never become publication elements or Z-order participants/);
+assert.match(adr, /never change publication layer order/);
 
 console.log('PublisherStudio media gesture, polygon region, sequence, export and Z-order contracts passed.');

@@ -1,21 +1,36 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.CodeEditing;
 
+/// <summary>
+/// Provides code language service operations.
+/// </summary>
 public sealed class CodeLanguageService : ICodeLanguageService
 {
     private readonly IReadOnlyList<CodeLanguageProfile> _profiles;
     private readonly IReadOnlyDictionary<string, CodeLanguageProfile> _byId;
 
+    /// <summary>
+    /// Runs the code language service operation.
+    /// </summary>
     public CodeLanguageService()
     {
         _profiles = BuildProfiles();
         _byId = _profiles.ToDictionary(profile => profile.Id, StringComparer.OrdinalIgnoreCase);
     }
 
+    /// <summary>
+    /// Gets profiles.
+    /// </summary>
     public IReadOnlyList<CodeLanguageProfile> GetProfiles() => _profiles;
+    /// <summary>
+    /// Runs the get operation.
+    /// </summary>
     public CodeLanguageProfile Get(string languageId) => _byId.GetValueOrDefault(languageId ?? string.Empty) ?? _byId["text"];
 
+    /// <summary>
+    /// Runs the detect operation.
+    /// </summary>
     public CodeLanguageProfile Detect(string fileNameOrExtension, string? content = null)
     {
         var extension = Path.GetExtension(fileNameOrExtension ?? string.Empty);

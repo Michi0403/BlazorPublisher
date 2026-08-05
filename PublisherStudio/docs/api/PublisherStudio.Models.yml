@@ -1,0 +1,25 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Models
+  commentId: N:PublisherStudio.Models
+  id: Models
+  parent: PublisherStudio
+  children:
+  - PublisherStudio.Models.SpreadsheetEditorViewModel
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.Models
+  nameWithType: PublisherStudio.Models
+  fullName: PublisherStudio.Models
+  type: Namespace
+  assemblies:
+  - PublisherStudio.Web
+references:
+- uid: PublisherStudio.Models.SpreadsheetEditorViewModel
+  commentId: T:PublisherStudio.Models.SpreadsheetEditorViewModel
+  isExternal: true
+  href: PublisherStudio.Models.SpreadsheetEditorViewModel.html
+  name: SpreadsheetEditorViewModel
+  nameWithType: SpreadsheetEditorViewModel
+  fullName: PublisherStudio.Models.SpreadsheetEditorViewModel

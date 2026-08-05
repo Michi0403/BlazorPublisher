@@ -62,146 +62,29 @@ function Get-ProjectVersion {
     return [string]$version[0]
 }
 
-function Write-ReleaseManifest {
-    param(
-        [Parameter(Mandatory)][string]$OutputRoot,
-        [Parameter(Mandatory)][string]$PayloadKind,
-        [Parameter(Mandatory)][string]$Executable,
-        [Parameter(Mandatory)][string]$Version
-    )
-    $files = @(
-        Get-ChildItem -LiteralPath $OutputRoot -File -Recurse |
-            Where-Object { -not [string]::Equals($_.Name, 'publisherstudio-release.json', [StringComparison]::OrdinalIgnoreCase) } |
-            Sort-Object FullName |
-            ForEach-Object {
-                $relativePath = $_.FullName.Substring($OutputRoot.Length).TrimStart([char[]]"\/").Replace('\', '/')
-                [ordered]@{
-                    Path = $relativePath
-                    Length = [long]$_.Length
-                    Sha256 = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash
-                }
-            }
-    )
-    if ($files.Count -eq 0) { throw "Cannot create an empty PublisherStudio $PayloadKind release manifest." }
-    if (-not ($files.Path -contains $Executable)) { throw "PublisherStudio $PayloadKind manifest does not contain executable $Executable." }
-
-    $manifest = [ordered]@{
-        SchemaVersion = 2
-        Product = 'PublisherStudio'
-        Version = $Version
-        RuntimeIdentifier = $Runtime
-        PayloadKind = $PayloadKind
-        Executable = $Executable
-        WireProtocolVersion = $WireProtocolVersion
-        CreatedUtc = [DateTimeOffset]::UtcNow.ToString('O')
-        Files = $files
-    }
-    $manifest | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $OutputRoot 'publisherstudio-release.json') -Encoding UTF8
-}
-
-function Write-BootstrapRepairManifest {
-    param(
-        [Parameter(Mandatory)][string]$SetupRoot,
-        [Parameter(Mandatory)][string]$Executable,
-        [Parameter(Mandatory)][string]$Version,
-        [Parameter(Mandatory)][string[]]$Files
-    )
-    $catalogue = @(
-        $Files | Sort-Object -Unique | ForEach-Object {
-            $path = Join-Path $SetupRoot $_
-            if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Launcher repair file is unavailable: $path" }
-            [ordered]@{
-                Path = $_.Replace('\', '/')
-                Length = [long](Get-Item -LiteralPath $path).Length
-                Sha256 = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash
-            }
-        }
-    )
-    $manifest = [ordered]@{
-        SchemaVersion = 2
-        Product = 'PublisherStudio'
-        Version = $Version
-        RuntimeIdentifier = $Runtime
-        PayloadKind = 'SetupRepair'
-        Executable = $Executable
-        WireProtocolVersion = $WireProtocolVersion
-        CreatedUtc = [DateTimeOffset]::UtcNow.ToString('O')
-        Files = $catalogue
-    }
-    $manifest | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $SetupRoot 'publisherstudio-bootstrap-repair.json') -Encoding UTF8
-}
-
-function New-ReleaseArchive {
-    param(
-        [Parameter(Mandatory)][string]$SourceRoot,
-        [Parameter(Mandatory)][string]$ArchivePath,
-        [Parameter(Mandatory)][string]$RootFolderName,
-        [string]$LastFile = "",
-        [string]$PreludeRoot = "",
-        [string]$PreludeFolderName = "",
-        [string[]]$PreludeFiles = @()
-    )
-
-    Add-Type -AssemblyName System.IO.Compression -ErrorAction SilentlyContinue
-    Add-Type -AssemblyName System.IO.Compression.FileSystem -ErrorAction SilentlyContinue
-    Remove-Item -LiteralPath $ArchivePath -Force -ErrorAction SilentlyContinue
-    $files = @(Get-ChildItem -LiteralPath $SourceRoot -File -Recurse | Sort-Object FullName)
-    if (-not [string]::IsNullOrWhiteSpace($LastFile)) {
-        $lastPath = Join-Path $SourceRoot $LastFile
-        $files = @($files | Where-Object { -not [string]::Equals($_.FullName, $lastPath, [StringComparison]::OrdinalIgnoreCase) }) + @($files | Where-Object { [string]::Equals($_.FullName, $lastPath, [StringComparison]::OrdinalIgnoreCase) })
-    }
-
-    $stream = [IO.File]::Open($ArchivePath, [IO.FileMode]::CreateNew, [IO.FileAccess]::ReadWrite, [IO.FileShare]::None)
-    try {
-        $archive = [IO.Compression.ZipArchive]::new($stream, [IO.Compression.ZipArchiveMode]::Create, $false)
-        try {
-            if (-not [string]::IsNullOrWhiteSpace($PreludeRoot) -and $PreludeFiles.Count -gt 0) {
-                if ([string]::IsNullOrWhiteSpace($PreludeFolderName)) { throw 'PreludeFolderName is required when PreludeFiles are supplied.' }
-                foreach ($relative in $PreludeFiles) {
-                    $preludePath = Join-Path $PreludeRoot $relative
-                    if (-not (Test-Path -LiteralPath $preludePath -PathType Leaf)) { throw "Release archive prelude file is unavailable: $preludePath" }
-                    $entryName = "$PreludeFolderName/$($relative.Replace('\', '/'))"
-                    [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, $preludePath, $entryName, [IO.Compression.CompressionLevel]::Optimal) | Out-Null
-                }
-            }
-            foreach ($file in $files) {
-                $relative = $file.FullName.Substring($SourceRoot.Length).TrimStart([char[]]"\/").Replace('\', '/')
-                $entryName = "$RootFolderName/$relative"
-                [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, $file.FullName, $entryName, [IO.Compression.CompressionLevel]::Optimal) | Out-Null
-            }
-        }
-        finally { $archive.Dispose() }
-    }
-    finally { $stream.Dispose() }
-}
-
 function Assert-ReleaseArchiveLayout {
     param(
         [Parameter(Mandatory)][string]$ArchivePath,
         [Parameter(Mandatory)][string]$RootFolderName,
-        [Parameter(Mandatory)][string]$Executable,
-        [string]$AllowedAdditionalRoot = ""
+        [Parameter(Mandatory)][string]$Executable
     )
+
     Add-Type -AssemblyName System.IO.Compression.FileSystem
     $archive = [IO.Compression.ZipFile]::OpenRead($ArchivePath)
     try {
         $names = @($archive.Entries | ForEach-Object { $_.FullName.Replace('\','/').TrimStart('/') })
         $expectedExecutable = "$RootFolderName/$Executable"
-        $expectedManifest = "$RootFolderName/publisherstudio-release.json"
-        if (-not ($names -contains $expectedExecutable)) { throw "Release archive does not preserve the legacy-compatible $expectedExecutable layout: $ArchivePath" }
-        if (-not ($names -contains $expectedManifest)) { throw "Release archive is missing ${expectedManifest}: $ArchivePath" }
-        if (-not [string]::IsNullOrWhiteSpace($AllowedAdditionalRoot)) {
-            $repairExecutable = "$AllowedAdditionalRoot/PublisherStudio.Setup.repair.exe"
-            $repairManifest = "$AllowedAdditionalRoot/publisherstudio-bootstrap-repair.json"
-            if (-not ($names -contains $repairExecutable) -or -not ($names -contains $repairManifest)) { throw "Release archive is missing the existing-launcher repair prelude: $ArchivePath" }
-            if ([Array]::IndexOf($names, $repairExecutable) -gt [Array]::IndexOf($names, $expectedExecutable)) { throw "Launcher repair executable must be archived before the application executable: $ArchivePath" }
+        if (-not ($names -contains $expectedExecutable)) {
+            throw "Release archive does not contain ${expectedExecutable}: $ArchivePath"
         }
         foreach ($name in $names) {
             if ([string]::IsNullOrWhiteSpace($name)) { continue }
-            $inPrimaryRoot = $name.StartsWith("$RootFolderName/", [StringComparison]::OrdinalIgnoreCase)
-            $inAdditionalRoot = -not [string]::IsNullOrWhiteSpace($AllowedAdditionalRoot) -and $name.StartsWith("$AllowedAdditionalRoot/", [StringComparison]::OrdinalIgnoreCase)
-            if (-not $inPrimaryRoot -and -not $inAdditionalRoot) { throw "Release archive entry '$name' escapes expected wrappers '$RootFolderName' and '$AllowedAdditionalRoot'." }
-            if ($name.StartsWith('/') -or $name.Split('/') -contains '..') { throw "Unsafe archive path '$name' in $ArchivePath" }
+            if (-not $name.StartsWith("$RootFolderName/", [StringComparison]::OrdinalIgnoreCase)) {
+                throw "Release archive entry '$name' escapes expected wrapper '$RootFolderName'."
+            }
+            if ($name.StartsWith('/') -or $name.Split('/') -contains '..') {
+                throw "Unsafe archive path '$name' in $ArchivePath"
+            }
         }
     }
     finally { $archive.Dispose() }
@@ -308,16 +191,6 @@ $setupExecutable = if ($Runtime.StartsWith("win-")) { "PublisherStudio.Setup.exe
 if (-not (Test-Path (Join-Path $appFolder $appExecutable))) { throw "Published application executable not found: $(Join-Path $appFolder $appExecutable)" }
 if (-not (Test-Path (Join-Path $setupFolder $setupExecutable))) { throw "Published setup executable not found: $(Join-Path $setupFolder $setupExecutable)" }
 
-# Existing installed launchers can be running from setupwin*/PublisherStudio.Setup.exe while
-# they extract a new release. Windows will not overwrite that active executable. The repair
-# copy is catalogued and extracted before the locked executable; updated launchers promote it
-# atomically on their next invocation.
-$setupRepairExecutable = ""
-if ($Runtime.StartsWith("win-")) {
-    $setupRepairExecutable = "PublisherStudio.Setup.repair.exe"
-    Copy-Item -LiteralPath (Join-Path $setupFolder $setupExecutable) -Destination (Join-Path $setupFolder $setupRepairExecutable) -Force
-}
-
 $protocolAppDirectory = Join-Path $appFolder "protocol"
 $protocolSetupDirectory = Join-Path $setupFolder "protocol"
 New-Item -ItemType Directory -Path $protocolAppDirectory, $protocolSetupDirectory -Force | Out-Null
@@ -325,8 +198,8 @@ Copy-Item $wireProtocolPackage (Join-Path $protocolAppDirectory $wireProtocolPac
 Copy-Item $wireProtocolPackage (Join-Path $protocolSetupDirectory $wireProtocolPackageName) -Force
 Copy-Item $wireProtocolPackage (Join-Path $artifacts $wireProtocolPackageName) -Force
 
-# Keep the repository-owned icon explicit in both publish outputs so desktop and Start-menu
-# shortcuts never depend on incidental SDK Content-item behavior.
+# Keep the repository-owned icon explicit in both publish outputs so Desktop and Start Menu
+# shortcuts use the same PublisherStudio artwork regardless of SDK content-item behavior.
 $publisherIcon = Join-Path $root "assets\PublisherStudio.ico"
 if (-not (Test-Path -LiteralPath $publisherIcon -PathType Leaf)) {
     throw "PublisherStudio release icon is unavailable: $publisherIcon"
@@ -334,29 +207,15 @@ if (-not (Test-Path -LiteralPath $publisherIcon -PathType Leaf)) {
 Copy-Item -LiteralPath $publisherIcon -Destination (Join-Path $setupFolder "PublisherStudio.ico") -Force
 Copy-Item -LiteralPath $publisherIcon -Destination (Join-Path $appFolder "PublisherStudio.ico") -Force
 
-$requiredSetupFiles = @("Default.cmd", "Install.cmd", "Update.cmd", "Start.cmd", "Start-NoBrowser.cmd", "Check-FFmpeg.cmd", "Install-FFmpeg.cmd", "Uninstall.cmd", "PublisherStudio.ico")
+$requiredSetupFiles = @("Install.cmd", "Update.cmd", "Start.cmd", "PublisherStudio.ico")
 $missingSetupFiles = @($requiredSetupFiles | Where-Object { -not (Test-Path (Join-Path $setupFolder $_)) })
 if ($missingSetupFiles.Count -gt 0) { throw "Published setup is incomplete. Missing: $($missingSetupFiles -join ', ')" }
 
-$bootstrapRepairFiles = @()
-if ($Runtime.StartsWith("win-")) {
-    $bootstrapRepairFiles = @($requiredSetupFiles + $setupRepairExecutable | Sort-Object -Unique)
-    Write-BootstrapRepairManifest -SetupRoot $setupFolder -Executable $setupRepairExecutable -Version $setupVersion -Files $bootstrapRepairFiles
-    $bootstrapRepairFiles += 'publisherstudio-bootstrap-repair.json'
-}
-
-Write-ReleaseManifest -OutputRoot $appFolder -PayloadKind 'Application' -Executable $appExecutable -Version $appVersion
-Write-ReleaseManifest -OutputRoot $setupFolder -PayloadKind 'Setup' -Executable $setupExecutable -Version $setupVersion
-
-if ($Runtime.StartsWith("win-")) {
-    New-ReleaseArchive -SourceRoot $appFolder -ArchivePath $appZip -RootFolderName $profile.AppFolder -LastFile $appExecutable -PreludeRoot $setupFolder -PreludeFolderName $profile.SetupFolder -PreludeFiles $bootstrapRepairFiles
-    Assert-ReleaseArchiveLayout -ArchivePath $appZip -RootFolderName $profile.AppFolder -Executable $appExecutable -AllowedAdditionalRoot $profile.SetupFolder
-}
-else {
-    New-ReleaseArchive -SourceRoot $appFolder -ArchivePath $appZip -RootFolderName $profile.AppFolder
-    Assert-ReleaseArchiveLayout -ArchivePath $appZip -RootFolderName $profile.AppFolder -Executable $appExecutable
-}
-New-ReleaseArchive -SourceRoot $setupFolder -ArchivePath $setupZip -RootFolderName $profile.SetupFolder -LastFile $setupExecutable
+# Match the working LocalGPT deployment contract: each archive keeps its runtime wrapper,
+# and setup extracts both archives into one product-owned LOCALAPPDATA root.
+Compress-Archive -Path $appFolder -DestinationPath $appZip -CompressionLevel Optimal -Force
+Compress-Archive -Path $setupFolder -DestinationPath $setupZip -CompressionLevel Optimal -Force
+Assert-ReleaseArchiveLayout -ArchivePath $appZip -RootFolderName $profile.AppFolder -Executable $appExecutable
 Assert-ReleaseArchiveLayout -ArchivePath $setupZip -RootFolderName $profile.SetupFolder -Executable $setupExecutable
 Write-Host "Release assets:" -ForegroundColor Green
 Write-Host "  $appZip"

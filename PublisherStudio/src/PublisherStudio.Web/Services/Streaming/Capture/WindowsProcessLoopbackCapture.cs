@@ -1,27 +1,42 @@
-using PublisherStudio.Services.Configuration;
+﻿using PublisherStudio.Services.Configuration;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
 namespace PublisherStudio.Services.Streaming.Capture;
 
+/// <summary>
+/// Defines the windows process loopback capture contract.
+/// </summary>
 public interface IWindowsProcessLoopbackCapture : IDisposable
 {
     void Start();
 }
 
+/// <summary>
+/// Defines the windows process loopback capture factory contract.
+/// </summary>
 public interface IWindowsProcessLoopbackCaptureFactory
 {
     IWindowsProcessLoopbackCapture Create(uint processId, Stream destination, CancellationToken cancellationToken);
 }
 
+/// <summary>
+/// Provides windows process loopback capture factory operations.
+/// </summary>
 public sealed class WindowsProcessLoopbackCaptureFactory(
     IWindowsProcessLoopbackNativeService nativeService,
     IPublisherRuntimePolicyDataService runtimePolicy,
     ILoggerFactory loggerFactory,
     ILogger<WindowsProcessLoopbackCaptureFactory> logger) : IWindowsProcessLoopbackCaptureFactory
 {
+    /// <summary>
+    /// Runs the create operation.
+    /// </summary>
     public IWindowsProcessLoopbackCapture Create(uint processId, Stream destination, CancellationToken cancellationToken)
     {
+        if (!OperatingSystem.IsWindows())
+            throw new PlatformNotSupportedException("Process audio loopback is available only on Windows.");
+
         try
         {
             logger.LogTrace("Creating Windows process loopback capture for process {ProcessId}.", processId);
@@ -70,6 +85,9 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
     private Exception? _startupError;
     private bool _disposed;
 
+    /// <summary>
+    /// Runs the windows process loopback capture operation.
+    /// </summary>
     public WindowsProcessLoopbackCapture(
         uint processId,
         Stream destination,
@@ -94,6 +112,9 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
         };
     }
 
+    /// <summary>
+    /// Runs the start operation.
+    /// </summary>
     public void Start()
     {
         _thread.Start();
@@ -249,6 +270,9 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
         try { Marshal.FinalReleaseComObject(value); } catch { }
     }
 
+    /// <summary>
+    /// Runs the dispose operation.
+    /// </summary>
     public void Dispose()
     {
         if (_disposed) return;
@@ -264,6 +288,9 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
     {
         private readonly TaskCompletionSource<IAudioClient> _completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
+        /// <summary>
+        /// Runs the activate completed operation.
+        /// </summary>
         public int ActivateCompleted(IActivateAudioInterfaceAsyncOperation operation)
         {
             try
@@ -276,6 +303,9 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
             return 0;
         }
 
+        /// <summary>
+        /// Runs the wait operation.
+        /// </summary>
         public IAudioClient Wait(TimeSpan timeout)
         {
             if (!_completion.Task.Wait(timeout)) throw new TimeoutException("Windows process audio activation timed out.");
@@ -286,40 +316,85 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
     [StructLayout(LayoutKind.Sequential)]
     private struct AudioClientActivationParams
     {
+        /// <summary>
+        /// Stores activation type.
+        /// </summary>
         public int ActivationType;
+        /// <summary>
+        /// Stores process loopback params.
+        /// </summary>
         public AudioClientProcessLoopbackParams ProcessLoopbackParams;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     private struct AudioClientProcessLoopbackParams
     {
+        /// <summary>
+        /// Stores target process identifier.
+        /// </summary>
         public uint TargetProcessId;
+        /// <summary>
+        /// Stores process loopback mode.
+        /// </summary>
         public int ProcessLoopbackMode;
     }
 
     [StructLayout(LayoutKind.Explicit)]
     private struct PropVariant
     {
+        /// <summary>
+        /// Stores variant type.
+        /// </summary>
         [FieldOffset(0)] public ushort VariantType;
+        /// <summary>
+        /// Stores blob.
+        /// </summary>
         [FieldOffset(8)] public Blob Blob;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     private struct Blob
     {
+        /// <summary>
+        /// Stores size.
+        /// </summary>
         public uint Size;
+        /// <summary>
+        /// Stores data.
+        /// </summary>
         public IntPtr Data;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 2)]
     private struct WaveFormatEx
     {
+        /// <summary>
+        /// Stores format tag.
+        /// </summary>
         public ushort FormatTag;
+        /// <summary>
+        /// Stores channels.
+        /// </summary>
         public ushort Channels;
+        /// <summary>
+        /// Stores samples per sec.
+        /// </summary>
         public uint SamplesPerSec;
+        /// <summary>
+        /// Stores avg bytes per sec.
+        /// </summary>
         public uint AvgBytesPerSec;
+        /// <summary>
+        /// Stores block align.
+        /// </summary>
         public ushort BlockAlign;
+        /// <summary>
+        /// Stores bits per sample.
+        /// </summary>
         public ushort BitsPerSample;
+        /// <summary>
+        /// Stores size.
+        /// </summary>
         public ushort Size;
     }
 

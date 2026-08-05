@@ -1,0 +1,134 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationContentFitMode
+  commentId: T:PublisherStudio.BusinessObjects.PublicationContentFitMode
+  id: PublicationContentFitMode
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationContentFitMode.Clip
+  - PublisherStudio.BusinessObjects.PublicationContentFitMode.Fill
+  - PublisherStudio.BusinessObjects.PublicationContentFitMode.Fit
+  - PublisherStudio.BusinessObjects.PublicationContentFitMode.Stretch
+  langs:
+  - csharp
+  - vb
+  name: PublicationContentFitMode
+  nameWithType: PublicationContentFitMode
+  fullName: PublisherStudio.BusinessObjects.PublicationContentFitMode
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication content fit mode values.
+  example: []
+  syntax:
+    content: public enum PublicationContentFitMode
+    content.vb: Public Enum PublicationContentFitMode
+- uid: PublisherStudio.BusinessObjects.PublicationContentFitMode.Clip
+  commentId: F:PublisherStudio.BusinessObjects.PublicationContentFitMode.Clip
+  id: Clip
+  parent: PublisherStudio.BusinessObjects.PublicationContentFitMode
+  langs:
+  - csharp
+  - vb
+  name: Clip
+  nameWithType: PublicationContentFitMode.Clip
+  fullName: PublisherStudio.BusinessObjects.PublicationContentFitMode.Clip
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Clip = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationContentFitMode
+- uid: PublisherStudio.BusinessObjects.PublicationContentFitMode.Fit
+  commentId: F:PublisherStudio.BusinessObjects.PublicationContentFitMode.Fit
+  id: Fit
+  parent: PublisherStudio.BusinessObjects.PublicationContentFitMode
+  langs:
+  - csharp
+  - vb
+  name: Fit
+  nameWithType: PublicationContentFitMode.Fit
+  fullName: PublisherStudio.BusinessObjects.PublicationContentFitMode.Fit
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Fit = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationContentFitMode
+- uid: PublisherStudio.BusinessObjects.PublicationContentFitMode.Fill
+  commentId: F:PublisherStudio.BusinessObjects.PublicationContentFitMode.Fill
+  id: Fill
+  parent: PublisherStudio.BusinessObjects.PublicationContentFitMode
+  langs:
+  - csharp
+  - vb
+  name: Fill
+  nameWithType: PublicationContentFitMode.Fill
+  fullName: PublisherStudio.BusinessObjects.PublicationContentFitMode.Fill
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Fill = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationContentFitMode
+- uid: PublisherStudio.BusinessObjects.PublicationContentFitMode.Stretch
+  commentId: F:PublisherStudio.BusinessObjects.PublicationContentFitMode.Stretch
+  id: Stretch
+  parent: PublisherStudio.BusinessObjects.PublicationContentFitMode
+  langs:
+  - csharp
+  - vb
+  name: Stretch
+  nameWithType: PublicationContentFitMode.Stretch
+  fullName: PublisherStudio.BusinessObjects.PublicationContentFitMode.Stretch
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Stretch = 3
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationContentFitMode
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationContentFitMode
+  commentId: T:PublisherStudio.BusinessObjects.PublicationContentFitMode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationContentFitMode.html
+  name: PublicationContentFitMode
+  nameWithType: PublicationContentFitMode
+  fullName: PublisherStudio.BusinessObjects.PublicationContentFitMode

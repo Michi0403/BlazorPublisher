@@ -1,0 +1,166 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Streaming.Sessions.IPlatformChatServiceFactory
+  commentId: T:PublisherStudio.Services.Streaming.Sessions.IPlatformChatServiceFactory
+  id: IPlatformChatServiceFactory
+  parent: PublisherStudio.Services.Streaming.Sessions
+  children:
+  - PublisherStudio.Services.Streaming.Sessions.IPlatformChatServiceFactory.Create(PublisherStudio.Services.Streaming.Sessions.MediaSession)
+  langs:
+  - csharp
+  - vb
+  name: IPlatformChatServiceFactory
+  nameWithType: IPlatformChatServiceFactory
+  fullName: PublisherStudio.Services.Streaming.Sessions.IPlatformChatServiceFactory
+  type: Interface
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Defines the platform chat service factory contract.
+  example: []
+  syntax:
+    content: public interface IPlatformChatServiceFactory
+    content.vb: Public Interface IPlatformChatServiceFactory
+  derivedClasses:
+  - PublisherStudio.Services.Streaming.Sessions.PlatformChatServiceFactory
+- uid: PublisherStudio.Services.Streaming.Sessions.IPlatformChatServiceFactory.Create(PublisherStudio.Services.Streaming.Sessions.MediaSession)
+  commentId: M:PublisherStudio.Services.Streaming.Sessions.IPlatformChatServiceFactory.Create(PublisherStudio.Services.Streaming.Sessions.MediaSession)
+  id: Create(PublisherStudio.Services.Streaming.Sessions.MediaSession)
+  parent: PublisherStudio.Services.Streaming.Sessions.IPlatformChatServiceFactory
+  langs:
+  - csharp
+  - vb
+  name: Create(MediaSession)
+  nameWithType: IPlatformChatServiceFactory.Create(MediaSession)
+  fullName: PublisherStudio.Services.Streaming.Sessions.IPlatformChatServiceFactory.Create(PublisherStudio.Services.Streaming.Sessions.MediaSession)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  syntax:
+    content: PlatformChatService Create(MediaSession session)
+    parameters:
+    - id: session
+      type: PublisherStudio.Services.Streaming.Sessions.MediaSession
+    return:
+      type: PublisherStudio.Services.Streaming.Chat.PlatformChatService
+    content.vb: Function Create(session As MediaSession) As PlatformChatService
+  overload: PublisherStudio.Services.Streaming.Sessions.IPlatformChatServiceFactory.Create*
+references:
+- uid: PublisherStudio.Services.Streaming.Sessions
+  commentId: N:PublisherStudio.Services.Streaming.Sessions
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Sessions
+  nameWithType: PublisherStudio.Services.Streaming.Sessions
+  fullName: PublisherStudio.Services.Streaming.Sessions
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Sessions
+    name: Sessions
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Sessions.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Sessions
+    name: Sessions
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Sessions.html
+- uid: PublisherStudio.Services.Streaming.Sessions.IPlatformChatServiceFactory.Create*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.IPlatformChatServiceFactory.Create
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.IPlatformChatServiceFactory.html#PublisherStudio_Services_Streaming_Sessions_IPlatformChatServiceFactory_Create_PublisherStudio_Services_Streaming_Sessions_MediaSession_
+  name: Create
+  nameWithType: IPlatformChatServiceFactory.Create
+  fullName: PublisherStudio.Services.Streaming.Sessions.IPlatformChatServiceFactory.Create
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  commentId: T:PublisherStudio.Services.Streaming.Sessions.MediaSession
+  parent: PublisherStudio.Services.Streaming.Sessions
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html
+  name: MediaSession
+  nameWithType: MediaSession
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession
+- uid: PublisherStudio.Services.Streaming.Chat.PlatformChatService
+  commentId: T:PublisherStudio.Services.Streaming.Chat.PlatformChatService
+  parent: PublisherStudio.Services.Streaming.Chat
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Chat.PlatformChatService.html
+  name: PlatformChatService
+  nameWithType: PlatformChatService
+  fullName: PublisherStudio.Services.Streaming.Chat.PlatformChatService
+- uid: PublisherStudio.Services.Streaming.Chat
+  commentId: N:PublisherStudio.Services.Streaming.Chat
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Chat
+  nameWithType: PublisherStudio.Services.Streaming.Chat
+  fullName: PublisherStudio.Services.Streaming.Chat
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Chat
+    name: Chat
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Chat.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Chat
+    name: Chat
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Chat.html

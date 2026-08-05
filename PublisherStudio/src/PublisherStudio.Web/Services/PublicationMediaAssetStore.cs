@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using PublisherStudio.BusinessObjects;
 
@@ -18,6 +18,9 @@ public sealed class PublicationMediaAssetStore(
 
     private readonly ConcurrentDictionary<Guid, MediaAsset> _assets = new();
 
+    /// <summary>
+    /// Gets or register.
+    /// </summary>
     public string GetOrRegister(PublicationMediaElement media)
     {
         try
@@ -36,6 +39,9 @@ public sealed class PublicationMediaAssetStore(
         }
     }
 
+    /// <summary>
+    /// Gets or register.
+    /// </summary>
     public string GetOrRegister(PublicationMediaSegment segment)
         {
             try
@@ -50,6 +56,9 @@ public sealed class PublicationMediaAssetStore(
             }
         }
 
+    /// <summary>
+    /// Runs the register operation.
+    /// </summary>
     public string Register(Guid id, string? source, string? declaredMimeType)
     {
         try
@@ -76,6 +85,9 @@ public sealed class PublicationMediaAssetStore(
         }
     }
 
+    /// <summary>
+    /// Registers bytes.
+    /// </summary>
     public string RegisterBytes(Guid id, byte[] bytes, string? mimeType)
         {
             try
@@ -111,6 +123,9 @@ public sealed class PublicationMediaAssetStore(
         }
     }
 
+    /// <summary>
+    /// Attempts to get.
+    /// </summary>
     public bool TryGet(Guid id, out byte[] bytes, out string mimeType, out string version)
     {
         try
@@ -138,6 +153,9 @@ public sealed class PublicationMediaAssetStore(
         }
     }
 
+    /// <summary>
+    /// Runs the copy operation.
+    /// </summary>
     public bool Copy(Guid sourceId, Guid targetId)
     {
         try
@@ -155,6 +173,9 @@ public sealed class PublicationMediaAssetStore(
         }
     }
 
+    /// <summary>
+    /// Registers document.
+    /// </summary>
     public void RegisterDocument(PublicationDocument document)
     {
         try
@@ -174,6 +195,9 @@ public sealed class PublicationMediaAssetStore(
         }
     }
 
+    /// <summary>
+    /// Runs the remove operation.
+    /// </summary>
     public void Remove(Guid id) {
         try
         {

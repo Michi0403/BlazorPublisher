@@ -1,0 +1,115 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.ImageMaskShape
+  commentId: T:PublisherStudio.BusinessObjects.ImageMaskShape
+  id: ImageMaskShape
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.ImageMaskShape.Ellipse
+  - PublisherStudio.BusinessObjects.ImageMaskShape.Rectangle
+  - PublisherStudio.BusinessObjects.ImageMaskShape.RoundedRectangle
+  langs:
+  - csharp
+  - vb
+  name: ImageMaskShape
+  nameWithType: ImageMaskShape
+  fullName: PublisherStudio.BusinessObjects.ImageMaskShape
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported image mask shape values.
+  example: []
+  syntax:
+    content: public enum ImageMaskShape
+    content.vb: Public Enum ImageMaskShape
+- uid: PublisherStudio.BusinessObjects.ImageMaskShape.Rectangle
+  commentId: F:PublisherStudio.BusinessObjects.ImageMaskShape.Rectangle
+  id: Rectangle
+  parent: PublisherStudio.BusinessObjects.ImageMaskShape
+  langs:
+  - csharp
+  - vb
+  name: Rectangle
+  nameWithType: ImageMaskShape.Rectangle
+  fullName: PublisherStudio.BusinessObjects.ImageMaskShape.Rectangle
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Rectangle = 0
+    return:
+      type: PublisherStudio.BusinessObjects.ImageMaskShape
+- uid: PublisherStudio.BusinessObjects.ImageMaskShape.RoundedRectangle
+  commentId: F:PublisherStudio.BusinessObjects.ImageMaskShape.RoundedRectangle
+  id: RoundedRectangle
+  parent: PublisherStudio.BusinessObjects.ImageMaskShape
+  langs:
+  - csharp
+  - vb
+  name: RoundedRectangle
+  nameWithType: ImageMaskShape.RoundedRectangle
+  fullName: PublisherStudio.BusinessObjects.ImageMaskShape.RoundedRectangle
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: RoundedRectangle = 1
+    return:
+      type: PublisherStudio.BusinessObjects.ImageMaskShape
+- uid: PublisherStudio.BusinessObjects.ImageMaskShape.Ellipse
+  commentId: F:PublisherStudio.BusinessObjects.ImageMaskShape.Ellipse
+  id: Ellipse
+  parent: PublisherStudio.BusinessObjects.ImageMaskShape
+  langs:
+  - csharp
+  - vb
+  name: Ellipse
+  nameWithType: ImageMaskShape.Ellipse
+  fullName: PublisherStudio.BusinessObjects.ImageMaskShape.Ellipse
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Ellipse = 2
+    return:
+      type: PublisherStudio.BusinessObjects.ImageMaskShape
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.ImageMaskShape
+  commentId: T:PublisherStudio.BusinessObjects.ImageMaskShape
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ImageMaskShape.html
+  name: ImageMaskShape
+  nameWithType: ImageMaskShape
+  fullName: PublisherStudio.BusinessObjects.ImageMaskShape

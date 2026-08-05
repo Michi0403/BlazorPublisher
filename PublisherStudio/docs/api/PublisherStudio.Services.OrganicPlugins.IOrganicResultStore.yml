@@ -1,0 +1,460 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore
+  commentId: T:PublisherStudio.Services.OrganicPlugins.IOrganicResultStore
+  id: IOrganicResultStore
+  parent: PublisherStudio.Services.OrganicPlugins
+  children:
+  - PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.AddTextProposal(PublisherStudio.BusinessObjects.OrganicTextInsertionProposal)
+  - PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.Changed
+  - PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.GetResults
+  - PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.GetTextProposals
+  - PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.RecordEnvelope(LocalGPT.WireProtocol.OneWireEnvelope)
+  - PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.RemoveTextProposal(System.Guid)
+  langs:
+  - csharp
+  - vb
+  name: IOrganicResultStore
+  nameWithType: IOrganicResultStore
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore
+  type: Interface
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Defines the organic result store contract.
+  example: []
+  syntax:
+    content: public interface IOrganicResultStore
+    content.vb: Public Interface IOrganicResultStore
+  derivedClasses:
+  - PublisherStudio.Services.OrganicPlugins.OrganicResultStore
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.GetResults
+  commentId: M:PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.GetResults
+  id: GetResults
+  parent: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore
+  langs:
+  - csharp
+  - vb
+  name: GetResults()
+  nameWithType: IOrganicResultStore.GetResults()
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.GetResults()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  syntax:
+    content: IReadOnlyList<OrganicPluginWorkItem> GetResults()
+    return:
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.OrganicPluginWorkItem}
+    content.vb: Function GetResults() As IReadOnlyList(Of OrganicPluginWorkItem)
+  overload: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.GetResults*
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.RecordEnvelope(LocalGPT.WireProtocol.OneWireEnvelope)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.RecordEnvelope(LocalGPT.WireProtocol.OneWireEnvelope)
+  id: RecordEnvelope(LocalGPT.WireProtocol.OneWireEnvelope)
+  parent: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore
+  langs:
+  - csharp
+  - vb
+  name: RecordEnvelope(OneWireEnvelope)
+  nameWithType: IOrganicResultStore.RecordEnvelope(OneWireEnvelope)
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.RecordEnvelope(LocalGPT.WireProtocol.OneWireEnvelope)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  syntax:
+    content: void RecordEnvelope(OneWireEnvelope envelope)
+    parameters:
+    - id: envelope
+      type: LocalGPT.WireProtocol.OneWireEnvelope
+    content.vb: Sub RecordEnvelope(envelope As OneWireEnvelope)
+  overload: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.RecordEnvelope*
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.AddTextProposal(PublisherStudio.BusinessObjects.OrganicTextInsertionProposal)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.AddTextProposal(PublisherStudio.BusinessObjects.OrganicTextInsertionProposal)
+  id: AddTextProposal(PublisherStudio.BusinessObjects.OrganicTextInsertionProposal)
+  parent: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore
+  langs:
+  - csharp
+  - vb
+  name: AddTextProposal(OrganicTextInsertionProposal)
+  nameWithType: IOrganicResultStore.AddTextProposal(OrganicTextInsertionProposal)
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.AddTextProposal(PublisherStudio.BusinessObjects.OrganicTextInsertionProposal)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  syntax:
+    content: void AddTextProposal(OrganicTextInsertionProposal proposal)
+    parameters:
+    - id: proposal
+      type: PublisherStudio.BusinessObjects.OrganicTextInsertionProposal
+    content.vb: Sub AddTextProposal(proposal As OrganicTextInsertionProposal)
+  overload: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.AddTextProposal*
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.GetTextProposals
+  commentId: M:PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.GetTextProposals
+  id: GetTextProposals
+  parent: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore
+  langs:
+  - csharp
+  - vb
+  name: GetTextProposals()
+  nameWithType: IOrganicResultStore.GetTextProposals()
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.GetTextProposals()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  syntax:
+    content: IReadOnlyList<OrganicTextInsertionProposal> GetTextProposals()
+    return:
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.OrganicTextInsertionProposal}
+    content.vb: Function GetTextProposals() As IReadOnlyList(Of OrganicTextInsertionProposal)
+  overload: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.GetTextProposals*
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.RemoveTextProposal(System.Guid)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.RemoveTextProposal(System.Guid)
+  id: RemoveTextProposal(System.Guid)
+  parent: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore
+  langs:
+  - csharp
+  - vb
+  name: RemoveTextProposal(Guid)
+  nameWithType: IOrganicResultStore.RemoveTextProposal(Guid)
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.RemoveTextProposal(System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  syntax:
+    content: bool RemoveTextProposal(Guid id)
+    parameters:
+    - id: id
+      type: System.Guid
+    return:
+      type: System.Boolean
+    content.vb: Function RemoveTextProposal(id As Guid) As Boolean
+  overload: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.RemoveTextProposal*
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.Changed
+  commentId: E:PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.Changed
+  id: Changed
+  parent: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore
+  langs:
+  - csharp
+  - vb
+  name: Changed
+  nameWithType: IOrganicResultStore.Changed
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.Changed
+  type: Event
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  syntax:
+    content: event Action? Changed
+    return:
+      type: System.Action
+    content.vb: Event Changed As Action
+references:
+- uid: PublisherStudio.Services.OrganicPlugins
+  commentId: N:PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.OrganicPlugins
+  nameWithType: PublisherStudio.Services.OrganicPlugins
+  fullName: PublisherStudio.Services.OrganicPlugins
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OrganicPlugins
+    name: OrganicPlugins
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OrganicPlugins
+    name: OrganicPlugins
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.html
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.GetResults*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.GetResults
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicResultStore_GetResults
+  name: GetResults
+  nameWithType: IOrganicResultStore.GetResults
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.GetResults
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.OrganicPluginWorkItem}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.OrganicPluginWorkItem}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<OrganicPluginWorkItem>
+  nameWithType: IReadOnlyList<OrganicPluginWorkItem>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.OrganicPluginWorkItem>
+  nameWithType.vb: IReadOnlyList(Of OrganicPluginWorkItem)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.OrganicPluginWorkItem)
+  name.vb: IReadOnlyList(Of OrganicPluginWorkItem)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.OrganicPluginWorkItem
+    name: OrganicPluginWorkItem
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.OrganicPluginWorkItem.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.OrganicPluginWorkItem
+    name: OrganicPluginWorkItem
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.OrganicPluginWorkItem.html
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.RecordEnvelope*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.RecordEnvelope
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicResultStore_RecordEnvelope_LocalGPT_WireProtocol_OneWireEnvelope_
+  name: RecordEnvelope
+  nameWithType: IOrganicResultStore.RecordEnvelope
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.RecordEnvelope
+- uid: LocalGPT.WireProtocol.OneWireEnvelope
+  commentId: T:LocalGPT.WireProtocol.OneWireEnvelope
+  parent: LocalGPT.WireProtocol
+  isExternal: true
+  name: OneWireEnvelope
+  nameWithType: OneWireEnvelope
+  fullName: LocalGPT.WireProtocol.OneWireEnvelope
+- uid: LocalGPT.WireProtocol
+  commentId: N:LocalGPT.WireProtocol
+  isExternal: true
+  name: LocalGPT.WireProtocol
+  nameWithType: LocalGPT.WireProtocol
+  fullName: LocalGPT.WireProtocol
+  spec.csharp:
+  - uid: LocalGPT
+    name: LocalGPT
+    isExternal: true
+  - name: .
+  - uid: LocalGPT.WireProtocol
+    name: WireProtocol
+    isExternal: true
+  spec.vb:
+  - uid: LocalGPT
+    name: LocalGPT
+    isExternal: true
+  - name: .
+  - uid: LocalGPT.WireProtocol
+    name: WireProtocol
+    isExternal: true
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.AddTextProposal*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.AddTextProposal
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicResultStore_AddTextProposal_PublisherStudio_BusinessObjects_OrganicTextInsertionProposal_
+  name: AddTextProposal
+  nameWithType: IOrganicResultStore.AddTextProposal
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.AddTextProposal
+- uid: PublisherStudio.BusinessObjects.OrganicTextInsertionProposal
+  commentId: T:PublisherStudio.BusinessObjects.OrganicTextInsertionProposal
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OrganicTextInsertionProposal.html
+  name: OrganicTextInsertionProposal
+  nameWithType: OrganicTextInsertionProposal
+  fullName: PublisherStudio.BusinessObjects.OrganicTextInsertionProposal
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.GetTextProposals*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.GetTextProposals
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicResultStore_GetTextProposals
+  name: GetTextProposals
+  nameWithType: IOrganicResultStore.GetTextProposals
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.GetTextProposals
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.OrganicTextInsertionProposal}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.OrganicTextInsertionProposal}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<OrganicTextInsertionProposal>
+  nameWithType: IReadOnlyList<OrganicTextInsertionProposal>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.OrganicTextInsertionProposal>
+  nameWithType.vb: IReadOnlyList(Of OrganicTextInsertionProposal)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.OrganicTextInsertionProposal)
+  name.vb: IReadOnlyList(Of OrganicTextInsertionProposal)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.OrganicTextInsertionProposal
+    name: OrganicTextInsertionProposal
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.OrganicTextInsertionProposal.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.OrganicTextInsertionProposal
+    name: OrganicTextInsertionProposal
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.OrganicTextInsertionProposal.html
+  - name: )
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.RemoveTextProposal*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.RemoveTextProposal
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicResultStore_RemoveTextProposal_System_Guid_
+  name: RemoveTextProposal
+  nameWithType: IOrganicResultStore.RemoveTextProposal
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicResultStore.RemoveTextProposal
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: System.Action
+  commentId: T:System.Action
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.action
+  name: Action
+  nameWithType: Action
+  fullName: System.Action

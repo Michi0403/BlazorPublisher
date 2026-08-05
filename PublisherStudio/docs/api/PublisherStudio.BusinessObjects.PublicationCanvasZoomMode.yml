@@ -1,0 +1,96 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationCanvasZoomMode
+  commentId: T:PublisherStudio.BusinessObjects.PublicationCanvasZoomMode
+  id: PublicationCanvasZoomMode
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationCanvasZoomMode.CssLayout
+  - PublisherStudio.BusinessObjects.PublicationCanvasZoomMode.Transform
+  langs:
+  - csharp
+  - vb
+  name: PublicationCanvasZoomMode
+  nameWithType: PublicationCanvasZoomMode
+  fullName: PublisherStudio.BusinessObjects.PublicationCanvasZoomMode
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication canvas zoom mode values.
+  example: []
+  syntax:
+    content: public enum PublicationCanvasZoomMode
+    content.vb: Public Enum PublicationCanvasZoomMode
+- uid: PublisherStudio.BusinessObjects.PublicationCanvasZoomMode.CssLayout
+  commentId: F:PublisherStudio.BusinessObjects.PublicationCanvasZoomMode.CssLayout
+  id: CssLayout
+  parent: PublisherStudio.BusinessObjects.PublicationCanvasZoomMode
+  langs:
+  - csharp
+  - vb
+  name: CssLayout
+  nameWithType: PublicationCanvasZoomMode.CssLayout
+  fullName: PublisherStudio.BusinessObjects.PublicationCanvasZoomMode.CssLayout
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: CssLayout = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationCanvasZoomMode
+- uid: PublisherStudio.BusinessObjects.PublicationCanvasZoomMode.Transform
+  commentId: F:PublisherStudio.BusinessObjects.PublicationCanvasZoomMode.Transform
+  id: Transform
+  parent: PublisherStudio.BusinessObjects.PublicationCanvasZoomMode
+  langs:
+  - csharp
+  - vb
+  name: Transform
+  nameWithType: PublicationCanvasZoomMode.Transform
+  fullName: PublisherStudio.BusinessObjects.PublicationCanvasZoomMode.Transform
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Transform = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationCanvasZoomMode
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationCanvasZoomMode
+  commentId: T:PublisherStudio.BusinessObjects.PublicationCanvasZoomMode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationCanvasZoomMode.html
+  name: PublicationCanvasZoomMode
+  nameWithType: PublicationCanvasZoomMode
+  fullName: PublisherStudio.BusinessObjects.PublicationCanvasZoomMode

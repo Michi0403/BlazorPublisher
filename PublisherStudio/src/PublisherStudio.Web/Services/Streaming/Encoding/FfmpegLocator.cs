@@ -1,13 +1,19 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Services.Streaming.Encoding;
 
+/// <summary>
+/// Represents a FFmpeg locator.
+/// </summary>
 public sealed class FfmpegLocator(
     IPublisherRuntimePolicyDataService runtimePolicy,
     ILogger<FfmpegLocator> logger)
 {
+    /// <summary>
+    /// Runs the resolve operation.
+    /// </summary>
     public string? Resolve(string? configuredPath = null)
     {
         try
@@ -52,6 +58,9 @@ public sealed class FfmpegLocator(
         }
     }
 
+    /// <summary>
+    /// Determines whether available.
+    /// </summary>
     public bool IsAvailable(string? configuredPath = null)
     {
         try
@@ -67,6 +76,9 @@ public sealed class FfmpegLocator(
         }
     }
 
+    /// <summary>
+    /// Reads version async.
+    /// </summary>
     public async Task<string?> ReadVersionAsync(string? configuredPath = null, CancellationToken cancellationToken = default)
     {
         try

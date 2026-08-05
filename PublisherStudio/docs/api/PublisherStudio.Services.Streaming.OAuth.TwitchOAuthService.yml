@@ -1,0 +1,1256 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService
+  commentId: T:PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService
+  id: TwitchOAuthService
+  parent: PublisherStudio.Services.Streaming.OAuth
+  children:
+  - PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.#ctor(System.Net.Http.IHttpClientFactory,PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore,Microsoft.Extensions.Configuration.IConfiguration,PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService)
+  - PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ApplyIngestCandidateAsync(System.Guid,PublisherStudio.BusinessObjects.TwitchIngestCandidate,System.Threading.CancellationToken)
+  - PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.CompleteDeviceAuthorizationAsync(System.Guid,PublisherStudio.BusinessObjects.TwitchDeviceAuthorization,System.Boolean,System.String,System.Threading.CancellationToken)
+  - PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.DefaultClientId
+  - PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.DisconnectAsync(System.Guid,System.Threading.CancellationToken)
+  - PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.EnsureValidAccessTokenAsync(System.Guid,System.Threading.CancellationToken)
+  - PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ResolveClientId(System.String)
+  - PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.StartDeviceAuthorizationAsync(System.String,System.Boolean,System.Threading.CancellationToken)
+  - PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.TestIngestEndpointsAsync(System.Threading.CancellationToken)
+  - PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ValidateProfileAsync(System.Guid,System.Threading.CancellationToken)
+  langs:
+  - csharp
+  - vb
+  name: TwitchOAuthService
+  nameWithType: TwitchOAuthService
+  fullName: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.OAuth
+  summary: Provides twitch OAuth service operations.
+  example: []
+  syntax:
+    content: public sealed class TwitchOAuthService
+    content.vb: Public NotInheritable Class TwitchOAuthService
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.#ctor(System.Net.Http.IHttpClientFactory,PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore,Microsoft.Extensions.Configuration.IConfiguration,PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService)
+  commentId: M:PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.#ctor(System.Net.Http.IHttpClientFactory,PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore,Microsoft.Extensions.Configuration.IConfiguration,PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService)
+  id: '#ctor(System.Net.Http.IHttpClientFactory,PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore,Microsoft.Extensions.Configuration.IConfiguration,PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService)'
+  parent: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService
+  langs:
+  - csharp
+  - vb
+  name: TwitchOAuthService(IHttpClientFactory, StreamingProfileStore, IConfiguration, IPublisherRuntimePolicyDataService)
+  nameWithType: TwitchOAuthService.TwitchOAuthService(IHttpClientFactory, StreamingProfileStore, IConfiguration, IPublisherRuntimePolicyDataService)
+  fullName: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.TwitchOAuthService(System.Net.Http.IHttpClientFactory, PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore, Microsoft.Extensions.Configuration.IConfiguration, PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.OAuth
+  summary: Runs the twitch OAuth service operation.
+  example: []
+  syntax:
+    content: public TwitchOAuthService(IHttpClientFactory httpClientFactory, StreamingProfileStore profiles, IConfiguration configuration, IPublisherRuntimePolicyDataService runtimePolicy)
+    parameters:
+    - id: httpClientFactory
+      type: System.Net.Http.IHttpClientFactory
+    - id: profiles
+      type: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore
+    - id: configuration
+      type: Microsoft.Extensions.Configuration.IConfiguration
+    - id: runtimePolicy
+      type: PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService
+    content.vb: Public Sub New(httpClientFactory As IHttpClientFactory, profiles As StreamingProfileStore, configuration As IConfiguration, runtimePolicy As IPublisherRuntimePolicyDataService)
+  overload: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.#ctor*
+  nameWithType.vb: TwitchOAuthService.New(IHttpClientFactory, StreamingProfileStore, IConfiguration, IPublisherRuntimePolicyDataService)
+  fullName.vb: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.New(System.Net.Http.IHttpClientFactory, PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore, Microsoft.Extensions.Configuration.IConfiguration, PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService)
+  name.vb: New(IHttpClientFactory, StreamingProfileStore, IConfiguration, IPublisherRuntimePolicyDataService)
+- uid: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ResolveClientId(System.String)
+  commentId: M:PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ResolveClientId(System.String)
+  id: ResolveClientId(System.String)
+  parent: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService
+  langs:
+  - csharp
+  - vb
+  name: ResolveClientId(string?)
+  nameWithType: TwitchOAuthService.ResolveClientId(string?)
+  fullName: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ResolveClientId(string?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.OAuth
+  summary: Resolves client identifier.
+  example: []
+  syntax:
+    content: public string ResolveClientId(string? profileClientId)
+    parameters:
+    - id: profileClientId
+      type: System.String
+    return:
+      type: System.String
+    content.vb: Public Function ResolveClientId(profileClientId As String) As String
+  overload: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ResolveClientId*
+  nameWithType.vb: TwitchOAuthService.ResolveClientId(String)
+  fullName.vb: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ResolveClientId(String)
+  name.vb: ResolveClientId(String)
+- uid: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.StartDeviceAuthorizationAsync(System.String,System.Boolean,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.StartDeviceAuthorizationAsync(System.String,System.Boolean,System.Threading.CancellationToken)
+  id: StartDeviceAuthorizationAsync(System.String,System.Boolean,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService
+  langs:
+  - csharp
+  - vb
+  name: StartDeviceAuthorizationAsync(string, bool, CancellationToken)
+  nameWithType: TwitchOAuthService.StartDeviceAuthorizationAsync(string, bool, CancellationToken)
+  fullName: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.StartDeviceAuthorizationAsync(string, bool, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.OAuth
+  summary: Starts device authorization async.
+  example: []
+  syntax:
+    content: public Task<TwitchDeviceAuthorization> StartDeviceAuthorizationAsync(string clientId, bool includeChat, CancellationToken cancellationToken = default)
+    parameters:
+    - id: clientId
+      type: System.String
+    - id: includeChat
+      type: System.Boolean
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.TwitchDeviceAuthorization}
+    content.vb: Public Function StartDeviceAuthorizationAsync(clientId As String, includeChat As Boolean, cancellationToken As CancellationToken = Nothing) As Task(Of TwitchDeviceAuthorization)
+  overload: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.StartDeviceAuthorizationAsync*
+  nameWithType.vb: TwitchOAuthService.StartDeviceAuthorizationAsync(String, Boolean, CancellationToken)
+  fullName.vb: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.StartDeviceAuthorizationAsync(String, Boolean, System.Threading.CancellationToken)
+  name.vb: StartDeviceAuthorizationAsync(String, Boolean, CancellationToken)
+- uid: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.CompleteDeviceAuthorizationAsync(System.Guid,PublisherStudio.BusinessObjects.TwitchDeviceAuthorization,System.Boolean,System.String,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.CompleteDeviceAuthorizationAsync(System.Guid,PublisherStudio.BusinessObjects.TwitchDeviceAuthorization,System.Boolean,System.String,System.Threading.CancellationToken)
+  id: CompleteDeviceAuthorizationAsync(System.Guid,PublisherStudio.BusinessObjects.TwitchDeviceAuthorization,System.Boolean,System.String,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService
+  langs:
+  - csharp
+  - vb
+  name: CompleteDeviceAuthorizationAsync(Guid, TwitchDeviceAuthorization, bool, string, CancellationToken)
+  nameWithType: TwitchOAuthService.CompleteDeviceAuthorizationAsync(Guid, TwitchDeviceAuthorization, bool, string, CancellationToken)
+  fullName: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.CompleteDeviceAuthorizationAsync(System.Guid, PublisherStudio.BusinessObjects.TwitchDeviceAuthorization, bool, string, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.OAuth
+  summary: Runs the complete device authorization async operation.
+  example: []
+  syntax:
+    content: public Task<TwitchOAuthConnectionResult> CompleteDeviceAuthorizationAsync(Guid profileId, TwitchDeviceAuthorization authorization, bool autoSelectIngest, string currentEndpoint, CancellationToken cancellationToken = default)
+    parameters:
+    - id: profileId
+      type: System.Guid
+    - id: authorization
+      type: PublisherStudio.BusinessObjects.TwitchDeviceAuthorization
+    - id: autoSelectIngest
+      type: System.Boolean
+    - id: currentEndpoint
+      type: System.String
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.TwitchOAuthConnectionResult}
+    content.vb: Public Function CompleteDeviceAuthorizationAsync(profileId As Guid, authorization As TwitchDeviceAuthorization, autoSelectIngest As Boolean, currentEndpoint As String, cancellationToken As CancellationToken = Nothing) As Task(Of TwitchOAuthConnectionResult)
+  overload: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.CompleteDeviceAuthorizationAsync*
+  nameWithType.vb: TwitchOAuthService.CompleteDeviceAuthorizationAsync(Guid, TwitchDeviceAuthorization, Boolean, String, CancellationToken)
+  fullName.vb: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.CompleteDeviceAuthorizationAsync(System.Guid, PublisherStudio.BusinessObjects.TwitchDeviceAuthorization, Boolean, String, System.Threading.CancellationToken)
+  name.vb: CompleteDeviceAuthorizationAsync(Guid, TwitchDeviceAuthorization, Boolean, String, CancellationToken)
+- uid: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.TestIngestEndpointsAsync(System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.TestIngestEndpointsAsync(System.Threading.CancellationToken)
+  id: TestIngestEndpointsAsync(System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService
+  langs:
+  - csharp
+  - vb
+  name: TestIngestEndpointsAsync(CancellationToken)
+  nameWithType: TwitchOAuthService.TestIngestEndpointsAsync(CancellationToken)
+  fullName: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.TestIngestEndpointsAsync(System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.OAuth
+  summary: Runs the test ingest endpoints async operation.
+  example: []
+  syntax:
+    content: public Task<List<TwitchIngestCandidate>> TestIngestEndpointsAsync(CancellationToken cancellationToken = default)
+    parameters:
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{System.Collections.Generic.List{PublisherStudio.BusinessObjects.TwitchIngestCandidate}}
+    content.vb: Public Function TestIngestEndpointsAsync(cancellationToken As CancellationToken = Nothing) As Task(Of List(Of TwitchIngestCandidate))
+  overload: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.TestIngestEndpointsAsync*
+- uid: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ApplyIngestCandidateAsync(System.Guid,PublisherStudio.BusinessObjects.TwitchIngestCandidate,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ApplyIngestCandidateAsync(System.Guid,PublisherStudio.BusinessObjects.TwitchIngestCandidate,System.Threading.CancellationToken)
+  id: ApplyIngestCandidateAsync(System.Guid,PublisherStudio.BusinessObjects.TwitchIngestCandidate,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService
+  langs:
+  - csharp
+  - vb
+  name: ApplyIngestCandidateAsync(Guid, TwitchIngestCandidate, CancellationToken)
+  nameWithType: TwitchOAuthService.ApplyIngestCandidateAsync(Guid, TwitchIngestCandidate, CancellationToken)
+  fullName: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ApplyIngestCandidateAsync(System.Guid, PublisherStudio.BusinessObjects.TwitchIngestCandidate, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.OAuth
+  summary: Applies ingest candidate async.
+  example: []
+  syntax:
+    content: public Task<StreamingProviderProfile?> ApplyIngestCandidateAsync(Guid profileId, TwitchIngestCandidate candidate, CancellationToken cancellationToken = default)
+    parameters:
+    - id: profileId
+      type: System.Guid
+    - id: candidate
+      type: PublisherStudio.BusinessObjects.TwitchIngestCandidate
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.StreamingProviderProfile}
+    content.vb: Public Function ApplyIngestCandidateAsync(profileId As Guid, candidate As TwitchIngestCandidate, cancellationToken As CancellationToken = Nothing) As Task(Of StreamingProviderProfile)
+  overload: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ApplyIngestCandidateAsync*
+- uid: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.EnsureValidAccessTokenAsync(System.Guid,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.EnsureValidAccessTokenAsync(System.Guid,System.Threading.CancellationToken)
+  id: EnsureValidAccessTokenAsync(System.Guid,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService
+  langs:
+  - csharp
+  - vb
+  name: EnsureValidAccessTokenAsync(Guid, CancellationToken)
+  nameWithType: TwitchOAuthService.EnsureValidAccessTokenAsync(Guid, CancellationToken)
+  fullName: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.EnsureValidAccessTokenAsync(System.Guid, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.OAuth
+  summary: Ensures valid access token async.
+  example: []
+  syntax:
+    content: public Task<string?> EnsureValidAccessTokenAsync(Guid profileId, CancellationToken cancellationToken = default)
+    parameters:
+    - id: profileId
+      type: System.Guid
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{System.String}
+    content.vb: Public Function EnsureValidAccessTokenAsync(profileId As Guid, cancellationToken As CancellationToken = Nothing) As Task(Of String)
+  overload: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.EnsureValidAccessTokenAsync*
+- uid: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ValidateProfileAsync(System.Guid,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ValidateProfileAsync(System.Guid,System.Threading.CancellationToken)
+  id: ValidateProfileAsync(System.Guid,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService
+  langs:
+  - csharp
+  - vb
+  name: ValidateProfileAsync(Guid, CancellationToken)
+  nameWithType: TwitchOAuthService.ValidateProfileAsync(Guid, CancellationToken)
+  fullName: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ValidateProfileAsync(System.Guid, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.OAuth
+  summary: Validates profile async.
+  example: []
+  syntax:
+    content: public Task<bool> ValidateProfileAsync(Guid profileId, CancellationToken cancellationToken = default)
+    parameters:
+    - id: profileId
+      type: System.Guid
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{System.Boolean}
+    content.vb: Public Function ValidateProfileAsync(profileId As Guid, cancellationToken As CancellationToken = Nothing) As Task(Of Boolean)
+  overload: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ValidateProfileAsync*
+- uid: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.DisconnectAsync(System.Guid,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.DisconnectAsync(System.Guid,System.Threading.CancellationToken)
+  id: DisconnectAsync(System.Guid,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService
+  langs:
+  - csharp
+  - vb
+  name: DisconnectAsync(Guid, CancellationToken)
+  nameWithType: TwitchOAuthService.DisconnectAsync(Guid, CancellationToken)
+  fullName: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.DisconnectAsync(System.Guid, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.OAuth
+  summary: Runs the disconnect async operation.
+  example: []
+  syntax:
+    content: public Task DisconnectAsync(Guid profileId, CancellationToken cancellationToken = default)
+    parameters:
+    - id: profileId
+      type: System.Guid
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task
+    content.vb: Public Function DisconnectAsync(profileId As Guid, cancellationToken As CancellationToken = Nothing) As Task
+  overload: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.DisconnectAsync*
+- uid: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.DefaultClientId
+  commentId: P:PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.DefaultClientId
+  id: DefaultClientId
+  parent: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService
+  langs:
+  - csharp
+  - vb
+  name: DefaultClientId
+  nameWithType: TwitchOAuthService.DefaultClientId
+  fullName: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.DefaultClientId
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.OAuth
+  summary: Gets default client identifier.
+  example: []
+  syntax:
+    content: public string DefaultClientId { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public ReadOnly Property DefaultClientId As String
+  overload: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.DefaultClientId*
+references:
+- uid: PublisherStudio.Services.Streaming.OAuth
+  commentId: N:PublisherStudio.Services.Streaming.OAuth
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.OAuth
+  nameWithType: PublisherStudio.Services.Streaming.OAuth
+  fullName: PublisherStudio.Services.Streaming.OAuth
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.OAuth
+    name: OAuth
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.OAuth.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.OAuth
+    name: OAuth
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.OAuth.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.#ctor*
+  commentId: Overload:PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.html#PublisherStudio_Services_Streaming_OAuth_TwitchOAuthService__ctor_System_Net_Http_IHttpClientFactory_PublisherStudio_Services_Streaming_Profiles_StreamingProfileStore_Microsoft_Extensions_Configuration_IConfiguration_PublisherStudio_Services_Configuration_IPublisherRuntimePolicyDataService_
+  name: TwitchOAuthService
+  nameWithType: TwitchOAuthService.TwitchOAuthService
+  fullName: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.TwitchOAuthService
+  nameWithType.vb: TwitchOAuthService.New
+  fullName.vb: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.New
+  name.vb: New
+- uid: System.Net.Http.IHttpClientFactory
+  commentId: T:System.Net.Http.IHttpClientFactory
+  parent: System.Net.Http
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.net.http.ihttpclientfactory
+  name: IHttpClientFactory
+  nameWithType: IHttpClientFactory
+  fullName: System.Net.Http.IHttpClientFactory
+- uid: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore
+  commentId: T:PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore
+  parent: PublisherStudio.Services.Streaming.Profiles
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.html
+  name: StreamingProfileStore
+  nameWithType: StreamingProfileStore
+  fullName: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore
+- uid: Microsoft.Extensions.Configuration.IConfiguration
+  commentId: T:Microsoft.Extensions.Configuration.IConfiguration
+  parent: Microsoft.Extensions.Configuration
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.configuration.iconfiguration
+  name: IConfiguration
+  nameWithType: IConfiguration
+  fullName: Microsoft.Extensions.Configuration.IConfiguration
+- uid: PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService
+  commentId: T:PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService
+  parent: PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService.html
+  name: IPublisherRuntimePolicyDataService
+  nameWithType: IPublisherRuntimePolicyDataService
+  fullName: PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService
+- uid: System.Net.Http
+  commentId: N:System.Net.Http
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Net.Http
+  nameWithType: System.Net.Http
+  fullName: System.Net.Http
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Net
+    name: Net
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.net
+  - name: .
+  - uid: System.Net.Http
+    name: Http
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.net.http
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Net
+    name: Net
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.net
+  - name: .
+  - uid: System.Net.Http
+    name: Http
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.net.http
+- uid: PublisherStudio.Services.Streaming.Profiles
+  commentId: N:PublisherStudio.Services.Streaming.Profiles
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Profiles
+  nameWithType: PublisherStudio.Services.Streaming.Profiles
+  fullName: PublisherStudio.Services.Streaming.Profiles
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Profiles
+    name: Profiles
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Profiles.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Profiles
+    name: Profiles
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Profiles.html
+- uid: Microsoft.Extensions.Configuration
+  commentId: N:Microsoft.Extensions.Configuration
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Configuration
+  nameWithType: Microsoft.Extensions.Configuration
+  fullName: Microsoft.Extensions.Configuration
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Configuration
+    name: Configuration
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.configuration
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Configuration
+    name: Configuration
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.configuration
+- uid: PublisherStudio.Services.Configuration
+  commentId: N:PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Configuration
+  nameWithType: PublisherStudio.Services.Configuration
+  fullName: PublisherStudio.Services.Configuration
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+- uid: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ResolveClientId*
+  commentId: Overload:PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ResolveClientId
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.html#PublisherStudio_Services_Streaming_OAuth_TwitchOAuthService_ResolveClientId_System_String_
+  name: ResolveClientId
+  nameWithType: TwitchOAuthService.ResolveClientId
+  fullName: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ResolveClientId
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.StartDeviceAuthorizationAsync*
+  commentId: Overload:PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.StartDeviceAuthorizationAsync
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.html#PublisherStudio_Services_Streaming_OAuth_TwitchOAuthService_StartDeviceAuthorizationAsync_System_String_System_Boolean_System_Threading_CancellationToken_
+  name: StartDeviceAuthorizationAsync
+  nameWithType: TwitchOAuthService.StartDeviceAuthorizationAsync
+  fullName: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.StartDeviceAuthorizationAsync
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: System.Threading.CancellationToken
+  commentId: T:System.Threading.CancellationToken
+  parent: System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  name: CancellationToken
+  nameWithType: CancellationToken
+  fullName: System.Threading.CancellationToken
+- uid: System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.TwitchDeviceAuthorization}
+  commentId: T:System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.TwitchDeviceAuthorization}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<TwitchDeviceAuthorization>
+  nameWithType: Task<TwitchDeviceAuthorization>
+  fullName: System.Threading.Tasks.Task<PublisherStudio.BusinessObjects.TwitchDeviceAuthorization>
+  nameWithType.vb: Task(Of TwitchDeviceAuthorization)
+  fullName.vb: System.Threading.Tasks.Task(Of PublisherStudio.BusinessObjects.TwitchDeviceAuthorization)
+  name.vb: Task(Of TwitchDeviceAuthorization)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.TwitchDeviceAuthorization
+    name: TwitchDeviceAuthorization
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.TwitchDeviceAuthorization.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.TwitchDeviceAuthorization
+    name: TwitchDeviceAuthorization
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.TwitchDeviceAuthorization.html
+  - name: )
+- uid: System.Threading
+  commentId: N:System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading
+  nameWithType: System.Threading
+  fullName: System.Threading
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+- uid: System.Threading.Tasks.Task`1
+  commentId: T:System.Threading.Tasks.Task`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<TResult>
+  nameWithType: Task<TResult>
+  fullName: System.Threading.Tasks.Task<TResult>
+  nameWithType.vb: Task(Of TResult)
+  fullName.vb: System.Threading.Tasks.Task(Of TResult)
+  name.vb: Task(Of TResult)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - name: TResult
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TResult
+  - name: )
+- uid: System.Threading.Tasks
+  commentId: N:System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading.Tasks
+  nameWithType: System.Threading.Tasks
+  fullName: System.Threading.Tasks
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+- uid: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.CompleteDeviceAuthorizationAsync*
+  commentId: Overload:PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.CompleteDeviceAuthorizationAsync
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.html#PublisherStudio_Services_Streaming_OAuth_TwitchOAuthService_CompleteDeviceAuthorizationAsync_System_Guid_PublisherStudio_BusinessObjects_TwitchDeviceAuthorization_System_Boolean_System_String_System_Threading_CancellationToken_
+  name: CompleteDeviceAuthorizationAsync
+  nameWithType: TwitchOAuthService.CompleteDeviceAuthorizationAsync
+  fullName: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.CompleteDeviceAuthorizationAsync
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: PublisherStudio.BusinessObjects.TwitchDeviceAuthorization
+  commentId: T:PublisherStudio.BusinessObjects.TwitchDeviceAuthorization
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.TwitchDeviceAuthorization.html
+  name: TwitchDeviceAuthorization
+  nameWithType: TwitchDeviceAuthorization
+  fullName: PublisherStudio.BusinessObjects.TwitchDeviceAuthorization
+- uid: System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.TwitchOAuthConnectionResult}
+  commentId: T:System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.TwitchOAuthConnectionResult}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<TwitchOAuthConnectionResult>
+  nameWithType: Task<TwitchOAuthConnectionResult>
+  fullName: System.Threading.Tasks.Task<PublisherStudio.BusinessObjects.TwitchOAuthConnectionResult>
+  nameWithType.vb: Task(Of TwitchOAuthConnectionResult)
+  fullName.vb: System.Threading.Tasks.Task(Of PublisherStudio.BusinessObjects.TwitchOAuthConnectionResult)
+  name.vb: Task(Of TwitchOAuthConnectionResult)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.TwitchOAuthConnectionResult
+    name: TwitchOAuthConnectionResult
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.TwitchOAuthConnectionResult.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.TwitchOAuthConnectionResult
+    name: TwitchOAuthConnectionResult
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.TwitchOAuthConnectionResult.html
+  - name: )
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.TestIngestEndpointsAsync*
+  commentId: Overload:PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.TestIngestEndpointsAsync
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.html#PublisherStudio_Services_Streaming_OAuth_TwitchOAuthService_TestIngestEndpointsAsync_System_Threading_CancellationToken_
+  name: TestIngestEndpointsAsync
+  nameWithType: TwitchOAuthService.TestIngestEndpointsAsync
+  fullName: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.TestIngestEndpointsAsync
+- uid: System.Threading.Tasks.Task{System.Collections.Generic.List{PublisherStudio.BusinessObjects.TwitchIngestCandidate}}
+  commentId: T:System.Threading.Tasks.Task{System.Collections.Generic.List{PublisherStudio.BusinessObjects.TwitchIngestCandidate}}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<List<TwitchIngestCandidate>>
+  nameWithType: Task<List<TwitchIngestCandidate>>
+  fullName: System.Threading.Tasks.Task<System.Collections.Generic.List<PublisherStudio.BusinessObjects.TwitchIngestCandidate>>
+  nameWithType.vb: Task(Of List(Of TwitchIngestCandidate))
+  fullName.vb: System.Threading.Tasks.Task(Of System.Collections.Generic.List(Of PublisherStudio.BusinessObjects.TwitchIngestCandidate))
+  name.vb: Task(Of List(Of TwitchIngestCandidate))
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.TwitchIngestCandidate
+    name: TwitchIngestCandidate
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.TwitchIngestCandidate.html
+  - name: '>'
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.TwitchIngestCandidate
+    name: TwitchIngestCandidate
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.TwitchIngestCandidate.html
+  - name: )
+  - name: )
+- uid: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ApplyIngestCandidateAsync*
+  commentId: Overload:PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ApplyIngestCandidateAsync
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.html#PublisherStudio_Services_Streaming_OAuth_TwitchOAuthService_ApplyIngestCandidateAsync_System_Guid_PublisherStudio_BusinessObjects_TwitchIngestCandidate_System_Threading_CancellationToken_
+  name: ApplyIngestCandidateAsync
+  nameWithType: TwitchOAuthService.ApplyIngestCandidateAsync
+  fullName: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ApplyIngestCandidateAsync
+- uid: PublisherStudio.BusinessObjects.TwitchIngestCandidate
+  commentId: T:PublisherStudio.BusinessObjects.TwitchIngestCandidate
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.TwitchIngestCandidate.html
+  name: TwitchIngestCandidate
+  nameWithType: TwitchIngestCandidate
+  fullName: PublisherStudio.BusinessObjects.TwitchIngestCandidate
+- uid: System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.StreamingProviderProfile}
+  commentId: T:System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.StreamingProviderProfile}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<StreamingProviderProfile>
+  nameWithType: Task<StreamingProviderProfile>
+  fullName: System.Threading.Tasks.Task<PublisherStudio.BusinessObjects.StreamingProviderProfile>
+  nameWithType.vb: Task(Of StreamingProviderProfile)
+  fullName.vb: System.Threading.Tasks.Task(Of PublisherStudio.BusinessObjects.StreamingProviderProfile)
+  name.vb: Task(Of StreamingProviderProfile)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.StreamingProviderProfile
+    name: StreamingProviderProfile
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.StreamingProviderProfile.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.StreamingProviderProfile
+    name: StreamingProviderProfile
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.StreamingProviderProfile.html
+  - name: )
+- uid: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.EnsureValidAccessTokenAsync*
+  commentId: Overload:PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.EnsureValidAccessTokenAsync
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.html#PublisherStudio_Services_Streaming_OAuth_TwitchOAuthService_EnsureValidAccessTokenAsync_System_Guid_System_Threading_CancellationToken_
+  name: EnsureValidAccessTokenAsync
+  nameWithType: TwitchOAuthService.EnsureValidAccessTokenAsync
+  fullName: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.EnsureValidAccessTokenAsync
+- uid: System.Threading.Tasks.Task{System.String}
+  commentId: T:System.Threading.Tasks.Task{System.String}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<string>
+  nameWithType: Task<string>
+  fullName: System.Threading.Tasks.Task<string>
+  nameWithType.vb: Task(Of String)
+  fullName.vb: System.Threading.Tasks.Task(Of String)
+  name.vb: Task(Of String)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ValidateProfileAsync*
+  commentId: Overload:PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ValidateProfileAsync
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.html#PublisherStudio_Services_Streaming_OAuth_TwitchOAuthService_ValidateProfileAsync_System_Guid_System_Threading_CancellationToken_
+  name: ValidateProfileAsync
+  nameWithType: TwitchOAuthService.ValidateProfileAsync
+  fullName: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.ValidateProfileAsync
+- uid: System.Threading.Tasks.Task{System.Boolean}
+  commentId: T:System.Threading.Tasks.Task{System.Boolean}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<bool>
+  nameWithType: Task<bool>
+  fullName: System.Threading.Tasks.Task<bool>
+  nameWithType.vb: Task(Of Boolean)
+  fullName.vb: System.Threading.Tasks.Task(Of Boolean)
+  name.vb: Task(Of Boolean)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: System.Boolean
+    name: bool
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.boolean
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Boolean
+    name: Boolean
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.boolean
+  - name: )
+- uid: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.DisconnectAsync*
+  commentId: Overload:PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.DisconnectAsync
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.html#PublisherStudio_Services_Streaming_OAuth_TwitchOAuthService_DisconnectAsync_System_Guid_System_Threading_CancellationToken_
+  name: DisconnectAsync
+  nameWithType: TwitchOAuthService.DisconnectAsync
+  fullName: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.DisconnectAsync
+- uid: System.Threading.Tasks.Task
+  commentId: T:System.Threading.Tasks.Task
+  parent: System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task
+  name: Task
+  nameWithType: Task
+  fullName: System.Threading.Tasks.Task
+- uid: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.DefaultClientId*
+  commentId: Overload:PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.DefaultClientId
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.html#PublisherStudio_Services_Streaming_OAuth_TwitchOAuthService_DefaultClientId
+  name: DefaultClientId
+  nameWithType: TwitchOAuthService.DefaultClientId
+  fullName: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.DefaultClientId

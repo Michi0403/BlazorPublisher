@@ -1,9 +1,12 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace PublisherStudio.Services.Configuration;
 
+/// <summary>
+/// Provides system variable store service operations.
+/// </summary>
 public sealed class SystemVariableStoreService : ISystemVariableStoreService
 {
     private readonly object _sync = new();
@@ -25,6 +28,9 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
     private readonly string _runtimeEndpointFileName = "Application.RuntimeEndpointFileName";
     private readonly string _defaultDocumentName = "Editor.DefaultDocumentName";
 
+    /// <summary>
+    /// Runs the system variable store service operation.
+    /// </summary>
     public SystemVariableStoreService(IConfiguration configuration)
     {
         var root = Path.Combine(
@@ -51,20 +57,62 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
         LoadPersisted();
     }
 
+    /// <summary>
+    /// Gets default port.
+    /// </summary>
     public int DefaultPort => GetInt(_defaultPortName, 58071);
+    /// <summary>
+    /// Gets port environment variable name.
+    /// </summary>
     public string PortEnvironmentVariableName => GetString(_portEnvironmentVariableName, "PUBLISHERSTUDIO_PORT");
+    /// <summary>
+    /// Gets default culture.
+    /// </summary>
     public string DefaultCulture => GetString(_defaultCultureName, "en-US");
+    /// <summary>
+    /// Gets cors policy name.
+    /// </summary>
     public string CorsPolicyName => GetString(_corsPolicyName, "PublisherExport");
+    /// <summary>
+    /// Gets data protection directory name.
+    /// </summary>
     public string DataProtectionDirectoryName => GetString(_dataProtectionDirectoryName, "DataProtection");
+    /// <summary>
+    /// Gets data protection application name.
+    /// </summary>
     public string DataProtectionApplicationName => GetString(_dataProtectionApplicationName, "PublisherStudio");
+    /// <summary>
+    /// Gets spreadsheet hibernation directory name.
+    /// </summary>
     public string SpreadsheetHibernationDirectoryName => GetString(_spreadsheetHibernationDirectoryName, "SpreadsheetHibernation");
+    /// <summary>
+    /// Gets spreadsheet hibernation timeout.
+    /// </summary>
     public TimeSpan SpreadsheetHibernationTimeout => GetTimeSpan(_spreadsheetHibernationMinutesName, TimeSpan.FromMinutes(20));
+    /// <summary>
+    /// Gets spreadsheet documents dispose timeout.
+    /// </summary>
     public TimeSpan SpreadsheetDocumentsDisposeTimeout => GetTimeSpan(_spreadsheetDocumentsDisposeHoursName, TimeSpan.FromHours(4));
+    /// <summary>
+    /// Gets twitch HTTP timeout.
+    /// </summary>
     public TimeSpan TwitchHttpTimeout => TimeSpan.FromSeconds(GetInt(_twitchHttpTimeoutSecondsName, 20));
+    /// <summary>
+    /// Gets runtime directory name.
+    /// </summary>
     public string RuntimeDirectoryName => GetString(_runtimeDirectoryName, "runtime");
+    /// <summary>
+    /// Gets runtime endpoint file name.
+    /// </summary>
     public string RuntimeEndpointFileName => GetString(_runtimeEndpointFileName, "server.json");
+    /// <summary>
+    /// Gets default document name.
+    /// </summary>
     public string DefaultDocumentName => GetString(_defaultDocumentName, "Untitled Publication");
 
+    /// <summary>
+    /// Runs the attach logger operation.
+    /// </summary>
     public void AttachLogger(ILogger<SystemVariableStoreService> logger)
     {
         try
@@ -79,6 +127,9 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
         }
     }
 
+    /// <summary>
+    /// Gets string.
+    /// </summary>
     public string GetString(string name, string fallback)
     {
         try
@@ -100,6 +151,9 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
         }
     }
 
+    /// <summary>
+    /// Gets int.
+    /// </summary>
     public int GetInt(string name, int fallback)
     {
         try
@@ -116,6 +170,9 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
         }
     }
 
+    /// <summary>
+    /// Gets time span.
+    /// </summary>
     public TimeSpan GetTimeSpan(string name, TimeSpan fallback)
     {
         try
@@ -136,6 +193,9 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
         }
     }
 
+    /// <summary>
+    /// Runs the set operation.
+    /// </summary>
     public void Set<T>(string name, T value)
     {
         try
@@ -156,6 +216,9 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
         }
     }
 
+    /// <summary>
+    /// Runs the snapshot operation.
+    /// </summary>
     public IReadOnlyDictionary<string, string> Snapshot()
     {
         try

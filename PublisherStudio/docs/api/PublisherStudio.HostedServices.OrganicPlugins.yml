@@ -1,0 +1,25 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.HostedServices.OrganicPlugins
+  commentId: N:PublisherStudio.HostedServices.OrganicPlugins
+  id: OrganicPlugins
+  parent: PublisherStudio.HostedServices
+  children:
+  - PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.HostedServices.OrganicPlugins
+  nameWithType: PublisherStudio.HostedServices.OrganicPlugins
+  fullName: PublisherStudio.HostedServices.OrganicPlugins
+  type: Namespace
+  assemblies:
+  - PublisherStudio.Web
+references:
+- uid: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService
+  commentId: T:PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService
+  isExternal: true
+  href: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService.html
+  name: LocalGptDiscoveryHostedService
+  nameWithType: LocalGptDiscoveryHostedService
+  fullName: PublisherStudio.HostedServices.OrganicPlugins.LocalGptDiscoveryHostedService

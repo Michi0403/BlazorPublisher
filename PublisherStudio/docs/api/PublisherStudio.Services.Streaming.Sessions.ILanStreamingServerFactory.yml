@@ -1,0 +1,166 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Streaming.Sessions.ILanStreamingServerFactory
+  commentId: T:PublisherStudio.Services.Streaming.Sessions.ILanStreamingServerFactory
+  id: ILanStreamingServerFactory
+  parent: PublisherStudio.Services.Streaming.Sessions
+  children:
+  - PublisherStudio.Services.Streaming.Sessions.ILanStreamingServerFactory.Create(PublisherStudio.Services.Streaming.Sessions.MediaSession)
+  langs:
+  - csharp
+  - vb
+  name: ILanStreamingServerFactory
+  nameWithType: ILanStreamingServerFactory
+  fullName: PublisherStudio.Services.Streaming.Sessions.ILanStreamingServerFactory
+  type: Interface
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  summary: Defines the LAN streaming server factory contract.
+  example: []
+  syntax:
+    content: public interface ILanStreamingServerFactory
+    content.vb: Public Interface ILanStreamingServerFactory
+  derivedClasses:
+  - PublisherStudio.Services.Streaming.Sessions.LanStreamingServerFactory
+- uid: PublisherStudio.Services.Streaming.Sessions.ILanStreamingServerFactory.Create(PublisherStudio.Services.Streaming.Sessions.MediaSession)
+  commentId: M:PublisherStudio.Services.Streaming.Sessions.ILanStreamingServerFactory.Create(PublisherStudio.Services.Streaming.Sessions.MediaSession)
+  id: Create(PublisherStudio.Services.Streaming.Sessions.MediaSession)
+  parent: PublisherStudio.Services.Streaming.Sessions.ILanStreamingServerFactory
+  langs:
+  - csharp
+  - vb
+  name: Create(MediaSession)
+  nameWithType: ILanStreamingServerFactory.Create(MediaSession)
+  fullName: PublisherStudio.Services.Streaming.Sessions.ILanStreamingServerFactory.Create(PublisherStudio.Services.Streaming.Sessions.MediaSession)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Sessions
+  syntax:
+    content: LanStreamingServer Create(MediaSession session)
+    parameters:
+    - id: session
+      type: PublisherStudio.Services.Streaming.Sessions.MediaSession
+    return:
+      type: PublisherStudio.Services.Streaming.Lan.LanStreamingServer
+    content.vb: Function Create(session As MediaSession) As LanStreamingServer
+  overload: PublisherStudio.Services.Streaming.Sessions.ILanStreamingServerFactory.Create*
+references:
+- uid: PublisherStudio.Services.Streaming.Sessions
+  commentId: N:PublisherStudio.Services.Streaming.Sessions
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Sessions
+  nameWithType: PublisherStudio.Services.Streaming.Sessions
+  fullName: PublisherStudio.Services.Streaming.Sessions
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Sessions
+    name: Sessions
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Sessions.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Sessions
+    name: Sessions
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Sessions.html
+- uid: PublisherStudio.Services.Streaming.Sessions.ILanStreamingServerFactory.Create*
+  commentId: Overload:PublisherStudio.Services.Streaming.Sessions.ILanStreamingServerFactory.Create
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.ILanStreamingServerFactory.html#PublisherStudio_Services_Streaming_Sessions_ILanStreamingServerFactory_Create_PublisherStudio_Services_Streaming_Sessions_MediaSession_
+  name: Create
+  nameWithType: ILanStreamingServerFactory.Create
+  fullName: PublisherStudio.Services.Streaming.Sessions.ILanStreamingServerFactory.Create
+- uid: PublisherStudio.Services.Streaming.Sessions.MediaSession
+  commentId: T:PublisherStudio.Services.Streaming.Sessions.MediaSession
+  parent: PublisherStudio.Services.Streaming.Sessions
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Sessions.MediaSession.html
+  name: MediaSession
+  nameWithType: MediaSession
+  fullName: PublisherStudio.Services.Streaming.Sessions.MediaSession
+- uid: PublisherStudio.Services.Streaming.Lan.LanStreamingServer
+  commentId: T:PublisherStudio.Services.Streaming.Lan.LanStreamingServer
+  parent: PublisherStudio.Services.Streaming.Lan
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Lan.LanStreamingServer.html
+  name: LanStreamingServer
+  nameWithType: LanStreamingServer
+  fullName: PublisherStudio.Services.Streaming.Lan.LanStreamingServer
+- uid: PublisherStudio.Services.Streaming.Lan
+  commentId: N:PublisherStudio.Services.Streaming.Lan
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Lan
+  nameWithType: PublisherStudio.Services.Streaming.Lan
+  fullName: PublisherStudio.Services.Streaming.Lan
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Lan
+    name: Lan
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Lan.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Lan
+    name: Lan
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Lan.html

@@ -1,4 +1,4 @@
-
+﻿
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -9,16 +9,28 @@ using System.Text;
 ///
 namespace PublisherStudio.InstallerConsole.Helper
 {
+    /// <summary>
+    /// Represents a color console logger.
+    /// </summary>
     public sealed class ColorConsoleLogger(
     string name,
     Func<ColorConsoleLoggerConfiguration> getCurrentConfig) : ILogger
     {
+        /// <summary>
+        /// Runs the begin scope operation.
+        /// </summary>
         public IDisposable? BeginScope<TState>(TState state)
             where TState : notnull => default!;
 
+        /// <summary>
+        /// Determines whether enabled.
+        /// </summary>
         public bool IsEnabled(LogLevel logLevel) =>
             getCurrentConfig().LogLevelToColorMap.ContainsKey(logLevel);
 
+        /// <summary>
+        /// Runs the log operation.
+        /// </summary>
         public void Log<TState>(
             LogLevel logLevel,
             EventId eventId,

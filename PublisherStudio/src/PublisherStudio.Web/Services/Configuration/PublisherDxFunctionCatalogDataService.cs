@@ -1,16 +1,28 @@
-using PublisherStudio.Services.OrganicPlugins;
+﻿using PublisherStudio.Services.OrganicPlugins;
 using System.Text.Json;
 
 namespace PublisherStudio.Services.Configuration;
 
+/// <summary>
+/// Defines the publisher DevExpress function catalog data service contract.
+/// </summary>
 public interface IPublisherDxFunctionCatalogDataService
 {
     Task<IReadOnlyList<OrganicCapabilityDescriptor>> GetFunctionsAsync(CancellationToken cancellationToken = default);
 }
 
+/// <summary>
+/// Represents a publisher DevExpress function catalog document.
+/// </summary>
 public sealed class PublisherDxFunctionCatalogDocument
 {
+    /// <summary>
+    /// Gets or sets schema version.
+    /// </summary>
     public int SchemaVersion { get; set; }
+    /// <summary>
+    /// Gets or sets functions.
+    /// </summary>
     public List<OrganicCapabilityDescriptor> Functions { get; set; } = [];
 }
 
@@ -28,6 +40,9 @@ public sealed class PublisherDxFunctionCatalogDataService(
         WriteIndented = true
     };
 
+    /// <summary>
+    /// Gets functions async.
+    /// </summary>
     public async Task<IReadOnlyList<OrganicCapabilityDescriptor>> GetFunctionsAsync(CancellationToken cancellationToken = default)
     {
         try

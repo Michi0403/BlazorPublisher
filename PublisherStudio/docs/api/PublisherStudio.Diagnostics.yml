@@ -1,0 +1,33 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Diagnostics
+  commentId: N:PublisherStudio.Diagnostics
+  id: Diagnostics
+  parent: PublisherStudio
+  children:
+  - PublisherStudio.Diagnostics.ControllerRequestLoggingFilter
+  - PublisherStudio.Diagnostics.ServiceRegistrationLoggingHostedService
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.Diagnostics
+  nameWithType: PublisherStudio.Diagnostics
+  fullName: PublisherStudio.Diagnostics
+  type: Namespace
+  assemblies:
+  - PublisherStudio.Web
+references:
+- uid: PublisherStudio.Diagnostics.ControllerRequestLoggingFilter
+  commentId: T:PublisherStudio.Diagnostics.ControllerRequestLoggingFilter
+  isExternal: true
+  href: PublisherStudio.Diagnostics.ControllerRequestLoggingFilter.html
+  name: ControllerRequestLoggingFilter
+  nameWithType: ControllerRequestLoggingFilter
+  fullName: PublisherStudio.Diagnostics.ControllerRequestLoggingFilter
+- uid: PublisherStudio.Diagnostics.ServiceRegistrationLoggingHostedService
+  commentId: T:PublisherStudio.Diagnostics.ServiceRegistrationLoggingHostedService
+  isExternal: true
+  href: PublisherStudio.Diagnostics.ServiceRegistrationLoggingHostedService.html
+  name: ServiceRegistrationLoggingHostedService
+  nameWithType: ServiceRegistrationLoggingHostedService
+  fullName: PublisherStudio.Diagnostics.ServiceRegistrationLoggingHostedService

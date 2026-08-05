@@ -1,0 +1,191 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.DataVisualAggregationMode
+  commentId: T:PublisherStudio.BusinessObjects.DataVisualAggregationMode
+  id: DataVisualAggregationMode
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.DataVisualAggregationMode.Auto
+  - PublisherStudio.BusinessObjects.DataVisualAggregationMode.Average
+  - PublisherStudio.BusinessObjects.DataVisualAggregationMode.Count
+  - PublisherStudio.BusinessObjects.DataVisualAggregationMode.Maximum
+  - PublisherStudio.BusinessObjects.DataVisualAggregationMode.Minimum
+  - PublisherStudio.BusinessObjects.DataVisualAggregationMode.None
+  - PublisherStudio.BusinessObjects.DataVisualAggregationMode.Sum
+  langs:
+  - csharp
+  - vb
+  name: DataVisualAggregationMode
+  nameWithType: DataVisualAggregationMode
+  fullName: PublisherStudio.BusinessObjects.DataVisualAggregationMode
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported data visual aggregation mode values.
+  example: []
+  syntax:
+    content: public enum DataVisualAggregationMode
+    content.vb: Public Enum DataVisualAggregationMode
+- uid: PublisherStudio.BusinessObjects.DataVisualAggregationMode.Auto
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualAggregationMode.Auto
+  id: Auto
+  parent: PublisherStudio.BusinessObjects.DataVisualAggregationMode
+  langs:
+  - csharp
+  - vb
+  name: Auto
+  nameWithType: DataVisualAggregationMode.Auto
+  fullName: PublisherStudio.BusinessObjects.DataVisualAggregationMode.Auto
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Auto = 0
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualAggregationMode
+- uid: PublisherStudio.BusinessObjects.DataVisualAggregationMode.None
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualAggregationMode.None
+  id: None
+  parent: PublisherStudio.BusinessObjects.DataVisualAggregationMode
+  langs:
+  - csharp
+  - vb
+  name: None
+  nameWithType: DataVisualAggregationMode.None
+  fullName: PublisherStudio.BusinessObjects.DataVisualAggregationMode.None
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: None = 1
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualAggregationMode
+- uid: PublisherStudio.BusinessObjects.DataVisualAggregationMode.Sum
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualAggregationMode.Sum
+  id: Sum
+  parent: PublisherStudio.BusinessObjects.DataVisualAggregationMode
+  langs:
+  - csharp
+  - vb
+  name: Sum
+  nameWithType: DataVisualAggregationMode.Sum
+  fullName: PublisherStudio.BusinessObjects.DataVisualAggregationMode.Sum
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Sum = 2
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualAggregationMode
+- uid: PublisherStudio.BusinessObjects.DataVisualAggregationMode.Average
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualAggregationMode.Average
+  id: Average
+  parent: PublisherStudio.BusinessObjects.DataVisualAggregationMode
+  langs:
+  - csharp
+  - vb
+  name: Average
+  nameWithType: DataVisualAggregationMode.Average
+  fullName: PublisherStudio.BusinessObjects.DataVisualAggregationMode.Average
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Average = 3
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualAggregationMode
+- uid: PublisherStudio.BusinessObjects.DataVisualAggregationMode.Minimum
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualAggregationMode.Minimum
+  id: Minimum
+  parent: PublisherStudio.BusinessObjects.DataVisualAggregationMode
+  langs:
+  - csharp
+  - vb
+  name: Minimum
+  nameWithType: DataVisualAggregationMode.Minimum
+  fullName: PublisherStudio.BusinessObjects.DataVisualAggregationMode.Minimum
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Minimum = 4
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualAggregationMode
+- uid: PublisherStudio.BusinessObjects.DataVisualAggregationMode.Maximum
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualAggregationMode.Maximum
+  id: Maximum
+  parent: PublisherStudio.BusinessObjects.DataVisualAggregationMode
+  langs:
+  - csharp
+  - vb
+  name: Maximum
+  nameWithType: DataVisualAggregationMode.Maximum
+  fullName: PublisherStudio.BusinessObjects.DataVisualAggregationMode.Maximum
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Maximum = 5
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualAggregationMode
+- uid: PublisherStudio.BusinessObjects.DataVisualAggregationMode.Count
+  commentId: F:PublisherStudio.BusinessObjects.DataVisualAggregationMode.Count
+  id: Count
+  parent: PublisherStudio.BusinessObjects.DataVisualAggregationMode
+  langs:
+  - csharp
+  - vb
+  name: Count
+  nameWithType: DataVisualAggregationMode.Count
+  fullName: PublisherStudio.BusinessObjects.DataVisualAggregationMode.Count
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Count = 6
+    return:
+      type: PublisherStudio.BusinessObjects.DataVisualAggregationMode
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.DataVisualAggregationMode
+  commentId: T:PublisherStudio.BusinessObjects.DataVisualAggregationMode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataVisualAggregationMode.html
+  name: DataVisualAggregationMode
+  nameWithType: DataVisualAggregationMode
+  fullName: PublisherStudio.BusinessObjects.DataVisualAggregationMode

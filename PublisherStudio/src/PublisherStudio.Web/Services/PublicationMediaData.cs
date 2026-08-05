@@ -1,9 +1,15 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 // logging-policy: pure-helper
 namespace PublisherStudio.Services;
 
+/// <summary>
+/// Represents a publication media data.
+/// </summary>
 public sealed class PublicationMediaData(ILogger<PublicationMediaData> logger)
 {
+    /// <summary>
+    /// Normalizes mime type.
+    /// </summary>
     public string NormalizeMimeType(string? mimeType, string fallback)
     {
         logger.LogTrace("Normalizing publication media MIME type.");
@@ -13,6 +19,9 @@ public sealed class PublicationMediaData(ILogger<PublicationMediaData> logger)
         return value.Contains('/') ? value.ToLowerInvariant() : fallback;
     }
 
+    /// <summary>
+    /// Normalizes data URL.
+    /// </summary>
     public string NormalizeDataUrl(string? dataUrl, string fallbackMimeType)
     {
         if (string.IsNullOrWhiteSpace(dataUrl) || !dataUrl.StartsWith("data:", StringComparison.OrdinalIgnoreCase))

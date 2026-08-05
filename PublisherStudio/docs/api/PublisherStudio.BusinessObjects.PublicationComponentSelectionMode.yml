@@ -1,0 +1,115 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationComponentSelectionMode
+  commentId: T:PublisherStudio.BusinessObjects.PublicationComponentSelectionMode
+  id: PublicationComponentSelectionMode
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationComponentSelectionMode.Multiple
+  - PublisherStudio.BusinessObjects.PublicationComponentSelectionMode.None
+  - PublisherStudio.BusinessObjects.PublicationComponentSelectionMode.Single
+  langs:
+  - csharp
+  - vb
+  name: PublicationComponentSelectionMode
+  nameWithType: PublicationComponentSelectionMode
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentSelectionMode
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication component selection mode values.
+  example: []
+  syntax:
+    content: public enum PublicationComponentSelectionMode
+    content.vb: Public Enum PublicationComponentSelectionMode
+- uid: PublisherStudio.BusinessObjects.PublicationComponentSelectionMode.None
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentSelectionMode.None
+  id: None
+  parent: PublisherStudio.BusinessObjects.PublicationComponentSelectionMode
+  langs:
+  - csharp
+  - vb
+  name: None
+  nameWithType: PublicationComponentSelectionMode.None
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentSelectionMode.None
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: None = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentSelectionMode
+- uid: PublisherStudio.BusinessObjects.PublicationComponentSelectionMode.Single
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentSelectionMode.Single
+  id: Single
+  parent: PublisherStudio.BusinessObjects.PublicationComponentSelectionMode
+  langs:
+  - csharp
+  - vb
+  name: Single
+  nameWithType: PublicationComponentSelectionMode.Single
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentSelectionMode.Single
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Single = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentSelectionMode
+- uid: PublisherStudio.BusinessObjects.PublicationComponentSelectionMode.Multiple
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentSelectionMode.Multiple
+  id: Multiple
+  parent: PublisherStudio.BusinessObjects.PublicationComponentSelectionMode
+  langs:
+  - csharp
+  - vb
+  name: Multiple
+  nameWithType: PublicationComponentSelectionMode.Multiple
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentSelectionMode.Multiple
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Multiple = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentSelectionMode
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationComponentSelectionMode
+  commentId: T:PublisherStudio.BusinessObjects.PublicationComponentSelectionMode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationComponentSelectionMode.html
+  name: PublicationComponentSelectionMode
+  nameWithType: PublicationComponentSelectionMode
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentSelectionMode

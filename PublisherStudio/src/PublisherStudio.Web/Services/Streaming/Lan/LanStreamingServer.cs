@@ -1,10 +1,13 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.WebSockets;
 using System.Text.Json;
 using System.Security.Cryptography;
 
 namespace PublisherStudio.Services.Streaming.Lan;
 
+/// <summary>
+/// Represents a LAN streaming server.
+/// </summary>
 public sealed class LanStreamingServer : IAsyncDisposable
 {
     private readonly MediaSession _session;
@@ -15,6 +18,9 @@ public sealed class LanStreamingServer : IAsyncDisposable
     private Task? _runTask;
     private RtspLanServer? _rtspServer;
 
+    /// <summary>
+    /// Runs the LAN streaming server operation.
+    /// </summary>
     public LanStreamingServer(MediaSession session, ILogger<LanStreamingServer> logger)
     {
         _session = session;
@@ -25,8 +31,17 @@ public sealed class LanStreamingServer : IAsyncDisposable
             : string.Empty;
     }
 
+    /// <summary>
+    /// Gets access token.
+    /// </summary>
     public string AccessToken { get; }
+    /// <summary>
+    /// Gets or sets status.
+    /// </summary>
     public string Status { get; private set; } = "stopped";
+    /// <summary>
+    /// Gets or sets last error.
+    /// </summary>
     public string LastError { get; private set; } = string.Empty;
 
     public string AdvertisedHost
@@ -50,17 +65,32 @@ public sealed class LanStreamingServer : IAsyncDisposable
         }
     }
 
+    /// <summary>
+    /// Gets token query.
+    /// </summary>
     public string TokenQuery => string.IsNullOrWhiteSpace(AccessToken) ? string.Empty : $"?token={Uri.EscapeDataString(AccessToken)}";
+    /// <summary>
+    /// Gets browser URL.
+    /// </summary>
     public string? BrowserUrl => _session.LanDefinition.EnableBrowserWebRtc
         ? $"http://{AdvertisedHost}:{_session.LanDefinition.Port}/watch/{_session.Id:D}{TokenQuery}"
         : null;
+    /// <summary>
+    /// Gets hls URL.
+    /// </summary>
     public string? HlsUrl => _session.LanDefinition.EnableHls
         ? $"http://{AdvertisedHost}:{_session.LanDefinition.Port}/stream/{_session.Id:D}/index.m3u8{TokenQuery}"
         : null;
+    /// <summary>
+    /// Gets rtsp URL.
+    /// </summary>
     public string? RtspUrl => _session.LanDefinition.EnableRtsp
         ? $"rtsp://{AdvertisedHost}:{_session.LanDefinition.RtspPort}/publisherstudio{TokenQuery}"
         : null;
 
+    /// <summary>
+    /// Runs the start operation.
+    /// </summary>
     public void Start()
     {
         if (_runTask is not null || !_session.LanDefinition.Enabled) return;
@@ -334,6 +364,9 @@ public sealed class LanStreamingServer : IAsyncDisposable
         return candidate.StartsWith(rootWithSeparator, StringComparison.OrdinalIgnoreCase) ? candidate : null;
     }
 
+    /// <summary>
+    /// Runs the dispose async operation.
+    /// </summary>
     public async ValueTask DisposeAsync()
     {
         _cancellation.Cancel();
@@ -358,19 +391,61 @@ public sealed class LanStreamingServer : IAsyncDisposable
     }
 }
 
+/// <summary>
+/// Represents a media LAN definition.
+/// </summary>
 public sealed class MediaLanDefinition
 {
+    /// <summary>
+    /// Gets or sets whether the feature is enabled.
+    /// </summary>
     public bool Enabled { get; set; }
+    /// <summary>
+    /// Gets or sets bind address.
+    /// </summary>
     public string BindAddress { get; set; } = "127.0.0.1";
+    /// <summary>
+    /// Gets or sets port.
+    /// </summary>
     public int Port { get; set; } = 17848;
+    /// <summary>
+    /// Gets or sets width.
+    /// </summary>
     public int Width { get; set; } = 1920;
+    /// <summary>
+    /// Gets or sets height.
+    /// </summary>
     public int Height { get; set; } = 1080;
+    /// <summary>
+    /// Gets or sets frame rate.
+    /// </summary>
     public int FrameRate { get; set; } = 60;
+    /// <summary>
+    /// Gets or sets video bitrate kbps.
+    /// </summary>
     public int VideoBitrateKbps { get; set; } = 8000;
+    /// <summary>
+    /// Gets or sets enable browser web rtc.
+    /// </summary>
     public bool EnableBrowserWebRtc { get; set; } = true;
+    /// <summary>
+    /// Gets or sets enable hls.
+    /// </summary>
     public bool EnableHls { get; set; } = true;
+    /// <summary>
+    /// Gets or sets enable rtsp.
+    /// </summary>
     public bool EnableRtsp { get; set; }
+    /// <summary>
+    /// Gets or sets rtsp port.
+    /// </summary>
     public int RtspPort { get; set; } = 8554;
+    /// <summary>
+    /// Gets or sets require access token.
+    /// </summary>
     public bool RequireAccessToken { get; set; } = true;
+    /// <summary>
+    /// Gets or sets viewer limit.
+    /// </summary>
     public int ViewerLimit { get; set; } = 50;
 }

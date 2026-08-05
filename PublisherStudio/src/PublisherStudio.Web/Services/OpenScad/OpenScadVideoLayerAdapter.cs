@@ -1,12 +1,18 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.VideoStudio.Export;
 
 namespace PublisherStudio.Services.OpenScad;
 
+/// <summary>
+/// Represents an open scad video layer adapter.
+/// </summary>
 public sealed class OpenScadVideoLayerAdapter(
     IPolygonGeometryService geometry,
     IOpenScadDocumentService documents) : IOpenScadVideoLayerAdapter
 {
+    /// <summary>
+    /// Creates script.
+    /// </summary>
     public string CreateScript(VideoEffectLayer layer)
     {
         ArgumentNullException.ThrowIfNull(layer);

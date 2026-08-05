@@ -1,0 +1,73 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.MediaStudio.UseCases
+  commentId: N:PublisherStudio.Services.MediaStudio.UseCases
+  id: MediaStudio.UseCases
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.Services.MediaStudio.UseCases
+  nameWithType: PublisherStudio.Services.MediaStudio.UseCases
+  fullName: PublisherStudio.Services.MediaStudio.UseCases
+  type: Namespace
+  assemblies:
+  - PublisherStudio.Web
+references:
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  commentId: T:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  parent: PublisherStudio.Services.MediaStudio.UseCases
+  isExternal: true
+  href: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.html
+  name: MediaTimelineEditService
+  nameWithType: MediaTimelineEditService
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+- uid: PublisherStudio.Services.MediaStudio.UseCases
+  commentId: N:PublisherStudio.Services.MediaStudio.UseCases
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.MediaStudio.UseCases
+  nameWithType: PublisherStudio.Services.MediaStudio.UseCases
+  fullName: PublisherStudio.Services.MediaStudio.UseCases
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.MediaStudio
+    name: MediaStudio
+    isExternal: true
+    href: PublisherStudio.Services.MediaStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.MediaStudio.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.MediaStudio.UseCases.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.MediaStudio
+    name: MediaStudio
+    isExternal: true
+    href: PublisherStudio.Services.MediaStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.MediaStudio.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.MediaStudio.UseCases.html

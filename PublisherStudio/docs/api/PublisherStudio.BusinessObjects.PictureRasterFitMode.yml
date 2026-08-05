@@ -1,0 +1,115 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PictureRasterFitMode
+  commentId: T:PublisherStudio.BusinessObjects.PictureRasterFitMode
+  id: PictureRasterFitMode
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PictureRasterFitMode.Contain
+  - PublisherStudio.BusinessObjects.PictureRasterFitMode.Cover
+  - PublisherStudio.BusinessObjects.PictureRasterFitMode.Stretch
+  langs:
+  - csharp
+  - vb
+  name: PictureRasterFitMode
+  nameWithType: PictureRasterFitMode
+  fullName: PublisherStudio.BusinessObjects.PictureRasterFitMode
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported picture raster fit mode values.
+  example: []
+  syntax:
+    content: public enum PictureRasterFitMode
+    content.vb: Public Enum PictureRasterFitMode
+- uid: PublisherStudio.BusinessObjects.PictureRasterFitMode.Stretch
+  commentId: F:PublisherStudio.BusinessObjects.PictureRasterFitMode.Stretch
+  id: Stretch
+  parent: PublisherStudio.BusinessObjects.PictureRasterFitMode
+  langs:
+  - csharp
+  - vb
+  name: Stretch
+  nameWithType: PictureRasterFitMode.Stretch
+  fullName: PublisherStudio.BusinessObjects.PictureRasterFitMode.Stretch
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Stretch = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PictureRasterFitMode
+- uid: PublisherStudio.BusinessObjects.PictureRasterFitMode.Contain
+  commentId: F:PublisherStudio.BusinessObjects.PictureRasterFitMode.Contain
+  id: Contain
+  parent: PublisherStudio.BusinessObjects.PictureRasterFitMode
+  langs:
+  - csharp
+  - vb
+  name: Contain
+  nameWithType: PictureRasterFitMode.Contain
+  fullName: PublisherStudio.BusinessObjects.PictureRasterFitMode.Contain
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Contain = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PictureRasterFitMode
+- uid: PublisherStudio.BusinessObjects.PictureRasterFitMode.Cover
+  commentId: F:PublisherStudio.BusinessObjects.PictureRasterFitMode.Cover
+  id: Cover
+  parent: PublisherStudio.BusinessObjects.PictureRasterFitMode
+  langs:
+  - csharp
+  - vb
+  name: Cover
+  nameWithType: PictureRasterFitMode.Cover
+  fullName: PublisherStudio.BusinessObjects.PictureRasterFitMode.Cover
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Cover = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PictureRasterFitMode
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PictureRasterFitMode
+  commentId: T:PublisherStudio.BusinessObjects.PictureRasterFitMode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PictureRasterFitMode.html
+  name: PictureRasterFitMode
+  nameWithType: PictureRasterFitMode
+  fullName: PublisherStudio.BusinessObjects.PictureRasterFitMode

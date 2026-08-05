@@ -1,0 +1,636 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.RuntimeEndpointWriter
+  commentId: T:PublisherStudio.Services.RuntimeEndpointWriter
+  id: RuntimeEndpointWriter
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.RuntimeEndpointWriter.#ctor(PublisherStudio.Services.Configuration.ISystemVariableStoreService,PublisherStudio.Services.IRuntimeEndpointState,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.RuntimeEndpointWriter})
+  - PublisherStudio.Services.RuntimeEndpointWriter.DeleteOwnedEndpoint
+  - PublisherStudio.Services.RuntimeEndpointWriter.Write(Microsoft.AspNetCore.Builder.WebApplication)
+  langs:
+  - csharp
+  - vb
+  name: RuntimeEndpointWriter
+  nameWithType: RuntimeEndpointWriter
+  fullName: PublisherStudio.Services.RuntimeEndpointWriter
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Provides runtime endpoint writer operations.
+  example: []
+  syntax:
+    content: 'public sealed class RuntimeEndpointWriter : IRuntimeEndpointWriter'
+    content.vb: Public NotInheritable Class RuntimeEndpointWriter Implements IRuntimeEndpointWriter
+  inheritance:
+  - System.Object
+  implements:
+  - PublisherStudio.Services.IRuntimeEndpointWriter
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.RuntimeEndpointWriter.#ctor(PublisherStudio.Services.Configuration.ISystemVariableStoreService,PublisherStudio.Services.IRuntimeEndpointState,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.RuntimeEndpointWriter})
+  commentId: M:PublisherStudio.Services.RuntimeEndpointWriter.#ctor(PublisherStudio.Services.Configuration.ISystemVariableStoreService,PublisherStudio.Services.IRuntimeEndpointState,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.RuntimeEndpointWriter})
+  id: '#ctor(PublisherStudio.Services.Configuration.ISystemVariableStoreService,PublisherStudio.Services.IRuntimeEndpointState,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.RuntimeEndpointWriter})'
+  parent: PublisherStudio.Services.RuntimeEndpointWriter
+  langs:
+  - csharp
+  - vb
+  name: RuntimeEndpointWriter(ISystemVariableStoreService, IRuntimeEndpointState, ILogger<RuntimeEndpointWriter>)
+  nameWithType: RuntimeEndpointWriter.RuntimeEndpointWriter(ISystemVariableStoreService, IRuntimeEndpointState, ILogger<RuntimeEndpointWriter>)
+  fullName: PublisherStudio.Services.RuntimeEndpointWriter.RuntimeEndpointWriter(PublisherStudio.Services.Configuration.ISystemVariableStoreService, PublisherStudio.Services.IRuntimeEndpointState, Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.RuntimeEndpointWriter>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the runtime endpoint writer operation.
+  example: []
+  syntax:
+    content: public RuntimeEndpointWriter(ISystemVariableStoreService systemVariables, IRuntimeEndpointState runtimeEndpointState, ILogger<RuntimeEndpointWriter> logger)
+    parameters:
+    - id: systemVariables
+      type: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+    - id: runtimeEndpointState
+      type: PublisherStudio.Services.IRuntimeEndpointState
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.RuntimeEndpointWriter}
+    content.vb: Public Sub New(systemVariables As ISystemVariableStoreService, runtimeEndpointState As IRuntimeEndpointState, logger As ILogger(Of RuntimeEndpointWriter))
+  overload: PublisherStudio.Services.RuntimeEndpointWriter.#ctor*
+  nameWithType.vb: RuntimeEndpointWriter.New(ISystemVariableStoreService, IRuntimeEndpointState, ILogger(Of RuntimeEndpointWriter))
+  fullName.vb: PublisherStudio.Services.RuntimeEndpointWriter.New(PublisherStudio.Services.Configuration.ISystemVariableStoreService, PublisherStudio.Services.IRuntimeEndpointState, Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.RuntimeEndpointWriter))
+  name.vb: New(ISystemVariableStoreService, IRuntimeEndpointState, ILogger(Of RuntimeEndpointWriter))
+- uid: PublisherStudio.Services.RuntimeEndpointWriter.Write(Microsoft.AspNetCore.Builder.WebApplication)
+  commentId: M:PublisherStudio.Services.RuntimeEndpointWriter.Write(Microsoft.AspNetCore.Builder.WebApplication)
+  id: Write(Microsoft.AspNetCore.Builder.WebApplication)
+  parent: PublisherStudio.Services.RuntimeEndpointWriter
+  langs:
+  - csharp
+  - vb
+  name: Write(WebApplication)
+  nameWithType: RuntimeEndpointWriter.Write(WebApplication)
+  fullName: PublisherStudio.Services.RuntimeEndpointWriter.Write(Microsoft.AspNetCore.Builder.WebApplication)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the write operation.
+  example: []
+  syntax:
+    content: public void Write(WebApplication app)
+    parameters:
+    - id: app
+      type: Microsoft.AspNetCore.Builder.WebApplication
+    content.vb: Public Sub Write(app As WebApplication)
+  overload: PublisherStudio.Services.RuntimeEndpointWriter.Write*
+  implements:
+  - PublisherStudio.Services.IRuntimeEndpointWriter.Write(Microsoft.AspNetCore.Builder.WebApplication)
+- uid: PublisherStudio.Services.RuntimeEndpointWriter.DeleteOwnedEndpoint
+  commentId: M:PublisherStudio.Services.RuntimeEndpointWriter.DeleteOwnedEndpoint
+  id: DeleteOwnedEndpoint
+  parent: PublisherStudio.Services.RuntimeEndpointWriter
+  langs:
+  - csharp
+  - vb
+  name: DeleteOwnedEndpoint()
+  nameWithType: RuntimeEndpointWriter.DeleteOwnedEndpoint()
+  fullName: PublisherStudio.Services.RuntimeEndpointWriter.DeleteOwnedEndpoint()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Deletes owned endpoint.
+  example: []
+  syntax:
+    content: public void DeleteOwnedEndpoint()
+    content.vb: Public Sub DeleteOwnedEndpoint()
+  overload: PublisherStudio.Services.RuntimeEndpointWriter.DeleteOwnedEndpoint*
+  implements:
+  - PublisherStudio.Services.IRuntimeEndpointWriter.DeleteOwnedEndpoint
+references:
+- uid: PublisherStudio.Services
+  commentId: N:PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services
+  nameWithType: PublisherStudio.Services
+  fullName: PublisherStudio.Services
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: PublisherStudio.Services.IRuntimeEndpointWriter
+  commentId: T:PublisherStudio.Services.IRuntimeEndpointWriter
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.IRuntimeEndpointWriter.html
+  name: IRuntimeEndpointWriter
+  nameWithType: IRuntimeEndpointWriter
+  fullName: PublisherStudio.Services.IRuntimeEndpointWriter
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.RuntimeEndpointWriter.#ctor*
+  commentId: Overload:PublisherStudio.Services.RuntimeEndpointWriter.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.RuntimeEndpointWriter.html#PublisherStudio_Services_RuntimeEndpointWriter__ctor_PublisherStudio_Services_Configuration_ISystemVariableStoreService_PublisherStudio_Services_IRuntimeEndpointState_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_RuntimeEndpointWriter__
+  name: RuntimeEndpointWriter
+  nameWithType: RuntimeEndpointWriter.RuntimeEndpointWriter
+  fullName: PublisherStudio.Services.RuntimeEndpointWriter.RuntimeEndpointWriter
+  nameWithType.vb: RuntimeEndpointWriter.New
+  fullName.vb: PublisherStudio.Services.RuntimeEndpointWriter.New
+  name.vb: New
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  commentId: T:PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  parent: PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.ISystemVariableStoreService.html
+  name: ISystemVariableStoreService
+  nameWithType: ISystemVariableStoreService
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+- uid: PublisherStudio.Services.IRuntimeEndpointState
+  commentId: T:PublisherStudio.Services.IRuntimeEndpointState
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.IRuntimeEndpointState.html
+  name: IRuntimeEndpointState
+  nameWithType: IRuntimeEndpointState
+  fullName: PublisherStudio.Services.IRuntimeEndpointState
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.RuntimeEndpointWriter}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.RuntimeEndpointWriter}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<RuntimeEndpointWriter>
+  nameWithType: ILogger<RuntimeEndpointWriter>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.RuntimeEndpointWriter>
+  nameWithType.vb: ILogger(Of RuntimeEndpointWriter)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.RuntimeEndpointWriter)
+  name.vb: ILogger(Of RuntimeEndpointWriter)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.RuntimeEndpointWriter
+    name: RuntimeEndpointWriter
+    isExternal: true
+    href: PublisherStudio.Services.RuntimeEndpointWriter.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.RuntimeEndpointWriter
+    name: RuntimeEndpointWriter
+    isExternal: true
+    href: PublisherStudio.Services.RuntimeEndpointWriter.html
+  - name: )
+- uid: PublisherStudio.Services.Configuration
+  commentId: N:PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Configuration
+  nameWithType: PublisherStudio.Services.Configuration
+  fullName: PublisherStudio.Services.Configuration
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: PublisherStudio.Services.RuntimeEndpointWriter.Write*
+  commentId: Overload:PublisherStudio.Services.RuntimeEndpointWriter.Write
+  isExternal: true
+  href: PublisherStudio.Services.RuntimeEndpointWriter.html#PublisherStudio_Services_RuntimeEndpointWriter_Write_Microsoft_AspNetCore_Builder_WebApplication_
+  name: Write
+  nameWithType: RuntimeEndpointWriter.Write
+  fullName: PublisherStudio.Services.RuntimeEndpointWriter.Write
+- uid: PublisherStudio.Services.IRuntimeEndpointWriter.Write(Microsoft.AspNetCore.Builder.WebApplication)
+  commentId: M:PublisherStudio.Services.IRuntimeEndpointWriter.Write(Microsoft.AspNetCore.Builder.WebApplication)
+  parent: PublisherStudio.Services.IRuntimeEndpointWriter
+  isExternal: true
+  href: PublisherStudio.Services.IRuntimeEndpointWriter.html#PublisherStudio_Services_IRuntimeEndpointWriter_Write_Microsoft_AspNetCore_Builder_WebApplication_
+  name: Write(WebApplication)
+  nameWithType: IRuntimeEndpointWriter.Write(WebApplication)
+  fullName: PublisherStudio.Services.IRuntimeEndpointWriter.Write(Microsoft.AspNetCore.Builder.WebApplication)
+  spec.csharp:
+  - uid: PublisherStudio.Services.IRuntimeEndpointWriter.Write(Microsoft.AspNetCore.Builder.WebApplication)
+    name: Write
+    isExternal: true
+    href: PublisherStudio.Services.IRuntimeEndpointWriter.html#PublisherStudio_Services_IRuntimeEndpointWriter_Write_Microsoft_AspNetCore_Builder_WebApplication_
+  - name: (
+  - uid: Microsoft.AspNetCore.Builder.WebApplication
+    name: WebApplication
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.builder.webapplication
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.IRuntimeEndpointWriter.Write(Microsoft.AspNetCore.Builder.WebApplication)
+    name: Write
+    isExternal: true
+    href: PublisherStudio.Services.IRuntimeEndpointWriter.html#PublisherStudio_Services_IRuntimeEndpointWriter_Write_Microsoft_AspNetCore_Builder_WebApplication_
+  - name: (
+  - uid: Microsoft.AspNetCore.Builder.WebApplication
+    name: WebApplication
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.builder.webapplication
+  - name: )
+- uid: Microsoft.AspNetCore.Builder.WebApplication
+  commentId: T:Microsoft.AspNetCore.Builder.WebApplication
+  parent: Microsoft.AspNetCore.Builder
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.builder.webapplication
+  name: WebApplication
+  nameWithType: WebApplication
+  fullName: Microsoft.AspNetCore.Builder.WebApplication
+- uid: Microsoft.AspNetCore.Builder
+  commentId: N:Microsoft.AspNetCore.Builder
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.AspNetCore.Builder
+  nameWithType: Microsoft.AspNetCore.Builder
+  fullName: Microsoft.AspNetCore.Builder
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.AspNetCore
+    name: AspNetCore
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore
+  - name: .
+  - uid: Microsoft.AspNetCore.Builder
+    name: Builder
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.builder
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.AspNetCore
+    name: AspNetCore
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore
+  - name: .
+  - uid: Microsoft.AspNetCore.Builder
+    name: Builder
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.builder
+- uid: PublisherStudio.Services.RuntimeEndpointWriter.DeleteOwnedEndpoint*
+  commentId: Overload:PublisherStudio.Services.RuntimeEndpointWriter.DeleteOwnedEndpoint
+  isExternal: true
+  href: PublisherStudio.Services.RuntimeEndpointWriter.html#PublisherStudio_Services_RuntimeEndpointWriter_DeleteOwnedEndpoint
+  name: DeleteOwnedEndpoint
+  nameWithType: RuntimeEndpointWriter.DeleteOwnedEndpoint
+  fullName: PublisherStudio.Services.RuntimeEndpointWriter.DeleteOwnedEndpoint
+- uid: PublisherStudio.Services.IRuntimeEndpointWriter.DeleteOwnedEndpoint
+  commentId: M:PublisherStudio.Services.IRuntimeEndpointWriter.DeleteOwnedEndpoint
+  parent: PublisherStudio.Services.IRuntimeEndpointWriter
+  isExternal: true
+  href: PublisherStudio.Services.IRuntimeEndpointWriter.html#PublisherStudio_Services_IRuntimeEndpointWriter_DeleteOwnedEndpoint
+  name: DeleteOwnedEndpoint()
+  nameWithType: IRuntimeEndpointWriter.DeleteOwnedEndpoint()
+  fullName: PublisherStudio.Services.IRuntimeEndpointWriter.DeleteOwnedEndpoint()
+  spec.csharp:
+  - uid: PublisherStudio.Services.IRuntimeEndpointWriter.DeleteOwnedEndpoint
+    name: DeleteOwnedEndpoint
+    isExternal: true
+    href: PublisherStudio.Services.IRuntimeEndpointWriter.html#PublisherStudio_Services_IRuntimeEndpointWriter_DeleteOwnedEndpoint
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.IRuntimeEndpointWriter.DeleteOwnedEndpoint
+    name: DeleteOwnedEndpoint
+    isExternal: true
+    href: PublisherStudio.Services.IRuntimeEndpointWriter.html#PublisherStudio_Services_IRuntimeEndpointWriter_DeleteOwnedEndpoint
+  - name: (
+  - name: )

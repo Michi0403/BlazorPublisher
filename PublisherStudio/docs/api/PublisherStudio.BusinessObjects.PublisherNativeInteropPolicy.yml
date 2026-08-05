@@ -1,0 +1,1200 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  commentId: T:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  id: PublisherNativeInteropPolicy
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.#ctor
+  - PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioActivationSuccessResult
+  - PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientBufferFlagsSilent
+  - PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsAutoConvertPcm
+  - PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsEventCallback
+  - PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsLoopback
+  - PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsSourceDefaultQuality
+  - PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.Equals(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy)
+  - PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.Equals(System.Object)
+  - PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.GetHashCode
+  - PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierAlt
+  - PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierControl
+  - PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierNoRepeat
+  - PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierShift
+  - PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierWindows
+  - PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ToString
+  - PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.VariantBlobType
+  - PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.VirtualAudioDeviceProcessLoopback
+  - PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.WindowMessageCommand
+  - PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.WindowMessageHotkey
+  - PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.WindowMessageQuit
+  - PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.op_Equality(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy,PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy)
+  - PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.op_Inequality(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy,PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy)
+  langs:
+  - csharp
+  - vb
+  name: PublisherNativeInteropPolicy
+  nameWithType: PublisherNativeInteropPolicy
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents a publisher native interop policy.
+  example: []
+  syntax:
+    content: 'public sealed record PublisherNativeInteropPolicy : IEquatable<PublisherNativeInteropPolicy>'
+    content.vb: Public NotInheritable Class PublisherNativeInteropPolicy Implements IEquatable(Of PublisherNativeInteropPolicy)
+  inheritance:
+  - System.Object
+  implements:
+  - System.IEquatable{PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy}
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ToString
+  commentId: M:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ToString
+  id: ToString
+  parent: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  langs:
+  - csharp
+  - vb
+  name: ToString()
+  nameWithType: PublisherNativeInteropPolicy.ToString()
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ToString()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  example: []
+  syntax:
+    content: public override string ToString()
+    return:
+      type: System.String
+    content.vb: Public Overrides Function ToString() As String
+  overridden: System.Object.ToString
+  overload: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ToString*
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.op_Inequality(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy,PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy)
+  commentId: M:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.op_Inequality(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy,PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy)
+  id: op_Inequality(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy,PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy)
+  parent: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  langs:
+  - csharp
+  - vb
+  name: operator !=(PublisherNativeInteropPolicy?, PublisherNativeInteropPolicy?)
+  nameWithType: PublisherNativeInteropPolicy.operator !=(PublisherNativeInteropPolicy?, PublisherNativeInteropPolicy?)
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.operator !=(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy?, PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy?)
+  type: Operator
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public static bool operator !=(PublisherNativeInteropPolicy? left, PublisherNativeInteropPolicy? right)
+    parameters:
+    - id: left
+      type: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+    - id: right
+      type: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+    return:
+      type: System.Boolean
+    content.vb: Public Shared Operator <>(left As PublisherNativeInteropPolicy, right As PublisherNativeInteropPolicy) As Boolean
+  overload: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.op_Inequality*
+  nameWithType.vb: PublisherNativeInteropPolicy.<>(PublisherNativeInteropPolicy, PublisherNativeInteropPolicy)
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.<>(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy, PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy)
+  name.vb: <>(PublisherNativeInteropPolicy, PublisherNativeInteropPolicy)
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.op_Equality(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy,PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy)
+  commentId: M:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.op_Equality(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy,PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy)
+  id: op_Equality(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy,PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy)
+  parent: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  langs:
+  - csharp
+  - vb
+  name: operator ==(PublisherNativeInteropPolicy?, PublisherNativeInteropPolicy?)
+  nameWithType: PublisherNativeInteropPolicy.operator ==(PublisherNativeInteropPolicy?, PublisherNativeInteropPolicy?)
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.operator ==(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy?, PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy?)
+  type: Operator
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public static bool operator ==(PublisherNativeInteropPolicy? left, PublisherNativeInteropPolicy? right)
+    parameters:
+    - id: left
+      type: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+    - id: right
+      type: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+    return:
+      type: System.Boolean
+    content.vb: Public Shared Operator =(left As PublisherNativeInteropPolicy, right As PublisherNativeInteropPolicy) As Boolean
+  overload: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.op_Equality*
+  nameWithType.vb: PublisherNativeInteropPolicy.=(PublisherNativeInteropPolicy, PublisherNativeInteropPolicy)
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.=(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy, PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy)
+  name.vb: =(PublisherNativeInteropPolicy, PublisherNativeInteropPolicy)
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.GetHashCode
+  commentId: M:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.GetHashCode
+  id: GetHashCode
+  parent: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  langs:
+  - csharp
+  - vb
+  name: GetHashCode()
+  nameWithType: PublisherNativeInteropPolicy.GetHashCode()
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.GetHashCode()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  example: []
+  syntax:
+    content: public override int GetHashCode()
+    return:
+      type: System.Int32
+    content.vb: Public Overrides Function GetHashCode() As Integer
+  overridden: System.Object.GetHashCode
+  overload: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.GetHashCode*
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.Equals(System.Object)
+  commentId: M:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.Equals(System.Object)
+  id: Equals(System.Object)
+  parent: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  langs:
+  - csharp
+  - vb
+  name: Equals(object?)
+  nameWithType: PublisherNativeInteropPolicy.Equals(object?)
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.Equals(object?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  example: []
+  syntax:
+    content: public override bool Equals(object? obj)
+    parameters:
+    - id: obj
+      type: System.Object
+    return:
+      type: System.Boolean
+    content.vb: Public Overrides Function Equals(obj As Object) As Boolean
+  overridden: System.Object.Equals(System.Object)
+  overload: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.Equals*
+  nameWithType.vb: PublisherNativeInteropPolicy.Equals(Object)
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.Equals(Object)
+  name.vb: Equals(Object)
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.Equals(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy)
+  commentId: M:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.Equals(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy)
+  id: Equals(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy)
+  parent: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  langs:
+  - csharp
+  - vb
+  name: Equals(PublisherNativeInteropPolicy?)
+  nameWithType: PublisherNativeInteropPolicy.Equals(PublisherNativeInteropPolicy?)
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.Equals(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  example: []
+  syntax:
+    content: public bool Equals(PublisherNativeInteropPolicy? other)
+    parameters:
+    - id: other
+      type: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+    return:
+      type: System.Boolean
+    content.vb: Public Function Equals(other As PublisherNativeInteropPolicy) As Boolean
+  overload: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.Equals*
+  implements:
+  - System.IEquatable{PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy}.Equals(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy)
+  nameWithType.vb: PublisherNativeInteropPolicy.Equals(PublisherNativeInteropPolicy)
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.Equals(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy)
+  name.vb: Equals(PublisherNativeInteropPolicy)
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.#ctor
+  commentId: M:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  langs:
+  - csharp
+  - vb
+  name: PublisherNativeInteropPolicy()
+  nameWithType: PublisherNativeInteropPolicy.PublisherNativeInteropPolicy()
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.PublisherNativeInteropPolicy()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public PublisherNativeInteropPolicy()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.#ctor*
+  nameWithType.vb: PublisherNativeInteropPolicy.New()
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.New()
+  name.vb: New()
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.VirtualAudioDeviceProcessLoopback
+  commentId: P:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.VirtualAudioDeviceProcessLoopback
+  id: VirtualAudioDeviceProcessLoopback
+  parent: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  langs:
+  - csharp
+  - vb
+  name: VirtualAudioDeviceProcessLoopback
+  nameWithType: PublisherNativeInteropPolicy.VirtualAudioDeviceProcessLoopback
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.VirtualAudioDeviceProcessLoopback
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets virtual audio device process loopback.
+  example: []
+  syntax:
+    content: public string VirtualAudioDeviceProcessLoopback { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property VirtualAudioDeviceProcessLoopback As String
+  overload: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.VirtualAudioDeviceProcessLoopback*
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsLoopback
+  commentId: P:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsLoopback
+  id: AudioClientStreamFlagsLoopback
+  parent: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  langs:
+  - csharp
+  - vb
+  name: AudioClientStreamFlagsLoopback
+  nameWithType: PublisherNativeInteropPolicy.AudioClientStreamFlagsLoopback
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsLoopback
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets audio client stream flags loopback.
+  example: []
+  syntax:
+    content: public uint AudioClientStreamFlagsLoopback { get; init; }
+    parameters: []
+    return:
+      type: System.UInt32
+    content.vb: Public Property AudioClientStreamFlagsLoopback As UInteger
+  overload: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsLoopback*
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsEventCallback
+  commentId: P:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsEventCallback
+  id: AudioClientStreamFlagsEventCallback
+  parent: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  langs:
+  - csharp
+  - vb
+  name: AudioClientStreamFlagsEventCallback
+  nameWithType: PublisherNativeInteropPolicy.AudioClientStreamFlagsEventCallback
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsEventCallback
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets audio client stream flags event callback.
+  example: []
+  syntax:
+    content: public uint AudioClientStreamFlagsEventCallback { get; init; }
+    parameters: []
+    return:
+      type: System.UInt32
+    content.vb: Public Property AudioClientStreamFlagsEventCallback As UInteger
+  overload: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsEventCallback*
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsSourceDefaultQuality
+  commentId: P:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsSourceDefaultQuality
+  id: AudioClientStreamFlagsSourceDefaultQuality
+  parent: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  langs:
+  - csharp
+  - vb
+  name: AudioClientStreamFlagsSourceDefaultQuality
+  nameWithType: PublisherNativeInteropPolicy.AudioClientStreamFlagsSourceDefaultQuality
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsSourceDefaultQuality
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets audio client stream flags source default quality.
+  example: []
+  syntax:
+    content: public uint AudioClientStreamFlagsSourceDefaultQuality { get; init; }
+    parameters: []
+    return:
+      type: System.UInt32
+    content.vb: Public Property AudioClientStreamFlagsSourceDefaultQuality As UInteger
+  overload: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsSourceDefaultQuality*
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsAutoConvertPcm
+  commentId: P:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsAutoConvertPcm
+  id: AudioClientStreamFlagsAutoConvertPcm
+  parent: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  langs:
+  - csharp
+  - vb
+  name: AudioClientStreamFlagsAutoConvertPcm
+  nameWithType: PublisherNativeInteropPolicy.AudioClientStreamFlagsAutoConvertPcm
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsAutoConvertPcm
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets audio client stream flags auto convert pcm.
+  example: []
+  syntax:
+    content: public uint AudioClientStreamFlagsAutoConvertPcm { get; init; }
+    parameters: []
+    return:
+      type: System.UInt32
+    content.vb: Public Property AudioClientStreamFlagsAutoConvertPcm As UInteger
+  overload: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsAutoConvertPcm*
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientBufferFlagsSilent
+  commentId: P:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientBufferFlagsSilent
+  id: AudioClientBufferFlagsSilent
+  parent: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  langs:
+  - csharp
+  - vb
+  name: AudioClientBufferFlagsSilent
+  nameWithType: PublisherNativeInteropPolicy.AudioClientBufferFlagsSilent
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientBufferFlagsSilent
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets audio client buffer flags silent.
+  example: []
+  syntax:
+    content: public uint AudioClientBufferFlagsSilent { get; init; }
+    parameters: []
+    return:
+      type: System.UInt32
+    content.vb: Public Property AudioClientBufferFlagsSilent As UInteger
+  overload: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientBufferFlagsSilent*
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.VariantBlobType
+  commentId: P:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.VariantBlobType
+  id: VariantBlobType
+  parent: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  langs:
+  - csharp
+  - vb
+  name: VariantBlobType
+  nameWithType: PublisherNativeInteropPolicy.VariantBlobType
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.VariantBlobType
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets variant blob type.
+  example: []
+  syntax:
+    content: public ushort VariantBlobType { get; init; }
+    parameters: []
+    return:
+      type: System.UInt16
+    content.vb: Public Property VariantBlobType As UShort
+  overload: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.VariantBlobType*
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.WindowMessageHotkey
+  commentId: P:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.WindowMessageHotkey
+  id: WindowMessageHotkey
+  parent: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  langs:
+  - csharp
+  - vb
+  name: WindowMessageHotkey
+  nameWithType: PublisherNativeInteropPolicy.WindowMessageHotkey
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.WindowMessageHotkey
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets window message hotkey.
+  example: []
+  syntax:
+    content: public uint WindowMessageHotkey { get; init; }
+    parameters: []
+    return:
+      type: System.UInt32
+    content.vb: Public Property WindowMessageHotkey As UInteger
+  overload: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.WindowMessageHotkey*
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.WindowMessageCommand
+  commentId: P:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.WindowMessageCommand
+  id: WindowMessageCommand
+  parent: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  langs:
+  - csharp
+  - vb
+  name: WindowMessageCommand
+  nameWithType: PublisherNativeInteropPolicy.WindowMessageCommand
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.WindowMessageCommand
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets window message command.
+  example: []
+  syntax:
+    content: public uint WindowMessageCommand { get; init; }
+    parameters: []
+    return:
+      type: System.UInt32
+    content.vb: Public Property WindowMessageCommand As UInteger
+  overload: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.WindowMessageCommand*
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.WindowMessageQuit
+  commentId: P:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.WindowMessageQuit
+  id: WindowMessageQuit
+  parent: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  langs:
+  - csharp
+  - vb
+  name: WindowMessageQuit
+  nameWithType: PublisherNativeInteropPolicy.WindowMessageQuit
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.WindowMessageQuit
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets window message quit.
+  example: []
+  syntax:
+    content: public uint WindowMessageQuit { get; init; }
+    parameters: []
+    return:
+      type: System.UInt32
+    content.vb: Public Property WindowMessageQuit As UInteger
+  overload: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.WindowMessageQuit*
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierAlt
+  commentId: P:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierAlt
+  id: ModifierAlt
+  parent: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  langs:
+  - csharp
+  - vb
+  name: ModifierAlt
+  nameWithType: PublisherNativeInteropPolicy.ModifierAlt
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierAlt
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets modifier alt.
+  example: []
+  syntax:
+    content: public uint ModifierAlt { get; init; }
+    parameters: []
+    return:
+      type: System.UInt32
+    content.vb: Public Property ModifierAlt As UInteger
+  overload: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierAlt*
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierControl
+  commentId: P:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierControl
+  id: ModifierControl
+  parent: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  langs:
+  - csharp
+  - vb
+  name: ModifierControl
+  nameWithType: PublisherNativeInteropPolicy.ModifierControl
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierControl
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets modifier control.
+  example: []
+  syntax:
+    content: public uint ModifierControl { get; init; }
+    parameters: []
+    return:
+      type: System.UInt32
+    content.vb: Public Property ModifierControl As UInteger
+  overload: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierControl*
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierShift
+  commentId: P:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierShift
+  id: ModifierShift
+  parent: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  langs:
+  - csharp
+  - vb
+  name: ModifierShift
+  nameWithType: PublisherNativeInteropPolicy.ModifierShift
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierShift
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets modifier shift.
+  example: []
+  syntax:
+    content: public uint ModifierShift { get; init; }
+    parameters: []
+    return:
+      type: System.UInt32
+    content.vb: Public Property ModifierShift As UInteger
+  overload: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierShift*
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierWindows
+  commentId: P:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierWindows
+  id: ModifierWindows
+  parent: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  langs:
+  - csharp
+  - vb
+  name: ModifierWindows
+  nameWithType: PublisherNativeInteropPolicy.ModifierWindows
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierWindows
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets modifier windows.
+  example: []
+  syntax:
+    content: public uint ModifierWindows { get; init; }
+    parameters: []
+    return:
+      type: System.UInt32
+    content.vb: Public Property ModifierWindows As UInteger
+  overload: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierWindows*
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierNoRepeat
+  commentId: P:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierNoRepeat
+  id: ModifierNoRepeat
+  parent: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  langs:
+  - csharp
+  - vb
+  name: ModifierNoRepeat
+  nameWithType: PublisherNativeInteropPolicy.ModifierNoRepeat
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierNoRepeat
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets modifier no repeat.
+  example: []
+  syntax:
+    content: public uint ModifierNoRepeat { get; init; }
+    parameters: []
+    return:
+      type: System.UInt32
+    content.vb: Public Property ModifierNoRepeat As UInteger
+  overload: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierNoRepeat*
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioActivationSuccessResult
+  commentId: P:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioActivationSuccessResult
+  id: AudioActivationSuccessResult
+  parent: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  langs:
+  - csharp
+  - vb
+  name: AudioActivationSuccessResult
+  nameWithType: PublisherNativeInteropPolicy.AudioActivationSuccessResult
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioActivationSuccessResult
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets audio activation success result.
+  example: []
+  syntax:
+    content: public int AudioActivationSuccessResult { get; init; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property AudioActivationSuccessResult As Integer
+  overload: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioActivationSuccessResult*
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.IEquatable{PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy}
+  commentId: T:System.IEquatable{PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy}
+  parent: System
+  definition: System.IEquatable`1
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<PublisherNativeInteropPolicy>
+  nameWithType: IEquatable<PublisherNativeInteropPolicy>
+  fullName: System.IEquatable<PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy>
+  nameWithType.vb: IEquatable(Of PublisherNativeInteropPolicy)
+  fullName.vb: System.IEquatable(Of PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy)
+  name.vb: IEquatable(Of PublisherNativeInteropPolicy)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+    name: PublisherNativeInteropPolicy
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+    name: PublisherNativeInteropPolicy
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: System.IEquatable`1
+  commentId: T:System.IEquatable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<T>
+  nameWithType: IEquatable<T>
+  fullName: System.IEquatable<T>
+  nameWithType.vb: IEquatable(Of T)
+  fullName.vb: System.IEquatable(Of T)
+  name.vb: IEquatable(Of T)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ToString*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ToString
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html#PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_ToString
+  name: ToString
+  nameWithType: PublisherNativeInteropPolicy.ToString
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ToString
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.op_Inequality*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.op_Inequality
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html#PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_op_Inequality_PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_
+  name: operator !=
+  nameWithType: PublisherNativeInteropPolicy.operator !=
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.operator !=
+  nameWithType.vb: PublisherNativeInteropPolicy.<>
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.<>
+  name.vb: <>
+  spec.csharp:
+  - name: operator
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.op_Inequality*
+    name: '!='
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html#PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_op_Inequality_PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  commentId: T:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html
+  name: PublisherNativeInteropPolicy
+  nameWithType: PublisherNativeInteropPolicy
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.op_Equality*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.op_Equality
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html#PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_op_Equality_PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_
+  name: operator ==
+  nameWithType: PublisherNativeInteropPolicy.operator ==
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.operator ==
+  nameWithType.vb: PublisherNativeInteropPolicy.=
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.=
+  name.vb: =
+  spec.csharp:
+  - name: operator
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.op_Equality*
+    name: ==
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html#PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_op_Equality_PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.GetHashCode*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.GetHashCode
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html#PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_GetHashCode
+  name: GetHashCode
+  nameWithType: PublisherNativeInteropPolicy.GetHashCode
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.GetHashCode
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.Equals*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.Equals
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html#PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_Equals_System_Object_
+  name: Equals
+  nameWithType: PublisherNativeInteropPolicy.Equals
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.Equals
+- uid: System.IEquatable{PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy}.Equals(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy)
+  commentId: M:System.IEquatable{PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy}.Equals(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy)
+  parent: System.IEquatable{PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy}
+  definition: System.IEquatable`1.Equals(`0)
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  name: Equals(PublisherNativeInteropPolicy)
+  nameWithType: IEquatable<PublisherNativeInteropPolicy>.Equals(PublisherNativeInteropPolicy)
+  fullName: System.IEquatable<PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy>.Equals(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy)
+  nameWithType.vb: IEquatable(Of PublisherNativeInteropPolicy).Equals(PublisherNativeInteropPolicy)
+  fullName.vb: System.IEquatable(Of PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy).Equals(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy)
+  spec.csharp:
+  - uid: System.IEquatable{PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy}.Equals(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+    name: PublisherNativeInteropPolicy
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html
+  - name: )
+  spec.vb:
+  - uid: System.IEquatable{PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy}.Equals(PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy
+    name: PublisherNativeInteropPolicy
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html
+  - name: )
+- uid: System.IEquatable`1.Equals(`0)
+  commentId: M:System.IEquatable`1.Equals(`0)
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  name: Equals(T)
+  nameWithType: IEquatable<T>.Equals(T)
+  fullName: System.IEquatable<T>.Equals(T)
+  nameWithType.vb: IEquatable(Of T).Equals(T)
+  fullName.vb: System.IEquatable(Of T).Equals(T)
+  spec.csharp:
+  - uid: System.IEquatable`1.Equals(`0)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - name: T
+  - name: )
+  spec.vb:
+  - uid: System.IEquatable`1.Equals(`0)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - name: T
+  - name: )
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.#ctor*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.#ctor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html#PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy__ctor
+  name: PublisherNativeInteropPolicy
+  nameWithType: PublisherNativeInteropPolicy.PublisherNativeInteropPolicy
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.PublisherNativeInteropPolicy
+  nameWithType.vb: PublisherNativeInteropPolicy.New
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.New
+  name.vb: New
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.VirtualAudioDeviceProcessLoopback*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.VirtualAudioDeviceProcessLoopback
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html#PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_VirtualAudioDeviceProcessLoopback
+  name: VirtualAudioDeviceProcessLoopback
+  nameWithType: PublisherNativeInteropPolicy.VirtualAudioDeviceProcessLoopback
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.VirtualAudioDeviceProcessLoopback
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsLoopback*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsLoopback
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html#PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_AudioClientStreamFlagsLoopback
+  name: AudioClientStreamFlagsLoopback
+  nameWithType: PublisherNativeInteropPolicy.AudioClientStreamFlagsLoopback
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsLoopback
+- uid: System.UInt32
+  commentId: T:System.UInt32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.uint32
+  name: uint
+  nameWithType: uint
+  fullName: uint
+  nameWithType.vb: UInteger
+  fullName.vb: UInteger
+  name.vb: UInteger
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsEventCallback*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsEventCallback
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html#PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_AudioClientStreamFlagsEventCallback
+  name: AudioClientStreamFlagsEventCallback
+  nameWithType: PublisherNativeInteropPolicy.AudioClientStreamFlagsEventCallback
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsEventCallback
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsSourceDefaultQuality*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsSourceDefaultQuality
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html#PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_AudioClientStreamFlagsSourceDefaultQuality
+  name: AudioClientStreamFlagsSourceDefaultQuality
+  nameWithType: PublisherNativeInteropPolicy.AudioClientStreamFlagsSourceDefaultQuality
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsSourceDefaultQuality
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsAutoConvertPcm*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsAutoConvertPcm
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html#PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_AudioClientStreamFlagsAutoConvertPcm
+  name: AudioClientStreamFlagsAutoConvertPcm
+  nameWithType: PublisherNativeInteropPolicy.AudioClientStreamFlagsAutoConvertPcm
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientStreamFlagsAutoConvertPcm
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientBufferFlagsSilent*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientBufferFlagsSilent
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html#PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_AudioClientBufferFlagsSilent
+  name: AudioClientBufferFlagsSilent
+  nameWithType: PublisherNativeInteropPolicy.AudioClientBufferFlagsSilent
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioClientBufferFlagsSilent
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.VariantBlobType*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.VariantBlobType
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html#PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_VariantBlobType
+  name: VariantBlobType
+  nameWithType: PublisherNativeInteropPolicy.VariantBlobType
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.VariantBlobType
+- uid: System.UInt16
+  commentId: T:System.UInt16
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.uint16
+  name: ushort
+  nameWithType: ushort
+  fullName: ushort
+  nameWithType.vb: UShort
+  fullName.vb: UShort
+  name.vb: UShort
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.WindowMessageHotkey*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.WindowMessageHotkey
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html#PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_WindowMessageHotkey
+  name: WindowMessageHotkey
+  nameWithType: PublisherNativeInteropPolicy.WindowMessageHotkey
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.WindowMessageHotkey
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.WindowMessageCommand*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.WindowMessageCommand
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html#PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_WindowMessageCommand
+  name: WindowMessageCommand
+  nameWithType: PublisherNativeInteropPolicy.WindowMessageCommand
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.WindowMessageCommand
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.WindowMessageQuit*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.WindowMessageQuit
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html#PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_WindowMessageQuit
+  name: WindowMessageQuit
+  nameWithType: PublisherNativeInteropPolicy.WindowMessageQuit
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.WindowMessageQuit
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierAlt*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierAlt
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html#PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_ModifierAlt
+  name: ModifierAlt
+  nameWithType: PublisherNativeInteropPolicy.ModifierAlt
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierAlt
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierControl*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierControl
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html#PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_ModifierControl
+  name: ModifierControl
+  nameWithType: PublisherNativeInteropPolicy.ModifierControl
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierControl
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierShift*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierShift
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html#PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_ModifierShift
+  name: ModifierShift
+  nameWithType: PublisherNativeInteropPolicy.ModifierShift
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierShift
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierWindows*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierWindows
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html#PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_ModifierWindows
+  name: ModifierWindows
+  nameWithType: PublisherNativeInteropPolicy.ModifierWindows
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierWindows
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierNoRepeat*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierNoRepeat
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html#PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_ModifierNoRepeat
+  name: ModifierNoRepeat
+  nameWithType: PublisherNativeInteropPolicy.ModifierNoRepeat
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.ModifierNoRepeat
+- uid: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioActivationSuccessResult*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioActivationSuccessResult
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.html#PublisherStudio_BusinessObjects_PublisherNativeInteropPolicy_AudioActivationSuccessResult
+  name: AudioActivationSuccessResult
+  nameWithType: PublisherNativeInteropPolicy.AudioActivationSuccessResult
+  fullName: PublisherStudio.BusinessObjects.PublisherNativeInteropPolicy.AudioActivationSuccessResult

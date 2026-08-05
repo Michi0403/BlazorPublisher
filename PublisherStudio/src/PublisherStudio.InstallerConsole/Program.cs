@@ -1,5 +1,4 @@
 using PublisherStudio.InstallerConsole.Helper;
-using PublisherStudio.InstallerConsole.Installation;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -21,19 +20,69 @@ using System.Threading.Tasks;
 namespace PublisherStudio.InstallerConsole;
 internal static class Program
 {
-    private const string BlazorPublisherRepo = "Michi0403/BlazorPublisher";
-    private const string BlazorPublisherZipName = "BlazorPublisherByMichi0403.zip";
-    private const string BlazorPublisherSetupZipName = "BlazorPublisherSetupByMichi0403.zip";
+    private const string PublisherStudioRepo = "Michi0403/BlazorPublisher";
+    private const string PublisherStudioZipName = "PublisherStudioByMichi0403.zip";
+    private const string PublisherStudioSetupZipName = "PublisherStudioSetupByMichi0403.zip";
     private static readonly HttpClient Http = CreateHttpClient();
+    private const string DetachedSetupEnvironmentVariable = "PUBLISHERSTUDIO_SETUP_DETACHED";
 
+    private static bool TryStartDetachedSetup(string[] args)
+    {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            return false;
+        if (string.Equals(Environment.GetEnvironmentVariable(DetachedSetupEnvironmentVariable), "1", StringComparison.Ordinal))
+            return false;
+
+        var processPath = Environment.ProcessPath;
+        if (string.IsNullOrWhiteSpace(processPath) || !File.Exists(processPath))
+            return false;
+
+        var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        if (string.IsNullOrWhiteSpace(localAppData))
+            return false;
+
+        var installRoot = Path.GetFullPath(Path.Combine(localAppData, "PublisherStudio"))
+            .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var executablePath = Path.GetFullPath(processPath);
+        if (!executablePath.StartsWith(installRoot + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        var detachedDirectory = Path.Combine(Path.GetTempPath(), "PublisherStudio", "setup", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(detachedDirectory);
+        var detachedExecutable = Path.Combine(detachedDirectory, Path.GetFileName(executablePath));
+        File.Copy(executablePath, detachedExecutable, overwrite: true);
+
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = detachedExecutable,
+            UseShellExecute = false,
+            CreateNoWindow = false,
+            WorkingDirectory = Environment.CurrentDirectory
+        };
+        foreach (var arg in args)
+            startInfo.ArgumentList.Add(arg);
+        startInfo.Environment[DetachedSetupEnvironmentVariable] = "1";
+
+        Process.Start(startInfo)
+            ?? throw new InvalidOperationException("PublisherStudio detached setup process could not be started.");
+        Console.WriteLine("PublisherStudio setup continued from a temporary copy so the installed setup can be replaced.");
+        return true;
+    }
+
+    /// <summary>
+    /// Runs the main operation.
+    /// </summary>
     public static async Task<int> Main(string[] args)
     {
+        if (TryStartDetachedSetup(args))
+            return 0;
+
         var launchedByDoubleClick = args.Length == 0 && Environment.UserInteractive;
 
-        Console.WriteLine("PublisherStudio Setup 2.0.5");
+        Console.WriteLine("PublisherStudio Setup 2.1.1");
         var options = CliOptions.Parse(args);
         if (args.Length == 0)
-            Console.WriteLine("No command-line action was supplied. Running the default preservation-first install and update routine.");
+            Console.WriteLine("No command-line action was supplied. Running the default install, update, shortcut, and start routine.");
         else
             Console.WriteLine($"Requested setup actions:{Environment.NewLine}{options}");
         try
@@ -55,22 +104,6 @@ internal static class Program
             }
         }
         
-    }
-    private static string ArgsToString(string[]? args)
-    {
-        if (args is null)
-            return "args=null";
-
-        if (args.Length == 0)
-            return "args=[]";
-
-        var builder = new StringBuilder();
-        builder.AppendLine($"args.Length={args.Length}");
-
-        for (var i = 0; i < args.Length; i++)
-            builder.AppendLine($"args[{i}]=\"{args[i]}\"");
-
-        return builder.ToString().TrimEnd();
     }
     private static async Task<int> RunAsync(string[] args, CliOptions options)
     {
@@ -100,21 +133,21 @@ internal static class Program
             {
                 if (options.Uninstall)
                 {
-                    UninstallBlazorPublisherWindows(options, logger);
+                    UninstallPublisherStudioWindows(options, logger);
                     return 0;
                 }
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error in UninstallBlazorPublisherWindows.");
+                logger.LogError(ex, "Error in UninstallPublisherStudioWindows.");
             }
 
             try
             {
                 try
                 {
-                    if (options.InstallBlazorPublisher || options.UpdateBlazorPublisher)
-                        await InstallBlazorPublisherAsync(options, logger).ConfigureAwait(false);
+                    if (options.InstallPublisherStudio || options.UpdatePublisherStudio)
+                        await InstallPublisherStudioAsync(options, logger).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -125,7 +158,7 @@ internal static class Program
                 {
                     if (options.CheckFfmpeg && !options.InstallFfmpeg)
                         FfmpegProvisioner.ReportStatus(logger);
-                    else if (!options.SkipFfmpeg && (options.InstallFfmpeg || options.InstallBlazorPublisher || options.UpdateBlazorPublisher))
+                    else if (!options.SkipFfmpeg && (options.InstallFfmpeg || options.InstallPublisherStudio || options.UpdatePublisherStudio))
                         await FfmpegProvisioner.EnsureInstalledAsync(logger).ConfigureAwait(false);
                 }
                 catch (Exception ex)
@@ -143,12 +176,12 @@ internal static class Program
                 }
                 try
                 {
-                    if (options.StartBlazorPublisher)
-                        StartBlazorPublisher(options, logger);
+                    if (options.StartPublisherStudio)
+                        StartPublisherStudio(options, logger);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Error in StartBlazorPublisher.");
+                    logger.LogError(ex, "Error in StartPublisherStudio.");
                 }
 
 
@@ -170,89 +203,66 @@ internal static class Program
         }
     }
 
-    private static async Task InstallBlazorPublisherAsync(CliOptions options, ILogger logger)
+    private static async Task InstallPublisherStudioAsync(CliOptions options, ILogger logger)
     {
         try
         {
-            var layout = PublisherStudioInstallLayout.Resolve(logger);
-            var deployment = new PublisherStudioDeploymentService(logger);
-            var cacheDirectory = Path.Combine(Path.GetTempPath(), "PublisherStudio", "downloads");
-            Directory.CreateDirectory(cacheDirectory);
+            var zipPath = options.PublisherStudioZipPath ?? Path.Combine(Environment.CurrentDirectory, PublisherStudioZipName);
 
-            var applicationZipPath = !string.IsNullOrWhiteSpace(options.BlazorPublisherZipPath)
-                ? Path.GetFullPath(Environment.ExpandEnvironmentVariables(options.BlazorPublisherZipPath))
-                : Path.Combine(cacheDirectory, BlazorPublisherZipName);
-            var setupZipPath = !string.IsNullOrWhiteSpace(options.BlazorPublisherSetupZipPath)
-                ? Path.GetFullPath(Environment.ExpandEnvironmentVariables(options.BlazorPublisherSetupZipPath))
-                : Path.Combine(cacheDirectory, BlazorPublisherSetupZipName);
+            await DownloadLatestReleaseAssetAsync(
+                PublisherStudioRepo,
+                zipPath,
+                logger,
+                options,
+                setupAsset: false,
+                runtimeIdentifier: GetRuntimeIdentifier()).ConfigureAwait(false);
 
-            if (string.IsNullOrWhiteSpace(options.BlazorPublisherZipPath))
-            {
-                await DownloadLatestReleaseAssetAsync(
-                    BlazorPublisherRepo,
-                    applicationZipPath,
-                    logger,
-                    options,
-                    setupAsset: false,
-                    runtimeIdentifier: layout.RuntimeIdentifier).ConfigureAwait(false);
-            }
-            else
-            {
-                logger.LogInformation("Using explicit PublisherStudio application package {PackagePath}.", applicationZipPath);
-            }
+            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            if (string.IsNullOrWhiteSpace(localAppData))
+                throw new InvalidOperationException("LOCALAPPDATA could not be resolved.");
 
-            if (string.IsNullOrWhiteSpace(options.BlazorPublisherSetupZipPath))
-            {
-                await DownloadLatestReleaseAssetAsync(
-                    BlazorPublisherRepo,
-                    setupZipPath,
-                    logger,
-                    options,
-                    setupAsset: true,
-                    runtimeIdentifier: layout.RuntimeIdentifier).ConfigureAwait(false);
-            }
-            else
-            {
-                logger.LogInformation("Using explicit PublisherStudio setup package {PackagePath}.", setupZipPath);
-            }
+            var targetPath = Path.Combine(localAppData, "PublisherStudio");
 
-            // Validate both release assets before the installed application is stopped or any
-            // application/setup file is changed.
-            ValidateZipArchive(applicationZipPath, layout.ApplicationExecutableName, "Application", layout.RuntimeIdentifier, logger);
-            ValidateZipArchive(setupZipPath, layout.SetupExecutableName, "Setup", layout.RuntimeIdentifier, logger);
+            if (options.ForceDelete)
+                DeleteIfExists(targetPath, logger);
 
-            deployment.DeployApplication(applicationZipPath, layout);
-            var setupReplacementScheduled = deployment.DeploySetup(setupZipPath, layout);
-            logger.LogInformation(
-                "PublisherStudio application files were carefully merged into {ApplicationDirectory}; setup launchers target {SetupDirectory}. DelayedSetupReplacement={DelayedSetupReplacement}.",
-                layout.ApplicationDirectory,
-                layout.SetupDirectory,
-                setupReplacementScheduled);
+            Directory.CreateDirectory(targetPath);
+
+            logger.LogInformation($"Extracting PublisherStudio app '{zipPath}' to '{targetPath}'");
+            ExtractZipWithFallback(zipPath, targetPath, logger);
+
+            var setupZipPath = options.PublisherStudioSetupZipPath ?? Path.Combine(Environment.CurrentDirectory, PublisherStudioSetupZipName);
+
+            await DownloadLatestReleaseAssetAsync(
+                PublisherStudioRepo,
+                setupZipPath,
+                logger,
+                options,
+                setupAsset: true,
+                runtimeIdentifier: GetRuntimeIdentifier()).ConfigureAwait(false);
+
+            logger.LogInformation($"Extracting PublisherStudio setup/bootstrap '{setupZipPath}' to '{targetPath}'");
+            ExtractZipWithFallback(setupZipPath, targetPath, logger);
+
+            logger.LogDebug($"PublisherStudio installed to '{targetPath}'.");
+            logger.LogInformation($"PublisherStudio app and setup/bootstrap files now reside in '{targetPath}'.");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "PublisherStudio installation/update failed. Unrelated application files and user data were preserved; overwritten managed files were rolled back when possible.");
+            logger.LogError(ex, $"Error in InstallPublisherStudioAsync. options {options}");
             throw;
         }
     }
 
-    private static void ValidateZipArchive(string path, string expectedExecutable, string expectedPayloadKind, string expectedRuntimeIdentifier, ILogger logger)
-    {
-        if (!File.Exists(path))
-            throw new FileNotFoundException($"Release archive was not found: {path}", path);
-        PublisherStudioDeploymentService.ValidateArchive(path, expectedPayloadKind, expectedExecutable, expectedRuntimeIdentifier, logger);
-        logger.LogInformation("Validated {PayloadKind} archive {ArchivePath}.", expectedPayloadKind, path);
-    }
-
-    private static void UninstallBlazorPublisherWindows(CliOptions options, ILogger logger)
+    private static void UninstallPublisherStudioWindows(CliOptions options, ILogger logger)
     {
         try
         {
-            EnsureWindowsOnly(nameof(UninstallBlazorPublisherWindows), logger);
+            EnsureWindowsOnly(nameof(UninstallPublisherStudioWindows), logger);
 
-            var targets = GetBlazorPublisherUninstallTargets(options, logger);
+            var targets = GetPublisherStudioUninstallTargets(options, logger);
 
-            logger.LogWarning("BlazorPublisher uninstall preview:");
+            logger.LogWarning("PublisherStudio uninstall preview:");
 
             foreach (var target in targets)
             {
@@ -263,39 +273,39 @@ internal static class Program
             if (!options.ForceDelete)
             {
                 logger.LogWarning("Dry run only. Nothing was deleted.");
-                logger.LogWarning("Run again with --uninstall --force-delete to delete the listed BlazorPublisher files.");
+                logger.LogWarning("Run again with --uninstall --force-delete to delete the listed PublisherStudio files.");
                 return;
             }
 
-            logger.LogWarning("--force-delete was used. Removing listed BlazorPublisher files.");
+            logger.LogWarning("--force-delete was used. Removing listed PublisherStudio files.");
 
             foreach (var target in targets)
             {
                 DeleteIfExists(target, logger);
             }
 
-            logger.LogInformation("BlazorPublisher uninstall finished.");
+            logger.LogInformation("PublisherStudio uninstall finished.");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, $"Error in UninstallBlazorPublisherWindows. options {options.ToString()}");
+            logger.LogError(ex, $"Error in UninstallPublisherStudioWindows. options {options.ToString()}");
         }
     }
-    private static List<string> GetBlazorPublisherUninstallTargets(CliOptions options, ILogger logger)
+    private static List<string> GetPublisherStudioUninstallTargets(CliOptions options, ILogger logger)
     {
         try
         {
             var targets = new List<string>();
 
-            var blazorPublisherRoot = GetBlazorPublisherInstallRoot(logger);
-            targets.Add(blazorPublisherRoot);
+            var publisherStudioRoot = GetPublisherStudioInstallRoot(logger);
+            targets.Add(publisherStudioRoot);
 
             var startMenuFolder = GetStartMenuFolder(options,logger);
             targets.Add(startMenuFolder);
 
             var desktop = GetDesktopFolder(logger);
 
-            var shortcutDefinitions = GetShortcutTargets(blazorPublisherRoot, logger);
+            var shortcutDefinitions = GetShortcutTargets(publisherStudioRoot, logger);
 
             foreach (var shortcut in shortcutDefinitions)
             {
@@ -309,7 +319,7 @@ internal static class Program
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, $"Error in GetBlazorPublisherUninstallTargets. options {options.ToString()}");
+            logger.LogError(ex, $"Error in GetPublisherStudioUninstallTargets. options {options.ToString()}");
             return new List<string>();
         }
     }
@@ -320,18 +330,18 @@ internal static class Program
         {
             EnsureWindowsOnly(nameof(ProvisionWindowsShortcuts), logger);
 
-            var blazorPublisherRoot = GetBlazorPublisherInstallRoot(logger);
+            var publisherStudioRoot = GetPublisherStudioInstallRoot(logger);
 
-            if (string.IsNullOrWhiteSpace(blazorPublisherRoot) || !Directory.Exists(blazorPublisherRoot))
-                throw new DirectoryNotFoundException($"BlazorPublisher directory was not found: {blazorPublisherRoot}");
+            if (string.IsNullOrWhiteSpace(publisherStudioRoot) || !Directory.Exists(publisherStudioRoot))
+                throw new DirectoryNotFoundException($"PublisherStudio directory was not found: {publisherStudioRoot}");
 
-            logger.LogInformation($"Provisioning Windows shortcuts from BlazorPublisher directory: {blazorPublisherRoot}");
+            logger.LogInformation($"Provisioning Windows shortcuts from PublisherStudio directory: {publisherStudioRoot}");
 
-            var shortcuts = GetShortcutTargets(blazorPublisherRoot, logger);
+            var shortcuts = GetShortcutTargets(publisherStudioRoot, logger);
 
             if (shortcuts.Count == 0)
             {
-                logger.LogWarning($"No shortcut targets found in BlazorPublisher directory: {blazorPublisherRoot}");
+                logger.LogWarning($"No shortcut targets found in PublisherStudio directory: {publisherStudioRoot}");
                 return;
             }
 
@@ -360,50 +370,44 @@ internal static class Program
             throw;
         }
     }
-    private static List<ShortcutDefinition> GetShortcutTargets(string blazorPublisherRoot, ILogger logger)
+    private static List<ShortcutDefinition> GetShortcutTargets(string publisherStudioRoot, ILogger logger)
     {
         try
         {
-            var layout = PublisherStudioInstallLayout.Resolve(logger);
-            var shortcuts = new List<ShortcutDefinition>
-            {
-                new(
-                    ShortcutName: "BlazorPublisher Folder.lnk",
-                    TargetPath: blazorPublisherRoot,
-                    Arguments: string.Empty,
-                    WorkingDirectory: blazorPublisherRoot)
-            };
+            var shortcuts = new List<ShortcutDefinition>();
 
-            var launchers = new (string FileName, string ShortcutName)[]
-            {
-                ("Default.cmd", "BlazorPublisher Default Install and Update.url"),
-                ("Install.cmd", "BlazorPublisher Install.url"),
-                ("Update.cmd", "BlazorPublisher Update.url"),
-                ("Start.cmd", "BlazorPublisher Start.url"),
-                ("Start-NoBrowser.cmd", "BlazorPublisher Start without Browser.url"),
-                ("Check-FFmpeg.cmd", "BlazorPublisher Check FFmpeg.url"),
-                ("Install-FFmpeg.cmd", "BlazorPublisher Install FFmpeg.url"),
-                ("Uninstall.cmd", "BlazorPublisher Uninstall.url")
-            };
+            shortcuts.Add(new ShortcutDefinition(
+                ShortcutName: "PublisherStudio Folder.lnk",
+                TargetPath: publisherStudioRoot,
+                Arguments: string.Empty,
+                WorkingDirectory: publisherStudioRoot));
 
-            foreach (var launcher in launchers)
-            {
-                // The setup folder is a stable launcher contract. During a self-update the new
-                // folder is staged and replaces this exact path after the current setup exits,
-                // so shortcuts can be repaired before the delayed replacement completes.
-                var launcherPath = Path.Combine(layout.SetupDirectory, launcher.FileName);
-                shortcuts.Add(new ShortcutDefinition(
-                    ShortcutName: launcher.ShortcutName,
-                    TargetPath: launcherPath,
-                    Arguments: string.Empty,
-                    WorkingDirectory: layout.SetupDirectory));
-            }
+            AddCmdShortcutIfExists(
+                shortcuts,
+                publisherStudioRoot,
+                "Install.cmd",
+                "PublisherStudio Install.url",
+                logger);
+
+            AddCmdShortcutIfExists(
+                shortcuts,
+                publisherStudioRoot,
+                "Update.cmd",
+                "PublisherStudio Update.url",
+                logger);
+
+            AddCmdShortcutIfExists(
+                shortcuts,
+                publisherStudioRoot,
+                "Start.cmd",
+                "PublisherStudio Start.url",
+                logger);
 
             return shortcuts;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, $"Error in GetShortcutTargets. blazorPublisherRoot {blazorPublisherRoot}");
+            logger.LogError(ex, $"Error in GetShortcutTargets. publisherStudioRoot {publisherStudioRoot}");
             return new List<ShortcutDefinition>();
         }
     }
@@ -419,8 +423,8 @@ internal static class Program
 
             Directory.CreateDirectory(targetDirectory);
 
-            var blazorPublisherRoot = GetBlazorPublisherInstallRoot(logger);
-            var iconPath = FindBlazorPublisherIcon(logger);
+            var publisherStudioRoot = GetPublisherStudioInstallRoot(logger);
+            var iconPath = FindPublisherStudioIcon(logger);
 
             foreach (var shortcut in shortcuts)
             {
@@ -518,100 +522,89 @@ internal static class Program
             return Enumerable.Empty<string>();
         }
     }
-    private static string? FindBlazorPublisherIcon(ILogger logger)
+    private static string? FindPublisherStudioIcon(ILogger logger)
     {
         try
         {
-            var blazorPublisherRoot = GetBlazorPublisherInstallRoot(logger);
+            var publisherStudioRoot = GetPublisherStudioInstallRoot(logger);
 
-            if (string.IsNullOrWhiteSpace(blazorPublisherRoot) || !Directory.Exists(blazorPublisherRoot))
+            if (string.IsNullOrWhiteSpace(publisherStudioRoot) || !Directory.Exists(publisherStudioRoot))
             {
-                logger.LogWarning($"BlazorPublisher root does not exist while resolving icon: {blazorPublisherRoot}");
+                logger.LogWarning($"PublisherStudio root does not exist while resolving icon: {publisherStudioRoot}");
                 return null;
             }
 
-            var layout = PublisherStudioInstallLayout.Resolve(logger);
             var knownCandidates = new[]
             {
-                Path.Combine(layout.SetupDirectory, "PublisherStudio.ico"),
-                Path.Combine(layout.ApplicationDirectory, "PublisherStudio.ico"),
-                Path.Combine(blazorPublisherRoot, "PublisherStudio.ico"),
-                Path.Combine(blazorPublisherRoot, "BlazorPublisher.ico"),
-                Path.Combine(blazorPublisherRoot, GetRuntimeFolderName(), "PublisherStudio.ico")
+                Path.Combine(publisherStudioRoot, "PublisherStudio.ico"),
+                Path.Combine(publisherStudioRoot, GetRuntimeFolderName(), "PublisherStudio.ico"),
+                Path.Combine(publisherStudioRoot, $"setup{GetRuntimeFolderName()}", "PublisherStudio.ico")
             };
 
             foreach (var candidate in knownCandidates)
             {
-                logger.LogInformation($"Checking BlazorPublisher icon candidate: {candidate}");
+                logger.LogInformation($"Checking PublisherStudio icon candidate: {candidate}");
 
                 if (File.Exists(candidate))
                 {
-                    logger.LogInformation($"Resolved BlazorPublisher icon from known path: {candidate}");
+                    logger.LogInformation($"Resolved PublisherStudio icon from known path: {candidate}");
                     return candidate;
                 }
             }
 
-            logger.LogWarning($"Known PublisherStudio.ico paths failed. Searching recursively under: {blazorPublisherRoot}");
+            logger.LogWarning($"Known PublisherStudio.ico paths failed. Searching recursively under: {publisherStudioRoot}");
 
-            var publisherIcon = EnumerateFilesSafe(blazorPublisherRoot, "PublisherStudio.ico", logger)
-                .OrderBy(path => GetRelativePathDepth(blazorPublisherRoot, path))
+            var publisherIcon = EnumerateFilesSafe(publisherStudioRoot, "PublisherStudio.ico", logger)
+                .OrderBy(path => GetRelativePathDepth(publisherStudioRoot, path))
                 .ThenBy(path => path.Length)
                 .FirstOrDefault();
 
             if (!string.IsNullOrWhiteSpace(publisherIcon) && File.Exists(publisherIcon))
             {
-                logger.LogInformation($"Resolved BlazorPublisher PublisherStudio.ico recursively: {publisherIcon}");
+                logger.LogInformation($"Resolved PublisherStudio PublisherStudio.ico recursively: {publisherIcon}");
                 return publisherIcon;
             }
 
-            var blazorPublisherIcon = EnumerateFilesSafe(blazorPublisherRoot, "BlazorPublisher.ico", logger)
-                .OrderBy(path => GetRelativePathDepth(blazorPublisherRoot, path))
-                .ThenBy(path => path.Length)
-                .FirstOrDefault();
+            logger.LogWarning($"Publisher icon not found. Falling back to any .ico under: {publisherStudioRoot}");
 
-            if (!string.IsNullOrWhiteSpace(blazorPublisherIcon) && File.Exists(blazorPublisherIcon))
-            {
-                logger.LogInformation($"Resolved BlazorPublisher BlazorPublisher.ico recursively: {blazorPublisherIcon}");
-                return blazorPublisherIcon;
-            }
-
-            logger.LogWarning($"Publisher icon not found. Falling back to any .ico under: {blazorPublisherRoot}");
-
-            var anyIcon = EnumerateFilesSafe(blazorPublisherRoot, "*.ico", logger)
-                .OrderBy(path => GetRelativePathDepth(blazorPublisherRoot, path))
+            var anyIcon = EnumerateFilesSafe(publisherStudioRoot, "*.ico", logger)
+                .OrderBy(path => GetRelativePathDepth(publisherStudioRoot, path))
                 .ThenBy(path => path.Length)
                 .FirstOrDefault();
 
             if (!string.IsNullOrWhiteSpace(anyIcon) && File.Exists(anyIcon))
             {
-                logger.LogInformation($"Resolved BlazorPublisher icon recursively: {anyIcon}");
+                logger.LogInformation($"Resolved PublisherStudio icon recursively: {anyIcon}");
                 return anyIcon;
             }
 
-            logger.LogWarning($"No .ico file found under: {blazorPublisherRoot}");
+            logger.LogWarning($"No .ico file found under: {publisherStudioRoot}");
             return null;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error in FindBlazorPublisherIcon.");
+            logger.LogError(ex, "Error in FindPublisherStudioIcon.");
             return null;
         }
     }
-    private static string? FindBlazorPublisherFile(
-    string blazorPublisherRoot,
+    private static string? FindPublisherStudioFile(
+    string publisherStudioRoot,
     string fileName,
     ILogger logger)
     {
         try
         {
-            if (string.IsNullOrWhiteSpace(blazorPublisherRoot) || !Directory.Exists(blazorPublisherRoot))
+            if (string.IsNullOrWhiteSpace(publisherStudioRoot) || !Directory.Exists(publisherStudioRoot))
             {
-                logger.LogWarning($"BlazorPublisher root does not exist while searching for file '{fileName}': {blazorPublisherRoot}");
+                logger.LogWarning($"PublisherStudio root does not exist while searching for file '{fileName}': {publisherStudioRoot}");
                 return null;
             }
 
-            var layout = PublisherStudioInstallLayout.Resolve(logger);
-            foreach (var directPath in new[] { Path.Combine(layout.SetupDirectory, fileName), Path.Combine(blazorPublisherRoot, fileName) })
+            foreach (var directPath in new[]
+            {
+                Path.Combine(publisherStudioRoot, fileName),
+                Path.Combine(publisherStudioRoot, $"setup{GetRuntimeFolderName()}", fileName)
+            })
             {
                 logger.LogInformation("Checking PublisherStudio file candidate: {CandidatePath}", directPath);
                 if (!File.Exists(directPath)) continue;
@@ -619,49 +612,49 @@ internal static class Program
                 return directPath;
             }
 
-            logger.LogWarning($"Direct BlazorPublisher file candidate not found. Searching recursively for '{fileName}' under: {blazorPublisherRoot}");
+            logger.LogWarning($"Direct PublisherStudio file candidate not found. Searching recursively for '{fileName}' under: {publisherStudioRoot}");
 
-            var recursiveCandidate = EnumerateFilesSafe(blazorPublisherRoot, fileName, logger)
-                .OrderBy(path => GetRelativePathDepth(blazorPublisherRoot, path))
+            var recursiveCandidate = EnumerateFilesSafe(publisherStudioRoot, fileName, logger)
+                .OrderBy(path => GetRelativePathDepth(publisherStudioRoot, path))
                 .ThenBy(path => path.Length)
                 .FirstOrDefault();
 
             if (!string.IsNullOrWhiteSpace(recursiveCandidate) && File.Exists(recursiveCandidate))
             {
-                logger.LogInformation($"Resolved BlazorPublisher file recursively: {recursiveCandidate}");
+                logger.LogInformation($"Resolved PublisherStudio file recursively: {recursiveCandidate}");
                 return recursiveCandidate;
             }
 
-            logger.LogWarning($"Could not find '{fileName}' under: {blazorPublisherRoot}");
+            logger.LogWarning($"Could not find '{fileName}' under: {publisherStudioRoot}");
             return null;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, $"Error in FindBlazorPublisherFile. blazorPublisherRoot {blazorPublisherRoot} fileName {fileName}");
+            logger.LogError(ex, $"Error in FindPublisherStudioFile. publisherStudioRoot {publisherStudioRoot} fileName {fileName}");
             return null;
         }
     }
-    private static string? FindBlazorPublisherExecutable(CliOptions options, ILogger logger)
+    private static string? FindPublisherStudioExecutable(CliOptions options, ILogger logger)
     {
         try
         {
-            if (!string.IsNullOrWhiteSpace(options.BlazorPublisherExePath))
+            if (!string.IsNullOrWhiteSpace(options.PublisherStudioExePath))
             {
-                var explicitPath = Environment.ExpandEnvironmentVariables(options.BlazorPublisherExePath);
+                var explicitPath = Environment.ExpandEnvironmentVariables(options.PublisherStudioExePath);
 
-                logger.LogInformation($"Checking explicit BlazorPublisher executable path: {explicitPath}");
+                logger.LogInformation($"Checking explicit PublisherStudio executable path: {explicitPath}");
 
                 if (File.Exists(explicitPath))
                     return Path.GetFullPath(explicitPath);
 
-                logger.LogWarning($"--blazorpublisher-exe was provided but does not exist: {explicitPath}");
+                logger.LogWarning($"--publisherstudio-exe was provided but does not exist: {explicitPath}");
             }
 
-            var blazorPublisherRoot = GetBlazorPublisherInstallRoot(logger);
+            var publisherStudioRoot = GetPublisherStudioInstallRoot(logger);
 
-            if (string.IsNullOrWhiteSpace(blazorPublisherRoot) || !Directory.Exists(blazorPublisherRoot))
+            if (string.IsNullOrWhiteSpace(publisherStudioRoot) || !Directory.Exists(publisherStudioRoot))
             {
-                logger.LogWarning($"BlazorPublisher root does not exist: {blazorPublisherRoot}");
+                logger.LogWarning($"PublisherStudio root does not exist: {publisherStudioRoot}");
                 return null;
             }
 
@@ -669,44 +662,42 @@ internal static class Program
                 ? "PublisherStudio.Web.exe"
                 : "PublisherStudio.Web";
 
-            var layout = PublisherStudioInstallLayout.Resolve(logger);
             var knownCandidates = new[]
             {
-                Path.Combine(layout.ApplicationDirectory, executableName),
-                Path.Combine(blazorPublisherRoot, GetRuntimeFolderName(), executableName),
-                Path.Combine(blazorPublisherRoot, executableName)
+                Path.Combine(publisherStudioRoot, GetRuntimeFolderName(), executableName),
+                Path.Combine(publisherStudioRoot, executableName)
             };
 
             foreach (var candidate in knownCandidates)
             {
-                logger.LogInformation($"Checking BlazorPublisher executable candidate: {candidate}");
+                logger.LogInformation($"Checking PublisherStudio executable candidate: {candidate}");
 
                 if (File.Exists(candidate))
                 {
-                    logger.LogInformation($"Resolved BlazorPublisher executable from known path: {candidate}");
+                    logger.LogInformation($"Resolved PublisherStudio executable from known path: {candidate}");
                     return candidate;
                 }
             }
 
-            logger.LogWarning($"Known BlazorPublisher executable paths failed. Searching recursively under: {blazorPublisherRoot}");
+            logger.LogWarning($"Known PublisherStudio executable paths failed. Searching recursively under: {publisherStudioRoot}");
 
-            var recursiveCandidate = EnumerateFilesSafe(blazorPublisherRoot, executableName, logger)
-                .OrderBy(path => GetRelativePathDepth(blazorPublisherRoot, path))
+            var recursiveCandidate = EnumerateFilesSafe(publisherStudioRoot, executableName, logger)
+                .OrderBy(path => GetRelativePathDepth(publisherStudioRoot, path))
                 .ThenBy(path => path.Length)
                 .FirstOrDefault();
 
             if (!string.IsNullOrWhiteSpace(recursiveCandidate) && File.Exists(recursiveCandidate))
             {
-                logger.LogInformation($"Resolved BlazorPublisher executable recursively: {recursiveCandidate}");
+                logger.LogInformation($"Resolved PublisherStudio executable recursively: {recursiveCandidate}");
                 return recursiveCandidate;
             }
 
-            logger.LogWarning($"Could not find {executableName} under: {blazorPublisherRoot}");
+            logger.LogWarning($"Could not find {executableName} under: {publisherStudioRoot}");
             return null;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, $"Error in FindBlazorPublisherExecutable. options {options}");
+            logger.LogError(ex, $"Error in FindPublisherStudioExecutable. options {options}");
             return null;
         }
     }
@@ -724,14 +715,14 @@ internal static class Program
     }
     private static void AddCmdShortcutIfExists(
     List<ShortcutDefinition> shortcuts,
-    string blazorPublisherRoot,
+    string publisherStudioRoot,
     string cmdFileName,
     string shortcutName,
     ILogger logger)
     {
         try
         {
-            var cmdPath = FindBlazorPublisherFile(blazorPublisherRoot, cmdFileName, logger);
+            var cmdPath = FindPublisherStudioFile(publisherStudioRoot, cmdFileName, logger);
 
             if (string.IsNullOrWhiteSpace(cmdPath) || !File.Exists(cmdPath))
             {
@@ -742,7 +733,7 @@ internal static class Program
             var workingDirectory = Path.GetDirectoryName(cmdPath);
 
             if (string.IsNullOrWhiteSpace(workingDirectory))
-                workingDirectory = blazorPublisherRoot;
+                workingDirectory = publisherStudioRoot;
 
             shortcuts.Add(new ShortcutDefinition(
                 ShortcutName: shortcutName,
@@ -765,12 +756,20 @@ internal static class Program
         throw exception;
     }
 
-    private static string GetBlazorPublisherInstallRoot(ILogger logger)
+    private static string GetPublisherStudioInstallRoot(ILogger logger)
     {
-        try { return PublisherStudioInstallLayout.Resolve(logger).RootDirectory; }
+        try
+        {
+            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+
+            if (string.IsNullOrWhiteSpace(localAppData))
+                throw new InvalidOperationException("LOCALAPPDATA could not be resolved.");
+
+            return Path.Combine(localAppData, "PublisherStudio");
+        }
         catch (Exception ex)
         {
-            logger.LogError(ex, "PublisherStudio installation root resolution failed.");
+            logger.LogError(ex, $"Error in GetPublisherStudioInstallRoot. {ex}");
             return string.Empty;
         }
     }
@@ -787,7 +786,7 @@ internal static class Program
             var groupName = SanitizeShortcutGroupName(options.ShortcutGroupName, logger);
 
             if (string.IsNullOrWhiteSpace(groupName))
-                groupName = "BlazorPublisher by Michi0403";
+                groupName = "PublisherStudio by Michi0403";
 
             return Path.Combine(startMenu, "Programs", groupName);
         }
@@ -802,7 +801,7 @@ internal static class Program
         try
         {
             if (string.IsNullOrWhiteSpace(value))
-                return "BlazorPublisher by Michi0403";
+                return "PublisherStudio by Michi0403";
 
             var invalid = Path.GetInvalidFileNameChars();
 
@@ -814,7 +813,7 @@ internal static class Program
         catch (Exception ex)
         {
             logger.LogError(ex, $"Error in SanitizeShortcutGroupName. value {value}");
-            return "BlazorPublisher by Michi0403";
+            return "PublisherStudio by Michi0403";
         }
     }
     private static string GetDesktopFolder(ILogger logger)
@@ -835,21 +834,21 @@ internal static class Program
         }
     }
 
-    private static void StartBlazorPublisher(CliOptions options, ILogger logger)
+    private static void StartPublisherStudio(CliOptions options, ILogger logger)
     {
         try
         {
-            var exePath = FindBlazorPublisherExecutable(options, logger);
+            var exePath = FindPublisherStudioExecutable(options, logger);
 
 
             if (string.IsNullOrWhiteSpace(exePath) || !File.Exists(exePath))
                 throw new FileNotFoundException(
-                    $"BlazorPublisher executable not found at '{exePath}'. Install it first or pass --blazorpublisher-exe.");
+                    $"PublisherStudio executable not found at '{exePath}'. Install it first or pass --publisherstudio-exe.");
 
-            var port = options.BlazorPublisherPort <= 0 ? 58071 : options.BlazorPublisherPort;
+            var port = options.PublisherStudioPort <= 0 ? 58071 : options.PublisherStudioPort;
 
-            logger.LogInformation($"Starting BlazorPublisher: {exePath}");
-            logger.LogInformation($"BlazorPublisher requested loopback port: {port}");
+            logger.LogInformation($"Starting PublisherStudio: {exePath}");
+            logger.LogInformation($"PublisherStudio requested loopback port: {port}");
 
             if (TryGetRunningEndpoint("PublisherStudio", "PublisherStudio", out var existingUrl, logger))
             {
@@ -867,7 +866,7 @@ internal static class Program
                 ArgumentList = { "--port", port.ToString() },
                 UseShellExecute = true,
                 WorkingDirectory = Path.GetDirectoryName(exePath)
-            }) ?? throw new InvalidOperationException("BlazorPublisher process could not be started.");
+            }) ?? throw new InvalidOperationException("PublisherStudio process could not be started.");
 
             var url = WaitForRuntimeEndpoint(
                 productName: "PublisherStudio",
@@ -1220,7 +1219,7 @@ internal static class Program
 
                 using var totalTimeout = new CancellationTokenSource(TimeSpan.FromMinutes(45));
                 using var request = new HttpRequestMessage(HttpMethod.Get, url);
-                request.Headers.UserAgent.ParseAdd("BlazorPublisherSetupTool/1.0");
+                request.Headers.UserAgent.ParseAdd("PublisherStudioSetupTool/1.0");
                 request.Headers.Accept.ParseAdd("*/*");
                 if (resumeAt > 0)
                     request.Headers.Range = new RangeHeaderValue(resumeAt, null);
@@ -1430,6 +1429,34 @@ internal static class Program
             logger.LogError(ex, $"Error in DeleteIfExists. path {path.ToString()}");
         }
     }
+    private static void ExtractZipWithFallback(string zipPath, string targetPath, ILogger logger)
+    {
+        try
+        {
+            Directory.CreateDirectory(targetPath);
+            try
+            {
+                ZipFile.ExtractToDirectory(zipPath, targetPath, overwriteFiles: true);
+                return;
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, $".NET ZIP extraction failed: {ex.Message}");
+            }
+
+            var sevenZip = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "7-Zip", "7z.exe");
+            if (!File.Exists(sevenZip))
+                throw new InvalidOperationException("ZIP extraction failed and 7-Zip was not found. Install 7-Zip or enable long paths.");
+
+            RunProcessAsync(sevenZip, $"x \"{zipPath}\" -o\"{targetPath}\" -y", logger).GetAwaiter().GetResult();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Error in ExtractZipWithFallback. zipPath {zipPath} targetPath {targetPath}");
+            throw;
+        }
+    }
+
     private static async Task RunProcessAsync(string fileName, string arguments, ILogger logger)
     {
         try
@@ -1500,6 +1527,25 @@ internal static class Program
         _ => ""
     };
 
+    private static string GetRuntimeIdentifier()
+    {
+        var platform = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? "win"
+            : RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
+                ? "linux"
+                : RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+                    ? "osx"
+                    : throw new PlatformNotSupportedException("PublisherStudio setup does not support this operating system.");
+        var architecture = RuntimeInformation.OSArchitecture switch
+        {
+            Architecture.X64 => "x64",
+            Architecture.X86 => "x86",
+            Architecture.Arm64 => "arm64",
+            _ => throw new PlatformNotSupportedException($"PublisherStudio setup does not support architecture {RuntimeInformation.OSArchitecture}.")
+        };
+        return $"{platform}-{architecture}";
+    }
+
     private static string GetRuntimeFolderName()
     {
         var platform = GetPlatformToken();
@@ -1527,7 +1573,7 @@ internal static class Program
         try
         {
             var client = new HttpClient();
-            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("BlazorPublisherSetupTool", "1.0"));
+            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("PublisherStudioSetupTool", "1.0"));
             client.Timeout = Timeout.InfiniteTimeSpan;
             return client;
         }
@@ -1548,42 +1594,97 @@ internal sealed record ShortcutDefinition(
 
 internal sealed class CliOptions
 {
+    /// <summary>
+    /// Gets or sets show help.
+    /// </summary>
     public bool ShowHelp { get; private set; }
-    public bool InstallBlazorPublisher { get; private set; }
-    public bool UpdateBlazorPublisher { get; private set; }
-    public bool StartBlazorPublisher { get; private set; }
+    /// <summary>
+    /// Gets or sets install blazor publisher.
+    /// </summary>
+    public bool InstallPublisherStudio { get; private set; }
+    /// <summary>
+    /// Gets or sets update blazor publisher.
+    /// </summary>
+    public bool UpdatePublisherStudio { get; private set; }
+    /// <summary>
+    /// Gets or sets start blazor publisher.
+    /// </summary>
+    public bool StartPublisherStudio { get; private set; }
+    /// <summary>
+    /// Gets or sets verbose.
+    /// </summary>
     public bool Verbose { get; private set; }
-    public string? BlazorPublisherZipPath { get; private set; }
-    public string? BlazorPublisherSetupZipPath { get; private set; }
-    public string? BlazorPublisherExePath { get; private set; }
-    public int BlazorPublisherPort { get; private set; } = 58071;
+    /// <summary>
+    /// Gets or sets blazor publisher zip path.
+    /// </summary>
+    public string? PublisherStudioZipPath { get; private set; }
+    /// <summary>
+    /// Gets or sets blazor publisher setup zip path.
+    /// </summary>
+    public string? PublisherStudioSetupZipPath { get; private set; }
+    /// <summary>
+    /// Gets or sets blazor publisher exe path.
+    /// </summary>
+    public string? PublisherStudioExePath { get; private set; }
+    /// <summary>
+    /// Gets or sets blazor publisher port.
+    /// </summary>
+    public int PublisherStudioPort { get; private set; } = 58071;
+    /// <summary>
+    /// Gets or sets open browser.
+    /// </summary>
     public bool OpenBrowser { get; private set; } = true;
+    /// <summary>
+    /// Gets or sets force delete.
+    /// </summary>
     public bool ForceDelete { get; private set; }
+    /// <summary>
+    /// Gets or sets wait on exit.
+    /// </summary>
     public bool WaitOnExit { get; private set; }
+    /// <summary>
+    /// Gets or sets uninstall.
+    /// </summary>
     public bool Uninstall { get; private set; }
+    /// <summary>
+    /// Gets or sets desktop shortcuts.
+    /// </summary>
     public bool DesktopShortcuts { get; private set; }
+    /// <summary>
+    /// Gets or sets start menu shortcuts.
+    /// </summary>
     public bool StartMenuShortcuts { get; private set; }
+    /// <summary>
+    /// Gets or sets install FFmpeg.
+    /// </summary>
     public bool InstallFfmpeg { get; private set; }
+    /// <summary>
+    /// Gets or sets skip FFmpeg.
+    /// </summary>
     public bool SkipFfmpeg { get; private set; }
+    /// <summary>
+    /// Gets or sets check FFmpeg.
+    /// </summary>
     public bool CheckFfmpeg { get; private set; }
-    public string ShortcutGroupName { get; private set; } = "BlazorPublisher by Michi0403";
+    /// <summary>
+    /// Gets or sets shortcut group name.
+    /// </summary>
+    public string ShortcutGroupName { get; private set; } = "PublisherStudio by Michi0403";
+    /// <summary>
+    /// Runs the parse operation.
+    /// </summary>
     public static CliOptions Parse(string[] args)
     {
         List<string> argsList = args.ToList();
         var options = new CliOptions();
         if (argsList.Count == 0)
         {
-            options.UpdateBlazorPublisher = true;
-            options.StartBlazorPublisher = true;
-            options.InstallFfmpeg = true;
-
+            argsList.Add("--install-publisherstudio");
+            argsList.Add("--update-publisherstudio");
+            argsList.Add("--install-ffmpeg");
+            argsList.Add("--start-publisherstudio");
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                options.DesktopShortcuts = true;
-                options.StartMenuShortcuts = true;
-            }
-
-            return options;
+                argsList.Add("--shortcuts");
         }
         for (var i = 0; i < argsList.Count; i++)
         {
@@ -1596,16 +1697,19 @@ internal sealed class CliOptions
                     options.ShowHelp = true;
                     break;
                 case "--install":
+                case "--install-publisherstudio":
                 case "--install-blazorpublisher":
-                    options.InstallBlazorPublisher = true;
+                    options.InstallPublisherStudio = true;
                     break;
                 case "--update":
+                case "--update-publisherstudio":
                 case "--update-blazorpublisher":
-                    options.UpdateBlazorPublisher = true;
+                    options.UpdatePublisherStudio = true;
                     break;
                 case "--start":
+                case "--start-publisherstudio":
                 case "--start-blazorpublisher":
-                    options.StartBlazorPublisher = true;
+                    options.StartPublisherStudio = true;
                     break;
                 case "--wait":
                 case "--pause":
@@ -1615,8 +1719,9 @@ internal sealed class CliOptions
                     options.Verbose = true;
                     break;
                 case "--all":
-                    options.InstallBlazorPublisher = true;
-                    options.StartBlazorPublisher = true;
+                    options.InstallPublisherStudio = true;
+                    options.UpdatePublisherStudio = true;
+                    options.StartPublisherStudio = true;
                     options.DesktopShortcuts = true;
                     options.StartMenuShortcuts = true;
                     options.InstallFfmpeg = true;
@@ -1633,14 +1738,17 @@ internal sealed class CliOptions
                 case "--check-ffmpeg":
                     options.CheckFfmpeg = true;
                     break;
+                case "--publisherstudio-zip":
                 case "--blazorpublisher-zip":
-                    options.BlazorPublisherZipPath = NextValue(argsList, ref i, arg);
+                    options.PublisherStudioZipPath = NextValue(argsList, ref i, arg);
                     break;
+                case "--publisherstudio-setup-zip":
                 case "--blazorpublisher-setup-zip":
-                    options.BlazorPublisherSetupZipPath = NextValue(argsList, ref i, arg);
+                    options.PublisherStudioSetupZipPath = NextValue(argsList, ref i, arg);
                     break;
+                case "--publisherstudio-exe":
                 case "--blazorpublisher-exe":
-                    options.BlazorPublisherExePath = NextValue(argsList, ref i, arg);
+                    options.PublisherStudioExePath = NextValue(argsList, ref i, arg);
                     break;
                 case "--desktop-shortcuts":
                     options.DesktopShortcuts = true;
@@ -1658,9 +1766,9 @@ internal sealed class CliOptions
                     options.StartMenuShortcuts = true;
                     break;
                 case "--port":
-                    options.BlazorPublisherPort = int.Parse(NextValue(argsList, ref i, arg));
-                    if (options.BlazorPublisherPort <= 0 || options.BlazorPublisherPort > 65535)
-                        throw new ArgumentOutOfRangeException(nameof(options.BlazorPublisherPort), "Port must be between 1 and 65535.");
+                    options.PublisherStudioPort = int.Parse(NextValue(argsList, ref i, arg));
+                    if (options.PublisherStudioPort <= 0 || options.PublisherStudioPort > 65535)
+                        throw new ArgumentOutOfRangeException(nameof(options.PublisherStudioPort), "Port must be between 1 and 65535.");
                     break;
 
                 case "--no-browser":
@@ -1684,20 +1792,23 @@ internal sealed class CliOptions
 
         return options;
     }
+    /// <summary>
+    /// Runs the to string operation.
+    /// </summary>
     public override string ToString()
     {
         return string.Join(Environment.NewLine,
         [
             $"{nameof(ShowHelp)}={ShowHelp}",
-        $"{nameof(InstallBlazorPublisher)}={InstallBlazorPublisher}",
-        $"{nameof(UpdateBlazorPublisher)}={UpdateBlazorPublisher}",
-        $"{nameof(StartBlazorPublisher)}={StartBlazorPublisher}",
+        $"{nameof(InstallPublisherStudio)}={InstallPublisherStudio}",
+        $"{nameof(UpdatePublisherStudio)}={UpdatePublisherStudio}",
+        $"{nameof(StartPublisherStudio)}={StartPublisherStudio}",
         $"{nameof(ForceDelete)}={ForceDelete}",
         $"{nameof(Verbose)}={Verbose}",
-        $"{nameof(BlazorPublisherZipPath)}={BlazorPublisherZipPath}",
-        $"{nameof(BlazorPublisherSetupZipPath)}={BlazorPublisherSetupZipPath}",
-        $"{nameof(BlazorPublisherExePath)}={BlazorPublisherExePath}",
-        $"{nameof(BlazorPublisherPort)}={BlazorPublisherPort}",
+        $"{nameof(PublisherStudioZipPath)}={PublisherStudioZipPath}",
+        $"{nameof(PublisherStudioSetupZipPath)}={PublisherStudioSetupZipPath}",
+        $"{nameof(PublisherStudioExePath)}={PublisherStudioExePath}",
+        $"{nameof(PublisherStudioPort)}={PublisherStudioPort}",
         $"{nameof(OpenBrowser)}={OpenBrowser}",
         $"{nameof(WaitOnExit)}={WaitOnExit}",
         $"{nameof(Uninstall)}={Uninstall}",
@@ -1709,44 +1820,52 @@ internal sealed class CliOptions
         $"{nameof(ShortcutGroupName)}={ShortcutGroupName}"
         ]);
     }
+    /// <summary>
+    /// Runs the print help operation.
+    /// </summary>
     public static void PrintHelp(ILogger logger)
     {
         logger.LogInformation("""
-BlazorPublisher setup helper
+PublisherStudio setup helper
 
 Usage:
   PublisherStudio.Setup [options]
 
+Double-click behavior:
+  Installs or updates PublisherStudio in %LOCALAPPDATA%\PublisherStudio,
+  ensures FFmpeg is available, creates Desktop and Start Menu shortcuts,
+  and starts PublisherStudio.
+
 Common examples:
-  PublisherStudio.Setup --install-blazorpublisher --start-blazorpublisher --shortcuts
-  PublisherStudio.Setup --update-blazorpublisher --start-blazorpublisher --shortcuts
-  PublisherStudio.Setup --start-blazorpublisher --port 58071
-  PublisherStudio.Setup --install-ffmpeg
-  PublisherStudio.Setup --check-ffmpeg
+  PublisherStudio.Setup --install-publisherstudio --start-publisherstudio --shortcuts
+  PublisherStudio.Setup --update-publisherstudio --start-publisherstudio --shortcuts
+  PublisherStudio.Setup --start-publisherstudio --port 58071
   PublisherStudio.Setup --uninstall --force-delete
 
 Options:
-  --install-blazorpublisher         Download and install the latest BlazorPublisher release.
-  --update-blazorpublisher          Download both release payloads, merge the runtime files safely, and repair/replace setup launchers.
-  --start-blazorpublisher           Start PublisherStudio.Web from the local BlazorPublisher installation.
-  --install-ffmpeg                  Check for FFmpeg and install it with an available OS package manager.
-  --check-ffmpeg                    Report whether FFmpeg is available without installing it.
-  --skip-ffmpeg                     Skip the automatic FFmpeg check/install during app installation or update.
-  --blazorpublisher-zip <path>      Override BlazorPublisher application ZIP download path.
-  --blazorpublisher-setup-zip <path> Override the setup/launcher ZIP. Normal updates replace setup after the running bootstrap exits.
-  --blazorpublisher-exe <path>      Override PublisherStudio.Web executable path.
-  --port <number>                   Port for BlazorPublisher. Default: 58071.
-  --wait                            An option beside opening with mouse to keep it running.
-  --no-browser                      Start BlazorPublisher without opening the browser.
-  --force-delete                    Required only with --uninstall. Application updates never delete the runtime directory.
-  --all                             Install BlazorPublisher, create shortcuts, and start BlazorPublisher.
-  --verbose                         Print full exception details on failure.
-  --help                            Show this help.
-  --desktop-shortcuts               Create Desktop shortcuts to selected BlazorPublisher command files.
-  --startmenu-shortcuts             Create Start Menu shortcuts to selected BlazorPublisher command files.
-  --shortcuts                       Create both Desktop and Start Menu shortcuts.
-  --uninstall                       Preview BlazorPublisher uninstall. Shows what would be removed, deletes nothing.
-  --uninstall --force-delete        Actually remove BlazorPublisher files and shortcuts.
+  --install-publisherstudio          Download and install the latest PublisherStudio release.
+  --update-publisherstudio           Download and extract the latest application and setup release over the PublisherStudio AppData installation.
+  --start-publisherstudio            Start PublisherStudio.Web from %LOCALAPPDATA%\PublisherStudio.
+  --install-ffmpeg                   Check for FFmpeg and install it with an available OS package manager.
+  --check-ffmpeg                     Report whether FFmpeg is available without installing it.
+  --skip-ffmpeg                      Skip the automatic FFmpeg check/install during application installation or update.
+  --publisherstudio-zip <path>       Override the local PublisherStudio application ZIP download path.
+  --publisherstudio-setup-zip <path> Override the local PublisherStudio setup ZIP download path.
+  --publisherstudio-exe <path>       Override the PublisherStudio.Web executable path.
+  --port <number>                    Port for PublisherStudio. Default: 58071.
+  --wait                             Keep the setup console open after command-line execution.
+  --no-browser                       Start PublisherStudio without opening the browser.
+  --force-delete                     Delete the existing PublisherStudio AppData folder before installation, or confirm uninstall deletion.
+  --all                              Install/update PublisherStudio, ensure FFmpeg, create shortcuts, and start PublisherStudio.
+  --verbose                          Print full exception details on failure.
+  --help                             Show this help.
+  --desktop-shortcuts                Create Desktop shortcuts for Install, Update, Start, and the PublisherStudio folder.
+  --startmenu-shortcuts              Create Start Menu shortcuts for Install, Update, Start, and the PublisherStudio folder.
+  --shortcuts                        Create both Desktop and Start Menu shortcuts.
+  --uninstall                        Preview PublisherStudio uninstall. Shows what would be removed, deletes nothing.
+  --uninstall --force-delete         Actually remove PublisherStudio files and shortcuts.
+
+Compatibility aliases using the former --*-blazorpublisher names remain accepted.
 """);
     }
 

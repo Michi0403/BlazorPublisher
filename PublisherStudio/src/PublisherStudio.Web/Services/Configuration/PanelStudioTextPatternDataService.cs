@@ -1,4 +1,4 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Options;
@@ -15,6 +15,9 @@ public sealed class PanelStudioTextPatternDataService : IPanelStudioTextPatternD
     private readonly IReadOnlyDictionary<string, Regex> _patterns;
     private readonly ILogger<PanelStudioTextPatternDataService> logger;
 
+    /// <summary>
+    /// Runs the panel studio text pattern data service operation.
+    /// </summary>
     public PanelStudioTextPatternDataService(
         IWebHostEnvironment environment,
         IOptions<PanelTextPatternStoreOptions> options,
@@ -58,9 +61,21 @@ public sealed class PanelStudioTextPatternDataService : IPanelStudioTextPatternD
         }
     }
 
+    /// <summary>
+    /// Gets shutdown pattern.
+    /// </summary>
     public Regex ShutdownPattern => RequirePattern(nameof(ShutdownPattern));
+    /// <summary>
+    /// Gets HTML break pattern.
+    /// </summary>
     public Regex HtmlBreakPattern => RequirePattern(nameof(HtmlBreakPattern));
+    /// <summary>
+    /// Gets HTML tag pattern.
+    /// </summary>
     public Regex HtmlTagPattern => RequirePattern(nameof(HtmlTagPattern));
+    /// <summary>
+    /// Gets unsafe file name pattern.
+    /// </summary>
     public Regex UnsafeFileNamePattern => RequirePattern(nameof(UnsafeFileNamePattern));
 
     private Regex RequirePattern(string name)
@@ -169,15 +184,36 @@ public sealed class PanelStudioTextPatternDataService : IPanelStudioTextPatternD
 
 internal sealed class PatternStoreDocument
 {
+    /// <summary>
+    /// Runs the pattern store document operation.
+    /// </summary>
     public PatternStoreDocument() { }
+    /// <summary>
+    /// Gets or sets schema version.
+    /// </summary>
     public int SchemaVersion { get; set; }
+    /// <summary>
+    /// Gets or sets patterns.
+    /// </summary>
     public Dictionary<string, PatternDefinition> Patterns { get; set; } = new(StringComparer.Ordinal);
 }
 
 internal sealed class PatternDefinition
 {
+    /// <summary>
+    /// Runs the pattern definition operation.
+    /// </summary>
     public PatternDefinition() { }
+    /// <summary>
+    /// Gets or sets pattern.
+    /// </summary>
     public string Pattern { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets options.
+    /// </summary>
     public List<string> Options { get; set; } = [];
+    /// <summary>
+    /// Gets or sets timeout milliseconds.
+    /// </summary>
     public int TimeoutMilliseconds { get; set; }
 }

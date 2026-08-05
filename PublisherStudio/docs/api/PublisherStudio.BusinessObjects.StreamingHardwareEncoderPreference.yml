@@ -1,0 +1,172 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference
+  commentId: T:PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference
+  id: StreamingHardwareEncoderPreference
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.AmdAmf
+  - PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.AppleVideoToolbox
+  - PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.Auto
+  - PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.IntelQuickSync
+  - PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.NvidiaNvenc
+  - PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.Software
+  langs:
+  - csharp
+  - vb
+  name: StreamingHardwareEncoderPreference
+  nameWithType: StreamingHardwareEncoderPreference
+  fullName: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported streaming hardware encoder preference values.
+  example: []
+  syntax:
+    content: public enum StreamingHardwareEncoderPreference
+    content.vb: Public Enum StreamingHardwareEncoderPreference
+- uid: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.Auto
+  commentId: F:PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.Auto
+  id: Auto
+  parent: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference
+  langs:
+  - csharp
+  - vb
+  name: Auto
+  nameWithType: StreamingHardwareEncoderPreference.Auto
+  fullName: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.Auto
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Auto = 0
+    return:
+      type: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference
+- uid: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.Software
+  commentId: F:PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.Software
+  id: Software
+  parent: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference
+  langs:
+  - csharp
+  - vb
+  name: Software
+  nameWithType: StreamingHardwareEncoderPreference.Software
+  fullName: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.Software
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Software = 1
+    return:
+      type: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference
+- uid: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.NvidiaNvenc
+  commentId: F:PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.NvidiaNvenc
+  id: NvidiaNvenc
+  parent: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference
+  langs:
+  - csharp
+  - vb
+  name: NvidiaNvenc
+  nameWithType: StreamingHardwareEncoderPreference.NvidiaNvenc
+  fullName: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.NvidiaNvenc
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: NvidiaNvenc = 2
+    return:
+      type: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference
+- uid: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.IntelQuickSync
+  commentId: F:PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.IntelQuickSync
+  id: IntelQuickSync
+  parent: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference
+  langs:
+  - csharp
+  - vb
+  name: IntelQuickSync
+  nameWithType: StreamingHardwareEncoderPreference.IntelQuickSync
+  fullName: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.IntelQuickSync
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: IntelQuickSync = 3
+    return:
+      type: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference
+- uid: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.AmdAmf
+  commentId: F:PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.AmdAmf
+  id: AmdAmf
+  parent: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference
+  langs:
+  - csharp
+  - vb
+  name: AmdAmf
+  nameWithType: StreamingHardwareEncoderPreference.AmdAmf
+  fullName: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.AmdAmf
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: AmdAmf = 4
+    return:
+      type: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference
+- uid: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.AppleVideoToolbox
+  commentId: F:PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.AppleVideoToolbox
+  id: AppleVideoToolbox
+  parent: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference
+  langs:
+  - csharp
+  - vb
+  name: AppleVideoToolbox
+  nameWithType: StreamingHardwareEncoderPreference.AppleVideoToolbox
+  fullName: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.AppleVideoToolbox
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: AppleVideoToolbox = 5
+    return:
+      type: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference
+  commentId: T:PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.html
+  name: StreamingHardwareEncoderPreference
+  nameWithType: StreamingHardwareEncoderPreference
+  fullName: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference

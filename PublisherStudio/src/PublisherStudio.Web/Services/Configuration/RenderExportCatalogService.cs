@@ -1,7 +1,10 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Configuration;
 
+/// <summary>
+/// Provides render export catalog service operations.
+/// </summary>
 public sealed class RenderExportCatalogService(ILogger<RenderExportCatalogService> logger) : IRenderExportCatalogService
 {
     private readonly IReadOnlyList<RenderExportCapability> _capabilities = new List<RenderExportCapability>
@@ -13,6 +16,9 @@ public sealed class RenderExportCatalogService(ILogger<RenderExportCatalogServic
         new() { Format = "pdf", MimeType = "application/pdf", CapturesVideoFrames = true, CapturesCanvasEffects = true, PreservesVectorContent = false, HtmlSupport = PublicationHtmlExportSupport.RenderBeforeExport, Note = "Browser print path; dynamic media is represented by its current rendered frame." }
     }.AsReadOnly();
 
+    /// <summary>
+    /// Gets capabilities.
+    /// </summary>
     public IReadOnlyList<RenderExportCapability> GetCapabilities() {
         try
         {
@@ -25,6 +31,9 @@ public sealed class RenderExportCatalogService(ILogger<RenderExportCatalogServic
             throw;
         }
     }
+    /// <summary>
+    /// Runs the find operation.
+    /// </summary>
     public RenderExportCapability? Find(string format) {
         try
         {

@@ -1,18 +1,27 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Services;
 
+/// <summary>
+/// Defines the page preset catalog contract.
+/// </summary>
 public interface IPagePresetCatalog
 {
     IReadOnlyList<PagePreset> GetAll();
     PagePreset? Find(string? key);
 }
 
+/// <summary>
+/// Provides page preset catalog operations.
+/// </summary>
 public sealed class PagePresetCatalog(
     IPublisherRuntimePolicyDataService runtimePolicy,
     ILogger<PagePresetCatalog> logger) : IPagePresetCatalog
 {
+    /// <summary>
+    /// Gets all.
+    /// </summary>
     public IReadOnlyList<PagePreset> GetAll()
     {
         try
@@ -28,6 +37,9 @@ public sealed class PagePresetCatalog(
         }
     }
 
+    /// <summary>
+    /// Runs the find operation.
+    /// </summary>
     public PagePreset? Find(string? key)
     {
         try
@@ -43,6 +55,9 @@ public sealed class PagePresetCatalog(
     }
 }
 
+/// <summary>
+/// Defines the story page layout service contract.
+/// </summary>
 public interface IStoryPageLayoutService
 {
     StoryPageLayout GetDefault();
@@ -55,10 +70,16 @@ public interface IStoryPageLayoutService
         double marginLeftMm);
 }
 
+/// <summary>
+/// Provides story page layout service operations.
+/// </summary>
 public sealed class StoryPageLayoutService(
     IPublisherRuntimePolicyDataService runtimePolicy,
     ILogger<StoryPageLayoutService> logger) : IStoryPageLayoutService
 {
+    /// <summary>
+    /// Gets default.
+    /// </summary>
     public StoryPageLayout GetDefault()
     {
         try
@@ -79,6 +100,9 @@ public sealed class StoryPageLayoutService(
         }
     }
 
+    /// <summary>
+    /// Runs the normalize operation.
+    /// </summary>
     public StoryPageLayout Normalize(
         double pageWidthMm,
         double pageHeightMm,

@@ -1,0 +1,33 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.HostedServices.Streaming
+  commentId: N:PublisherStudio.HostedServices.Streaming
+  id: Streaming
+  parent: PublisherStudio.HostedServices
+  children:
+  - PublisherStudio.HostedServices.Streaming.GlobalHotkeyHostedService
+  - PublisherStudio.HostedServices.Streaming.TwitchOAuthMaintenanceService
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.HostedServices.Streaming
+  nameWithType: PublisherStudio.HostedServices.Streaming
+  fullName: PublisherStudio.HostedServices.Streaming
+  type: Namespace
+  assemblies:
+  - PublisherStudio.Web
+references:
+- uid: PublisherStudio.HostedServices.Streaming.GlobalHotkeyHostedService
+  commentId: T:PublisherStudio.HostedServices.Streaming.GlobalHotkeyHostedService
+  isExternal: true
+  href: PublisherStudio.HostedServices.Streaming.GlobalHotkeyHostedService.html
+  name: GlobalHotkeyHostedService
+  nameWithType: GlobalHotkeyHostedService
+  fullName: PublisherStudio.HostedServices.Streaming.GlobalHotkeyHostedService
+- uid: PublisherStudio.HostedServices.Streaming.TwitchOAuthMaintenanceService
+  commentId: T:PublisherStudio.HostedServices.Streaming.TwitchOAuthMaintenanceService
+  isExternal: true
+  href: PublisherStudio.HostedServices.Streaming.TwitchOAuthMaintenanceService.html
+  name: TwitchOAuthMaintenanceService
+  nameWithType: TwitchOAuthMaintenanceService
+  fullName: PublisherStudio.HostedServices.Streaming.TwitchOAuthMaintenanceService

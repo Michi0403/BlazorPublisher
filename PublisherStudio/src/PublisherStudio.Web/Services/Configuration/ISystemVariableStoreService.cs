@@ -1,5 +1,8 @@
-namespace PublisherStudio.Services.Configuration;
+﻿namespace PublisherStudio.Services.Configuration;
 
+/// <summary>
+/// Defines the system variable store service contract.
+/// </summary>
 public interface ISystemVariableStoreService
 {
     int DefaultPort { get; }

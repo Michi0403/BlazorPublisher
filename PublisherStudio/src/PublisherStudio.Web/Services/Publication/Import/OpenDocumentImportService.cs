@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.IO.Compression;
 using System.Net;
 using System.Security;
@@ -33,6 +33,9 @@ public sealed partial class OpenDocumentImportService(
     private readonly XNamespace XLink = "http://www.w3.org/1999/xlink";
     private readonly XNamespace Presentation = "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0";
 
+    /// <summary>
+    /// Imports async.
+    /// </summary>
     public async Task<PublicationImportResult> ImportAsync(Stream source, string fileName, CancellationToken cancellationToken = default)
     {
         try
@@ -765,6 +768,9 @@ public sealed partial class OpenDocumentImportService(
         private readonly OpenDocumentImportService owner;
         private readonly ILogger<StyleCatalog> logger;
 
+        /// <summary>
+        /// Runs the style catalog operation.
+        /// </summary>
         public StyleCatalog(OpenDocumentImportService owner, ILogger<StyleCatalog> logger)
         {
             try
@@ -780,10 +786,22 @@ public sealed partial class OpenDocumentImportService(
             }
         }
 
+        /// <summary>
+        /// Gets styles.
+        /// </summary>
         public Dictionary<string, XElement> Styles { get; } = new(StringComparer.Ordinal);
+        /// <summary>
+        /// Gets page layouts.
+        /// </summary>
         public Dictionary<string, XElement> PageLayouts { get; } = new(StringComparer.Ordinal);
+        /// <summary>
+        /// Gets master pages.
+        /// </summary>
         public Dictionary<string, XElement> MasterPages { get; } = new(StringComparer.Ordinal);
 
+        /// <summary>
+        /// Runs the resolve operation.
+        /// </summary>
         public ResolvedStyle Resolve(string? name)
         {
             try

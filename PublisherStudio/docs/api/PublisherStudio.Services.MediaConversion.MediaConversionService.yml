@@ -1,0 +1,1908 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService
+  commentId: T:PublisherStudio.Services.MediaConversion.MediaConversionService
+  id: MediaConversionService
+  parent: PublisherStudio.Services.MediaConversion
+  children:
+  - PublisherStudio.Services.MediaConversion.MediaConversionService.#ctor(PublisherStudio.Services.Streaming.Encoding.FfmpegLocator,PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService,PublisherStudio.Services.Configuration.IPublisherRuntimePatternService,PublisherStudio.BusinessObjects.PublisherStudioConfigurationNode,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.MediaConversion.MediaConversionService})
+  - PublisherStudio.Services.MediaConversion.MediaConversionService.Cancel(System.Guid)
+  - PublisherStudio.Services.MediaConversion.MediaConversionService.DeleteProfile(System.Guid)
+  - PublisherStudio.Services.MediaConversion.MediaConversionService.Dispose
+  - PublisherStudio.Services.MediaConversion.MediaConversionService.GetCapabilitiesAsync(System.Threading.CancellationToken)
+  - PublisherStudio.Services.MediaConversion.MediaConversionService.GetJob(System.Guid)
+  - PublisherStudio.Services.MediaConversion.MediaConversionService.GetJobs
+  - PublisherStudio.Services.MediaConversion.MediaConversionService.GetProfiles
+  - PublisherStudio.Services.MediaConversion.MediaConversionService.OpenOutputAsync(System.Guid,System.Threading.CancellationToken)
+  - PublisherStudio.Services.MediaConversion.MediaConversionService.QueueAsync(System.IO.Stream,System.String,System.String,System.String,PublisherStudio.BusinessObjects.MediaConversionOptions,System.Threading.CancellationToken)
+  - PublisherStudio.Services.MediaConversion.MediaConversionService.QueueAsync(System.IO.Stream,System.String,System.String,System.String,System.Threading.CancellationToken)
+  - PublisherStudio.Services.MediaConversion.MediaConversionService.Remove(System.Guid)
+  - PublisherStudio.Services.MediaConversion.MediaConversionService.SaveProfile(PublisherStudio.BusinessObjects.MediaConversionProfile)
+  langs:
+  - csharp
+  - vb
+  name: MediaConversionService
+  nameWithType: MediaConversionService
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaConversion
+  summary: Provides media conversion service operations.
+  example: []
+  syntax:
+    content: 'public sealed class MediaConversionService : IMediaConversionService, IDisposable'
+    content.vb: Public NotInheritable Class MediaConversionService Implements IMediaConversionService, IDisposable
+  inheritance:
+  - System.Object
+  implements:
+  - PublisherStudio.Services.MediaConversion.IMediaConversionService
+  - System.IDisposable
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.#ctor(PublisherStudio.Services.Streaming.Encoding.FfmpegLocator,PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService,PublisherStudio.Services.Configuration.IPublisherRuntimePatternService,PublisherStudio.BusinessObjects.PublisherStudioConfigurationNode,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.MediaConversion.MediaConversionService})
+  commentId: M:PublisherStudio.Services.MediaConversion.MediaConversionService.#ctor(PublisherStudio.Services.Streaming.Encoding.FfmpegLocator,PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService,PublisherStudio.Services.Configuration.IPublisherRuntimePatternService,PublisherStudio.BusinessObjects.PublisherStudioConfigurationNode,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.MediaConversion.MediaConversionService})
+  id: '#ctor(PublisherStudio.Services.Streaming.Encoding.FfmpegLocator,PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService,PublisherStudio.Services.Configuration.IPublisherRuntimePatternService,PublisherStudio.BusinessObjects.PublisherStudioConfigurationNode,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.MediaConversion.MediaConversionService})'
+  parent: PublisherStudio.Services.MediaConversion.MediaConversionService
+  langs:
+  - csharp
+  - vb
+  name: MediaConversionService(FfmpegLocator, IPublisherRuntimePolicyDataService, IPublisherRuntimePatternService, PublisherStudioConfigurationNode, ILogger<MediaConversionService>)
+  nameWithType: MediaConversionService.MediaConversionService(FfmpegLocator, IPublisherRuntimePolicyDataService, IPublisherRuntimePatternService, PublisherStudioConfigurationNode, ILogger<MediaConversionService>)
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.MediaConversionService(PublisherStudio.Services.Streaming.Encoding.FfmpegLocator, PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService, PublisherStudio.Services.Configuration.IPublisherRuntimePatternService, PublisherStudio.BusinessObjects.PublisherStudioConfigurationNode, Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.MediaConversion.MediaConversionService>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaConversion
+  summary: Runs the media conversion service operation.
+  example: []
+  syntax:
+    content: public MediaConversionService(FfmpegLocator ffmpegLocator, IPublisherRuntimePolicyDataService runtimePolicy, IPublisherRuntimePatternService runtimePatterns, PublisherStudioConfigurationNode publisherConfiguration, ILogger<MediaConversionService> logger)
+    parameters:
+    - id: ffmpegLocator
+      type: PublisherStudio.Services.Streaming.Encoding.FfmpegLocator
+    - id: runtimePolicy
+      type: PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService
+    - id: runtimePatterns
+      type: PublisherStudio.Services.Configuration.IPublisherRuntimePatternService
+    - id: publisherConfiguration
+      type: PublisherStudio.BusinessObjects.PublisherStudioConfigurationNode
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.MediaConversion.MediaConversionService}
+    content.vb: Public Sub New(ffmpegLocator As FfmpegLocator, runtimePolicy As IPublisherRuntimePolicyDataService, runtimePatterns As IPublisherRuntimePatternService, publisherConfiguration As PublisherStudioConfigurationNode, logger As ILogger(Of MediaConversionService))
+  overload: PublisherStudio.Services.MediaConversion.MediaConversionService.#ctor*
+  nameWithType.vb: MediaConversionService.New(FfmpegLocator, IPublisherRuntimePolicyDataService, IPublisherRuntimePatternService, PublisherStudioConfigurationNode, ILogger(Of MediaConversionService))
+  fullName.vb: PublisherStudio.Services.MediaConversion.MediaConversionService.New(PublisherStudio.Services.Streaming.Encoding.FfmpegLocator, PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService, PublisherStudio.Services.Configuration.IPublisherRuntimePatternService, PublisherStudio.BusinessObjects.PublisherStudioConfigurationNode, Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.MediaConversion.MediaConversionService))
+  name.vb: New(FfmpegLocator, IPublisherRuntimePolicyDataService, IPublisherRuntimePatternService, PublisherStudioConfigurationNode, ILogger(Of MediaConversionService))
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.GetCapabilitiesAsync(System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.MediaConversion.MediaConversionService.GetCapabilitiesAsync(System.Threading.CancellationToken)
+  id: GetCapabilitiesAsync(System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.MediaConversion.MediaConversionService
+  langs:
+  - csharp
+  - vb
+  name: GetCapabilitiesAsync(CancellationToken)
+  nameWithType: MediaConversionService.GetCapabilitiesAsync(CancellationToken)
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.GetCapabilitiesAsync(System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaConversion
+  summary: Gets capabilities async.
+  example: []
+  syntax:
+    content: public Task<MediaConversionCapabilities> GetCapabilitiesAsync(CancellationToken cancellationToken = default)
+    parameters:
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.MediaConversionCapabilities}
+    content.vb: Public Function GetCapabilitiesAsync(cancellationToken As CancellationToken = Nothing) As Task(Of MediaConversionCapabilities)
+  overload: PublisherStudio.Services.MediaConversion.MediaConversionService.GetCapabilitiesAsync*
+  implements:
+  - PublisherStudio.Services.MediaConversion.IMediaConversionService.GetCapabilitiesAsync(System.Threading.CancellationToken)
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.QueueAsync(System.IO.Stream,System.String,System.String,System.String,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.MediaConversion.MediaConversionService.QueueAsync(System.IO.Stream,System.String,System.String,System.String,System.Threading.CancellationToken)
+  id: QueueAsync(System.IO.Stream,System.String,System.String,System.String,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.MediaConversion.MediaConversionService
+  langs:
+  - csharp
+  - vb
+  name: QueueAsync(Stream, string, string, string, CancellationToken)
+  nameWithType: MediaConversionService.QueueAsync(Stream, string, string, string, CancellationToken)
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.QueueAsync(System.IO.Stream, string, string, string, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaConversion
+  summary: Runs the queue async operation.
+  example: []
+  syntax:
+    content: public Task<MediaConversionJobInfo> QueueAsync(Stream source, string fileName, string mimeType, string presetId, CancellationToken cancellationToken = default)
+    parameters:
+    - id: source
+      type: System.IO.Stream
+    - id: fileName
+      type: System.String
+    - id: mimeType
+      type: System.String
+    - id: presetId
+      type: System.String
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.MediaConversionJobInfo}
+    content.vb: Public Function QueueAsync(source As Stream, fileName As String, mimeType As String, presetId As String, cancellationToken As CancellationToken = Nothing) As Task(Of MediaConversionJobInfo)
+  overload: PublisherStudio.Services.MediaConversion.MediaConversionService.QueueAsync*
+  implements:
+  - PublisherStudio.Services.MediaConversion.IMediaConversionService.QueueAsync(System.IO.Stream,System.String,System.String,System.String,System.Threading.CancellationToken)
+  nameWithType.vb: MediaConversionService.QueueAsync(Stream, String, String, String, CancellationToken)
+  fullName.vb: PublisherStudio.Services.MediaConversion.MediaConversionService.QueueAsync(System.IO.Stream, String, String, String, System.Threading.CancellationToken)
+  name.vb: QueueAsync(Stream, String, String, String, CancellationToken)
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.QueueAsync(System.IO.Stream,System.String,System.String,System.String,PublisherStudio.BusinessObjects.MediaConversionOptions,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.MediaConversion.MediaConversionService.QueueAsync(System.IO.Stream,System.String,System.String,System.String,PublisherStudio.BusinessObjects.MediaConversionOptions,System.Threading.CancellationToken)
+  id: QueueAsync(System.IO.Stream,System.String,System.String,System.String,PublisherStudio.BusinessObjects.MediaConversionOptions,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.MediaConversion.MediaConversionService
+  langs:
+  - csharp
+  - vb
+  name: QueueAsync(Stream, string, string, string, MediaConversionOptions, CancellationToken)
+  nameWithType: MediaConversionService.QueueAsync(Stream, string, string, string, MediaConversionOptions, CancellationToken)
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.QueueAsync(System.IO.Stream, string, string, string, PublisherStudio.BusinessObjects.MediaConversionOptions, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaConversion
+  summary: Runs the queue async operation.
+  example: []
+  syntax:
+    content: public Task<MediaConversionJobInfo> QueueAsync(Stream source, string fileName, string mimeType, string presetId, MediaConversionOptions options, CancellationToken cancellationToken = default)
+    parameters:
+    - id: source
+      type: System.IO.Stream
+    - id: fileName
+      type: System.String
+    - id: mimeType
+      type: System.String
+    - id: presetId
+      type: System.String
+    - id: options
+      type: PublisherStudio.BusinessObjects.MediaConversionOptions
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.MediaConversionJobInfo}
+    content.vb: Public Function QueueAsync(source As Stream, fileName As String, mimeType As String, presetId As String, options As MediaConversionOptions, cancellationToken As CancellationToken = Nothing) As Task(Of MediaConversionJobInfo)
+  overload: PublisherStudio.Services.MediaConversion.MediaConversionService.QueueAsync*
+  implements:
+  - PublisherStudio.Services.MediaConversion.IMediaConversionService.QueueAsync(System.IO.Stream,System.String,System.String,System.String,PublisherStudio.BusinessObjects.MediaConversionOptions,System.Threading.CancellationToken)
+  nameWithType.vb: MediaConversionService.QueueAsync(Stream, String, String, String, MediaConversionOptions, CancellationToken)
+  fullName.vb: PublisherStudio.Services.MediaConversion.MediaConversionService.QueueAsync(System.IO.Stream, String, String, String, PublisherStudio.BusinessObjects.MediaConversionOptions, System.Threading.CancellationToken)
+  name.vb: QueueAsync(Stream, String, String, String, MediaConversionOptions, CancellationToken)
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.GetJob(System.Guid)
+  commentId: M:PublisherStudio.Services.MediaConversion.MediaConversionService.GetJob(System.Guid)
+  id: GetJob(System.Guid)
+  parent: PublisherStudio.Services.MediaConversion.MediaConversionService
+  langs:
+  - csharp
+  - vb
+  name: GetJob(Guid)
+  nameWithType: MediaConversionService.GetJob(Guid)
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.GetJob(System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaConversion
+  summary: Gets job.
+  example: []
+  syntax:
+    content: public MediaConversionJobInfo? GetJob(Guid id)
+    parameters:
+    - id: id
+      type: System.Guid
+    return:
+      type: PublisherStudio.BusinessObjects.MediaConversionJobInfo
+    content.vb: Public Function GetJob(id As Guid) As MediaConversionJobInfo
+  overload: PublisherStudio.Services.MediaConversion.MediaConversionService.GetJob*
+  implements:
+  - PublisherStudio.Services.MediaConversion.IMediaConversionService.GetJob(System.Guid)
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.GetJobs
+  commentId: M:PublisherStudio.Services.MediaConversion.MediaConversionService.GetJobs
+  id: GetJobs
+  parent: PublisherStudio.Services.MediaConversion.MediaConversionService
+  langs:
+  - csharp
+  - vb
+  name: GetJobs()
+  nameWithType: MediaConversionService.GetJobs()
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.GetJobs()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaConversion
+  summary: Gets jobs.
+  example: []
+  syntax:
+    content: public IReadOnlyList<MediaConversionJobInfo> GetJobs()
+    return:
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.MediaConversionJobInfo}
+    content.vb: Public Function GetJobs() As IReadOnlyList(Of MediaConversionJobInfo)
+  overload: PublisherStudio.Services.MediaConversion.MediaConversionService.GetJobs*
+  implements:
+  - PublisherStudio.Services.MediaConversion.IMediaConversionService.GetJobs
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.OpenOutputAsync(System.Guid,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.MediaConversion.MediaConversionService.OpenOutputAsync(System.Guid,System.Threading.CancellationToken)
+  id: OpenOutputAsync(System.Guid,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.MediaConversion.MediaConversionService
+  langs:
+  - csharp
+  - vb
+  name: OpenOutputAsync(Guid, CancellationToken)
+  nameWithType: MediaConversionService.OpenOutputAsync(Guid, CancellationToken)
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.OpenOutputAsync(System.Guid, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaConversion
+  summary: Opens output async.
+  example: []
+  syntax:
+    content: public Task<Stream?> OpenOutputAsync(Guid id, CancellationToken cancellationToken = default)
+    parameters:
+    - id: id
+      type: System.Guid
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{System.IO.Stream}
+    content.vb: Public Function OpenOutputAsync(id As Guid, cancellationToken As CancellationToken = Nothing) As Task(Of Stream)
+  overload: PublisherStudio.Services.MediaConversion.MediaConversionService.OpenOutputAsync*
+  implements:
+  - PublisherStudio.Services.MediaConversion.IMediaConversionService.OpenOutputAsync(System.Guid,System.Threading.CancellationToken)
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.GetProfiles
+  commentId: M:PublisherStudio.Services.MediaConversion.MediaConversionService.GetProfiles
+  id: GetProfiles
+  parent: PublisherStudio.Services.MediaConversion.MediaConversionService
+  langs:
+  - csharp
+  - vb
+  name: GetProfiles()
+  nameWithType: MediaConversionService.GetProfiles()
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.GetProfiles()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaConversion
+  summary: Gets profiles.
+  example: []
+  syntax:
+    content: public IReadOnlyList<MediaConversionProfile> GetProfiles()
+    return:
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.MediaConversionProfile}
+    content.vb: Public Function GetProfiles() As IReadOnlyList(Of MediaConversionProfile)
+  overload: PublisherStudio.Services.MediaConversion.MediaConversionService.GetProfiles*
+  implements:
+  - PublisherStudio.Services.MediaConversion.IMediaConversionService.GetProfiles
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.SaveProfile(PublisherStudio.BusinessObjects.MediaConversionProfile)
+  commentId: M:PublisherStudio.Services.MediaConversion.MediaConversionService.SaveProfile(PublisherStudio.BusinessObjects.MediaConversionProfile)
+  id: SaveProfile(PublisherStudio.BusinessObjects.MediaConversionProfile)
+  parent: PublisherStudio.Services.MediaConversion.MediaConversionService
+  langs:
+  - csharp
+  - vb
+  name: SaveProfile(MediaConversionProfile)
+  nameWithType: MediaConversionService.SaveProfile(MediaConversionProfile)
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.SaveProfile(PublisherStudio.BusinessObjects.MediaConversionProfile)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaConversion
+  summary: Saves profile.
+  example: []
+  syntax:
+    content: public MediaConversionProfile SaveProfile(MediaConversionProfile profile)
+    parameters:
+    - id: profile
+      type: PublisherStudio.BusinessObjects.MediaConversionProfile
+    return:
+      type: PublisherStudio.BusinessObjects.MediaConversionProfile
+    content.vb: Public Function SaveProfile(profile As MediaConversionProfile) As MediaConversionProfile
+  overload: PublisherStudio.Services.MediaConversion.MediaConversionService.SaveProfile*
+  implements:
+  - PublisherStudio.Services.MediaConversion.IMediaConversionService.SaveProfile(PublisherStudio.BusinessObjects.MediaConversionProfile)
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.DeleteProfile(System.Guid)
+  commentId: M:PublisherStudio.Services.MediaConversion.MediaConversionService.DeleteProfile(System.Guid)
+  id: DeleteProfile(System.Guid)
+  parent: PublisherStudio.Services.MediaConversion.MediaConversionService
+  langs:
+  - csharp
+  - vb
+  name: DeleteProfile(Guid)
+  nameWithType: MediaConversionService.DeleteProfile(Guid)
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.DeleteProfile(System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaConversion
+  summary: Deletes profile.
+  example: []
+  syntax:
+    content: public bool DeleteProfile(Guid id)
+    parameters:
+    - id: id
+      type: System.Guid
+    return:
+      type: System.Boolean
+    content.vb: Public Function DeleteProfile(id As Guid) As Boolean
+  overload: PublisherStudio.Services.MediaConversion.MediaConversionService.DeleteProfile*
+  implements:
+  - PublisherStudio.Services.MediaConversion.IMediaConversionService.DeleteProfile(System.Guid)
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.Cancel(System.Guid)
+  commentId: M:PublisherStudio.Services.MediaConversion.MediaConversionService.Cancel(System.Guid)
+  id: Cancel(System.Guid)
+  parent: PublisherStudio.Services.MediaConversion.MediaConversionService
+  langs:
+  - csharp
+  - vb
+  name: Cancel(Guid)
+  nameWithType: MediaConversionService.Cancel(Guid)
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.Cancel(System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaConversion
+  summary: Determines whether cel.
+  example: []
+  syntax:
+    content: public bool Cancel(Guid id)
+    parameters:
+    - id: id
+      type: System.Guid
+    return:
+      type: System.Boolean
+    content.vb: Public Function Cancel(id As Guid) As Boolean
+  overload: PublisherStudio.Services.MediaConversion.MediaConversionService.Cancel*
+  implements:
+  - PublisherStudio.Services.MediaConversion.IMediaConversionService.Cancel(System.Guid)
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.Remove(System.Guid)
+  commentId: M:PublisherStudio.Services.MediaConversion.MediaConversionService.Remove(System.Guid)
+  id: Remove(System.Guid)
+  parent: PublisherStudio.Services.MediaConversion.MediaConversionService
+  langs:
+  - csharp
+  - vb
+  name: Remove(Guid)
+  nameWithType: MediaConversionService.Remove(Guid)
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.Remove(System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaConversion
+  summary: Runs the remove operation.
+  example: []
+  syntax:
+    content: public bool Remove(Guid id)
+    parameters:
+    - id: id
+      type: System.Guid
+    return:
+      type: System.Boolean
+    content.vb: Public Function Remove(id As Guid) As Boolean
+  overload: PublisherStudio.Services.MediaConversion.MediaConversionService.Remove*
+  implements:
+  - PublisherStudio.Services.MediaConversion.IMediaConversionService.Remove(System.Guid)
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.Dispose
+  commentId: M:PublisherStudio.Services.MediaConversion.MediaConversionService.Dispose
+  id: Dispose
+  parent: PublisherStudio.Services.MediaConversion.MediaConversionService
+  langs:
+  - csharp
+  - vb
+  name: Dispose()
+  nameWithType: MediaConversionService.Dispose()
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.Dispose()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaConversion
+  summary: Runs the dispose operation.
+  example: []
+  syntax:
+    content: public void Dispose()
+    content.vb: Public Sub Dispose()
+  overload: PublisherStudio.Services.MediaConversion.MediaConversionService.Dispose*
+  implements:
+  - System.IDisposable.Dispose
+references:
+- uid: PublisherStudio.Services.MediaConversion
+  commentId: N:PublisherStudio.Services.MediaConversion
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.MediaConversion
+  nameWithType: PublisherStudio.Services.MediaConversion
+  fullName: PublisherStudio.Services.MediaConversion
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.MediaConversion
+    name: MediaConversion
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.MediaConversion
+    name: MediaConversion
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: PublisherStudio.Services.MediaConversion.IMediaConversionService
+  commentId: T:PublisherStudio.Services.MediaConversion.IMediaConversionService
+  parent: PublisherStudio.Services.MediaConversion
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html
+  name: IMediaConversionService
+  nameWithType: IMediaConversionService
+  fullName: PublisherStudio.Services.MediaConversion.IMediaConversionService
+- uid: System.IDisposable
+  commentId: T:System.IDisposable
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.idisposable
+  name: IDisposable
+  nameWithType: IDisposable
+  fullName: System.IDisposable
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.#ctor*
+  commentId: Overload:PublisherStudio.Services.MediaConversion.MediaConversionService.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.MediaConversionService.html#PublisherStudio_Services_MediaConversion_MediaConversionService__ctor_PublisherStudio_Services_Streaming_Encoding_FfmpegLocator_PublisherStudio_Services_Configuration_IPublisherRuntimePolicyDataService_PublisherStudio_Services_Configuration_IPublisherRuntimePatternService_PublisherStudio_BusinessObjects_PublisherStudioConfigurationNode_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_MediaConversion_MediaConversionService__
+  name: MediaConversionService
+  nameWithType: MediaConversionService.MediaConversionService
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.MediaConversionService
+  nameWithType.vb: MediaConversionService.New
+  fullName.vb: PublisherStudio.Services.MediaConversion.MediaConversionService.New
+  name.vb: New
+- uid: PublisherStudio.Services.Streaming.Encoding.FfmpegLocator
+  commentId: T:PublisherStudio.Services.Streaming.Encoding.FfmpegLocator
+  parent: PublisherStudio.Services.Streaming.Encoding
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Encoding.FfmpegLocator.html
+  name: FfmpegLocator
+  nameWithType: FfmpegLocator
+  fullName: PublisherStudio.Services.Streaming.Encoding.FfmpegLocator
+- uid: PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService
+  commentId: T:PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService
+  parent: PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService.html
+  name: IPublisherRuntimePolicyDataService
+  nameWithType: IPublisherRuntimePolicyDataService
+  fullName: PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService
+- uid: PublisherStudio.Services.Configuration.IPublisherRuntimePatternService
+  commentId: T:PublisherStudio.Services.Configuration.IPublisherRuntimePatternService
+  parent: PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IPublisherRuntimePatternService.html
+  name: IPublisherRuntimePatternService
+  nameWithType: IPublisherRuntimePatternService
+  fullName: PublisherStudio.Services.Configuration.IPublisherRuntimePatternService
+- uid: PublisherStudio.BusinessObjects.PublisherStudioConfigurationNode
+  commentId: T:PublisherStudio.BusinessObjects.PublisherStudioConfigurationNode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherStudioConfigurationNode.html
+  name: PublisherStudioConfigurationNode
+  nameWithType: PublisherStudioConfigurationNode
+  fullName: PublisherStudio.BusinessObjects.PublisherStudioConfigurationNode
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.MediaConversion.MediaConversionService}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.MediaConversion.MediaConversionService}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<MediaConversionService>
+  nameWithType: ILogger<MediaConversionService>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.MediaConversion.MediaConversionService>
+  nameWithType.vb: ILogger(Of MediaConversionService)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.MediaConversion.MediaConversionService)
+  name.vb: ILogger(Of MediaConversionService)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.MediaConversion.MediaConversionService
+    name: MediaConversionService
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.MediaConversionService.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.MediaConversion.MediaConversionService
+    name: MediaConversionService
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.MediaConversionService.html
+  - name: )
+- uid: PublisherStudio.Services.Streaming.Encoding
+  commentId: N:PublisherStudio.Services.Streaming.Encoding
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Encoding
+  nameWithType: PublisherStudio.Services.Streaming.Encoding
+  fullName: PublisherStudio.Services.Streaming.Encoding
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Encoding
+    name: Encoding
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Encoding.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Encoding
+    name: Encoding
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Encoding.html
+- uid: PublisherStudio.Services.Configuration
+  commentId: N:PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Configuration
+  nameWithType: PublisherStudio.Services.Configuration
+  fullName: PublisherStudio.Services.Configuration
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.GetCapabilitiesAsync*
+  commentId: Overload:PublisherStudio.Services.MediaConversion.MediaConversionService.GetCapabilitiesAsync
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.MediaConversionService.html#PublisherStudio_Services_MediaConversion_MediaConversionService_GetCapabilitiesAsync_System_Threading_CancellationToken_
+  name: GetCapabilitiesAsync
+  nameWithType: MediaConversionService.GetCapabilitiesAsync
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.GetCapabilitiesAsync
+- uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.GetCapabilitiesAsync(System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.MediaConversion.IMediaConversionService.GetCapabilitiesAsync(System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.MediaConversion.IMediaConversionService
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_GetCapabilitiesAsync_System_Threading_CancellationToken_
+  name: GetCapabilitiesAsync(CancellationToken)
+  nameWithType: IMediaConversionService.GetCapabilitiesAsync(CancellationToken)
+  fullName: PublisherStudio.Services.MediaConversion.IMediaConversionService.GetCapabilitiesAsync(System.Threading.CancellationToken)
+  spec.csharp:
+  - uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.GetCapabilitiesAsync(System.Threading.CancellationToken)
+    name: GetCapabilitiesAsync
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_GetCapabilitiesAsync_System_Threading_CancellationToken_
+  - name: (
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.GetCapabilitiesAsync(System.Threading.CancellationToken)
+    name: GetCapabilitiesAsync
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_GetCapabilitiesAsync_System_Threading_CancellationToken_
+  - name: (
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+- uid: System.Threading.CancellationToken
+  commentId: T:System.Threading.CancellationToken
+  parent: System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  name: CancellationToken
+  nameWithType: CancellationToken
+  fullName: System.Threading.CancellationToken
+- uid: System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.MediaConversionCapabilities}
+  commentId: T:System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.MediaConversionCapabilities}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<MediaConversionCapabilities>
+  nameWithType: Task<MediaConversionCapabilities>
+  fullName: System.Threading.Tasks.Task<PublisherStudio.BusinessObjects.MediaConversionCapabilities>
+  nameWithType.vb: Task(Of MediaConversionCapabilities)
+  fullName.vb: System.Threading.Tasks.Task(Of PublisherStudio.BusinessObjects.MediaConversionCapabilities)
+  name.vb: Task(Of MediaConversionCapabilities)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.MediaConversionCapabilities
+    name: MediaConversionCapabilities
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaConversionCapabilities.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.MediaConversionCapabilities
+    name: MediaConversionCapabilities
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaConversionCapabilities.html
+  - name: )
+- uid: System.Threading
+  commentId: N:System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading
+  nameWithType: System.Threading
+  fullName: System.Threading
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+- uid: System.Threading.Tasks.Task`1
+  commentId: T:System.Threading.Tasks.Task`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<TResult>
+  nameWithType: Task<TResult>
+  fullName: System.Threading.Tasks.Task<TResult>
+  nameWithType.vb: Task(Of TResult)
+  fullName.vb: System.Threading.Tasks.Task(Of TResult)
+  name.vb: Task(Of TResult)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - name: TResult
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TResult
+  - name: )
+- uid: System.Threading.Tasks
+  commentId: N:System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading.Tasks
+  nameWithType: System.Threading.Tasks
+  fullName: System.Threading.Tasks
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.QueueAsync*
+  commentId: Overload:PublisherStudio.Services.MediaConversion.MediaConversionService.QueueAsync
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.MediaConversionService.html#PublisherStudio_Services_MediaConversion_MediaConversionService_QueueAsync_System_IO_Stream_System_String_System_String_System_String_System_Threading_CancellationToken_
+  name: QueueAsync
+  nameWithType: MediaConversionService.QueueAsync
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.QueueAsync
+- uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.QueueAsync(System.IO.Stream,System.String,System.String,System.String,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.MediaConversion.IMediaConversionService.QueueAsync(System.IO.Stream,System.String,System.String,System.String,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.MediaConversion.IMediaConversionService
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_QueueAsync_System_IO_Stream_System_String_System_String_System_String_System_Threading_CancellationToken_
+  name: QueueAsync(Stream, string, string, string, CancellationToken)
+  nameWithType: IMediaConversionService.QueueAsync(Stream, string, string, string, CancellationToken)
+  fullName: PublisherStudio.Services.MediaConversion.IMediaConversionService.QueueAsync(System.IO.Stream, string, string, string, System.Threading.CancellationToken)
+  nameWithType.vb: IMediaConversionService.QueueAsync(Stream, String, String, String, CancellationToken)
+  fullName.vb: PublisherStudio.Services.MediaConversion.IMediaConversionService.QueueAsync(System.IO.Stream, String, String, String, System.Threading.CancellationToken)
+  name.vb: QueueAsync(Stream, String, String, String, CancellationToken)
+  spec.csharp:
+  - uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.QueueAsync(System.IO.Stream,System.String,System.String,System.String,System.Threading.CancellationToken)
+    name: QueueAsync
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_QueueAsync_System_IO_Stream_System_String_System_String_System_String_System_Threading_CancellationToken_
+  - name: (
+  - uid: System.IO.Stream
+    name: Stream
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.io.stream
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.QueueAsync(System.IO.Stream,System.String,System.String,System.String,System.Threading.CancellationToken)
+    name: QueueAsync
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_QueueAsync_System_IO_Stream_System_String_System_String_System_String_System_Threading_CancellationToken_
+  - name: (
+  - uid: System.IO.Stream
+    name: Stream
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.io.stream
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+- uid: System.IO.Stream
+  commentId: T:System.IO.Stream
+  parent: System.IO
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.io.stream
+  name: Stream
+  nameWithType: Stream
+  fullName: System.IO.Stream
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.MediaConversionJobInfo}
+  commentId: T:System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.MediaConversionJobInfo}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<MediaConversionJobInfo>
+  nameWithType: Task<MediaConversionJobInfo>
+  fullName: System.Threading.Tasks.Task<PublisherStudio.BusinessObjects.MediaConversionJobInfo>
+  nameWithType.vb: Task(Of MediaConversionJobInfo)
+  fullName.vb: System.Threading.Tasks.Task(Of PublisherStudio.BusinessObjects.MediaConversionJobInfo)
+  name.vb: Task(Of MediaConversionJobInfo)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.MediaConversionJobInfo
+    name: MediaConversionJobInfo
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaConversionJobInfo.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.MediaConversionJobInfo
+    name: MediaConversionJobInfo
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaConversionJobInfo.html
+  - name: )
+- uid: System.IO
+  commentId: N:System.IO
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.IO
+  nameWithType: System.IO
+  fullName: System.IO
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.IO
+    name: IO
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.io
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.IO
+    name: IO
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.io
+- uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.QueueAsync(System.IO.Stream,System.String,System.String,System.String,PublisherStudio.BusinessObjects.MediaConversionOptions,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.MediaConversion.IMediaConversionService.QueueAsync(System.IO.Stream,System.String,System.String,System.String,PublisherStudio.BusinessObjects.MediaConversionOptions,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.MediaConversion.IMediaConversionService
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_QueueAsync_System_IO_Stream_System_String_System_String_System_String_PublisherStudio_BusinessObjects_MediaConversionOptions_System_Threading_CancellationToken_
+  name: QueueAsync(Stream, string, string, string, MediaConversionOptions, CancellationToken)
+  nameWithType: IMediaConversionService.QueueAsync(Stream, string, string, string, MediaConversionOptions, CancellationToken)
+  fullName: PublisherStudio.Services.MediaConversion.IMediaConversionService.QueueAsync(System.IO.Stream, string, string, string, PublisherStudio.BusinessObjects.MediaConversionOptions, System.Threading.CancellationToken)
+  nameWithType.vb: IMediaConversionService.QueueAsync(Stream, String, String, String, MediaConversionOptions, CancellationToken)
+  fullName.vb: PublisherStudio.Services.MediaConversion.IMediaConversionService.QueueAsync(System.IO.Stream, String, String, String, PublisherStudio.BusinessObjects.MediaConversionOptions, System.Threading.CancellationToken)
+  name.vb: QueueAsync(Stream, String, String, String, MediaConversionOptions, CancellationToken)
+  spec.csharp:
+  - uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.QueueAsync(System.IO.Stream,System.String,System.String,System.String,PublisherStudio.BusinessObjects.MediaConversionOptions,System.Threading.CancellationToken)
+    name: QueueAsync
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_QueueAsync_System_IO_Stream_System_String_System_String_System_String_PublisherStudio_BusinessObjects_MediaConversionOptions_System_Threading_CancellationToken_
+  - name: (
+  - uid: System.IO.Stream
+    name: Stream
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.io.stream
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.MediaConversionOptions
+    name: MediaConversionOptions
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaConversionOptions.html
+  - name: ','
+  - name: " "
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.QueueAsync(System.IO.Stream,System.String,System.String,System.String,PublisherStudio.BusinessObjects.MediaConversionOptions,System.Threading.CancellationToken)
+    name: QueueAsync
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_QueueAsync_System_IO_Stream_System_String_System_String_System_String_PublisherStudio_BusinessObjects_MediaConversionOptions_System_Threading_CancellationToken_
+  - name: (
+  - uid: System.IO.Stream
+    name: Stream
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.io.stream
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.MediaConversionOptions
+    name: MediaConversionOptions
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaConversionOptions.html
+  - name: ','
+  - name: " "
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+- uid: PublisherStudio.BusinessObjects.MediaConversionOptions
+  commentId: T:PublisherStudio.BusinessObjects.MediaConversionOptions
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaConversionOptions.html
+  name: MediaConversionOptions
+  nameWithType: MediaConversionOptions
+  fullName: PublisherStudio.BusinessObjects.MediaConversionOptions
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.GetJob*
+  commentId: Overload:PublisherStudio.Services.MediaConversion.MediaConversionService.GetJob
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.MediaConversionService.html#PublisherStudio_Services_MediaConversion_MediaConversionService_GetJob_System_Guid_
+  name: GetJob
+  nameWithType: MediaConversionService.GetJob
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.GetJob
+- uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.GetJob(System.Guid)
+  commentId: M:PublisherStudio.Services.MediaConversion.IMediaConversionService.GetJob(System.Guid)
+  parent: PublisherStudio.Services.MediaConversion.IMediaConversionService
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_GetJob_System_Guid_
+  name: GetJob(Guid)
+  nameWithType: IMediaConversionService.GetJob(Guid)
+  fullName: PublisherStudio.Services.MediaConversion.IMediaConversionService.GetJob(System.Guid)
+  spec.csharp:
+  - uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.GetJob(System.Guid)
+    name: GetJob
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_GetJob_System_Guid_
+  - name: (
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.GetJob(System.Guid)
+    name: GetJob
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_GetJob_System_Guid_
+  - name: (
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: )
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: PublisherStudio.BusinessObjects.MediaConversionJobInfo
+  commentId: T:PublisherStudio.BusinessObjects.MediaConversionJobInfo
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaConversionJobInfo.html
+  name: MediaConversionJobInfo
+  nameWithType: MediaConversionJobInfo
+  fullName: PublisherStudio.BusinessObjects.MediaConversionJobInfo
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.GetJobs*
+  commentId: Overload:PublisherStudio.Services.MediaConversion.MediaConversionService.GetJobs
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.MediaConversionService.html#PublisherStudio_Services_MediaConversion_MediaConversionService_GetJobs
+  name: GetJobs
+  nameWithType: MediaConversionService.GetJobs
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.GetJobs
+- uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.GetJobs
+  commentId: M:PublisherStudio.Services.MediaConversion.IMediaConversionService.GetJobs
+  parent: PublisherStudio.Services.MediaConversion.IMediaConversionService
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_GetJobs
+  name: GetJobs()
+  nameWithType: IMediaConversionService.GetJobs()
+  fullName: PublisherStudio.Services.MediaConversion.IMediaConversionService.GetJobs()
+  spec.csharp:
+  - uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.GetJobs
+    name: GetJobs
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_GetJobs
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.GetJobs
+    name: GetJobs
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_GetJobs
+  - name: (
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.MediaConversionJobInfo}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.MediaConversionJobInfo}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<MediaConversionJobInfo>
+  nameWithType: IReadOnlyList<MediaConversionJobInfo>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.MediaConversionJobInfo>
+  nameWithType.vb: IReadOnlyList(Of MediaConversionJobInfo)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.MediaConversionJobInfo)
+  name.vb: IReadOnlyList(Of MediaConversionJobInfo)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.MediaConversionJobInfo
+    name: MediaConversionJobInfo
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaConversionJobInfo.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.MediaConversionJobInfo
+    name: MediaConversionJobInfo
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaConversionJobInfo.html
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.OpenOutputAsync*
+  commentId: Overload:PublisherStudio.Services.MediaConversion.MediaConversionService.OpenOutputAsync
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.MediaConversionService.html#PublisherStudio_Services_MediaConversion_MediaConversionService_OpenOutputAsync_System_Guid_System_Threading_CancellationToken_
+  name: OpenOutputAsync
+  nameWithType: MediaConversionService.OpenOutputAsync
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.OpenOutputAsync
+- uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.OpenOutputAsync(System.Guid,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.MediaConversion.IMediaConversionService.OpenOutputAsync(System.Guid,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.MediaConversion.IMediaConversionService
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_OpenOutputAsync_System_Guid_System_Threading_CancellationToken_
+  name: OpenOutputAsync(Guid, CancellationToken)
+  nameWithType: IMediaConversionService.OpenOutputAsync(Guid, CancellationToken)
+  fullName: PublisherStudio.Services.MediaConversion.IMediaConversionService.OpenOutputAsync(System.Guid, System.Threading.CancellationToken)
+  spec.csharp:
+  - uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.OpenOutputAsync(System.Guid,System.Threading.CancellationToken)
+    name: OpenOutputAsync
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_OpenOutputAsync_System_Guid_System_Threading_CancellationToken_
+  - name: (
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: ','
+  - name: " "
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.OpenOutputAsync(System.Guid,System.Threading.CancellationToken)
+    name: OpenOutputAsync
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_OpenOutputAsync_System_Guid_System_Threading_CancellationToken_
+  - name: (
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: ','
+  - name: " "
+  - uid: System.Threading.CancellationToken
+    name: CancellationToken
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  - name: )
+- uid: System.Threading.Tasks.Task{System.IO.Stream}
+  commentId: T:System.Threading.Tasks.Task{System.IO.Stream}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<Stream>
+  nameWithType: Task<Stream>
+  fullName: System.Threading.Tasks.Task<System.IO.Stream>
+  nameWithType.vb: Task(Of Stream)
+  fullName.vb: System.Threading.Tasks.Task(Of System.IO.Stream)
+  name.vb: Task(Of Stream)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: System.IO.Stream
+    name: Stream
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.io.stream
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.IO.Stream
+    name: Stream
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.io.stream
+  - name: )
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.GetProfiles*
+  commentId: Overload:PublisherStudio.Services.MediaConversion.MediaConversionService.GetProfiles
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.MediaConversionService.html#PublisherStudio_Services_MediaConversion_MediaConversionService_GetProfiles
+  name: GetProfiles
+  nameWithType: MediaConversionService.GetProfiles
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.GetProfiles
+- uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.GetProfiles
+  commentId: M:PublisherStudio.Services.MediaConversion.IMediaConversionService.GetProfiles
+  parent: PublisherStudio.Services.MediaConversion.IMediaConversionService
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_GetProfiles
+  name: GetProfiles()
+  nameWithType: IMediaConversionService.GetProfiles()
+  fullName: PublisherStudio.Services.MediaConversion.IMediaConversionService.GetProfiles()
+  spec.csharp:
+  - uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.GetProfiles
+    name: GetProfiles
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_GetProfiles
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.GetProfiles
+    name: GetProfiles
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_GetProfiles
+  - name: (
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.MediaConversionProfile}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.MediaConversionProfile}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<MediaConversionProfile>
+  nameWithType: IReadOnlyList<MediaConversionProfile>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.MediaConversionProfile>
+  nameWithType.vb: IReadOnlyList(Of MediaConversionProfile)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.MediaConversionProfile)
+  name.vb: IReadOnlyList(Of MediaConversionProfile)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.MediaConversionProfile
+    name: MediaConversionProfile
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaConversionProfile.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.MediaConversionProfile
+    name: MediaConversionProfile
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaConversionProfile.html
+  - name: )
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.SaveProfile*
+  commentId: Overload:PublisherStudio.Services.MediaConversion.MediaConversionService.SaveProfile
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.MediaConversionService.html#PublisherStudio_Services_MediaConversion_MediaConversionService_SaveProfile_PublisherStudio_BusinessObjects_MediaConversionProfile_
+  name: SaveProfile
+  nameWithType: MediaConversionService.SaveProfile
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.SaveProfile
+- uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.SaveProfile(PublisherStudio.BusinessObjects.MediaConversionProfile)
+  commentId: M:PublisherStudio.Services.MediaConversion.IMediaConversionService.SaveProfile(PublisherStudio.BusinessObjects.MediaConversionProfile)
+  parent: PublisherStudio.Services.MediaConversion.IMediaConversionService
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_SaveProfile_PublisherStudio_BusinessObjects_MediaConversionProfile_
+  name: SaveProfile(MediaConversionProfile)
+  nameWithType: IMediaConversionService.SaveProfile(MediaConversionProfile)
+  fullName: PublisherStudio.Services.MediaConversion.IMediaConversionService.SaveProfile(PublisherStudio.BusinessObjects.MediaConversionProfile)
+  spec.csharp:
+  - uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.SaveProfile(PublisherStudio.BusinessObjects.MediaConversionProfile)
+    name: SaveProfile
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_SaveProfile_PublisherStudio_BusinessObjects_MediaConversionProfile_
+  - name: (
+  - uid: PublisherStudio.BusinessObjects.MediaConversionProfile
+    name: MediaConversionProfile
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaConversionProfile.html
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.SaveProfile(PublisherStudio.BusinessObjects.MediaConversionProfile)
+    name: SaveProfile
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_SaveProfile_PublisherStudio_BusinessObjects_MediaConversionProfile_
+  - name: (
+  - uid: PublisherStudio.BusinessObjects.MediaConversionProfile
+    name: MediaConversionProfile
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.MediaConversionProfile.html
+  - name: )
+- uid: PublisherStudio.BusinessObjects.MediaConversionProfile
+  commentId: T:PublisherStudio.BusinessObjects.MediaConversionProfile
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaConversionProfile.html
+  name: MediaConversionProfile
+  nameWithType: MediaConversionProfile
+  fullName: PublisherStudio.BusinessObjects.MediaConversionProfile
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.DeleteProfile*
+  commentId: Overload:PublisherStudio.Services.MediaConversion.MediaConversionService.DeleteProfile
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.MediaConversionService.html#PublisherStudio_Services_MediaConversion_MediaConversionService_DeleteProfile_System_Guid_
+  name: DeleteProfile
+  nameWithType: MediaConversionService.DeleteProfile
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.DeleteProfile
+- uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.DeleteProfile(System.Guid)
+  commentId: M:PublisherStudio.Services.MediaConversion.IMediaConversionService.DeleteProfile(System.Guid)
+  parent: PublisherStudio.Services.MediaConversion.IMediaConversionService
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_DeleteProfile_System_Guid_
+  name: DeleteProfile(Guid)
+  nameWithType: IMediaConversionService.DeleteProfile(Guid)
+  fullName: PublisherStudio.Services.MediaConversion.IMediaConversionService.DeleteProfile(System.Guid)
+  spec.csharp:
+  - uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.DeleteProfile(System.Guid)
+    name: DeleteProfile
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_DeleteProfile_System_Guid_
+  - name: (
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.DeleteProfile(System.Guid)
+    name: DeleteProfile
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_DeleteProfile_System_Guid_
+  - name: (
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: )
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.Cancel*
+  commentId: Overload:PublisherStudio.Services.MediaConversion.MediaConversionService.Cancel
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.MediaConversionService.html#PublisherStudio_Services_MediaConversion_MediaConversionService_Cancel_System_Guid_
+  name: Cancel
+  nameWithType: MediaConversionService.Cancel
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.Cancel
+- uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.Cancel(System.Guid)
+  commentId: M:PublisherStudio.Services.MediaConversion.IMediaConversionService.Cancel(System.Guid)
+  parent: PublisherStudio.Services.MediaConversion.IMediaConversionService
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_Cancel_System_Guid_
+  name: Cancel(Guid)
+  nameWithType: IMediaConversionService.Cancel(Guid)
+  fullName: PublisherStudio.Services.MediaConversion.IMediaConversionService.Cancel(System.Guid)
+  spec.csharp:
+  - uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.Cancel(System.Guid)
+    name: Cancel
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_Cancel_System_Guid_
+  - name: (
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.Cancel(System.Guid)
+    name: Cancel
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_Cancel_System_Guid_
+  - name: (
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: )
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.Remove*
+  commentId: Overload:PublisherStudio.Services.MediaConversion.MediaConversionService.Remove
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.MediaConversionService.html#PublisherStudio_Services_MediaConversion_MediaConversionService_Remove_System_Guid_
+  name: Remove
+  nameWithType: MediaConversionService.Remove
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.Remove
+- uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.Remove(System.Guid)
+  commentId: M:PublisherStudio.Services.MediaConversion.IMediaConversionService.Remove(System.Guid)
+  parent: PublisherStudio.Services.MediaConversion.IMediaConversionService
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_Remove_System_Guid_
+  name: Remove(Guid)
+  nameWithType: IMediaConversionService.Remove(Guid)
+  fullName: PublisherStudio.Services.MediaConversion.IMediaConversionService.Remove(System.Guid)
+  spec.csharp:
+  - uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.Remove(System.Guid)
+    name: Remove
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_Remove_System_Guid_
+  - name: (
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.MediaConversion.IMediaConversionService.Remove(System.Guid)
+    name: Remove
+    isExternal: true
+    href: PublisherStudio.Services.MediaConversion.IMediaConversionService.html#PublisherStudio_Services_MediaConversion_IMediaConversionService_Remove_System_Guid_
+  - name: (
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: )
+- uid: PublisherStudio.Services.MediaConversion.MediaConversionService.Dispose*
+  commentId: Overload:PublisherStudio.Services.MediaConversion.MediaConversionService.Dispose
+  isExternal: true
+  href: PublisherStudio.Services.MediaConversion.MediaConversionService.html#PublisherStudio_Services_MediaConversion_MediaConversionService_Dispose
+  name: Dispose
+  nameWithType: MediaConversionService.Dispose
+  fullName: PublisherStudio.Services.MediaConversion.MediaConversionService.Dispose
+- uid: System.IDisposable.Dispose
+  commentId: M:System.IDisposable.Dispose
+  parent: System.IDisposable
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.idisposable.dispose
+  name: Dispose()
+  nameWithType: IDisposable.Dispose()
+  fullName: System.IDisposable.Dispose()
+  spec.csharp:
+  - uid: System.IDisposable.Dispose
+    name: Dispose
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.idisposable.dispose
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.IDisposable.Dispose
+    name: Dispose
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.idisposable.dispose
+  - name: (
+  - name: )

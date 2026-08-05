@@ -1,0 +1,203 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.OpenScad.IOpenScadDocumentService
+  commentId: T:PublisherStudio.Services.OpenScad.IOpenScadDocumentService
+  id: IOpenScadDocumentService
+  parent: PublisherStudio.Services.OpenScad
+  children:
+  - PublisherStudio.Services.OpenScad.IOpenScadDocumentService.CreateExampleDocument
+  - PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Generate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  - PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Validate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  langs:
+  - csharp
+  - vb
+  name: IOpenScadDocumentService
+  nameWithType: IOpenScadDocumentService
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadDocumentService
+  type: Interface
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OpenScad
+  summary: Defines the open scad document service contract.
+  example: []
+  syntax:
+    content: public interface IOpenScadDocumentService
+    content.vb: Public Interface IOpenScadDocumentService
+  derivedClasses:
+  - PublisherStudio.Services.OpenScad.OpenScadDocumentService
+- uid: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Validate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  commentId: M:PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Validate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  id: Validate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  parent: PublisherStudio.Services.OpenScad.IOpenScadDocumentService
+  langs:
+  - csharp
+  - vb
+  name: Validate(OpenScadDocument)
+  nameWithType: IOpenScadDocumentService.Validate(OpenScadDocument)
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Validate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OpenScad
+  syntax:
+    content: OpenScadValidationResult Validate(OpenScadDocument document)
+    parameters:
+    - id: document
+      type: PublisherStudio.BusinessObjects.OpenScadDocument
+    return:
+      type: PublisherStudio.BusinessObjects.OpenScadValidationResult
+    content.vb: Function Validate(document As OpenScadDocument) As OpenScadValidationResult
+  overload: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Validate*
+- uid: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Generate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  commentId: M:PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Generate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  id: Generate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  parent: PublisherStudio.Services.OpenScad.IOpenScadDocumentService
+  langs:
+  - csharp
+  - vb
+  name: Generate(OpenScadDocument)
+  nameWithType: IOpenScadDocumentService.Generate(OpenScadDocument)
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Generate(PublisherStudio.BusinessObjects.OpenScadDocument)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OpenScad
+  syntax:
+    content: OpenScadGenerationResult Generate(OpenScadDocument document)
+    parameters:
+    - id: document
+      type: PublisherStudio.BusinessObjects.OpenScadDocument
+    return:
+      type: PublisherStudio.BusinessObjects.OpenScadGenerationResult
+    content.vb: Function Generate(document As OpenScadDocument) As OpenScadGenerationResult
+  overload: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Generate*
+- uid: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.CreateExampleDocument
+  commentId: M:PublisherStudio.Services.OpenScad.IOpenScadDocumentService.CreateExampleDocument
+  id: CreateExampleDocument
+  parent: PublisherStudio.Services.OpenScad.IOpenScadDocumentService
+  langs:
+  - csharp
+  - vb
+  name: CreateExampleDocument()
+  nameWithType: IOpenScadDocumentService.CreateExampleDocument()
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.CreateExampleDocument()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OpenScad
+  syntax:
+    content: OpenScadDocument CreateExampleDocument()
+    return:
+      type: PublisherStudio.BusinessObjects.OpenScadDocument
+    content.vb: Function CreateExampleDocument() As OpenScadDocument
+  overload: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.CreateExampleDocument*
+references:
+- uid: PublisherStudio.Services.OpenScad
+  commentId: N:PublisherStudio.Services.OpenScad
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.OpenScad
+  nameWithType: PublisherStudio.Services.OpenScad
+  fullName: PublisherStudio.Services.OpenScad
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OpenScad
+    name: OpenScad
+    isExternal: true
+    href: PublisherStudio.Services.OpenScad.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OpenScad
+    name: OpenScad
+    isExternal: true
+    href: PublisherStudio.Services.OpenScad.html
+- uid: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Validate*
+  commentId: Overload:PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Validate
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.html#PublisherStudio_Services_OpenScad_IOpenScadDocumentService_Validate_PublisherStudio_BusinessObjects_OpenScadDocument_
+  name: Validate
+  nameWithType: IOpenScadDocumentService.Validate
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Validate
+- uid: PublisherStudio.BusinessObjects.OpenScadDocument
+  commentId: T:PublisherStudio.BusinessObjects.OpenScadDocument
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OpenScadDocument.html
+  name: OpenScadDocument
+  nameWithType: OpenScadDocument
+  fullName: PublisherStudio.BusinessObjects.OpenScadDocument
+- uid: PublisherStudio.BusinessObjects.OpenScadValidationResult
+  commentId: T:PublisherStudio.BusinessObjects.OpenScadValidationResult
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OpenScadValidationResult.html
+  name: OpenScadValidationResult
+  nameWithType: OpenScadValidationResult
+  fullName: PublisherStudio.BusinessObjects.OpenScadValidationResult
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Generate*
+  commentId: Overload:PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Generate
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.html#PublisherStudio_Services_OpenScad_IOpenScadDocumentService_Generate_PublisherStudio_BusinessObjects_OpenScadDocument_
+  name: Generate
+  nameWithType: IOpenScadDocumentService.Generate
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.Generate
+- uid: PublisherStudio.BusinessObjects.OpenScadGenerationResult
+  commentId: T:PublisherStudio.BusinessObjects.OpenScadGenerationResult
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OpenScadGenerationResult.html
+  name: OpenScadGenerationResult
+  nameWithType: OpenScadGenerationResult
+  fullName: PublisherStudio.BusinessObjects.OpenScadGenerationResult
+- uid: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.CreateExampleDocument*
+  commentId: Overload:PublisherStudio.Services.OpenScad.IOpenScadDocumentService.CreateExampleDocument
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.html#PublisherStudio_Services_OpenScad_IOpenScadDocumentService_CreateExampleDocument
+  name: CreateExampleDocument
+  nameWithType: IOpenScadDocumentService.CreateExampleDocument
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadDocumentService.CreateExampleDocument

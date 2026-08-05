@@ -1,0 +1,783 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.PublicationLiveDataRegistry
+  commentId: T:PublisherStudio.Services.PublicationLiveDataRegistry
+  id: PublicationLiveDataRegistry
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.PublicationLiveDataRegistry.#ctor(PublisherStudio.Services.PublicationWebhookStore)
+  - PublisherStudio.Services.PublicationLiveDataRegistry.Register(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.Services.PublicationDataService,System.Nullable{System.Guid})
+  - PublisherStudio.Services.PublicationLiveDataRegistry.Summaries
+  - PublisherStudio.Services.PublicationLiveDataRegistry.TryGet(System.Guid,PublisherStudio.Services.LivePublicationSnapshot@)
+  - PublisherStudio.Services.PublicationLiveDataRegistry.TryGetExportRows(System.Guid,System.Guid,System.String,System.Collections.Generic.IReadOnlyList{System.Collections.Generic.Dictionary{System.String,System.String}}@)
+  - PublisherStudio.Services.PublicationLiveDataRegistry.Unregister(System.Guid)
+  langs:
+  - csharp
+  - vb
+  name: PublicationLiveDataRegistry
+  nameWithType: PublicationLiveDataRegistry
+  fullName: PublisherStudio.Services.PublicationLiveDataRegistry
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: 'Keeps immutable snapshots of open publications available to the local monolith API. This is also the first transport boundary for future LAN presentation and streaming providers: consumers see DTOs instead of mutable editor state.'
+  example: []
+  syntax:
+    content: public sealed class PublicationLiveDataRegistry
+    content.vb: Public NotInheritable Class PublicationLiveDataRegistry
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.PublicationLiveDataRegistry.#ctor(PublisherStudio.Services.PublicationWebhookStore)
+  commentId: M:PublisherStudio.Services.PublicationLiveDataRegistry.#ctor(PublisherStudio.Services.PublicationWebhookStore)
+  id: '#ctor(PublisherStudio.Services.PublicationWebhookStore)'
+  parent: PublisherStudio.Services.PublicationLiveDataRegistry
+  langs:
+  - csharp
+  - vb
+  name: PublicationLiveDataRegistry(PublicationWebhookStore)
+  nameWithType: PublicationLiveDataRegistry.PublicationLiveDataRegistry(PublicationWebhookStore)
+  fullName: PublisherStudio.Services.PublicationLiveDataRegistry.PublicationLiveDataRegistry(PublisherStudio.Services.PublicationWebhookStore)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the publication live data registry operation.
+  example: []
+  syntax:
+    content: public PublicationLiveDataRegistry(PublicationWebhookStore webhooks)
+    parameters:
+    - id: webhooks
+      type: PublisherStudio.Services.PublicationWebhookStore
+    content.vb: Public Sub New(webhooks As PublicationWebhookStore)
+  overload: PublisherStudio.Services.PublicationLiveDataRegistry.#ctor*
+  nameWithType.vb: PublicationLiveDataRegistry.New(PublicationWebhookStore)
+  fullName.vb: PublisherStudio.Services.PublicationLiveDataRegistry.New(PublisherStudio.Services.PublicationWebhookStore)
+  name.vb: New(PublicationWebhookStore)
+- uid: PublisherStudio.Services.PublicationLiveDataRegistry.Register(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.Services.PublicationDataService,System.Nullable{System.Guid})
+  commentId: M:PublisherStudio.Services.PublicationLiveDataRegistry.Register(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.Services.PublicationDataService,System.Nullable{System.Guid})
+  id: Register(PublisherStudio.BusinessObjects.PublicationDocument,PublisherStudio.Services.PublicationDataService,System.Nullable{System.Guid})
+  parent: PublisherStudio.Services.PublicationLiveDataRegistry
+  langs:
+  - csharp
+  - vb
+  name: Register(PublicationDocument, PublicationDataService, Guid?)
+  nameWithType: PublicationLiveDataRegistry.Register(PublicationDocument, PublicationDataService, Guid?)
+  fullName: PublisherStudio.Services.PublicationLiveDataRegistry.Register(PublisherStudio.BusinessObjects.PublicationDocument, PublisherStudio.Services.PublicationDataService, System.Guid?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the register operation.
+  example: []
+  syntax:
+    content: public void Register(PublicationDocument document, PublicationDataService dataService, Guid? currentPageId = null)
+    parameters:
+    - id: document
+      type: PublisherStudio.BusinessObjects.PublicationDocument
+    - id: dataService
+      type: PublisherStudio.Services.PublicationDataService
+    - id: currentPageId
+      type: System.Nullable{System.Guid}
+    content.vb: Public Sub Register(document As PublicationDocument, dataService As PublicationDataService, currentPageId As Guid? = Nothing)
+  overload: PublisherStudio.Services.PublicationLiveDataRegistry.Register*
+- uid: PublisherStudio.Services.PublicationLiveDataRegistry.Unregister(System.Guid)
+  commentId: M:PublisherStudio.Services.PublicationLiveDataRegistry.Unregister(System.Guid)
+  id: Unregister(System.Guid)
+  parent: PublisherStudio.Services.PublicationLiveDataRegistry
+  langs:
+  - csharp
+  - vb
+  name: Unregister(Guid)
+  nameWithType: PublicationLiveDataRegistry.Unregister(Guid)
+  fullName: PublisherStudio.Services.PublicationLiveDataRegistry.Unregister(System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the unregister operation.
+  example: []
+  syntax:
+    content: public void Unregister(Guid documentId)
+    parameters:
+    - id: documentId
+      type: System.Guid
+    content.vb: Public Sub Unregister(documentId As Guid)
+  overload: PublisherStudio.Services.PublicationLiveDataRegistry.Unregister*
+- uid: PublisherStudio.Services.PublicationLiveDataRegistry.TryGet(System.Guid,PublisherStudio.Services.LivePublicationSnapshot@)
+  commentId: M:PublisherStudio.Services.PublicationLiveDataRegistry.TryGet(System.Guid,PublisherStudio.Services.LivePublicationSnapshot@)
+  id: TryGet(System.Guid,PublisherStudio.Services.LivePublicationSnapshot@)
+  parent: PublisherStudio.Services.PublicationLiveDataRegistry
+  langs:
+  - csharp
+  - vb
+  name: TryGet(Guid, out LivePublicationSnapshot)
+  nameWithType: PublicationLiveDataRegistry.TryGet(Guid, out LivePublicationSnapshot)
+  fullName: PublisherStudio.Services.PublicationLiveDataRegistry.TryGet(System.Guid, out PublisherStudio.Services.LivePublicationSnapshot)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Attempts to get.
+  example: []
+  syntax:
+    content: public bool TryGet(Guid documentId, out LivePublicationSnapshot snapshot)
+    parameters:
+    - id: documentId
+      type: System.Guid
+    - id: snapshot
+      type: PublisherStudio.Services.LivePublicationSnapshot
+    return:
+      type: System.Boolean
+    content.vb: Public Function TryGet(documentId As Guid, snapshot As LivePublicationSnapshot) As Boolean
+  overload: PublisherStudio.Services.PublicationLiveDataRegistry.TryGet*
+  nameWithType.vb: PublicationLiveDataRegistry.TryGet(Guid, LivePublicationSnapshot)
+  fullName.vb: PublisherStudio.Services.PublicationLiveDataRegistry.TryGet(System.Guid, PublisherStudio.Services.LivePublicationSnapshot)
+  name.vb: TryGet(Guid, LivePublicationSnapshot)
+- uid: PublisherStudio.Services.PublicationLiveDataRegistry.TryGetExportRows(System.Guid,System.Guid,System.String,System.Collections.Generic.IReadOnlyList{System.Collections.Generic.Dictionary{System.String,System.String}}@)
+  commentId: M:PublisherStudio.Services.PublicationLiveDataRegistry.TryGetExportRows(System.Guid,System.Guid,System.String,System.Collections.Generic.IReadOnlyList{System.Collections.Generic.Dictionary{System.String,System.String}}@)
+  id: TryGetExportRows(System.Guid,System.Guid,System.String,System.Collections.Generic.IReadOnlyList{System.Collections.Generic.Dictionary{System.String,System.String}}@)
+  parent: PublisherStudio.Services.PublicationLiveDataRegistry
+  langs:
+  - csharp
+  - vb
+  name: TryGetExportRows(Guid, Guid, string, out IReadOnlyList<Dictionary<string, string>>)
+  nameWithType: PublicationLiveDataRegistry.TryGetExportRows(Guid, Guid, string, out IReadOnlyList<Dictionary<string, string>>)
+  fullName: PublisherStudio.Services.PublicationLiveDataRegistry.TryGetExportRows(System.Guid, System.Guid, string, out System.Collections.Generic.IReadOnlyList<System.Collections.Generic.Dictionary<string, string>>)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Attempts to get export rows.
+  example: []
+  syntax:
+    content: public bool TryGetExportRows(Guid documentId, Guid dataId, string token, out IReadOnlyList<Dictionary<string, string>> rows)
+    parameters:
+    - id: documentId
+      type: System.Guid
+    - id: dataId
+      type: System.Guid
+    - id: token
+      type: System.String
+    - id: rows
+      type: System.Collections.Generic.IReadOnlyList{System.Collections.Generic.Dictionary{System.String,System.String}}
+    return:
+      type: System.Boolean
+    content.vb: Public Function TryGetExportRows(documentId As Guid, dataId As Guid, token As String, rows As IReadOnlyList(Of Dictionary(Of String, String))) As Boolean
+  overload: PublisherStudio.Services.PublicationLiveDataRegistry.TryGetExportRows*
+  nameWithType.vb: PublicationLiveDataRegistry.TryGetExportRows(Guid, Guid, String, IReadOnlyList(Of Dictionary(Of String, String)))
+  fullName.vb: PublisherStudio.Services.PublicationLiveDataRegistry.TryGetExportRows(System.Guid, System.Guid, String, System.Collections.Generic.IReadOnlyList(Of System.Collections.Generic.Dictionary(Of String, String)))
+  name.vb: TryGetExportRows(Guid, Guid, String, IReadOnlyList(Of Dictionary(Of String, String)))
+- uid: PublisherStudio.Services.PublicationLiveDataRegistry.Summaries
+  commentId: M:PublisherStudio.Services.PublicationLiveDataRegistry.Summaries
+  id: Summaries
+  parent: PublisherStudio.Services.PublicationLiveDataRegistry
+  langs:
+  - csharp
+  - vb
+  name: Summaries()
+  nameWithType: PublicationLiveDataRegistry.Summaries()
+  fullName: PublisherStudio.Services.PublicationLiveDataRegistry.Summaries()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the summaries operation.
+  example: []
+  syntax:
+    content: public IReadOnlyList<LivePublicationSummary> Summaries()
+    return:
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.Services.LivePublicationSummary}
+    content.vb: Public Function Summaries() As IReadOnlyList(Of LivePublicationSummary)
+  overload: PublisherStudio.Services.PublicationLiveDataRegistry.Summaries*
+references:
+- uid: PublisherStudio.Services
+  commentId: N:PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services
+  nameWithType: PublisherStudio.Services
+  fullName: PublisherStudio.Services
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.PublicationLiveDataRegistry.#ctor*
+  commentId: Overload:PublisherStudio.Services.PublicationLiveDataRegistry.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.PublicationLiveDataRegistry.html#PublisherStudio_Services_PublicationLiveDataRegistry__ctor_PublisherStudio_Services_PublicationWebhookStore_
+  name: PublicationLiveDataRegistry
+  nameWithType: PublicationLiveDataRegistry.PublicationLiveDataRegistry
+  fullName: PublisherStudio.Services.PublicationLiveDataRegistry.PublicationLiveDataRegistry
+  nameWithType.vb: PublicationLiveDataRegistry.New
+  fullName.vb: PublisherStudio.Services.PublicationLiveDataRegistry.New
+  name.vb: New
+- uid: PublisherStudio.Services.PublicationWebhookStore
+  commentId: T:PublisherStudio.Services.PublicationWebhookStore
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.PublicationWebhookStore.html
+  name: PublicationWebhookStore
+  nameWithType: PublicationWebhookStore
+  fullName: PublisherStudio.Services.PublicationWebhookStore
+- uid: PublisherStudio.Services.PublicationLiveDataRegistry.Register*
+  commentId: Overload:PublisherStudio.Services.PublicationLiveDataRegistry.Register
+  isExternal: true
+  href: PublisherStudio.Services.PublicationLiveDataRegistry.html#PublisherStudio_Services_PublicationLiveDataRegistry_Register_PublisherStudio_BusinessObjects_PublicationDocument_PublisherStudio_Services_PublicationDataService_System_Nullable_System_Guid__
+  name: Register
+  nameWithType: PublicationLiveDataRegistry.Register
+  fullName: PublisherStudio.Services.PublicationLiveDataRegistry.Register
+- uid: PublisherStudio.BusinessObjects.PublicationDocument
+  commentId: T:PublisherStudio.BusinessObjects.PublicationDocument
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationDocument.html
+  name: PublicationDocument
+  nameWithType: PublicationDocument
+  fullName: PublisherStudio.BusinessObjects.PublicationDocument
+- uid: PublisherStudio.Services.PublicationDataService
+  commentId: T:PublisherStudio.Services.PublicationDataService
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.PublicationDataService.html
+  name: PublicationDataService
+  nameWithType: PublicationDataService
+  fullName: PublisherStudio.Services.PublicationDataService
+- uid: System.Nullable{System.Guid}
+  commentId: T:System.Nullable{System.Guid}
+  parent: System
+  definition: System.Nullable`1
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid?
+  nameWithType: Guid?
+  fullName: System.Guid?
+  spec.csharp:
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: '?'
+  spec.vb:
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: '?'
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Nullable`1
+  commentId: T:System.Nullable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  name: Nullable<T>
+  nameWithType: Nullable<T>
+  fullName: System.Nullable<T>
+  nameWithType.vb: Nullable(Of T)
+  fullName.vb: System.Nullable(Of T)
+  name.vb: Nullable(Of T)
+  spec.csharp:
+  - uid: System.Nullable`1
+    name: Nullable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Nullable`1
+    name: Nullable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: PublisherStudio.Services.PublicationLiveDataRegistry.Unregister*
+  commentId: Overload:PublisherStudio.Services.PublicationLiveDataRegistry.Unregister
+  isExternal: true
+  href: PublisherStudio.Services.PublicationLiveDataRegistry.html#PublisherStudio_Services_PublicationLiveDataRegistry_Unregister_System_Guid_
+  name: Unregister
+  nameWithType: PublicationLiveDataRegistry.Unregister
+  fullName: PublisherStudio.Services.PublicationLiveDataRegistry.Unregister
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: PublisherStudio.Services.PublicationLiveDataRegistry.TryGet*
+  commentId: Overload:PublisherStudio.Services.PublicationLiveDataRegistry.TryGet
+  isExternal: true
+  href: PublisherStudio.Services.PublicationLiveDataRegistry.html#PublisherStudio_Services_PublicationLiveDataRegistry_TryGet_System_Guid_PublisherStudio_Services_LivePublicationSnapshot__
+  name: TryGet
+  nameWithType: PublicationLiveDataRegistry.TryGet
+  fullName: PublisherStudio.Services.PublicationLiveDataRegistry.TryGet
+- uid: PublisherStudio.Services.LivePublicationSnapshot
+  commentId: T:PublisherStudio.Services.LivePublicationSnapshot
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.LivePublicationSnapshot.html
+  name: LivePublicationSnapshot
+  nameWithType: LivePublicationSnapshot
+  fullName: PublisherStudio.Services.LivePublicationSnapshot
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.Services.PublicationLiveDataRegistry.TryGetExportRows*
+  commentId: Overload:PublisherStudio.Services.PublicationLiveDataRegistry.TryGetExportRows
+  isExternal: true
+  href: PublisherStudio.Services.PublicationLiveDataRegistry.html#PublisherStudio_Services_PublicationLiveDataRegistry_TryGetExportRows_System_Guid_System_Guid_System_String_System_Collections_Generic_IReadOnlyList_System_Collections_Generic_Dictionary_System_String_System_String____
+  name: TryGetExportRows
+  nameWithType: PublicationLiveDataRegistry.TryGetExportRows
+  fullName: PublisherStudio.Services.PublicationLiveDataRegistry.TryGetExportRows
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System.Collections.Generic.IReadOnlyList{System.Collections.Generic.Dictionary{System.String,System.String}}
+  commentId: T:System.Collections.Generic.IReadOnlyList{System.Collections.Generic.Dictionary{System.String,System.String}}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<Dictionary<string, string>>
+  nameWithType: IReadOnlyList<Dictionary<string, string>>
+  fullName: System.Collections.Generic.IReadOnlyList<System.Collections.Generic.Dictionary<string, string>>
+  nameWithType.vb: IReadOnlyList(Of Dictionary(Of String, String))
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of System.Collections.Generic.Dictionary(Of String, String))
+  name.vb: IReadOnlyList(Of Dictionary(Of String, String))
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: System.Collections.Generic.Dictionary`2
+    name: Dictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.dictionary-2
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Collections.Generic.Dictionary`2
+    name: Dictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.dictionary-2
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: PublisherStudio.Services.PublicationLiveDataRegistry.Summaries*
+  commentId: Overload:PublisherStudio.Services.PublicationLiveDataRegistry.Summaries
+  isExternal: true
+  href: PublisherStudio.Services.PublicationLiveDataRegistry.html#PublisherStudio_Services_PublicationLiveDataRegistry_Summaries
+  name: Summaries
+  nameWithType: PublicationLiveDataRegistry.Summaries
+  fullName: PublisherStudio.Services.PublicationLiveDataRegistry.Summaries
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.Services.LivePublicationSummary}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.Services.LivePublicationSummary}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<LivePublicationSummary>
+  nameWithType: IReadOnlyList<LivePublicationSummary>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.Services.LivePublicationSummary>
+  nameWithType.vb: IReadOnlyList(Of LivePublicationSummary)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.Services.LivePublicationSummary)
+  name.vb: IReadOnlyList(Of LivePublicationSummary)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.Services.LivePublicationSummary
+    name: LivePublicationSummary
+    isExternal: true
+    href: PublisherStudio.Services.LivePublicationSummary.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.LivePublicationSummary
+    name: LivePublicationSummary
+    isExternal: true
+    href: PublisherStudio.Services.LivePublicationSummary.html
+  - name: )

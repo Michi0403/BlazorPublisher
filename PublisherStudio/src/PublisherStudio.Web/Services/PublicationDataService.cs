@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Xml.Linq;
@@ -6,8 +6,14 @@ using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services;
 
+/// <summary>
+/// Provides publication data service operations.
+/// </summary>
 public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, PublicationMediaData mediaData, ILogger<PublicationDataService> logger)
 {
+    /// <summary>
+    /// Creates sample.
+    /// </summary>
     public PublicationDataObject CreateSample(string name = "Quarterly Sales")
     {
         try
@@ -31,6 +37,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Runs the clone operation.
+    /// </summary>
     public PublicationDataObject Clone(PublicationDataObject source)
     {
         try
@@ -47,6 +56,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Runs the normalize operation.
+    /// </summary>
     public void Normalize(PublicationDocument document)
     {
         try
@@ -100,6 +112,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Parses into.
+    /// </summary>
     public void ParseInto(PublicationDataObject data)
     {
         try
@@ -148,6 +163,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Resolves rows.
+    /// </summary>
     public IReadOnlyList<PublicationDataRow> ResolveRows(PublicationDocument document, PublicationDataObject? data, Guid currentPageId)
     {
         try
@@ -171,6 +189,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Resolves columns.
+    /// </summary>
     public IReadOnlyList<PublicationDataColumn> ResolveColumns(PublicationDataObject? data)
         {
             try
@@ -192,6 +213,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
             }
         }
 
+    /// <summary>
+    /// Ensures built in objects.
+    /// </summary>
     public void EnsureBuiltInObjects(PublicationDocument document)
     {
         try
@@ -240,6 +264,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Builds chart points.
+    /// </summary>
     public IReadOnlyList<DataChartPoint> BuildChartPoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
     {
         try
@@ -274,6 +301,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Builds pie points.
+    /// </summary>
     public IReadOnlyList<DataPiePoint> BuildPiePoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
     {
         try
@@ -296,6 +326,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Builds spark points.
+    /// </summary>
     public IReadOnlyList<DataSparkPoint> BuildSparkPoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
     {
         try
@@ -319,6 +352,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
 
+    /// <summary>
+    /// Builds range points.
+    /// </summary>
     public IReadOnlyList<DataRangePoint> BuildRangePoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
     {
         try
@@ -343,6 +379,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Builds bubble points.
+    /// </summary>
     public IReadOnlyList<DataBubblePoint> BuildBubblePoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
     {
         try
@@ -367,6 +406,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Builds financial points.
+    /// </summary>
     public IReadOnlyList<DataFinancialPoint> BuildFinancialPoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
     {
         try
@@ -390,6 +432,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Builds sankey points.
+    /// </summary>
     public IReadOnlyList<DataSankeyPoint> BuildSankeyPoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
     {
         try
@@ -411,6 +456,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Builds tree map points.
+    /// </summary>
     public IReadOnlyList<DataTreeMapPoint> BuildTreeMapPoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
     {
         try
@@ -431,6 +479,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Builds client visual configuration.
+    /// </summary>
     public object BuildClientVisualConfiguration(PublicationDocument document, DataVisualElement item, Guid currentPageId)
     {
         try
@@ -501,6 +552,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Runs the grid columns operation.
+    /// </summary>
     public IReadOnlyList<string> GridColumns(PublicationDataObject? data)
         {
             try
@@ -515,6 +569,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
             }
         }
 
+    /// <summary>
+    /// Builds grid rows.
+    /// </summary>
     public IReadOnlyList<PublicationGridRow> BuildGridRows(PublicationDocument document, DataVisualElement item, Guid currentPageId)
     {
         try

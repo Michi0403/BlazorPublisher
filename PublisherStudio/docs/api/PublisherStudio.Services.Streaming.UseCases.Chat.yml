@@ -1,0 +1,100 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Streaming.UseCases.Chat
+  commentId: N:PublisherStudio.Services.Streaming.UseCases.Chat
+  id: Chat
+  parent: PublisherStudio.Services.Streaming.UseCases
+  children:
+  - PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory
+  - PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory
+  - PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatUseCases
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.Services.Streaming.UseCases.Chat
+  nameWithType: PublisherStudio.Services.Streaming.UseCases.Chat
+  fullName: PublisherStudio.Services.Streaming.UseCases.Chat
+  type: Namespace
+  assemblies:
+  - PublisherStudio.Web
+references:
+- uid: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory
+  commentId: T:PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory
+  parent: PublisherStudio.Services.Streaming.UseCases.Chat
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory.html
+  name: IStreamingChatResultFactory
+  nameWithType: IStreamingChatResultFactory
+  fullName: PublisherStudio.Services.Streaming.UseCases.Chat.IStreamingChatResultFactory
+- uid: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory
+  commentId: T:PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory.html
+  name: StreamingChatResultFactory
+  nameWithType: StreamingChatResultFactory
+  fullName: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatResultFactory
+- uid: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatUseCases
+  commentId: T:PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatUseCases
+  parent: PublisherStudio.Services.Streaming.UseCases.Chat
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatUseCases.html
+  name: StreamingChatUseCases
+  nameWithType: StreamingChatUseCases
+  fullName: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatUseCases
+- uid: PublisherStudio.Services.Streaming.UseCases.Chat
+  commentId: N:PublisherStudio.Services.Streaming.UseCases.Chat
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.UseCases.Chat
+  nameWithType: PublisherStudio.Services.Streaming.UseCases.Chat
+  fullName: PublisherStudio.Services.Streaming.UseCases.Chat
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases.Chat
+    name: Chat
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Chat.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases.Chat
+    name: Chat
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Chat.html

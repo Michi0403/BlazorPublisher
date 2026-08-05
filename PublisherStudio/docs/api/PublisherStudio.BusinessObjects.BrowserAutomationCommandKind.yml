@@ -1,0 +1,324 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+  commentId: T:PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+  id: BrowserAutomationCommandKind
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.Blur
+  - PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.Click
+  - PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.ContextMenu
+  - PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.DoubleClick
+  - PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.Focus
+  - PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.KeyDown
+  - PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.KeyPress
+  - PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.KeyUp
+  - PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.MouseDown
+  - PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.MouseMove
+  - PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.MouseUp
+  - PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.SetValue
+  - PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.TypeText
+  - PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.Wheel
+  langs:
+  - csharp
+  - vb
+  name: BrowserAutomationCommandKind
+  nameWithType: BrowserAutomationCommandKind
+  fullName: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported browser automation command kind values.
+  example: []
+  syntax:
+    content: public enum BrowserAutomationCommandKind
+    content.vb: Public Enum BrowserAutomationCommandKind
+- uid: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.Click
+  commentId: F:PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.Click
+  id: Click
+  parent: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+  langs:
+  - csharp
+  - vb
+  name: Click
+  nameWithType: BrowserAutomationCommandKind.Click
+  fullName: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.Click
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Click = 0
+    return:
+      type: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+- uid: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.DoubleClick
+  commentId: F:PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.DoubleClick
+  id: DoubleClick
+  parent: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+  langs:
+  - csharp
+  - vb
+  name: DoubleClick
+  nameWithType: BrowserAutomationCommandKind.DoubleClick
+  fullName: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.DoubleClick
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: DoubleClick = 1
+    return:
+      type: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+- uid: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.ContextMenu
+  commentId: F:PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.ContextMenu
+  id: ContextMenu
+  parent: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+  langs:
+  - csharp
+  - vb
+  name: ContextMenu
+  nameWithType: BrowserAutomationCommandKind.ContextMenu
+  fullName: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.ContextMenu
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: ContextMenu = 2
+    return:
+      type: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+- uid: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.MouseMove
+  commentId: F:PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.MouseMove
+  id: MouseMove
+  parent: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+  langs:
+  - csharp
+  - vb
+  name: MouseMove
+  nameWithType: BrowserAutomationCommandKind.MouseMove
+  fullName: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.MouseMove
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: MouseMove = 3
+    return:
+      type: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+- uid: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.MouseDown
+  commentId: F:PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.MouseDown
+  id: MouseDown
+  parent: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+  langs:
+  - csharp
+  - vb
+  name: MouseDown
+  nameWithType: BrowserAutomationCommandKind.MouseDown
+  fullName: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.MouseDown
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: MouseDown = 4
+    return:
+      type: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+- uid: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.MouseUp
+  commentId: F:PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.MouseUp
+  id: MouseUp
+  parent: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+  langs:
+  - csharp
+  - vb
+  name: MouseUp
+  nameWithType: BrowserAutomationCommandKind.MouseUp
+  fullName: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.MouseUp
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: MouseUp = 5
+    return:
+      type: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+- uid: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.Wheel
+  commentId: F:PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.Wheel
+  id: Wheel
+  parent: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+  langs:
+  - csharp
+  - vb
+  name: Wheel
+  nameWithType: BrowserAutomationCommandKind.Wheel
+  fullName: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.Wheel
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Wheel = 6
+    return:
+      type: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+- uid: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.Focus
+  commentId: F:PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.Focus
+  id: Focus
+  parent: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+  langs:
+  - csharp
+  - vb
+  name: Focus
+  nameWithType: BrowserAutomationCommandKind.Focus
+  fullName: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.Focus
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Focus = 7
+    return:
+      type: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+- uid: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.Blur
+  commentId: F:PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.Blur
+  id: Blur
+  parent: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+  langs:
+  - csharp
+  - vb
+  name: Blur
+  nameWithType: BrowserAutomationCommandKind.Blur
+  fullName: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.Blur
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Blur = 8
+    return:
+      type: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+- uid: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.TypeText
+  commentId: F:PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.TypeText
+  id: TypeText
+  parent: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+  langs:
+  - csharp
+  - vb
+  name: TypeText
+  nameWithType: BrowserAutomationCommandKind.TypeText
+  fullName: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.TypeText
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: TypeText = 9
+    return:
+      type: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+- uid: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.SetValue
+  commentId: F:PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.SetValue
+  id: SetValue
+  parent: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+  langs:
+  - csharp
+  - vb
+  name: SetValue
+  nameWithType: BrowserAutomationCommandKind.SetValue
+  fullName: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.SetValue
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: SetValue = 10
+    return:
+      type: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+- uid: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.KeyDown
+  commentId: F:PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.KeyDown
+  id: KeyDown
+  parent: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+  langs:
+  - csharp
+  - vb
+  name: KeyDown
+  nameWithType: BrowserAutomationCommandKind.KeyDown
+  fullName: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.KeyDown
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: KeyDown = 11
+    return:
+      type: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+- uid: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.KeyUp
+  commentId: F:PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.KeyUp
+  id: KeyUp
+  parent: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+  langs:
+  - csharp
+  - vb
+  name: KeyUp
+  nameWithType: BrowserAutomationCommandKind.KeyUp
+  fullName: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.KeyUp
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: KeyUp = 12
+    return:
+      type: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+- uid: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.KeyPress
+  commentId: F:PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.KeyPress
+  id: KeyPress
+  parent: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+  langs:
+  - csharp
+  - vb
+  name: KeyPress
+  nameWithType: BrowserAutomationCommandKind.KeyPress
+  fullName: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.KeyPress
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: KeyPress = 13
+    return:
+      type: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+  commentId: T:PublisherStudio.BusinessObjects.BrowserAutomationCommandKind
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind.html
+  name: BrowserAutomationCommandKind
+  nameWithType: BrowserAutomationCommandKind
+  fullName: PublisherStudio.BusinessObjects.BrowserAutomationCommandKind

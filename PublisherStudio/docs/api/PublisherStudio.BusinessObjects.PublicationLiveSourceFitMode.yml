@@ -1,0 +1,115 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode
+  commentId: T:PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode
+  id: PublicationLiveSourceFitMode
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode.Contain
+  - PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode.Cover
+  - PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode.Stretch
+  langs:
+  - csharp
+  - vb
+  name: PublicationLiveSourceFitMode
+  nameWithType: PublicationLiveSourceFitMode
+  fullName: PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication live source fit mode values.
+  example: []
+  syntax:
+    content: public enum PublicationLiveSourceFitMode
+    content.vb: Public Enum PublicationLiveSourceFitMode
+- uid: PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode.Contain
+  commentId: F:PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode.Contain
+  id: Contain
+  parent: PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode
+  langs:
+  - csharp
+  - vb
+  name: Contain
+  nameWithType: PublicationLiveSourceFitMode.Contain
+  fullName: PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode.Contain
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Contain = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode
+- uid: PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode.Cover
+  commentId: F:PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode.Cover
+  id: Cover
+  parent: PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode
+  langs:
+  - csharp
+  - vb
+  name: Cover
+  nameWithType: PublicationLiveSourceFitMode.Cover
+  fullName: PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode.Cover
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Cover = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode
+- uid: PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode.Stretch
+  commentId: F:PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode.Stretch
+  id: Stretch
+  parent: PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode
+  langs:
+  - csharp
+  - vb
+  name: Stretch
+  nameWithType: PublicationLiveSourceFitMode.Stretch
+  fullName: PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode.Stretch
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Stretch = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode
+  commentId: T:PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode.html
+  name: PublicationLiveSourceFitMode
+  nameWithType: PublicationLiveSourceFitMode
+  fullName: PublisherStudio.BusinessObjects.PublicationLiveSourceFitMode

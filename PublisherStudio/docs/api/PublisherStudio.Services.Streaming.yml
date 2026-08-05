@@ -1,0 +1,543 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Streaming
+  id: Streaming
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.Streaming.Capture
+  - PublisherStudio.Services.Streaming.Chat
+  - PublisherStudio.Services.Streaming.Encoding
+  - PublisherStudio.Services.Streaming.Hotkeys
+  - PublisherStudio.Services.Streaming.Lan
+  - PublisherStudio.Services.Streaming.MediaHost
+  - PublisherStudio.Services.Streaming.Metadata
+  - PublisherStudio.Services.Streaming.OAuth
+  - PublisherStudio.Services.Streaming.Profiles
+  - PublisherStudio.Services.Streaming.Sessions
+  - PublisherStudio.Services.Streaming.Settings
+  - PublisherStudio.Services.Streaming.UseCases
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.Services.Streaming
+  type: Namespace
+references:
+- uid: PublisherStudio.Services.Streaming.Capture
+  commentId: N:PublisherStudio.Services.Streaming.Capture
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Capture
+  nameWithType: PublisherStudio.Services.Streaming.Capture
+  fullName: PublisherStudio.Services.Streaming.Capture
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Capture
+    name: Capture
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Capture.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Capture
+    name: Capture
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Capture.html
+- uid: PublisherStudio.Services.Streaming.Chat
+  commentId: N:PublisherStudio.Services.Streaming.Chat
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Chat
+  nameWithType: PublisherStudio.Services.Streaming.Chat
+  fullName: PublisherStudio.Services.Streaming.Chat
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Chat
+    name: Chat
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Chat.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Chat
+    name: Chat
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Chat.html
+- uid: PublisherStudio.Services.Streaming.Encoding
+  commentId: N:PublisherStudio.Services.Streaming.Encoding
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Encoding
+  nameWithType: PublisherStudio.Services.Streaming.Encoding
+  fullName: PublisherStudio.Services.Streaming.Encoding
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Encoding
+    name: Encoding
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Encoding.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Encoding
+    name: Encoding
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Encoding.html
+- uid: PublisherStudio.Services.Streaming.Hotkeys
+  commentId: N:PublisherStudio.Services.Streaming.Hotkeys
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Hotkeys
+  nameWithType: PublisherStudio.Services.Streaming.Hotkeys
+  fullName: PublisherStudio.Services.Streaming.Hotkeys
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Hotkeys
+    name: Hotkeys
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Hotkeys.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Hotkeys
+    name: Hotkeys
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Hotkeys.html
+- uid: PublisherStudio.Services.Streaming.Lan
+  commentId: N:PublisherStudio.Services.Streaming.Lan
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Lan
+  nameWithType: PublisherStudio.Services.Streaming.Lan
+  fullName: PublisherStudio.Services.Streaming.Lan
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Lan
+    name: Lan
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Lan.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Lan
+    name: Lan
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Lan.html
+- uid: PublisherStudio.Services.Streaming.MediaHost
+  commentId: N:PublisherStudio.Services.Streaming.MediaHost
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.MediaHost
+  nameWithType: PublisherStudio.Services.Streaming.MediaHost
+  fullName: PublisherStudio.Services.Streaming.MediaHost
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.MediaHost
+    name: MediaHost
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.MediaHost.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.MediaHost
+    name: MediaHost
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.MediaHost.html
+- uid: PublisherStudio.Services.Streaming.Metadata
+  commentId: N:PublisherStudio.Services.Streaming.Metadata
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Metadata
+  nameWithType: PublisherStudio.Services.Streaming.Metadata
+  fullName: PublisherStudio.Services.Streaming.Metadata
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Metadata
+    name: Metadata
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Metadata.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Metadata
+    name: Metadata
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Metadata.html
+- uid: PublisherStudio.Services.Streaming.OAuth
+  commentId: N:PublisherStudio.Services.Streaming.OAuth
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.OAuth
+  nameWithType: PublisherStudio.Services.Streaming.OAuth
+  fullName: PublisherStudio.Services.Streaming.OAuth
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.OAuth
+    name: OAuth
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.OAuth.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.OAuth
+    name: OAuth
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.OAuth.html
+- uid: PublisherStudio.Services.Streaming.Profiles
+  commentId: N:PublisherStudio.Services.Streaming.Profiles
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Profiles
+  nameWithType: PublisherStudio.Services.Streaming.Profiles
+  fullName: PublisherStudio.Services.Streaming.Profiles
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Profiles
+    name: Profiles
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Profiles.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Profiles
+    name: Profiles
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Profiles.html
+- uid: PublisherStudio.Services.Streaming.Sessions
+  commentId: N:PublisherStudio.Services.Streaming.Sessions
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Sessions
+  nameWithType: PublisherStudio.Services.Streaming.Sessions
+  fullName: PublisherStudio.Services.Streaming.Sessions
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Sessions
+    name: Sessions
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Sessions.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Sessions
+    name: Sessions
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Sessions.html
+- uid: PublisherStudio.Services.Streaming.Settings
+  commentId: N:PublisherStudio.Services.Streaming.Settings
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Settings
+  nameWithType: PublisherStudio.Services.Streaming.Settings
+  fullName: PublisherStudio.Services.Streaming.Settings
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Settings
+    name: Settings
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Settings.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Settings
+    name: Settings
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Settings.html
+- uid: PublisherStudio.Services.Streaming.UseCases
+  isExternal: true

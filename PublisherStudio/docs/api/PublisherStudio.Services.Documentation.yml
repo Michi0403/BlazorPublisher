@@ -1,0 +1,71 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Documentation
+  commentId: N:PublisherStudio.Services.Documentation
+  id: Documentation
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService
+  - PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.Services.Documentation
+  nameWithType: PublisherStudio.Services.Documentation
+  fullName: PublisherStudio.Services.Documentation
+  type: Namespace
+  assemblies:
+  - PublisherStudio.Web
+references:
+- uid: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService
+  commentId: T:PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService
+  parent: PublisherStudio.Services.Documentation
+  isExternal: true
+  href: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService.html
+  name: IPublisherDocumentationCatalogService
+  nameWithType: IPublisherDocumentationCatalogService
+  fullName: PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService
+- uid: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService
+  commentId: T:PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService
+  isExternal: true
+  href: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService.html
+  name: PublisherDocumentationCatalogService
+  nameWithType: PublisherDocumentationCatalogService
+  fullName: PublisherStudio.Services.Documentation.PublisherDocumentationCatalogService
+- uid: PublisherStudio.Services.Documentation
+  commentId: N:PublisherStudio.Services.Documentation
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Documentation
+  nameWithType: PublisherStudio.Services.Documentation
+  fullName: PublisherStudio.Services.Documentation
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Documentation
+    name: Documentation
+    isExternal: true
+    href: PublisherStudio.Services.Documentation.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Documentation
+    name: Documentation
+    isExternal: true
+    href: PublisherStudio.Services.Documentation.html

@@ -1,0 +1,681 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.ShapeElement
+  commentId: T:PublisherStudio.BusinessObjects.ShapeElement
+  id: ShapeElement
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.ShapeElement.#ctor
+  - PublisherStudio.BusinessObjects.ShapeElement.CornerRadiusMm
+  - PublisherStudio.BusinessObjects.ShapeElement.Fill
+  - PublisherStudio.BusinessObjects.ShapeElement.Kind
+  - PublisherStudio.BusinessObjects.ShapeElement.Shape
+  - PublisherStudio.BusinessObjects.ShapeElement.Stroke
+  - PublisherStudio.BusinessObjects.ShapeElement.StrokeWidth
+  langs:
+  - csharp
+  - vb
+  name: ShapeElement
+  nameWithType: ShapeElement
+  fullName: PublisherStudio.BusinessObjects.ShapeElement
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents a shape element.
+  example: []
+  syntax:
+    content: 'public sealed class ShapeElement : PublicationElement'
+    content.vb: Public NotInheritable Class ShapeElement Inherits PublicationElement
+  inheritance:
+  - System.Object
+  - PublisherStudio.BusinessObjects.PublicationElement
+  inheritedMembers:
+  - PublisherStudio.BusinessObjects.PublicationElement.Id
+  - PublisherStudio.BusinessObjects.PublicationElement.Name
+  - PublisherStudio.BusinessObjects.PublicationElement.X
+  - PublisherStudio.BusinessObjects.PublicationElement.Y
+  - PublisherStudio.BusinessObjects.PublicationElement.Width
+  - PublisherStudio.BusinessObjects.PublicationElement.Height
+  - PublisherStudio.BusinessObjects.PublicationElement.Rotation
+  - PublisherStudio.BusinessObjects.PublicationElement.ZIndex
+  - PublisherStudio.BusinessObjects.PublicationElement.Visible
+  - PublisherStudio.BusinessObjects.PublicationElement.Locked
+  - PublisherStudio.BusinessObjects.PublicationElement.HiddenAtPresentationStart
+  - PublisherStudio.BusinessObjects.PublicationElement.GroupId
+  - PublisherStudio.BusinessObjects.PublicationElement.Animations
+  - PublisherStudio.BusinessObjects.PublicationElement.Interaction
+  - PublisherStudio.BusinessObjects.PublicationElement.ConnectorPorts
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.BusinessObjects.ShapeElement.#ctor
+  commentId: M:PublisherStudio.BusinessObjects.ShapeElement.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.BusinessObjects.ShapeElement
+  langs:
+  - csharp
+  - vb
+  name: ShapeElement()
+  nameWithType: ShapeElement.ShapeElement()
+  fullName: PublisherStudio.BusinessObjects.ShapeElement.ShapeElement()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public ShapeElement()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.BusinessObjects.ShapeElement.#ctor*
+  nameWithType.vb: ShapeElement.New()
+  fullName.vb: PublisherStudio.BusinessObjects.ShapeElement.New()
+  name.vb: New()
+- uid: PublisherStudio.BusinessObjects.ShapeElement.Kind
+  commentId: P:PublisherStudio.BusinessObjects.ShapeElement.Kind
+  id: Kind
+  parent: PublisherStudio.BusinessObjects.ShapeElement
+  langs:
+  - csharp
+  - vb
+  name: Kind
+  nameWithType: ShapeElement.Kind
+  fullName: PublisherStudio.BusinessObjects.ShapeElement.Kind
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets kind.
+  example: []
+  syntax:
+    content: public override PublicationElementKind Kind { get; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationElementKind
+    content.vb: Public Overrides ReadOnly Property Kind As PublicationElementKind
+  overridden: PublisherStudio.BusinessObjects.PublicationElement.Kind
+  overload: PublisherStudio.BusinessObjects.ShapeElement.Kind*
+- uid: PublisherStudio.BusinessObjects.ShapeElement.Shape
+  commentId: P:PublisherStudio.BusinessObjects.ShapeElement.Shape
+  id: Shape
+  parent: PublisherStudio.BusinessObjects.ShapeElement
+  langs:
+  - csharp
+  - vb
+  name: Shape
+  nameWithType: ShapeElement.Shape
+  fullName: PublisherStudio.BusinessObjects.ShapeElement.Shape
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets shape.
+  example: []
+  syntax:
+    content: public PublicationShape Shape { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationShape
+    content.vb: Public Property Shape As PublicationShape
+  overload: PublisherStudio.BusinessObjects.ShapeElement.Shape*
+- uid: PublisherStudio.BusinessObjects.ShapeElement.Fill
+  commentId: P:PublisherStudio.BusinessObjects.ShapeElement.Fill
+  id: Fill
+  parent: PublisherStudio.BusinessObjects.ShapeElement
+  langs:
+  - csharp
+  - vb
+  name: Fill
+  nameWithType: ShapeElement.Fill
+  fullName: PublisherStudio.BusinessObjects.ShapeElement.Fill
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets fill.
+  example: []
+  syntax:
+    content: public string Fill { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Fill As String
+  overload: PublisherStudio.BusinessObjects.ShapeElement.Fill*
+- uid: PublisherStudio.BusinessObjects.ShapeElement.Stroke
+  commentId: P:PublisherStudio.BusinessObjects.ShapeElement.Stroke
+  id: Stroke
+  parent: PublisherStudio.BusinessObjects.ShapeElement
+  langs:
+  - csharp
+  - vb
+  name: Stroke
+  nameWithType: ShapeElement.Stroke
+  fullName: PublisherStudio.BusinessObjects.ShapeElement.Stroke
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets stroke.
+  example: []
+  syntax:
+    content: public string Stroke { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Stroke As String
+  overload: PublisherStudio.BusinessObjects.ShapeElement.Stroke*
+- uid: PublisherStudio.BusinessObjects.ShapeElement.StrokeWidth
+  commentId: P:PublisherStudio.BusinessObjects.ShapeElement.StrokeWidth
+  id: StrokeWidth
+  parent: PublisherStudio.BusinessObjects.ShapeElement
+  langs:
+  - csharp
+  - vb
+  name: StrokeWidth
+  nameWithType: ShapeElement.StrokeWidth
+  fullName: PublisherStudio.BusinessObjects.ShapeElement.StrokeWidth
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets stroke width.
+  example: []
+  syntax:
+    content: public double StrokeWidth { get; set; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property StrokeWidth As Double
+  overload: PublisherStudio.BusinessObjects.ShapeElement.StrokeWidth*
+- uid: PublisherStudio.BusinessObjects.ShapeElement.CornerRadiusMm
+  commentId: P:PublisherStudio.BusinessObjects.ShapeElement.CornerRadiusMm
+  id: CornerRadiusMm
+  parent: PublisherStudio.BusinessObjects.ShapeElement
+  langs:
+  - csharp
+  - vb
+  name: CornerRadiusMm
+  nameWithType: ShapeElement.CornerRadiusMm
+  fullName: PublisherStudio.BusinessObjects.ShapeElement.CornerRadiusMm
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets corner radius millimetres.
+  example: []
+  syntax:
+    content: public double CornerRadiusMm { get; set; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property CornerRadiusMm As Double
+  overload: PublisherStudio.BusinessObjects.ShapeElement.CornerRadiusMm*
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: PublisherStudio.BusinessObjects.PublicationElement
+  commentId: T:PublisherStudio.BusinessObjects.PublicationElement
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html
+  name: PublicationElement
+  nameWithType: PublicationElement
+  fullName: PublisherStudio.BusinessObjects.PublicationElement
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Id
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Id
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Id
+  name: Id
+  nameWithType: PublicationElement.Id
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Id
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Name
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Name
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Name
+  name: Name
+  nameWithType: PublicationElement.Name
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Name
+- uid: PublisherStudio.BusinessObjects.PublicationElement.X
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.X
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_X
+  name: X
+  nameWithType: PublicationElement.X
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.X
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Y
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Y
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Y
+  name: Y
+  nameWithType: PublicationElement.Y
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Y
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Width
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Width
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Width
+  name: Width
+  nameWithType: PublicationElement.Width
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Width
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Height
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Height
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Height
+  name: Height
+  nameWithType: PublicationElement.Height
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Height
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Rotation
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Rotation
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Rotation
+  name: Rotation
+  nameWithType: PublicationElement.Rotation
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Rotation
+- uid: PublisherStudio.BusinessObjects.PublicationElement.ZIndex
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.ZIndex
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_ZIndex
+  name: ZIndex
+  nameWithType: PublicationElement.ZIndex
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.ZIndex
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Visible
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Visible
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Visible
+  name: Visible
+  nameWithType: PublicationElement.Visible
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Visible
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Locked
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Locked
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Locked
+  name: Locked
+  nameWithType: PublicationElement.Locked
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Locked
+- uid: PublisherStudio.BusinessObjects.PublicationElement.HiddenAtPresentationStart
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.HiddenAtPresentationStart
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_HiddenAtPresentationStart
+  name: HiddenAtPresentationStart
+  nameWithType: PublicationElement.HiddenAtPresentationStart
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.HiddenAtPresentationStart
+- uid: PublisherStudio.BusinessObjects.PublicationElement.GroupId
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.GroupId
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_GroupId
+  name: GroupId
+  nameWithType: PublicationElement.GroupId
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.GroupId
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Animations
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Animations
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Animations
+  name: Animations
+  nameWithType: PublicationElement.Animations
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Animations
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Interaction
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Interaction
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Interaction
+  name: Interaction
+  nameWithType: PublicationElement.Interaction
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Interaction
+- uid: PublisherStudio.BusinessObjects.PublicationElement.ConnectorPorts
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.ConnectorPorts
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_ConnectorPorts
+  name: ConnectorPorts
+  nameWithType: PublicationElement.ConnectorPorts
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.ConnectorPorts
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.BusinessObjects.ShapeElement.#ctor*
+  commentId: Overload:PublisherStudio.BusinessObjects.ShapeElement.#ctor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ShapeElement.html#PublisherStudio_BusinessObjects_ShapeElement__ctor
+  name: ShapeElement
+  nameWithType: ShapeElement.ShapeElement
+  fullName: PublisherStudio.BusinessObjects.ShapeElement.ShapeElement
+  nameWithType.vb: ShapeElement.New
+  fullName.vb: PublisherStudio.BusinessObjects.ShapeElement.New
+  name.vb: New
+- uid: PublisherStudio.BusinessObjects.PublicationElement.Kind
+  commentId: P:PublisherStudio.BusinessObjects.PublicationElement.Kind
+  parent: PublisherStudio.BusinessObjects.PublicationElement
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElement.html#PublisherStudio_BusinessObjects_PublicationElement_Kind
+  name: Kind
+  nameWithType: PublicationElement.Kind
+  fullName: PublisherStudio.BusinessObjects.PublicationElement.Kind
+- uid: PublisherStudio.BusinessObjects.ShapeElement.Kind*
+  commentId: Overload:PublisherStudio.BusinessObjects.ShapeElement.Kind
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ShapeElement.html#PublisherStudio_BusinessObjects_ShapeElement_Kind
+  name: Kind
+  nameWithType: ShapeElement.Kind
+  fullName: PublisherStudio.BusinessObjects.ShapeElement.Kind
+- uid: PublisherStudio.BusinessObjects.PublicationElementKind
+  commentId: T:PublisherStudio.BusinessObjects.PublicationElementKind
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationElementKind.html
+  name: PublicationElementKind
+  nameWithType: PublicationElementKind
+  fullName: PublisherStudio.BusinessObjects.PublicationElementKind
+- uid: PublisherStudio.BusinessObjects.ShapeElement.Shape*
+  commentId: Overload:PublisherStudio.BusinessObjects.ShapeElement.Shape
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ShapeElement.html#PublisherStudio_BusinessObjects_ShapeElement_Shape
+  name: Shape
+  nameWithType: ShapeElement.Shape
+  fullName: PublisherStudio.BusinessObjects.ShapeElement.Shape
+- uid: PublisherStudio.BusinessObjects.PublicationShape
+  commentId: T:PublisherStudio.BusinessObjects.PublicationShape
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationShape.html
+  name: PublicationShape
+  nameWithType: PublicationShape
+  fullName: PublisherStudio.BusinessObjects.PublicationShape
+- uid: PublisherStudio.BusinessObjects.ShapeElement.Fill*
+  commentId: Overload:PublisherStudio.BusinessObjects.ShapeElement.Fill
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ShapeElement.html#PublisherStudio_BusinessObjects_ShapeElement_Fill
+  name: Fill
+  nameWithType: ShapeElement.Fill
+  fullName: PublisherStudio.BusinessObjects.ShapeElement.Fill
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.BusinessObjects.ShapeElement.Stroke*
+  commentId: Overload:PublisherStudio.BusinessObjects.ShapeElement.Stroke
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ShapeElement.html#PublisherStudio_BusinessObjects_ShapeElement_Stroke
+  name: Stroke
+  nameWithType: ShapeElement.Stroke
+  fullName: PublisherStudio.BusinessObjects.ShapeElement.Stroke
+- uid: PublisherStudio.BusinessObjects.ShapeElement.StrokeWidth*
+  commentId: Overload:PublisherStudio.BusinessObjects.ShapeElement.StrokeWidth
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ShapeElement.html#PublisherStudio_BusinessObjects_ShapeElement_StrokeWidth
+  name: StrokeWidth
+  nameWithType: ShapeElement.StrokeWidth
+  fullName: PublisherStudio.BusinessObjects.ShapeElement.StrokeWidth
+- uid: System.Double
+  commentId: T:System.Double
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.double
+  name: double
+  nameWithType: double
+  fullName: double
+  nameWithType.vb: Double
+  fullName.vb: Double
+  name.vb: Double
+- uid: PublisherStudio.BusinessObjects.ShapeElement.CornerRadiusMm*
+  commentId: Overload:PublisherStudio.BusinessObjects.ShapeElement.CornerRadiusMm
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ShapeElement.html#PublisherStudio_BusinessObjects_ShapeElement_CornerRadiusMm
+  name: CornerRadiusMm
+  nameWithType: ShapeElement.CornerRadiusMm
+  fullName: PublisherStudio.BusinessObjects.ShapeElement.CornerRadiusMm

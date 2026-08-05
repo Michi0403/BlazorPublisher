@@ -68,7 +68,7 @@ const ribbon = read('src/PublisherStudio.Web/Components/Editor/PublicationRibbon
 assert.ok(ribbon.includes('CanShowAiCouncil'));
 assert.ok(ribbon.includes('LocalGptConnection.Changed += OnLocalGptChanged'));
 
-const docs = read('docs/ONEWIRE_RUNTIME_SECURITY_HTTP_JSON.md');
+const docs = read('docs/articles/localgpt-and-onewire.md');
 assert.ok(docs.includes('ESP32'));
 assert.ok(docs.includes('generated at runtime') || docs.includes('generate their own random'));
 console.log('PASS organic runtime security, correlation, fresh capture consent, OCR and HTTP/JSON contracts.');

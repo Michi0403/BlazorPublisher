@@ -1,0 +1,833 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.OpenScadValue
+  commentId: T:PublisherStudio.BusinessObjects.OpenScadValue
+  id: OpenScadValue
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.OpenScadValue.#ctor
+  - PublisherStudio.BusinessObjects.OpenScadValue.Boolean
+  - PublisherStudio.BusinessObjects.OpenScadValue.Faces
+  - PublisherStudio.BusinessObjects.OpenScadValue.Integer
+  - PublisherStudio.BusinessObjects.OpenScadValue.Matrix
+  - PublisherStudio.BusinessObjects.OpenScadValue.Number
+  - PublisherStudio.BusinessObjects.OpenScadValue.Points
+  - PublisherStudio.BusinessObjects.OpenScadValue.Text
+  - PublisherStudio.BusinessObjects.OpenScadValue.Type
+  - PublisherStudio.BusinessObjects.OpenScadValue.Vector
+  langs:
+  - csharp
+  - vb
+  name: OpenScadValue
+  nameWithType: OpenScadValue
+  fullName: PublisherStudio.BusinessObjects.OpenScadValue
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents an open scad value.
+  example: []
+  syntax:
+    content: public sealed class OpenScadValue
+    content.vb: Public NotInheritable Class OpenScadValue
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.BusinessObjects.OpenScadValue.#ctor
+  commentId: M:PublisherStudio.BusinessObjects.OpenScadValue.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.BusinessObjects.OpenScadValue
+  langs:
+  - csharp
+  - vb
+  name: OpenScadValue()
+  nameWithType: OpenScadValue.OpenScadValue()
+  fullName: PublisherStudio.BusinessObjects.OpenScadValue.OpenScadValue()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public OpenScadValue()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.BusinessObjects.OpenScadValue.#ctor*
+  nameWithType.vb: OpenScadValue.New()
+  fullName.vb: PublisherStudio.BusinessObjects.OpenScadValue.New()
+  name.vb: New()
+- uid: PublisherStudio.BusinessObjects.OpenScadValue.Type
+  commentId: P:PublisherStudio.BusinessObjects.OpenScadValue.Type
+  id: Type
+  parent: PublisherStudio.BusinessObjects.OpenScadValue
+  langs:
+  - csharp
+  - vb
+  name: Type
+  nameWithType: OpenScadValue.Type
+  fullName: PublisherStudio.BusinessObjects.OpenScadValue.Type
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets type.
+  example: []
+  syntax:
+    content: public OpenScadParameterType Type { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.OpenScadParameterType
+    content.vb: Public Property Type As OpenScadParameterType
+  overload: PublisherStudio.BusinessObjects.OpenScadValue.Type*
+- uid: PublisherStudio.BusinessObjects.OpenScadValue.Number
+  commentId: P:PublisherStudio.BusinessObjects.OpenScadValue.Number
+  id: Number
+  parent: PublisherStudio.BusinessObjects.OpenScadValue
+  langs:
+  - csharp
+  - vb
+  name: Number
+  nameWithType: OpenScadValue.Number
+  fullName: PublisherStudio.BusinessObjects.OpenScadValue.Number
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets number.
+  example: []
+  syntax:
+    content: public double Number { get; set; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property Number As Double
+  overload: PublisherStudio.BusinessObjects.OpenScadValue.Number*
+- uid: PublisherStudio.BusinessObjects.OpenScadValue.Integer
+  commentId: P:PublisherStudio.BusinessObjects.OpenScadValue.Integer
+  id: Integer
+  parent: PublisherStudio.BusinessObjects.OpenScadValue
+  langs:
+  - csharp
+  - vb
+  name: Integer
+  nameWithType: OpenScadValue.Integer
+  fullName: PublisherStudio.BusinessObjects.OpenScadValue.Integer
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets integer.
+  example: []
+  syntax:
+    content: public int Integer { get; set; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property [Integer] As Integer
+  overload: PublisherStudio.BusinessObjects.OpenScadValue.Integer*
+- uid: PublisherStudio.BusinessObjects.OpenScadValue.Boolean
+  commentId: P:PublisherStudio.BusinessObjects.OpenScadValue.Boolean
+  id: Boolean
+  parent: PublisherStudio.BusinessObjects.OpenScadValue
+  langs:
+  - csharp
+  - vb
+  name: Boolean
+  nameWithType: OpenScadValue.Boolean
+  fullName: PublisherStudio.BusinessObjects.OpenScadValue.Boolean
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets boolean.
+  example: []
+  syntax:
+    content: public bool Boolean { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property [Boolean] As Boolean
+  overload: PublisherStudio.BusinessObjects.OpenScadValue.Boolean*
+- uid: PublisherStudio.BusinessObjects.OpenScadValue.Text
+  commentId: P:PublisherStudio.BusinessObjects.OpenScadValue.Text
+  id: Text
+  parent: PublisherStudio.BusinessObjects.OpenScadValue
+  langs:
+  - csharp
+  - vb
+  name: Text
+  nameWithType: OpenScadValue.Text
+  fullName: PublisherStudio.BusinessObjects.OpenScadValue.Text
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets text.
+  example: []
+  syntax:
+    content: public string Text { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Text As String
+  overload: PublisherStudio.BusinessObjects.OpenScadValue.Text*
+- uid: PublisherStudio.BusinessObjects.OpenScadValue.Vector
+  commentId: P:PublisherStudio.BusinessObjects.OpenScadValue.Vector
+  id: Vector
+  parent: PublisherStudio.BusinessObjects.OpenScadValue
+  langs:
+  - csharp
+  - vb
+  name: Vector
+  nameWithType: OpenScadValue.Vector
+  fullName: PublisherStudio.BusinessObjects.OpenScadValue.Vector
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets vector.
+  example: []
+  syntax:
+    content: public List<double> Vector { get; set; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.List{System.Double}
+    content.vb: Public Property Vector As List(Of Double)
+  overload: PublisherStudio.BusinessObjects.OpenScadValue.Vector*
+- uid: PublisherStudio.BusinessObjects.OpenScadValue.Matrix
+  commentId: P:PublisherStudio.BusinessObjects.OpenScadValue.Matrix
+  id: Matrix
+  parent: PublisherStudio.BusinessObjects.OpenScadValue
+  langs:
+  - csharp
+  - vb
+  name: Matrix
+  nameWithType: OpenScadValue.Matrix
+  fullName: PublisherStudio.BusinessObjects.OpenScadValue.Matrix
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets matrix.
+  example: []
+  syntax:
+    content: public List<List<double>> Matrix { get; set; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.List{System.Collections.Generic.List{System.Double}}
+    content.vb: Public Property Matrix As List(Of List(Of Double))
+  overload: PublisherStudio.BusinessObjects.OpenScadValue.Matrix*
+- uid: PublisherStudio.BusinessObjects.OpenScadValue.Points
+  commentId: P:PublisherStudio.BusinessObjects.OpenScadValue.Points
+  id: Points
+  parent: PublisherStudio.BusinessObjects.OpenScadValue
+  langs:
+  - csharp
+  - vb
+  name: Points
+  nameWithType: OpenScadValue.Points
+  fullName: PublisherStudio.BusinessObjects.OpenScadValue.Points
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets points.
+  example: []
+  syntax:
+    content: public List<List<double>> Points { get; set; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.List{System.Collections.Generic.List{System.Double}}
+    content.vb: Public Property Points As List(Of List(Of Double))
+  overload: PublisherStudio.BusinessObjects.OpenScadValue.Points*
+- uid: PublisherStudio.BusinessObjects.OpenScadValue.Faces
+  commentId: P:PublisherStudio.BusinessObjects.OpenScadValue.Faces
+  id: Faces
+  parent: PublisherStudio.BusinessObjects.OpenScadValue
+  langs:
+  - csharp
+  - vb
+  name: Faces
+  nameWithType: OpenScadValue.Faces
+  fullName: PublisherStudio.BusinessObjects.OpenScadValue.Faces
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets faces.
+  example: []
+  syntax:
+    content: public List<List<int>> Faces { get; set; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.List{System.Collections.Generic.List{System.Int32}}
+    content.vb: Public Property Faces As List(Of List(Of Integer))
+  overload: PublisherStudio.BusinessObjects.OpenScadValue.Faces*
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.BusinessObjects.OpenScadValue.#ctor*
+  commentId: Overload:PublisherStudio.BusinessObjects.OpenScadValue.#ctor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OpenScadValue.html#PublisherStudio_BusinessObjects_OpenScadValue__ctor
+  name: OpenScadValue
+  nameWithType: OpenScadValue.OpenScadValue
+  fullName: PublisherStudio.BusinessObjects.OpenScadValue.OpenScadValue
+  nameWithType.vb: OpenScadValue.New
+  fullName.vb: PublisherStudio.BusinessObjects.OpenScadValue.New
+  name.vb: New
+- uid: PublisherStudio.BusinessObjects.OpenScadValue.Type*
+  commentId: Overload:PublisherStudio.BusinessObjects.OpenScadValue.Type
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OpenScadValue.html#PublisherStudio_BusinessObjects_OpenScadValue_Type
+  name: Type
+  nameWithType: OpenScadValue.Type
+  fullName: PublisherStudio.BusinessObjects.OpenScadValue.Type
+- uid: PublisherStudio.BusinessObjects.OpenScadParameterType
+  commentId: T:PublisherStudio.BusinessObjects.OpenScadParameterType
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OpenScadParameterType.html
+  name: OpenScadParameterType
+  nameWithType: OpenScadParameterType
+  fullName: PublisherStudio.BusinessObjects.OpenScadParameterType
+- uid: PublisherStudio.BusinessObjects.OpenScadValue.Number*
+  commentId: Overload:PublisherStudio.BusinessObjects.OpenScadValue.Number
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OpenScadValue.html#PublisherStudio_BusinessObjects_OpenScadValue_Number
+  name: Number
+  nameWithType: OpenScadValue.Number
+  fullName: PublisherStudio.BusinessObjects.OpenScadValue.Number
+- uid: System.Double
+  commentId: T:System.Double
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.double
+  name: double
+  nameWithType: double
+  fullName: double
+  nameWithType.vb: Double
+  fullName.vb: Double
+  name.vb: Double
+- uid: PublisherStudio.BusinessObjects.OpenScadValue.Integer*
+  commentId: Overload:PublisherStudio.BusinessObjects.OpenScadValue.Integer
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OpenScadValue.html#PublisherStudio_BusinessObjects_OpenScadValue_Integer
+  name: Integer
+  nameWithType: OpenScadValue.Integer
+  fullName: PublisherStudio.BusinessObjects.OpenScadValue.Integer
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: PublisherStudio.BusinessObjects.OpenScadValue.Boolean*
+  commentId: Overload:PublisherStudio.BusinessObjects.OpenScadValue.Boolean
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OpenScadValue.html#PublisherStudio_BusinessObjects_OpenScadValue_Boolean
+  name: Boolean
+  nameWithType: OpenScadValue.Boolean
+  fullName: PublisherStudio.BusinessObjects.OpenScadValue.Boolean
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.BusinessObjects.OpenScadValue.Text*
+  commentId: Overload:PublisherStudio.BusinessObjects.OpenScadValue.Text
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OpenScadValue.html#PublisherStudio_BusinessObjects_OpenScadValue_Text
+  name: Text
+  nameWithType: OpenScadValue.Text
+  fullName: PublisherStudio.BusinessObjects.OpenScadValue.Text
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.BusinessObjects.OpenScadValue.Vector*
+  commentId: Overload:PublisherStudio.BusinessObjects.OpenScadValue.Vector
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OpenScadValue.html#PublisherStudio_BusinessObjects_OpenScadValue_Vector
+  name: Vector
+  nameWithType: OpenScadValue.Vector
+  fullName: PublisherStudio.BusinessObjects.OpenScadValue.Vector
+- uid: System.Collections.Generic.List{System.Double}
+  commentId: T:System.Collections.Generic.List{System.Double}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.List`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<double>
+  nameWithType: List<double>
+  fullName: System.Collections.Generic.List<double>
+  nameWithType.vb: List(Of Double)
+  fullName.vb: System.Collections.Generic.List(Of Double)
+  name.vb: List(Of Double)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: System.Double
+    name: double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Double
+    name: Double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: )
+- uid: System.Collections.Generic.List`1
+  commentId: T:System.Collections.Generic.List`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<T>
+  nameWithType: List<T>
+  fullName: System.Collections.Generic.List<T>
+  nameWithType.vb: List(Of T)
+  fullName.vb: System.Collections.Generic.List(Of T)
+  name.vb: List(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: PublisherStudio.BusinessObjects.OpenScadValue.Matrix*
+  commentId: Overload:PublisherStudio.BusinessObjects.OpenScadValue.Matrix
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OpenScadValue.html#PublisherStudio_BusinessObjects_OpenScadValue_Matrix
+  name: Matrix
+  nameWithType: OpenScadValue.Matrix
+  fullName: PublisherStudio.BusinessObjects.OpenScadValue.Matrix
+- uid: System.Collections.Generic.List{System.Collections.Generic.List{System.Double}}
+  commentId: T:System.Collections.Generic.List{System.Collections.Generic.List{System.Double}}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.List`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<List<double>>
+  nameWithType: List<List<double>>
+  fullName: System.Collections.Generic.List<System.Collections.Generic.List<double>>
+  nameWithType.vb: List(Of List(Of Double))
+  fullName.vb: System.Collections.Generic.List(Of System.Collections.Generic.List(Of Double))
+  name.vb: List(Of List(Of Double))
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: System.Double
+    name: double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: '>'
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Double
+    name: Double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: )
+  - name: )
+- uid: PublisherStudio.BusinessObjects.OpenScadValue.Points*
+  commentId: Overload:PublisherStudio.BusinessObjects.OpenScadValue.Points
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OpenScadValue.html#PublisherStudio_BusinessObjects_OpenScadValue_Points
+  name: Points
+  nameWithType: OpenScadValue.Points
+  fullName: PublisherStudio.BusinessObjects.OpenScadValue.Points
+- uid: PublisherStudio.BusinessObjects.OpenScadValue.Faces*
+  commentId: Overload:PublisherStudio.BusinessObjects.OpenScadValue.Faces
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OpenScadValue.html#PublisherStudio_BusinessObjects_OpenScadValue_Faces
+  name: Faces
+  nameWithType: OpenScadValue.Faces
+  fullName: PublisherStudio.BusinessObjects.OpenScadValue.Faces
+- uid: System.Collections.Generic.List{System.Collections.Generic.List{System.Int32}}
+  commentId: T:System.Collections.Generic.List{System.Collections.Generic.List{System.Int32}}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.List`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<List<int>>
+  nameWithType: List<List<int>>
+  fullName: System.Collections.Generic.List<System.Collections.Generic.List<int>>
+  nameWithType.vb: List(Of List(Of Integer))
+  fullName.vb: System.Collections.Generic.List(Of System.Collections.Generic.List(Of Integer))
+  name.vb: List(Of List(Of Integer))
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: System.Int32
+    name: int
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.int32
+  - name: '>'
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Int32
+    name: Integer
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.int32
+  - name: )
+  - name: )

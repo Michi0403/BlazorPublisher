@@ -1,7 +1,10 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.UserExperience;
 
+/// <summary>
+/// Defines the user notification service contract.
+/// </summary>
 public interface IUserNotificationService
 {
     event Action? Changed;

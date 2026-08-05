@@ -1,0 +1,115 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationVideoFitMode
+  commentId: T:PublisherStudio.BusinessObjects.PublicationVideoFitMode
+  id: PublicationVideoFitMode
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationVideoFitMode.Contain
+  - PublisherStudio.BusinessObjects.PublicationVideoFitMode.Cover
+  - PublisherStudio.BusinessObjects.PublicationVideoFitMode.Stretch
+  langs:
+  - csharp
+  - vb
+  name: PublicationVideoFitMode
+  nameWithType: PublicationVideoFitMode
+  fullName: PublisherStudio.BusinessObjects.PublicationVideoFitMode
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication video fit mode values.
+  example: []
+  syntax:
+    content: public enum PublicationVideoFitMode
+    content.vb: Public Enum PublicationVideoFitMode
+- uid: PublisherStudio.BusinessObjects.PublicationVideoFitMode.Contain
+  commentId: F:PublisherStudio.BusinessObjects.PublicationVideoFitMode.Contain
+  id: Contain
+  parent: PublisherStudio.BusinessObjects.PublicationVideoFitMode
+  langs:
+  - csharp
+  - vb
+  name: Contain
+  nameWithType: PublicationVideoFitMode.Contain
+  fullName: PublisherStudio.BusinessObjects.PublicationVideoFitMode.Contain
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Contain = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationVideoFitMode
+- uid: PublisherStudio.BusinessObjects.PublicationVideoFitMode.Cover
+  commentId: F:PublisherStudio.BusinessObjects.PublicationVideoFitMode.Cover
+  id: Cover
+  parent: PublisherStudio.BusinessObjects.PublicationVideoFitMode
+  langs:
+  - csharp
+  - vb
+  name: Cover
+  nameWithType: PublicationVideoFitMode.Cover
+  fullName: PublisherStudio.BusinessObjects.PublicationVideoFitMode.Cover
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Cover = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationVideoFitMode
+- uid: PublisherStudio.BusinessObjects.PublicationVideoFitMode.Stretch
+  commentId: F:PublisherStudio.BusinessObjects.PublicationVideoFitMode.Stretch
+  id: Stretch
+  parent: PublisherStudio.BusinessObjects.PublicationVideoFitMode
+  langs:
+  - csharp
+  - vb
+  name: Stretch
+  nameWithType: PublicationVideoFitMode.Stretch
+  fullName: PublisherStudio.BusinessObjects.PublicationVideoFitMode.Stretch
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Stretch = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationVideoFitMode
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationVideoFitMode
+  commentId: T:PublisherStudio.BusinessObjects.PublicationVideoFitMode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationVideoFitMode.html
+  name: PublicationVideoFitMode
+  nameWithType: PublicationVideoFitMode
+  fullName: PublisherStudio.BusinessObjects.PublicationVideoFitMode

@@ -1,0 +1,659 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PictureStroke
+  commentId: T:PublisherStudio.BusinessObjects.PictureStroke
+  id: PictureStroke
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PictureStroke.#ctor
+  - PublisherStudio.BusinessObjects.PictureStroke.Color
+  - PublisherStudio.BusinessObjects.PictureStroke.Hardness
+  - PublisherStudio.BusinessObjects.PictureStroke.Id
+  - PublisherStudio.BusinessObjects.PictureStroke.Kind
+  - PublisherStudio.BusinessObjects.PictureStroke.Opacity
+  - PublisherStudio.BusinessObjects.PictureStroke.Points
+  - PublisherStudio.BusinessObjects.PictureStroke.WidthPx
+  langs:
+  - csharp
+  - vb
+  name: PictureStroke
+  nameWithType: PictureStroke
+  fullName: PublisherStudio.BusinessObjects.PictureStroke
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents a picture stroke.
+  example: []
+  syntax:
+    content: public sealed class PictureStroke
+    content.vb: Public NotInheritable Class PictureStroke
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.BusinessObjects.PictureStroke.#ctor
+  commentId: M:PublisherStudio.BusinessObjects.PictureStroke.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.BusinessObjects.PictureStroke
+  langs:
+  - csharp
+  - vb
+  name: PictureStroke()
+  nameWithType: PictureStroke.PictureStroke()
+  fullName: PublisherStudio.BusinessObjects.PictureStroke.PictureStroke()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public PictureStroke()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.BusinessObjects.PictureStroke.#ctor*
+  nameWithType.vb: PictureStroke.New()
+  fullName.vb: PublisherStudio.BusinessObjects.PictureStroke.New()
+  name.vb: New()
+- uid: PublisherStudio.BusinessObjects.PictureStroke.Id
+  commentId: P:PublisherStudio.BusinessObjects.PictureStroke.Id
+  id: Id
+  parent: PublisherStudio.BusinessObjects.PictureStroke
+  langs:
+  - csharp
+  - vb
+  name: Id
+  nameWithType: PictureStroke.Id
+  fullName: PublisherStudio.BusinessObjects.PictureStroke.Id
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets the stable identifier.
+  example: []
+  syntax:
+    content: public Guid Id { get; set; }
+    parameters: []
+    return:
+      type: System.Guid
+    content.vb: Public Property Id As Guid
+  overload: PublisherStudio.BusinessObjects.PictureStroke.Id*
+- uid: PublisherStudio.BusinessObjects.PictureStroke.Kind
+  commentId: P:PublisherStudio.BusinessObjects.PictureStroke.Kind
+  id: Kind
+  parent: PublisherStudio.BusinessObjects.PictureStroke
+  langs:
+  - csharp
+  - vb
+  name: Kind
+  nameWithType: PictureStroke.Kind
+  fullName: PublisherStudio.BusinessObjects.PictureStroke.Kind
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets kind.
+  example: []
+  syntax:
+    content: public PictureStrokeKind Kind { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.PictureStrokeKind
+    content.vb: Public Property Kind As PictureStrokeKind
+  overload: PublisherStudio.BusinessObjects.PictureStroke.Kind*
+- uid: PublisherStudio.BusinessObjects.PictureStroke.Color
+  commentId: P:PublisherStudio.BusinessObjects.PictureStroke.Color
+  id: Color
+  parent: PublisherStudio.BusinessObjects.PictureStroke
+  langs:
+  - csharp
+  - vb
+  name: Color
+  nameWithType: PictureStroke.Color
+  fullName: PublisherStudio.BusinessObjects.PictureStroke.Color
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets color.
+  example: []
+  syntax:
+    content: public string Color { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Color As String
+  overload: PublisherStudio.BusinessObjects.PictureStroke.Color*
+- uid: PublisherStudio.BusinessObjects.PictureStroke.WidthPx
+  commentId: P:PublisherStudio.BusinessObjects.PictureStroke.WidthPx
+  id: WidthPx
+  parent: PublisherStudio.BusinessObjects.PictureStroke
+  langs:
+  - csharp
+  - vb
+  name: WidthPx
+  nameWithType: PictureStroke.WidthPx
+  fullName: PublisherStudio.BusinessObjects.PictureStroke.WidthPx
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets width px.
+  example: []
+  syntax:
+    content: public double WidthPx { get; set; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property WidthPx As Double
+  overload: PublisherStudio.BusinessObjects.PictureStroke.WidthPx*
+- uid: PublisherStudio.BusinessObjects.PictureStroke.Opacity
+  commentId: P:PublisherStudio.BusinessObjects.PictureStroke.Opacity
+  id: Opacity
+  parent: PublisherStudio.BusinessObjects.PictureStroke
+  langs:
+  - csharp
+  - vb
+  name: Opacity
+  nameWithType: PictureStroke.Opacity
+  fullName: PublisherStudio.BusinessObjects.PictureStroke.Opacity
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets opacity.
+  example: []
+  syntax:
+    content: public double Opacity { get; set; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property Opacity As Double
+  overload: PublisherStudio.BusinessObjects.PictureStroke.Opacity*
+- uid: PublisherStudio.BusinessObjects.PictureStroke.Hardness
+  commentId: P:PublisherStudio.BusinessObjects.PictureStroke.Hardness
+  id: Hardness
+  parent: PublisherStudio.BusinessObjects.PictureStroke
+  langs:
+  - csharp
+  - vb
+  name: Hardness
+  nameWithType: PictureStroke.Hardness
+  fullName: PublisherStudio.BusinessObjects.PictureStroke.Hardness
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets hardness.
+  example: []
+  syntax:
+    content: public double Hardness { get; set; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property Hardness As Double
+  overload: PublisherStudio.BusinessObjects.PictureStroke.Hardness*
+- uid: PublisherStudio.BusinessObjects.PictureStroke.Points
+  commentId: P:PublisherStudio.BusinessObjects.PictureStroke.Points
+  id: Points
+  parent: PublisherStudio.BusinessObjects.PictureStroke
+  langs:
+  - csharp
+  - vb
+  name: Points
+  nameWithType: PictureStroke.Points
+  fullName: PublisherStudio.BusinessObjects.PictureStroke.Points
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets points.
+  example: []
+  syntax:
+    content: public List<PicturePoint> Points { get; set; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.List{PublisherStudio.BusinessObjects.PicturePoint}
+    content.vb: Public Property Points As List(Of PicturePoint)
+  overload: PublisherStudio.BusinessObjects.PictureStroke.Points*
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.BusinessObjects.PictureStroke.#ctor*
+  commentId: Overload:PublisherStudio.BusinessObjects.PictureStroke.#ctor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PictureStroke.html#PublisherStudio_BusinessObjects_PictureStroke__ctor
+  name: PictureStroke
+  nameWithType: PictureStroke.PictureStroke
+  fullName: PublisherStudio.BusinessObjects.PictureStroke.PictureStroke
+  nameWithType.vb: PictureStroke.New
+  fullName.vb: PublisherStudio.BusinessObjects.PictureStroke.New
+  name.vb: New
+- uid: PublisherStudio.BusinessObjects.PictureStroke.Id*
+  commentId: Overload:PublisherStudio.BusinessObjects.PictureStroke.Id
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PictureStroke.html#PublisherStudio_BusinessObjects_PictureStroke_Id
+  name: Id
+  nameWithType: PictureStroke.Id
+  fullName: PublisherStudio.BusinessObjects.PictureStroke.Id
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: PublisherStudio.BusinessObjects.PictureStroke.Kind*
+  commentId: Overload:PublisherStudio.BusinessObjects.PictureStroke.Kind
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PictureStroke.html#PublisherStudio_BusinessObjects_PictureStroke_Kind
+  name: Kind
+  nameWithType: PictureStroke.Kind
+  fullName: PublisherStudio.BusinessObjects.PictureStroke.Kind
+- uid: PublisherStudio.BusinessObjects.PictureStrokeKind
+  commentId: T:PublisherStudio.BusinessObjects.PictureStrokeKind
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PictureStrokeKind.html
+  name: PictureStrokeKind
+  nameWithType: PictureStrokeKind
+  fullName: PublisherStudio.BusinessObjects.PictureStrokeKind
+- uid: PublisherStudio.BusinessObjects.PictureStroke.Color*
+  commentId: Overload:PublisherStudio.BusinessObjects.PictureStroke.Color
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PictureStroke.html#PublisherStudio_BusinessObjects_PictureStroke_Color
+  name: Color
+  nameWithType: PictureStroke.Color
+  fullName: PublisherStudio.BusinessObjects.PictureStroke.Color
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.BusinessObjects.PictureStroke.WidthPx*
+  commentId: Overload:PublisherStudio.BusinessObjects.PictureStroke.WidthPx
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PictureStroke.html#PublisherStudio_BusinessObjects_PictureStroke_WidthPx
+  name: WidthPx
+  nameWithType: PictureStroke.WidthPx
+  fullName: PublisherStudio.BusinessObjects.PictureStroke.WidthPx
+- uid: System.Double
+  commentId: T:System.Double
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.double
+  name: double
+  nameWithType: double
+  fullName: double
+  nameWithType.vb: Double
+  fullName.vb: Double
+  name.vb: Double
+- uid: PublisherStudio.BusinessObjects.PictureStroke.Opacity*
+  commentId: Overload:PublisherStudio.BusinessObjects.PictureStroke.Opacity
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PictureStroke.html#PublisherStudio_BusinessObjects_PictureStroke_Opacity
+  name: Opacity
+  nameWithType: PictureStroke.Opacity
+  fullName: PublisherStudio.BusinessObjects.PictureStroke.Opacity
+- uid: PublisherStudio.BusinessObjects.PictureStroke.Hardness*
+  commentId: Overload:PublisherStudio.BusinessObjects.PictureStroke.Hardness
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PictureStroke.html#PublisherStudio_BusinessObjects_PictureStroke_Hardness
+  name: Hardness
+  nameWithType: PictureStroke.Hardness
+  fullName: PublisherStudio.BusinessObjects.PictureStroke.Hardness
+- uid: PublisherStudio.BusinessObjects.PictureStroke.Points*
+  commentId: Overload:PublisherStudio.BusinessObjects.PictureStroke.Points
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PictureStroke.html#PublisherStudio_BusinessObjects_PictureStroke_Points
+  name: Points
+  nameWithType: PictureStroke.Points
+  fullName: PublisherStudio.BusinessObjects.PictureStroke.Points
+- uid: System.Collections.Generic.List{PublisherStudio.BusinessObjects.PicturePoint}
+  commentId: T:System.Collections.Generic.List{PublisherStudio.BusinessObjects.PicturePoint}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.List`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<PicturePoint>
+  nameWithType: List<PicturePoint>
+  fullName: System.Collections.Generic.List<PublisherStudio.BusinessObjects.PicturePoint>
+  nameWithType.vb: List(Of PicturePoint)
+  fullName.vb: System.Collections.Generic.List(Of PublisherStudio.BusinessObjects.PicturePoint)
+  name.vb: List(Of PicturePoint)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.PicturePoint
+    name: PicturePoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PicturePoint.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.PicturePoint
+    name: PicturePoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PicturePoint.html
+  - name: )
+- uid: System.Collections.Generic.List`1
+  commentId: T:System.Collections.Generic.List`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<T>
+  nameWithType: List<T>
+  fullName: System.Collections.Generic.List<T>
+  nameWithType.vb: List(Of T)
+  fullName.vb: System.Collections.Generic.List(Of T)
+  name.vb: List(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic

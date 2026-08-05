@@ -1,5 +1,8 @@
-namespace PublisherStudio.BusinessObjects;
+﻿namespace PublisherStudio.BusinessObjects;
 
+/// <summary>
+/// Represents a platform chat message.
+/// </summary>
 public sealed record PlatformChatMessage(
     string Id,
     Guid OutputId,
@@ -13,4 +16,7 @@ public sealed record PlatformChatMessage(
     string Color = "",
     string Badges = "");
 
+/// <summary>
+/// Represents a streaming chat send result.
+/// </summary>
 public sealed record StreamingChatSendResult(bool Exists, bool Sent, string Error);

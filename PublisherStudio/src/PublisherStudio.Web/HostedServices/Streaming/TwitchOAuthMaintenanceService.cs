@@ -1,11 +1,17 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.HostedServices.Streaming;
 
+/// <summary>
+/// Provides twitch OAuth maintenance service operations.
+/// </summary>
 public sealed class TwitchOAuthMaintenanceService(
     IServiceProvider services,
     ILogger<TwitchOAuthMaintenanceService> logger) : BackgroundService
 {
+    /// <summary>
+    /// Runs the execute async operation.
+    /// </summary>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)

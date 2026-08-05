@@ -1,14 +1,23 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.OpenScad;
 
+/// <summary>
+/// Provides open scad primitive node renderer operations.
+/// </summary>
 public sealed class OpenScadPrimitiveNodeRenderer(IOpenScadCatalogService catalog) : IOpenScadNodeRenderer
 {
     private readonly HashSet<OpenScadNodeCategory> _categories =
     [OpenScadNodeCategory.Primitive2D, OpenScadNodeCategory.Primitive3D, OpenScadNodeCategory.Import];
 
+    /// <summary>
+    /// Determines whether render.
+    /// </summary>
     public bool CanRender(OpenScadNode node) => catalog.Find(node.Kind) is { } definition && _categories.Contains(definition.Category);
 
+    /// <summary>
+    /// Runs the render operation.
+    /// </summary>
     public string Render(OpenScadNode node, OpenScadRenderContext context)
     {
         var definition = catalog.Find(node.Kind)!;
@@ -19,13 +28,22 @@ public sealed class OpenScadPrimitiveNodeRenderer(IOpenScadCatalogService catalo
     }
 }
 
+/// <summary>
+/// Provides open scad wrapper node renderer operations.
+/// </summary>
 public sealed class OpenScadWrapperNodeRenderer(IOpenScadCatalogService catalog) : IOpenScadNodeRenderer
 {
     private readonly HashSet<OpenScadNodeCategory> _categories =
     [OpenScadNodeCategory.Transform, OpenScadNodeCategory.BooleanOperation, OpenScadNodeCategory.Extrusion, OpenScadNodeCategory.Projection, OpenScadNodeCategory.Utility];
 
+    /// <summary>
+    /// Determines whether render.
+    /// </summary>
     public bool CanRender(OpenScadNode node) => catalog.Find(node.Kind) is { } definition && _categories.Contains(definition.Category);
 
+    /// <summary>
+    /// Runs the render operation.
+    /// </summary>
     public string Render(OpenScadNode node, OpenScadRenderContext context)
     {
         var definition = catalog.Find(node.Kind)!;
@@ -37,10 +55,19 @@ public sealed class OpenScadWrapperNodeRenderer(IOpenScadCatalogService catalog)
     }
 }
 
+/// <summary>
+/// Provides open scad raw node renderer operations.
+/// </summary>
 public sealed class OpenScadRawNodeRenderer : IOpenScadNodeRenderer
 {
+    /// <summary>
+    /// Determines whether render.
+    /// </summary>
     public bool CanRender(OpenScadNode node) => string.Equals(node.Kind, "raw", StringComparison.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// Runs the render operation.
+    /// </summary>
     public string Render(OpenScadNode node, OpenScadRenderContext context)
     {
         var code = node.Parameters.GetValueOrDefault("code")?.Text ?? string.Empty;
@@ -48,10 +75,19 @@ public sealed class OpenScadRawNodeRenderer : IOpenScadNodeRenderer
     }
 }
 
+/// <summary>
+/// Provides open scad module call node renderer operations.
+/// </summary>
 public sealed class OpenScadModuleCallNodeRenderer(IOpenScadValueFormatter values) : IOpenScadNodeRenderer
 {
+    /// <summary>
+    /// Determines whether render.
+    /// </summary>
     public bool CanRender(OpenScadNode node) => string.Equals(node.Kind, "module_call", StringComparison.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// Runs the render operation.
+    /// </summary>
     public string Render(OpenScadNode node, OpenScadRenderContext context)
     {
         var name = values.Identifier(node.Parameters.GetValueOrDefault("name")?.Text ?? node.Name, "part");

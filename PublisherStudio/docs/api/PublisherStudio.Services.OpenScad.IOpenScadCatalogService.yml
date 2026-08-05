@@ -1,0 +1,277 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.OpenScad.IOpenScadCatalogService
+  commentId: T:PublisherStudio.Services.OpenScad.IOpenScadCatalogService
+  id: IOpenScadCatalogService
+  parent: PublisherStudio.Services.OpenScad
+  children:
+  - PublisherStudio.Services.OpenScad.IOpenScadCatalogService.Find(System.String)
+  - PublisherStudio.Services.OpenScad.IOpenScadCatalogService.GetDefinitions
+  langs:
+  - csharp
+  - vb
+  name: IOpenScadCatalogService
+  nameWithType: IOpenScadCatalogService
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadCatalogService
+  type: Interface
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OpenScad
+  summary: Defines the open scad catalog service contract.
+  example: []
+  syntax:
+    content: public interface IOpenScadCatalogService
+    content.vb: Public Interface IOpenScadCatalogService
+  derivedClasses:
+  - PublisherStudio.Services.OpenScad.OpenScadCatalogService
+- uid: PublisherStudio.Services.OpenScad.IOpenScadCatalogService.GetDefinitions
+  commentId: M:PublisherStudio.Services.OpenScad.IOpenScadCatalogService.GetDefinitions
+  id: GetDefinitions
+  parent: PublisherStudio.Services.OpenScad.IOpenScadCatalogService
+  langs:
+  - csharp
+  - vb
+  name: GetDefinitions()
+  nameWithType: IOpenScadCatalogService.GetDefinitions()
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadCatalogService.GetDefinitions()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OpenScad
+  syntax:
+    content: IReadOnlyList<OpenScadNodeDefinition> GetDefinitions()
+    return:
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.OpenScadNodeDefinition}
+    content.vb: Function GetDefinitions() As IReadOnlyList(Of OpenScadNodeDefinition)
+  overload: PublisherStudio.Services.OpenScad.IOpenScadCatalogService.GetDefinitions*
+- uid: PublisherStudio.Services.OpenScad.IOpenScadCatalogService.Find(System.String)
+  commentId: M:PublisherStudio.Services.OpenScad.IOpenScadCatalogService.Find(System.String)
+  id: Find(System.String)
+  parent: PublisherStudio.Services.OpenScad.IOpenScadCatalogService
+  langs:
+  - csharp
+  - vb
+  name: Find(string)
+  nameWithType: IOpenScadCatalogService.Find(string)
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadCatalogService.Find(string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OpenScad
+  syntax:
+    content: OpenScadNodeDefinition? Find(string kind)
+    parameters:
+    - id: kind
+      type: System.String
+    return:
+      type: PublisherStudio.BusinessObjects.OpenScadNodeDefinition
+    content.vb: Function Find(kind As String) As OpenScadNodeDefinition
+  overload: PublisherStudio.Services.OpenScad.IOpenScadCatalogService.Find*
+  nameWithType.vb: IOpenScadCatalogService.Find(String)
+  fullName.vb: PublisherStudio.Services.OpenScad.IOpenScadCatalogService.Find(String)
+  name.vb: Find(String)
+references:
+- uid: PublisherStudio.Services.OpenScad
+  commentId: N:PublisherStudio.Services.OpenScad
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.OpenScad
+  nameWithType: PublisherStudio.Services.OpenScad
+  fullName: PublisherStudio.Services.OpenScad
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OpenScad
+    name: OpenScad
+    isExternal: true
+    href: PublisherStudio.Services.OpenScad.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OpenScad
+    name: OpenScad
+    isExternal: true
+    href: PublisherStudio.Services.OpenScad.html
+- uid: PublisherStudio.Services.OpenScad.IOpenScadCatalogService.GetDefinitions*
+  commentId: Overload:PublisherStudio.Services.OpenScad.IOpenScadCatalogService.GetDefinitions
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.IOpenScadCatalogService.html#PublisherStudio_Services_OpenScad_IOpenScadCatalogService_GetDefinitions
+  name: GetDefinitions
+  nameWithType: IOpenScadCatalogService.GetDefinitions
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadCatalogService.GetDefinitions
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.OpenScadNodeDefinition}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.OpenScadNodeDefinition}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<OpenScadNodeDefinition>
+  nameWithType: IReadOnlyList<OpenScadNodeDefinition>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.OpenScadNodeDefinition>
+  nameWithType.vb: IReadOnlyList(Of OpenScadNodeDefinition)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.OpenScadNodeDefinition)
+  name.vb: IReadOnlyList(Of OpenScadNodeDefinition)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.OpenScadNodeDefinition
+    name: OpenScadNodeDefinition
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.OpenScadNodeDefinition.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.OpenScadNodeDefinition
+    name: OpenScadNodeDefinition
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.OpenScadNodeDefinition.html
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: PublisherStudio.Services.OpenScad.IOpenScadCatalogService.Find*
+  commentId: Overload:PublisherStudio.Services.OpenScad.IOpenScadCatalogService.Find
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.IOpenScadCatalogService.html#PublisherStudio_Services_OpenScad_IOpenScadCatalogService_Find_System_String_
+  name: Find
+  nameWithType: IOpenScadCatalogService.Find
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadCatalogService.Find
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.BusinessObjects.OpenScadNodeDefinition
+  commentId: T:PublisherStudio.BusinessObjects.OpenScadNodeDefinition
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OpenScadNodeDefinition.html
+  name: OpenScadNodeDefinition
+  nameWithType: OpenScadNodeDefinition
+  fullName: PublisherStudio.BusinessObjects.OpenScadNodeDefinition
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html

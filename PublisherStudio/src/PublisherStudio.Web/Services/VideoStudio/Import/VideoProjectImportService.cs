@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
@@ -19,8 +19,14 @@ public sealed class VideoProjectImportService(
     IPublisherRuntimePatternService runtimePatterns,
     ILogger<VideoProjectImportService> logger)
 {
+    /// <summary>
+    /// Gets supported extensions.
+    /// </summary>
     public IReadOnlyList<string> SupportedExtensions => runtimePolicy.GetCollection(PublisherRuntimeCollection.VideoProjectExtensions);
 
+    /// <summary>
+    /// Imports async.
+    /// </summary>
     public async Task<VideoProjectImportResult> ImportAsync(
         Stream source,
         string fileName,

@@ -1,7 +1,10 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace PublisherStudio.Services.Streaming.Hotkeys;
 
+/// <summary>
+/// Defines the windows hotkey native service contract.
+/// </summary>
 public interface IWindowsHotkeyNativeService
 {
     bool IsAvailable { get; }
@@ -12,22 +15,55 @@ public interface IWindowsHotkeyNativeService
     bool TryPostThreadMessage(uint threadId, uint message, UIntPtr wordParameter, IntPtr longParameter);
 }
 
+/// <summary>
+/// Represents a windows hotkey native message.
+/// </summary>
 [StructLayout(LayoutKind.Sequential)]
 public struct WindowsHotkeyNativeMessage
 {
+    /// <summary>
+    /// Stores window handle.
+    /// </summary>
     public IntPtr WindowHandle;
+    /// <summary>
+    /// Stores message.
+    /// </summary>
     public uint Message;
+    /// <summary>
+    /// Stores word parameter.
+    /// </summary>
     public UIntPtr WordParameter;
+    /// <summary>
+    /// Stores long parameter.
+    /// </summary>
     public IntPtr LongParameter;
+    /// <summary>
+    /// Stores time.
+    /// </summary>
     public uint Time;
+    /// <summary>
+    /// Stores point.
+    /// </summary>
     public WindowsHotkeyNativePoint Point;
+    /// <summary>
+    /// Stores private.
+    /// </summary>
     public uint Private;
 }
 
+/// <summary>
+/// Represents a windows hotkey native point.
+/// </summary>
 [StructLayout(LayoutKind.Sequential)]
 public struct WindowsHotkeyNativePoint
 {
+    /// <summary>
+    /// Stores horizontal position.
+    /// </summary>
     public int X;
+    /// <summary>
+    /// Stores vertical position.
+    /// </summary>
     public int Y;
 }
 
@@ -49,6 +85,9 @@ public sealed class WindowsHotkeyNativeService : IWindowsHotkeyNativeService, ID
     private GetCurrentThreadIdDelegate? getCurrentThreadId;
     private bool disposed;
 
+    /// <summary>
+    /// Runs the windows hotkey native service operation.
+    /// </summary>
     public WindowsHotkeyNativeService(ILogger<WindowsHotkeyNativeService> logger)
     {
         this.logger = logger;
@@ -78,8 +117,14 @@ public sealed class WindowsHotkeyNativeService : IWindowsHotkeyNativeService, ID
         }
     }
 
+    /// <summary>
+    /// Gets or sets is available.
+    /// </summary>
     public bool IsAvailable { get; private set; }
 
+    /// <summary>
+    /// Attempts to initialize message queue.
+    /// </summary>
     public bool TryInitializeMessageQueue(out uint threadId)
     {
         try
@@ -101,6 +146,9 @@ public sealed class WindowsHotkeyNativeService : IWindowsHotkeyNativeService, ID
         }
     }
 
+    /// <summary>
+    /// Attempts to register hot key.
+    /// </summary>
     public bool TryRegisterHotKey(IntPtr windowHandle, int id, uint modifiers, uint virtualKey)
     {
         try
@@ -119,6 +167,9 @@ public sealed class WindowsHotkeyNativeService : IWindowsHotkeyNativeService, ID
         }
     }
 
+    /// <summary>
+    /// Attempts to unregister hot key.
+    /// </summary>
     public bool TryUnregisterHotKey(IntPtr windowHandle, int id)
     {
         try
@@ -137,6 +188,9 @@ public sealed class WindowsHotkeyNativeService : IWindowsHotkeyNativeService, ID
         }
     }
 
+    /// <summary>
+    /// Reads message.
+    /// </summary>
     public int ReadMessage(out WindowsHotkeyNativeMessage message)
     {
         try
@@ -157,6 +211,9 @@ public sealed class WindowsHotkeyNativeService : IWindowsHotkeyNativeService, ID
         }
     }
 
+    /// <summary>
+    /// Attempts to post thread message.
+    /// </summary>
     public bool TryPostThreadMessage(uint threadId, uint message, UIntPtr wordParameter, IntPtr longParameter)
     {
         try
@@ -192,6 +249,9 @@ public sealed class WindowsHotkeyNativeService : IWindowsHotkeyNativeService, ID
         }
     }
 
+    /// <summary>
+    /// Runs the dispose operation.
+    /// </summary>
     public void Dispose()
     {
         try

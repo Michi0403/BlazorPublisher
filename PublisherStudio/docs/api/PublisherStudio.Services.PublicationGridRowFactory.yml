@@ -1,0 +1,661 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.PublicationGridRowFactory
+  commentId: T:PublisherStudio.Services.PublicationGridRowFactory
+  id: PublicationGridRowFactory
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.PublicationGridRowFactory.#ctor(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationGridRowFactory})
+  - PublisherStudio.Services.PublicationGridRowFactory.Create(PublisherStudio.BusinessObjects.PublicationDataRow,System.Collections.Generic.IReadOnlyList{System.String})
+  langs:
+  - csharp
+  - vb
+  name: PublicationGridRowFactory
+  nameWithType: PublicationGridRowFactory
+  fullName: PublisherStudio.Services.PublicationGridRowFactory
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Provides publication grid row factory operations.
+  example: []
+  syntax:
+    content: 'public sealed class PublicationGridRowFactory : IPublicationGridRowFactory'
+    content.vb: Public NotInheritable Class PublicationGridRowFactory Implements IPublicationGridRowFactory
+  inheritance:
+  - System.Object
+  implements:
+  - PublisherStudio.Services.IPublicationGridRowFactory
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.PublicationGridRowFactory.#ctor(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationGridRowFactory})
+  commentId: M:PublisherStudio.Services.PublicationGridRowFactory.#ctor(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationGridRowFactory})
+  id: '#ctor(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationGridRowFactory})'
+  parent: PublisherStudio.Services.PublicationGridRowFactory
+  langs:
+  - csharp
+  - vb
+  name: PublicationGridRowFactory(ILogger<PublicationGridRowFactory>)
+  nameWithType: PublicationGridRowFactory.PublicationGridRowFactory(ILogger<PublicationGridRowFactory>)
+  fullName: PublisherStudio.Services.PublicationGridRowFactory.PublicationGridRowFactory(Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.PublicationGridRowFactory>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Provides publication grid row factory operations.
+  example: []
+  syntax:
+    content: public PublicationGridRowFactory(ILogger<PublicationGridRowFactory> logger)
+    parameters:
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationGridRowFactory}
+    content.vb: Public Sub New(logger As ILogger(Of PublicationGridRowFactory))
+  overload: PublisherStudio.Services.PublicationGridRowFactory.#ctor*
+  nameWithType.vb: PublicationGridRowFactory.New(ILogger(Of PublicationGridRowFactory))
+  fullName.vb: PublisherStudio.Services.PublicationGridRowFactory.New(Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.PublicationGridRowFactory))
+  name.vb: New(ILogger(Of PublicationGridRowFactory))
+- uid: PublisherStudio.Services.PublicationGridRowFactory.Create(PublisherStudio.BusinessObjects.PublicationDataRow,System.Collections.Generic.IReadOnlyList{System.String})
+  commentId: M:PublisherStudio.Services.PublicationGridRowFactory.Create(PublisherStudio.BusinessObjects.PublicationDataRow,System.Collections.Generic.IReadOnlyList{System.String})
+  id: Create(PublisherStudio.BusinessObjects.PublicationDataRow,System.Collections.Generic.IReadOnlyList{System.String})
+  parent: PublisherStudio.Services.PublicationGridRowFactory
+  langs:
+  - csharp
+  - vb
+  name: Create(PublicationDataRow, IReadOnlyList<string>)
+  nameWithType: PublicationGridRowFactory.Create(PublicationDataRow, IReadOnlyList<string>)
+  fullName: PublisherStudio.Services.PublicationGridRowFactory.Create(PublisherStudio.BusinessObjects.PublicationDataRow, System.Collections.Generic.IReadOnlyList<string>)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the create operation.
+  example: []
+  syntax:
+    content: public PublicationGridRow Create(PublicationDataRow row, IReadOnlyList<string> columns)
+    parameters:
+    - id: row
+      type: PublisherStudio.BusinessObjects.PublicationDataRow
+    - id: columns
+      type: System.Collections.Generic.IReadOnlyList{System.String}
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationGridRow
+    content.vb: Public Function Create(row As PublicationDataRow, columns As IReadOnlyList(Of String)) As PublicationGridRow
+  overload: PublisherStudio.Services.PublicationGridRowFactory.Create*
+  implements:
+  - PublisherStudio.Services.IPublicationGridRowFactory.Create(PublisherStudio.BusinessObjects.PublicationDataRow,System.Collections.Generic.IReadOnlyList{System.String})
+  nameWithType.vb: PublicationGridRowFactory.Create(PublicationDataRow, IReadOnlyList(Of String))
+  fullName.vb: PublisherStudio.Services.PublicationGridRowFactory.Create(PublisherStudio.BusinessObjects.PublicationDataRow, System.Collections.Generic.IReadOnlyList(Of String))
+  name.vb: Create(PublicationDataRow, IReadOnlyList(Of String))
+references:
+- uid: PublisherStudio.Services
+  commentId: N:PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services
+  nameWithType: PublisherStudio.Services
+  fullName: PublisherStudio.Services
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: PublisherStudio.Services.IPublicationGridRowFactory
+  commentId: T:PublisherStudio.Services.IPublicationGridRowFactory
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.IPublicationGridRowFactory.html
+  name: IPublicationGridRowFactory
+  nameWithType: IPublicationGridRowFactory
+  fullName: PublisherStudio.Services.IPublicationGridRowFactory
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.PublicationGridRowFactory.#ctor*
+  commentId: Overload:PublisherStudio.Services.PublicationGridRowFactory.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.PublicationGridRowFactory.html#PublisherStudio_Services_PublicationGridRowFactory__ctor_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_PublicationGridRowFactory__
+  name: PublicationGridRowFactory
+  nameWithType: PublicationGridRowFactory.PublicationGridRowFactory
+  fullName: PublisherStudio.Services.PublicationGridRowFactory.PublicationGridRowFactory
+  nameWithType.vb: PublicationGridRowFactory.New
+  fullName.vb: PublisherStudio.Services.PublicationGridRowFactory.New
+  name.vb: New
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationGridRowFactory}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.PublicationGridRowFactory}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<PublicationGridRowFactory>
+  nameWithType: ILogger<PublicationGridRowFactory>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.PublicationGridRowFactory>
+  nameWithType.vb: ILogger(Of PublicationGridRowFactory)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.PublicationGridRowFactory)
+  name.vb: ILogger(Of PublicationGridRowFactory)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.PublicationGridRowFactory
+    name: PublicationGridRowFactory
+    isExternal: true
+    href: PublisherStudio.Services.PublicationGridRowFactory.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.PublicationGridRowFactory
+    name: PublicationGridRowFactory
+    isExternal: true
+    href: PublisherStudio.Services.PublicationGridRowFactory.html
+  - name: )
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: PublisherStudio.Services.PublicationGridRowFactory.Create*
+  commentId: Overload:PublisherStudio.Services.PublicationGridRowFactory.Create
+  isExternal: true
+  href: PublisherStudio.Services.PublicationGridRowFactory.html#PublisherStudio_Services_PublicationGridRowFactory_Create_PublisherStudio_BusinessObjects_PublicationDataRow_System_Collections_Generic_IReadOnlyList_System_String__
+  name: Create
+  nameWithType: PublicationGridRowFactory.Create
+  fullName: PublisherStudio.Services.PublicationGridRowFactory.Create
+- uid: PublisherStudio.Services.IPublicationGridRowFactory.Create(PublisherStudio.BusinessObjects.PublicationDataRow,System.Collections.Generic.IReadOnlyList{System.String})
+  commentId: M:PublisherStudio.Services.IPublicationGridRowFactory.Create(PublisherStudio.BusinessObjects.PublicationDataRow,System.Collections.Generic.IReadOnlyList{System.String})
+  parent: PublisherStudio.Services.IPublicationGridRowFactory
+  isExternal: true
+  href: PublisherStudio.Services.IPublicationGridRowFactory.html#PublisherStudio_Services_IPublicationGridRowFactory_Create_PublisherStudio_BusinessObjects_PublicationDataRow_System_Collections_Generic_IReadOnlyList_System_String__
+  name: Create(PublicationDataRow, IReadOnlyList<string>)
+  nameWithType: IPublicationGridRowFactory.Create(PublicationDataRow, IReadOnlyList<string>)
+  fullName: PublisherStudio.Services.IPublicationGridRowFactory.Create(PublisherStudio.BusinessObjects.PublicationDataRow, System.Collections.Generic.IReadOnlyList<string>)
+  nameWithType.vb: IPublicationGridRowFactory.Create(PublicationDataRow, IReadOnlyList(Of String))
+  fullName.vb: PublisherStudio.Services.IPublicationGridRowFactory.Create(PublisherStudio.BusinessObjects.PublicationDataRow, System.Collections.Generic.IReadOnlyList(Of String))
+  name.vb: Create(PublicationDataRow, IReadOnlyList(Of String))
+  spec.csharp:
+  - uid: PublisherStudio.Services.IPublicationGridRowFactory.Create(PublisherStudio.BusinessObjects.PublicationDataRow,System.Collections.Generic.IReadOnlyList{System.String})
+    name: Create
+    isExternal: true
+    href: PublisherStudio.Services.IPublicationGridRowFactory.html#PublisherStudio_Services_IPublicationGridRowFactory_Create_PublisherStudio_BusinessObjects_PublicationDataRow_System_Collections_Generic_IReadOnlyList_System_String__
+  - name: (
+  - uid: PublisherStudio.BusinessObjects.PublicationDataRow
+    name: PublicationDataRow
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublicationDataRow.html
+  - name: ','
+  - name: " "
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  - name: )
+  spec.vb:
+  - uid: PublisherStudio.Services.IPublicationGridRowFactory.Create(PublisherStudio.BusinessObjects.PublicationDataRow,System.Collections.Generic.IReadOnlyList{System.String})
+    name: Create
+    isExternal: true
+    href: PublisherStudio.Services.IPublicationGridRowFactory.html#PublisherStudio_Services_IPublicationGridRowFactory_Create_PublisherStudio_BusinessObjects_PublicationDataRow_System_Collections_Generic_IReadOnlyList_System_String__
+  - name: (
+  - uid: PublisherStudio.BusinessObjects.PublicationDataRow
+    name: PublicationDataRow
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublicationDataRow.html
+  - name: ','
+  - name: " "
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  - name: )
+- uid: PublisherStudio.BusinessObjects.PublicationDataRow
+  commentId: T:PublisherStudio.BusinessObjects.PublicationDataRow
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationDataRow.html
+  name: PublicationDataRow
+  nameWithType: PublicationDataRow
+  fullName: PublisherStudio.BusinessObjects.PublicationDataRow
+- uid: System.Collections.Generic.IReadOnlyList{System.String}
+  commentId: T:System.Collections.Generic.IReadOnlyList{System.String}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<string>
+  nameWithType: IReadOnlyList<string>
+  fullName: System.Collections.Generic.IReadOnlyList<string>
+  nameWithType.vb: IReadOnlyList(Of String)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of String)
+  name.vb: IReadOnlyList(Of String)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: PublisherStudio.BusinessObjects.PublicationGridRow
+  commentId: T:PublisherStudio.BusinessObjects.PublicationGridRow
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationGridRow.html
+  name: PublicationGridRow
+  nameWithType: PublicationGridRow
+  fullName: PublisherStudio.BusinessObjects.PublicationGridRow
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic

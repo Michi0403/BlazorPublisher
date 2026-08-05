@@ -1,0 +1,115 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationCaptureBackend
+  commentId: T:PublisherStudio.BusinessObjects.PublicationCaptureBackend
+  id: PublicationCaptureBackend
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationCaptureBackend.Auto
+  - PublisherStudio.BusinessObjects.PublicationCaptureBackend.Browser
+  - PublisherStudio.BusinessObjects.PublicationCaptureBackend.Native
+  langs:
+  - csharp
+  - vb
+  name: PublicationCaptureBackend
+  nameWithType: PublicationCaptureBackend
+  fullName: PublisherStudio.BusinessObjects.PublicationCaptureBackend
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication capture backend values.
+  example: []
+  syntax:
+    content: public enum PublicationCaptureBackend
+    content.vb: Public Enum PublicationCaptureBackend
+- uid: PublisherStudio.BusinessObjects.PublicationCaptureBackend.Auto
+  commentId: F:PublisherStudio.BusinessObjects.PublicationCaptureBackend.Auto
+  id: Auto
+  parent: PublisherStudio.BusinessObjects.PublicationCaptureBackend
+  langs:
+  - csharp
+  - vb
+  name: Auto
+  nameWithType: PublicationCaptureBackend.Auto
+  fullName: PublisherStudio.BusinessObjects.PublicationCaptureBackend.Auto
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Auto = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationCaptureBackend
+- uid: PublisherStudio.BusinessObjects.PublicationCaptureBackend.Browser
+  commentId: F:PublisherStudio.BusinessObjects.PublicationCaptureBackend.Browser
+  id: Browser
+  parent: PublisherStudio.BusinessObjects.PublicationCaptureBackend
+  langs:
+  - csharp
+  - vb
+  name: Browser
+  nameWithType: PublicationCaptureBackend.Browser
+  fullName: PublisherStudio.BusinessObjects.PublicationCaptureBackend.Browser
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Browser = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationCaptureBackend
+- uid: PublisherStudio.BusinessObjects.PublicationCaptureBackend.Native
+  commentId: F:PublisherStudio.BusinessObjects.PublicationCaptureBackend.Native
+  id: Native
+  parent: PublisherStudio.BusinessObjects.PublicationCaptureBackend
+  langs:
+  - csharp
+  - vb
+  name: Native
+  nameWithType: PublicationCaptureBackend.Native
+  fullName: PublisherStudio.BusinessObjects.PublicationCaptureBackend.Native
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Native = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationCaptureBackend
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationCaptureBackend
+  commentId: T:PublisherStudio.BusinessObjects.PublicationCaptureBackend
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationCaptureBackend.html
+  name: PublicationCaptureBackend
+  nameWithType: PublicationCaptureBackend
+  fullName: PublisherStudio.BusinessObjects.PublicationCaptureBackend

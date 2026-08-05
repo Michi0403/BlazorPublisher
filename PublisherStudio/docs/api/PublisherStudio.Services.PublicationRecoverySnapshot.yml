@@ -1,0 +1,896 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot
+  commentId: T:PublisherStudio.Services.PublicationRecoverySnapshot
+  id: PublicationRecoverySnapshot
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.PublicationRecoverySnapshot.#ctor(System.Guid,System.String,System.DateTimeOffset,System.DateTimeOffset,System.String)
+  - PublisherStudio.Services.PublicationRecoverySnapshot.Deconstruct(System.Guid@,System.String@,System.DateTimeOffset@,System.DateTimeOffset@,System.String@)
+  - PublisherStudio.Services.PublicationRecoverySnapshot.DocumentId
+  - PublisherStudio.Services.PublicationRecoverySnapshot.DocumentName
+  - PublisherStudio.Services.PublicationRecoverySnapshot.Equals(PublisherStudio.Services.PublicationRecoverySnapshot)
+  - PublisherStudio.Services.PublicationRecoverySnapshot.Equals(System.Object)
+  - PublisherStudio.Services.PublicationRecoverySnapshot.GetHashCode
+  - PublisherStudio.Services.PublicationRecoverySnapshot.Json
+  - PublisherStudio.Services.PublicationRecoverySnapshot.ModifiedUtc
+  - PublisherStudio.Services.PublicationRecoverySnapshot.SavedUtc
+  - PublisherStudio.Services.PublicationRecoverySnapshot.ToString
+  - PublisherStudio.Services.PublicationRecoverySnapshot.op_Equality(PublisherStudio.Services.PublicationRecoverySnapshot,PublisherStudio.Services.PublicationRecoverySnapshot)
+  - PublisherStudio.Services.PublicationRecoverySnapshot.op_Inequality(PublisherStudio.Services.PublicationRecoverySnapshot,PublisherStudio.Services.PublicationRecoverySnapshot)
+  langs:
+  - csharp
+  - vb
+  name: PublicationRecoverySnapshot
+  nameWithType: PublicationRecoverySnapshot
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Represents a publication recovery snapshot.
+  example: []
+  syntax:
+    content: 'public sealed record PublicationRecoverySnapshot : IEquatable<PublicationRecoverySnapshot>'
+    content.vb: Public NotInheritable Class PublicationRecoverySnapshot Implements IEquatable(Of PublicationRecoverySnapshot)
+  inheritance:
+  - System.Object
+  implements:
+  - System.IEquatable{PublisherStudio.Services.PublicationRecoverySnapshot}
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.#ctor(System.Guid,System.String,System.DateTimeOffset,System.DateTimeOffset,System.String)
+  commentId: M:PublisherStudio.Services.PublicationRecoverySnapshot.#ctor(System.Guid,System.String,System.DateTimeOffset,System.DateTimeOffset,System.String)
+  id: '#ctor(System.Guid,System.String,System.DateTimeOffset,System.DateTimeOffset,System.String)'
+  parent: PublisherStudio.Services.PublicationRecoverySnapshot
+  langs:
+  - csharp
+  - vb
+  name: PublicationRecoverySnapshot(Guid, string, DateTimeOffset, DateTimeOffset, string)
+  nameWithType: PublicationRecoverySnapshot.PublicationRecoverySnapshot(Guid, string, DateTimeOffset, DateTimeOffset, string)
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.PublicationRecoverySnapshot(System.Guid, string, System.DateTimeOffset, System.DateTimeOffset, string)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Represents a publication recovery snapshot.
+  example: []
+  syntax:
+    content: public PublicationRecoverySnapshot(Guid DocumentId, string DocumentName, DateTimeOffset ModifiedUtc, DateTimeOffset SavedUtc, string Json)
+    parameters:
+    - id: DocumentId
+      type: System.Guid
+    - id: DocumentName
+      type: System.String
+    - id: ModifiedUtc
+      type: System.DateTimeOffset
+    - id: SavedUtc
+      type: System.DateTimeOffset
+    - id: Json
+      type: System.String
+    content.vb: Public Sub New(DocumentId As Guid, DocumentName As String, ModifiedUtc As DateTimeOffset, SavedUtc As DateTimeOffset, Json As String)
+  overload: PublisherStudio.Services.PublicationRecoverySnapshot.#ctor*
+  nameWithType.vb: PublicationRecoverySnapshot.New(Guid, String, DateTimeOffset, DateTimeOffset, String)
+  fullName.vb: PublisherStudio.Services.PublicationRecoverySnapshot.New(System.Guid, String, System.DateTimeOffset, System.DateTimeOffset, String)
+  name.vb: New(Guid, String, DateTimeOffset, DateTimeOffset, String)
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.ToString
+  commentId: M:PublisherStudio.Services.PublicationRecoverySnapshot.ToString
+  id: ToString
+  parent: PublisherStudio.Services.PublicationRecoverySnapshot
+  langs:
+  - csharp
+  - vb
+  name: ToString()
+  nameWithType: PublicationRecoverySnapshot.ToString()
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.ToString()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  example: []
+  syntax:
+    content: public override string ToString()
+    return:
+      type: System.String
+    content.vb: Public Overrides Function ToString() As String
+  overridden: System.Object.ToString
+  overload: PublisherStudio.Services.PublicationRecoverySnapshot.ToString*
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.op_Inequality(PublisherStudio.Services.PublicationRecoverySnapshot,PublisherStudio.Services.PublicationRecoverySnapshot)
+  commentId: M:PublisherStudio.Services.PublicationRecoverySnapshot.op_Inequality(PublisherStudio.Services.PublicationRecoverySnapshot,PublisherStudio.Services.PublicationRecoverySnapshot)
+  id: op_Inequality(PublisherStudio.Services.PublicationRecoverySnapshot,PublisherStudio.Services.PublicationRecoverySnapshot)
+  parent: PublisherStudio.Services.PublicationRecoverySnapshot
+  langs:
+  - csharp
+  - vb
+  name: operator !=(PublicationRecoverySnapshot?, PublicationRecoverySnapshot?)
+  nameWithType: PublicationRecoverySnapshot.operator !=(PublicationRecoverySnapshot?, PublicationRecoverySnapshot?)
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.operator !=(PublisherStudio.Services.PublicationRecoverySnapshot?, PublisherStudio.Services.PublicationRecoverySnapshot?)
+  type: Operator
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public static bool operator !=(PublicationRecoverySnapshot? left, PublicationRecoverySnapshot? right)
+    parameters:
+    - id: left
+      type: PublisherStudio.Services.PublicationRecoverySnapshot
+    - id: right
+      type: PublisherStudio.Services.PublicationRecoverySnapshot
+    return:
+      type: System.Boolean
+    content.vb: Public Shared Operator <>(left As PublicationRecoverySnapshot, right As PublicationRecoverySnapshot) As Boolean
+  overload: PublisherStudio.Services.PublicationRecoverySnapshot.op_Inequality*
+  nameWithType.vb: PublicationRecoverySnapshot.<>(PublicationRecoverySnapshot, PublicationRecoverySnapshot)
+  fullName.vb: PublisherStudio.Services.PublicationRecoverySnapshot.<>(PublisherStudio.Services.PublicationRecoverySnapshot, PublisherStudio.Services.PublicationRecoverySnapshot)
+  name.vb: <>(PublicationRecoverySnapshot, PublicationRecoverySnapshot)
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.op_Equality(PublisherStudio.Services.PublicationRecoverySnapshot,PublisherStudio.Services.PublicationRecoverySnapshot)
+  commentId: M:PublisherStudio.Services.PublicationRecoverySnapshot.op_Equality(PublisherStudio.Services.PublicationRecoverySnapshot,PublisherStudio.Services.PublicationRecoverySnapshot)
+  id: op_Equality(PublisherStudio.Services.PublicationRecoverySnapshot,PublisherStudio.Services.PublicationRecoverySnapshot)
+  parent: PublisherStudio.Services.PublicationRecoverySnapshot
+  langs:
+  - csharp
+  - vb
+  name: operator ==(PublicationRecoverySnapshot?, PublicationRecoverySnapshot?)
+  nameWithType: PublicationRecoverySnapshot.operator ==(PublicationRecoverySnapshot?, PublicationRecoverySnapshot?)
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.operator ==(PublisherStudio.Services.PublicationRecoverySnapshot?, PublisherStudio.Services.PublicationRecoverySnapshot?)
+  type: Operator
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public static bool operator ==(PublicationRecoverySnapshot? left, PublicationRecoverySnapshot? right)
+    parameters:
+    - id: left
+      type: PublisherStudio.Services.PublicationRecoverySnapshot
+    - id: right
+      type: PublisherStudio.Services.PublicationRecoverySnapshot
+    return:
+      type: System.Boolean
+    content.vb: Public Shared Operator =(left As PublicationRecoverySnapshot, right As PublicationRecoverySnapshot) As Boolean
+  overload: PublisherStudio.Services.PublicationRecoverySnapshot.op_Equality*
+  nameWithType.vb: PublicationRecoverySnapshot.=(PublicationRecoverySnapshot, PublicationRecoverySnapshot)
+  fullName.vb: PublisherStudio.Services.PublicationRecoverySnapshot.=(PublisherStudio.Services.PublicationRecoverySnapshot, PublisherStudio.Services.PublicationRecoverySnapshot)
+  name.vb: =(PublicationRecoverySnapshot, PublicationRecoverySnapshot)
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.GetHashCode
+  commentId: M:PublisherStudio.Services.PublicationRecoverySnapshot.GetHashCode
+  id: GetHashCode
+  parent: PublisherStudio.Services.PublicationRecoverySnapshot
+  langs:
+  - csharp
+  - vb
+  name: GetHashCode()
+  nameWithType: PublicationRecoverySnapshot.GetHashCode()
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.GetHashCode()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  example: []
+  syntax:
+    content: public override int GetHashCode()
+    return:
+      type: System.Int32
+    content.vb: Public Overrides Function GetHashCode() As Integer
+  overridden: System.Object.GetHashCode
+  overload: PublisherStudio.Services.PublicationRecoverySnapshot.GetHashCode*
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.Equals(System.Object)
+  commentId: M:PublisherStudio.Services.PublicationRecoverySnapshot.Equals(System.Object)
+  id: Equals(System.Object)
+  parent: PublisherStudio.Services.PublicationRecoverySnapshot
+  langs:
+  - csharp
+  - vb
+  name: Equals(object?)
+  nameWithType: PublicationRecoverySnapshot.Equals(object?)
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.Equals(object?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  example: []
+  syntax:
+    content: public override bool Equals(object? obj)
+    parameters:
+    - id: obj
+      type: System.Object
+    return:
+      type: System.Boolean
+    content.vb: Public Overrides Function Equals(obj As Object) As Boolean
+  overridden: System.Object.Equals(System.Object)
+  overload: PublisherStudio.Services.PublicationRecoverySnapshot.Equals*
+  nameWithType.vb: PublicationRecoverySnapshot.Equals(Object)
+  fullName.vb: PublisherStudio.Services.PublicationRecoverySnapshot.Equals(Object)
+  name.vb: Equals(Object)
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.Equals(PublisherStudio.Services.PublicationRecoverySnapshot)
+  commentId: M:PublisherStudio.Services.PublicationRecoverySnapshot.Equals(PublisherStudio.Services.PublicationRecoverySnapshot)
+  id: Equals(PublisherStudio.Services.PublicationRecoverySnapshot)
+  parent: PublisherStudio.Services.PublicationRecoverySnapshot
+  langs:
+  - csharp
+  - vb
+  name: Equals(PublicationRecoverySnapshot?)
+  nameWithType: PublicationRecoverySnapshot.Equals(PublicationRecoverySnapshot?)
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.Equals(PublisherStudio.Services.PublicationRecoverySnapshot?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  example: []
+  syntax:
+    content: public bool Equals(PublicationRecoverySnapshot? other)
+    parameters:
+    - id: other
+      type: PublisherStudio.Services.PublicationRecoverySnapshot
+    return:
+      type: System.Boolean
+    content.vb: Public Function Equals(other As PublicationRecoverySnapshot) As Boolean
+  overload: PublisherStudio.Services.PublicationRecoverySnapshot.Equals*
+  implements:
+  - System.IEquatable{PublisherStudio.Services.PublicationRecoverySnapshot}.Equals(PublisherStudio.Services.PublicationRecoverySnapshot)
+  nameWithType.vb: PublicationRecoverySnapshot.Equals(PublicationRecoverySnapshot)
+  fullName.vb: PublisherStudio.Services.PublicationRecoverySnapshot.Equals(PublisherStudio.Services.PublicationRecoverySnapshot)
+  name.vb: Equals(PublicationRecoverySnapshot)
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.Deconstruct(System.Guid@,System.String@,System.DateTimeOffset@,System.DateTimeOffset@,System.String@)
+  commentId: M:PublisherStudio.Services.PublicationRecoverySnapshot.Deconstruct(System.Guid@,System.String@,System.DateTimeOffset@,System.DateTimeOffset@,System.String@)
+  id: Deconstruct(System.Guid@,System.String@,System.DateTimeOffset@,System.DateTimeOffset@,System.String@)
+  parent: PublisherStudio.Services.PublicationRecoverySnapshot
+  langs:
+  - csharp
+  - vb
+  name: Deconstruct(out Guid, out string, out DateTimeOffset, out DateTimeOffset, out string)
+  nameWithType: PublicationRecoverySnapshot.Deconstruct(out Guid, out string, out DateTimeOffset, out DateTimeOffset, out string)
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.Deconstruct(out System.Guid, out string, out System.DateTimeOffset, out System.DateTimeOffset, out string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public void Deconstruct(out Guid DocumentId, out string DocumentName, out DateTimeOffset ModifiedUtc, out DateTimeOffset SavedUtc, out string Json)
+    parameters:
+    - id: DocumentId
+      type: System.Guid
+    - id: DocumentName
+      type: System.String
+    - id: ModifiedUtc
+      type: System.DateTimeOffset
+    - id: SavedUtc
+      type: System.DateTimeOffset
+    - id: Json
+      type: System.String
+    content.vb: Public Sub Deconstruct(DocumentId As Guid, DocumentName As String, ModifiedUtc As DateTimeOffset, SavedUtc As DateTimeOffset, Json As String)
+  overload: PublisherStudio.Services.PublicationRecoverySnapshot.Deconstruct*
+  nameWithType.vb: PublicationRecoverySnapshot.Deconstruct(Guid, String, DateTimeOffset, DateTimeOffset, String)
+  fullName.vb: PublisherStudio.Services.PublicationRecoverySnapshot.Deconstruct(System.Guid, String, System.DateTimeOffset, System.DateTimeOffset, String)
+  name.vb: Deconstruct(Guid, String, DateTimeOffset, DateTimeOffset, String)
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.DocumentId
+  commentId: P:PublisherStudio.Services.PublicationRecoverySnapshot.DocumentId
+  id: DocumentId
+  parent: PublisherStudio.Services.PublicationRecoverySnapshot
+  langs:
+  - csharp
+  - vb
+  name: DocumentId
+  nameWithType: PublicationRecoverySnapshot.DocumentId
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.DocumentId
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public Guid DocumentId { get; init; }
+    parameters: []
+    return:
+      type: System.Guid
+    content.vb: Public Property DocumentId As Guid
+  overload: PublisherStudio.Services.PublicationRecoverySnapshot.DocumentId*
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.DocumentName
+  commentId: P:PublisherStudio.Services.PublicationRecoverySnapshot.DocumentName
+  id: DocumentName
+  parent: PublisherStudio.Services.PublicationRecoverySnapshot
+  langs:
+  - csharp
+  - vb
+  name: DocumentName
+  nameWithType: PublicationRecoverySnapshot.DocumentName
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.DocumentName
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public string DocumentName { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property DocumentName As String
+  overload: PublisherStudio.Services.PublicationRecoverySnapshot.DocumentName*
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.ModifiedUtc
+  commentId: P:PublisherStudio.Services.PublicationRecoverySnapshot.ModifiedUtc
+  id: ModifiedUtc
+  parent: PublisherStudio.Services.PublicationRecoverySnapshot
+  langs:
+  - csharp
+  - vb
+  name: ModifiedUtc
+  nameWithType: PublicationRecoverySnapshot.ModifiedUtc
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.ModifiedUtc
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public DateTimeOffset ModifiedUtc { get; init; }
+    parameters: []
+    return:
+      type: System.DateTimeOffset
+    content.vb: Public Property ModifiedUtc As DateTimeOffset
+  overload: PublisherStudio.Services.PublicationRecoverySnapshot.ModifiedUtc*
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.SavedUtc
+  commentId: P:PublisherStudio.Services.PublicationRecoverySnapshot.SavedUtc
+  id: SavedUtc
+  parent: PublisherStudio.Services.PublicationRecoverySnapshot
+  langs:
+  - csharp
+  - vb
+  name: SavedUtc
+  nameWithType: PublicationRecoverySnapshot.SavedUtc
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.SavedUtc
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public DateTimeOffset SavedUtc { get; init; }
+    parameters: []
+    return:
+      type: System.DateTimeOffset
+    content.vb: Public Property SavedUtc As DateTimeOffset
+  overload: PublisherStudio.Services.PublicationRecoverySnapshot.SavedUtc*
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.Json
+  commentId: P:PublisherStudio.Services.PublicationRecoverySnapshot.Json
+  id: Json
+  parent: PublisherStudio.Services.PublicationRecoverySnapshot
+  langs:
+  - csharp
+  - vb
+  name: Json
+  nameWithType: PublicationRecoverySnapshot.Json
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.Json
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public string Json { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Json As String
+  overload: PublisherStudio.Services.PublicationRecoverySnapshot.Json*
+references:
+- uid: PublisherStudio.Services
+  commentId: N:PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services
+  nameWithType: PublisherStudio.Services
+  fullName: PublisherStudio.Services
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.IEquatable{PublisherStudio.Services.PublicationRecoverySnapshot}
+  commentId: T:System.IEquatable{PublisherStudio.Services.PublicationRecoverySnapshot}
+  parent: System
+  definition: System.IEquatable`1
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<PublicationRecoverySnapshot>
+  nameWithType: IEquatable<PublicationRecoverySnapshot>
+  fullName: System.IEquatable<PublisherStudio.Services.PublicationRecoverySnapshot>
+  nameWithType.vb: IEquatable(Of PublicationRecoverySnapshot)
+  fullName.vb: System.IEquatable(Of PublisherStudio.Services.PublicationRecoverySnapshot)
+  name.vb: IEquatable(Of PublicationRecoverySnapshot)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - uid: PublisherStudio.Services.PublicationRecoverySnapshot
+    name: PublicationRecoverySnapshot
+    isExternal: true
+    href: PublisherStudio.Services.PublicationRecoverySnapshot.html
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.PublicationRecoverySnapshot
+    name: PublicationRecoverySnapshot
+    isExternal: true
+    href: PublisherStudio.Services.PublicationRecoverySnapshot.html
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: System.IEquatable`1
+  commentId: T:System.IEquatable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<T>
+  nameWithType: IEquatable<T>
+  fullName: System.IEquatable<T>
+  nameWithType.vb: IEquatable(Of T)
+  fullName.vb: System.IEquatable(Of T)
+  name.vb: IEquatable(Of T)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.#ctor*
+  commentId: Overload:PublisherStudio.Services.PublicationRecoverySnapshot.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.PublicationRecoverySnapshot.html#PublisherStudio_Services_PublicationRecoverySnapshot__ctor_System_Guid_System_String_System_DateTimeOffset_System_DateTimeOffset_System_String_
+  name: PublicationRecoverySnapshot
+  nameWithType: PublicationRecoverySnapshot.PublicationRecoverySnapshot
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.PublicationRecoverySnapshot
+  nameWithType.vb: PublicationRecoverySnapshot.New
+  fullName.vb: PublisherStudio.Services.PublicationRecoverySnapshot.New
+  name.vb: New
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System.DateTimeOffset
+  commentId: T:System.DateTimeOffset
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.datetimeoffset
+  name: DateTimeOffset
+  nameWithType: DateTimeOffset
+  fullName: System.DateTimeOffset
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.ToString*
+  commentId: Overload:PublisherStudio.Services.PublicationRecoverySnapshot.ToString
+  isExternal: true
+  href: PublisherStudio.Services.PublicationRecoverySnapshot.html#PublisherStudio_Services_PublicationRecoverySnapshot_ToString
+  name: ToString
+  nameWithType: PublicationRecoverySnapshot.ToString
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.ToString
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.op_Inequality*
+  commentId: Overload:PublisherStudio.Services.PublicationRecoverySnapshot.op_Inequality
+  isExternal: true
+  href: PublisherStudio.Services.PublicationRecoverySnapshot.html#PublisherStudio_Services_PublicationRecoverySnapshot_op_Inequality_PublisherStudio_Services_PublicationRecoverySnapshot_PublisherStudio_Services_PublicationRecoverySnapshot_
+  name: operator !=
+  nameWithType: PublicationRecoverySnapshot.operator !=
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.operator !=
+  nameWithType.vb: PublicationRecoverySnapshot.<>
+  fullName.vb: PublisherStudio.Services.PublicationRecoverySnapshot.<>
+  name.vb: <>
+  spec.csharp:
+  - name: operator
+  - name: " "
+  - uid: PublisherStudio.Services.PublicationRecoverySnapshot.op_Inequality*
+    name: '!='
+    isExternal: true
+    href: PublisherStudio.Services.PublicationRecoverySnapshot.html#PublisherStudio_Services_PublicationRecoverySnapshot_op_Inequality_PublisherStudio_Services_PublicationRecoverySnapshot_PublisherStudio_Services_PublicationRecoverySnapshot_
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot
+  commentId: T:PublisherStudio.Services.PublicationRecoverySnapshot
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.PublicationRecoverySnapshot.html
+  name: PublicationRecoverySnapshot
+  nameWithType: PublicationRecoverySnapshot
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.op_Equality*
+  commentId: Overload:PublisherStudio.Services.PublicationRecoverySnapshot.op_Equality
+  isExternal: true
+  href: PublisherStudio.Services.PublicationRecoverySnapshot.html#PublisherStudio_Services_PublicationRecoverySnapshot_op_Equality_PublisherStudio_Services_PublicationRecoverySnapshot_PublisherStudio_Services_PublicationRecoverySnapshot_
+  name: operator ==
+  nameWithType: PublicationRecoverySnapshot.operator ==
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.operator ==
+  nameWithType.vb: PublicationRecoverySnapshot.=
+  fullName.vb: PublisherStudio.Services.PublicationRecoverySnapshot.=
+  name.vb: =
+  spec.csharp:
+  - name: operator
+  - name: " "
+  - uid: PublisherStudio.Services.PublicationRecoverySnapshot.op_Equality*
+    name: ==
+    isExternal: true
+    href: PublisherStudio.Services.PublicationRecoverySnapshot.html#PublisherStudio_Services_PublicationRecoverySnapshot_op_Equality_PublisherStudio_Services_PublicationRecoverySnapshot_PublisherStudio_Services_PublicationRecoverySnapshot_
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.GetHashCode*
+  commentId: Overload:PublisherStudio.Services.PublicationRecoverySnapshot.GetHashCode
+  isExternal: true
+  href: PublisherStudio.Services.PublicationRecoverySnapshot.html#PublisherStudio_Services_PublicationRecoverySnapshot_GetHashCode
+  name: GetHashCode
+  nameWithType: PublicationRecoverySnapshot.GetHashCode
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.GetHashCode
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.Equals*
+  commentId: Overload:PublisherStudio.Services.PublicationRecoverySnapshot.Equals
+  isExternal: true
+  href: PublisherStudio.Services.PublicationRecoverySnapshot.html#PublisherStudio_Services_PublicationRecoverySnapshot_Equals_System_Object_
+  name: Equals
+  nameWithType: PublicationRecoverySnapshot.Equals
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.Equals
+- uid: System.IEquatable{PublisherStudio.Services.PublicationRecoverySnapshot}.Equals(PublisherStudio.Services.PublicationRecoverySnapshot)
+  commentId: M:System.IEquatable{PublisherStudio.Services.PublicationRecoverySnapshot}.Equals(PublisherStudio.Services.PublicationRecoverySnapshot)
+  parent: System.IEquatable{PublisherStudio.Services.PublicationRecoverySnapshot}
+  definition: System.IEquatable`1.Equals(`0)
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  name: Equals(PublicationRecoverySnapshot)
+  nameWithType: IEquatable<PublicationRecoverySnapshot>.Equals(PublicationRecoverySnapshot)
+  fullName: System.IEquatable<PublisherStudio.Services.PublicationRecoverySnapshot>.Equals(PublisherStudio.Services.PublicationRecoverySnapshot)
+  nameWithType.vb: IEquatable(Of PublicationRecoverySnapshot).Equals(PublicationRecoverySnapshot)
+  fullName.vb: System.IEquatable(Of PublisherStudio.Services.PublicationRecoverySnapshot).Equals(PublisherStudio.Services.PublicationRecoverySnapshot)
+  spec.csharp:
+  - uid: System.IEquatable{PublisherStudio.Services.PublicationRecoverySnapshot}.Equals(PublisherStudio.Services.PublicationRecoverySnapshot)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - uid: PublisherStudio.Services.PublicationRecoverySnapshot
+    name: PublicationRecoverySnapshot
+    isExternal: true
+    href: PublisherStudio.Services.PublicationRecoverySnapshot.html
+  - name: )
+  spec.vb:
+  - uid: System.IEquatable{PublisherStudio.Services.PublicationRecoverySnapshot}.Equals(PublisherStudio.Services.PublicationRecoverySnapshot)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - uid: PublisherStudio.Services.PublicationRecoverySnapshot
+    name: PublicationRecoverySnapshot
+    isExternal: true
+    href: PublisherStudio.Services.PublicationRecoverySnapshot.html
+  - name: )
+- uid: System.IEquatable`1.Equals(`0)
+  commentId: M:System.IEquatable`1.Equals(`0)
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  name: Equals(T)
+  nameWithType: IEquatable<T>.Equals(T)
+  fullName: System.IEquatable<T>.Equals(T)
+  nameWithType.vb: IEquatable(Of T).Equals(T)
+  fullName.vb: System.IEquatable(Of T).Equals(T)
+  spec.csharp:
+  - uid: System.IEquatable`1.Equals(`0)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - name: T
+  - name: )
+  spec.vb:
+  - uid: System.IEquatable`1.Equals(`0)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - name: T
+  - name: )
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.Deconstruct*
+  commentId: Overload:PublisherStudio.Services.PublicationRecoverySnapshot.Deconstruct
+  isExternal: true
+  href: PublisherStudio.Services.PublicationRecoverySnapshot.html#PublisherStudio_Services_PublicationRecoverySnapshot_Deconstruct_System_Guid__System_String__System_DateTimeOffset__System_DateTimeOffset__System_String__
+  name: Deconstruct
+  nameWithType: PublicationRecoverySnapshot.Deconstruct
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.Deconstruct
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.DocumentId*
+  commentId: Overload:PublisherStudio.Services.PublicationRecoverySnapshot.DocumentId
+  isExternal: true
+  href: PublisherStudio.Services.PublicationRecoverySnapshot.html#PublisherStudio_Services_PublicationRecoverySnapshot_DocumentId
+  name: DocumentId
+  nameWithType: PublicationRecoverySnapshot.DocumentId
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.DocumentId
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.DocumentName*
+  commentId: Overload:PublisherStudio.Services.PublicationRecoverySnapshot.DocumentName
+  isExternal: true
+  href: PublisherStudio.Services.PublicationRecoverySnapshot.html#PublisherStudio_Services_PublicationRecoverySnapshot_DocumentName
+  name: DocumentName
+  nameWithType: PublicationRecoverySnapshot.DocumentName
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.DocumentName
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.ModifiedUtc*
+  commentId: Overload:PublisherStudio.Services.PublicationRecoverySnapshot.ModifiedUtc
+  isExternal: true
+  href: PublisherStudio.Services.PublicationRecoverySnapshot.html#PublisherStudio_Services_PublicationRecoverySnapshot_ModifiedUtc
+  name: ModifiedUtc
+  nameWithType: PublicationRecoverySnapshot.ModifiedUtc
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.ModifiedUtc
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.SavedUtc*
+  commentId: Overload:PublisherStudio.Services.PublicationRecoverySnapshot.SavedUtc
+  isExternal: true
+  href: PublisherStudio.Services.PublicationRecoverySnapshot.html#PublisherStudio_Services_PublicationRecoverySnapshot_SavedUtc
+  name: SavedUtc
+  nameWithType: PublicationRecoverySnapshot.SavedUtc
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.SavedUtc
+- uid: PublisherStudio.Services.PublicationRecoverySnapshot.Json*
+  commentId: Overload:PublisherStudio.Services.PublicationRecoverySnapshot.Json
+  isExternal: true
+  href: PublisherStudio.Services.PublicationRecoverySnapshot.html#PublisherStudio_Services_PublicationRecoverySnapshot_Json
+  name: Json
+  nameWithType: PublicationRecoverySnapshot.Json
+  fullName: PublisherStudio.Services.PublicationRecoverySnapshot.Json

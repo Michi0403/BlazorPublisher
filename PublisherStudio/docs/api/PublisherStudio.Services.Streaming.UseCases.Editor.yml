@@ -1,0 +1,25 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Streaming.UseCases.Editor
+  commentId: N:PublisherStudio.Services.Streaming.UseCases.Editor
+  id: Editor
+  parent: PublisherStudio.Services.Streaming.UseCases
+  children:
+  - PublisherStudio.Services.Streaming.UseCases.Editor.StreamingSessionService
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.Services.Streaming.UseCases.Editor
+  nameWithType: PublisherStudio.Services.Streaming.UseCases.Editor
+  fullName: PublisherStudio.Services.Streaming.UseCases.Editor
+  type: Namespace
+  assemblies:
+  - PublisherStudio.Web
+references:
+- uid: PublisherStudio.Services.Streaming.UseCases.Editor.StreamingSessionService
+  commentId: T:PublisherStudio.Services.Streaming.UseCases.Editor.StreamingSessionService
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Editor.StreamingSessionService.html
+  name: StreamingSessionService
+  nameWithType: StreamingSessionService
+  fullName: PublisherStudio.Services.Streaming.UseCases.Editor.StreamingSessionService

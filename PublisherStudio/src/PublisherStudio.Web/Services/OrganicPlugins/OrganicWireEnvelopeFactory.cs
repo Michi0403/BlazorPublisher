@@ -1,12 +1,18 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 using System.Text.Json;
 
 namespace PublisherStudio.Services.OrganicPlugins;
 
+/// <summary>
+/// Provides organic wire envelope factory operations.
+/// </summary>
 public sealed class OrganicWireEnvelopeFactory(
     IOrganicPluginProtocolCodec codec,
     ILogger<OrganicWireEnvelopeFactory> logger) : IOrganicWireEnvelopeFactory
 {
+    /// <summary>
+    /// Creates work envelope.
+    /// </summary>
     public OrganicWireEnvelope CreateWorkEnvelope(OrganicPluginWorkItem item, string sourcePeerId)
     {
         try

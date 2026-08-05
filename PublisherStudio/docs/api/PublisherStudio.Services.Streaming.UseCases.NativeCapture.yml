@@ -1,0 +1,83 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Streaming.UseCases.NativeCapture
+  commentId: N:PublisherStudio.Services.Streaming.UseCases.NativeCapture
+  id: NativeCapture
+  parent: PublisherStudio.Services.Streaming.UseCases
+  children:
+  - PublisherStudio.Services.Streaming.UseCases.NativeCapture.NativeCaptureUseCases
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.Services.Streaming.UseCases.NativeCapture
+  nameWithType: PublisherStudio.Services.Streaming.UseCases.NativeCapture
+  fullName: PublisherStudio.Services.Streaming.UseCases.NativeCapture
+  type: Namespace
+  assemblies:
+  - PublisherStudio.Web
+references:
+- uid: PublisherStudio.Services.Streaming.UseCases.NativeCapture.NativeCaptureUseCases
+  commentId: T:PublisherStudio.Services.Streaming.UseCases.NativeCapture.NativeCaptureUseCases
+  parent: PublisherStudio.Services.Streaming.UseCases.NativeCapture
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.NativeCapture.NativeCaptureUseCases.html
+  name: NativeCaptureUseCases
+  nameWithType: NativeCaptureUseCases
+  fullName: PublisherStudio.Services.Streaming.UseCases.NativeCapture.NativeCaptureUseCases
+- uid: PublisherStudio.Services.Streaming.UseCases.NativeCapture
+  commentId: N:PublisherStudio.Services.Streaming.UseCases.NativeCapture
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.UseCases.NativeCapture
+  nameWithType: PublisherStudio.Services.Streaming.UseCases.NativeCapture
+  fullName: PublisherStudio.Services.Streaming.UseCases.NativeCapture
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases.NativeCapture
+    name: NativeCapture
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.NativeCapture.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases.NativeCapture
+    name: NativeCapture
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.NativeCapture.html

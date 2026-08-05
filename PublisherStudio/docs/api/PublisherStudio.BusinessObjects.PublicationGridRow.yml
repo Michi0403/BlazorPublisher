@@ -1,0 +1,563 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationGridRow
+  commentId: T:PublisherStudio.BusinessObjects.PublicationGridRow
+  id: PublicationGridRow
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationGridRow.#ctor
+  - PublisherStudio.BusinessObjects.PublicationGridRow.C1
+  - PublisherStudio.BusinessObjects.PublicationGridRow.C2
+  - PublisherStudio.BusinessObjects.PublicationGridRow.C3
+  - PublisherStudio.BusinessObjects.PublicationGridRow.C4
+  - PublisherStudio.BusinessObjects.PublicationGridRow.C5
+  - PublisherStudio.BusinessObjects.PublicationGridRow.C6
+  - PublisherStudio.BusinessObjects.PublicationGridRow.C7
+  - PublisherStudio.BusinessObjects.PublicationGridRow.C8
+  langs:
+  - csharp
+  - vb
+  name: PublicationGridRow
+  nameWithType: PublicationGridRow
+  fullName: PublisherStudio.BusinessObjects.PublicationGridRow
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents a publication grid row.
+  example: []
+  syntax:
+    content: public sealed class PublicationGridRow
+    content.vb: Public NotInheritable Class PublicationGridRow
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.BusinessObjects.PublicationGridRow.#ctor
+  commentId: M:PublisherStudio.BusinessObjects.PublicationGridRow.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.BusinessObjects.PublicationGridRow
+  langs:
+  - csharp
+  - vb
+  name: PublicationGridRow()
+  nameWithType: PublicationGridRow.PublicationGridRow()
+  fullName: PublisherStudio.BusinessObjects.PublicationGridRow.PublicationGridRow()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public PublicationGridRow()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.BusinessObjects.PublicationGridRow.#ctor*
+  nameWithType.vb: PublicationGridRow.New()
+  fullName.vb: PublisherStudio.BusinessObjects.PublicationGridRow.New()
+  name.vb: New()
+- uid: PublisherStudio.BusinessObjects.PublicationGridRow.C1
+  commentId: P:PublisherStudio.BusinessObjects.PublicationGridRow.C1
+  id: C1
+  parent: PublisherStudio.BusinessObjects.PublicationGridRow
+  langs:
+  - csharp
+  - vb
+  name: C1
+  nameWithType: PublicationGridRow.C1
+  fullName: PublisherStudio.BusinessObjects.PublicationGridRow.C1
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets c1.
+  example: []
+  syntax:
+    content: public string C1 { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property C1 As String
+  overload: PublisherStudio.BusinessObjects.PublicationGridRow.C1*
+- uid: PublisherStudio.BusinessObjects.PublicationGridRow.C2
+  commentId: P:PublisherStudio.BusinessObjects.PublicationGridRow.C2
+  id: C2
+  parent: PublisherStudio.BusinessObjects.PublicationGridRow
+  langs:
+  - csharp
+  - vb
+  name: C2
+  nameWithType: PublicationGridRow.C2
+  fullName: PublisherStudio.BusinessObjects.PublicationGridRow.C2
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets c2.
+  example: []
+  syntax:
+    content: public string C2 { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property C2 As String
+  overload: PublisherStudio.BusinessObjects.PublicationGridRow.C2*
+- uid: PublisherStudio.BusinessObjects.PublicationGridRow.C3
+  commentId: P:PublisherStudio.BusinessObjects.PublicationGridRow.C3
+  id: C3
+  parent: PublisherStudio.BusinessObjects.PublicationGridRow
+  langs:
+  - csharp
+  - vb
+  name: C3
+  nameWithType: PublicationGridRow.C3
+  fullName: PublisherStudio.BusinessObjects.PublicationGridRow.C3
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets c3.
+  example: []
+  syntax:
+    content: public string C3 { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property C3 As String
+  overload: PublisherStudio.BusinessObjects.PublicationGridRow.C3*
+- uid: PublisherStudio.BusinessObjects.PublicationGridRow.C4
+  commentId: P:PublisherStudio.BusinessObjects.PublicationGridRow.C4
+  id: C4
+  parent: PublisherStudio.BusinessObjects.PublicationGridRow
+  langs:
+  - csharp
+  - vb
+  name: C4
+  nameWithType: PublicationGridRow.C4
+  fullName: PublisherStudio.BusinessObjects.PublicationGridRow.C4
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets c4.
+  example: []
+  syntax:
+    content: public string C4 { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property C4 As String
+  overload: PublisherStudio.BusinessObjects.PublicationGridRow.C4*
+- uid: PublisherStudio.BusinessObjects.PublicationGridRow.C5
+  commentId: P:PublisherStudio.BusinessObjects.PublicationGridRow.C5
+  id: C5
+  parent: PublisherStudio.BusinessObjects.PublicationGridRow
+  langs:
+  - csharp
+  - vb
+  name: C5
+  nameWithType: PublicationGridRow.C5
+  fullName: PublisherStudio.BusinessObjects.PublicationGridRow.C5
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets c5.
+  example: []
+  syntax:
+    content: public string C5 { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property C5 As String
+  overload: PublisherStudio.BusinessObjects.PublicationGridRow.C5*
+- uid: PublisherStudio.BusinessObjects.PublicationGridRow.C6
+  commentId: P:PublisherStudio.BusinessObjects.PublicationGridRow.C6
+  id: C6
+  parent: PublisherStudio.BusinessObjects.PublicationGridRow
+  langs:
+  - csharp
+  - vb
+  name: C6
+  nameWithType: PublicationGridRow.C6
+  fullName: PublisherStudio.BusinessObjects.PublicationGridRow.C6
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets c6.
+  example: []
+  syntax:
+    content: public string C6 { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property C6 As String
+  overload: PublisherStudio.BusinessObjects.PublicationGridRow.C6*
+- uid: PublisherStudio.BusinessObjects.PublicationGridRow.C7
+  commentId: P:PublisherStudio.BusinessObjects.PublicationGridRow.C7
+  id: C7
+  parent: PublisherStudio.BusinessObjects.PublicationGridRow
+  langs:
+  - csharp
+  - vb
+  name: C7
+  nameWithType: PublicationGridRow.C7
+  fullName: PublisherStudio.BusinessObjects.PublicationGridRow.C7
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets c7.
+  example: []
+  syntax:
+    content: public string C7 { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property C7 As String
+  overload: PublisherStudio.BusinessObjects.PublicationGridRow.C7*
+- uid: PublisherStudio.BusinessObjects.PublicationGridRow.C8
+  commentId: P:PublisherStudio.BusinessObjects.PublicationGridRow.C8
+  id: C8
+  parent: PublisherStudio.BusinessObjects.PublicationGridRow
+  langs:
+  - csharp
+  - vb
+  name: C8
+  nameWithType: PublicationGridRow.C8
+  fullName: PublisherStudio.BusinessObjects.PublicationGridRow.C8
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets c8.
+  example: []
+  syntax:
+    content: public string C8 { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property C8 As String
+  overload: PublisherStudio.BusinessObjects.PublicationGridRow.C8*
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.BusinessObjects.PublicationGridRow.#ctor*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationGridRow.#ctor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationGridRow.html#PublisherStudio_BusinessObjects_PublicationGridRow__ctor
+  name: PublicationGridRow
+  nameWithType: PublicationGridRow.PublicationGridRow
+  fullName: PublisherStudio.BusinessObjects.PublicationGridRow.PublicationGridRow
+  nameWithType.vb: PublicationGridRow.New
+  fullName.vb: PublisherStudio.BusinessObjects.PublicationGridRow.New
+  name.vb: New
+- uid: PublisherStudio.BusinessObjects.PublicationGridRow.C1*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationGridRow.C1
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationGridRow.html#PublisherStudio_BusinessObjects_PublicationGridRow_C1
+  name: C1
+  nameWithType: PublicationGridRow.C1
+  fullName: PublisherStudio.BusinessObjects.PublicationGridRow.C1
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.BusinessObjects.PublicationGridRow.C2*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationGridRow.C2
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationGridRow.html#PublisherStudio_BusinessObjects_PublicationGridRow_C2
+  name: C2
+  nameWithType: PublicationGridRow.C2
+  fullName: PublisherStudio.BusinessObjects.PublicationGridRow.C2
+- uid: PublisherStudio.BusinessObjects.PublicationGridRow.C3*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationGridRow.C3
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationGridRow.html#PublisherStudio_BusinessObjects_PublicationGridRow_C3
+  name: C3
+  nameWithType: PublicationGridRow.C3
+  fullName: PublisherStudio.BusinessObjects.PublicationGridRow.C3
+- uid: PublisherStudio.BusinessObjects.PublicationGridRow.C4*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationGridRow.C4
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationGridRow.html#PublisherStudio_BusinessObjects_PublicationGridRow_C4
+  name: C4
+  nameWithType: PublicationGridRow.C4
+  fullName: PublisherStudio.BusinessObjects.PublicationGridRow.C4
+- uid: PublisherStudio.BusinessObjects.PublicationGridRow.C5*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationGridRow.C5
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationGridRow.html#PublisherStudio_BusinessObjects_PublicationGridRow_C5
+  name: C5
+  nameWithType: PublicationGridRow.C5
+  fullName: PublisherStudio.BusinessObjects.PublicationGridRow.C5
+- uid: PublisherStudio.BusinessObjects.PublicationGridRow.C6*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationGridRow.C6
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationGridRow.html#PublisherStudio_BusinessObjects_PublicationGridRow_C6
+  name: C6
+  nameWithType: PublicationGridRow.C6
+  fullName: PublisherStudio.BusinessObjects.PublicationGridRow.C6
+- uid: PublisherStudio.BusinessObjects.PublicationGridRow.C7*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationGridRow.C7
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationGridRow.html#PublisherStudio_BusinessObjects_PublicationGridRow_C7
+  name: C7
+  nameWithType: PublicationGridRow.C7
+  fullName: PublisherStudio.BusinessObjects.PublicationGridRow.C7
+- uid: PublisherStudio.BusinessObjects.PublicationGridRow.C8*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationGridRow.C8
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationGridRow.html#PublisherStudio_BusinessObjects_PublicationGridRow_C8
+  name: C8
+  nameWithType: PublicationGridRow.C8
+  fullName: PublisherStudio.BusinessObjects.PublicationGridRow.C8

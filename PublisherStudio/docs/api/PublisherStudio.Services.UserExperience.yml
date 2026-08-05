@@ -1,0 +1,71 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.UserExperience
+  commentId: N:PublisherStudio.Services.UserExperience
+  id: UserExperience
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.UserExperience.IUserNotificationService
+  - PublisherStudio.Services.UserExperience.UserNotificationService
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.Services.UserExperience
+  nameWithType: PublisherStudio.Services.UserExperience
+  fullName: PublisherStudio.Services.UserExperience
+  type: Namespace
+  assemblies:
+  - PublisherStudio.Web
+references:
+- uid: PublisherStudio.Services.UserExperience.IUserNotificationService
+  commentId: T:PublisherStudio.Services.UserExperience.IUserNotificationService
+  parent: PublisherStudio.Services.UserExperience
+  isExternal: true
+  href: PublisherStudio.Services.UserExperience.IUserNotificationService.html
+  name: IUserNotificationService
+  nameWithType: IUserNotificationService
+  fullName: PublisherStudio.Services.UserExperience.IUserNotificationService
+- uid: PublisherStudio.Services.UserExperience.UserNotificationService
+  commentId: T:PublisherStudio.Services.UserExperience.UserNotificationService
+  isExternal: true
+  href: PublisherStudio.Services.UserExperience.UserNotificationService.html
+  name: UserNotificationService
+  nameWithType: UserNotificationService
+  fullName: PublisherStudio.Services.UserExperience.UserNotificationService
+- uid: PublisherStudio.Services.UserExperience
+  commentId: N:PublisherStudio.Services.UserExperience
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.UserExperience
+  nameWithType: PublisherStudio.Services.UserExperience
+  fullName: PublisherStudio.Services.UserExperience
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.UserExperience
+    name: UserExperience
+    isExternal: true
+    href: PublisherStudio.Services.UserExperience.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.UserExperience
+    name: UserExperience
+    isExternal: true
+    href: PublisherStudio.Services.UserExperience.html

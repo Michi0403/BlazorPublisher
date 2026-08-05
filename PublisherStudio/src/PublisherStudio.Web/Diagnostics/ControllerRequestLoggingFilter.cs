@@ -1,11 +1,17 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace PublisherStudio.Diagnostics;
 
+/// <summary>
+/// Provides controller request logging filter operations.
+/// </summary>
 public sealed class ControllerRequestLoggingFilter(
     ILogger<ControllerRequestLoggingFilter> logger) : IAsyncActionFilter
 {
+    /// <summary>
+    /// Runs the on action execution async operation.
+    /// </summary>
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         var stopwatch = Stopwatch.StartNew();
@@ -45,11 +51,10 @@ public sealed class ControllerRequestLoggingFilter(
                 context.HttpContext.Response.StatusCode,
                 stopwatch.ElapsedMilliseconds);
         }
-        catch (OperationCanceledException exception) when (context.HttpContext.RequestAborted.IsCancellationRequested)
+        catch (OperationCanceledException) when (context.HttpContext.RequestAborted.IsCancellationRequested)
         {
 #if DEBUG
             logger.LogInformation(
-                exception,
                 "Controller action {Controller}.{Action} was cancelled because the client disconnected in a Debug build.",
                 controller,
                 action);

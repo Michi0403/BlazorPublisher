@@ -1,0 +1,225 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Controllers
+  commentId: N:PublisherStudio.Controllers
+  id: Controllers
+  parent: PublisherStudio
+  children:
+  - PublisherStudio.Controllers.ApiSurfaceCatalogService
+  - PublisherStudio.Controllers.AssetController
+  - PublisherStudio.Controllers.AutomationInputController
+  - PublisherStudio.Controllers.AutomationRuntimeController
+  - PublisherStudio.Controllers.AutomationScreenshotController
+  - PublisherStudio.Controllers.CodeController
+  - PublisherStudio.Controllers.ConfigurationController
+  - PublisherStudio.Controllers.DocumentationController
+  - PublisherStudio.Controllers.DomainContextController
+  - PublisherStudio.Controllers.MediaConversionController
+  - PublisherStudio.Controllers.OpenScadController
+  - PublisherStudio.Controllers.OrganicPluginController
+  - PublisherStudio.Controllers.OrganicWireHttpController
+  - PublisherStudio.Controllers.PublicationController
+  - PublisherStudio.Controllers.PublicationLayoutController
+  - PublisherStudio.Controllers.RenderExportController
+  - PublisherStudio.Controllers.RuntimePolicyController
+  - PublisherStudio.Controllers.SpreadsheetController
+  - PublisherStudio.Controllers.Streaming.UseCases
+  - PublisherStudio.Controllers.VideoLayerInterchangeController
+  - PublisherStudio.Controllers.WebDataController
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.Controllers
+  nameWithType: PublisherStudio.Controllers
+  fullName: PublisherStudio.Controllers
+  type: Namespace
+  assemblies:
+  - PublisherStudio.Web
+references:
+- uid: PublisherStudio.Controllers.ApiSurfaceCatalogService
+  commentId: T:PublisherStudio.Controllers.ApiSurfaceCatalogService
+  isExternal: true
+  href: PublisherStudio.Controllers.ApiSurfaceCatalogService.html
+  name: ApiSurfaceCatalogService
+  nameWithType: ApiSurfaceCatalogService
+  fullName: PublisherStudio.Controllers.ApiSurfaceCatalogService
+- uid: PublisherStudio.Controllers.AssetController
+  commentId: T:PublisherStudio.Controllers.AssetController
+  isExternal: true
+  href: PublisherStudio.Controllers.AssetController.html
+  name: AssetController
+  nameWithType: AssetController
+  fullName: PublisherStudio.Controllers.AssetController
+- uid: PublisherStudio.Controllers.AutomationInputController
+  commentId: T:PublisherStudio.Controllers.AutomationInputController
+  isExternal: true
+  href: PublisherStudio.Controllers.AutomationInputController.html
+  name: AutomationInputController
+  nameWithType: AutomationInputController
+  fullName: PublisherStudio.Controllers.AutomationInputController
+- uid: PublisherStudio.Controllers.AutomationRuntimeController
+  commentId: T:PublisherStudio.Controllers.AutomationRuntimeController
+  isExternal: true
+  href: PublisherStudio.Controllers.AutomationRuntimeController.html
+  name: AutomationRuntimeController
+  nameWithType: AutomationRuntimeController
+  fullName: PublisherStudio.Controllers.AutomationRuntimeController
+- uid: PublisherStudio.Controllers.AutomationScreenshotController
+  commentId: T:PublisherStudio.Controllers.AutomationScreenshotController
+  isExternal: true
+  href: PublisherStudio.Controllers.AutomationScreenshotController.html
+  name: AutomationScreenshotController
+  nameWithType: AutomationScreenshotController
+  fullName: PublisherStudio.Controllers.AutomationScreenshotController
+- uid: PublisherStudio.Controllers.CodeController
+  commentId: T:PublisherStudio.Controllers.CodeController
+  isExternal: true
+  href: PublisherStudio.Controllers.CodeController.html
+  name: CodeController
+  nameWithType: CodeController
+  fullName: PublisherStudio.Controllers.CodeController
+- uid: PublisherStudio.Controllers.ConfigurationController
+  commentId: T:PublisherStudio.Controllers.ConfigurationController
+  isExternal: true
+  href: PublisherStudio.Controllers.ConfigurationController.html
+  name: ConfigurationController
+  nameWithType: ConfigurationController
+  fullName: PublisherStudio.Controllers.ConfigurationController
+- uid: PublisherStudio.Controllers.DocumentationController
+  commentId: T:PublisherStudio.Controllers.DocumentationController
+  isExternal: true
+  href: PublisherStudio.Controllers.DocumentationController.html
+  name: DocumentationController
+  nameWithType: DocumentationController
+  fullName: PublisherStudio.Controllers.DocumentationController
+- uid: PublisherStudio.Controllers.DomainContextController
+  commentId: T:PublisherStudio.Controllers.DomainContextController
+  isExternal: true
+  href: PublisherStudio.Controllers.DomainContextController.html
+  name: DomainContextController
+  nameWithType: DomainContextController
+  fullName: PublisherStudio.Controllers.DomainContextController
+- uid: PublisherStudio.Controllers.MediaConversionController
+  commentId: T:PublisherStudio.Controllers.MediaConversionController
+  isExternal: true
+  href: PublisherStudio.Controllers.MediaConversionController.html
+  name: MediaConversionController
+  nameWithType: MediaConversionController
+  fullName: PublisherStudio.Controllers.MediaConversionController
+- uid: PublisherStudio.Controllers.OpenScadController
+  commentId: T:PublisherStudio.Controllers.OpenScadController
+  isExternal: true
+  href: PublisherStudio.Controllers.OpenScadController.html
+  name: OpenScadController
+  nameWithType: OpenScadController
+  fullName: PublisherStudio.Controllers.OpenScadController
+- uid: PublisherStudio.Controllers.OrganicPluginController
+  commentId: T:PublisherStudio.Controllers.OrganicPluginController
+  isExternal: true
+  href: PublisherStudio.Controllers.OrganicPluginController.html
+  name: OrganicPluginController
+  nameWithType: OrganicPluginController
+  fullName: PublisherStudio.Controllers.OrganicPluginController
+- uid: PublisherStudio.Controllers.OrganicWireHttpController
+  commentId: T:PublisherStudio.Controllers.OrganicWireHttpController
+  isExternal: true
+  href: PublisherStudio.Controllers.OrganicWireHttpController.html
+  name: OrganicWireHttpController
+  nameWithType: OrganicWireHttpController
+  fullName: PublisherStudio.Controllers.OrganicWireHttpController
+- uid: PublisherStudio.Controllers.PublicationController
+  commentId: T:PublisherStudio.Controllers.PublicationController
+  isExternal: true
+  href: PublisherStudio.Controllers.PublicationController.html
+  name: PublicationController
+  nameWithType: PublicationController
+  fullName: PublisherStudio.Controllers.PublicationController
+- uid: PublisherStudio.Controllers.PublicationLayoutController
+  commentId: T:PublisherStudio.Controllers.PublicationLayoutController
+  isExternal: true
+  href: PublisherStudio.Controllers.PublicationLayoutController.html
+  name: PublicationLayoutController
+  nameWithType: PublicationLayoutController
+  fullName: PublisherStudio.Controllers.PublicationLayoutController
+- uid: PublisherStudio.Controllers.RenderExportController
+  commentId: T:PublisherStudio.Controllers.RenderExportController
+  isExternal: true
+  href: PublisherStudio.Controllers.RenderExportController.html
+  name: RenderExportController
+  nameWithType: RenderExportController
+  fullName: PublisherStudio.Controllers.RenderExportController
+- uid: PublisherStudio.Controllers.RuntimePolicyController
+  commentId: T:PublisherStudio.Controllers.RuntimePolicyController
+  isExternal: true
+  href: PublisherStudio.Controllers.RuntimePolicyController.html
+  name: RuntimePolicyController
+  nameWithType: RuntimePolicyController
+  fullName: PublisherStudio.Controllers.RuntimePolicyController
+- uid: PublisherStudio.Controllers.SpreadsheetController
+  commentId: T:PublisherStudio.Controllers.SpreadsheetController
+  isExternal: true
+  href: PublisherStudio.Controllers.SpreadsheetController.html
+  name: SpreadsheetController
+  nameWithType: SpreadsheetController
+  fullName: PublisherStudio.Controllers.SpreadsheetController
+- uid: PublisherStudio.Controllers.VideoLayerInterchangeController
+  commentId: T:PublisherStudio.Controllers.VideoLayerInterchangeController
+  isExternal: true
+  href: PublisherStudio.Controllers.VideoLayerInterchangeController.html
+  name: VideoLayerInterchangeController
+  nameWithType: VideoLayerInterchangeController
+  fullName: PublisherStudio.Controllers.VideoLayerInterchangeController
+- uid: PublisherStudio.Controllers.WebDataController
+  commentId: T:PublisherStudio.Controllers.WebDataController
+  isExternal: true
+  href: PublisherStudio.Controllers.WebDataController.html
+  name: WebDataController
+  nameWithType: WebDataController
+  fullName: PublisherStudio.Controllers.WebDataController
+- uid: PublisherStudio.Controllers.Streaming.UseCases
+  commentId: N:PublisherStudio.Controllers.Streaming.UseCases
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Controllers.Streaming.UseCases
+  nameWithType: PublisherStudio.Controllers.Streaming.UseCases
+  fullName: PublisherStudio.Controllers.Streaming.UseCases
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Controllers
+    name: Controllers
+    isExternal: true
+    href: PublisherStudio.Controllers.html
+  - name: .
+  - uid: PublisherStudio.Controllers.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Controllers.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Controllers.Streaming.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Controllers.Streaming.UseCases.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Controllers
+    name: Controllers
+    isExternal: true
+    href: PublisherStudio.Controllers.html
+  - name: .
+  - uid: PublisherStudio.Controllers.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Controllers.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Controllers.Streaming.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Controllers.Streaming.UseCases.html

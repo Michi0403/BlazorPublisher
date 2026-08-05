@@ -1,0 +1,811 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Publication.Import.OpenDocumentImportService
+  commentId: T:PublisherStudio.Services.Publication.Import.OpenDocumentImportService
+  id: OpenDocumentImportService
+  parent: PublisherStudio.Services.Publication.Import
+  children:
+  - PublisherStudio.Services.Publication.Import.OpenDocumentImportService.#ctor(PublisherStudio.Services.IPublisherDocumentFactory,PublisherStudio.Services.RichTextDocumentFactory,PublisherStudio.Services.PictureStudio.Import.SvgInterchangeSanitizer,PublisherStudio.Services.Configuration.IPublisherRuntimePatternService,Microsoft.Extensions.Logging.ILoggerFactory,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Publication.Import.OpenDocumentImportService})
+  - PublisherStudio.Services.Publication.Import.OpenDocumentImportService.ImportAsync(System.IO.Stream,System.String,System.Threading.CancellationToken)
+  langs:
+  - csharp
+  - vb
+  name: OpenDocumentImportService
+  nameWithType: OpenDocumentImportService
+  fullName: PublisherStudio.Services.Publication.Import.OpenDocumentImportService
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Publication.Import
+  summary: Imports the open ODF drawing/presentation page model into PublisherStudio's canonical page system. The adapter intentionally uses only BCL ZIP/XML APIs and reports every unsupported construct instead of silently changing the native publication model to resemble ODF.
+  example: []
+  syntax:
+    content: public sealed class OpenDocumentImportService
+    content.vb: Public NotInheritable Class OpenDocumentImportService
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.Publication.Import.OpenDocumentImportService.#ctor(PublisherStudio.Services.IPublisherDocumentFactory,PublisherStudio.Services.RichTextDocumentFactory,PublisherStudio.Services.PictureStudio.Import.SvgInterchangeSanitizer,PublisherStudio.Services.Configuration.IPublisherRuntimePatternService,Microsoft.Extensions.Logging.ILoggerFactory,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Publication.Import.OpenDocumentImportService})
+  commentId: M:PublisherStudio.Services.Publication.Import.OpenDocumentImportService.#ctor(PublisherStudio.Services.IPublisherDocumentFactory,PublisherStudio.Services.RichTextDocumentFactory,PublisherStudio.Services.PictureStudio.Import.SvgInterchangeSanitizer,PublisherStudio.Services.Configuration.IPublisherRuntimePatternService,Microsoft.Extensions.Logging.ILoggerFactory,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Publication.Import.OpenDocumentImportService})
+  id: '#ctor(PublisherStudio.Services.IPublisherDocumentFactory,PublisherStudio.Services.RichTextDocumentFactory,PublisherStudio.Services.PictureStudio.Import.SvgInterchangeSanitizer,PublisherStudio.Services.Configuration.IPublisherRuntimePatternService,Microsoft.Extensions.Logging.ILoggerFactory,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Publication.Import.OpenDocumentImportService})'
+  parent: PublisherStudio.Services.Publication.Import.OpenDocumentImportService
+  langs:
+  - csharp
+  - vb
+  name: OpenDocumentImportService(IPublisherDocumentFactory, RichTextDocumentFactory, SvgInterchangeSanitizer, IPublisherRuntimePatternService, ILoggerFactory, ILogger<OpenDocumentImportService>)
+  nameWithType: OpenDocumentImportService.OpenDocumentImportService(IPublisherDocumentFactory, RichTextDocumentFactory, SvgInterchangeSanitizer, IPublisherRuntimePatternService, ILoggerFactory, ILogger<OpenDocumentImportService>)
+  fullName: PublisherStudio.Services.Publication.Import.OpenDocumentImportService.OpenDocumentImportService(PublisherStudio.Services.IPublisherDocumentFactory, PublisherStudio.Services.RichTextDocumentFactory, PublisherStudio.Services.PictureStudio.Import.SvgInterchangeSanitizer, PublisherStudio.Services.Configuration.IPublisherRuntimePatternService, Microsoft.Extensions.Logging.ILoggerFactory, Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.Publication.Import.OpenDocumentImportService>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Publication.Import
+  summary: Imports the open ODF drawing/presentation page model into PublisherStudio's canonical page system. The adapter intentionally uses only BCL ZIP/XML APIs and reports every unsupported construct instead of silently changing the native publication model to resemble ODF.
+  example: []
+  syntax:
+    content: public OpenDocumentImportService(IPublisherDocumentFactory documentFactory, RichTextDocumentFactory richTextFactory, SvgInterchangeSanitizer svgSanitizer, IPublisherRuntimePatternService runtimePatterns, ILoggerFactory loggerFactory, ILogger<OpenDocumentImportService> logger)
+    parameters:
+    - id: documentFactory
+      type: PublisherStudio.Services.IPublisherDocumentFactory
+    - id: richTextFactory
+      type: PublisherStudio.Services.RichTextDocumentFactory
+    - id: svgSanitizer
+      type: PublisherStudio.Services.PictureStudio.Import.SvgInterchangeSanitizer
+    - id: runtimePatterns
+      type: PublisherStudio.Services.Configuration.IPublisherRuntimePatternService
+    - id: loggerFactory
+      type: Microsoft.Extensions.Logging.ILoggerFactory
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Publication.Import.OpenDocumentImportService}
+    content.vb: Public Sub New(documentFactory As IPublisherDocumentFactory, richTextFactory As RichTextDocumentFactory, svgSanitizer As SvgInterchangeSanitizer, runtimePatterns As IPublisherRuntimePatternService, loggerFactory As ILoggerFactory, logger As ILogger(Of OpenDocumentImportService))
+  overload: PublisherStudio.Services.Publication.Import.OpenDocumentImportService.#ctor*
+  nameWithType.vb: OpenDocumentImportService.New(IPublisherDocumentFactory, RichTextDocumentFactory, SvgInterchangeSanitizer, IPublisherRuntimePatternService, ILoggerFactory, ILogger(Of OpenDocumentImportService))
+  fullName.vb: PublisherStudio.Services.Publication.Import.OpenDocumentImportService.New(PublisherStudio.Services.IPublisherDocumentFactory, PublisherStudio.Services.RichTextDocumentFactory, PublisherStudio.Services.PictureStudio.Import.SvgInterchangeSanitizer, PublisherStudio.Services.Configuration.IPublisherRuntimePatternService, Microsoft.Extensions.Logging.ILoggerFactory, Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.Publication.Import.OpenDocumentImportService))
+  name.vb: New(IPublisherDocumentFactory, RichTextDocumentFactory, SvgInterchangeSanitizer, IPublisherRuntimePatternService, ILoggerFactory, ILogger(Of OpenDocumentImportService))
+- uid: PublisherStudio.Services.Publication.Import.OpenDocumentImportService.ImportAsync(System.IO.Stream,System.String,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Publication.Import.OpenDocumentImportService.ImportAsync(System.IO.Stream,System.String,System.Threading.CancellationToken)
+  id: ImportAsync(System.IO.Stream,System.String,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Publication.Import.OpenDocumentImportService
+  langs:
+  - csharp
+  - vb
+  name: ImportAsync(Stream, string, CancellationToken)
+  nameWithType: OpenDocumentImportService.ImportAsync(Stream, string, CancellationToken)
+  fullName: PublisherStudio.Services.Publication.Import.OpenDocumentImportService.ImportAsync(System.IO.Stream, string, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Publication.Import
+  summary: Imports async.
+  example: []
+  syntax:
+    content: public Task<PublicationImportResult> ImportAsync(Stream source, string fileName, CancellationToken cancellationToken = default)
+    parameters:
+    - id: source
+      type: System.IO.Stream
+    - id: fileName
+      type: System.String
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.PublicationImportResult}
+    content.vb: Public Function ImportAsync(source As Stream, fileName As String, cancellationToken As CancellationToken = Nothing) As Task(Of PublicationImportResult)
+  overload: PublisherStudio.Services.Publication.Import.OpenDocumentImportService.ImportAsync*
+  nameWithType.vb: OpenDocumentImportService.ImportAsync(Stream, String, CancellationToken)
+  fullName.vb: PublisherStudio.Services.Publication.Import.OpenDocumentImportService.ImportAsync(System.IO.Stream, String, System.Threading.CancellationToken)
+  name.vb: ImportAsync(Stream, String, CancellationToken)
+references:
+- uid: PublisherStudio.Services.Publication.Import
+  commentId: N:PublisherStudio.Services.Publication.Import
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Publication.Import
+  nameWithType: PublisherStudio.Services.Publication.Import
+  fullName: PublisherStudio.Services.Publication.Import
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Publication
+    name: Publication
+    isExternal: true
+    href: PublisherStudio.Services.Publication.html
+  - name: .
+  - uid: PublisherStudio.Services.Publication.Import
+    name: Import
+    isExternal: true
+    href: PublisherStudio.Services.Publication.Import.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Publication
+    name: Publication
+    isExternal: true
+    href: PublisherStudio.Services.Publication.html
+  - name: .
+  - uid: PublisherStudio.Services.Publication.Import
+    name: Import
+    isExternal: true
+    href: PublisherStudio.Services.Publication.Import.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.Publication.Import.OpenDocumentImportService.#ctor*
+  commentId: Overload:PublisherStudio.Services.Publication.Import.OpenDocumentImportService.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.Publication.Import.OpenDocumentImportService.html#PublisherStudio_Services_Publication_Import_OpenDocumentImportService__ctor_PublisherStudio_Services_IPublisherDocumentFactory_PublisherStudio_Services_RichTextDocumentFactory_PublisherStudio_Services_PictureStudio_Import_SvgInterchangeSanitizer_PublisherStudio_Services_Configuration_IPublisherRuntimePatternService_Microsoft_Extensions_Logging_ILoggerFactory_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_Publication_Import_OpenDocumentImportService__
+  name: OpenDocumentImportService
+  nameWithType: OpenDocumentImportService.OpenDocumentImportService
+  fullName: PublisherStudio.Services.Publication.Import.OpenDocumentImportService.OpenDocumentImportService
+  nameWithType.vb: OpenDocumentImportService.New
+  fullName.vb: PublisherStudio.Services.Publication.Import.OpenDocumentImportService.New
+  name.vb: New
+- uid: PublisherStudio.Services.IPublisherDocumentFactory
+  commentId: T:PublisherStudio.Services.IPublisherDocumentFactory
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.IPublisherDocumentFactory.html
+  name: IPublisherDocumentFactory
+  nameWithType: IPublisherDocumentFactory
+  fullName: PublisherStudio.Services.IPublisherDocumentFactory
+- uid: PublisherStudio.Services.RichTextDocumentFactory
+  commentId: T:PublisherStudio.Services.RichTextDocumentFactory
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.RichTextDocumentFactory.html
+  name: RichTextDocumentFactory
+  nameWithType: RichTextDocumentFactory
+  fullName: PublisherStudio.Services.RichTextDocumentFactory
+- uid: PublisherStudio.Services.PictureStudio.Import.SvgInterchangeSanitizer
+  commentId: T:PublisherStudio.Services.PictureStudio.Import.SvgInterchangeSanitizer
+  parent: PublisherStudio.Services.PictureStudio.Import
+  isExternal: true
+  href: PublisherStudio.Services.PictureStudio.Import.SvgInterchangeSanitizer.html
+  name: SvgInterchangeSanitizer
+  nameWithType: SvgInterchangeSanitizer
+  fullName: PublisherStudio.Services.PictureStudio.Import.SvgInterchangeSanitizer
+- uid: PublisherStudio.Services.Configuration.IPublisherRuntimePatternService
+  commentId: T:PublisherStudio.Services.Configuration.IPublisherRuntimePatternService
+  parent: PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IPublisherRuntimePatternService.html
+  name: IPublisherRuntimePatternService
+  nameWithType: IPublisherRuntimePatternService
+  fullName: PublisherStudio.Services.Configuration.IPublisherRuntimePatternService
+- uid: Microsoft.Extensions.Logging.ILoggerFactory
+  commentId: T:Microsoft.Extensions.Logging.ILoggerFactory
+  parent: Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.iloggerfactory
+  name: ILoggerFactory
+  nameWithType: ILoggerFactory
+  fullName: Microsoft.Extensions.Logging.ILoggerFactory
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Publication.Import.OpenDocumentImportService}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Publication.Import.OpenDocumentImportService}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<OpenDocumentImportService>
+  nameWithType: ILogger<OpenDocumentImportService>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.Publication.Import.OpenDocumentImportService>
+  nameWithType.vb: ILogger(Of OpenDocumentImportService)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.Publication.Import.OpenDocumentImportService)
+  name.vb: ILogger(Of OpenDocumentImportService)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.Publication.Import.OpenDocumentImportService
+    name: OpenDocumentImportService
+    isExternal: true
+    href: PublisherStudio.Services.Publication.Import.OpenDocumentImportService.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.Publication.Import.OpenDocumentImportService
+    name: OpenDocumentImportService
+    isExternal: true
+    href: PublisherStudio.Services.Publication.Import.OpenDocumentImportService.html
+  - name: )
+- uid: PublisherStudio.Services
+  commentId: N:PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services
+  nameWithType: PublisherStudio.Services
+  fullName: PublisherStudio.Services
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+- uid: PublisherStudio.Services.PictureStudio.Import
+  commentId: N:PublisherStudio.Services.PictureStudio.Import
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.PictureStudio.Import
+  nameWithType: PublisherStudio.Services.PictureStudio.Import
+  fullName: PublisherStudio.Services.PictureStudio.Import
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.PictureStudio
+    name: PictureStudio
+    isExternal: true
+    href: PublisherStudio.Services.PictureStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.PictureStudio.Import
+    name: Import
+    isExternal: true
+    href: PublisherStudio.Services.PictureStudio.Import.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.PictureStudio
+    name: PictureStudio
+    isExternal: true
+    href: PublisherStudio.Services.PictureStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.PictureStudio.Import
+    name: Import
+    isExternal: true
+    href: PublisherStudio.Services.PictureStudio.Import.html
+- uid: PublisherStudio.Services.Configuration
+  commentId: N:PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Configuration
+  nameWithType: PublisherStudio.Services.Configuration
+  fullName: PublisherStudio.Services.Configuration
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: PublisherStudio.Services.Publication.Import.OpenDocumentImportService.ImportAsync*
+  commentId: Overload:PublisherStudio.Services.Publication.Import.OpenDocumentImportService.ImportAsync
+  isExternal: true
+  href: PublisherStudio.Services.Publication.Import.OpenDocumentImportService.html#PublisherStudio_Services_Publication_Import_OpenDocumentImportService_ImportAsync_System_IO_Stream_System_String_System_Threading_CancellationToken_
+  name: ImportAsync
+  nameWithType: OpenDocumentImportService.ImportAsync
+  fullName: PublisherStudio.Services.Publication.Import.OpenDocumentImportService.ImportAsync
+- uid: System.IO.Stream
+  commentId: T:System.IO.Stream
+  parent: System.IO
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.io.stream
+  name: Stream
+  nameWithType: Stream
+  fullName: System.IO.Stream
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System.Threading.CancellationToken
+  commentId: T:System.Threading.CancellationToken
+  parent: System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  name: CancellationToken
+  nameWithType: CancellationToken
+  fullName: System.Threading.CancellationToken
+- uid: System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.PublicationImportResult}
+  commentId: T:System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.PublicationImportResult}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<PublicationImportResult>
+  nameWithType: Task<PublicationImportResult>
+  fullName: System.Threading.Tasks.Task<PublisherStudio.BusinessObjects.PublicationImportResult>
+  nameWithType.vb: Task(Of PublicationImportResult)
+  fullName.vb: System.Threading.Tasks.Task(Of PublisherStudio.BusinessObjects.PublicationImportResult)
+  name.vb: Task(Of PublicationImportResult)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.PublicationImportResult
+    name: PublicationImportResult
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublicationImportResult.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.PublicationImportResult
+    name: PublicationImportResult
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublicationImportResult.html
+  - name: )
+- uid: System.IO
+  commentId: N:System.IO
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.IO
+  nameWithType: System.IO
+  fullName: System.IO
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.IO
+    name: IO
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.io
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.IO
+    name: IO
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.io
+- uid: System.Threading
+  commentId: N:System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading
+  nameWithType: System.Threading
+  fullName: System.Threading
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+- uid: System.Threading.Tasks.Task`1
+  commentId: T:System.Threading.Tasks.Task`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<TResult>
+  nameWithType: Task<TResult>
+  fullName: System.Threading.Tasks.Task<TResult>
+  nameWithType.vb: Task(Of TResult)
+  fullName.vb: System.Threading.Tasks.Task(Of TResult)
+  name.vb: Task(Of TResult)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - name: TResult
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TResult
+  - name: )
+- uid: System.Threading.Tasks
+  commentId: N:System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading.Tasks
+  nameWithType: System.Threading.Tasks
+  fullName: System.Threading.Tasks
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks

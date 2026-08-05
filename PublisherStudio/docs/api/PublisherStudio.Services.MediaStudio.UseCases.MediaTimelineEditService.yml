@@ -1,0 +1,1690 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  commentId: T:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  id: MediaTimelineEditService
+  parent: PublisherStudio.Services.MediaStudio.UseCases
+  children:
+  - PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.#ctor(PublisherStudio.Services.PublicationMediaData,PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService})
+  - PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CanMergeBoundary(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Int32)
+  - PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Clone(PublisherStudio.BusinessObjects.PublicationMediaSegment)
+  - PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CloneVideoLayer(PublisherStudio.BusinessObjects.VideoEffectLayer)
+  - PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CloneVideoProject(PublisherStudio.BusinessObjects.VideoProjectDocument)
+  - PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateDefaultVideoLayer(System.String)
+  - PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateFilter(PublisherStudio.BusinessObjects.VideoEffectFilterKind)
+  - PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateTrackProjection(PublisherStudio.BusinessObjects.VideoProjectDocument,System.Guid)
+  - PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Duplicate(PublisherStudio.BusinessObjects.PublicationMediaSegment)
+  - PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.InsertAt(System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Double,System.Double,PublisherStudio.BusinessObjects.PublicationMediaSegment)
+  - PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.MergeBoundary(System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Int32)
+  - PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Normalize(System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Boolean)
+  - PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.NormalizeVideoLayers(System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.VideoEffectLayer},System.Double,System.Double,System.String)
+  - PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.ReplaceTrackProjection(PublisherStudio.BusinessObjects.VideoProjectDocument,System.Guid,System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.PublicationMediaSegment})
+  - PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SegmentIndexAt(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Double,System.Double)
+  - PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SegmentTimelineStart(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Int32,System.Double)
+  - PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SourcePositionAt(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Int32,System.Double,System.Double)
+  - PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SplitAt(System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Double,System.Double)
+  - PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SynchronizeLiveSourceLayer(PublisherStudio.BusinessObjects.LiveSourceElement)
+  - PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.TimelineLength(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Double)
+  langs:
+  - csharp
+  - vb
+  name: MediaTimelineEditService
+  nameWithType: MediaTimelineEditService
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaStudio.UseCases
+  summary: Reusable, non-destructive clip orchestration shared by Video Studio, Audio Studio and live video inputs. Components own pointer state; this service owns deterministic timeline, cut-section and video-layer mutations.
+  example: []
+  syntax:
+    content: public sealed class MediaTimelineEditService
+    content.vb: Public NotInheritable Class MediaTimelineEditService
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.#ctor(PublisherStudio.Services.PublicationMediaData,PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService})
+  commentId: M:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.#ctor(PublisherStudio.Services.PublicationMediaData,PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService})
+  id: '#ctor(PublisherStudio.Services.PublicationMediaData,PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService})'
+  parent: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  langs:
+  - csharp
+  - vb
+  name: MediaTimelineEditService(PublicationMediaData, IPublisherRuntimePolicyDataService, ILogger<MediaTimelineEditService>)
+  nameWithType: MediaTimelineEditService.MediaTimelineEditService(PublicationMediaData, IPublisherRuntimePolicyDataService, ILogger<MediaTimelineEditService>)
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.MediaTimelineEditService(PublisherStudio.Services.PublicationMediaData, PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService, Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaStudio.UseCases
+  summary: Reusable, non-destructive clip orchestration shared by Video Studio, Audio Studio and live video inputs. Components own pointer state; this service owns deterministic timeline, cut-section and video-layer mutations.
+  example: []
+  syntax:
+    content: public MediaTimelineEditService(PublicationMediaData mediaData, IPublisherRuntimePolicyDataService runtimePolicy, ILogger<MediaTimelineEditService> logger)
+    parameters:
+    - id: mediaData
+      type: PublisherStudio.Services.PublicationMediaData
+    - id: runtimePolicy
+      type: PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService}
+    content.vb: Public Sub New(mediaData As PublicationMediaData, runtimePolicy As IPublisherRuntimePolicyDataService, logger As ILogger(Of MediaTimelineEditService))
+  overload: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.#ctor*
+  nameWithType.vb: MediaTimelineEditService.New(PublicationMediaData, IPublisherRuntimePolicyDataService, ILogger(Of MediaTimelineEditService))
+  fullName.vb: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.New(PublisherStudio.Services.PublicationMediaData, PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService, Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService))
+  name.vb: New(PublicationMediaData, IPublisherRuntimePolicyDataService, ILogger(Of MediaTimelineEditService))
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Normalize(System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Boolean)
+  commentId: M:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Normalize(System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Boolean)
+  id: Normalize(System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Boolean)
+  parent: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  langs:
+  - csharp
+  - vb
+  name: Normalize(IEnumerable<PublicationMediaSegment>?, bool)
+  nameWithType: MediaTimelineEditService.Normalize(IEnumerable<PublicationMediaSegment>?, bool)
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Normalize(System.Collections.Generic.IEnumerable<PublisherStudio.BusinessObjects.PublicationMediaSegment>?, bool)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaStudio.UseCases
+  summary: Runs the normalize operation.
+  example: []
+  syntax:
+    content: public List<PublicationMediaSegment> Normalize(IEnumerable<PublicationMediaSegment>? source, bool video)
+    parameters:
+    - id: source
+      type: System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.PublicationMediaSegment}
+    - id: video
+      type: System.Boolean
+    return:
+      type: System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationMediaSegment}
+    content.vb: Public Function Normalize(source As IEnumerable(Of PublicationMediaSegment), video As Boolean) As List(Of PublicationMediaSegment)
+  overload: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Normalize*
+  nameWithType.vb: MediaTimelineEditService.Normalize(IEnumerable(Of PublicationMediaSegment), Boolean)
+  fullName.vb: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Normalize(System.Collections.Generic.IEnumerable(Of PublisherStudio.BusinessObjects.PublicationMediaSegment), Boolean)
+  name.vb: Normalize(IEnumerable(Of PublicationMediaSegment), Boolean)
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CloneVideoProject(PublisherStudio.BusinessObjects.VideoProjectDocument)
+  commentId: M:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CloneVideoProject(PublisherStudio.BusinessObjects.VideoProjectDocument)
+  id: CloneVideoProject(PublisherStudio.BusinessObjects.VideoProjectDocument)
+  parent: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  langs:
+  - csharp
+  - vb
+  name: CloneVideoProject(VideoProjectDocument?)
+  nameWithType: MediaTimelineEditService.CloneVideoProject(VideoProjectDocument?)
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CloneVideoProject(PublisherStudio.BusinessObjects.VideoProjectDocument?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaStudio.UseCases
+  summary: Runs the clone video project operation.
+  example: []
+  syntax:
+    content: public VideoProjectDocument CloneVideoProject(VideoProjectDocument? source)
+    parameters:
+    - id: source
+      type: PublisherStudio.BusinessObjects.VideoProjectDocument
+    return:
+      type: PublisherStudio.BusinessObjects.VideoProjectDocument
+    content.vb: Public Function CloneVideoProject(source As VideoProjectDocument) As VideoProjectDocument
+  overload: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CloneVideoProject*
+  nameWithType.vb: MediaTimelineEditService.CloneVideoProject(VideoProjectDocument)
+  fullName.vb: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CloneVideoProject(PublisherStudio.BusinessObjects.VideoProjectDocument)
+  name.vb: CloneVideoProject(VideoProjectDocument)
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateTrackProjection(PublisherStudio.BusinessObjects.VideoProjectDocument,System.Guid)
+  commentId: M:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateTrackProjection(PublisherStudio.BusinessObjects.VideoProjectDocument,System.Guid)
+  id: CreateTrackProjection(PublisherStudio.BusinessObjects.VideoProjectDocument,System.Guid)
+  parent: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  langs:
+  - csharp
+  - vb
+  name: CreateTrackProjection(VideoProjectDocument, Guid)
+  nameWithType: MediaTimelineEditService.CreateTrackProjection(VideoProjectDocument, Guid)
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateTrackProjection(PublisherStudio.BusinessObjects.VideoProjectDocument, System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaStudio.UseCases
+  summary: Creates track projection.
+  example: []
+  syntax:
+    content: public List<PublicationMediaSegment> CreateTrackProjection(VideoProjectDocument project, Guid trackId)
+    parameters:
+    - id: project
+      type: PublisherStudio.BusinessObjects.VideoProjectDocument
+    - id: trackId
+      type: System.Guid
+    return:
+      type: System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationMediaSegment}
+    content.vb: Public Function CreateTrackProjection(project As VideoProjectDocument, trackId As Guid) As List(Of PublicationMediaSegment)
+  overload: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateTrackProjection*
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.ReplaceTrackProjection(PublisherStudio.BusinessObjects.VideoProjectDocument,System.Guid,System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.PublicationMediaSegment})
+  commentId: M:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.ReplaceTrackProjection(PublisherStudio.BusinessObjects.VideoProjectDocument,System.Guid,System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.PublicationMediaSegment})
+  id: ReplaceTrackProjection(PublisherStudio.BusinessObjects.VideoProjectDocument,System.Guid,System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.PublicationMediaSegment})
+  parent: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  langs:
+  - csharp
+  - vb
+  name: ReplaceTrackProjection(VideoProjectDocument, Guid, IEnumerable<PublicationMediaSegment>)
+  nameWithType: MediaTimelineEditService.ReplaceTrackProjection(VideoProjectDocument, Guid, IEnumerable<PublicationMediaSegment>)
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.ReplaceTrackProjection(PublisherStudio.BusinessObjects.VideoProjectDocument, System.Guid, System.Collections.Generic.IEnumerable<PublisherStudio.BusinessObjects.PublicationMediaSegment>)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaStudio.UseCases
+  summary: Runs the replace track projection operation.
+  example: []
+  syntax:
+    content: public void ReplaceTrackProjection(VideoProjectDocument project, Guid trackId, IEnumerable<PublicationMediaSegment> projection)
+    parameters:
+    - id: project
+      type: PublisherStudio.BusinessObjects.VideoProjectDocument
+    - id: trackId
+      type: System.Guid
+    - id: projection
+      type: System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.PublicationMediaSegment}
+    content.vb: Public Sub ReplaceTrackProjection(project As VideoProjectDocument, trackId As Guid, projection As IEnumerable(Of PublicationMediaSegment))
+  overload: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.ReplaceTrackProjection*
+  nameWithType.vb: MediaTimelineEditService.ReplaceTrackProjection(VideoProjectDocument, Guid, IEnumerable(Of PublicationMediaSegment))
+  fullName.vb: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.ReplaceTrackProjection(PublisherStudio.BusinessObjects.VideoProjectDocument, System.Guid, System.Collections.Generic.IEnumerable(Of PublisherStudio.BusinessObjects.PublicationMediaSegment))
+  name.vb: ReplaceTrackProjection(VideoProjectDocument, Guid, IEnumerable(Of PublicationMediaSegment))
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateDefaultVideoLayer(System.String)
+  commentId: M:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateDefaultVideoLayer(System.String)
+  id: CreateDefaultVideoLayer(System.String)
+  parent: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  langs:
+  - csharp
+  - vb
+  name: CreateDefaultVideoLayer(string?)
+  nameWithType: MediaTimelineEditService.CreateDefaultVideoLayer(string?)
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateDefaultVideoLayer(string?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaStudio.UseCases
+  summary: Creates default video layer.
+  example: []
+  syntax:
+    content: public VideoEffectLayer CreateDefaultVideoLayer(string? name = null)
+    parameters:
+    - id: name
+      type: System.String
+    return:
+      type: PublisherStudio.BusinessObjects.VideoEffectLayer
+    content.vb: Public Function CreateDefaultVideoLayer(name As String = Nothing) As VideoEffectLayer
+  overload: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateDefaultVideoLayer*
+  nameWithType.vb: MediaTimelineEditService.CreateDefaultVideoLayer(String)
+  fullName.vb: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateDefaultVideoLayer(String)
+  name.vb: CreateDefaultVideoLayer(String)
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.NormalizeVideoLayers(System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.VideoEffectLayer},System.Double,System.Double,System.String)
+  commentId: M:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.NormalizeVideoLayers(System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.VideoEffectLayer},System.Double,System.Double,System.String)
+  id: NormalizeVideoLayers(System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.VideoEffectLayer},System.Double,System.Double,System.String)
+  parent: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  langs:
+  - csharp
+  - vb
+  name: NormalizeVideoLayers(IEnumerable<VideoEffectLayer>?, double, double, string?)
+  nameWithType: MediaTimelineEditService.NormalizeVideoLayers(IEnumerable<VideoEffectLayer>?, double, double, string?)
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.NormalizeVideoLayers(System.Collections.Generic.IEnumerable<PublisherStudio.BusinessObjects.VideoEffectLayer>?, double, double, string?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaStudio.UseCases
+  summary: Normalizes video layers.
+  example: []
+  syntax:
+    content: public List<VideoEffectLayer> NormalizeVideoLayers(IEnumerable<VideoEffectLayer>? source, double minimumSeconds, double maximumSeconds, string? defaultName = null)
+    parameters:
+    - id: source
+      type: System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.VideoEffectLayer}
+    - id: minimumSeconds
+      type: System.Double
+    - id: maximumSeconds
+      type: System.Double
+    - id: defaultName
+      type: System.String
+    return:
+      type: System.Collections.Generic.List{PublisherStudio.BusinessObjects.VideoEffectLayer}
+    content.vb: Public Function NormalizeVideoLayers(source As IEnumerable(Of VideoEffectLayer), minimumSeconds As Double, maximumSeconds As Double, defaultName As String = Nothing) As List(Of VideoEffectLayer)
+  overload: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.NormalizeVideoLayers*
+  nameWithType.vb: MediaTimelineEditService.NormalizeVideoLayers(IEnumerable(Of VideoEffectLayer), Double, Double, String)
+  fullName.vb: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.NormalizeVideoLayers(System.Collections.Generic.IEnumerable(Of PublisherStudio.BusinessObjects.VideoEffectLayer), Double, Double, String)
+  name.vb: NormalizeVideoLayers(IEnumerable(Of VideoEffectLayer), Double, Double, String)
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.TimelineLength(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Double)
+  commentId: M:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.TimelineLength(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Double)
+  id: TimelineLength(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Double)
+  parent: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  langs:
+  - csharp
+  - vb
+  name: TimelineLength(IReadOnlyList<PublicationMediaSegment>, double)
+  nameWithType: MediaTimelineEditService.TimelineLength(IReadOnlyList<PublicationMediaSegment>, double)
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.TimelineLength(System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.PublicationMediaSegment>, double)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaStudio.UseCases
+  summary: Runs the timeline length operation.
+  example: []
+  syntax:
+    content: public double TimelineLength(IReadOnlyList<PublicationMediaSegment> segments, double playbackRate)
+    parameters:
+    - id: segments
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment}
+    - id: playbackRate
+      type: System.Double
+    return:
+      type: System.Double
+    content.vb: Public Function TimelineLength(segments As IReadOnlyList(Of PublicationMediaSegment), playbackRate As Double) As Double
+  overload: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.TimelineLength*
+  nameWithType.vb: MediaTimelineEditService.TimelineLength(IReadOnlyList(Of PublicationMediaSegment), Double)
+  fullName.vb: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.TimelineLength(System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.PublicationMediaSegment), Double)
+  name.vb: TimelineLength(IReadOnlyList(Of PublicationMediaSegment), Double)
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SegmentIndexAt(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Double,System.Double)
+  commentId: M:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SegmentIndexAt(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Double,System.Double)
+  id: SegmentIndexAt(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Double,System.Double)
+  parent: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  langs:
+  - csharp
+  - vb
+  name: SegmentIndexAt(IReadOnlyList<PublicationMediaSegment>, double, double)
+  nameWithType: MediaTimelineEditService.SegmentIndexAt(IReadOnlyList<PublicationMediaSegment>, double, double)
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SegmentIndexAt(System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.PublicationMediaSegment>, double, double)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaStudio.UseCases
+  summary: Runs the segment index at operation.
+  example: []
+  syntax:
+    content: public int SegmentIndexAt(IReadOnlyList<PublicationMediaSegment> segments, double playbackRate, double timelineSeconds)
+    parameters:
+    - id: segments
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment}
+    - id: playbackRate
+      type: System.Double
+    - id: timelineSeconds
+      type: System.Double
+    return:
+      type: System.Int32
+    content.vb: Public Function SegmentIndexAt(segments As IReadOnlyList(Of PublicationMediaSegment), playbackRate As Double, timelineSeconds As Double) As Integer
+  overload: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SegmentIndexAt*
+  nameWithType.vb: MediaTimelineEditService.SegmentIndexAt(IReadOnlyList(Of PublicationMediaSegment), Double, Double)
+  fullName.vb: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SegmentIndexAt(System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.PublicationMediaSegment), Double, Double)
+  name.vb: SegmentIndexAt(IReadOnlyList(Of PublicationMediaSegment), Double, Double)
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SegmentTimelineStart(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Int32,System.Double)
+  commentId: M:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SegmentTimelineStart(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Int32,System.Double)
+  id: SegmentTimelineStart(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Int32,System.Double)
+  parent: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  langs:
+  - csharp
+  - vb
+  name: SegmentTimelineStart(IReadOnlyList<PublicationMediaSegment>, int, double)
+  nameWithType: MediaTimelineEditService.SegmentTimelineStart(IReadOnlyList<PublicationMediaSegment>, int, double)
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SegmentTimelineStart(System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.PublicationMediaSegment>, int, double)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaStudio.UseCases
+  summary: Runs the segment timeline start operation.
+  example: []
+  syntax:
+    content: public double SegmentTimelineStart(IReadOnlyList<PublicationMediaSegment> segments, int index, double playbackRate)
+    parameters:
+    - id: segments
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment}
+    - id: index
+      type: System.Int32
+    - id: playbackRate
+      type: System.Double
+    return:
+      type: System.Double
+    content.vb: Public Function SegmentTimelineStart(segments As IReadOnlyList(Of PublicationMediaSegment), index As Integer, playbackRate As Double) As Double
+  overload: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SegmentTimelineStart*
+  nameWithType.vb: MediaTimelineEditService.SegmentTimelineStart(IReadOnlyList(Of PublicationMediaSegment), Integer, Double)
+  fullName.vb: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SegmentTimelineStart(System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.PublicationMediaSegment), Integer, Double)
+  name.vb: SegmentTimelineStart(IReadOnlyList(Of PublicationMediaSegment), Integer, Double)
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SourcePositionAt(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Int32,System.Double,System.Double)
+  commentId: M:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SourcePositionAt(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Int32,System.Double,System.Double)
+  id: SourcePositionAt(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Int32,System.Double,System.Double)
+  parent: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  langs:
+  - csharp
+  - vb
+  name: SourcePositionAt(IReadOnlyList<PublicationMediaSegment>, int, double, double)
+  nameWithType: MediaTimelineEditService.SourcePositionAt(IReadOnlyList<PublicationMediaSegment>, int, double, double)
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SourcePositionAt(System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.PublicationMediaSegment>, int, double, double)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaStudio.UseCases
+  summary: Runs the source position at operation.
+  example: []
+  syntax:
+    content: public double SourcePositionAt(IReadOnlyList<PublicationMediaSegment> segments, int index, double playbackRate, double timelineSeconds)
+    parameters:
+    - id: segments
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment}
+    - id: index
+      type: System.Int32
+    - id: playbackRate
+      type: System.Double
+    - id: timelineSeconds
+      type: System.Double
+    return:
+      type: System.Double
+    content.vb: Public Function SourcePositionAt(segments As IReadOnlyList(Of PublicationMediaSegment), index As Integer, playbackRate As Double, timelineSeconds As Double) As Double
+  overload: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SourcePositionAt*
+  nameWithType.vb: MediaTimelineEditService.SourcePositionAt(IReadOnlyList(Of PublicationMediaSegment), Integer, Double, Double)
+  fullName.vb: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SourcePositionAt(System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.PublicationMediaSegment), Integer, Double, Double)
+  name.vb: SourcePositionAt(IReadOnlyList(Of PublicationMediaSegment), Integer, Double, Double)
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SplitAt(System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Double,System.Double)
+  commentId: M:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SplitAt(System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Double,System.Double)
+  id: SplitAt(System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Double,System.Double)
+  parent: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  langs:
+  - csharp
+  - vb
+  name: SplitAt(List<PublicationMediaSegment>, double, double)
+  nameWithType: MediaTimelineEditService.SplitAt(List<PublicationMediaSegment>, double, double)
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SplitAt(System.Collections.Generic.List<PublisherStudio.BusinessObjects.PublicationMediaSegment>, double, double)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaStudio.UseCases
+  summary: Runs the split at operation.
+  example: []
+  syntax:
+    content: public Guid? SplitAt(List<PublicationMediaSegment> segments, double playbackRate, double timelineSeconds)
+    parameters:
+    - id: segments
+      type: System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationMediaSegment}
+    - id: playbackRate
+      type: System.Double
+    - id: timelineSeconds
+      type: System.Double
+    return:
+      type: System.Nullable{System.Guid}
+    content.vb: Public Function SplitAt(segments As List(Of PublicationMediaSegment), playbackRate As Double, timelineSeconds As Double) As Guid?
+  overload: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SplitAt*
+  nameWithType.vb: MediaTimelineEditService.SplitAt(List(Of PublicationMediaSegment), Double, Double)
+  fullName.vb: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SplitAt(System.Collections.Generic.List(Of PublisherStudio.BusinessObjects.PublicationMediaSegment), Double, Double)
+  name.vb: SplitAt(List(Of PublicationMediaSegment), Double, Double)
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.InsertAt(System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Double,System.Double,PublisherStudio.BusinessObjects.PublicationMediaSegment)
+  commentId: M:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.InsertAt(System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Double,System.Double,PublisherStudio.BusinessObjects.PublicationMediaSegment)
+  id: InsertAt(System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Double,System.Double,PublisherStudio.BusinessObjects.PublicationMediaSegment)
+  parent: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  langs:
+  - csharp
+  - vb
+  name: InsertAt(List<PublicationMediaSegment>, double, double, PublicationMediaSegment)
+  nameWithType: MediaTimelineEditService.InsertAt(List<PublicationMediaSegment>, double, double, PublicationMediaSegment)
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.InsertAt(System.Collections.Generic.List<PublisherStudio.BusinessObjects.PublicationMediaSegment>, double, double, PublisherStudio.BusinessObjects.PublicationMediaSegment)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaStudio.UseCases
+  summary: Runs the insert at operation.
+  example: []
+  syntax:
+    content: public Guid InsertAt(List<PublicationMediaSegment> segments, double playbackRate, double timelineSeconds, PublicationMediaSegment inserted)
+    parameters:
+    - id: segments
+      type: System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationMediaSegment}
+    - id: playbackRate
+      type: System.Double
+    - id: timelineSeconds
+      type: System.Double
+    - id: inserted
+      type: PublisherStudio.BusinessObjects.PublicationMediaSegment
+    return:
+      type: System.Guid
+    content.vb: Public Function InsertAt(segments As List(Of PublicationMediaSegment), playbackRate As Double, timelineSeconds As Double, inserted As PublicationMediaSegment) As Guid
+  overload: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.InsertAt*
+  nameWithType.vb: MediaTimelineEditService.InsertAt(List(Of PublicationMediaSegment), Double, Double, PublicationMediaSegment)
+  fullName.vb: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.InsertAt(System.Collections.Generic.List(Of PublisherStudio.BusinessObjects.PublicationMediaSegment), Double, Double, PublisherStudio.BusinessObjects.PublicationMediaSegment)
+  name.vb: InsertAt(List(Of PublicationMediaSegment), Double, Double, PublicationMediaSegment)
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CanMergeBoundary(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Int32)
+  commentId: M:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CanMergeBoundary(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Int32)
+  id: CanMergeBoundary(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Int32)
+  parent: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  langs:
+  - csharp
+  - vb
+  name: CanMergeBoundary(IReadOnlyList<PublicationMediaSegment>, int)
+  nameWithType: MediaTimelineEditService.CanMergeBoundary(IReadOnlyList<PublicationMediaSegment>, int)
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CanMergeBoundary(System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.PublicationMediaSegment>, int)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaStudio.UseCases
+  summary: Determines whether merge boundary.
+  example: []
+  syntax:
+    content: public bool CanMergeBoundary(IReadOnlyList<PublicationMediaSegment> segments, int rightIndex)
+    parameters:
+    - id: segments
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment}
+    - id: rightIndex
+      type: System.Int32
+    return:
+      type: System.Boolean
+    content.vb: Public Function CanMergeBoundary(segments As IReadOnlyList(Of PublicationMediaSegment), rightIndex As Integer) As Boolean
+  overload: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CanMergeBoundary*
+  nameWithType.vb: MediaTimelineEditService.CanMergeBoundary(IReadOnlyList(Of PublicationMediaSegment), Integer)
+  fullName.vb: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CanMergeBoundary(System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.PublicationMediaSegment), Integer)
+  name.vb: CanMergeBoundary(IReadOnlyList(Of PublicationMediaSegment), Integer)
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.MergeBoundary(System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Int32)
+  commentId: M:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.MergeBoundary(System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Int32)
+  id: MergeBoundary(System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationMediaSegment},System.Int32)
+  parent: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  langs:
+  - csharp
+  - vb
+  name: MergeBoundary(List<PublicationMediaSegment>, int)
+  nameWithType: MediaTimelineEditService.MergeBoundary(List<PublicationMediaSegment>, int)
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.MergeBoundary(System.Collections.Generic.List<PublisherStudio.BusinessObjects.PublicationMediaSegment>, int)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaStudio.UseCases
+  summary: Runs the merge boundary operation.
+  example: []
+  syntax:
+    content: public bool MergeBoundary(List<PublicationMediaSegment> segments, int rightIndex)
+    parameters:
+    - id: segments
+      type: System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationMediaSegment}
+    - id: rightIndex
+      type: System.Int32
+    return:
+      type: System.Boolean
+    content.vb: Public Function MergeBoundary(segments As List(Of PublicationMediaSegment), rightIndex As Integer) As Boolean
+  overload: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.MergeBoundary*
+  nameWithType.vb: MediaTimelineEditService.MergeBoundary(List(Of PublicationMediaSegment), Integer)
+  fullName.vb: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.MergeBoundary(System.Collections.Generic.List(Of PublisherStudio.BusinessObjects.PublicationMediaSegment), Integer)
+  name.vb: MergeBoundary(List(Of PublicationMediaSegment), Integer)
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Clone(PublisherStudio.BusinessObjects.PublicationMediaSegment)
+  commentId: M:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Clone(PublisherStudio.BusinessObjects.PublicationMediaSegment)
+  id: Clone(PublisherStudio.BusinessObjects.PublicationMediaSegment)
+  parent: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  langs:
+  - csharp
+  - vb
+  name: Clone(PublicationMediaSegment)
+  nameWithType: MediaTimelineEditService.Clone(PublicationMediaSegment)
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Clone(PublisherStudio.BusinessObjects.PublicationMediaSegment)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaStudio.UseCases
+  summary: Runs the clone operation.
+  example: []
+  syntax:
+    content: public PublicationMediaSegment Clone(PublicationMediaSegment segment)
+    parameters:
+    - id: segment
+      type: PublisherStudio.BusinessObjects.PublicationMediaSegment
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationMediaSegment
+    content.vb: Public Function Clone(segment As PublicationMediaSegment) As PublicationMediaSegment
+  overload: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Clone*
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Duplicate(PublisherStudio.BusinessObjects.PublicationMediaSegment)
+  commentId: M:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Duplicate(PublisherStudio.BusinessObjects.PublicationMediaSegment)
+  id: Duplicate(PublisherStudio.BusinessObjects.PublicationMediaSegment)
+  parent: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  langs:
+  - csharp
+  - vb
+  name: Duplicate(PublicationMediaSegment)
+  nameWithType: MediaTimelineEditService.Duplicate(PublicationMediaSegment)
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Duplicate(PublisherStudio.BusinessObjects.PublicationMediaSegment)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaStudio.UseCases
+  summary: Runs the duplicate operation.
+  example: []
+  syntax:
+    content: public PublicationMediaSegment Duplicate(PublicationMediaSegment segment)
+    parameters:
+    - id: segment
+      type: PublisherStudio.BusinessObjects.PublicationMediaSegment
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationMediaSegment
+    content.vb: Public Function Duplicate(segment As PublicationMediaSegment) As PublicationMediaSegment
+  overload: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Duplicate*
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CloneVideoLayer(PublisherStudio.BusinessObjects.VideoEffectLayer)
+  commentId: M:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CloneVideoLayer(PublisherStudio.BusinessObjects.VideoEffectLayer)
+  id: CloneVideoLayer(PublisherStudio.BusinessObjects.VideoEffectLayer)
+  parent: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  langs:
+  - csharp
+  - vb
+  name: CloneVideoLayer(VideoEffectLayer)
+  nameWithType: MediaTimelineEditService.CloneVideoLayer(VideoEffectLayer)
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CloneVideoLayer(PublisherStudio.BusinessObjects.VideoEffectLayer)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaStudio.UseCases
+  summary: Runs the clone video layer operation.
+  example: []
+  syntax:
+    content: public VideoEffectLayer CloneVideoLayer(VideoEffectLayer layer)
+    parameters:
+    - id: layer
+      type: PublisherStudio.BusinessObjects.VideoEffectLayer
+    return:
+      type: PublisherStudio.BusinessObjects.VideoEffectLayer
+    content.vb: Public Function CloneVideoLayer(layer As VideoEffectLayer) As VideoEffectLayer
+  overload: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CloneVideoLayer*
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateFilter(PublisherStudio.BusinessObjects.VideoEffectFilterKind)
+  commentId: M:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateFilter(PublisherStudio.BusinessObjects.VideoEffectFilterKind)
+  id: CreateFilter(PublisherStudio.BusinessObjects.VideoEffectFilterKind)
+  parent: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  langs:
+  - csharp
+  - vb
+  name: CreateFilter(VideoEffectFilterKind)
+  nameWithType: MediaTimelineEditService.CreateFilter(VideoEffectFilterKind)
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateFilter(PublisherStudio.BusinessObjects.VideoEffectFilterKind)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaStudio.UseCases
+  summary: Creates filter.
+  example: []
+  syntax:
+    content: public VideoEffectFilter CreateFilter(VideoEffectFilterKind kind)
+    parameters:
+    - id: kind
+      type: PublisherStudio.BusinessObjects.VideoEffectFilterKind
+    return:
+      type: PublisherStudio.BusinessObjects.VideoEffectFilter
+    content.vb: Public Function CreateFilter(kind As VideoEffectFilterKind) As VideoEffectFilter
+  overload: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateFilter*
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SynchronizeLiveSourceLayer(PublisherStudio.BusinessObjects.LiveSourceElement)
+  commentId: M:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SynchronizeLiveSourceLayer(PublisherStudio.BusinessObjects.LiveSourceElement)
+  id: SynchronizeLiveSourceLayer(PublisherStudio.BusinessObjects.LiveSourceElement)
+  parent: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+  langs:
+  - csharp
+  - vb
+  name: SynchronizeLiveSourceLayer(LiveSourceElement)
+  nameWithType: MediaTimelineEditService.SynchronizeLiveSourceLayer(LiveSourceElement)
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SynchronizeLiveSourceLayer(PublisherStudio.BusinessObjects.LiveSourceElement)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.MediaStudio.UseCases
+  summary: Projects the Mainframe live-input adjustment controls into one canonical layer while preserving any additional user-authored layers. Streaming preview and program output therefore use the same layer/filter renderer as Video Studio instead of a separate chroma/filter implementation.
+  example: []
+  syntax:
+    content: public void SynchronizeLiveSourceLayer(LiveSourceElement source)
+    parameters:
+    - id: source
+      type: PublisherStudio.BusinessObjects.LiveSourceElement
+    content.vb: Public Sub SynchronizeLiveSourceLayer(source As LiveSourceElement)
+  overload: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SynchronizeLiveSourceLayer*
+references:
+- uid: PublisherStudio.Services.MediaStudio.UseCases
+  commentId: N:PublisherStudio.Services.MediaStudio.UseCases
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.MediaStudio.UseCases
+  nameWithType: PublisherStudio.Services.MediaStudio.UseCases
+  fullName: PublisherStudio.Services.MediaStudio.UseCases
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.MediaStudio
+    name: MediaStudio
+    isExternal: true
+    href: PublisherStudio.Services.MediaStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.MediaStudio.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.MediaStudio.UseCases.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.MediaStudio
+    name: MediaStudio
+    isExternal: true
+    href: PublisherStudio.Services.MediaStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.MediaStudio.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.MediaStudio.UseCases.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.#ctor*
+  commentId: Overload:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.html#PublisherStudio_Services_MediaStudio_UseCases_MediaTimelineEditService__ctor_PublisherStudio_Services_PublicationMediaData_PublisherStudio_Services_Configuration_IPublisherRuntimePolicyDataService_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_MediaStudio_UseCases_MediaTimelineEditService__
+  name: MediaTimelineEditService
+  nameWithType: MediaTimelineEditService.MediaTimelineEditService
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.MediaTimelineEditService
+  nameWithType.vb: MediaTimelineEditService.New
+  fullName.vb: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.New
+  name.vb: New
+- uid: PublisherStudio.Services.PublicationMediaData
+  commentId: T:PublisherStudio.Services.PublicationMediaData
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.PublicationMediaData.html
+  name: PublicationMediaData
+  nameWithType: PublicationMediaData
+  fullName: PublisherStudio.Services.PublicationMediaData
+- uid: PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService
+  commentId: T:PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService
+  parent: PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService.html
+  name: IPublisherRuntimePolicyDataService
+  nameWithType: IPublisherRuntimePolicyDataService
+  fullName: PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<MediaTimelineEditService>
+  nameWithType: ILogger<MediaTimelineEditService>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService>
+  nameWithType.vb: ILogger(Of MediaTimelineEditService)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService)
+  name.vb: ILogger(Of MediaTimelineEditService)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+    name: MediaTimelineEditService
+    isExternal: true
+    href: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService
+    name: MediaTimelineEditService
+    isExternal: true
+    href: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.html
+  - name: )
+- uid: PublisherStudio.Services
+  commentId: N:PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services
+  nameWithType: PublisherStudio.Services
+  fullName: PublisherStudio.Services
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+- uid: PublisherStudio.Services.Configuration
+  commentId: N:PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Configuration
+  nameWithType: PublisherStudio.Services.Configuration
+  fullName: PublisherStudio.Services.Configuration
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Normalize*
+  commentId: Overload:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Normalize
+  isExternal: true
+  href: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.html#PublisherStudio_Services_MediaStudio_UseCases_MediaTimelineEditService_Normalize_System_Collections_Generic_IEnumerable_PublisherStudio_BusinessObjects_PublicationMediaSegment__System_Boolean_
+  name: Normalize
+  nameWithType: MediaTimelineEditService.Normalize
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Normalize
+- uid: System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.PublicationMediaSegment}
+  commentId: T:System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.PublicationMediaSegment}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IEnumerable`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  name: IEnumerable<PublicationMediaSegment>
+  nameWithType: IEnumerable<PublicationMediaSegment>
+  fullName: System.Collections.Generic.IEnumerable<PublisherStudio.BusinessObjects.PublicationMediaSegment>
+  nameWithType.vb: IEnumerable(Of PublicationMediaSegment)
+  fullName.vb: System.Collections.Generic.IEnumerable(Of PublisherStudio.BusinessObjects.PublicationMediaSegment)
+  name.vb: IEnumerable(Of PublicationMediaSegment)
+  spec.csharp:
+  - uid: System.Collections.Generic.IEnumerable`1
+    name: IEnumerable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.PublicationMediaSegment
+    name: PublicationMediaSegment
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublicationMediaSegment.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IEnumerable`1
+    name: IEnumerable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.PublicationMediaSegment
+    name: PublicationMediaSegment
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublicationMediaSegment.html
+  - name: )
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationMediaSegment}
+  commentId: T:System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationMediaSegment}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.List`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<PublicationMediaSegment>
+  nameWithType: List<PublicationMediaSegment>
+  fullName: System.Collections.Generic.List<PublisherStudio.BusinessObjects.PublicationMediaSegment>
+  nameWithType.vb: List(Of PublicationMediaSegment)
+  fullName.vb: System.Collections.Generic.List(Of PublisherStudio.BusinessObjects.PublicationMediaSegment)
+  name.vb: List(Of PublicationMediaSegment)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.PublicationMediaSegment
+    name: PublicationMediaSegment
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublicationMediaSegment.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.PublicationMediaSegment
+    name: PublicationMediaSegment
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublicationMediaSegment.html
+  - name: )
+- uid: System.Collections.Generic.IEnumerable`1
+  commentId: T:System.Collections.Generic.IEnumerable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  name: IEnumerable<T>
+  nameWithType: IEnumerable<T>
+  fullName: System.Collections.Generic.IEnumerable<T>
+  nameWithType.vb: IEnumerable(Of T)
+  fullName.vb: System.Collections.Generic.IEnumerable(Of T)
+  name.vb: IEnumerable(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IEnumerable`1
+    name: IEnumerable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IEnumerable`1
+    name: IEnumerable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: System.Collections.Generic.List`1
+  commentId: T:System.Collections.Generic.List`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<T>
+  nameWithType: List<T>
+  fullName: System.Collections.Generic.List<T>
+  nameWithType.vb: List(Of T)
+  fullName.vb: System.Collections.Generic.List(Of T)
+  name.vb: List(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CloneVideoProject*
+  commentId: Overload:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CloneVideoProject
+  isExternal: true
+  href: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.html#PublisherStudio_Services_MediaStudio_UseCases_MediaTimelineEditService_CloneVideoProject_PublisherStudio_BusinessObjects_VideoProjectDocument_
+  name: CloneVideoProject
+  nameWithType: MediaTimelineEditService.CloneVideoProject
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CloneVideoProject
+- uid: PublisherStudio.BusinessObjects.VideoProjectDocument
+  commentId: T:PublisherStudio.BusinessObjects.VideoProjectDocument
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.VideoProjectDocument.html
+  name: VideoProjectDocument
+  nameWithType: VideoProjectDocument
+  fullName: PublisherStudio.BusinessObjects.VideoProjectDocument
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateTrackProjection*
+  commentId: Overload:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateTrackProjection
+  isExternal: true
+  href: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.html#PublisherStudio_Services_MediaStudio_UseCases_MediaTimelineEditService_CreateTrackProjection_PublisherStudio_BusinessObjects_VideoProjectDocument_System_Guid_
+  name: CreateTrackProjection
+  nameWithType: MediaTimelineEditService.CreateTrackProjection
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateTrackProjection
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.ReplaceTrackProjection*
+  commentId: Overload:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.ReplaceTrackProjection
+  isExternal: true
+  href: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.html#PublisherStudio_Services_MediaStudio_UseCases_MediaTimelineEditService_ReplaceTrackProjection_PublisherStudio_BusinessObjects_VideoProjectDocument_System_Guid_System_Collections_Generic_IEnumerable_PublisherStudio_BusinessObjects_PublicationMediaSegment__
+  name: ReplaceTrackProjection
+  nameWithType: MediaTimelineEditService.ReplaceTrackProjection
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.ReplaceTrackProjection
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateDefaultVideoLayer*
+  commentId: Overload:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateDefaultVideoLayer
+  isExternal: true
+  href: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.html#PublisherStudio_Services_MediaStudio_UseCases_MediaTimelineEditService_CreateDefaultVideoLayer_System_String_
+  name: CreateDefaultVideoLayer
+  nameWithType: MediaTimelineEditService.CreateDefaultVideoLayer
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateDefaultVideoLayer
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.BusinessObjects.VideoEffectLayer
+  commentId: T:PublisherStudio.BusinessObjects.VideoEffectLayer
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.VideoEffectLayer.html
+  name: VideoEffectLayer
+  nameWithType: VideoEffectLayer
+  fullName: PublisherStudio.BusinessObjects.VideoEffectLayer
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.NormalizeVideoLayers*
+  commentId: Overload:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.NormalizeVideoLayers
+  isExternal: true
+  href: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.html#PublisherStudio_Services_MediaStudio_UseCases_MediaTimelineEditService_NormalizeVideoLayers_System_Collections_Generic_IEnumerable_PublisherStudio_BusinessObjects_VideoEffectLayer__System_Double_System_Double_System_String_
+  name: NormalizeVideoLayers
+  nameWithType: MediaTimelineEditService.NormalizeVideoLayers
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.NormalizeVideoLayers
+- uid: System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.VideoEffectLayer}
+  commentId: T:System.Collections.Generic.IEnumerable{PublisherStudio.BusinessObjects.VideoEffectLayer}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IEnumerable`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  name: IEnumerable<VideoEffectLayer>
+  nameWithType: IEnumerable<VideoEffectLayer>
+  fullName: System.Collections.Generic.IEnumerable<PublisherStudio.BusinessObjects.VideoEffectLayer>
+  nameWithType.vb: IEnumerable(Of VideoEffectLayer)
+  fullName.vb: System.Collections.Generic.IEnumerable(Of PublisherStudio.BusinessObjects.VideoEffectLayer)
+  name.vb: IEnumerable(Of VideoEffectLayer)
+  spec.csharp:
+  - uid: System.Collections.Generic.IEnumerable`1
+    name: IEnumerable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.VideoEffectLayer
+    name: VideoEffectLayer
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.VideoEffectLayer.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IEnumerable`1
+    name: IEnumerable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.VideoEffectLayer
+    name: VideoEffectLayer
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.VideoEffectLayer.html
+  - name: )
+- uid: System.Double
+  commentId: T:System.Double
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.double
+  name: double
+  nameWithType: double
+  fullName: double
+  nameWithType.vb: Double
+  fullName.vb: Double
+  name.vb: Double
+- uid: System.Collections.Generic.List{PublisherStudio.BusinessObjects.VideoEffectLayer}
+  commentId: T:System.Collections.Generic.List{PublisherStudio.BusinessObjects.VideoEffectLayer}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.List`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<VideoEffectLayer>
+  nameWithType: List<VideoEffectLayer>
+  fullName: System.Collections.Generic.List<PublisherStudio.BusinessObjects.VideoEffectLayer>
+  nameWithType.vb: List(Of VideoEffectLayer)
+  fullName.vb: System.Collections.Generic.List(Of PublisherStudio.BusinessObjects.VideoEffectLayer)
+  name.vb: List(Of VideoEffectLayer)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.VideoEffectLayer
+    name: VideoEffectLayer
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.VideoEffectLayer.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.VideoEffectLayer
+    name: VideoEffectLayer
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.VideoEffectLayer.html
+  - name: )
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.TimelineLength*
+  commentId: Overload:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.TimelineLength
+  isExternal: true
+  href: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.html#PublisherStudio_Services_MediaStudio_UseCases_MediaTimelineEditService_TimelineLength_System_Collections_Generic_IReadOnlyList_PublisherStudio_BusinessObjects_PublicationMediaSegment__System_Double_
+  name: TimelineLength
+  nameWithType: MediaTimelineEditService.TimelineLength
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.TimelineLength
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.PublicationMediaSegment}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<PublicationMediaSegment>
+  nameWithType: IReadOnlyList<PublicationMediaSegment>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.PublicationMediaSegment>
+  nameWithType.vb: IReadOnlyList(Of PublicationMediaSegment)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.PublicationMediaSegment)
+  name.vb: IReadOnlyList(Of PublicationMediaSegment)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.PublicationMediaSegment
+    name: PublicationMediaSegment
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublicationMediaSegment.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.PublicationMediaSegment
+    name: PublicationMediaSegment
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublicationMediaSegment.html
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SegmentIndexAt*
+  commentId: Overload:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SegmentIndexAt
+  isExternal: true
+  href: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.html#PublisherStudio_Services_MediaStudio_UseCases_MediaTimelineEditService_SegmentIndexAt_System_Collections_Generic_IReadOnlyList_PublisherStudio_BusinessObjects_PublicationMediaSegment__System_Double_System_Double_
+  name: SegmentIndexAt
+  nameWithType: MediaTimelineEditService.SegmentIndexAt
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SegmentIndexAt
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SegmentTimelineStart*
+  commentId: Overload:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SegmentTimelineStart
+  isExternal: true
+  href: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.html#PublisherStudio_Services_MediaStudio_UseCases_MediaTimelineEditService_SegmentTimelineStart_System_Collections_Generic_IReadOnlyList_PublisherStudio_BusinessObjects_PublicationMediaSegment__System_Int32_System_Double_
+  name: SegmentTimelineStart
+  nameWithType: MediaTimelineEditService.SegmentTimelineStart
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SegmentTimelineStart
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SourcePositionAt*
+  commentId: Overload:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SourcePositionAt
+  isExternal: true
+  href: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.html#PublisherStudio_Services_MediaStudio_UseCases_MediaTimelineEditService_SourcePositionAt_System_Collections_Generic_IReadOnlyList_PublisherStudio_BusinessObjects_PublicationMediaSegment__System_Int32_System_Double_System_Double_
+  name: SourcePositionAt
+  nameWithType: MediaTimelineEditService.SourcePositionAt
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SourcePositionAt
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SplitAt*
+  commentId: Overload:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SplitAt
+  isExternal: true
+  href: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.html#PublisherStudio_Services_MediaStudio_UseCases_MediaTimelineEditService_SplitAt_System_Collections_Generic_List_PublisherStudio_BusinessObjects_PublicationMediaSegment__System_Double_System_Double_
+  name: SplitAt
+  nameWithType: MediaTimelineEditService.SplitAt
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SplitAt
+- uid: System.Nullable{System.Guid}
+  commentId: T:System.Nullable{System.Guid}
+  parent: System
+  definition: System.Nullable`1
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid?
+  nameWithType: Guid?
+  fullName: System.Guid?
+  spec.csharp:
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: '?'
+  spec.vb:
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: '?'
+- uid: System.Nullable`1
+  commentId: T:System.Nullable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  name: Nullable<T>
+  nameWithType: Nullable<T>
+  fullName: System.Nullable<T>
+  nameWithType.vb: Nullable(Of T)
+  fullName.vb: System.Nullable(Of T)
+  name.vb: Nullable(Of T)
+  spec.csharp:
+  - uid: System.Nullable`1
+    name: Nullable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Nullable`1
+    name: Nullable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.InsertAt*
+  commentId: Overload:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.InsertAt
+  isExternal: true
+  href: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.html#PublisherStudio_Services_MediaStudio_UseCases_MediaTimelineEditService_InsertAt_System_Collections_Generic_List_PublisherStudio_BusinessObjects_PublicationMediaSegment__System_Double_System_Double_PublisherStudio_BusinessObjects_PublicationMediaSegment_
+  name: InsertAt
+  nameWithType: MediaTimelineEditService.InsertAt
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.InsertAt
+- uid: PublisherStudio.BusinessObjects.PublicationMediaSegment
+  commentId: T:PublisherStudio.BusinessObjects.PublicationMediaSegment
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationMediaSegment.html
+  name: PublicationMediaSegment
+  nameWithType: PublicationMediaSegment
+  fullName: PublisherStudio.BusinessObjects.PublicationMediaSegment
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CanMergeBoundary*
+  commentId: Overload:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CanMergeBoundary
+  isExternal: true
+  href: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.html#PublisherStudio_Services_MediaStudio_UseCases_MediaTimelineEditService_CanMergeBoundary_System_Collections_Generic_IReadOnlyList_PublisherStudio_BusinessObjects_PublicationMediaSegment__System_Int32_
+  name: CanMergeBoundary
+  nameWithType: MediaTimelineEditService.CanMergeBoundary
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CanMergeBoundary
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.MergeBoundary*
+  commentId: Overload:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.MergeBoundary
+  isExternal: true
+  href: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.html#PublisherStudio_Services_MediaStudio_UseCases_MediaTimelineEditService_MergeBoundary_System_Collections_Generic_List_PublisherStudio_BusinessObjects_PublicationMediaSegment__System_Int32_
+  name: MergeBoundary
+  nameWithType: MediaTimelineEditService.MergeBoundary
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.MergeBoundary
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Clone*
+  commentId: Overload:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Clone
+  isExternal: true
+  href: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.html#PublisherStudio_Services_MediaStudio_UseCases_MediaTimelineEditService_Clone_PublisherStudio_BusinessObjects_PublicationMediaSegment_
+  name: Clone
+  nameWithType: MediaTimelineEditService.Clone
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Clone
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Duplicate*
+  commentId: Overload:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Duplicate
+  isExternal: true
+  href: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.html#PublisherStudio_Services_MediaStudio_UseCases_MediaTimelineEditService_Duplicate_PublisherStudio_BusinessObjects_PublicationMediaSegment_
+  name: Duplicate
+  nameWithType: MediaTimelineEditService.Duplicate
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.Duplicate
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CloneVideoLayer*
+  commentId: Overload:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CloneVideoLayer
+  isExternal: true
+  href: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.html#PublisherStudio_Services_MediaStudio_UseCases_MediaTimelineEditService_CloneVideoLayer_PublisherStudio_BusinessObjects_VideoEffectLayer_
+  name: CloneVideoLayer
+  nameWithType: MediaTimelineEditService.CloneVideoLayer
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CloneVideoLayer
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateFilter*
+  commentId: Overload:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateFilter
+  isExternal: true
+  href: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.html#PublisherStudio_Services_MediaStudio_UseCases_MediaTimelineEditService_CreateFilter_PublisherStudio_BusinessObjects_VideoEffectFilterKind_
+  name: CreateFilter
+  nameWithType: MediaTimelineEditService.CreateFilter
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.CreateFilter
+- uid: PublisherStudio.BusinessObjects.VideoEffectFilterKind
+  commentId: T:PublisherStudio.BusinessObjects.VideoEffectFilterKind
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.VideoEffectFilterKind.html
+  name: VideoEffectFilterKind
+  nameWithType: VideoEffectFilterKind
+  fullName: PublisherStudio.BusinessObjects.VideoEffectFilterKind
+- uid: PublisherStudio.BusinessObjects.VideoEffectFilter
+  commentId: T:PublisherStudio.BusinessObjects.VideoEffectFilter
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.VideoEffectFilter.html
+  name: VideoEffectFilter
+  nameWithType: VideoEffectFilter
+  fullName: PublisherStudio.BusinessObjects.VideoEffectFilter
+- uid: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SynchronizeLiveSourceLayer*
+  commentId: Overload:PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SynchronizeLiveSourceLayer
+  isExternal: true
+  href: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.html#PublisherStudio_Services_MediaStudio_UseCases_MediaTimelineEditService_SynchronizeLiveSourceLayer_PublisherStudio_BusinessObjects_LiveSourceElement_
+  name: SynchronizeLiveSourceLayer
+  nameWithType: MediaTimelineEditService.SynchronizeLiveSourceLayer
+  fullName: PublisherStudio.Services.MediaStudio.UseCases.MediaTimelineEditService.SynchronizeLiveSourceLayer
+- uid: PublisherStudio.BusinessObjects.LiveSourceElement
+  commentId: T:PublisherStudio.BusinessObjects.LiveSourceElement
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.LiveSourceElement.html
+  name: LiveSourceElement
+  nameWithType: LiveSourceElement
+  fullName: PublisherStudio.BusinessObjects.LiveSourceElement

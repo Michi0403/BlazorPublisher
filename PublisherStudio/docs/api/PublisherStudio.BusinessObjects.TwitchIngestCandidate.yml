@@ -1,0 +1,563 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.TwitchIngestCandidate
+  commentId: T:PublisherStudio.BusinessObjects.TwitchIngestCandidate
+  id: TwitchIngestCandidate
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.TwitchIngestCandidate.#ctor
+  - PublisherStudio.BusinessObjects.TwitchIngestCandidate.Endpoint
+  - PublisherStudio.BusinessObjects.TwitchIngestCandidate.Host
+  - PublisherStudio.BusinessObjects.TwitchIngestCandidate.IsGlobal
+  - PublisherStudio.BusinessObjects.TwitchIngestCandidate.LatencyMilliseconds
+  - PublisherStudio.BusinessObjects.TwitchIngestCandidate.Name
+  - PublisherStudio.BusinessObjects.TwitchIngestCandidate.Reachable
+  langs:
+  - csharp
+  - vb
+  name: TwitchIngestCandidate
+  nameWithType: TwitchIngestCandidate
+  fullName: PublisherStudio.BusinessObjects.TwitchIngestCandidate
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents a twitch ingest candidate.
+  example: []
+  syntax:
+    content: public sealed class TwitchIngestCandidate
+    content.vb: Public NotInheritable Class TwitchIngestCandidate
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.BusinessObjects.TwitchIngestCandidate.#ctor
+  commentId: M:PublisherStudio.BusinessObjects.TwitchIngestCandidate.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.BusinessObjects.TwitchIngestCandidate
+  langs:
+  - csharp
+  - vb
+  name: TwitchIngestCandidate()
+  nameWithType: TwitchIngestCandidate.TwitchIngestCandidate()
+  fullName: PublisherStudio.BusinessObjects.TwitchIngestCandidate.TwitchIngestCandidate()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public TwitchIngestCandidate()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.BusinessObjects.TwitchIngestCandidate.#ctor*
+  nameWithType.vb: TwitchIngestCandidate.New()
+  fullName.vb: PublisherStudio.BusinessObjects.TwitchIngestCandidate.New()
+  name.vb: New()
+- uid: PublisherStudio.BusinessObjects.TwitchIngestCandidate.Name
+  commentId: P:PublisherStudio.BusinessObjects.TwitchIngestCandidate.Name
+  id: Name
+  parent: PublisherStudio.BusinessObjects.TwitchIngestCandidate
+  langs:
+  - csharp
+  - vb
+  name: Name
+  nameWithType: TwitchIngestCandidate.Name
+  fullName: PublisherStudio.BusinessObjects.TwitchIngestCandidate.Name
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets the display name.
+  example: []
+  syntax:
+    content: public string Name { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Name As String
+  overload: PublisherStudio.BusinessObjects.TwitchIngestCandidate.Name*
+- uid: PublisherStudio.BusinessObjects.TwitchIngestCandidate.Endpoint
+  commentId: P:PublisherStudio.BusinessObjects.TwitchIngestCandidate.Endpoint
+  id: Endpoint
+  parent: PublisherStudio.BusinessObjects.TwitchIngestCandidate
+  langs:
+  - csharp
+  - vb
+  name: Endpoint
+  nameWithType: TwitchIngestCandidate.Endpoint
+  fullName: PublisherStudio.BusinessObjects.TwitchIngestCandidate.Endpoint
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets endpoint.
+  example: []
+  syntax:
+    content: public string Endpoint { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Endpoint As String
+  overload: PublisherStudio.BusinessObjects.TwitchIngestCandidate.Endpoint*
+- uid: PublisherStudio.BusinessObjects.TwitchIngestCandidate.Host
+  commentId: P:PublisherStudio.BusinessObjects.TwitchIngestCandidate.Host
+  id: Host
+  parent: PublisherStudio.BusinessObjects.TwitchIngestCandidate
+  langs:
+  - csharp
+  - vb
+  name: Host
+  nameWithType: TwitchIngestCandidate.Host
+  fullName: PublisherStudio.BusinessObjects.TwitchIngestCandidate.Host
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets host.
+  example: []
+  syntax:
+    content: public string Host { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Host As String
+  overload: PublisherStudio.BusinessObjects.TwitchIngestCandidate.Host*
+- uid: PublisherStudio.BusinessObjects.TwitchIngestCandidate.LatencyMilliseconds
+  commentId: P:PublisherStudio.BusinessObjects.TwitchIngestCandidate.LatencyMilliseconds
+  id: LatencyMilliseconds
+  parent: PublisherStudio.BusinessObjects.TwitchIngestCandidate
+  langs:
+  - csharp
+  - vb
+  name: LatencyMilliseconds
+  nameWithType: TwitchIngestCandidate.LatencyMilliseconds
+  fullName: PublisherStudio.BusinessObjects.TwitchIngestCandidate.LatencyMilliseconds
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets latency milliseconds.
+  example: []
+  syntax:
+    content: public double? LatencyMilliseconds { get; set; }
+    parameters: []
+    return:
+      type: System.Nullable{System.Double}
+    content.vb: Public Property LatencyMilliseconds As Double?
+  overload: PublisherStudio.BusinessObjects.TwitchIngestCandidate.LatencyMilliseconds*
+- uid: PublisherStudio.BusinessObjects.TwitchIngestCandidate.Reachable
+  commentId: P:PublisherStudio.BusinessObjects.TwitchIngestCandidate.Reachable
+  id: Reachable
+  parent: PublisherStudio.BusinessObjects.TwitchIngestCandidate
+  langs:
+  - csharp
+  - vb
+  name: Reachable
+  nameWithType: TwitchIngestCandidate.Reachable
+  fullName: PublisherStudio.BusinessObjects.TwitchIngestCandidate.Reachable
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets reachable.
+  example: []
+  syntax:
+    content: public bool Reachable { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property Reachable As Boolean
+  overload: PublisherStudio.BusinessObjects.TwitchIngestCandidate.Reachable*
+- uid: PublisherStudio.BusinessObjects.TwitchIngestCandidate.IsGlobal
+  commentId: P:PublisherStudio.BusinessObjects.TwitchIngestCandidate.IsGlobal
+  id: IsGlobal
+  parent: PublisherStudio.BusinessObjects.TwitchIngestCandidate
+  langs:
+  - csharp
+  - vb
+  name: IsGlobal
+  nameWithType: TwitchIngestCandidate.IsGlobal
+  fullName: PublisherStudio.BusinessObjects.TwitchIngestCandidate.IsGlobal
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets is global.
+  example: []
+  syntax:
+    content: public bool IsGlobal { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property IsGlobal As Boolean
+  overload: PublisherStudio.BusinessObjects.TwitchIngestCandidate.IsGlobal*
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.BusinessObjects.TwitchIngestCandidate.#ctor*
+  commentId: Overload:PublisherStudio.BusinessObjects.TwitchIngestCandidate.#ctor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.TwitchIngestCandidate.html#PublisherStudio_BusinessObjects_TwitchIngestCandidate__ctor
+  name: TwitchIngestCandidate
+  nameWithType: TwitchIngestCandidate.TwitchIngestCandidate
+  fullName: PublisherStudio.BusinessObjects.TwitchIngestCandidate.TwitchIngestCandidate
+  nameWithType.vb: TwitchIngestCandidate.New
+  fullName.vb: PublisherStudio.BusinessObjects.TwitchIngestCandidate.New
+  name.vb: New
+- uid: PublisherStudio.BusinessObjects.TwitchIngestCandidate.Name*
+  commentId: Overload:PublisherStudio.BusinessObjects.TwitchIngestCandidate.Name
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.TwitchIngestCandidate.html#PublisherStudio_BusinessObjects_TwitchIngestCandidate_Name
+  name: Name
+  nameWithType: TwitchIngestCandidate.Name
+  fullName: PublisherStudio.BusinessObjects.TwitchIngestCandidate.Name
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.BusinessObjects.TwitchIngestCandidate.Endpoint*
+  commentId: Overload:PublisherStudio.BusinessObjects.TwitchIngestCandidate.Endpoint
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.TwitchIngestCandidate.html#PublisherStudio_BusinessObjects_TwitchIngestCandidate_Endpoint
+  name: Endpoint
+  nameWithType: TwitchIngestCandidate.Endpoint
+  fullName: PublisherStudio.BusinessObjects.TwitchIngestCandidate.Endpoint
+- uid: PublisherStudio.BusinessObjects.TwitchIngestCandidate.Host*
+  commentId: Overload:PublisherStudio.BusinessObjects.TwitchIngestCandidate.Host
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.TwitchIngestCandidate.html#PublisherStudio_BusinessObjects_TwitchIngestCandidate_Host
+  name: Host
+  nameWithType: TwitchIngestCandidate.Host
+  fullName: PublisherStudio.BusinessObjects.TwitchIngestCandidate.Host
+- uid: PublisherStudio.BusinessObjects.TwitchIngestCandidate.LatencyMilliseconds*
+  commentId: Overload:PublisherStudio.BusinessObjects.TwitchIngestCandidate.LatencyMilliseconds
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.TwitchIngestCandidate.html#PublisherStudio_BusinessObjects_TwitchIngestCandidate_LatencyMilliseconds
+  name: LatencyMilliseconds
+  nameWithType: TwitchIngestCandidate.LatencyMilliseconds
+  fullName: PublisherStudio.BusinessObjects.TwitchIngestCandidate.LatencyMilliseconds
+- uid: System.Nullable{System.Double}
+  commentId: T:System.Nullable{System.Double}
+  parent: System
+  definition: System.Nullable`1
+  href: https://learn.microsoft.com/dotnet/api/system.double
+  name: double?
+  nameWithType: double?
+  fullName: double?
+  nameWithType.vb: Double?
+  fullName.vb: Double?
+  name.vb: Double?
+  spec.csharp:
+  - uid: System.Double
+    name: double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: '?'
+  spec.vb:
+  - uid: System.Double
+    name: Double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: '?'
+- uid: System.Nullable`1
+  commentId: T:System.Nullable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  name: Nullable<T>
+  nameWithType: Nullable<T>
+  fullName: System.Nullable<T>
+  nameWithType.vb: Nullable(Of T)
+  fullName.vb: System.Nullable(Of T)
+  name.vb: Nullable(Of T)
+  spec.csharp:
+  - uid: System.Nullable`1
+    name: Nullable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Nullable`1
+    name: Nullable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: PublisherStudio.BusinessObjects.TwitchIngestCandidate.Reachable*
+  commentId: Overload:PublisherStudio.BusinessObjects.TwitchIngestCandidate.Reachable
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.TwitchIngestCandidate.html#PublisherStudio_BusinessObjects_TwitchIngestCandidate_Reachable
+  name: Reachable
+  nameWithType: TwitchIngestCandidate.Reachable
+  fullName: PublisherStudio.BusinessObjects.TwitchIngestCandidate.Reachable
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.BusinessObjects.TwitchIngestCandidate.IsGlobal*
+  commentId: Overload:PublisherStudio.BusinessObjects.TwitchIngestCandidate.IsGlobal
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.TwitchIngestCandidate.html#PublisherStudio_BusinessObjects_TwitchIngestCandidate_IsGlobal
+  name: IsGlobal
+  nameWithType: TwitchIngestCandidate.IsGlobal
+  fullName: PublisherStudio.BusinessObjects.TwitchIngestCandidate.IsGlobal

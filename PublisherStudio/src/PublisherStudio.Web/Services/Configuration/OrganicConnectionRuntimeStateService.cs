@@ -1,8 +1,11 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.OrganicPlugins;
 
 namespace PublisherStudio.Services.Configuration;
 
+/// <summary>
+/// Provides organic connection runtime state service operations.
+/// </summary>
 public sealed class OrganicConnectionRuntimeStateService(
     ILogger<OrganicConnectionRuntimeStateService> logger) : IOrganicConnectionRuntimeState
 {
@@ -11,6 +14,9 @@ public sealed class OrganicConnectionRuntimeStateService(
     private string peerId = string.Empty;
     private bool isLoopback = true;
 
+    /// <summary>
+    /// Gets snapshot.
+    /// </summary>
     public OrganicConnectionRuntimeSnapshot GetSnapshot()
     {
         try
@@ -33,6 +39,9 @@ public sealed class OrganicConnectionRuntimeStateService(
         }
     }
 
+    /// <summary>
+    /// Sets connected.
+    /// </summary>
     public void SetConnected(Guid newConnectionId, string newPeerId, bool newIsLoopback)
     {
         try
@@ -55,6 +64,9 @@ public sealed class OrganicConnectionRuntimeStateService(
         }
     }
 
+    /// <summary>
+    /// Runs the reset operation.
+    /// </summary>
     public void Reset(Guid expectedConnectionId)
     {
         try

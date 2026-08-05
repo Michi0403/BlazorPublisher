@@ -1,9 +1,12 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using PublisherStudio.Services;
 
 namespace PublisherStudio.Controllers;
 
+/// <summary>
+/// Provides asset controller operations.
+/// </summary>
 [ApiController]
 [Route("api/assets")]
 public sealed class AssetController(PublicationMediaAssetStore mediaAssets) : ControllerBase
@@ -13,6 +16,9 @@ public sealed class AssetController(PublicationMediaAssetStore mediaAssets) : Co
         "image/png", "image/jpeg", "image/gif", "image/webp", "image/svg+xml"
     };
 
+    /// <summary>
+    /// Gets media.
+    /// </summary>
     [HttpGet("media/{id:guid}")]
     public IActionResult GetMedia(Guid id)
     {
@@ -24,6 +30,9 @@ public sealed class AssetController(PublicationMediaAssetStore mediaAssets) : Co
         return File(bytes, mimeType, enableRangeProcessing: true);
     }
 
+    /// <summary>
+    /// Runs the upload image operation.
+    /// </summary>
     [HttpPost("image")]
     [DisableRequestSizeLimit]
     public async Task<IActionResult> UploadImage(IFormFile file, CancellationToken cancellationToken)
@@ -41,6 +50,9 @@ public sealed class AssetController(PublicationMediaAssetStore mediaAssets) : Co
         });
     }
 
+    /// <summary>
+    /// Runs the upload dropped asset operation.
+    /// </summary>
     [HttpPost("drop/{id:guid}")]
     [DisableRequestSizeLimit]
     public async Task<IActionResult> UploadDroppedAsset(Guid id, CancellationToken cancellationToken)

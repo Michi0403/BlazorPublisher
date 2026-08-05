@@ -1,0 +1,153 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.WordArtWarp
+  commentId: T:PublisherStudio.BusinessObjects.WordArtWarp
+  id: WordArtWarp
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.WordArtWarp.ArchDown
+  - PublisherStudio.BusinessObjects.WordArtWarp.ArchUp
+  - PublisherStudio.BusinessObjects.WordArtWarp.Custom
+  - PublisherStudio.BusinessObjects.WordArtWarp.None
+  - PublisherStudio.BusinessObjects.WordArtWarp.Wave
+  langs:
+  - csharp
+  - vb
+  name: WordArtWarp
+  nameWithType: WordArtWarp
+  fullName: PublisherStudio.BusinessObjects.WordArtWarp
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported word art warp values.
+  example: []
+  syntax:
+    content: public enum WordArtWarp
+    content.vb: Public Enum WordArtWarp
+- uid: PublisherStudio.BusinessObjects.WordArtWarp.None
+  commentId: F:PublisherStudio.BusinessObjects.WordArtWarp.None
+  id: None
+  parent: PublisherStudio.BusinessObjects.WordArtWarp
+  langs:
+  - csharp
+  - vb
+  name: None
+  nameWithType: WordArtWarp.None
+  fullName: PublisherStudio.BusinessObjects.WordArtWarp.None
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: None = 0
+    return:
+      type: PublisherStudio.BusinessObjects.WordArtWarp
+- uid: PublisherStudio.BusinessObjects.WordArtWarp.ArchUp
+  commentId: F:PublisherStudio.BusinessObjects.WordArtWarp.ArchUp
+  id: ArchUp
+  parent: PublisherStudio.BusinessObjects.WordArtWarp
+  langs:
+  - csharp
+  - vb
+  name: ArchUp
+  nameWithType: WordArtWarp.ArchUp
+  fullName: PublisherStudio.BusinessObjects.WordArtWarp.ArchUp
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: ArchUp = 1
+    return:
+      type: PublisherStudio.BusinessObjects.WordArtWarp
+- uid: PublisherStudio.BusinessObjects.WordArtWarp.ArchDown
+  commentId: F:PublisherStudio.BusinessObjects.WordArtWarp.ArchDown
+  id: ArchDown
+  parent: PublisherStudio.BusinessObjects.WordArtWarp
+  langs:
+  - csharp
+  - vb
+  name: ArchDown
+  nameWithType: WordArtWarp.ArchDown
+  fullName: PublisherStudio.BusinessObjects.WordArtWarp.ArchDown
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: ArchDown = 2
+    return:
+      type: PublisherStudio.BusinessObjects.WordArtWarp
+- uid: PublisherStudio.BusinessObjects.WordArtWarp.Wave
+  commentId: F:PublisherStudio.BusinessObjects.WordArtWarp.Wave
+  id: Wave
+  parent: PublisherStudio.BusinessObjects.WordArtWarp
+  langs:
+  - csharp
+  - vb
+  name: Wave
+  nameWithType: WordArtWarp.Wave
+  fullName: PublisherStudio.BusinessObjects.WordArtWarp.Wave
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Wave = 3
+    return:
+      type: PublisherStudio.BusinessObjects.WordArtWarp
+- uid: PublisherStudio.BusinessObjects.WordArtWarp.Custom
+  commentId: F:PublisherStudio.BusinessObjects.WordArtWarp.Custom
+  id: Custom
+  parent: PublisherStudio.BusinessObjects.WordArtWarp
+  langs:
+  - csharp
+  - vb
+  name: Custom
+  nameWithType: WordArtWarp.Custom
+  fullName: PublisherStudio.BusinessObjects.WordArtWarp.Custom
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Custom = 4
+    return:
+      type: PublisherStudio.BusinessObjects.WordArtWarp
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.WordArtWarp
+  commentId: T:PublisherStudio.BusinessObjects.WordArtWarp
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtWarp.html
+  name: WordArtWarp
+  nameWithType: WordArtWarp
+  fullName: PublisherStudio.BusinessObjects.WordArtWarp

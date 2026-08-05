@@ -1,0 +1,954 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest
+  commentId: T:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest
+  id: MediaHostStartSessionRequest
+  parent: PublisherStudio.Services.Streaming.MediaHost
+  children:
+  - PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.#ctor
+  - PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.DryRun
+  - PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.FfmpegPath
+  - PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.HardwareEncoder
+  - PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Hotkeys
+  - PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Lan
+  - PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MasterFrameRate
+  - PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MasterHeight
+  - PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MasterWidth
+  - PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Outputs
+  - PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.PreferDeviceTimestamps
+  - PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.PublicationId
+  - PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.PublicationName
+  - PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Recording
+  langs:
+  - csharp
+  - vb
+  name: MediaHostStartSessionRequest
+  nameWithType: MediaHostStartSessionRequest
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  summary: Represents a media host start session request.
+  example: []
+  syntax:
+    content: public sealed class MediaHostStartSessionRequest
+    content.vb: Public NotInheritable Class MediaHostStartSessionRequest
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.#ctor
+  commentId: M:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest
+  langs:
+  - csharp
+  - vb
+  name: MediaHostStartSessionRequest()
+  nameWithType: MediaHostStartSessionRequest.MediaHostStartSessionRequest()
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MediaHostStartSessionRequest()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  syntax:
+    content: public MediaHostStartSessionRequest()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.#ctor*
+  nameWithType.vb: MediaHostStartSessionRequest.New()
+  fullName.vb: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.New()
+  name.vb: New()
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.PublicationId
+  commentId: P:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.PublicationId
+  id: PublicationId
+  parent: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest
+  langs:
+  - csharp
+  - vb
+  name: PublicationId
+  nameWithType: MediaHostStartSessionRequest.PublicationId
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.PublicationId
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  summary: Gets or sets publication identifier.
+  example: []
+  syntax:
+    content: public Guid PublicationId { get; set; }
+    parameters: []
+    return:
+      type: System.Guid
+    content.vb: Public Property PublicationId As Guid
+  overload: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.PublicationId*
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.PublicationName
+  commentId: P:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.PublicationName
+  id: PublicationName
+  parent: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest
+  langs:
+  - csharp
+  - vb
+  name: PublicationName
+  nameWithType: MediaHostStartSessionRequest.PublicationName
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.PublicationName
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  summary: Gets or sets publication name.
+  example: []
+  syntax:
+    content: public string PublicationName { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property PublicationName As String
+  overload: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.PublicationName*
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.DryRun
+  commentId: P:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.DryRun
+  id: DryRun
+  parent: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest
+  langs:
+  - csharp
+  - vb
+  name: DryRun
+  nameWithType: MediaHostStartSessionRequest.DryRun
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.DryRun
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  summary: Gets or sets dry run.
+  example: []
+  syntax:
+    content: public bool DryRun { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property DryRun As Boolean
+  overload: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.DryRun*
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MasterWidth
+  commentId: P:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MasterWidth
+  id: MasterWidth
+  parent: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest
+  langs:
+  - csharp
+  - vb
+  name: MasterWidth
+  nameWithType: MediaHostStartSessionRequest.MasterWidth
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MasterWidth
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  summary: Gets or sets master width.
+  example: []
+  syntax:
+    content: public int MasterWidth { get; set; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property MasterWidth As Integer
+  overload: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MasterWidth*
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MasterHeight
+  commentId: P:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MasterHeight
+  id: MasterHeight
+  parent: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest
+  langs:
+  - csharp
+  - vb
+  name: MasterHeight
+  nameWithType: MediaHostStartSessionRequest.MasterHeight
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MasterHeight
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  summary: Gets or sets master height.
+  example: []
+  syntax:
+    content: public int MasterHeight { get; set; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property MasterHeight As Integer
+  overload: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MasterHeight*
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MasterFrameRate
+  commentId: P:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MasterFrameRate
+  id: MasterFrameRate
+  parent: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest
+  langs:
+  - csharp
+  - vb
+  name: MasterFrameRate
+  nameWithType: MediaHostStartSessionRequest.MasterFrameRate
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MasterFrameRate
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  summary: Gets or sets master frame rate.
+  example: []
+  syntax:
+    content: public int MasterFrameRate { get; set; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property MasterFrameRate As Integer
+  overload: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MasterFrameRate*
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.PreferDeviceTimestamps
+  commentId: P:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.PreferDeviceTimestamps
+  id: PreferDeviceTimestamps
+  parent: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest
+  langs:
+  - csharp
+  - vb
+  name: PreferDeviceTimestamps
+  nameWithType: MediaHostStartSessionRequest.PreferDeviceTimestamps
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.PreferDeviceTimestamps
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  summary: Gets or sets prefer device timestamps.
+  example: []
+  syntax:
+    content: public bool PreferDeviceTimestamps { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property PreferDeviceTimestamps As Boolean
+  overload: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.PreferDeviceTimestamps*
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.FfmpegPath
+  commentId: P:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.FfmpegPath
+  id: FfmpegPath
+  parent: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest
+  langs:
+  - csharp
+  - vb
+  name: FfmpegPath
+  nameWithType: MediaHostStartSessionRequest.FfmpegPath
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.FfmpegPath
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  summary: Gets or sets FFmpeg path.
+  example: []
+  syntax:
+    content: public string FfmpegPath { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property FfmpegPath As String
+  overload: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.FfmpegPath*
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.HardwareEncoder
+  commentId: P:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.HardwareEncoder
+  id: HardwareEncoder
+  parent: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest
+  langs:
+  - csharp
+  - vb
+  name: HardwareEncoder
+  nameWithType: MediaHostStartSessionRequest.HardwareEncoder
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.HardwareEncoder
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  summary: Gets or sets hardware encoder.
+  example: []
+  syntax:
+    content: public StreamingHardwareEncoderPreference HardwareEncoder { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference
+    content.vb: Public Property HardwareEncoder As StreamingHardwareEncoderPreference
+  overload: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.HardwareEncoder*
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Outputs
+  commentId: P:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Outputs
+  id: Outputs
+  parent: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest
+  langs:
+  - csharp
+  - vb
+  name: Outputs
+  nameWithType: MediaHostStartSessionRequest.Outputs
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Outputs
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  summary: Gets or sets outputs.
+  example: []
+  syntax:
+    content: public List<MediaHostOutputRequest> Outputs { get; set; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.List{PublisherStudio.Services.Streaming.MediaHost.MediaHostOutputRequest}
+    content.vb: Public Property Outputs As List(Of MediaHostOutputRequest)
+  overload: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Outputs*
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Recording
+  commentId: P:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Recording
+  id: Recording
+  parent: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest
+  langs:
+  - csharp
+  - vb
+  name: Recording
+  nameWithType: MediaHostStartSessionRequest.Recording
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Recording
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  summary: Gets or sets recording.
+  example: []
+  syntax:
+    content: public PublicationRecordingSettings Recording { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationRecordingSettings
+    content.vb: Public Property Recording As PublicationRecordingSettings
+  overload: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Recording*
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Lan
+  commentId: P:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Lan
+  id: Lan
+  parent: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest
+  langs:
+  - csharp
+  - vb
+  name: Lan
+  nameWithType: MediaHostStartSessionRequest.Lan
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Lan
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  summary: Gets or sets LAN.
+  example: []
+  syntax:
+    content: public PublicationLanStreamingSettings Lan { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationLanStreamingSettings
+    content.vb: Public Property Lan As PublicationLanStreamingSettings
+  overload: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Lan*
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Hotkeys
+  commentId: P:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Hotkeys
+  id: Hotkeys
+  parent: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest
+  langs:
+  - csharp
+  - vb
+  name: Hotkeys
+  nameWithType: MediaHostStartSessionRequest.Hotkeys
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Hotkeys
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  summary: Gets or sets hotkeys.
+  example: []
+  syntax:
+    content: public List<PublicationStreamingHotkey> Hotkeys { get; set; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationStreamingHotkey}
+    content.vb: Public Property Hotkeys As List(Of PublicationStreamingHotkey)
+  overload: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Hotkeys*
+references:
+- uid: PublisherStudio.Services.Streaming.MediaHost
+  commentId: N:PublisherStudio.Services.Streaming.MediaHost
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.MediaHost
+  nameWithType: PublisherStudio.Services.Streaming.MediaHost
+  fullName: PublisherStudio.Services.Streaming.MediaHost
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.MediaHost
+    name: MediaHost
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.MediaHost.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.MediaHost
+    name: MediaHost
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.MediaHost.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.#ctor*
+  commentId: Overload:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.html#PublisherStudio_Services_Streaming_MediaHost_MediaHostStartSessionRequest__ctor
+  name: MediaHostStartSessionRequest
+  nameWithType: MediaHostStartSessionRequest.MediaHostStartSessionRequest
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MediaHostStartSessionRequest
+  nameWithType.vb: MediaHostStartSessionRequest.New
+  fullName.vb: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.New
+  name.vb: New
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.PublicationId*
+  commentId: Overload:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.PublicationId
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.html#PublisherStudio_Services_Streaming_MediaHost_MediaHostStartSessionRequest_PublicationId
+  name: PublicationId
+  nameWithType: MediaHostStartSessionRequest.PublicationId
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.PublicationId
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.PublicationName*
+  commentId: Overload:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.PublicationName
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.html#PublisherStudio_Services_Streaming_MediaHost_MediaHostStartSessionRequest_PublicationName
+  name: PublicationName
+  nameWithType: MediaHostStartSessionRequest.PublicationName
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.PublicationName
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.DryRun*
+  commentId: Overload:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.DryRun
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.html#PublisherStudio_Services_Streaming_MediaHost_MediaHostStartSessionRequest_DryRun
+  name: DryRun
+  nameWithType: MediaHostStartSessionRequest.DryRun
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.DryRun
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MasterWidth*
+  commentId: Overload:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MasterWidth
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.html#PublisherStudio_Services_Streaming_MediaHost_MediaHostStartSessionRequest_MasterWidth
+  name: MasterWidth
+  nameWithType: MediaHostStartSessionRequest.MasterWidth
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MasterWidth
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MasterHeight*
+  commentId: Overload:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MasterHeight
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.html#PublisherStudio_Services_Streaming_MediaHost_MediaHostStartSessionRequest_MasterHeight
+  name: MasterHeight
+  nameWithType: MediaHostStartSessionRequest.MasterHeight
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MasterHeight
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MasterFrameRate*
+  commentId: Overload:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MasterFrameRate
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.html#PublisherStudio_Services_Streaming_MediaHost_MediaHostStartSessionRequest_MasterFrameRate
+  name: MasterFrameRate
+  nameWithType: MediaHostStartSessionRequest.MasterFrameRate
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.MasterFrameRate
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.PreferDeviceTimestamps*
+  commentId: Overload:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.PreferDeviceTimestamps
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.html#PublisherStudio_Services_Streaming_MediaHost_MediaHostStartSessionRequest_PreferDeviceTimestamps
+  name: PreferDeviceTimestamps
+  nameWithType: MediaHostStartSessionRequest.PreferDeviceTimestamps
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.PreferDeviceTimestamps
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.FfmpegPath*
+  commentId: Overload:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.FfmpegPath
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.html#PublisherStudio_Services_Streaming_MediaHost_MediaHostStartSessionRequest_FfmpegPath
+  name: FfmpegPath
+  nameWithType: MediaHostStartSessionRequest.FfmpegPath
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.FfmpegPath
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.HardwareEncoder*
+  commentId: Overload:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.HardwareEncoder
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.html#PublisherStudio_Services_Streaming_MediaHost_MediaHostStartSessionRequest_HardwareEncoder
+  name: HardwareEncoder
+  nameWithType: MediaHostStartSessionRequest.HardwareEncoder
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.HardwareEncoder
+- uid: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference
+  commentId: T:PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference.html
+  name: StreamingHardwareEncoderPreference
+  nameWithType: StreamingHardwareEncoderPreference
+  fullName: PublisherStudio.BusinessObjects.StreamingHardwareEncoderPreference
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Outputs*
+  commentId: Overload:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Outputs
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.html#PublisherStudio_Services_Streaming_MediaHost_MediaHostStartSessionRequest_Outputs
+  name: Outputs
+  nameWithType: MediaHostStartSessionRequest.Outputs
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Outputs
+- uid: System.Collections.Generic.List{PublisherStudio.Services.Streaming.MediaHost.MediaHostOutputRequest}
+  commentId: T:System.Collections.Generic.List{PublisherStudio.Services.Streaming.MediaHost.MediaHostOutputRequest}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.List`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<MediaHostOutputRequest>
+  nameWithType: List<MediaHostOutputRequest>
+  fullName: System.Collections.Generic.List<PublisherStudio.Services.Streaming.MediaHost.MediaHostOutputRequest>
+  nameWithType.vb: List(Of MediaHostOutputRequest)
+  fullName.vb: System.Collections.Generic.List(Of PublisherStudio.Services.Streaming.MediaHost.MediaHostOutputRequest)
+  name.vb: List(Of MediaHostOutputRequest)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostOutputRequest
+    name: MediaHostOutputRequest
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.MediaHost.MediaHostOutputRequest.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostOutputRequest
+    name: MediaHostOutputRequest
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.MediaHost.MediaHostOutputRequest.html
+  - name: )
+- uid: System.Collections.Generic.List`1
+  commentId: T:System.Collections.Generic.List`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<T>
+  nameWithType: List<T>
+  fullName: System.Collections.Generic.List<T>
+  nameWithType.vb: List(Of T)
+  fullName.vb: System.Collections.Generic.List(Of T)
+  name.vb: List(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Recording*
+  commentId: Overload:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Recording
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.html#PublisherStudio_Services_Streaming_MediaHost_MediaHostStartSessionRequest_Recording
+  name: Recording
+  nameWithType: MediaHostStartSessionRequest.Recording
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Recording
+- uid: PublisherStudio.BusinessObjects.PublicationRecordingSettings
+  commentId: T:PublisherStudio.BusinessObjects.PublicationRecordingSettings
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationRecordingSettings.html
+  name: PublicationRecordingSettings
+  nameWithType: PublicationRecordingSettings
+  fullName: PublisherStudio.BusinessObjects.PublicationRecordingSettings
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Lan*
+  commentId: Overload:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Lan
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.html#PublisherStudio_Services_Streaming_MediaHost_MediaHostStartSessionRequest_Lan
+  name: Lan
+  nameWithType: MediaHostStartSessionRequest.Lan
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Lan
+- uid: PublisherStudio.BusinessObjects.PublicationLanStreamingSettings
+  commentId: T:PublisherStudio.BusinessObjects.PublicationLanStreamingSettings
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationLanStreamingSettings.html
+  name: PublicationLanStreamingSettings
+  nameWithType: PublicationLanStreamingSettings
+  fullName: PublisherStudio.BusinessObjects.PublicationLanStreamingSettings
+- uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Hotkeys*
+  commentId: Overload:PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Hotkeys
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.html#PublisherStudio_Services_Streaming_MediaHost_MediaHostStartSessionRequest_Hotkeys
+  name: Hotkeys
+  nameWithType: MediaHostStartSessionRequest.Hotkeys
+  fullName: PublisherStudio.Services.Streaming.MediaHost.MediaHostStartSessionRequest.Hotkeys
+- uid: System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationStreamingHotkey}
+  commentId: T:System.Collections.Generic.List{PublisherStudio.BusinessObjects.PublicationStreamingHotkey}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.List`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<PublicationStreamingHotkey>
+  nameWithType: List<PublicationStreamingHotkey>
+  fullName: System.Collections.Generic.List<PublisherStudio.BusinessObjects.PublicationStreamingHotkey>
+  nameWithType.vb: List(Of PublicationStreamingHotkey)
+  fullName.vb: System.Collections.Generic.List(Of PublisherStudio.BusinessObjects.PublicationStreamingHotkey)
+  name.vb: List(Of PublicationStreamingHotkey)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.PublicationStreamingHotkey
+    name: PublicationStreamingHotkey
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublicationStreamingHotkey.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.PublicationStreamingHotkey
+    name: PublicationStreamingHotkey
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.PublicationStreamingHotkey.html
+  - name: )

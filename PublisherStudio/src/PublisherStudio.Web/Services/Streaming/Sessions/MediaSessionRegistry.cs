@@ -1,9 +1,12 @@
-using PublisherStudio.Services.Configuration;
+﻿using PublisherStudio.Services.Configuration;
 using System.Collections.Concurrent;
 using System.Text.Json;
 
 namespace PublisherStudio.Services.Streaming.Sessions;
 
+/// <summary>
+/// Provides media session registry operations.
+/// </summary>
 public sealed class MediaSessionRegistry(
     GlobalHotkeyService hotkeys,
     EncoderOrchestrator encoder,
@@ -16,6 +19,9 @@ public sealed class MediaSessionRegistry(
     private readonly GlobalHotkeyService _hotkeys = hotkeys;
     private readonly EncoderOrchestrator _encoder = encoder;
 
+    /// <summary>
+    /// Runs the create operation.
+    /// </summary>
     public MediaSession Create(JsonElement request)
     {
         try
@@ -60,6 +66,9 @@ public sealed class MediaSessionRegistry(
         }
     }
 
+    /// <summary>
+    /// Attempts to get.
+    /// </summary>
     public bool TryGet(Guid id, out MediaSession session) {
         try
         {
@@ -73,6 +82,9 @@ public sealed class MediaSessionRegistry(
         }
     }
 
+    /// <summary>
+    /// Runs the stop operation.
+    /// </summary>
     public bool Stop(Guid id)
     {
         try
@@ -104,6 +116,9 @@ public sealed class MediaSessionRegistry(
         }
     }
 
+    /// <summary>
+    /// Runs the drain events operation.
+    /// </summary>
     public IReadOnlyList<MediaHostHotkeyEvent> DrainEvents(Guid sessionId) {
         try
         {
@@ -117,6 +132,9 @@ public sealed class MediaSessionRegistry(
         }
     }
 
+    /// <summary>
+    /// Sets output.
+    /// </summary>
     public bool SetOutput(Guid sessionId, Guid outputId, bool enabled)
     {
         try
@@ -135,6 +153,9 @@ public sealed class MediaSessionRegistry(
         }
     }
 
+    /// <summary>
+    /// Sets recording.
+    /// </summary>
     public bool SetRecording(Guid sessionId, bool enabled)
     {
         try
@@ -154,6 +175,9 @@ public sealed class MediaSessionRegistry(
         }
     }
 
+    /// <summary>
+    /// Sets program page.
+    /// </summary>
     public bool SetProgramPage(Guid sessionId, Guid pageId)
     {
         try
@@ -171,6 +195,9 @@ public sealed class MediaSessionRegistry(
         }
     }
 
+    /// <summary>
+    /// Runs the announce ingest operation.
+    /// </summary>
     public bool AnnounceIngest(Guid sessionId, Guid? outputId, IngestAnnouncement announcement)
     {
         try
@@ -189,6 +216,9 @@ public sealed class MediaSessionRegistry(
         }
     }
 
+    /// <summary>
+    /// Runs the push ingest operation.
+    /// </summary>
     public bool PushIngest(Guid sessionId, Guid? outputId, byte[] chunk)
     {
         try
@@ -207,6 +237,9 @@ public sealed class MediaSessionRegistry(
         }
     }
 
+    /// <summary>
+    /// Runs the dispose operation.
+    /// </summary>
     public void Dispose()
     {
         try

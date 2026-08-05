@@ -1,0 +1,908 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  commentId: T:PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  id: ISystemVariableStoreService
+  parent: PublisherStudio.Services.Configuration
+  children:
+  - PublisherStudio.Services.Configuration.ISystemVariableStoreService.AttachLogger(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Configuration.SystemVariableStoreService})
+  - PublisherStudio.Services.Configuration.ISystemVariableStoreService.CorsPolicyName
+  - PublisherStudio.Services.Configuration.ISystemVariableStoreService.DataProtectionApplicationName
+  - PublisherStudio.Services.Configuration.ISystemVariableStoreService.DataProtectionDirectoryName
+  - PublisherStudio.Services.Configuration.ISystemVariableStoreService.DefaultCulture
+  - PublisherStudio.Services.Configuration.ISystemVariableStoreService.DefaultDocumentName
+  - PublisherStudio.Services.Configuration.ISystemVariableStoreService.DefaultPort
+  - PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetInt(System.String,System.Int32)
+  - PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetString(System.String,System.String)
+  - PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetTimeSpan(System.String,System.TimeSpan)
+  - PublisherStudio.Services.Configuration.ISystemVariableStoreService.PortEnvironmentVariableName
+  - PublisherStudio.Services.Configuration.ISystemVariableStoreService.RuntimeDirectoryName
+  - PublisherStudio.Services.Configuration.ISystemVariableStoreService.RuntimeEndpointFileName
+  - PublisherStudio.Services.Configuration.ISystemVariableStoreService.Set``1(System.String,``0)
+  - PublisherStudio.Services.Configuration.ISystemVariableStoreService.Snapshot
+  - PublisherStudio.Services.Configuration.ISystemVariableStoreService.SpreadsheetDocumentsDisposeTimeout
+  - PublisherStudio.Services.Configuration.ISystemVariableStoreService.SpreadsheetHibernationDirectoryName
+  - PublisherStudio.Services.Configuration.ISystemVariableStoreService.SpreadsheetHibernationTimeout
+  - PublisherStudio.Services.Configuration.ISystemVariableStoreService.TwitchHttpTimeout
+  langs:
+  - csharp
+  - vb
+  name: ISystemVariableStoreService
+  nameWithType: ISystemVariableStoreService
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  type: Interface
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  summary: Defines the system variable store service contract.
+  example: []
+  syntax:
+    content: public interface ISystemVariableStoreService
+    content.vb: Public Interface ISystemVariableStoreService
+  derivedClasses:
+  - PublisherStudio.Services.Configuration.SystemVariableStoreService
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetString(System.String,System.String)
+  commentId: M:PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetString(System.String,System.String)
+  id: GetString(System.String,System.String)
+  parent: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  langs:
+  - csharp
+  - vb
+  name: GetString(string, string)
+  nameWithType: ISystemVariableStoreService.GetString(string, string)
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetString(string, string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: string GetString(string name, string fallback)
+    parameters:
+    - id: name
+      type: System.String
+    - id: fallback
+      type: System.String
+    return:
+      type: System.String
+    content.vb: Function GetString(name As String, fallback As String) As String
+  overload: PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetString*
+  nameWithType.vb: ISystemVariableStoreService.GetString(String, String)
+  fullName.vb: PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetString(String, String)
+  name.vb: GetString(String, String)
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetInt(System.String,System.Int32)
+  commentId: M:PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetInt(System.String,System.Int32)
+  id: GetInt(System.String,System.Int32)
+  parent: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  langs:
+  - csharp
+  - vb
+  name: GetInt(string, int)
+  nameWithType: ISystemVariableStoreService.GetInt(string, int)
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetInt(string, int)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: int GetInt(string name, int fallback)
+    parameters:
+    - id: name
+      type: System.String
+    - id: fallback
+      type: System.Int32
+    return:
+      type: System.Int32
+    content.vb: Function GetInt(name As String, fallback As Integer) As Integer
+  overload: PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetInt*
+  nameWithType.vb: ISystemVariableStoreService.GetInt(String, Integer)
+  fullName.vb: PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetInt(String, Integer)
+  name.vb: GetInt(String, Integer)
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetTimeSpan(System.String,System.TimeSpan)
+  commentId: M:PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetTimeSpan(System.String,System.TimeSpan)
+  id: GetTimeSpan(System.String,System.TimeSpan)
+  parent: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  langs:
+  - csharp
+  - vb
+  name: GetTimeSpan(string, TimeSpan)
+  nameWithType: ISystemVariableStoreService.GetTimeSpan(string, TimeSpan)
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetTimeSpan(string, System.TimeSpan)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: TimeSpan GetTimeSpan(string name, TimeSpan fallback)
+    parameters:
+    - id: name
+      type: System.String
+    - id: fallback
+      type: System.TimeSpan
+    return:
+      type: System.TimeSpan
+    content.vb: Function GetTimeSpan(name As String, fallback As TimeSpan) As TimeSpan
+  overload: PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetTimeSpan*
+  nameWithType.vb: ISystemVariableStoreService.GetTimeSpan(String, TimeSpan)
+  fullName.vb: PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetTimeSpan(String, System.TimeSpan)
+  name.vb: GetTimeSpan(String, TimeSpan)
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.Set``1(System.String,``0)
+  commentId: M:PublisherStudio.Services.Configuration.ISystemVariableStoreService.Set``1(System.String,``0)
+  id: Set``1(System.String,``0)
+  parent: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  langs:
+  - csharp
+  - vb
+  name: Set<T>(string, T)
+  nameWithType: ISystemVariableStoreService.Set<T>(string, T)
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.Set<T>(string, T)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: void Set<T>(string name, T value)
+    parameters:
+    - id: name
+      type: System.String
+    - id: value
+      type: '{T}'
+    typeParameters:
+    - id: T
+    content.vb: Sub [Set](Of T)(name As String, value As T)
+  overload: PublisherStudio.Services.Configuration.ISystemVariableStoreService.Set*
+  nameWithType.vb: ISystemVariableStoreService.Set(Of T)(String, T)
+  fullName.vb: PublisherStudio.Services.Configuration.ISystemVariableStoreService.Set(Of T)(String, T)
+  name.vb: Set(Of T)(String, T)
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.Snapshot
+  commentId: M:PublisherStudio.Services.Configuration.ISystemVariableStoreService.Snapshot
+  id: Snapshot
+  parent: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  langs:
+  - csharp
+  - vb
+  name: Snapshot()
+  nameWithType: ISystemVariableStoreService.Snapshot()
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.Snapshot()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: IReadOnlyDictionary<string, string> Snapshot()
+    return:
+      type: System.Collections.Generic.IReadOnlyDictionary{System.String,System.String}
+    content.vb: Function Snapshot() As IReadOnlyDictionary(Of String, String)
+  overload: PublisherStudio.Services.Configuration.ISystemVariableStoreService.Snapshot*
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.AttachLogger(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Configuration.SystemVariableStoreService})
+  commentId: M:PublisherStudio.Services.Configuration.ISystemVariableStoreService.AttachLogger(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Configuration.SystemVariableStoreService})
+  id: AttachLogger(Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Configuration.SystemVariableStoreService})
+  parent: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  langs:
+  - csharp
+  - vb
+  name: AttachLogger(ILogger<SystemVariableStoreService>)
+  nameWithType: ISystemVariableStoreService.AttachLogger(ILogger<SystemVariableStoreService>)
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.AttachLogger(Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.Configuration.SystemVariableStoreService>)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: void AttachLogger(ILogger<SystemVariableStoreService> logger)
+    parameters:
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Configuration.SystemVariableStoreService}
+    content.vb: Sub AttachLogger(logger As ILogger(Of SystemVariableStoreService))
+  overload: PublisherStudio.Services.Configuration.ISystemVariableStoreService.AttachLogger*
+  nameWithType.vb: ISystemVariableStoreService.AttachLogger(ILogger(Of SystemVariableStoreService))
+  fullName.vb: PublisherStudio.Services.Configuration.ISystemVariableStoreService.AttachLogger(Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.Configuration.SystemVariableStoreService))
+  name.vb: AttachLogger(ILogger(Of SystemVariableStoreService))
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DefaultPort
+  commentId: P:PublisherStudio.Services.Configuration.ISystemVariableStoreService.DefaultPort
+  id: DefaultPort
+  parent: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  langs:
+  - csharp
+  - vb
+  name: DefaultPort
+  nameWithType: ISystemVariableStoreService.DefaultPort
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DefaultPort
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: int DefaultPort { get; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: ReadOnly Property DefaultPort As Integer
+  overload: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DefaultPort*
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.PortEnvironmentVariableName
+  commentId: P:PublisherStudio.Services.Configuration.ISystemVariableStoreService.PortEnvironmentVariableName
+  id: PortEnvironmentVariableName
+  parent: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  langs:
+  - csharp
+  - vb
+  name: PortEnvironmentVariableName
+  nameWithType: ISystemVariableStoreService.PortEnvironmentVariableName
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.PortEnvironmentVariableName
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: string PortEnvironmentVariableName { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: ReadOnly Property PortEnvironmentVariableName As String
+  overload: PublisherStudio.Services.Configuration.ISystemVariableStoreService.PortEnvironmentVariableName*
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DefaultCulture
+  commentId: P:PublisherStudio.Services.Configuration.ISystemVariableStoreService.DefaultCulture
+  id: DefaultCulture
+  parent: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  langs:
+  - csharp
+  - vb
+  name: DefaultCulture
+  nameWithType: ISystemVariableStoreService.DefaultCulture
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DefaultCulture
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: string DefaultCulture { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: ReadOnly Property DefaultCulture As String
+  overload: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DefaultCulture*
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.CorsPolicyName
+  commentId: P:PublisherStudio.Services.Configuration.ISystemVariableStoreService.CorsPolicyName
+  id: CorsPolicyName
+  parent: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  langs:
+  - csharp
+  - vb
+  name: CorsPolicyName
+  nameWithType: ISystemVariableStoreService.CorsPolicyName
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.CorsPolicyName
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: string CorsPolicyName { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: ReadOnly Property CorsPolicyName As String
+  overload: PublisherStudio.Services.Configuration.ISystemVariableStoreService.CorsPolicyName*
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DataProtectionDirectoryName
+  commentId: P:PublisherStudio.Services.Configuration.ISystemVariableStoreService.DataProtectionDirectoryName
+  id: DataProtectionDirectoryName
+  parent: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  langs:
+  - csharp
+  - vb
+  name: DataProtectionDirectoryName
+  nameWithType: ISystemVariableStoreService.DataProtectionDirectoryName
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DataProtectionDirectoryName
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: string DataProtectionDirectoryName { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: ReadOnly Property DataProtectionDirectoryName As String
+  overload: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DataProtectionDirectoryName*
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DataProtectionApplicationName
+  commentId: P:PublisherStudio.Services.Configuration.ISystemVariableStoreService.DataProtectionApplicationName
+  id: DataProtectionApplicationName
+  parent: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  langs:
+  - csharp
+  - vb
+  name: DataProtectionApplicationName
+  nameWithType: ISystemVariableStoreService.DataProtectionApplicationName
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DataProtectionApplicationName
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: string DataProtectionApplicationName { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: ReadOnly Property DataProtectionApplicationName As String
+  overload: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DataProtectionApplicationName*
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.SpreadsheetHibernationDirectoryName
+  commentId: P:PublisherStudio.Services.Configuration.ISystemVariableStoreService.SpreadsheetHibernationDirectoryName
+  id: SpreadsheetHibernationDirectoryName
+  parent: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  langs:
+  - csharp
+  - vb
+  name: SpreadsheetHibernationDirectoryName
+  nameWithType: ISystemVariableStoreService.SpreadsheetHibernationDirectoryName
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.SpreadsheetHibernationDirectoryName
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: string SpreadsheetHibernationDirectoryName { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: ReadOnly Property SpreadsheetHibernationDirectoryName As String
+  overload: PublisherStudio.Services.Configuration.ISystemVariableStoreService.SpreadsheetHibernationDirectoryName*
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.SpreadsheetHibernationTimeout
+  commentId: P:PublisherStudio.Services.Configuration.ISystemVariableStoreService.SpreadsheetHibernationTimeout
+  id: SpreadsheetHibernationTimeout
+  parent: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  langs:
+  - csharp
+  - vb
+  name: SpreadsheetHibernationTimeout
+  nameWithType: ISystemVariableStoreService.SpreadsheetHibernationTimeout
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.SpreadsheetHibernationTimeout
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: TimeSpan SpreadsheetHibernationTimeout { get; }
+    parameters: []
+    return:
+      type: System.TimeSpan
+    content.vb: ReadOnly Property SpreadsheetHibernationTimeout As TimeSpan
+  overload: PublisherStudio.Services.Configuration.ISystemVariableStoreService.SpreadsheetHibernationTimeout*
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.SpreadsheetDocumentsDisposeTimeout
+  commentId: P:PublisherStudio.Services.Configuration.ISystemVariableStoreService.SpreadsheetDocumentsDisposeTimeout
+  id: SpreadsheetDocumentsDisposeTimeout
+  parent: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  langs:
+  - csharp
+  - vb
+  name: SpreadsheetDocumentsDisposeTimeout
+  nameWithType: ISystemVariableStoreService.SpreadsheetDocumentsDisposeTimeout
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.SpreadsheetDocumentsDisposeTimeout
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: TimeSpan SpreadsheetDocumentsDisposeTimeout { get; }
+    parameters: []
+    return:
+      type: System.TimeSpan
+    content.vb: ReadOnly Property SpreadsheetDocumentsDisposeTimeout As TimeSpan
+  overload: PublisherStudio.Services.Configuration.ISystemVariableStoreService.SpreadsheetDocumentsDisposeTimeout*
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.TwitchHttpTimeout
+  commentId: P:PublisherStudio.Services.Configuration.ISystemVariableStoreService.TwitchHttpTimeout
+  id: TwitchHttpTimeout
+  parent: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  langs:
+  - csharp
+  - vb
+  name: TwitchHttpTimeout
+  nameWithType: ISystemVariableStoreService.TwitchHttpTimeout
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.TwitchHttpTimeout
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: TimeSpan TwitchHttpTimeout { get; }
+    parameters: []
+    return:
+      type: System.TimeSpan
+    content.vb: ReadOnly Property TwitchHttpTimeout As TimeSpan
+  overload: PublisherStudio.Services.Configuration.ISystemVariableStoreService.TwitchHttpTimeout*
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.RuntimeDirectoryName
+  commentId: P:PublisherStudio.Services.Configuration.ISystemVariableStoreService.RuntimeDirectoryName
+  id: RuntimeDirectoryName
+  parent: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  langs:
+  - csharp
+  - vb
+  name: RuntimeDirectoryName
+  nameWithType: ISystemVariableStoreService.RuntimeDirectoryName
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.RuntimeDirectoryName
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: string RuntimeDirectoryName { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: ReadOnly Property RuntimeDirectoryName As String
+  overload: PublisherStudio.Services.Configuration.ISystemVariableStoreService.RuntimeDirectoryName*
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.RuntimeEndpointFileName
+  commentId: P:PublisherStudio.Services.Configuration.ISystemVariableStoreService.RuntimeEndpointFileName
+  id: RuntimeEndpointFileName
+  parent: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  langs:
+  - csharp
+  - vb
+  name: RuntimeEndpointFileName
+  nameWithType: ISystemVariableStoreService.RuntimeEndpointFileName
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.RuntimeEndpointFileName
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: string RuntimeEndpointFileName { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: ReadOnly Property RuntimeEndpointFileName As String
+  overload: PublisherStudio.Services.Configuration.ISystemVariableStoreService.RuntimeEndpointFileName*
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DefaultDocumentName
+  commentId: P:PublisherStudio.Services.Configuration.ISystemVariableStoreService.DefaultDocumentName
+  id: DefaultDocumentName
+  parent: PublisherStudio.Services.Configuration.ISystemVariableStoreService
+  langs:
+  - csharp
+  - vb
+  name: DefaultDocumentName
+  nameWithType: ISystemVariableStoreService.DefaultDocumentName
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DefaultDocumentName
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Configuration
+  syntax:
+    content: string DefaultDocumentName { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: ReadOnly Property DefaultDocumentName As String
+  overload: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DefaultDocumentName*
+references:
+- uid: PublisherStudio.Services.Configuration
+  commentId: N:PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Configuration
+  nameWithType: PublisherStudio.Services.Configuration
+  fullName: PublisherStudio.Services.Configuration
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetString*
+  commentId: Overload:PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetString
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.ISystemVariableStoreService.html#PublisherStudio_Services_Configuration_ISystemVariableStoreService_GetString_System_String_System_String_
+  name: GetString
+  nameWithType: ISystemVariableStoreService.GetString
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetString
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetInt*
+  commentId: Overload:PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetInt
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.ISystemVariableStoreService.html#PublisherStudio_Services_Configuration_ISystemVariableStoreService_GetInt_System_String_System_Int32_
+  name: GetInt
+  nameWithType: ISystemVariableStoreService.GetInt
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetInt
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetTimeSpan*
+  commentId: Overload:PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetTimeSpan
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.ISystemVariableStoreService.html#PublisherStudio_Services_Configuration_ISystemVariableStoreService_GetTimeSpan_System_String_System_TimeSpan_
+  name: GetTimeSpan
+  nameWithType: ISystemVariableStoreService.GetTimeSpan
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.GetTimeSpan
+- uid: System.TimeSpan
+  commentId: T:System.TimeSpan
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.timespan
+  name: TimeSpan
+  nameWithType: TimeSpan
+  fullName: System.TimeSpan
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.Set*
+  commentId: Overload:PublisherStudio.Services.Configuration.ISystemVariableStoreService.Set
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.ISystemVariableStoreService.html#PublisherStudio_Services_Configuration_ISystemVariableStoreService_Set__1_System_String___0_
+  name: Set
+  nameWithType: ISystemVariableStoreService.Set
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.Set
+- uid: '{T}'
+  commentId: '!:T'
+  definition: T
+  name: T
+  nameWithType: T
+  fullName: T
+- uid: T
+  name: T
+  nameWithType: T
+  fullName: T
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.Snapshot*
+  commentId: Overload:PublisherStudio.Services.Configuration.ISystemVariableStoreService.Snapshot
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.ISystemVariableStoreService.html#PublisherStudio_Services_Configuration_ISystemVariableStoreService_Snapshot
+  name: Snapshot
+  nameWithType: ISystemVariableStoreService.Snapshot
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.Snapshot
+- uid: System.Collections.Generic.IReadOnlyDictionary{System.String,System.String}
+  commentId: T:System.Collections.Generic.IReadOnlyDictionary{System.String,System.String}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyDictionary`2
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlydictionary-2
+  name: IReadOnlyDictionary<string, string>
+  nameWithType: IReadOnlyDictionary<string, string>
+  fullName: System.Collections.Generic.IReadOnlyDictionary<string, string>
+  nameWithType.vb: IReadOnlyDictionary(Of String, String)
+  fullName.vb: System.Collections.Generic.IReadOnlyDictionary(Of String, String)
+  name.vb: IReadOnlyDictionary(Of String, String)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyDictionary`2
+    name: IReadOnlyDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlydictionary-2
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyDictionary`2
+    name: IReadOnlyDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlydictionary-2
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyDictionary`2
+  commentId: T:System.Collections.Generic.IReadOnlyDictionary`2
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlydictionary-2
+  name: IReadOnlyDictionary<TKey, TValue>
+  nameWithType: IReadOnlyDictionary<TKey, TValue>
+  fullName: System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>
+  nameWithType.vb: IReadOnlyDictionary(Of TKey, TValue)
+  fullName.vb: System.Collections.Generic.IReadOnlyDictionary(Of TKey, TValue)
+  name.vb: IReadOnlyDictionary(Of TKey, TValue)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyDictionary`2
+    name: IReadOnlyDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlydictionary-2
+  - name: <
+  - name: TKey
+  - name: ','
+  - name: " "
+  - name: TValue
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyDictionary`2
+    name: IReadOnlyDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlydictionary-2
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TKey
+  - name: ','
+  - name: " "
+  - name: TValue
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.AttachLogger*
+  commentId: Overload:PublisherStudio.Services.Configuration.ISystemVariableStoreService.AttachLogger
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.ISystemVariableStoreService.html#PublisherStudio_Services_Configuration_ISystemVariableStoreService_AttachLogger_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_Configuration_SystemVariableStoreService__
+  name: AttachLogger
+  nameWithType: ISystemVariableStoreService.AttachLogger
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.AttachLogger
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Configuration.SystemVariableStoreService}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Configuration.SystemVariableStoreService}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<SystemVariableStoreService>
+  nameWithType: ILogger<SystemVariableStoreService>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.Configuration.SystemVariableStoreService>
+  nameWithType.vb: ILogger(Of SystemVariableStoreService)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.Configuration.SystemVariableStoreService)
+  name.vb: ILogger(Of SystemVariableStoreService)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.Configuration.SystemVariableStoreService
+    name: SystemVariableStoreService
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.SystemVariableStoreService.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.Configuration.SystemVariableStoreService
+    name: SystemVariableStoreService
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.SystemVariableStoreService.html
+  - name: )
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DefaultPort*
+  commentId: Overload:PublisherStudio.Services.Configuration.ISystemVariableStoreService.DefaultPort
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.ISystemVariableStoreService.html#PublisherStudio_Services_Configuration_ISystemVariableStoreService_DefaultPort
+  name: DefaultPort
+  nameWithType: ISystemVariableStoreService.DefaultPort
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DefaultPort
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.PortEnvironmentVariableName*
+  commentId: Overload:PublisherStudio.Services.Configuration.ISystemVariableStoreService.PortEnvironmentVariableName
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.ISystemVariableStoreService.html#PublisherStudio_Services_Configuration_ISystemVariableStoreService_PortEnvironmentVariableName
+  name: PortEnvironmentVariableName
+  nameWithType: ISystemVariableStoreService.PortEnvironmentVariableName
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.PortEnvironmentVariableName
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DefaultCulture*
+  commentId: Overload:PublisherStudio.Services.Configuration.ISystemVariableStoreService.DefaultCulture
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.ISystemVariableStoreService.html#PublisherStudio_Services_Configuration_ISystemVariableStoreService_DefaultCulture
+  name: DefaultCulture
+  nameWithType: ISystemVariableStoreService.DefaultCulture
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DefaultCulture
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.CorsPolicyName*
+  commentId: Overload:PublisherStudio.Services.Configuration.ISystemVariableStoreService.CorsPolicyName
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.ISystemVariableStoreService.html#PublisherStudio_Services_Configuration_ISystemVariableStoreService_CorsPolicyName
+  name: CorsPolicyName
+  nameWithType: ISystemVariableStoreService.CorsPolicyName
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.CorsPolicyName
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DataProtectionDirectoryName*
+  commentId: Overload:PublisherStudio.Services.Configuration.ISystemVariableStoreService.DataProtectionDirectoryName
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.ISystemVariableStoreService.html#PublisherStudio_Services_Configuration_ISystemVariableStoreService_DataProtectionDirectoryName
+  name: DataProtectionDirectoryName
+  nameWithType: ISystemVariableStoreService.DataProtectionDirectoryName
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DataProtectionDirectoryName
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DataProtectionApplicationName*
+  commentId: Overload:PublisherStudio.Services.Configuration.ISystemVariableStoreService.DataProtectionApplicationName
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.ISystemVariableStoreService.html#PublisherStudio_Services_Configuration_ISystemVariableStoreService_DataProtectionApplicationName
+  name: DataProtectionApplicationName
+  nameWithType: ISystemVariableStoreService.DataProtectionApplicationName
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DataProtectionApplicationName
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.SpreadsheetHibernationDirectoryName*
+  commentId: Overload:PublisherStudio.Services.Configuration.ISystemVariableStoreService.SpreadsheetHibernationDirectoryName
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.ISystemVariableStoreService.html#PublisherStudio_Services_Configuration_ISystemVariableStoreService_SpreadsheetHibernationDirectoryName
+  name: SpreadsheetHibernationDirectoryName
+  nameWithType: ISystemVariableStoreService.SpreadsheetHibernationDirectoryName
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.SpreadsheetHibernationDirectoryName
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.SpreadsheetHibernationTimeout*
+  commentId: Overload:PublisherStudio.Services.Configuration.ISystemVariableStoreService.SpreadsheetHibernationTimeout
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.ISystemVariableStoreService.html#PublisherStudio_Services_Configuration_ISystemVariableStoreService_SpreadsheetHibernationTimeout
+  name: SpreadsheetHibernationTimeout
+  nameWithType: ISystemVariableStoreService.SpreadsheetHibernationTimeout
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.SpreadsheetHibernationTimeout
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.SpreadsheetDocumentsDisposeTimeout*
+  commentId: Overload:PublisherStudio.Services.Configuration.ISystemVariableStoreService.SpreadsheetDocumentsDisposeTimeout
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.ISystemVariableStoreService.html#PublisherStudio_Services_Configuration_ISystemVariableStoreService_SpreadsheetDocumentsDisposeTimeout
+  name: SpreadsheetDocumentsDisposeTimeout
+  nameWithType: ISystemVariableStoreService.SpreadsheetDocumentsDisposeTimeout
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.SpreadsheetDocumentsDisposeTimeout
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.TwitchHttpTimeout*
+  commentId: Overload:PublisherStudio.Services.Configuration.ISystemVariableStoreService.TwitchHttpTimeout
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.ISystemVariableStoreService.html#PublisherStudio_Services_Configuration_ISystemVariableStoreService_TwitchHttpTimeout
+  name: TwitchHttpTimeout
+  nameWithType: ISystemVariableStoreService.TwitchHttpTimeout
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.TwitchHttpTimeout
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.RuntimeDirectoryName*
+  commentId: Overload:PublisherStudio.Services.Configuration.ISystemVariableStoreService.RuntimeDirectoryName
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.ISystemVariableStoreService.html#PublisherStudio_Services_Configuration_ISystemVariableStoreService_RuntimeDirectoryName
+  name: RuntimeDirectoryName
+  nameWithType: ISystemVariableStoreService.RuntimeDirectoryName
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.RuntimeDirectoryName
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.RuntimeEndpointFileName*
+  commentId: Overload:PublisherStudio.Services.Configuration.ISystemVariableStoreService.RuntimeEndpointFileName
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.ISystemVariableStoreService.html#PublisherStudio_Services_Configuration_ISystemVariableStoreService_RuntimeEndpointFileName
+  name: RuntimeEndpointFileName
+  nameWithType: ISystemVariableStoreService.RuntimeEndpointFileName
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.RuntimeEndpointFileName
+- uid: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DefaultDocumentName*
+  commentId: Overload:PublisherStudio.Services.Configuration.ISystemVariableStoreService.DefaultDocumentName
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.ISystemVariableStoreService.html#PublisherStudio_Services_Configuration_ISystemVariableStoreService_DefaultDocumentName
+  name: DefaultDocumentName
+  nameWithType: ISystemVariableStoreService.DefaultDocumentName
+  fullName: PublisherStudio.Services.Configuration.ISystemVariableStoreService.DefaultDocumentName

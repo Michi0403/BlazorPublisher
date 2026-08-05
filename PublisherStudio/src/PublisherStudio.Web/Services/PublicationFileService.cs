@@ -1,4 +1,4 @@
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Nodes;
@@ -11,6 +11,9 @@ using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Services;
 
+/// <summary>
+/// Provides publication file service operations.
+/// </summary>
 public sealed partial class PublicationFileService
 {
     private readonly PictureDocumentService _pictures;
@@ -36,6 +39,9 @@ public sealed partial class PublicationFileService
         Converters = { new JsonStringEnumConverter() }
     };
 
+    /// <summary>
+    /// Runs the publication file service operation.
+    /// </summary>
     public PublicationFileService(
         PictureDocumentService pictures,
         PublicationDataService data,
@@ -70,6 +76,9 @@ public sealed partial class PublicationFileService
         this.logger = logger;
     }
 
+    /// <summary>
+    /// Runs the serialize operation.
+    /// </summary>
     public string Serialize(PublicationDocument document)
     {
         try
@@ -91,6 +100,9 @@ public sealed partial class PublicationFileService
         }
     }
 
+    /// <summary>
+    /// Determines whether embedded streaming settings.
+    /// </summary>
     public bool HasEmbeddedStreamingSettings(string json)
     {
         try
@@ -117,6 +129,9 @@ public sealed partial class PublicationFileService
         }
     }
 
+    /// <summary>
+    /// Normalizes streaming settings.
+    /// </summary>
     public void NormalizeStreamingSettings(PublicationDocument document) {
         try
         {
@@ -130,6 +145,9 @@ public sealed partial class PublicationFileService
         }
     }
 
+    /// <summary>
+    /// Runs the clone element operation.
+    /// </summary>
     public PublicationElement CloneElement(PublicationElement element) {
         try
         {
@@ -145,6 +163,9 @@ public sealed partial class PublicationFileService
     }
 
 
+    /// <summary>
+    /// Runs the serialize element operation.
+    /// </summary>
     public string SerializeElement(PublicationElement element) {
         try
         {
@@ -158,6 +179,9 @@ public sealed partial class PublicationFileService
         }
     }
 
+    /// <summary>
+    /// Runs the deserialize element operation.
+    /// </summary>
     public PublicationElement DeserializeElement(string json) {
         try
         {
@@ -172,6 +196,9 @@ public sealed partial class PublicationFileService
         }
     }
 
+    /// <summary>
+    /// Runs the clone page operation.
+    /// </summary>
     public PublicationPage ClonePage(PublicationPage publicationPage) {
         try
         {
@@ -186,6 +213,9 @@ public sealed partial class PublicationFileService
         }
     }
 
+    /// <summary>
+    /// Runs the deserialize operation.
+    /// </summary>
     public PublicationDocument Deserialize(string json)
     {
         try
@@ -601,6 +631,9 @@ public sealed partial class PublicationFileService
         }
     }
 
+    /// <summary>
+    /// Runs the sanitize spreadsheet preview operation.
+    /// </summary>
     public string SanitizeSpreadsheetPreview(string? html)
     {
         try
@@ -622,6 +655,9 @@ public sealed partial class PublicationFileService
         }
     }
 
+    /// <summary>
+    /// Runs the safe file name operation.
+    /// </summary>
     public string SafeFileName(string value)
     {
         try
@@ -636,6 +672,9 @@ public sealed partial class PublicationFileService
         }
     }
 
+    /// <summary>
+    /// Runs the extract HTML body operation.
+    /// </summary>
     public string ExtractHtmlBody(byte[] htmlBytes)
     {
         try
@@ -655,6 +694,9 @@ public sealed partial class PublicationFileService
         }
     }
 
+    /// <summary>
+    /// Runs the extract open XML page layout operation.
+    /// </summary>
     public StoryPageLayout ExtractOpenXmlPageLayout(byte[] openXml)
     {
         try
@@ -758,6 +800,9 @@ public sealed partial class PublicationFileService
         }
     }
 
+    /// <summary>
+    /// Runs the extract open XML document background operation.
+    /// </summary>
     public string ExtractOpenXmlDocumentBackground(byte[] openXml)
     {
         try
@@ -812,6 +857,9 @@ public sealed partial class PublicationFileService
 
 
 
+    /// <summary>
+    /// Determines whether open XML document.
+    /// </summary>
     public bool IsOpenXmlDocument(byte[] content)
     {
         try
@@ -837,6 +885,9 @@ public sealed partial class PublicationFileService
         }
     }
 
+    /// <summary>
+    /// Creates open XML preview HTML.
+    /// </summary>
     public string CreateOpenXmlPreviewHtml(byte[] openXml, string? fallbackTitle = null)
     {
         try
@@ -1081,6 +1132,9 @@ public sealed partial class PublicationFileService
         }
     }
 
+    /// <summary>
+    /// Normalizes CSS background.
+    /// </summary>
     public string NormalizeCssBackground(string? value)
     {
         try
@@ -1095,6 +1149,9 @@ public sealed partial class PublicationFileService
         }
     }
 
+    /// <summary>
+    /// Runs the sanitize preview HTML operation.
+    /// </summary>
     public string SanitizePreviewHtml(string html)
     {
         try

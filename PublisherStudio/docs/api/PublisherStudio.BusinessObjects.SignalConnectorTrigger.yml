@@ -1,0 +1,134 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.SignalConnectorTrigger
+  commentId: T:PublisherStudio.BusinessObjects.SignalConnectorTrigger
+  id: SignalConnectorTrigger
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.SignalConnectorTrigger.Manual
+  - PublisherStudio.BusinessObjects.SignalConnectorTrigger.OnClick
+  - PublisherStudio.BusinessObjects.SignalConnectorTrigger.OnHover
+  - PublisherStudio.BusinessObjects.SignalConnectorTrigger.OnPageEnter
+  langs:
+  - csharp
+  - vb
+  name: SignalConnectorTrigger
+  nameWithType: SignalConnectorTrigger
+  fullName: PublisherStudio.BusinessObjects.SignalConnectorTrigger
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported signal connector trigger values.
+  example: []
+  syntax:
+    content: public enum SignalConnectorTrigger
+    content.vb: Public Enum SignalConnectorTrigger
+- uid: PublisherStudio.BusinessObjects.SignalConnectorTrigger.OnPageEnter
+  commentId: F:PublisherStudio.BusinessObjects.SignalConnectorTrigger.OnPageEnter
+  id: OnPageEnter
+  parent: PublisherStudio.BusinessObjects.SignalConnectorTrigger
+  langs:
+  - csharp
+  - vb
+  name: OnPageEnter
+  nameWithType: SignalConnectorTrigger.OnPageEnter
+  fullName: PublisherStudio.BusinessObjects.SignalConnectorTrigger.OnPageEnter
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: OnPageEnter = 0
+    return:
+      type: PublisherStudio.BusinessObjects.SignalConnectorTrigger
+- uid: PublisherStudio.BusinessObjects.SignalConnectorTrigger.OnClick
+  commentId: F:PublisherStudio.BusinessObjects.SignalConnectorTrigger.OnClick
+  id: OnClick
+  parent: PublisherStudio.BusinessObjects.SignalConnectorTrigger
+  langs:
+  - csharp
+  - vb
+  name: OnClick
+  nameWithType: SignalConnectorTrigger.OnClick
+  fullName: PublisherStudio.BusinessObjects.SignalConnectorTrigger.OnClick
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: OnClick = 1
+    return:
+      type: PublisherStudio.BusinessObjects.SignalConnectorTrigger
+- uid: PublisherStudio.BusinessObjects.SignalConnectorTrigger.OnHover
+  commentId: F:PublisherStudio.BusinessObjects.SignalConnectorTrigger.OnHover
+  id: OnHover
+  parent: PublisherStudio.BusinessObjects.SignalConnectorTrigger
+  langs:
+  - csharp
+  - vb
+  name: OnHover
+  nameWithType: SignalConnectorTrigger.OnHover
+  fullName: PublisherStudio.BusinessObjects.SignalConnectorTrigger.OnHover
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: OnHover = 2
+    return:
+      type: PublisherStudio.BusinessObjects.SignalConnectorTrigger
+- uid: PublisherStudio.BusinessObjects.SignalConnectorTrigger.Manual
+  commentId: F:PublisherStudio.BusinessObjects.SignalConnectorTrigger.Manual
+  id: Manual
+  parent: PublisherStudio.BusinessObjects.SignalConnectorTrigger
+  langs:
+  - csharp
+  - vb
+  name: Manual
+  nameWithType: SignalConnectorTrigger.Manual
+  fullName: PublisherStudio.BusinessObjects.SignalConnectorTrigger.Manual
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Manual = 3
+    return:
+      type: PublisherStudio.BusinessObjects.SignalConnectorTrigger
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.SignalConnectorTrigger
+  commentId: T:PublisherStudio.BusinessObjects.SignalConnectorTrigger
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.SignalConnectorTrigger.html
+  name: SignalConnectorTrigger
+  nameWithType: SignalConnectorTrigger
+  fullName: PublisherStudio.BusinessObjects.SignalConnectorTrigger

@@ -1,0 +1,153 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.ConnectorToolKind
+  commentId: T:PublisherStudio.BusinessObjects.ConnectorToolKind
+  id: ConnectorToolKind
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.ConnectorToolKind.Arrow
+  - PublisherStudio.BusinessObjects.ConnectorToolKind.Line
+  - PublisherStudio.BusinessObjects.ConnectorToolKind.None
+  - PublisherStudio.BusinessObjects.ConnectorToolKind.SignalArrow
+  - PublisherStudio.BusinessObjects.ConnectorToolKind.SignalConnector
+  langs:
+  - csharp
+  - vb
+  name: ConnectorToolKind
+  nameWithType: ConnectorToolKind
+  fullName: PublisherStudio.BusinessObjects.ConnectorToolKind
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported connector tool kind values.
+  example: []
+  syntax:
+    content: public enum ConnectorToolKind
+    content.vb: Public Enum ConnectorToolKind
+- uid: PublisherStudio.BusinessObjects.ConnectorToolKind.None
+  commentId: F:PublisherStudio.BusinessObjects.ConnectorToolKind.None
+  id: None
+  parent: PublisherStudio.BusinessObjects.ConnectorToolKind
+  langs:
+  - csharp
+  - vb
+  name: None
+  nameWithType: ConnectorToolKind.None
+  fullName: PublisherStudio.BusinessObjects.ConnectorToolKind.None
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: None = 0
+    return:
+      type: PublisherStudio.BusinessObjects.ConnectorToolKind
+- uid: PublisherStudio.BusinessObjects.ConnectorToolKind.Line
+  commentId: F:PublisherStudio.BusinessObjects.ConnectorToolKind.Line
+  id: Line
+  parent: PublisherStudio.BusinessObjects.ConnectorToolKind
+  langs:
+  - csharp
+  - vb
+  name: Line
+  nameWithType: ConnectorToolKind.Line
+  fullName: PublisherStudio.BusinessObjects.ConnectorToolKind.Line
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Line = 1
+    return:
+      type: PublisherStudio.BusinessObjects.ConnectorToolKind
+- uid: PublisherStudio.BusinessObjects.ConnectorToolKind.Arrow
+  commentId: F:PublisherStudio.BusinessObjects.ConnectorToolKind.Arrow
+  id: Arrow
+  parent: PublisherStudio.BusinessObjects.ConnectorToolKind
+  langs:
+  - csharp
+  - vb
+  name: Arrow
+  nameWithType: ConnectorToolKind.Arrow
+  fullName: PublisherStudio.BusinessObjects.ConnectorToolKind.Arrow
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Arrow = 2
+    return:
+      type: PublisherStudio.BusinessObjects.ConnectorToolKind
+- uid: PublisherStudio.BusinessObjects.ConnectorToolKind.SignalConnector
+  commentId: F:PublisherStudio.BusinessObjects.ConnectorToolKind.SignalConnector
+  id: SignalConnector
+  parent: PublisherStudio.BusinessObjects.ConnectorToolKind
+  langs:
+  - csharp
+  - vb
+  name: SignalConnector
+  nameWithType: ConnectorToolKind.SignalConnector
+  fullName: PublisherStudio.BusinessObjects.ConnectorToolKind.SignalConnector
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: SignalConnector = 3
+    return:
+      type: PublisherStudio.BusinessObjects.ConnectorToolKind
+- uid: PublisherStudio.BusinessObjects.ConnectorToolKind.SignalArrow
+  commentId: F:PublisherStudio.BusinessObjects.ConnectorToolKind.SignalArrow
+  id: SignalArrow
+  parent: PublisherStudio.BusinessObjects.ConnectorToolKind
+  langs:
+  - csharp
+  - vb
+  name: SignalArrow
+  nameWithType: ConnectorToolKind.SignalArrow
+  fullName: PublisherStudio.BusinessObjects.ConnectorToolKind.SignalArrow
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: SignalArrow = 4
+    return:
+      type: PublisherStudio.BusinessObjects.ConnectorToolKind
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.ConnectorToolKind
+  commentId: T:PublisherStudio.BusinessObjects.ConnectorToolKind
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ConnectorToolKind.html
+  name: ConnectorToolKind
+  nameWithType: ConnectorToolKind
+  fullName: PublisherStudio.BusinessObjects.ConnectorToolKind

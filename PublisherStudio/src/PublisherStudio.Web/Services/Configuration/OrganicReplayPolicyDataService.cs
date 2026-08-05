@@ -1,8 +1,11 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.OrganicPlugins;
 
 namespace PublisherStudio.Services.Configuration;
 
+/// <summary>
+/// Provides organic replay policy data service operations.
+/// </summary>
 public sealed class OrganicReplayPolicyDataService(
     ILogger<OrganicReplayPolicyDataService> logger) : IOrganicReplayPolicyDataService
 {
@@ -14,6 +17,9 @@ public sealed class OrganicReplayPolicyDataService(
         MaximumTrackedMessages = 4096
     };
 
+    /// <summary>
+    /// Gets snapshot.
+    /// </summary>
     public OrganicReplayPolicySnapshot GetSnapshot()
     {
         try

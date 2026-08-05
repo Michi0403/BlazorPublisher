@@ -1,8 +1,11 @@
-using System.Text;
+﻿using System.Text;
 using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.OpenScad;
 
+/// <summary>
+/// Provides open scad document service operations.
+/// </summary>
 public sealed class OpenScadDocumentService(
     IOpenScadCatalogService catalog,
     IOpenScadValueFormatter values,
@@ -10,6 +13,9 @@ public sealed class OpenScadDocumentService(
 {
     private readonly IReadOnlyList<IOpenScadNodeRenderer> _renderers = renderers.ToList().AsReadOnly();
 
+    /// <summary>
+    /// Runs the validate operation.
+    /// </summary>
     public OpenScadValidationResult Validate(OpenScadDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);
@@ -63,6 +69,9 @@ public sealed class OpenScadDocumentService(
         return result;
     }
 
+    /// <summary>
+    /// Runs the generate operation.
+    /// </summary>
     public OpenScadGenerationResult Generate(OpenScadDocument document)
     {
         var validation = Validate(document);
@@ -105,6 +114,9 @@ public sealed class OpenScadDocumentService(
         };
     }
 
+    /// <summary>
+    /// Creates example document.
+    /// </summary>
     public OpenScadDocument CreateExampleDocument()
     {
         var cube = new OpenScadNode

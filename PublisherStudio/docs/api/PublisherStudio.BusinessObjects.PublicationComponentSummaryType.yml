@@ -1,0 +1,153 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationComponentSummaryType
+  commentId: T:PublisherStudio.BusinessObjects.PublicationComponentSummaryType
+  id: PublicationComponentSummaryType
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationComponentSummaryType.Avg
+  - PublisherStudio.BusinessObjects.PublicationComponentSummaryType.Count
+  - PublisherStudio.BusinessObjects.PublicationComponentSummaryType.Max
+  - PublisherStudio.BusinessObjects.PublicationComponentSummaryType.Min
+  - PublisherStudio.BusinessObjects.PublicationComponentSummaryType.Sum
+  langs:
+  - csharp
+  - vb
+  name: PublicationComponentSummaryType
+  nameWithType: PublicationComponentSummaryType
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentSummaryType
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication component summary type values.
+  example: []
+  syntax:
+    content: public enum PublicationComponentSummaryType
+    content.vb: Public Enum PublicationComponentSummaryType
+- uid: PublisherStudio.BusinessObjects.PublicationComponentSummaryType.Sum
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentSummaryType.Sum
+  id: Sum
+  parent: PublisherStudio.BusinessObjects.PublicationComponentSummaryType
+  langs:
+  - csharp
+  - vb
+  name: Sum
+  nameWithType: PublicationComponentSummaryType.Sum
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentSummaryType.Sum
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Sum = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentSummaryType
+- uid: PublisherStudio.BusinessObjects.PublicationComponentSummaryType.Count
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentSummaryType.Count
+  id: Count
+  parent: PublisherStudio.BusinessObjects.PublicationComponentSummaryType
+  langs:
+  - csharp
+  - vb
+  name: Count
+  nameWithType: PublicationComponentSummaryType.Count
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentSummaryType.Count
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Count = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentSummaryType
+- uid: PublisherStudio.BusinessObjects.PublicationComponentSummaryType.Min
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentSummaryType.Min
+  id: Min
+  parent: PublisherStudio.BusinessObjects.PublicationComponentSummaryType
+  langs:
+  - csharp
+  - vb
+  name: Min
+  nameWithType: PublicationComponentSummaryType.Min
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentSummaryType.Min
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Min = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentSummaryType
+- uid: PublisherStudio.BusinessObjects.PublicationComponentSummaryType.Max
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentSummaryType.Max
+  id: Max
+  parent: PublisherStudio.BusinessObjects.PublicationComponentSummaryType
+  langs:
+  - csharp
+  - vb
+  name: Max
+  nameWithType: PublicationComponentSummaryType.Max
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentSummaryType.Max
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Max = 3
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentSummaryType
+- uid: PublisherStudio.BusinessObjects.PublicationComponentSummaryType.Avg
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentSummaryType.Avg
+  id: Avg
+  parent: PublisherStudio.BusinessObjects.PublicationComponentSummaryType
+  langs:
+  - csharp
+  - vb
+  name: Avg
+  nameWithType: PublicationComponentSummaryType.Avg
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentSummaryType.Avg
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Avg = 4
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentSummaryType
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationComponentSummaryType
+  commentId: T:PublisherStudio.BusinessObjects.PublicationComponentSummaryType
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationComponentSummaryType.html
+  name: PublicationComponentSummaryType
+  nameWithType: PublicationComponentSummaryType
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentSummaryType

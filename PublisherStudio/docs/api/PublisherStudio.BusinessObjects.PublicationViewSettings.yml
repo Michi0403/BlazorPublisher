@@ -1,0 +1,756 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings
+  commentId: T:PublisherStudio.BusinessObjects.PublicationViewSettings
+  id: PublicationViewSettings
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationViewSettings.#ctor
+  - PublisherStudio.BusinessObjects.PublicationViewSettings.CanvasZoomMode
+  - PublisherStudio.BusinessObjects.PublicationViewSettings.ExportDpi
+  - PublisherStudio.BusinessObjects.PublicationViewSettings.GridSpacingMm
+  - PublisherStudio.BusinessObjects.PublicationViewSettings.GridVisible
+  - PublisherStudio.BusinessObjects.PublicationViewSettings.GuidesVisible
+  - PublisherStudio.BusinessObjects.PublicationViewSettings.PanelLibraryVisible
+  - PublisherStudio.BusinessObjects.PublicationViewSettings.RulerUnit
+  - PublisherStudio.BusinessObjects.PublicationViewSettings.RulersVisible
+  - PublisherStudio.BusinessObjects.PublicationViewSettings.SnapInObjects
+  - PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToGrid
+  - PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToGuides
+  - PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToObjects
+  - PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToPage
+  langs:
+  - csharp
+  - vb
+  name: PublicationViewSettings
+  nameWithType: PublicationViewSettings
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents a publication view settings.
+  example: []
+  syntax:
+    content: public sealed class PublicationViewSettings
+    content.vb: Public NotInheritable Class PublicationViewSettings
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.#ctor
+  commentId: M:PublisherStudio.BusinessObjects.PublicationViewSettings.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.BusinessObjects.PublicationViewSettings
+  langs:
+  - csharp
+  - vb
+  name: PublicationViewSettings()
+  nameWithType: PublicationViewSettings.PublicationViewSettings()
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.PublicationViewSettings()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public PublicationViewSettings()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.BusinessObjects.PublicationViewSettings.#ctor*
+  nameWithType.vb: PublicationViewSettings.New()
+  fullName.vb: PublisherStudio.BusinessObjects.PublicationViewSettings.New()
+  name.vb: New()
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.RulerUnit
+  commentId: P:PublisherStudio.BusinessObjects.PublicationViewSettings.RulerUnit
+  id: RulerUnit
+  parent: PublisherStudio.BusinessObjects.PublicationViewSettings
+  langs:
+  - csharp
+  - vb
+  name: RulerUnit
+  nameWithType: PublicationViewSettings.RulerUnit
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.RulerUnit
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets ruler unit.
+  example: []
+  syntax:
+    content: public MeasurementUnit RulerUnit { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.MeasurementUnit
+    content.vb: Public Property RulerUnit As MeasurementUnit
+  overload: PublisherStudio.BusinessObjects.PublicationViewSettings.RulerUnit*
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.RulersVisible
+  commentId: P:PublisherStudio.BusinessObjects.PublicationViewSettings.RulersVisible
+  id: RulersVisible
+  parent: PublisherStudio.BusinessObjects.PublicationViewSettings
+  langs:
+  - csharp
+  - vb
+  name: RulersVisible
+  nameWithType: PublicationViewSettings.RulersVisible
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.RulersVisible
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets rulers visible.
+  example: []
+  syntax:
+    content: public bool RulersVisible { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property RulersVisible As Boolean
+  overload: PublisherStudio.BusinessObjects.PublicationViewSettings.RulersVisible*
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.GridVisible
+  commentId: P:PublisherStudio.BusinessObjects.PublicationViewSettings.GridVisible
+  id: GridVisible
+  parent: PublisherStudio.BusinessObjects.PublicationViewSettings
+  langs:
+  - csharp
+  - vb
+  name: GridVisible
+  nameWithType: PublicationViewSettings.GridVisible
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.GridVisible
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets grid visible.
+  example: []
+  syntax:
+    content: public bool GridVisible { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property GridVisible As Boolean
+  overload: PublisherStudio.BusinessObjects.PublicationViewSettings.GridVisible*
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.GuidesVisible
+  commentId: P:PublisherStudio.BusinessObjects.PublicationViewSettings.GuidesVisible
+  id: GuidesVisible
+  parent: PublisherStudio.BusinessObjects.PublicationViewSettings
+  langs:
+  - csharp
+  - vb
+  name: GuidesVisible
+  nameWithType: PublicationViewSettings.GuidesVisible
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.GuidesVisible
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets guides visible.
+  example: []
+  syntax:
+    content: public bool GuidesVisible { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property GuidesVisible As Boolean
+  overload: PublisherStudio.BusinessObjects.PublicationViewSettings.GuidesVisible*
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToGrid
+  commentId: P:PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToGrid
+  id: SnapToGrid
+  parent: PublisherStudio.BusinessObjects.PublicationViewSettings
+  langs:
+  - csharp
+  - vb
+  name: SnapToGrid
+  nameWithType: PublicationViewSettings.SnapToGrid
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToGrid
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets snap to grid.
+  example: []
+  syntax:
+    content: public bool SnapToGrid { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property SnapToGrid As Boolean
+  overload: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToGrid*
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToGuides
+  commentId: P:PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToGuides
+  id: SnapToGuides
+  parent: PublisherStudio.BusinessObjects.PublicationViewSettings
+  langs:
+  - csharp
+  - vb
+  name: SnapToGuides
+  nameWithType: PublicationViewSettings.SnapToGuides
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToGuides
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets snap to guides.
+  example: []
+  syntax:
+    content: public bool SnapToGuides { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property SnapToGuides As Boolean
+  overload: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToGuides*
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToPage
+  commentId: P:PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToPage
+  id: SnapToPage
+  parent: PublisherStudio.BusinessObjects.PublicationViewSettings
+  langs:
+  - csharp
+  - vb
+  name: SnapToPage
+  nameWithType: PublicationViewSettings.SnapToPage
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToPage
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets snap to page.
+  example: []
+  syntax:
+    content: public bool SnapToPage { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property SnapToPage As Boolean
+  overload: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToPage*
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToObjects
+  commentId: P:PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToObjects
+  id: SnapToObjects
+  parent: PublisherStudio.BusinessObjects.PublicationViewSettings
+  langs:
+  - csharp
+  - vb
+  name: SnapToObjects
+  nameWithType: PublicationViewSettings.SnapToObjects
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToObjects
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets snap to objects.
+  example: []
+  syntax:
+    content: public bool SnapToObjects { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property SnapToObjects As Boolean
+  overload: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToObjects*
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapInObjects
+  commentId: P:PublisherStudio.BusinessObjects.PublicationViewSettings.SnapInObjects
+  id: SnapInObjects
+  parent: PublisherStudio.BusinessObjects.PublicationViewSettings
+  langs:
+  - csharp
+  - vb
+  name: SnapInObjects
+  nameWithType: PublicationViewSettings.SnapInObjects
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapInObjects
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets snap in objects.
+  example: []
+  syntax:
+    content: public bool SnapInObjects { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property SnapInObjects As Boolean
+  overload: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapInObjects*
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.PanelLibraryVisible
+  commentId: P:PublisherStudio.BusinessObjects.PublicationViewSettings.PanelLibraryVisible
+  id: PanelLibraryVisible
+  parent: PublisherStudio.BusinessObjects.PublicationViewSettings
+  langs:
+  - csharp
+  - vb
+  name: PanelLibraryVisible
+  nameWithType: PublicationViewSettings.PanelLibraryVisible
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.PanelLibraryVisible
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets panel library visible.
+  example: []
+  syntax:
+    content: public bool PanelLibraryVisible { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property PanelLibraryVisible As Boolean
+  overload: PublisherStudio.BusinessObjects.PublicationViewSettings.PanelLibraryVisible*
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.GridSpacingMm
+  commentId: P:PublisherStudio.BusinessObjects.PublicationViewSettings.GridSpacingMm
+  id: GridSpacingMm
+  parent: PublisherStudio.BusinessObjects.PublicationViewSettings
+  langs:
+  - csharp
+  - vb
+  name: GridSpacingMm
+  nameWithType: PublicationViewSettings.GridSpacingMm
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.GridSpacingMm
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets grid spacing millimetres.
+  example: []
+  syntax:
+    content: public double GridSpacingMm { get; set; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property GridSpacingMm As Double
+  overload: PublisherStudio.BusinessObjects.PublicationViewSettings.GridSpacingMm*
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.ExportDpi
+  commentId: P:PublisherStudio.BusinessObjects.PublicationViewSettings.ExportDpi
+  id: ExportDpi
+  parent: PublisherStudio.BusinessObjects.PublicationViewSettings
+  langs:
+  - csharp
+  - vb
+  name: ExportDpi
+  nameWithType: PublicationViewSettings.ExportDpi
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.ExportDpi
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets export DPI.
+  example: []
+  syntax:
+    content: public int ExportDpi { get; set; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property ExportDpi As Integer
+  overload: PublisherStudio.BusinessObjects.PublicationViewSettings.ExportDpi*
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.CanvasZoomMode
+  commentId: P:PublisherStudio.BusinessObjects.PublicationViewSettings.CanvasZoomMode
+  id: CanvasZoomMode
+  parent: PublisherStudio.BusinessObjects.PublicationViewSettings
+  langs:
+  - csharp
+  - vb
+  name: CanvasZoomMode
+  nameWithType: PublicationViewSettings.CanvasZoomMode
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.CanvasZoomMode
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets canvas zoom mode.
+  example: []
+  syntax:
+    content: public PublicationCanvasZoomMode CanvasZoomMode { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationCanvasZoomMode
+    content.vb: Public Property CanvasZoomMode As PublicationCanvasZoomMode
+  overload: PublisherStudio.BusinessObjects.PublicationViewSettings.CanvasZoomMode*
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.#ctor*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationViewSettings.#ctor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationViewSettings.html#PublisherStudio_BusinessObjects_PublicationViewSettings__ctor
+  name: PublicationViewSettings
+  nameWithType: PublicationViewSettings.PublicationViewSettings
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.PublicationViewSettings
+  nameWithType.vb: PublicationViewSettings.New
+  fullName.vb: PublisherStudio.BusinessObjects.PublicationViewSettings.New
+  name.vb: New
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.RulerUnit*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationViewSettings.RulerUnit
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationViewSettings.html#PublisherStudio_BusinessObjects_PublicationViewSettings_RulerUnit
+  name: RulerUnit
+  nameWithType: PublicationViewSettings.RulerUnit
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.RulerUnit
+- uid: PublisherStudio.BusinessObjects.MeasurementUnit
+  commentId: T:PublisherStudio.BusinessObjects.MeasurementUnit
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MeasurementUnit.html
+  name: MeasurementUnit
+  nameWithType: MeasurementUnit
+  fullName: PublisherStudio.BusinessObjects.MeasurementUnit
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.RulersVisible*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationViewSettings.RulersVisible
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationViewSettings.html#PublisherStudio_BusinessObjects_PublicationViewSettings_RulersVisible
+  name: RulersVisible
+  nameWithType: PublicationViewSettings.RulersVisible
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.RulersVisible
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.GridVisible*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationViewSettings.GridVisible
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationViewSettings.html#PublisherStudio_BusinessObjects_PublicationViewSettings_GridVisible
+  name: GridVisible
+  nameWithType: PublicationViewSettings.GridVisible
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.GridVisible
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.GuidesVisible*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationViewSettings.GuidesVisible
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationViewSettings.html#PublisherStudio_BusinessObjects_PublicationViewSettings_GuidesVisible
+  name: GuidesVisible
+  nameWithType: PublicationViewSettings.GuidesVisible
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.GuidesVisible
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToGrid*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToGrid
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationViewSettings.html#PublisherStudio_BusinessObjects_PublicationViewSettings_SnapToGrid
+  name: SnapToGrid
+  nameWithType: PublicationViewSettings.SnapToGrid
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToGrid
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToGuides*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToGuides
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationViewSettings.html#PublisherStudio_BusinessObjects_PublicationViewSettings_SnapToGuides
+  name: SnapToGuides
+  nameWithType: PublicationViewSettings.SnapToGuides
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToGuides
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToPage*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToPage
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationViewSettings.html#PublisherStudio_BusinessObjects_PublicationViewSettings_SnapToPage
+  name: SnapToPage
+  nameWithType: PublicationViewSettings.SnapToPage
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToPage
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToObjects*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationViewSettings.html#PublisherStudio_BusinessObjects_PublicationViewSettings_SnapToObjects
+  name: SnapToObjects
+  nameWithType: PublicationViewSettings.SnapToObjects
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapToObjects
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapInObjects*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationViewSettings.SnapInObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationViewSettings.html#PublisherStudio_BusinessObjects_PublicationViewSettings_SnapInObjects
+  name: SnapInObjects
+  nameWithType: PublicationViewSettings.SnapInObjects
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.SnapInObjects
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.PanelLibraryVisible*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationViewSettings.PanelLibraryVisible
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationViewSettings.html#PublisherStudio_BusinessObjects_PublicationViewSettings_PanelLibraryVisible
+  name: PanelLibraryVisible
+  nameWithType: PublicationViewSettings.PanelLibraryVisible
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.PanelLibraryVisible
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.GridSpacingMm*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationViewSettings.GridSpacingMm
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationViewSettings.html#PublisherStudio_BusinessObjects_PublicationViewSettings_GridSpacingMm
+  name: GridSpacingMm
+  nameWithType: PublicationViewSettings.GridSpacingMm
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.GridSpacingMm
+- uid: System.Double
+  commentId: T:System.Double
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.double
+  name: double
+  nameWithType: double
+  fullName: double
+  nameWithType.vb: Double
+  fullName.vb: Double
+  name.vb: Double
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.ExportDpi*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationViewSettings.ExportDpi
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationViewSettings.html#PublisherStudio_BusinessObjects_PublicationViewSettings_ExportDpi
+  name: ExportDpi
+  nameWithType: PublicationViewSettings.ExportDpi
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.ExportDpi
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: PublisherStudio.BusinessObjects.PublicationViewSettings.CanvasZoomMode*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublicationViewSettings.CanvasZoomMode
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationViewSettings.html#PublisherStudio_BusinessObjects_PublicationViewSettings_CanvasZoomMode
+  name: CanvasZoomMode
+  nameWithType: PublicationViewSettings.CanvasZoomMode
+  fullName: PublisherStudio.BusinessObjects.PublicationViewSettings.CanvasZoomMode
+- uid: PublisherStudio.BusinessObjects.PublicationCanvasZoomMode
+  commentId: T:PublisherStudio.BusinessObjects.PublicationCanvasZoomMode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationCanvasZoomMode.html
+  name: PublicationCanvasZoomMode
+  nameWithType: PublicationCanvasZoomMode
+  fullName: PublisherStudio.BusinessObjects.PublicationCanvasZoomMode

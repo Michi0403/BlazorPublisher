@@ -1,0 +1,152 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.IRuntimeEndpointWriter
+  commentId: T:PublisherStudio.Services.IRuntimeEndpointWriter
+  id: IRuntimeEndpointWriter
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.IRuntimeEndpointWriter.DeleteOwnedEndpoint
+  - PublisherStudio.Services.IRuntimeEndpointWriter.Write(Microsoft.AspNetCore.Builder.WebApplication)
+  langs:
+  - csharp
+  - vb
+  name: IRuntimeEndpointWriter
+  nameWithType: IRuntimeEndpointWriter
+  fullName: PublisherStudio.Services.IRuntimeEndpointWriter
+  type: Interface
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Defines the runtime endpoint writer contract.
+  example: []
+  syntax:
+    content: public interface IRuntimeEndpointWriter
+    content.vb: Public Interface IRuntimeEndpointWriter
+  derivedClasses:
+  - PublisherStudio.Services.RuntimeEndpointWriter
+- uid: PublisherStudio.Services.IRuntimeEndpointWriter.Write(Microsoft.AspNetCore.Builder.WebApplication)
+  commentId: M:PublisherStudio.Services.IRuntimeEndpointWriter.Write(Microsoft.AspNetCore.Builder.WebApplication)
+  id: Write(Microsoft.AspNetCore.Builder.WebApplication)
+  parent: PublisherStudio.Services.IRuntimeEndpointWriter
+  langs:
+  - csharp
+  - vb
+  name: Write(WebApplication)
+  nameWithType: IRuntimeEndpointWriter.Write(WebApplication)
+  fullName: PublisherStudio.Services.IRuntimeEndpointWriter.Write(Microsoft.AspNetCore.Builder.WebApplication)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: void Write(WebApplication app)
+    parameters:
+    - id: app
+      type: Microsoft.AspNetCore.Builder.WebApplication
+    content.vb: Sub Write(app As WebApplication)
+  overload: PublisherStudio.Services.IRuntimeEndpointWriter.Write*
+- uid: PublisherStudio.Services.IRuntimeEndpointWriter.DeleteOwnedEndpoint
+  commentId: M:PublisherStudio.Services.IRuntimeEndpointWriter.DeleteOwnedEndpoint
+  id: DeleteOwnedEndpoint
+  parent: PublisherStudio.Services.IRuntimeEndpointWriter
+  langs:
+  - csharp
+  - vb
+  name: DeleteOwnedEndpoint()
+  nameWithType: IRuntimeEndpointWriter.DeleteOwnedEndpoint()
+  fullName: PublisherStudio.Services.IRuntimeEndpointWriter.DeleteOwnedEndpoint()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: void DeleteOwnedEndpoint()
+    content.vb: Sub DeleteOwnedEndpoint()
+  overload: PublisherStudio.Services.IRuntimeEndpointWriter.DeleteOwnedEndpoint*
+references:
+- uid: PublisherStudio.Services
+  commentId: N:PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services
+  nameWithType: PublisherStudio.Services
+  fullName: PublisherStudio.Services
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+- uid: PublisherStudio.Services.IRuntimeEndpointWriter.Write*
+  commentId: Overload:PublisherStudio.Services.IRuntimeEndpointWriter.Write
+  isExternal: true
+  href: PublisherStudio.Services.IRuntimeEndpointWriter.html#PublisherStudio_Services_IRuntimeEndpointWriter_Write_Microsoft_AspNetCore_Builder_WebApplication_
+  name: Write
+  nameWithType: IRuntimeEndpointWriter.Write
+  fullName: PublisherStudio.Services.IRuntimeEndpointWriter.Write
+- uid: Microsoft.AspNetCore.Builder.WebApplication
+  commentId: T:Microsoft.AspNetCore.Builder.WebApplication
+  parent: Microsoft.AspNetCore.Builder
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.builder.webapplication
+  name: WebApplication
+  nameWithType: WebApplication
+  fullName: Microsoft.AspNetCore.Builder.WebApplication
+- uid: Microsoft.AspNetCore.Builder
+  commentId: N:Microsoft.AspNetCore.Builder
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.AspNetCore.Builder
+  nameWithType: Microsoft.AspNetCore.Builder
+  fullName: Microsoft.AspNetCore.Builder
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.AspNetCore
+    name: AspNetCore
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore
+  - name: .
+  - uid: Microsoft.AspNetCore.Builder
+    name: Builder
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.builder
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.AspNetCore
+    name: AspNetCore
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore
+  - name: .
+  - uid: Microsoft.AspNetCore.Builder
+    name: Builder
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.builder
+- uid: PublisherStudio.Services.IRuntimeEndpointWriter.DeleteOwnedEndpoint*
+  commentId: Overload:PublisherStudio.Services.IRuntimeEndpointWriter.DeleteOwnedEndpoint
+  isExternal: true
+  href: PublisherStudio.Services.IRuntimeEndpointWriter.html#PublisherStudio_Services_IRuntimeEndpointWriter_DeleteOwnedEndpoint
+  name: DeleteOwnedEndpoint
+  nameWithType: IRuntimeEndpointWriter.DeleteOwnedEndpoint
+  fullName: PublisherStudio.Services.IRuntimeEndpointWriter.DeleteOwnedEndpoint

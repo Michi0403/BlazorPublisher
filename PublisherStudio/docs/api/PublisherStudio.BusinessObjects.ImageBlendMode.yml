@@ -1,0 +1,153 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.ImageBlendMode
+  commentId: T:PublisherStudio.BusinessObjects.ImageBlendMode
+  id: ImageBlendMode
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.ImageBlendMode.Darken
+  - PublisherStudio.BusinessObjects.ImageBlendMode.Lighten
+  - PublisherStudio.BusinessObjects.ImageBlendMode.Multiply
+  - PublisherStudio.BusinessObjects.ImageBlendMode.Normal
+  - PublisherStudio.BusinessObjects.ImageBlendMode.Screen
+  langs:
+  - csharp
+  - vb
+  name: ImageBlendMode
+  nameWithType: ImageBlendMode
+  fullName: PublisherStudio.BusinessObjects.ImageBlendMode
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported image blend mode values.
+  example: []
+  syntax:
+    content: public enum ImageBlendMode
+    content.vb: Public Enum ImageBlendMode
+- uid: PublisherStudio.BusinessObjects.ImageBlendMode.Normal
+  commentId: F:PublisherStudio.BusinessObjects.ImageBlendMode.Normal
+  id: Normal
+  parent: PublisherStudio.BusinessObjects.ImageBlendMode
+  langs:
+  - csharp
+  - vb
+  name: Normal
+  nameWithType: ImageBlendMode.Normal
+  fullName: PublisherStudio.BusinessObjects.ImageBlendMode.Normal
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Normal = 0
+    return:
+      type: PublisherStudio.BusinessObjects.ImageBlendMode
+- uid: PublisherStudio.BusinessObjects.ImageBlendMode.Multiply
+  commentId: F:PublisherStudio.BusinessObjects.ImageBlendMode.Multiply
+  id: Multiply
+  parent: PublisherStudio.BusinessObjects.ImageBlendMode
+  langs:
+  - csharp
+  - vb
+  name: Multiply
+  nameWithType: ImageBlendMode.Multiply
+  fullName: PublisherStudio.BusinessObjects.ImageBlendMode.Multiply
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Multiply = 1
+    return:
+      type: PublisherStudio.BusinessObjects.ImageBlendMode
+- uid: PublisherStudio.BusinessObjects.ImageBlendMode.Screen
+  commentId: F:PublisherStudio.BusinessObjects.ImageBlendMode.Screen
+  id: Screen
+  parent: PublisherStudio.BusinessObjects.ImageBlendMode
+  langs:
+  - csharp
+  - vb
+  name: Screen
+  nameWithType: ImageBlendMode.Screen
+  fullName: PublisherStudio.BusinessObjects.ImageBlendMode.Screen
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Screen = 2
+    return:
+      type: PublisherStudio.BusinessObjects.ImageBlendMode
+- uid: PublisherStudio.BusinessObjects.ImageBlendMode.Darken
+  commentId: F:PublisherStudio.BusinessObjects.ImageBlendMode.Darken
+  id: Darken
+  parent: PublisherStudio.BusinessObjects.ImageBlendMode
+  langs:
+  - csharp
+  - vb
+  name: Darken
+  nameWithType: ImageBlendMode.Darken
+  fullName: PublisherStudio.BusinessObjects.ImageBlendMode.Darken
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Darken = 3
+    return:
+      type: PublisherStudio.BusinessObjects.ImageBlendMode
+- uid: PublisherStudio.BusinessObjects.ImageBlendMode.Lighten
+  commentId: F:PublisherStudio.BusinessObjects.ImageBlendMode.Lighten
+  id: Lighten
+  parent: PublisherStudio.BusinessObjects.ImageBlendMode
+  langs:
+  - csharp
+  - vb
+  name: Lighten
+  nameWithType: ImageBlendMode.Lighten
+  fullName: PublisherStudio.BusinessObjects.ImageBlendMode.Lighten
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Lighten = 4
+    return:
+      type: PublisherStudio.BusinessObjects.ImageBlendMode
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.ImageBlendMode
+  commentId: T:PublisherStudio.BusinessObjects.ImageBlendMode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ImageBlendMode.html
+  name: ImageBlendMode
+  nameWithType: ImageBlendMode
+  fullName: PublisherStudio.BusinessObjects.ImageBlendMode

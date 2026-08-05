@@ -1,0 +1,227 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState
+  commentId: T:PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState
+  id: IOrganicConnectionRuntimeState
+  parent: PublisherStudio.Services.OrganicPlugins
+  children:
+  - PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.GetSnapshot
+  - PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.Reset(System.Guid)
+  - PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.SetConnected(System.Guid,System.String,System.Boolean)
+  langs:
+  - csharp
+  - vb
+  name: IOrganicConnectionRuntimeState
+  nameWithType: IOrganicConnectionRuntimeState
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState
+  type: Interface
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Defines the organic connection runtime state contract.
+  example: []
+  syntax:
+    content: public interface IOrganicConnectionRuntimeState
+    content.vb: Public Interface IOrganicConnectionRuntimeState
+  derivedClasses:
+  - PublisherStudio.Services.Configuration.OrganicConnectionRuntimeStateService
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.GetSnapshot
+  commentId: M:PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.GetSnapshot
+  id: GetSnapshot
+  parent: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState
+  langs:
+  - csharp
+  - vb
+  name: GetSnapshot()
+  nameWithType: IOrganicConnectionRuntimeState.GetSnapshot()
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.GetSnapshot()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  syntax:
+    content: OrganicConnectionRuntimeSnapshot GetSnapshot()
+    return:
+      type: PublisherStudio.BusinessObjects.OrganicConnectionRuntimeSnapshot
+    content.vb: Function GetSnapshot() As OrganicConnectionRuntimeSnapshot
+  overload: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.GetSnapshot*
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.SetConnected(System.Guid,System.String,System.Boolean)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.SetConnected(System.Guid,System.String,System.Boolean)
+  id: SetConnected(System.Guid,System.String,System.Boolean)
+  parent: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState
+  langs:
+  - csharp
+  - vb
+  name: SetConnected(Guid, string, bool)
+  nameWithType: IOrganicConnectionRuntimeState.SetConnected(Guid, string, bool)
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.SetConnected(System.Guid, string, bool)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  syntax:
+    content: void SetConnected(Guid connectionId, string peerId, bool isLoopback)
+    parameters:
+    - id: connectionId
+      type: System.Guid
+    - id: peerId
+      type: System.String
+    - id: isLoopback
+      type: System.Boolean
+    content.vb: Sub SetConnected(connectionId As Guid, peerId As String, isLoopback As Boolean)
+  overload: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.SetConnected*
+  nameWithType.vb: IOrganicConnectionRuntimeState.SetConnected(Guid, String, Boolean)
+  fullName.vb: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.SetConnected(System.Guid, String, Boolean)
+  name.vb: SetConnected(Guid, String, Boolean)
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.Reset(System.Guid)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.Reset(System.Guid)
+  id: Reset(System.Guid)
+  parent: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState
+  langs:
+  - csharp
+  - vb
+  name: Reset(Guid)
+  nameWithType: IOrganicConnectionRuntimeState.Reset(Guid)
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.Reset(System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  syntax:
+    content: void Reset(Guid connectionId)
+    parameters:
+    - id: connectionId
+      type: System.Guid
+    content.vb: Sub Reset(connectionId As Guid)
+  overload: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.Reset*
+references:
+- uid: PublisherStudio.Services.OrganicPlugins
+  commentId: N:PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.OrganicPlugins
+  nameWithType: PublisherStudio.Services.OrganicPlugins
+  fullName: PublisherStudio.Services.OrganicPlugins
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OrganicPlugins
+    name: OrganicPlugins
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OrganicPlugins
+    name: OrganicPlugins
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.html
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.GetSnapshot*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.GetSnapshot
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.html#PublisherStudio_Services_OrganicPlugins_IOrganicConnectionRuntimeState_GetSnapshot
+  name: GetSnapshot
+  nameWithType: IOrganicConnectionRuntimeState.GetSnapshot
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.GetSnapshot
+- uid: PublisherStudio.BusinessObjects.OrganicConnectionRuntimeSnapshot
+  commentId: T:PublisherStudio.BusinessObjects.OrganicConnectionRuntimeSnapshot
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OrganicConnectionRuntimeSnapshot.html
+  name: OrganicConnectionRuntimeSnapshot
+  nameWithType: OrganicConnectionRuntimeSnapshot
+  fullName: PublisherStudio.BusinessObjects.OrganicConnectionRuntimeSnapshot
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.SetConnected*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.SetConnected
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.html#PublisherStudio_Services_OrganicPlugins_IOrganicConnectionRuntimeState_SetConnected_System_Guid_System_String_System_Boolean_
+  name: SetConnected
+  nameWithType: IOrganicConnectionRuntimeState.SetConnected
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.SetConnected
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.Reset*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.Reset
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.html#PublisherStudio_Services_OrganicPlugins_IOrganicConnectionRuntimeState_Reset_System_Guid_
+  name: Reset
+  nameWithType: IOrganicConnectionRuntimeState.Reset
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicConnectionRuntimeState.Reset

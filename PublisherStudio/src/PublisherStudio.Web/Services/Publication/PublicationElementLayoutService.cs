@@ -1,7 +1,10 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Publication;
 
+/// <summary>
+/// Defines the publication element layout service contract.
+/// </summary>
 public interface IPublicationElementLayoutService
 {
     PublicationCanvasBounds Constrain(PublicationCanvasBounds bounds, double canvasWidth, double canvasHeight);
@@ -20,6 +23,9 @@ public interface IPublicationElementLayoutService
 /// </summary>
 public sealed class PublicationElementLayoutService(ILogger<PublicationElementLayoutService> logger) : IPublicationElementLayoutService
 {
+    /// <summary>
+    /// Runs the constrain operation.
+    /// </summary>
     public PublicationCanvasBounds Constrain(PublicationCanvasBounds bounds, double canvasWidth, double canvasHeight)
     {
         ArgumentNullException.ThrowIfNull(bounds);
@@ -36,6 +42,9 @@ public sealed class PublicationElementLayoutService(ILogger<PublicationElementLa
         };
     }
 
+    /// <summary>
+    /// Applies bounds.
+    /// </summary>
     public void ApplyBounds(PublicationElement element, PublicationCanvasBounds bounds, double canvasWidth, double canvasHeight)
     {
         ArgumentNullException.ThrowIfNull(element);
@@ -46,6 +55,9 @@ public sealed class PublicationElementLayoutService(ILogger<PublicationElementLa
         element.Height = constrained.Height;
     }
 
+    /// <summary>
+    /// Runs the nudge operation.
+    /// </summary>
     public void Nudge(PublicationElement element, double deltaX, double deltaY, double canvasWidth, double canvasHeight)
     {
         ArgumentNullException.ThrowIfNull(element);
@@ -58,12 +70,18 @@ public sealed class PublicationElementLayoutService(ILogger<PublicationElementLa
         }, canvasWidth, canvasHeight);
     }
 
+    /// <summary>
+    /// Runs the next z operation.
+    /// </summary>
     public int NextZ(IEnumerable<PublicationElement> elements)
     {
         ArgumentNullException.ThrowIfNull(elements);
         return elements.Select(element => element.ZIndex).DefaultIfEmpty(0).Max() + 1;
     }
 
+    /// <summary>
+    /// Normalizes zorder.
+    /// </summary>
     public void NormalizeZOrder(IList<PublicationElement> elements)
     {
         ArgumentNullException.ThrowIfNull(elements);
@@ -85,6 +103,9 @@ public sealed class PublicationElementLayoutService(ILogger<PublicationElementLa
         }
     }
 
+    /// <summary>
+    /// Runs the move layer operation.
+    /// </summary>
     public bool MoveLayer(IList<PublicationElement> elements, Guid elementId, PublicationLayerMove move)
     {
         ArgumentNullException.ThrowIfNull(elements);
@@ -119,6 +140,9 @@ public sealed class PublicationElementLayoutService(ILogger<PublicationElementLa
         return true;
     }
 
+    /// <summary>
+    /// Runs the reorder operation.
+    /// </summary>
     public IReadOnlyList<PublicationLayerItem> Reorder(IReadOnlyList<PublicationLayerItem> elements, Guid elementId, PublicationLayerMove move)
     {
         ArgumentNullException.ThrowIfNull(elements);

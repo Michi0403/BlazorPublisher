@@ -1,12 +1,18 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace PublisherStudio.Controllers.Streaming.UseCases;
 
+/// <summary>
+/// Provides streaming LAN controller operations.
+/// </summary>
 [ApiController]
 public sealed class StreamingLanController(StreamingLanUseCases useCases) : ControllerBase
 {
     private readonly StreamingLanUseCases _useCases = useCases;
 
+    /// <summary>
+    /// Gets status.
+    /// </summary>
     [HttpGet("api/mediahost/sessions/{sessionId:guid}/lan")]
     public IActionResult GetStatus(Guid sessionId)
     {
@@ -14,6 +20,9 @@ public sealed class StreamingLanController(StreamingLanUseCases useCases) : Cont
         return status is null ? NotFound() : Ok(status);
     }
 
+    /// <summary>
+    /// Gets asset.
+    /// </summary>
     [HttpGet("stream/{sessionId:guid}/{**asset}")]
     public IActionResult GetAsset(Guid sessionId, string? asset)
     {
@@ -23,6 +32,9 @@ public sealed class StreamingLanController(StreamingLanUseCases useCases) : Cont
             : PhysicalFile(resolved.Path, resolved.ContentType, enableRangeProcessing: true);
     }
 
+    /// <summary>
+    /// Runs the watch operation.
+    /// </summary>
     [HttpGet("watch/{sessionId:guid}")]
     public IActionResult Watch(Guid sessionId)
     {

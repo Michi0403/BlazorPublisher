@@ -1,18 +1,33 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 using System.Collections.Concurrent;
 using System.Text.Json;
 
 namespace PublisherStudio.Services.OrganicPlugins;
 
+/// <summary>
+/// Provides local gpt discovery registry operations.
+/// </summary>
 public sealed class LocalGptDiscoveryRegistry(ILogger<LocalGptDiscoveryRegistry> logger) : ILocalGptDiscoveryRegistry
 {
     private readonly ConcurrentDictionary<string, OrganicPeerAdvertisement> peers = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>
+    /// Occurs when changed.
+    /// </summary>
     public event Action? Changed;
 
+    /// <summary>
+    /// Gets peers.
+    /// </summary>
     public IReadOnlyList<OrganicPeerAdvertisement> GetPeers() => peers.Values
         .OrderByDescending(peer => peer.IsConnected).ThenByDescending(peer => peer.SeenUtc).Select(Clone).ToList();
+    /// <summary>
+    /// Gets peer.
+    /// </summary>
     public OrganicPeerAdvertisement? GetPeer(string peerId) => peers.TryGetValue(peerId, out var peer) ? Clone(peer) : null;
 
+    /// <summary>
+    /// Runs the upsert operation.
+    /// </summary>
     public void Upsert(OrganicPeerAdvertisement peer)
     {
         ArgumentNullException.ThrowIfNull(peer);
@@ -28,6 +43,9 @@ public sealed class LocalGptDiscoveryRegistry(ILogger<LocalGptDiscoveryRegistry>
         Changed?.Invoke();
     }
 
+    /// <summary>
+    /// Sets connected.
+    /// </summary>
     public void SetConnected(string peerId, bool connected)
     {
         if (peers.TryGetValue(peerId, out var peer))
@@ -38,6 +56,9 @@ public sealed class LocalGptDiscoveryRegistry(ILogger<LocalGptDiscoveryRegistry>
         }
     }
 
+    /// <summary>
+    /// Removes expired.
+    /// </summary>
     public void RemoveExpired(TimeSpan maximumAge)
     {
         var cutoff = DateTimeOffset.UtcNow - maximumAge;
@@ -71,6 +92,9 @@ public sealed class LocalGptDiscoveryRegistry(ILogger<LocalGptDiscoveryRegistry>
     };
 }
 
+/// <summary>
+/// Provides organic permission store operations.
+/// </summary>
 public sealed class OrganicPermissionStore : IOrganicPermissionStore
 {
     private readonly ILogger<OrganicPermissionStore> logger;
@@ -79,6 +103,9 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
     private readonly string filePath;
     private List<OrganicPermissionRule>? rules;
 
+    /// <summary>
+    /// Runs the organic permission store operation.
+    /// </summary>
     public OrganicPermissionStore(ILogger<OrganicPermissionStore> logger, IOrganicPluginProtocolCodec codec)
     {
         this.logger = logger;
@@ -90,12 +117,18 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
 
     private List<OrganicPermissionRule> Rules => rules ??= Load();
 
+    /// <summary>
+    /// Gets rules.
+    /// </summary>
     public IReadOnlyList<OrganicPermissionRule> GetRules()
     {
         lock (gate)
             return Rules.Select(Clone).OrderBy(rule => rule.CapabilityKey).ThenBy(rule => rule.Organ).ToList();
     }
 
+    /// <summary>
+    /// Runs the save operation.
+    /// </summary>
     public OrganicPermissionRule Save(OrganicPermissionRule rule)
     {
         ArgumentNullException.ThrowIfNull(rule);
@@ -112,6 +145,9 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
         }
     }
 
+    /// <summary>
+    /// Runs the delete operation.
+    /// </summary>
     public bool Delete(string peerId, string capabilityKey, string organ)
     {
         lock (gate)
@@ -125,6 +161,9 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
         }
     }
 
+    /// <summary>
+    /// Determines whether allowed.
+    /// </summary>
     public bool IsAllowed(OrganicWireEnvelope envelope)
     {
         lock (gate)
@@ -146,6 +185,9 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
         }
     }
 
+    /// <summary>
+    /// Determines whether denied.
+    /// </summary>
     public bool IsDenied(OrganicWireEnvelope envelope)
     {
         lock (gate)
@@ -158,6 +200,9 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
     }
 
 
+    /// <summary>
+    /// Determines whether capability exposed.
+    /// </summary>
     public bool IsCapabilityExposed(string peerId, OrganicCapabilityDescriptor capability)
     {
         ArgumentNullException.ThrowIfNull(capability);
@@ -172,6 +217,9 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
         }
     }
 
+    /// <summary>
+    /// Runs the resolve operation.
+    /// </summary>
     public OrganicPermissionRule? Resolve(string peerId, string capabilityKey, string organ = "")
     {
         lock (gate)
@@ -236,6 +284,9 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
     };
 }
 
+/// <summary>
+/// Represents an organic replay guard.
+/// </summary>
 public sealed class OrganicReplayGuard(
     IOrganicReplayPolicyDataService policyData,
     ILogger<OrganicReplayGuard> logger) : IOrganicReplayGuard
@@ -243,6 +294,9 @@ public sealed class OrganicReplayGuard(
     private readonly ConcurrentDictionary<string, DateTimeOffset> accepted = new(StringComparer.OrdinalIgnoreCase);
     private int cleanupCounter;
 
+    /// <summary>
+    /// Attempts to accept.
+    /// </summary>
     public bool TryAccept(string peerId, Guid messageId, DateTimeOffset createdUtc)
     {
         try
@@ -282,13 +336,25 @@ public sealed class OrganicReplayGuard(
     }
 }
 
+/// <summary>
+/// Provides organic result store operations.
+/// </summary>
 public sealed class OrganicResultStore(IOrganicPluginProtocolCodec codec) : IOrganicResultStore
 {
     private readonly ConcurrentQueue<OrganicPluginWorkItem> results = new();
     private readonly ConcurrentDictionary<Guid, OrganicTextInsertionProposal> textProposals = new();
 
+    /// <summary>
+    /// Occurs when changed.
+    /// </summary>
     public event Action? Changed;
+    /// <summary>
+    /// Gets results.
+    /// </summary>
     public IReadOnlyList<OrganicPluginWorkItem> GetResults() => results.Reverse().Take(200).ToList();
+    /// <summary>
+    /// Runs the record envelope operation.
+    /// </summary>
     public void RecordEnvelope(OrganicWireEnvelope envelope)
     {
         results.Enqueue(new OrganicPluginWorkItem
@@ -300,12 +366,21 @@ public sealed class OrganicResultStore(IOrganicPluginProtocolCodec codec) : IOrg
         while (results.Count > 200) results.TryDequeue(out _);
         Changed?.Invoke();
     }
+    /// <summary>
+    /// Adds text proposal.
+    /// </summary>
     public void AddTextProposal(OrganicTextInsertionProposal proposal)
     {
         textProposals[proposal.Id] = proposal;
         Changed?.Invoke();
     }
+    /// <summary>
+    /// Gets text proposals.
+    /// </summary>
     public IReadOnlyList<OrganicTextInsertionProposal> GetTextProposals() => textProposals.Values.OrderByDescending(item => item.CreatedUtc).ToList();
+    /// <summary>
+    /// Removes text proposal.
+    /// </summary>
     public bool RemoveTextProposal(Guid id)
     {
         var removed = textProposals.TryRemove(id, out _);

@@ -1,5 +1,5 @@
-param(
-    [string]$OutputPath = (Join-Path $PSScriptRoot 'artifacts/source/PublisherStudio-v2.0.5-source.zip')
+﻿param(
+    [string]$OutputPath = (Join-Path $PSScriptRoot 'artifacts/source/PublisherStudio-v2.1.1-source.zip')
 )
 
 $ErrorActionPreference = 'Stop'
@@ -18,7 +18,7 @@ try {
         Where-Object {
             $relative = $_.FullName.Substring($root.Length).TrimStart([char[]]"\/").Replace('\', '/')
             $fileName = [IO.Path]::GetFileName($relative)
-            $excludedDirectory = $relative -match '(^|/)(\.git|\.vs|\.cr|node_modules|artifacts|bin|obj|AppPackages|BundleArtifacts)(/|$)'
+            $excludedDirectory = $relative -match '(^|/)(\.git|\.vs|\.cr|node_modules|artifacts|bin|obj|AppPackages|BundleArtifacts)(/|$)' -or $relative -match '^docs/(_site|input|api|_tools|_print-book)(/|$)'
             $excludedGeneratedVendor = $relative -match '^src/PublisherStudio\.Web/wwwroot/vendor/(devextreme-dist|devexpress-aspnetcore-spreadsheet|jquery)(/|$)' -or $relative -match '^src/PublisherStudio\.Web/wwwroot/vendor/devextreme-license(?:\.generated)?\.js$' -or $relative -match '^src/PublisherStudio\.Web/wwwroot/vendor/devextreme-license\.(?:meta\.json|version)$'
             $excludedFile = $fileName -match '\.(?:user|suo|db|pfx|snk|licx|download)$' -or $fileName -in @('.DS_Store', 'Thumbs.db')
             -not $excludedDirectory -and -not $excludedGeneratedVendor -and -not $excludedFile

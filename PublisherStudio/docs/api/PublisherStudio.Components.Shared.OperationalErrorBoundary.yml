@@ -1,0 +1,651 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Components.Shared.OperationalErrorBoundary
+  commentId: T:PublisherStudio.Components.Shared.OperationalErrorBoundary
+  id: OperationalErrorBoundary
+  parent: PublisherStudio.Components.Shared
+  children:
+  - PublisherStudio.Components.Shared.OperationalErrorBoundary.#ctor
+  - PublisherStudio.Components.Shared.OperationalErrorBoundary.OnErrorAsync(System.Exception)
+  langs:
+  - csharp
+  - vb
+  name: OperationalErrorBoundary
+  nameWithType: OperationalErrorBoundary
+  fullName: PublisherStudio.Components.Shared.OperationalErrorBoundary
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Components.Shared
+  summary: Logs unhandled component failures and surfaces one circuit-scoped notification. Dispose paths are intentionally not instrumented because circuit shutdown is expected.
+  example: []
+  syntax:
+    content: 'public sealed class OperationalErrorBoundary : ErrorBoundary, IComponent, IHandleEvent, IHandleAfterRender'
+    content.vb: Public NotInheritable Class OperationalErrorBoundary Inherits ErrorBoundary Implements IComponent, IHandleEvent, IHandleAfterRender
+  inheritance:
+  - System.Object
+  - Microsoft.AspNetCore.Components.ComponentBase
+  - Microsoft.AspNetCore.Components.ErrorBoundaryBase
+  - Microsoft.AspNetCore.Components.Web.ErrorBoundary
+  implements:
+  - Microsoft.AspNetCore.Components.IComponent
+  - Microsoft.AspNetCore.Components.IHandleEvent
+  - Microsoft.AspNetCore.Components.IHandleAfterRender
+  inheritedMembers:
+  - Microsoft.AspNetCore.Components.ErrorBoundaryBase.Recover
+  - Microsoft.AspNetCore.Components.ErrorBoundaryBase.ChildContent
+  - Microsoft.AspNetCore.Components.ErrorBoundaryBase.ErrorContent
+  - Microsoft.AspNetCore.Components.ErrorBoundaryBase.MaximumErrorCount
+  - Microsoft.AspNetCore.Components.ComponentBase.SetParametersAsync(Microsoft.AspNetCore.Components.ParameterView)
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Components.Shared.OperationalErrorBoundary.OnErrorAsync(System.Exception)
+  commentId: M:PublisherStudio.Components.Shared.OperationalErrorBoundary.OnErrorAsync(System.Exception)
+  id: OnErrorAsync(System.Exception)
+  parent: PublisherStudio.Components.Shared.OperationalErrorBoundary
+  langs:
+  - csharp
+  - vb
+  name: OnErrorAsync(Exception)
+  nameWithType: OperationalErrorBoundary.OnErrorAsync(Exception)
+  fullName: PublisherStudio.Components.Shared.OperationalErrorBoundary.OnErrorAsync(System.Exception)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Components.Shared
+  summary: Runs the on error async operation.
+  example: []
+  syntax:
+    content: protected override Task OnErrorAsync(Exception exception)
+    parameters:
+    - id: exception
+      type: System.Exception
+    return:
+      type: System.Threading.Tasks.Task
+    content.vb: Protected Overrides Function OnErrorAsync(exception As Exception) As Task
+  overridden: Microsoft.AspNetCore.Components.Web.ErrorBoundary.OnErrorAsync(System.Exception)
+  overload: PublisherStudio.Components.Shared.OperationalErrorBoundary.OnErrorAsync*
+- uid: PublisherStudio.Components.Shared.OperationalErrorBoundary.#ctor
+  commentId: M:PublisherStudio.Components.Shared.OperationalErrorBoundary.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.Components.Shared.OperationalErrorBoundary
+  langs:
+  - csharp
+  - vb
+  name: OperationalErrorBoundary()
+  nameWithType: OperationalErrorBoundary.OperationalErrorBoundary()
+  fullName: PublisherStudio.Components.Shared.OperationalErrorBoundary.OperationalErrorBoundary()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Components.Shared
+  syntax:
+    content: public OperationalErrorBoundary()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.Components.Shared.OperationalErrorBoundary.#ctor*
+  nameWithType.vb: OperationalErrorBoundary.New()
+  fullName.vb: PublisherStudio.Components.Shared.OperationalErrorBoundary.New()
+  name.vb: New()
+references:
+- uid: PublisherStudio.Components.Shared
+  commentId: N:PublisherStudio.Components.Shared
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Components.Shared
+  nameWithType: PublisherStudio.Components.Shared
+  fullName: PublisherStudio.Components.Shared
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Components
+    name: Components
+    isExternal: true
+    href: PublisherStudio.Components.html
+  - name: .
+  - uid: PublisherStudio.Components.Shared
+    name: Shared
+    isExternal: true
+    href: PublisherStudio.Components.Shared.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Components
+    name: Components
+    isExternal: true
+    href: PublisherStudio.Components.html
+  - name: .
+  - uid: PublisherStudio.Components.Shared
+    name: Shared
+    isExternal: true
+    href: PublisherStudio.Components.Shared.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: Microsoft.AspNetCore.Components.ComponentBase
+  commentId: T:Microsoft.AspNetCore.Components.ComponentBase
+  parent: Microsoft.AspNetCore.Components
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components.componentbase
+  name: ComponentBase
+  nameWithType: ComponentBase
+  fullName: Microsoft.AspNetCore.Components.ComponentBase
+- uid: Microsoft.AspNetCore.Components.ErrorBoundaryBase
+  commentId: T:Microsoft.AspNetCore.Components.ErrorBoundaryBase
+  parent: Microsoft.AspNetCore.Components
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components.errorboundarybase
+  name: ErrorBoundaryBase
+  nameWithType: ErrorBoundaryBase
+  fullName: Microsoft.AspNetCore.Components.ErrorBoundaryBase
+- uid: Microsoft.AspNetCore.Components.Web.ErrorBoundary
+  commentId: T:Microsoft.AspNetCore.Components.Web.ErrorBoundary
+  parent: Microsoft.AspNetCore.Components.Web
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components.web.errorboundary
+  name: ErrorBoundary
+  nameWithType: ErrorBoundary
+  fullName: Microsoft.AspNetCore.Components.Web.ErrorBoundary
+- uid: Microsoft.AspNetCore.Components.IComponent
+  commentId: T:Microsoft.AspNetCore.Components.IComponent
+  parent: Microsoft.AspNetCore.Components
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components.icomponent
+  name: IComponent
+  nameWithType: IComponent
+  fullName: Microsoft.AspNetCore.Components.IComponent
+- uid: Microsoft.AspNetCore.Components.IHandleEvent
+  commentId: T:Microsoft.AspNetCore.Components.IHandleEvent
+  parent: Microsoft.AspNetCore.Components
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components.ihandleevent
+  name: IHandleEvent
+  nameWithType: IHandleEvent
+  fullName: Microsoft.AspNetCore.Components.IHandleEvent
+- uid: Microsoft.AspNetCore.Components.IHandleAfterRender
+  commentId: T:Microsoft.AspNetCore.Components.IHandleAfterRender
+  parent: Microsoft.AspNetCore.Components
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components.ihandleafterrender
+  name: IHandleAfterRender
+  nameWithType: IHandleAfterRender
+  fullName: Microsoft.AspNetCore.Components.IHandleAfterRender
+- uid: Microsoft.AspNetCore.Components.ErrorBoundaryBase.Recover
+  commentId: M:Microsoft.AspNetCore.Components.ErrorBoundaryBase.Recover
+  parent: Microsoft.AspNetCore.Components.ErrorBoundaryBase
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components.errorboundarybase.recover
+  name: Recover()
+  nameWithType: ErrorBoundaryBase.Recover()
+  fullName: Microsoft.AspNetCore.Components.ErrorBoundaryBase.Recover()
+  spec.csharp:
+  - uid: Microsoft.AspNetCore.Components.ErrorBoundaryBase.Recover
+    name: Recover
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components.errorboundarybase.recover
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Microsoft.AspNetCore.Components.ErrorBoundaryBase.Recover
+    name: Recover
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components.errorboundarybase.recover
+  - name: (
+  - name: )
+- uid: Microsoft.AspNetCore.Components.ErrorBoundaryBase.ChildContent
+  commentId: P:Microsoft.AspNetCore.Components.ErrorBoundaryBase.ChildContent
+  parent: Microsoft.AspNetCore.Components.ErrorBoundaryBase
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components.errorboundarybase.childcontent
+  name: ChildContent
+  nameWithType: ErrorBoundaryBase.ChildContent
+  fullName: Microsoft.AspNetCore.Components.ErrorBoundaryBase.ChildContent
+- uid: Microsoft.AspNetCore.Components.ErrorBoundaryBase.ErrorContent
+  commentId: P:Microsoft.AspNetCore.Components.ErrorBoundaryBase.ErrorContent
+  parent: Microsoft.AspNetCore.Components.ErrorBoundaryBase
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components.errorboundarybase.errorcontent
+  name: ErrorContent
+  nameWithType: ErrorBoundaryBase.ErrorContent
+  fullName: Microsoft.AspNetCore.Components.ErrorBoundaryBase.ErrorContent
+- uid: Microsoft.AspNetCore.Components.ErrorBoundaryBase.MaximumErrorCount
+  commentId: P:Microsoft.AspNetCore.Components.ErrorBoundaryBase.MaximumErrorCount
+  parent: Microsoft.AspNetCore.Components.ErrorBoundaryBase
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components.errorboundarybase.maximumerrorcount
+  name: MaximumErrorCount
+  nameWithType: ErrorBoundaryBase.MaximumErrorCount
+  fullName: Microsoft.AspNetCore.Components.ErrorBoundaryBase.MaximumErrorCount
+- uid: Microsoft.AspNetCore.Components.ComponentBase.SetParametersAsync(Microsoft.AspNetCore.Components.ParameterView)
+  commentId: M:Microsoft.AspNetCore.Components.ComponentBase.SetParametersAsync(Microsoft.AspNetCore.Components.ParameterView)
+  parent: Microsoft.AspNetCore.Components.ComponentBase
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components.componentbase.setparametersasync
+  name: SetParametersAsync(ParameterView)
+  nameWithType: ComponentBase.SetParametersAsync(ParameterView)
+  fullName: Microsoft.AspNetCore.Components.ComponentBase.SetParametersAsync(Microsoft.AspNetCore.Components.ParameterView)
+  spec.csharp:
+  - uid: Microsoft.AspNetCore.Components.ComponentBase.SetParametersAsync(Microsoft.AspNetCore.Components.ParameterView)
+    name: SetParametersAsync
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components.componentbase.setparametersasync
+  - name: (
+  - uid: Microsoft.AspNetCore.Components.ParameterView
+    name: ParameterView
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components.parameterview
+  - name: )
+  spec.vb:
+  - uid: Microsoft.AspNetCore.Components.ComponentBase.SetParametersAsync(Microsoft.AspNetCore.Components.ParameterView)
+    name: SetParametersAsync
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components.componentbase.setparametersasync
+  - name: (
+  - uid: Microsoft.AspNetCore.Components.ParameterView
+    name: ParameterView
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components.parameterview
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Microsoft.AspNetCore.Components
+  commentId: N:Microsoft.AspNetCore.Components
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.AspNetCore.Components
+  nameWithType: Microsoft.AspNetCore.Components
+  fullName: Microsoft.AspNetCore.Components
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.AspNetCore
+    name: AspNetCore
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore
+  - name: .
+  - uid: Microsoft.AspNetCore.Components
+    name: Components
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.AspNetCore
+    name: AspNetCore
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore
+  - name: .
+  - uid: Microsoft.AspNetCore.Components
+    name: Components
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components
+- uid: Microsoft.AspNetCore.Components.Web
+  commentId: N:Microsoft.AspNetCore.Components.Web
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.AspNetCore.Components.Web
+  nameWithType: Microsoft.AspNetCore.Components.Web
+  fullName: Microsoft.AspNetCore.Components.Web
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.AspNetCore
+    name: AspNetCore
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore
+  - name: .
+  - uid: Microsoft.AspNetCore.Components
+    name: Components
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components
+  - name: .
+  - uid: Microsoft.AspNetCore.Components.Web
+    name: Web
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components.web
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.AspNetCore
+    name: AspNetCore
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore
+  - name: .
+  - uid: Microsoft.AspNetCore.Components
+    name: Components
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components
+  - name: .
+  - uid: Microsoft.AspNetCore.Components.Web
+    name: Web
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components.web
+- uid: Microsoft.AspNetCore.Components.Web.ErrorBoundary.OnErrorAsync(System.Exception)
+  commentId: M:Microsoft.AspNetCore.Components.Web.ErrorBoundary.OnErrorAsync(System.Exception)
+  parent: Microsoft.AspNetCore.Components.Web.ErrorBoundary
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components.web.errorboundary.onerrorasync
+  name: OnErrorAsync(Exception)
+  nameWithType: ErrorBoundary.OnErrorAsync(Exception)
+  fullName: Microsoft.AspNetCore.Components.Web.ErrorBoundary.OnErrorAsync(System.Exception)
+  spec.csharp:
+  - uid: Microsoft.AspNetCore.Components.Web.ErrorBoundary.OnErrorAsync(System.Exception)
+    name: OnErrorAsync
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components.web.errorboundary.onerrorasync
+  - name: (
+  - uid: System.Exception
+    name: Exception
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.exception
+  - name: )
+  spec.vb:
+  - uid: Microsoft.AspNetCore.Components.Web.ErrorBoundary.OnErrorAsync(System.Exception)
+    name: OnErrorAsync
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.components.web.errorboundary.onerrorasync
+  - name: (
+  - uid: System.Exception
+    name: Exception
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.exception
+  - name: )
+- uid: PublisherStudio.Components.Shared.OperationalErrorBoundary.OnErrorAsync*
+  commentId: Overload:PublisherStudio.Components.Shared.OperationalErrorBoundary.OnErrorAsync
+  isExternal: true
+  href: PublisherStudio.Components.Shared.OperationalErrorBoundary.html#PublisherStudio_Components_Shared_OperationalErrorBoundary_OnErrorAsync_System_Exception_
+  name: OnErrorAsync
+  nameWithType: OperationalErrorBoundary.OnErrorAsync
+  fullName: PublisherStudio.Components.Shared.OperationalErrorBoundary.OnErrorAsync
+- uid: System.Exception
+  commentId: T:System.Exception
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.exception
+  name: Exception
+  nameWithType: Exception
+  fullName: System.Exception
+- uid: System.Threading.Tasks.Task
+  commentId: T:System.Threading.Tasks.Task
+  parent: System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task
+  name: Task
+  nameWithType: Task
+  fullName: System.Threading.Tasks.Task
+- uid: System.Threading.Tasks
+  commentId: N:System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading.Tasks
+  nameWithType: System.Threading.Tasks
+  fullName: System.Threading.Tasks
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+- uid: PublisherStudio.Components.Shared.OperationalErrorBoundary.#ctor*
+  commentId: Overload:PublisherStudio.Components.Shared.OperationalErrorBoundary.#ctor
+  isExternal: true
+  href: PublisherStudio.Components.Shared.OperationalErrorBoundary.html#PublisherStudio_Components_Shared_OperationalErrorBoundary__ctor
+  name: OperationalErrorBoundary
+  nameWithType: OperationalErrorBoundary.OperationalErrorBoundary
+  fullName: PublisherStudio.Components.Shared.OperationalErrorBoundary.OperationalErrorBoundary
+  nameWithType.vb: OperationalErrorBoundary.New
+  fullName.vb: PublisherStudio.Components.Shared.OperationalErrorBoundary.New
+  name.vb: New

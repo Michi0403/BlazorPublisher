@@ -1,4 +1,4 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 using System.Collections.Concurrent;
 using System.Net.Security;
 using System.Net.Sockets;
@@ -11,6 +11,9 @@ using TextEncoding = global::System.Text.Encoding;
 
 namespace PublisherStudio.Services.Streaming.Chat;
 
+/// <summary>
+/// Provides platform chat service operations.
+/// </summary>
 public sealed class PlatformChatService : IAsyncDisposable
 {
     private readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
@@ -21,14 +24,23 @@ public sealed class PlatformChatService : IAsyncDisposable
     private readonly ConcurrentDictionary<Guid, ConcurrentDictionary<Guid, Channel<PlatformChatMessage>>> _subscribers = new();
     private readonly CancellationTokenSource _lifetime = new();
 
+    /// <summary>
+    /// Runs the platform chat service operation.
+    /// </summary>
     public PlatformChatService(MediaSession session, ILogger<PlatformChatService> logger)
     {
         _session = session;
         _logger = logger;
     }
 
+    /// <summary>
+    /// Gets status.
+    /// </summary>
     public IReadOnlyDictionary<Guid, string> Status => _adapters.ToDictionary(pair => pair.Key, pair => pair.Value.Status);
 
+    /// <summary>
+    /// Runs the start operation.
+    /// </summary>
     public void Start()
     {
         try
@@ -53,6 +65,9 @@ public sealed class PlatformChatService : IAsyncDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the send async operation.
+    /// </summary>
     public async Task<bool> SendAsync(Guid outputId, string message, CancellationToken cancellationToken)
     {
         if (!_adapters.TryGetValue(outputId, out var adapter) || string.IsNullOrWhiteSpace(message)) return false;
@@ -60,6 +75,9 @@ public sealed class PlatformChatService : IAsyncDisposable
         return true;
     }
 
+    /// <summary>
+    /// Runs the run subscriber async operation.
+    /// </summary>
     public async Task RunSubscriberAsync(Guid outputId, WebSocket socket, CancellationToken cancellationToken)
     {
         if (!_session.OutputDefinitions.Any(item => item.OutputId == outputId))
@@ -116,6 +134,9 @@ public sealed class PlatformChatService : IAsyncDisposable
         foreach (var subscriber in subscribers.Values) subscriber.Writer.TryWrite(message);
     }
 
+    /// <summary>
+    /// Runs the dispose async operation.
+    /// </summary>
     public async ValueTask DisposeAsync()
     {
         _lifetime.Cancel();
@@ -146,6 +167,9 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
     private Task? _runTask;
     private StreamWriter? _writer;
 
+    /// <summary>
+    /// Runs the twitch irc chat adapter operation.
+    /// </summary>
     public TwitchIrcChatAdapter(MediaOutputDefinition output, Action<PlatformChatMessage> publish, CancellationToken sessionToken)
     {
         _output = output;
@@ -153,9 +177,18 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
         _lifetime = CancellationTokenSource.CreateLinkedTokenSource(sessionToken);
     }
 
+    /// <summary>
+    /// Gets or sets status.
+    /// </summary>
     public string Status { get; private set; } = "configured";
+    /// <summary>
+    /// Runs the start operation.
+    /// </summary>
     public void Start() => _runTask ??= Task.Run(RunAsync);
 
+    /// <summary>
+    /// Runs the send async operation.
+    /// </summary>
     public async Task SendAsync(string message, CancellationToken cancellationToken)
     {
         var writer = _writer ?? throw new InvalidOperationException("Twitch Chat is not connected.");
@@ -264,6 +297,9 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
     private string SanitizeMessage(string value) => value.Replace('\r', ' ').Replace('\n', ' ').Trim();
     private string DecodeTag(string value) => value.Replace("\\s", " ").Replace("\\:", ";").Replace("\\r", "\r").Replace("\\n", "\n").Replace("\\\\", "\\");
 
+    /// <summary>
+    /// Runs the dispose async operation.
+    /// </summary>
     public async ValueTask DisposeAsync()
     {
         _lifetime.Cancel();
@@ -284,6 +320,9 @@ internal sealed class YouTubeLiveChatAdapter : IPlatformChatAdapter
     private string _pageToken = string.Empty;
     private readonly HashSet<string> _seen = new(StringComparer.Ordinal);
 
+    /// <summary>
+    /// Runs the you tube live chat adapter operation.
+    /// </summary>
     public YouTubeLiveChatAdapter(MediaOutputDefinition output, Action<PlatformChatMessage> publish, CancellationToken sessionToken)
     {
         _output = output;
@@ -292,9 +331,18 @@ internal sealed class YouTubeLiveChatAdapter : IPlatformChatAdapter
         _http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", output.ChatSecret);
     }
 
+    /// <summary>
+    /// Gets or sets status.
+    /// </summary>
     public string Status { get; private set; } = "configured";
+    /// <summary>
+    /// Runs the start operation.
+    /// </summary>
     public void Start() => _runTask ??= Task.Run(RunAsync);
 
+    /// <summary>
+    /// Runs the send async operation.
+    /// </summary>
     public async Task SendAsync(string message, CancellationToken cancellationToken)
     {
         var body = JsonSerializer.Serialize(new
@@ -371,6 +419,9 @@ internal sealed class YouTubeLiveChatAdapter : IPlatformChatAdapter
         _publish(new PlatformChatMessage(id, _output.OutputId, "YouTube", _output.ChannelId, authorId, authorName, avatar, text, timestamp));
     }
 
+    /// <summary>
+    /// Runs the dispose async operation.
+    /// </summary>
     public async ValueTask DisposeAsync()
     {
         _lifetime.Cancel();

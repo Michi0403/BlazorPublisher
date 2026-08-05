@@ -1,7 +1,10 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Configuration;
 
+/// <summary>
+/// Defines the application path service contract.
+/// </summary>
 public interface IApplicationPathService
 {
     PublisherStudioPathOptions GetDefaults();
@@ -10,6 +13,9 @@ public interface IApplicationPathService
     void EnsureDirectories(PublisherStudioPathOptions? projectOverrides = null);
 }
 
+/// <summary>
+/// Defines the file localization service contract.
+/// </summary>
 public interface IFileLocalizationService
 {
     IReadOnlyList<string> GetAvailableCultures();
@@ -18,6 +24,9 @@ public interface IFileLocalizationService
     Task SaveOverridesAsync(string culture, IReadOnlyDictionary<string, string> strings, CancellationToken cancellationToken = default);
 }
 
+/// <summary>
+/// Defines the render export catalog service contract.
+/// </summary>
 public interface IRenderExportCatalogService
 {
     IReadOnlyList<RenderExportCapability> GetCapabilities();

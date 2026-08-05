@@ -1,0 +1,172 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationComponentEditMode
+  commentId: T:PublisherStudio.BusinessObjects.PublicationComponentEditMode
+  id: PublicationComponentEditMode
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationComponentEditMode.Batch
+  - PublisherStudio.BusinessObjects.PublicationComponentEditMode.Cell
+  - PublisherStudio.BusinessObjects.PublicationComponentEditMode.Form
+  - PublisherStudio.BusinessObjects.PublicationComponentEditMode.Popup
+  - PublisherStudio.BusinessObjects.PublicationComponentEditMode.ReadOnly
+  - PublisherStudio.BusinessObjects.PublicationComponentEditMode.Row
+  langs:
+  - csharp
+  - vb
+  name: PublicationComponentEditMode
+  nameWithType: PublicationComponentEditMode
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentEditMode
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication component edit mode values.
+  example: []
+  syntax:
+    content: public enum PublicationComponentEditMode
+    content.vb: Public Enum PublicationComponentEditMode
+- uid: PublisherStudio.BusinessObjects.PublicationComponentEditMode.ReadOnly
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentEditMode.ReadOnly
+  id: ReadOnly
+  parent: PublisherStudio.BusinessObjects.PublicationComponentEditMode
+  langs:
+  - csharp
+  - vb
+  name: ReadOnly
+  nameWithType: PublicationComponentEditMode.ReadOnly
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentEditMode.ReadOnly
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: ReadOnly = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentEditMode
+- uid: PublisherStudio.BusinessObjects.PublicationComponentEditMode.Cell
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentEditMode.Cell
+  id: Cell
+  parent: PublisherStudio.BusinessObjects.PublicationComponentEditMode
+  langs:
+  - csharp
+  - vb
+  name: Cell
+  nameWithType: PublicationComponentEditMode.Cell
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentEditMode.Cell
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Cell = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentEditMode
+- uid: PublisherStudio.BusinessObjects.PublicationComponentEditMode.Row
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentEditMode.Row
+  id: Row
+  parent: PublisherStudio.BusinessObjects.PublicationComponentEditMode
+  langs:
+  - csharp
+  - vb
+  name: Row
+  nameWithType: PublicationComponentEditMode.Row
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentEditMode.Row
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Row = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentEditMode
+- uid: PublisherStudio.BusinessObjects.PublicationComponentEditMode.Batch
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentEditMode.Batch
+  id: Batch
+  parent: PublisherStudio.BusinessObjects.PublicationComponentEditMode
+  langs:
+  - csharp
+  - vb
+  name: Batch
+  nameWithType: PublicationComponentEditMode.Batch
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentEditMode.Batch
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Batch = 3
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentEditMode
+- uid: PublisherStudio.BusinessObjects.PublicationComponentEditMode.Form
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentEditMode.Form
+  id: Form
+  parent: PublisherStudio.BusinessObjects.PublicationComponentEditMode
+  langs:
+  - csharp
+  - vb
+  name: Form
+  nameWithType: PublicationComponentEditMode.Form
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentEditMode.Form
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Form = 4
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentEditMode
+- uid: PublisherStudio.BusinessObjects.PublicationComponentEditMode.Popup
+  commentId: F:PublisherStudio.BusinessObjects.PublicationComponentEditMode.Popup
+  id: Popup
+  parent: PublisherStudio.BusinessObjects.PublicationComponentEditMode
+  langs:
+  - csharp
+  - vb
+  name: Popup
+  nameWithType: PublicationComponentEditMode.Popup
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentEditMode.Popup
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Popup = 5
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationComponentEditMode
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationComponentEditMode
+  commentId: T:PublisherStudio.BusinessObjects.PublicationComponentEditMode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationComponentEditMode.html
+  name: PublicationComponentEditMode
+  nameWithType: PublicationComponentEditMode
+  fullName: PublisherStudio.BusinessObjects.PublicationComponentEditMode

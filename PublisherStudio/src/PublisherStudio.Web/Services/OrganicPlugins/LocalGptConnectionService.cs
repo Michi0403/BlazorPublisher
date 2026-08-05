@@ -9,6 +9,9 @@ using System.Text.Json;
 
 namespace PublisherStudio.Services.OrganicPlugins;
 
+/// <summary>
+/// Provides local gpt connection service operations.
+/// </summary>
 public sealed class LocalGptConnectionService(
     ILocalGptDiscoveryRegistry discovery,
     IOrganicPluginProtocolCodec codec,
@@ -38,9 +41,18 @@ public sealed class LocalGptConnectionService(
     private Guid connectionId;
     private readonly string localPeerId = $"publisherstudio:{Environment.MachineName}";
 
+    /// <summary>
+    /// Occurs when changed.
+    /// </summary>
     public event Action? Changed;
+    /// <summary>
+    /// Gets state.
+    /// </summary>
     public OrganicConnectionState State { get; } = new();
 
+    /// <summary>
+    /// Runs the connect async operation.
+    /// </summary>
     public async Task<OrganicConnectionState> ConnectAsync(string requestedPeerId, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(requestedPeerId);
@@ -95,7 +107,7 @@ public sealed class LocalGptConnectionService(
                         PeerId = localPeerId,
                         DisplayName = "PublisherStudio / BlazorPublisher",
                         Application = "PublisherStudio",
-                        ApplicationVersion = "2.0.5-organic-wire",
+                        ApplicationVersion = "2.1.1-organic-wire",
                         HostName = Environment.MachineName,
                         Address = "0.0.0.0",
                         ServicePort = 0,
@@ -136,6 +148,9 @@ public sealed class LocalGptConnectionService(
         finally { lifecycleGate.Release(); }
     }
 
+    /// <summary>
+    /// Runs the disconnect async operation.
+    /// </summary>
     public async Task DisconnectAsync()
     {
         try
@@ -153,6 +168,9 @@ public sealed class LocalGptConnectionService(
         }
     }
 
+    /// <summary>
+    /// Runs the send council request async operation.
+    /// </summary>
     public async Task<Guid> SendCouncilRequestAsync(OrganicCouncilPromptRequest request, CancellationToken cancellationToken = default)
     {
         try
@@ -184,6 +202,9 @@ public sealed class LocalGptConnectionService(
         }
     }
 
+    /// <summary>
+    /// Runs the send envelope async operation.
+    /// </summary>
     public Task<Guid> SendEnvelopeAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default)
     {
         try
@@ -204,6 +225,9 @@ public sealed class LocalGptConnectionService(
         }
     }
 
+    /// <summary>
+    /// Runs the wait for result async operation.
+    /// </summary>
     public async Task<OrganicWireEnvelope> WaitForResultAsync(Guid correlationId, TimeSpan timeout, CancellationToken cancellationToken = default)
     {
         try
@@ -236,6 +260,9 @@ public sealed class LocalGptConnectionService(
         }
     }
 
+    /// <summary>
+    /// Runs the send work result async operation.
+    /// </summary>
     public async Task SendWorkResultAsync(OrganicPluginWorkItem item, CancellationToken cancellationToken = default)
     {
         try
@@ -537,6 +564,9 @@ public sealed class LocalGptConnectionService(
         }
     }
 
+    /// <summary>
+    /// Runs the dispose async operation.
+    /// </summary>
     public async ValueTask DisposeAsync()
     {
         try

@@ -1,4 +1,4 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.UserExperience;
 
@@ -12,9 +12,18 @@ public sealed class UserNotificationService(ILogger<UserNotificationService> log
     private const int MaximumMessages = 12;
     private readonly List<UserNotificationMessage> _messages = [];
 
+    /// <summary>
+    /// Occurs when changed.
+    /// </summary>
     public event Action? Changed;
+    /// <summary>
+    /// Gets messages.
+    /// </summary>
     public IReadOnlyList<UserNotificationMessage> Messages => _messages.AsReadOnly();
 
+    /// <summary>
+    /// Runs the publish operation.
+    /// </summary>
     public UserNotificationMessage Publish(UserNotificationMessage message)
     {
         ArgumentNullException.ThrowIfNull(message);
@@ -34,15 +43,27 @@ public sealed class UserNotificationService(ILogger<UserNotificationService> log
         return message;
     }
 
+    /// <summary>
+    /// Runs the information operation.
+    /// </summary>
     public UserNotificationMessage Information(string message, string title = "PublisherStudio", string source = "") =>
         Publish(Create(UserNotificationSeverity.Information, title, message, source));
 
+    /// <summary>
+    /// Runs the success operation.
+    /// </summary>
     public UserNotificationMessage Success(string message, string title = "Completed", string source = "") =>
         Publish(Create(UserNotificationSeverity.Success, title, message, source));
 
+    /// <summary>
+    /// Runs the warning operation.
+    /// </summary>
     public UserNotificationMessage Warning(string message, string title = "Attention", string source = "") =>
         Publish(Create(UserNotificationSeverity.Warning, title, message, source));
 
+    /// <summary>
+    /// Runs the error operation.
+    /// </summary>
     public UserNotificationMessage Error(string message, string title = "Something went wrong", string source = "", bool persistent = false)
     {
         var notification = Create(UserNotificationSeverity.Error, title, message, source);
@@ -51,6 +72,9 @@ public sealed class UserNotificationService(ILogger<UserNotificationService> log
         return Publish(notification);
     }
 
+    /// <summary>
+    /// Runs the dismiss operation.
+    /// </summary>
     public bool Dismiss(Guid id)
     {
         var index = _messages.FindIndex(message => message.Id == id);
@@ -60,6 +84,9 @@ public sealed class UserNotificationService(ILogger<UserNotificationService> log
         return true;
     }
 
+    /// <summary>
+    /// Runs the clear operation.
+    /// </summary>
     public void Clear()
     {
         if (_messages.Count == 0) return;

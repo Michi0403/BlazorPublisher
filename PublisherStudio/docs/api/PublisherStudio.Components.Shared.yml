@@ -1,0 +1,33 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Components.Shared
+  commentId: N:PublisherStudio.Components.Shared
+  id: Shared
+  parent: PublisherStudio.Components
+  children:
+  - PublisherStudio.Components.Shared.OperationalErrorBoundary
+  - PublisherStudio.Components.Shared.UserNotificationHost
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.Components.Shared
+  nameWithType: PublisherStudio.Components.Shared
+  fullName: PublisherStudio.Components.Shared
+  type: Namespace
+  assemblies:
+  - PublisherStudio.Web
+references:
+- uid: PublisherStudio.Components.Shared.OperationalErrorBoundary
+  commentId: T:PublisherStudio.Components.Shared.OperationalErrorBoundary
+  isExternal: true
+  href: PublisherStudio.Components.Shared.OperationalErrorBoundary.html
+  name: OperationalErrorBoundary
+  nameWithType: OperationalErrorBoundary
+  fullName: PublisherStudio.Components.Shared.OperationalErrorBoundary
+- uid: PublisherStudio.Components.Shared.UserNotificationHost
+  commentId: T:PublisherStudio.Components.Shared.UserNotificationHost
+  isExternal: true
+  href: PublisherStudio.Components.Shared.UserNotificationHost.html
+  name: UserNotificationHost
+  nameWithType: UserNotificationHost
+  fullName: PublisherStudio.Components.Shared.UserNotificationHost

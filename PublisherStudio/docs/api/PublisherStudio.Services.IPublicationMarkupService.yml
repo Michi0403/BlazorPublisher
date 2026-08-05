@@ -1,0 +1,172 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.IPublicationMarkupService
+  commentId: T:PublisherStudio.Services.IPublicationMarkupService
+  id: IPublicationMarkupService
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.IPublicationMarkupService.NormalizeCssBackground(System.String)
+  - PublisherStudio.Services.IPublicationMarkupService.SafeFileName(System.String)
+  - PublisherStudio.Services.IPublicationMarkupService.SanitizePreviewHtml(System.String)
+  langs:
+  - csharp
+  - vb
+  name: IPublicationMarkupService
+  nameWithType: IPublicationMarkupService
+  fullName: PublisherStudio.Services.IPublicationMarkupService
+  type: Interface
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Defines the publication markup service contract.
+  example: []
+  syntax:
+    content: public interface IPublicationMarkupService
+    content.vb: Public Interface IPublicationMarkupService
+  derivedClasses:
+  - PublisherStudio.Services.PublicationMarkupService
+- uid: PublisherStudio.Services.IPublicationMarkupService.SafeFileName(System.String)
+  commentId: M:PublisherStudio.Services.IPublicationMarkupService.SafeFileName(System.String)
+  id: SafeFileName(System.String)
+  parent: PublisherStudio.Services.IPublicationMarkupService
+  langs:
+  - csharp
+  - vb
+  name: SafeFileName(string)
+  nameWithType: IPublicationMarkupService.SafeFileName(string)
+  fullName: PublisherStudio.Services.IPublicationMarkupService.SafeFileName(string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: string SafeFileName(string value)
+    parameters:
+    - id: value
+      type: System.String
+    return:
+      type: System.String
+    content.vb: Function SafeFileName(value As String) As String
+  overload: PublisherStudio.Services.IPublicationMarkupService.SafeFileName*
+  nameWithType.vb: IPublicationMarkupService.SafeFileName(String)
+  fullName.vb: PublisherStudio.Services.IPublicationMarkupService.SafeFileName(String)
+  name.vb: SafeFileName(String)
+- uid: PublisherStudio.Services.IPublicationMarkupService.NormalizeCssBackground(System.String)
+  commentId: M:PublisherStudio.Services.IPublicationMarkupService.NormalizeCssBackground(System.String)
+  id: NormalizeCssBackground(System.String)
+  parent: PublisherStudio.Services.IPublicationMarkupService
+  langs:
+  - csharp
+  - vb
+  name: NormalizeCssBackground(string?)
+  nameWithType: IPublicationMarkupService.NormalizeCssBackground(string?)
+  fullName: PublisherStudio.Services.IPublicationMarkupService.NormalizeCssBackground(string?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: string NormalizeCssBackground(string? value)
+    parameters:
+    - id: value
+      type: System.String
+    return:
+      type: System.String
+    content.vb: Function NormalizeCssBackground(value As String) As String
+  overload: PublisherStudio.Services.IPublicationMarkupService.NormalizeCssBackground*
+  nameWithType.vb: IPublicationMarkupService.NormalizeCssBackground(String)
+  fullName.vb: PublisherStudio.Services.IPublicationMarkupService.NormalizeCssBackground(String)
+  name.vb: NormalizeCssBackground(String)
+- uid: PublisherStudio.Services.IPublicationMarkupService.SanitizePreviewHtml(System.String)
+  commentId: M:PublisherStudio.Services.IPublicationMarkupService.SanitizePreviewHtml(System.String)
+  id: SanitizePreviewHtml(System.String)
+  parent: PublisherStudio.Services.IPublicationMarkupService
+  langs:
+  - csharp
+  - vb
+  name: SanitizePreviewHtml(string)
+  nameWithType: IPublicationMarkupService.SanitizePreviewHtml(string)
+  fullName: PublisherStudio.Services.IPublicationMarkupService.SanitizePreviewHtml(string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: string SanitizePreviewHtml(string html)
+    parameters:
+    - id: html
+      type: System.String
+    return:
+      type: System.String
+    content.vb: Function SanitizePreviewHtml(html As String) As String
+  overload: PublisherStudio.Services.IPublicationMarkupService.SanitizePreviewHtml*
+  nameWithType.vb: IPublicationMarkupService.SanitizePreviewHtml(String)
+  fullName.vb: PublisherStudio.Services.IPublicationMarkupService.SanitizePreviewHtml(String)
+  name.vb: SanitizePreviewHtml(String)
+references:
+- uid: PublisherStudio.Services
+  commentId: N:PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services
+  nameWithType: PublisherStudio.Services
+  fullName: PublisherStudio.Services
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+- uid: PublisherStudio.Services.IPublicationMarkupService.SafeFileName*
+  commentId: Overload:PublisherStudio.Services.IPublicationMarkupService.SafeFileName
+  isExternal: true
+  href: PublisherStudio.Services.IPublicationMarkupService.html#PublisherStudio_Services_IPublicationMarkupService_SafeFileName_System_String_
+  name: SafeFileName
+  nameWithType: IPublicationMarkupService.SafeFileName
+  fullName: PublisherStudio.Services.IPublicationMarkupService.SafeFileName
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.IPublicationMarkupService.NormalizeCssBackground*
+  commentId: Overload:PublisherStudio.Services.IPublicationMarkupService.NormalizeCssBackground
+  isExternal: true
+  href: PublisherStudio.Services.IPublicationMarkupService.html#PublisherStudio_Services_IPublicationMarkupService_NormalizeCssBackground_System_String_
+  name: NormalizeCssBackground
+  nameWithType: IPublicationMarkupService.NormalizeCssBackground
+  fullName: PublisherStudio.Services.IPublicationMarkupService.NormalizeCssBackground
+- uid: PublisherStudio.Services.IPublicationMarkupService.SanitizePreviewHtml*
+  commentId: Overload:PublisherStudio.Services.IPublicationMarkupService.SanitizePreviewHtml
+  isExternal: true
+  href: PublisherStudio.Services.IPublicationMarkupService.html#PublisherStudio_Services_IPublicationMarkupService_SanitizePreviewHtml_System_String_
+  name: SanitizePreviewHtml
+  nameWithType: IPublicationMarkupService.SanitizePreviewHtml
+  fullName: PublisherStudio.Services.IPublicationMarkupService.SanitizePreviewHtml

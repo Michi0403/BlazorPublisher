@@ -1,0 +1,124 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.VideoStudio.Export.IBrowserRuntimeTemplateService
+  commentId: T:PublisherStudio.Services.VideoStudio.Export.IBrowserRuntimeTemplateService
+  id: IBrowserRuntimeTemplateService
+  parent: PublisherStudio.Services.VideoStudio.Export
+  children:
+  - PublisherStudio.Services.VideoStudio.Export.IBrowserRuntimeTemplateService.CreateBlobRuntime(System.String)
+  langs:
+  - csharp
+  - vb
+  name: IBrowserRuntimeTemplateService
+  nameWithType: IBrowserRuntimeTemplateService
+  fullName: PublisherStudio.Services.VideoStudio.Export.IBrowserRuntimeTemplateService
+  type: Interface
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.VideoStudio.Export
+  summary: Defines the browser runtime template service contract.
+  example: []
+  syntax:
+    content: public interface IBrowserRuntimeTemplateService
+    content.vb: Public Interface IBrowserRuntimeTemplateService
+  derivedClasses:
+  - PublisherStudio.Services.VideoStudio.Export.BrowserRuntimeTemplateService
+- uid: PublisherStudio.Services.VideoStudio.Export.IBrowserRuntimeTemplateService.CreateBlobRuntime(System.String)
+  commentId: M:PublisherStudio.Services.VideoStudio.Export.IBrowserRuntimeTemplateService.CreateBlobRuntime(System.String)
+  id: CreateBlobRuntime(System.String)
+  parent: PublisherStudio.Services.VideoStudio.Export.IBrowserRuntimeTemplateService
+  langs:
+  - csharp
+  - vb
+  name: CreateBlobRuntime(string)
+  nameWithType: IBrowserRuntimeTemplateService.CreateBlobRuntime(string)
+  fullName: PublisherStudio.Services.VideoStudio.Export.IBrowserRuntimeTemplateService.CreateBlobRuntime(string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.VideoStudio.Export
+  syntax:
+    content: string CreateBlobRuntime(string payload)
+    parameters:
+    - id: payload
+      type: System.String
+    return:
+      type: System.String
+    content.vb: Function CreateBlobRuntime(payload As String) As String
+  overload: PublisherStudio.Services.VideoStudio.Export.IBrowserRuntimeTemplateService.CreateBlobRuntime*
+  nameWithType.vb: IBrowserRuntimeTemplateService.CreateBlobRuntime(String)
+  fullName.vb: PublisherStudio.Services.VideoStudio.Export.IBrowserRuntimeTemplateService.CreateBlobRuntime(String)
+  name.vb: CreateBlobRuntime(String)
+references:
+- uid: PublisherStudio.Services.VideoStudio.Export
+  commentId: N:PublisherStudio.Services.VideoStudio.Export
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.VideoStudio.Export
+  nameWithType: PublisherStudio.Services.VideoStudio.Export
+  fullName: PublisherStudio.Services.VideoStudio.Export
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio
+    name: VideoStudio
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio.Export
+    name: Export
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.Export.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio
+    name: VideoStudio
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio.Export
+    name: Export
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.Export.html
+- uid: PublisherStudio.Services.VideoStudio.Export.IBrowserRuntimeTemplateService.CreateBlobRuntime*
+  commentId: Overload:PublisherStudio.Services.VideoStudio.Export.IBrowserRuntimeTemplateService.CreateBlobRuntime
+  isExternal: true
+  href: PublisherStudio.Services.VideoStudio.Export.IBrowserRuntimeTemplateService.html#PublisherStudio_Services_VideoStudio_Export_IBrowserRuntimeTemplateService_CreateBlobRuntime_System_String_
+  name: CreateBlobRuntime
+  nameWithType: IBrowserRuntimeTemplateService.CreateBlobRuntime
+  fullName: PublisherStudio.Services.VideoStudio.Export.IBrowserRuntimeTemplateService.CreateBlobRuntime
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System

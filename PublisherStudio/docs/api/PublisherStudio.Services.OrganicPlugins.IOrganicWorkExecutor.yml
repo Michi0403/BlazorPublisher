@@ -1,0 +1,259 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicWorkExecutor
+  commentId: T:PublisherStudio.Services.OrganicPlugins.IOrganicWorkExecutor
+  id: IOrganicWorkExecutor
+  parent: PublisherStudio.Services.OrganicPlugins
+  children:
+  - PublisherStudio.Services.OrganicPlugins.IOrganicWorkExecutor.ExecuteAsync(LocalGPT.WireProtocol.OneWireEnvelope,System.Threading.CancellationToken)
+  langs:
+  - csharp
+  - vb
+  name: IOrganicWorkExecutor
+  nameWithType: IOrganicWorkExecutor
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicWorkExecutor
+  type: Interface
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  summary: Defines the organic work executor contract.
+  example: []
+  syntax:
+    content: public interface IOrganicWorkExecutor
+    content.vb: Public Interface IOrganicWorkExecutor
+  derivedClasses:
+  - PublisherStudio.Services.OrganicPlugins.OrganicWorkExecutor
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicWorkExecutor.ExecuteAsync(LocalGPT.WireProtocol.OneWireEnvelope,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.OrganicPlugins.IOrganicWorkExecutor.ExecuteAsync(LocalGPT.WireProtocol.OneWireEnvelope,System.Threading.CancellationToken)
+  id: ExecuteAsync(LocalGPT.WireProtocol.OneWireEnvelope,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.OrganicPlugins.IOrganicWorkExecutor
+  langs:
+  - csharp
+  - vb
+  name: ExecuteAsync(OneWireEnvelope, CancellationToken)
+  nameWithType: IOrganicWorkExecutor.ExecuteAsync(OneWireEnvelope, CancellationToken)
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicWorkExecutor.ExecuteAsync(LocalGPT.WireProtocol.OneWireEnvelope, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OrganicPlugins
+  syntax:
+    content: Task<string> ExecuteAsync(OneWireEnvelope envelope, CancellationToken cancellationToken = default)
+    parameters:
+    - id: envelope
+      type: LocalGPT.WireProtocol.OneWireEnvelope
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{System.String}
+    content.vb: Function ExecuteAsync(envelope As OneWireEnvelope, cancellationToken As CancellationToken = Nothing) As Task(Of String)
+  overload: PublisherStudio.Services.OrganicPlugins.IOrganicWorkExecutor.ExecuteAsync*
+references:
+- uid: PublisherStudio.Services.OrganicPlugins
+  commentId: N:PublisherStudio.Services.OrganicPlugins
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.OrganicPlugins
+  nameWithType: PublisherStudio.Services.OrganicPlugins
+  fullName: PublisherStudio.Services.OrganicPlugins
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OrganicPlugins
+    name: OrganicPlugins
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OrganicPlugins
+    name: OrganicPlugins
+    isExternal: true
+    href: PublisherStudio.Services.OrganicPlugins.html
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicWorkExecutor.ExecuteAsync*
+  commentId: Overload:PublisherStudio.Services.OrganicPlugins.IOrganicWorkExecutor.ExecuteAsync
+  isExternal: true
+  href: PublisherStudio.Services.OrganicPlugins.IOrganicWorkExecutor.html#PublisherStudio_Services_OrganicPlugins_IOrganicWorkExecutor_ExecuteAsync_LocalGPT_WireProtocol_OneWireEnvelope_System_Threading_CancellationToken_
+  name: ExecuteAsync
+  nameWithType: IOrganicWorkExecutor.ExecuteAsync
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicWorkExecutor.ExecuteAsync
+- uid: LocalGPT.WireProtocol.OneWireEnvelope
+  commentId: T:LocalGPT.WireProtocol.OneWireEnvelope
+  parent: LocalGPT.WireProtocol
+  isExternal: true
+  name: OneWireEnvelope
+  nameWithType: OneWireEnvelope
+  fullName: LocalGPT.WireProtocol.OneWireEnvelope
+- uid: System.Threading.CancellationToken
+  commentId: T:System.Threading.CancellationToken
+  parent: System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  name: CancellationToken
+  nameWithType: CancellationToken
+  fullName: System.Threading.CancellationToken
+- uid: System.Threading.Tasks.Task{System.String}
+  commentId: T:System.Threading.Tasks.Task{System.String}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<string>
+  nameWithType: Task<string>
+  fullName: System.Threading.Tasks.Task<string>
+  nameWithType.vb: Task(Of String)
+  fullName.vb: System.Threading.Tasks.Task(Of String)
+  name.vb: Task(Of String)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: LocalGPT.WireProtocol
+  commentId: N:LocalGPT.WireProtocol
+  isExternal: true
+  name: LocalGPT.WireProtocol
+  nameWithType: LocalGPT.WireProtocol
+  fullName: LocalGPT.WireProtocol
+  spec.csharp:
+  - uid: LocalGPT
+    name: LocalGPT
+    isExternal: true
+  - name: .
+  - uid: LocalGPT.WireProtocol
+    name: WireProtocol
+    isExternal: true
+  spec.vb:
+  - uid: LocalGPT
+    name: LocalGPT
+    isExternal: true
+  - name: .
+  - uid: LocalGPT.WireProtocol
+    name: WireProtocol
+    isExternal: true
+- uid: System.Threading
+  commentId: N:System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading
+  nameWithType: System.Threading
+  fullName: System.Threading
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+- uid: System.Threading.Tasks.Task`1
+  commentId: T:System.Threading.Tasks.Task`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<TResult>
+  nameWithType: Task<TResult>
+  fullName: System.Threading.Tasks.Task<TResult>
+  nameWithType.vb: Task(Of TResult)
+  fullName.vb: System.Threading.Tasks.Task(Of TResult)
+  name.vb: Task(Of TResult)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - name: TResult
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TResult
+  - name: )
+- uid: System.Threading.Tasks
+  commentId: N:System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading.Tasks
+  nameWithType: System.Threading.Tasks
+  fullName: System.Threading.Tasks
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks

@@ -1,4 +1,4 @@
-using LocalGPT.WireProtocol;
+﻿using LocalGPT.WireProtocol;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -26,6 +26,9 @@ public sealed class OrganicRuntimeSecurityService(
     private RuntimeSecretFile? cached;
     private string? resolvedPath;
 
+    /// <summary>
+    /// Gets status async.
+    /// </summary>
     public async Task<OneWireRuntimeSecurityStatus> GetStatusAsync(CancellationToken cancellationToken = default)
     {
         await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -49,6 +52,9 @@ public sealed class OrganicRuntimeSecurityService(
         finally { gate.Release(); }
     }
 
+    /// <summary>
+    /// Ensures created async.
+    /// </summary>
     public async Task EnsureCreatedAsync(CancellationToken cancellationToken = default)
     {
         await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -64,6 +70,9 @@ public sealed class OrganicRuntimeSecurityService(
         finally { gate.Release(); }
     }
 
+    /// <summary>
+    /// Runs the regenerate async operation.
+    /// </summary>
     public async Task RegenerateAsync(CancellationToken cancellationToken = default)
     {
         await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -83,6 +92,9 @@ public sealed class OrganicRuntimeSecurityService(
         finally { gate.Release(); }
     }
 
+    /// <summary>
+    /// Deletes async.
+    /// </summary>
     public async Task DeleteAsync(CancellationToken cancellationToken = default)
     {
         await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -101,6 +113,9 @@ public sealed class OrganicRuntimeSecurityService(
         finally { gate.Release(); }
     }
 
+    /// <summary>
+    /// Gets public descriptor async.
+    /// </summary>
     public async Task<OneWireSecurityDescriptor> GetPublicDescriptorAsync(CancellationToken cancellationToken = default)
     {
         await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -117,6 +132,9 @@ public sealed class OrganicRuntimeSecurityService(
         finally { gate.Release(); }
     }
 
+    /// <summary>
+    /// Creates pairing ticket async.
+    /// </summary>
     public async Task<OneWirePairingTicket> CreatePairingTicketAsync(TimeSpan lifetime, CancellationToken cancellationToken = default)
     {
         await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -153,6 +171,9 @@ public sealed class OrganicRuntimeSecurityService(
         finally { gate.Release(); }
     }
 
+    /// <summary>
+    /// Gets otp auth URI async.
+    /// </summary>
     public async Task<string> GetOtpAuthUriAsync(CancellationToken cancellationToken = default)
     {
         await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -172,6 +193,9 @@ public sealed class OrganicRuntimeSecurityService(
         finally { gate.Release(); }
     }
 
+    /// <summary>
+    /// Runs the establish trust async operation.
+    /// </summary>
     public async Task<bool> EstablishTrustAsync(OneWireTrustEstablishmentRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -215,6 +239,9 @@ public sealed class OrganicRuntimeSecurityService(
         finally { gate.Release(); }
     }
 
+    /// <summary>
+    /// Runs the revoke trust async operation.
+    /// </summary>
     public async Task<bool> RevokeTrustAsync(string peerId, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(peerId);
@@ -240,6 +267,9 @@ public sealed class OrganicRuntimeSecurityService(
         finally { gate.Release(); }
     }
 
+    /// <summary>
+    /// Gets trusted peers async.
+    /// </summary>
     public async Task<IReadOnlyList<OneWireTrustedPeerDescriptor>> GetTrustedPeersAsync(CancellationToken cancellationToken = default)
     {
         await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -256,6 +286,9 @@ public sealed class OrganicRuntimeSecurityService(
         finally { gate.Release(); }
     }
 
+    /// <summary>
+    /// Runs the protect outgoing async operation.
+    /// </summary>
     public async Task ProtectOutgoingAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(envelope);
@@ -301,6 +334,9 @@ public sealed class OrganicRuntimeSecurityService(
         finally { gate.Release(); }
     }
 
+    /// <summary>
+    /// Runs the unprotect incoming async operation.
+    /// </summary>
     public async Task UnprotectIncomingAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(envelope);
@@ -612,18 +648,57 @@ public sealed class OrganicRuntimeSecurityService(
 
     private sealed class RuntimeSecretFile
     {
+        /// <summary>
+        /// Gets or sets schema version.
+        /// </summary>
         public int SchemaVersion { get; set; }
+        /// <summary>
+        /// Gets or sets peer identifier.
+        /// </summary>
         public string PeerId { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets the UTC creation time.
+        /// </summary>
         public DateTimeOffset CreatedUtc { get; set; }
+        /// <summary>
+        /// Gets or sets rotated UTC.
+        /// </summary>
         public DateTimeOffset? RotatedUtc { get; set; }
+        /// <summary>
+        /// Gets or sets root secret.
+        /// </summary>
         public string RootSecret { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets key identifier.
+        /// </summary>
         public string KeyId { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets fingerprint.
+        /// </summary>
         public string Fingerprint { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets key agreement private key.
+        /// </summary>
         public string KeyAgreementPrivateKey { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets key agreement public key.
+        /// </summary>
         public string KeyAgreementPublicKey { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets signing private key.
+        /// </summary>
         public string SigningPrivateKey { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets signing public key.
+        /// </summary>
         public string SigningPublicKey { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets mfa seed.
+        /// </summary>
         public string MfaSeed { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets trusted peers.
+        /// </summary>
         public List<OneWireTrustedPeerDescriptor> TrustedPeers { get; set; } = [];
     }
 }

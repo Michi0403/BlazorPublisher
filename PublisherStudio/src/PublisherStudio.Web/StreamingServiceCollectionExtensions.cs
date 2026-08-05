@@ -1,4 +1,4 @@
-using PublisherStudio.HostedServices.Streaming;
+﻿using PublisherStudio.HostedServices.Streaming;
 using PublisherStudio.Hubs.Streaming.Chat;
 using PublisherStudio.Hubs.Streaming.Lan;
 
@@ -11,6 +11,9 @@ namespace PublisherStudio;
 /// </summary>
 public static class StreamingServiceCollectionExtensions
 {
+    /// <summary>
+    /// Adds publisher streaming.
+    /// </summary>
     public static IServiceCollection AddPublisherStreaming(this IServiceCollection services, ILogger logger)
     {
         try

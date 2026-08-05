@@ -1,11 +1,17 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text;
 using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.OpenScad;
 
+/// <summary>
+/// Represents an open scad value formatter.
+/// </summary>
 public sealed class OpenScadValueFormatter : IOpenScadValueFormatter
 {
+    /// <summary>
+    /// Runs the format operation.
+    /// </summary>
     public string Format(OpenScadValue? value, string fallbackExpression = "undef")
     {
         if (value is null) return fallbackExpression;
@@ -24,6 +30,9 @@ public sealed class OpenScadValueFormatter : IOpenScadValueFormatter
         };
     }
 
+    /// <summary>
+    /// Runs the quote operation.
+    /// </summary>
     public string Quote(string value)
     {
         var escaped = (value ?? string.Empty)
@@ -32,6 +41,9 @@ public sealed class OpenScadValueFormatter : IOpenScadValueFormatter
         return "\"" + escaped + "\"";
     }
 
+    /// <summary>
+    /// Runs the identifier operation.
+    /// </summary>
     public string Identifier(string value, string fallback = "part")
     {
         var source = string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();

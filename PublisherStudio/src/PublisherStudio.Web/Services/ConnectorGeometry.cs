@@ -1,11 +1,17 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 using System.Globalization;
 
 // logging-policy: pure-helper
 namespace PublisherStudio.Services;
 
+/// <summary>
+/// Represents a connector geometry.
+/// </summary>
 public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
 {
+    /// <summary>
+    /// Attempts to resolve.
+    /// </summary>
     public bool TryResolve(PublicationPage page, ConnectorElement connector, out PublicationPoint source, out PublicationPoint target)
     {
         logger.LogTrace("Resolving connector geometry for page {PageId}.", page.Id);
@@ -18,6 +24,9 @@ public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
         return TryResolveEndpoint(page, connector.Target, out target);
     }
 
+    /// <summary>
+    /// Attempts to resolve endpoint.
+    /// </summary>
     public bool TryResolveEndpoint(PublicationPage page, ConnectorEndpoint endpoint, out PublicationPoint point)
     {
         if (endpoint.Kind == ConnectorEndpointKind.Canvas)
@@ -52,6 +61,9 @@ public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
         return true;
     }
 
+    /// <summary>
+    /// Runs the resolve operation.
+    /// </summary>
     public PublicationPoint Resolve(PublicationElement element, ConnectorAnchor anchor)
     {
         var relative = anchor switch
@@ -69,6 +81,9 @@ public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
         return Resolve(element, relative.X, relative.Y);
     }
 
+    /// <summary>
+    /// Runs the resolve operation.
+    /// </summary>
     public PublicationPoint Resolve(PublicationElement element, double xPercent, double yPercent)
     {
         var rawX = element.X + element.Width * Math.Clamp(xPercent, 0, 1);
@@ -85,6 +100,9 @@ public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
             centerY + dx * Math.Sin(radians) + dy * Math.Cos(radians));
     }
 
+    /// <summary>
+    /// Runs the path operation.
+    /// </summary>
     public string Path(ConnectorElement connector, PublicationPoint source, PublicationPoint target)
     {
         return connector.PathKind switch
@@ -95,6 +113,9 @@ public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
         };
     }
 
+    /// <summary>
+    /// Runs the control points operation.
+    /// </summary>
     public (PublicationPoint First, PublicationPoint Second) ControlPoints(
         ConnectorElement connector,
         PublicationPoint source,
@@ -140,6 +161,9 @@ public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
         _ => point
     };
 
+    /// <summary>
+    /// Runs the dash array operation.
+    /// </summary>
     public string DashArray(ConnectorElement connector) => connector.DashStyle switch
     {
         ConnectorDashStyle.Dash => $"{Inv(connector.StrokeWidthMm * 5)} {Inv(connector.StrokeWidthMm * 3)}",

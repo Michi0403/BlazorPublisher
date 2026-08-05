@@ -1,7 +1,10 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Streaming.UseCases.Editor;
 
+/// <summary>
+/// Provides streaming session service operations.
+/// </summary>
 public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
 {
     private readonly StreamingMediaHostClient _mediaHost = mediaHost;
@@ -9,10 +12,22 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
     private StreamingSessionSnapshot _snapshot = new();
     private CancellationTokenSource? _eventPollCancellation;
 
+    /// <summary>
+    /// Occurs when changed.
+    /// </summary>
     public event Action? Changed;
+    /// <summary>
+    /// Occurs when hotkey triggered.
+    /// </summary>
     public event Action<MediaHostHotkeyEvent>? HotkeyTriggered;
+    /// <summary>
+    /// Gets snapshot.
+    /// </summary>
     public StreamingSessionSnapshot Snapshot => _snapshot;
 
+    /// <summary>
+    /// Starts async.
+    /// </summary>
     public async Task StartAsync(PublicationDocument document, bool dryRun, CancellationToken cancellationToken = default)
     {
         await _gate.WaitAsync(cancellationToken);
@@ -52,6 +67,9 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
         }
     }
 
+    /// <summary>
+    /// Stops async.
+    /// </summary>
     public async Task StopAsync(CancellationToken cancellationToken = default)
     {
         await _gate.WaitAsync(cancellationToken);
@@ -75,6 +93,9 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
         }
     }
 
+    /// <summary>
+    /// Stops streaming outputs async.
+    /// </summary>
     public async Task<bool> StopStreamingOutputsAsync(CancellationToken cancellationToken = default)
     {
         await _gate.WaitAsync(cancellationToken);
@@ -103,6 +124,9 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
         }
     }
 
+    /// <summary>
+    /// Runs the toggle output async operation.
+    /// </summary>
     public async Task ToggleOutputAsync(Guid outputId, CancellationToken cancellationToken = default)
     {
         await _gate.WaitAsync(cancellationToken);
@@ -121,6 +145,9 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
         }
     }
 
+    /// <summary>
+    /// Runs the toggle recording async operation.
+    /// </summary>
     public async Task ToggleRecordingAsync(CancellationToken cancellationToken = default)
     {
         await _gate.WaitAsync(cancellationToken);
@@ -134,6 +161,9 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
         }
     }
 
+    /// <summary>
+    /// Sets recording async.
+    /// </summary>
     public async Task<bool> SetRecordingAsync(bool enabled, CancellationToken cancellationToken = default)
     {
         await _gate.WaitAsync(cancellationToken);
@@ -159,6 +189,9 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
         return true;
     }
 
+    /// <summary>
+    /// Sets program page.
+    /// </summary>
     public void SetProgramPage(Guid pageId)
     {
         _snapshot.ProgramPageId = pageId;

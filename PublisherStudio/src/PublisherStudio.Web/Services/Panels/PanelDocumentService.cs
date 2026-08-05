@@ -1,9 +1,12 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging.Abstractions;
 using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Panels;
 
+/// <summary>
+/// Provides panel document service operations.
+/// </summary>
 public sealed class PanelDocumentService(
     PublicationDataService data,
     PublicationComponentService components,
@@ -22,6 +25,9 @@ public sealed class PanelDocumentService(
         new("web-experience", "Web experience wrapper", "A menu-driven container for isolated interactive HTML experiences and exported web fragments.", "Web", false, "pub-icon pub-icon-web")
     ];
 
+    /// <summary>
+    /// Gets presets.
+    /// </summary>
     public IReadOnlyList<PublicationPanelPresetDescriptor> GetPresets()
     {
         try
@@ -57,6 +63,9 @@ public sealed class PanelDocumentService(
         new("panel", "Nested panel", "Another reusable Panel / Div module.", "Web", "pub-icon pub-icon-panel", "panel")
     ];
 
+    /// <summary>
+    /// Gets component tools.
+    /// </summary>
     public IReadOnlyList<PanelComponentToolDescriptor> GetComponentTools(PublicationDocument document)
     {
         try
@@ -83,6 +92,9 @@ public sealed class PanelDocumentService(
         }
     }
 
+    /// <summary>
+    /// Creates component tool.
+    /// </summary>
     public PublicationElement CreateComponentTool(PublicationDocument document, string toolId)
     {
         try
@@ -152,6 +164,9 @@ public sealed class PanelDocumentService(
         return component;
     }
 
+    /// <summary>
+    /// Creates preset.
+    /// </summary>
     public PanelElement CreatePreset(PublicationDocument document, string? presetId)
     {
         try
@@ -176,6 +191,9 @@ public sealed class PanelDocumentService(
         }
     }
 
+    /// <summary>
+    /// Creates blank.
+    /// </summary>
     public PanelElement CreateBlank(string name = "Panel")
     {
         try
@@ -199,6 +217,9 @@ public sealed class PanelDocumentService(
         }
     }
 
+    /// <summary>
+    /// Runs the normalize operation.
+    /// </summary>
     public void Normalize(PublicationDocument document, PanelElement panel)
     {
         try
@@ -213,6 +234,9 @@ public sealed class PanelDocumentService(
         }
     }
 
+    /// <summary>
+    /// Normalizes template.
+    /// </summary>
     public void NormalizeTemplate(PublicationDocument document, PublicationElementTemplate template)
     {
         try

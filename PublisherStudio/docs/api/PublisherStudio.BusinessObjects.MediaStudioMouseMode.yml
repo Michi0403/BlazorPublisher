@@ -1,0 +1,134 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.MediaStudioMouseMode
+  commentId: T:PublisherStudio.BusinessObjects.MediaStudioMouseMode
+  id: MediaStudioMouseMode
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.MediaStudioMouseMode.AddCutLine
+  - PublisherStudio.BusinessObjects.MediaStudioMouseMode.FrameRegion
+  - PublisherStudio.BusinessObjects.MediaStudioMouseMode.PlacePlayhead
+  - PublisherStudio.BusinessObjects.MediaStudioMouseMode.SelectSection
+  langs:
+  - csharp
+  - vb
+  name: MediaStudioMouseMode
+  nameWithType: MediaStudioMouseMode
+  fullName: PublisherStudio.BusinessObjects.MediaStudioMouseMode
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported media studio mouse mode values.
+  example: []
+  syntax:
+    content: public enum MediaStudioMouseMode
+    content.vb: Public Enum MediaStudioMouseMode
+- uid: PublisherStudio.BusinessObjects.MediaStudioMouseMode.SelectSection
+  commentId: F:PublisherStudio.BusinessObjects.MediaStudioMouseMode.SelectSection
+  id: SelectSection
+  parent: PublisherStudio.BusinessObjects.MediaStudioMouseMode
+  langs:
+  - csharp
+  - vb
+  name: SelectSection
+  nameWithType: MediaStudioMouseMode.SelectSection
+  fullName: PublisherStudio.BusinessObjects.MediaStudioMouseMode.SelectSection
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: SelectSection = 0
+    return:
+      type: PublisherStudio.BusinessObjects.MediaStudioMouseMode
+- uid: PublisherStudio.BusinessObjects.MediaStudioMouseMode.PlacePlayhead
+  commentId: F:PublisherStudio.BusinessObjects.MediaStudioMouseMode.PlacePlayhead
+  id: PlacePlayhead
+  parent: PublisherStudio.BusinessObjects.MediaStudioMouseMode
+  langs:
+  - csharp
+  - vb
+  name: PlacePlayhead
+  nameWithType: MediaStudioMouseMode.PlacePlayhead
+  fullName: PublisherStudio.BusinessObjects.MediaStudioMouseMode.PlacePlayhead
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: PlacePlayhead = 1
+    return:
+      type: PublisherStudio.BusinessObjects.MediaStudioMouseMode
+- uid: PublisherStudio.BusinessObjects.MediaStudioMouseMode.AddCutLine
+  commentId: F:PublisherStudio.BusinessObjects.MediaStudioMouseMode.AddCutLine
+  id: AddCutLine
+  parent: PublisherStudio.BusinessObjects.MediaStudioMouseMode
+  langs:
+  - csharp
+  - vb
+  name: AddCutLine
+  nameWithType: MediaStudioMouseMode.AddCutLine
+  fullName: PublisherStudio.BusinessObjects.MediaStudioMouseMode.AddCutLine
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: AddCutLine = 2
+    return:
+      type: PublisherStudio.BusinessObjects.MediaStudioMouseMode
+- uid: PublisherStudio.BusinessObjects.MediaStudioMouseMode.FrameRegion
+  commentId: F:PublisherStudio.BusinessObjects.MediaStudioMouseMode.FrameRegion
+  id: FrameRegion
+  parent: PublisherStudio.BusinessObjects.MediaStudioMouseMode
+  langs:
+  - csharp
+  - vb
+  name: FrameRegion
+  nameWithType: MediaStudioMouseMode.FrameRegion
+  fullName: PublisherStudio.BusinessObjects.MediaStudioMouseMode.FrameRegion
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: FrameRegion = 3
+    return:
+      type: PublisherStudio.BusinessObjects.MediaStudioMouseMode
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.MediaStudioMouseMode
+  commentId: T:PublisherStudio.BusinessObjects.MediaStudioMouseMode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.MediaStudioMouseMode.html
+  name: MediaStudioMouseMode
+  nameWithType: MediaStudioMouseMode
+  fullName: PublisherStudio.BusinessObjects.MediaStudioMouseMode

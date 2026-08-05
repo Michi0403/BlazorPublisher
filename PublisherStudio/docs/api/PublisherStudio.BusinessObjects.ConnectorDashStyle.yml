@@ -1,0 +1,115 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.ConnectorDashStyle
+  commentId: T:PublisherStudio.BusinessObjects.ConnectorDashStyle
+  id: ConnectorDashStyle
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.ConnectorDashStyle.Dash
+  - PublisherStudio.BusinessObjects.ConnectorDashStyle.Dot
+  - PublisherStudio.BusinessObjects.ConnectorDashStyle.Solid
+  langs:
+  - csharp
+  - vb
+  name: ConnectorDashStyle
+  nameWithType: ConnectorDashStyle
+  fullName: PublisherStudio.BusinessObjects.ConnectorDashStyle
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported connector dash style values.
+  example: []
+  syntax:
+    content: public enum ConnectorDashStyle
+    content.vb: Public Enum ConnectorDashStyle
+- uid: PublisherStudio.BusinessObjects.ConnectorDashStyle.Solid
+  commentId: F:PublisherStudio.BusinessObjects.ConnectorDashStyle.Solid
+  id: Solid
+  parent: PublisherStudio.BusinessObjects.ConnectorDashStyle
+  langs:
+  - csharp
+  - vb
+  name: Solid
+  nameWithType: ConnectorDashStyle.Solid
+  fullName: PublisherStudio.BusinessObjects.ConnectorDashStyle.Solid
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Solid = 0
+    return:
+      type: PublisherStudio.BusinessObjects.ConnectorDashStyle
+- uid: PublisherStudio.BusinessObjects.ConnectorDashStyle.Dash
+  commentId: F:PublisherStudio.BusinessObjects.ConnectorDashStyle.Dash
+  id: Dash
+  parent: PublisherStudio.BusinessObjects.ConnectorDashStyle
+  langs:
+  - csharp
+  - vb
+  name: Dash
+  nameWithType: ConnectorDashStyle.Dash
+  fullName: PublisherStudio.BusinessObjects.ConnectorDashStyle.Dash
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Dash = 1
+    return:
+      type: PublisherStudio.BusinessObjects.ConnectorDashStyle
+- uid: PublisherStudio.BusinessObjects.ConnectorDashStyle.Dot
+  commentId: F:PublisherStudio.BusinessObjects.ConnectorDashStyle.Dot
+  id: Dot
+  parent: PublisherStudio.BusinessObjects.ConnectorDashStyle
+  langs:
+  - csharp
+  - vb
+  name: Dot
+  nameWithType: ConnectorDashStyle.Dot
+  fullName: PublisherStudio.BusinessObjects.ConnectorDashStyle.Dot
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Dot = 2
+    return:
+      type: PublisherStudio.BusinessObjects.ConnectorDashStyle
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.ConnectorDashStyle
+  commentId: T:PublisherStudio.BusinessObjects.ConnectorDashStyle
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.ConnectorDashStyle.html
+  name: ConnectorDashStyle
+  nameWithType: ConnectorDashStyle
+  fullName: PublisherStudio.BusinessObjects.ConnectorDashStyle

@@ -1,9 +1,12 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Panels;
 using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Services;
 
+/// <summary>
+/// Provides editor state service operations.
+/// </summary>
 public sealed class EditorStateService : IDisposable
 {
     private readonly PublicationFileService _files;
@@ -29,6 +32,9 @@ public sealed class EditorStateService : IDisposable
     private double? _lastInsertionX;
     private double? _lastInsertionY;
 
+    /// <summary>
+    /// Runs the editor state service operation.
+    /// </summary>
     public EditorStateService(
         PublicationFileService files,
         PublicationDataService data,
@@ -68,29 +74,92 @@ public sealed class EditorStateService : IDisposable
         _liveData.Register(Document, _data, SelectedPageId);
     }
 
+    /// <summary>
+    /// Occurs when changed.
+    /// </summary>
     public event Action? Changed;
+    /// <summary>
+    /// Gets or sets document.
+    /// </summary>
     public PublicationDocument Document { get; private set; }
+    /// <summary>
+    /// Gets or sets selected page identifier.
+    /// </summary>
     public Guid SelectedPageId { get; private set; }
+    /// <summary>
+    /// Gets or sets selected element identifier.
+    /// </summary>
     public Guid? SelectedElementId { get; private set; }
+    /// <summary>
+    /// Gets or sets is dirty.
+    /// </summary>
     public bool IsDirty { get; private set; }
+    /// <summary>
+    /// Gets or sets revision.
+    /// </summary>
     public long Revision { get; private set; }
+    /// <summary>
+    /// Gets or sets crop mode.
+    /// </summary>
     public bool CropMode { get; private set; }
+    /// <summary>
+    /// Gets or sets content pan mode.
+    /// </summary>
     public bool ContentPanMode { get; private set; }
+    /// <summary>
+    /// Gets or sets connector tool.
+    /// </summary>
     public ConnectorToolKind ConnectorTool { get; private set; }
+    /// <summary>
+    /// Gets can undo.
+    /// </summary>
     public bool CanUndo => _undo.Count > 0;
+    /// <summary>
+    /// Gets can redo.
+    /// </summary>
     public bool CanRedo => _redo.Count > 0;
+    /// <summary>
+    /// Gets can paste.
+    /// </summary>
     public bool CanPaste => _clipboard.Count > 0;
+    /// <summary>
+    /// Gets or sets clipboard revision.
+    /// </summary>
     public long ClipboardRevision { get; private set; }
+    /// <summary>
+    /// Gets current page.
+    /// </summary>
     public PublicationPage CurrentPage => Document.Pages.First(p => p.Id == SelectedPageId);
+    /// <summary>
+    /// Gets selected element.
+    /// </summary>
     public PublicationElement? SelectedElement => CurrentPage.Elements.FirstOrDefault(e => e.Id == SelectedElementId);
+    /// <summary>
+    /// Gets selected elements.
+    /// </summary>
     public IReadOnlyList<PublicationElement> SelectedElements => CurrentPage.Elements
         .Where(element => _selectedElementIds.Contains(element.Id))
         .OrderBy(element => element.ZIndex)
         .ToList();
+    /// <summary>
+    /// Gets selected element identifiers.
+    /// </summary>
     public IReadOnlyCollection<Guid> SelectedElementIds => _selectedElementIds;
+    /// <summary>
+    /// Gets has multiple selection.
+    /// </summary>
     public bool HasMultipleSelection => _selectedElementIds.Count > 1;
+    /// <summary>
+    /// Gets can group selection.
+    /// </summary>
     public bool CanGroupSelection => SelectedElements.Count(element => element is not ConnectorElement && !element.Locked) > 1;
+    /// <summary>
+    /// Gets can ungroup selection.
+    /// </summary>
     public bool CanUngroupSelection => SelectedElements.Any(element => element.GroupId is not null);
+    /// <summary>
+    /// Determines whether selected.
+    /// </summary>
     public bool IsSelected(Guid id) {
         try
         {
@@ -104,6 +173,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the new document operation.
+    /// </summary>
     public void NewDocument()
     {
         try
@@ -135,6 +207,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the load operation.
+    /// </summary>
     public void Load(string json)
     {
         try
@@ -179,6 +254,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Loads recovery.
+    /// </summary>
     public void LoadRecovery(string json)
     {
         try
@@ -197,6 +275,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the mark saved operation.
+    /// </summary>
     public void MarkSaved()
     {
         try
@@ -214,6 +295,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the rename document operation.
+    /// </summary>
     public void RenameDocument(string value)
     {
         try
@@ -233,6 +317,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Sets publication culture.
+    /// </summary>
     public void SetPublicationCulture(string culture)
     {
         try
@@ -252,6 +339,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Sets insertion point.
+    /// </summary>
     public void SetInsertionPoint(double x, double y)
     {
         try
@@ -268,6 +358,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the select page operation.
+    /// </summary>
     public void SelectPage(Guid id)
     {
         try
@@ -292,6 +385,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the select element operation.
+    /// </summary>
     public void SelectElement(Guid? id, bool additive = false)
     {
         try
@@ -346,6 +442,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Sets selection.
+    /// </summary>
     public void SetSelection(IEnumerable<Guid> ids)
     {
         try
@@ -380,6 +479,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Sets primary selection.
+    /// </summary>
     public void SetPrimarySelection(Guid id)
     {
         try
@@ -405,6 +507,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the group selected operation.
+    /// </summary>
     public void GroupSelected()
     {
         try
@@ -426,6 +531,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the ungroup selected operation.
+    /// </summary>
     public void UngroupSelected()
     {
         try
@@ -448,6 +556,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds text.
+    /// </summary>
     public TextFrameElement AddText(double? centerX = null, double? centerY = null)
     {
         try
@@ -480,6 +591,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds spreadsheet.
+    /// </summary>
     public SpreadsheetElement AddSpreadsheet(byte[] content, string fileName, SpreadsheetStorageFormat format, double? centerX = null, double? centerY = null)
     {
         try
@@ -516,6 +630,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds panel.
+    /// </summary>
     public PanelElement AddPanel(string presetId = "blank", double? centerX = null, double? centerY = null)
     {
         try
@@ -539,6 +656,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds HTML embed.
+    /// </summary>
     public HtmlEmbedElement AddHtmlEmbed(double? centerX = null, double? centerY = null) {
         try
         {
@@ -552,6 +672,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds HTML embed.
+    /// </summary>
     public HtmlEmbedElement AddHtmlEmbed(Action<HtmlEmbedElement> configure, double? centerX = null, double? centerY = null)
     {
         try
@@ -583,6 +706,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Applies selected panel.
+    /// </summary>
     public bool ApplySelectedPanel(PanelElement draft)
     {
         try
@@ -621,6 +747,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Sets panel library visible.
+    /// </summary>
     public void SetPanelLibraryVisible(bool visible)
     {
         try
@@ -639,6 +768,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Applies selected HTML embed.
+    /// </summary>
     public bool ApplySelectedHtmlEmbed(HtmlEmbedElement draft)
     {
         try
@@ -714,6 +846,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds image.
+    /// </summary>
     public ImageFrameElement AddImage(string dataUrl, string name, PictureDocument? pictureSource = null, double? centerX = null, double? centerY = null, int pixelWidth = 0, int pixelHeight = 0)
     {
         try
@@ -751,6 +886,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds video.
+    /// </summary>
     public VideoElement AddVideo(string dataUrl, string mimeType, string name, double durationSeconds, string posterDataUrl = "", double? centerX = null, double? centerY = null)
     {
         try
@@ -789,6 +927,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds audio.
+    /// </summary>
     public AudioElement AddAudio(string dataUrl, string mimeType, string name, double durationSeconds, IReadOnlyList<double>? waveformSamples = null, double? centerX = null, double? centerY = null)
     {
         try
@@ -826,6 +967,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds live source.
+    /// </summary>
     public LiveSourceElement AddLiveSource(PublicationLiveSourceKind kind, double? centerX = null, double? centerY = null)
     {
         try
@@ -874,6 +1018,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Updates live source.
+    /// </summary>
     public void UpdateLiveSource(Guid id, Action<LiveSourceElement> update, bool capture = true)
     {
         try
@@ -908,6 +1055,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Applies streaming settings.
+    /// </summary>
     public void ApplyStreamingSettings(PublicationStreamingSettings settings)
     {
         try
@@ -927,6 +1077,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Updates media.
+    /// </summary>
     public void UpdateMedia(Guid id, Action<PublicationMediaElement> update, bool capture = true)
     {
         try
@@ -949,6 +1102,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Updates media live.
+    /// </summary>
     public void UpdateMediaLive(Guid id, string key, Action<PublicationMediaElement> update)
     {
         try
@@ -977,6 +1133,9 @@ public sealed class EditorStateService : IDisposable
 
 
 
+    /// <summary>
+    /// Adds word art.
+    /// </summary>
     public WordArtElement AddWordArt(double? centerX = null, double? centerY = null)
     {
         try
@@ -1007,6 +1166,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Ensures data object.
+    /// </summary>
     public PublicationDataObject EnsureDataObject()
     {
         try
@@ -1025,6 +1187,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds barcode.
+    /// </summary>
     public BarcodeElement AddBarcode(double? centerX = null, double? centerY = null)
     {
         try
@@ -1054,6 +1219,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds data visual.
+    /// </summary>
     public DataVisualElement AddDataVisual(DataVisualKind kind, double? centerX = null, double? centerY = null)
     {
         try
@@ -1115,6 +1283,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds dev extreme component.
+    /// </summary>
     public DevExtremeComponentElement AddDevExtremeComponent(PublicationComponentKind kind, double? centerX = null, double? centerY = null)
     {
         try
@@ -1138,6 +1309,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Applies selected component.
+    /// </summary>
     public void ApplySelectedComponent(DevExtremeComponentElement draft)
     {
         try
@@ -1172,6 +1346,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Sets selected component scope.
+    /// </summary>
     public void SetSelectedComponentScope(PublicationComponentScope scope)
     {
         try
@@ -1207,6 +1384,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the upsert data object operation.
+    /// </summary>
     public void UpsertDataObject(PublicationDataObject value)
     {
         try
@@ -1228,6 +1408,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Deletes data object.
+    /// </summary>
     public bool DeleteDataObject(Guid id)
     {
         try
@@ -1253,6 +1436,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the refresh data visuals operation.
+    /// </summary>
     public void RefreshDataVisuals() {
         try
         {
@@ -1266,8 +1452,14 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Gets has due web data.
+    /// </summary>
     public bool HasDueWebData => Document.DataObjects.Any(data => _webData.IsDue(data, DateTimeOffset.UtcNow));
 
+    /// <summary>
+    /// Runs the refresh web data async operation.
+    /// </summary>
     public async Task RefreshWebDataAsync(Guid? dataId = null, bool force = true, CancellationToken cancellationToken = default)
     {
         try
@@ -1289,6 +1481,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the refresh web data on open async operation.
+    /// </summary>
     public Task RefreshWebDataOnOpenAsync(CancellationToken cancellationToken = default)
         {
             try
@@ -1358,6 +1553,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds connector port.
+    /// </summary>
     public PublicationConnectorPort? AddConnectorPort(Guid elementId, double xPercent = .5, double yPercent = .5)
     {
         try
@@ -1386,6 +1584,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Removes connector port.
+    /// </summary>
     public void RemoveConnectorPort(Guid elementId, Guid portId)
     {
         try
@@ -1419,6 +1620,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds connector.
+    /// </summary>
     public ConnectorElement? AddConnector(Guid sourceElementId, ConnectorAnchor sourceAnchor, Guid targetElementId, ConnectorAnchor targetAnchor, ConnectorMarker endMarker = ConnectorMarker.Arrow)
     {
         try
@@ -1439,6 +1643,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds signal connector.
+    /// </summary>
     public ConnectorElement? AddSignalConnector(ConnectorEndpoint source, ConnectorEndpoint target, ConnectorMarker endMarker = ConnectorMarker.Arrow)
         {
             try
@@ -1453,6 +1660,9 @@ public sealed class EditorStateService : IDisposable
             }
         }
 
+    /// <summary>
+    /// Adds connector advanced.
+    /// </summary>
     public ConnectorElement? AddConnectorAdvanced(
         ConnectorEndpoint source,
         ConnectorEndpoint target,
@@ -1556,6 +1766,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the reconnect connector operation.
+    /// </summary>
     public void ReconnectConnector(Guid connectorId, bool sourceEnd, Guid elementId, ConnectorAnchor anchor)
         {
             try
@@ -1575,6 +1788,9 @@ public sealed class EditorStateService : IDisposable
             }
         }
 
+    /// <summary>
+    /// Runs the reconnect connector endpoint operation.
+    /// </summary>
     public void ReconnectConnectorEndpoint(Guid connectorId, bool sourceEnd, ConnectorEndpoint replacement, PublicationConnectorPort? pendingPort = null)
     {
         try
@@ -1603,6 +1819,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the commit connector control operation.
+    /// </summary>
     public void CommitConnectorControl(Guid connectorId, int controlIndex, double x, double y)
     {
         try
@@ -1632,6 +1851,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the commit connector route operation.
+    /// </summary>
     public void CommitConnectorRoute(Guid connectorId, double control1X, double control1Y, double control2X, double control2Y)
     {
         try
@@ -1655,6 +1877,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the reset connector route operation.
+    /// </summary>
     public void ResetConnectorRoute(Guid connectorId)
     {
         try
@@ -1674,6 +1899,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Sets connector tool.
+    /// </summary>
     public void SetConnectorTool(ConnectorToolKind tool)
     {
         try
@@ -1692,6 +1920,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Determines whether cel active tool.
+    /// </summary>
     public void CancelActiveTool()
     {
         try
@@ -1710,6 +1941,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds shape.
+    /// </summary>
     public ShapeElement AddShape(PublicationShape shape, double? centerX = null, double? centerY = null)
     {
         try
@@ -1740,6 +1974,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds page.
+    /// </summary>
     public void AddPage()
     {
         try
@@ -1779,6 +2016,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the duplicate page operation.
+    /// </summary>
     public void DuplicatePage()
     {
         try
@@ -1827,6 +2067,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Deletes page.
+    /// </summary>
     public void DeletePage()
     {
         try
@@ -1852,6 +2095,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Deletes selected.
+    /// </summary>
     public void DeleteSelected()
     {
         try
@@ -1932,6 +2178,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the copy selected operation.
+    /// </summary>
     public void CopySelected()
     {
         try
@@ -1952,6 +2201,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the cut selected operation.
+    /// </summary>
     public void CutSelected()
     {
         try
@@ -1969,6 +2221,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the paste operation.
+    /// </summary>
     public void Paste()
     {
         try
@@ -1985,6 +2240,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the duplicate selected operation.
+    /// </summary>
     public void DuplicateSelected()
     {
         try
@@ -2002,6 +2260,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the select all operation.
+    /// </summary>
     public void SelectAll()
     {
         try
@@ -2024,6 +2285,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the nudge selection operation.
+    /// </summary>
     public void NudgeSelection(double dx, double dy)
     {
         try
@@ -2054,6 +2318,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds animation.
+    /// </summary>
     public PublicationAnimation? AddAnimation(
         PublicationAnimationEffect effect,
         PublicationAnimationPhase phase,
@@ -2095,6 +2362,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Updates animation.
+    /// </summary>
     public void UpdateAnimation(Guid animationId, Action<PublicationAnimation> update)
     {
         try
@@ -2116,6 +2386,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Updates animation live.
+    /// </summary>
     public void UpdateAnimationLive(Guid animationId, string key, Action<PublicationAnimation> update)
     {
         try
@@ -2142,6 +2415,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the duplicate animation operation.
+    /// </summary>
     public PublicationAnimation? DuplicateAnimation(Guid animationId)
     {
         try
@@ -2185,6 +2461,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Deletes animation.
+    /// </summary>
     public void DeleteAnimation(Guid animationId)
     {
         try
@@ -2207,6 +2486,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the move animation operation.
+    /// </summary>
     public void MoveAnimation(Guid animationId, int offset)
     {
         try
@@ -2236,6 +2518,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the clear selected animations operation.
+    /// </summary>
     public void ClearSelectedAnimations()
     {
         try
@@ -2256,6 +2541,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Updates interaction.
+    /// </summary>
     public void UpdateInteraction(Action<PublicationInteraction> update)
     {
         try
@@ -2276,6 +2564,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Updates page transition.
+    /// </summary>
     public void UpdatePageTransition(Action<PublicationPageTransition> update)
     {
         try
@@ -2296,6 +2587,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Updates page transition live.
+    /// </summary>
     public void UpdatePageTransitionLive(string key, Action<PublicationPageTransition> update)
     {
         try
@@ -2321,6 +2615,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Sets animation timeline range.
+    /// </summary>
     public void SetAnimationTimelineRange(Guid animationId, double startSeconds, double durationSeconds)
     {
         try
@@ -2343,6 +2640,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the clear animation timeline position operation.
+    /// </summary>
     public void ClearAnimationTimelinePosition(Guid animationId)
     {
         try
@@ -2362,6 +2662,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Sets media timeline range.
+    /// </summary>
     public void SetMediaTimelineRange(Guid elementId, string mode, double startSeconds, double lengthSeconds)
     {
         try
@@ -2408,6 +2711,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Sets page timeline duration.
+    /// </summary>
     public void SetPageTimelineDuration(double seconds)
     {
         try
@@ -2426,6 +2732,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the effective animation start operation.
+    /// </summary>
     public double EffectiveAnimationStart(PublicationAnimation target)
     {
         try
@@ -2455,6 +2764,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the effective page timeline duration operation.
+    /// </summary>
     public double EffectivePageTimelineDuration()
     {
         try
@@ -2478,6 +2790,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the commit move operation.
+    /// </summary>
     public void CommitMove(Guid id, double x, double y, IReadOnlyCollection<Guid>? movingIds = null)
     {
         try
@@ -2534,6 +2849,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the commit bounds operation.
+    /// </summary>
     public void CommitBounds(Guid id, double x, double y, double width, double height)
     {
         try
@@ -2563,6 +2881,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the commit crop operation.
+    /// </summary>
     public void CommitCrop(Guid id, double cropX, double cropY, double cropScale)
     {
         try
@@ -2584,6 +2905,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Updates selected.
+    /// </summary>
     public void UpdateSelected(Action<PublicationElement> update, bool capture = true, bool allowLocked = false)
     {
         try
@@ -2608,6 +2932,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Updates selected live.
+    /// </summary>
     public void UpdateSelectedLive(string key, Action<PublicationElement> update)
     {
         try
@@ -2636,6 +2963,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the end live edit operation.
+    /// </summary>
     public void EndLiveEdit() {
         try
         {
@@ -2649,6 +2979,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Updates page.
+    /// </summary>
     public void UpdatePage(Action<PublicationPage> update)
     {
         try
@@ -2666,6 +2999,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Sets page size.
+    /// </summary>
     public void SetPageSize(double widthMm, double heightMm)
     {
         try
@@ -2686,6 +3022,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the swap page orientation operation.
+    /// </summary>
     public void SwapPageOrientation() {
         try
         {
@@ -2699,6 +3038,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Updates spreadsheet document.
+    /// </summary>
     public void UpdateSpreadsheetDocument(byte[] content, string fileName, SpreadsheetStorageFormat format, string previewHtml, string activeSheetName)
     {
         try
@@ -2722,6 +3064,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Updates text document.
+    /// </summary>
     public void UpdateTextDocument(byte[] content, string previewHtml, string documentBackground, StoryStorageFormat format = StoryStorageFormat.OpenXml)
     {
         try
@@ -2743,6 +3088,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the toggle crop mode operation.
+    /// </summary>
     public void ToggleCropMode()
     {
         try
@@ -2761,6 +3109,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the toggle content pan mode operation.
+    /// </summary>
     public void ToggleContentPanMode()
     {
         try
@@ -2783,6 +3134,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the commit content viewport operation.
+    /// </summary>
     public void CommitContentViewport(Guid id, double offsetX, double offsetY, double scale)
     {
         try
@@ -2810,6 +3164,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the commit map viewport operation.
+    /// </summary>
     public void CommitMapViewport(Guid id, double longitude, double latitude, double zoom)
     {
         try
@@ -2842,6 +3199,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the reset content viewport operation.
+    /// </summary>
     public void ResetContentViewport()
     {
         try
@@ -2858,6 +3218,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Determines whether pan content.
+    /// </summary>
     public bool CanPanContent(PublicationElement? element) {
         try
         {
@@ -2872,6 +3235,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds guide.
+    /// </summary>
     public void AddGuide(GuideOrientation orientation)
     {
         try
@@ -2887,6 +3253,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds guide at.
+    /// </summary>
     public void AddGuideAt(GuideOrientation orientation, double positionMm)
     {
         try
@@ -2910,6 +3279,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the commit guide operation.
+    /// </summary>
     public void CommitGuide(Guid id, double positionMm)
     {
         try
@@ -2930,6 +3302,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Deletes guide.
+    /// </summary>
     public void DeleteGuide(Guid id)
     {
         try
@@ -2949,6 +3324,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the clear guides operation.
+    /// </summary>
     public void ClearGuides()
     {
         try
@@ -2967,6 +3345,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Sets zoom.
+    /// </summary>
     public void SetZoom(double zoom)
     {
         try
@@ -2986,6 +3367,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Sets zoom percent.
+    /// </summary>
     public void SetZoomPercent(double percent) {
         try
         {
@@ -2999,6 +3383,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the step zoom percent operation.
+    /// </summary>
     public void StepZoomPercent(int deltaPercent)
     {
         try
@@ -3015,6 +3402,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Sets canvas zoom mode.
+    /// </summary>
     public void SetCanvasZoomMode(PublicationCanvasZoomMode mode)
     {
         try
@@ -3032,6 +3422,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Sets ruler unit.
+    /// </summary>
     public void SetRulerUnit(MeasurementUnit unit)
     {
         try
@@ -3049,6 +3442,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the cycle ruler unit operation.
+    /// </summary>
     public void CycleRulerUnit()
     {
         try
@@ -3066,6 +3462,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Sets view option.
+    /// </summary>
     public void SetViewOption(Action<PublicationViewSettings> update)
     {
         try
@@ -3084,6 +3483,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Sets playback.
+    /// </summary>
     public void SetPlayback(PublicationPlaybackSettings value)
     {
         try
@@ -3101,6 +3503,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the bring to front operation.
+    /// </summary>
     public void BringToFront() {
         try
         {
@@ -3113,6 +3518,9 @@ public sealed class EditorStateService : IDisposable
             throw;
         }
     }
+    /// <summary>
+    /// Runs the send to back operation.
+    /// </summary>
     public void SendToBack() {
         try
         {
@@ -3125,6 +3533,9 @@ public sealed class EditorStateService : IDisposable
             throw;
         }
     }
+    /// <summary>
+    /// Runs the bring forward operation.
+    /// </summary>
     public void BringForward() {
         try
         {
@@ -3137,6 +3548,9 @@ public sealed class EditorStateService : IDisposable
             throw;
         }
     }
+    /// <summary>
+    /// Runs the send backward operation.
+    /// </summary>
     public void SendBackward() {
         try
         {
@@ -3150,6 +3564,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Sets selected layer position.
+    /// </summary>
     public void SetSelectedLayerPosition(int position)
     {
         try
@@ -3177,6 +3594,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the align operation.
+    /// </summary>
     public void Align(string mode)
     {
         try
@@ -3219,6 +3639,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the undo operation.
+    /// </summary>
     public void Undo()
     {
         try
@@ -3236,6 +3659,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the redo operation.
+    /// </summary>
     public void Redo()
     {
         try
@@ -4015,6 +4441,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the dispose operation.
+    /// </summary>
     public void Dispose()
     {
         try

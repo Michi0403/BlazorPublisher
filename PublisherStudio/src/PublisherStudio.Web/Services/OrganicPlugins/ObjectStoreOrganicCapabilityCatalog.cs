@@ -1,4 +1,4 @@
-using PublisherStudio.Services.Configuration;
+﻿using PublisherStudio.Services.Configuration;
 using PublisherStudio.Services.MediaConversion;
 
 namespace PublisherStudio.Services.OrganicPlugins;
@@ -14,6 +14,9 @@ public sealed class ObjectStoreOrganicCapabilityCatalog(
     IMediaConversionService mediaConversion,
     ILogger<ObjectStoreOrganicCapabilityCatalog> logger) : IOrganicCapabilityCatalog
 {
+    /// <summary>
+    /// Gets capabilities async.
+    /// </summary>
     public async Task<IReadOnlyList<OrganicCapabilityDescriptor>> GetCapabilitiesAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -40,6 +43,9 @@ public sealed class ObjectStoreOrganicCapabilityCatalog(
         }
     }
 
+    /// <summary>
+    /// Gets skills async.
+    /// </summary>
     public async Task<IReadOnlyList<OrganicSkillDescriptor>> GetSkillsAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -78,6 +84,9 @@ public sealed class ObjectStoreOrganicCapabilityCatalog(
         }
     }
 
+    /// <summary>
+    /// Gets UI features async.
+    /// </summary>
     public async Task<IReadOnlyList<OrganicUiFeatureDescriptor>> GetUiFeaturesAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -98,6 +107,9 @@ public sealed class ObjectStoreOrganicCapabilityCatalog(
         }
     }
 
+    /// <summary>
+    /// Gets hardware async.
+    /// </summary>
     public async Task<IReadOnlyList<OrganicHardwareDescriptor>> GetHardwareAsync(CancellationToken cancellationToken = default)
     {
         try

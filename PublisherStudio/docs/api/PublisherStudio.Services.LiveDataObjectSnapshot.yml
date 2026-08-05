@@ -1,0 +1,1090 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot
+  commentId: T:PublisherStudio.Services.LiveDataObjectSnapshot
+  id: LiveDataObjectSnapshot
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.LiveDataObjectSnapshot.#ctor(System.Guid,System.String,System.String,System.DateTimeOffset,System.Collections.Generic.IReadOnlyList{PublisherStudio.Services.LiveDataColumn},System.Collections.Generic.IReadOnlyList{System.Collections.Generic.Dictionary{System.String,System.String}})
+  - PublisherStudio.Services.LiveDataObjectSnapshot.Columns
+  - PublisherStudio.Services.LiveDataObjectSnapshot.Deconstruct(System.Guid@,System.String@,System.String@,System.DateTimeOffset@,System.Collections.Generic.IReadOnlyList{PublisherStudio.Services.LiveDataColumn}@,System.Collections.Generic.IReadOnlyList{System.Collections.Generic.Dictionary{System.String,System.String}}@)
+  - PublisherStudio.Services.LiveDataObjectSnapshot.Equals(PublisherStudio.Services.LiveDataObjectSnapshot)
+  - PublisherStudio.Services.LiveDataObjectSnapshot.Equals(System.Object)
+  - PublisherStudio.Services.LiveDataObjectSnapshot.GetHashCode
+  - PublisherStudio.Services.LiveDataObjectSnapshot.Id
+  - PublisherStudio.Services.LiveDataObjectSnapshot.ModifiedUtc
+  - PublisherStudio.Services.LiveDataObjectSnapshot.Name
+  - PublisherStudio.Services.LiveDataObjectSnapshot.Rows
+  - PublisherStudio.Services.LiveDataObjectSnapshot.SourceKind
+  - PublisherStudio.Services.LiveDataObjectSnapshot.ToString
+  - PublisherStudio.Services.LiveDataObjectSnapshot.op_Equality(PublisherStudio.Services.LiveDataObjectSnapshot,PublisherStudio.Services.LiveDataObjectSnapshot)
+  - PublisherStudio.Services.LiveDataObjectSnapshot.op_Inequality(PublisherStudio.Services.LiveDataObjectSnapshot,PublisherStudio.Services.LiveDataObjectSnapshot)
+  langs:
+  - csharp
+  - vb
+  name: LiveDataObjectSnapshot
+  nameWithType: LiveDataObjectSnapshot
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Represents a live data object snapshot.
+  example: []
+  syntax:
+    content: 'public sealed record LiveDataObjectSnapshot : IEquatable<LiveDataObjectSnapshot>'
+    content.vb: Public NotInheritable Class LiveDataObjectSnapshot Implements IEquatable(Of LiveDataObjectSnapshot)
+  inheritance:
+  - System.Object
+  implements:
+  - System.IEquatable{PublisherStudio.Services.LiveDataObjectSnapshot}
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.#ctor(System.Guid,System.String,System.String,System.DateTimeOffset,System.Collections.Generic.IReadOnlyList{PublisherStudio.Services.LiveDataColumn},System.Collections.Generic.IReadOnlyList{System.Collections.Generic.Dictionary{System.String,System.String}})
+  commentId: M:PublisherStudio.Services.LiveDataObjectSnapshot.#ctor(System.Guid,System.String,System.String,System.DateTimeOffset,System.Collections.Generic.IReadOnlyList{PublisherStudio.Services.LiveDataColumn},System.Collections.Generic.IReadOnlyList{System.Collections.Generic.Dictionary{System.String,System.String}})
+  id: '#ctor(System.Guid,System.String,System.String,System.DateTimeOffset,System.Collections.Generic.IReadOnlyList{PublisherStudio.Services.LiveDataColumn},System.Collections.Generic.IReadOnlyList{System.Collections.Generic.Dictionary{System.String,System.String}})'
+  parent: PublisherStudio.Services.LiveDataObjectSnapshot
+  langs:
+  - csharp
+  - vb
+  name: LiveDataObjectSnapshot(Guid, string, string, DateTimeOffset, IReadOnlyList<LiveDataColumn>, IReadOnlyList<Dictionary<string, string>>)
+  nameWithType: LiveDataObjectSnapshot.LiveDataObjectSnapshot(Guid, string, string, DateTimeOffset, IReadOnlyList<LiveDataColumn>, IReadOnlyList<Dictionary<string, string>>)
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.LiveDataObjectSnapshot(System.Guid, string, string, System.DateTimeOffset, System.Collections.Generic.IReadOnlyList<PublisherStudio.Services.LiveDataColumn>, System.Collections.Generic.IReadOnlyList<System.Collections.Generic.Dictionary<string, string>>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Represents a live data object snapshot.
+  example: []
+  syntax:
+    content: public LiveDataObjectSnapshot(Guid Id, string Name, string SourceKind, DateTimeOffset ModifiedUtc, IReadOnlyList<LiveDataColumn> Columns, IReadOnlyList<Dictionary<string, string>> Rows)
+    parameters:
+    - id: Id
+      type: System.Guid
+    - id: Name
+      type: System.String
+    - id: SourceKind
+      type: System.String
+    - id: ModifiedUtc
+      type: System.DateTimeOffset
+    - id: Columns
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.Services.LiveDataColumn}
+    - id: Rows
+      type: System.Collections.Generic.IReadOnlyList{System.Collections.Generic.Dictionary{System.String,System.String}}
+    content.vb: Public Sub New(Id As Guid, Name As String, SourceKind As String, ModifiedUtc As DateTimeOffset, Columns As IReadOnlyList(Of LiveDataColumn), Rows As IReadOnlyList(Of Dictionary(Of String, String)))
+  overload: PublisherStudio.Services.LiveDataObjectSnapshot.#ctor*
+  nameWithType.vb: LiveDataObjectSnapshot.New(Guid, String, String, DateTimeOffset, IReadOnlyList(Of LiveDataColumn), IReadOnlyList(Of Dictionary(Of String, String)))
+  fullName.vb: PublisherStudio.Services.LiveDataObjectSnapshot.New(System.Guid, String, String, System.DateTimeOffset, System.Collections.Generic.IReadOnlyList(Of PublisherStudio.Services.LiveDataColumn), System.Collections.Generic.IReadOnlyList(Of System.Collections.Generic.Dictionary(Of String, String)))
+  name.vb: New(Guid, String, String, DateTimeOffset, IReadOnlyList(Of LiveDataColumn), IReadOnlyList(Of Dictionary(Of String, String)))
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.ToString
+  commentId: M:PublisherStudio.Services.LiveDataObjectSnapshot.ToString
+  id: ToString
+  parent: PublisherStudio.Services.LiveDataObjectSnapshot
+  langs:
+  - csharp
+  - vb
+  name: ToString()
+  nameWithType: LiveDataObjectSnapshot.ToString()
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.ToString()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  example: []
+  syntax:
+    content: public override string ToString()
+    return:
+      type: System.String
+    content.vb: Public Overrides Function ToString() As String
+  overridden: System.Object.ToString
+  overload: PublisherStudio.Services.LiveDataObjectSnapshot.ToString*
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.op_Inequality(PublisherStudio.Services.LiveDataObjectSnapshot,PublisherStudio.Services.LiveDataObjectSnapshot)
+  commentId: M:PublisherStudio.Services.LiveDataObjectSnapshot.op_Inequality(PublisherStudio.Services.LiveDataObjectSnapshot,PublisherStudio.Services.LiveDataObjectSnapshot)
+  id: op_Inequality(PublisherStudio.Services.LiveDataObjectSnapshot,PublisherStudio.Services.LiveDataObjectSnapshot)
+  parent: PublisherStudio.Services.LiveDataObjectSnapshot
+  langs:
+  - csharp
+  - vb
+  name: operator !=(LiveDataObjectSnapshot?, LiveDataObjectSnapshot?)
+  nameWithType: LiveDataObjectSnapshot.operator !=(LiveDataObjectSnapshot?, LiveDataObjectSnapshot?)
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.operator !=(PublisherStudio.Services.LiveDataObjectSnapshot?, PublisherStudio.Services.LiveDataObjectSnapshot?)
+  type: Operator
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public static bool operator !=(LiveDataObjectSnapshot? left, LiveDataObjectSnapshot? right)
+    parameters:
+    - id: left
+      type: PublisherStudio.Services.LiveDataObjectSnapshot
+    - id: right
+      type: PublisherStudio.Services.LiveDataObjectSnapshot
+    return:
+      type: System.Boolean
+    content.vb: Public Shared Operator <>(left As LiveDataObjectSnapshot, right As LiveDataObjectSnapshot) As Boolean
+  overload: PublisherStudio.Services.LiveDataObjectSnapshot.op_Inequality*
+  nameWithType.vb: LiveDataObjectSnapshot.<>(LiveDataObjectSnapshot, LiveDataObjectSnapshot)
+  fullName.vb: PublisherStudio.Services.LiveDataObjectSnapshot.<>(PublisherStudio.Services.LiveDataObjectSnapshot, PublisherStudio.Services.LiveDataObjectSnapshot)
+  name.vb: <>(LiveDataObjectSnapshot, LiveDataObjectSnapshot)
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.op_Equality(PublisherStudio.Services.LiveDataObjectSnapshot,PublisherStudio.Services.LiveDataObjectSnapshot)
+  commentId: M:PublisherStudio.Services.LiveDataObjectSnapshot.op_Equality(PublisherStudio.Services.LiveDataObjectSnapshot,PublisherStudio.Services.LiveDataObjectSnapshot)
+  id: op_Equality(PublisherStudio.Services.LiveDataObjectSnapshot,PublisherStudio.Services.LiveDataObjectSnapshot)
+  parent: PublisherStudio.Services.LiveDataObjectSnapshot
+  langs:
+  - csharp
+  - vb
+  name: operator ==(LiveDataObjectSnapshot?, LiveDataObjectSnapshot?)
+  nameWithType: LiveDataObjectSnapshot.operator ==(LiveDataObjectSnapshot?, LiveDataObjectSnapshot?)
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.operator ==(PublisherStudio.Services.LiveDataObjectSnapshot?, PublisherStudio.Services.LiveDataObjectSnapshot?)
+  type: Operator
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public static bool operator ==(LiveDataObjectSnapshot? left, LiveDataObjectSnapshot? right)
+    parameters:
+    - id: left
+      type: PublisherStudio.Services.LiveDataObjectSnapshot
+    - id: right
+      type: PublisherStudio.Services.LiveDataObjectSnapshot
+    return:
+      type: System.Boolean
+    content.vb: Public Shared Operator =(left As LiveDataObjectSnapshot, right As LiveDataObjectSnapshot) As Boolean
+  overload: PublisherStudio.Services.LiveDataObjectSnapshot.op_Equality*
+  nameWithType.vb: LiveDataObjectSnapshot.=(LiveDataObjectSnapshot, LiveDataObjectSnapshot)
+  fullName.vb: PublisherStudio.Services.LiveDataObjectSnapshot.=(PublisherStudio.Services.LiveDataObjectSnapshot, PublisherStudio.Services.LiveDataObjectSnapshot)
+  name.vb: =(LiveDataObjectSnapshot, LiveDataObjectSnapshot)
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.GetHashCode
+  commentId: M:PublisherStudio.Services.LiveDataObjectSnapshot.GetHashCode
+  id: GetHashCode
+  parent: PublisherStudio.Services.LiveDataObjectSnapshot
+  langs:
+  - csharp
+  - vb
+  name: GetHashCode()
+  nameWithType: LiveDataObjectSnapshot.GetHashCode()
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.GetHashCode()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  example: []
+  syntax:
+    content: public override int GetHashCode()
+    return:
+      type: System.Int32
+    content.vb: Public Overrides Function GetHashCode() As Integer
+  overridden: System.Object.GetHashCode
+  overload: PublisherStudio.Services.LiveDataObjectSnapshot.GetHashCode*
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.Equals(System.Object)
+  commentId: M:PublisherStudio.Services.LiveDataObjectSnapshot.Equals(System.Object)
+  id: Equals(System.Object)
+  parent: PublisherStudio.Services.LiveDataObjectSnapshot
+  langs:
+  - csharp
+  - vb
+  name: Equals(object?)
+  nameWithType: LiveDataObjectSnapshot.Equals(object?)
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.Equals(object?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  example: []
+  syntax:
+    content: public override bool Equals(object? obj)
+    parameters:
+    - id: obj
+      type: System.Object
+    return:
+      type: System.Boolean
+    content.vb: Public Overrides Function Equals(obj As Object) As Boolean
+  overridden: System.Object.Equals(System.Object)
+  overload: PublisherStudio.Services.LiveDataObjectSnapshot.Equals*
+  nameWithType.vb: LiveDataObjectSnapshot.Equals(Object)
+  fullName.vb: PublisherStudio.Services.LiveDataObjectSnapshot.Equals(Object)
+  name.vb: Equals(Object)
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.Equals(PublisherStudio.Services.LiveDataObjectSnapshot)
+  commentId: M:PublisherStudio.Services.LiveDataObjectSnapshot.Equals(PublisherStudio.Services.LiveDataObjectSnapshot)
+  id: Equals(PublisherStudio.Services.LiveDataObjectSnapshot)
+  parent: PublisherStudio.Services.LiveDataObjectSnapshot
+  langs:
+  - csharp
+  - vb
+  name: Equals(LiveDataObjectSnapshot?)
+  nameWithType: LiveDataObjectSnapshot.Equals(LiveDataObjectSnapshot?)
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.Equals(PublisherStudio.Services.LiveDataObjectSnapshot?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  example: []
+  syntax:
+    content: public bool Equals(LiveDataObjectSnapshot? other)
+    parameters:
+    - id: other
+      type: PublisherStudio.Services.LiveDataObjectSnapshot
+    return:
+      type: System.Boolean
+    content.vb: Public Function Equals(other As LiveDataObjectSnapshot) As Boolean
+  overload: PublisherStudio.Services.LiveDataObjectSnapshot.Equals*
+  implements:
+  - System.IEquatable{PublisherStudio.Services.LiveDataObjectSnapshot}.Equals(PublisherStudio.Services.LiveDataObjectSnapshot)
+  nameWithType.vb: LiveDataObjectSnapshot.Equals(LiveDataObjectSnapshot)
+  fullName.vb: PublisherStudio.Services.LiveDataObjectSnapshot.Equals(PublisherStudio.Services.LiveDataObjectSnapshot)
+  name.vb: Equals(LiveDataObjectSnapshot)
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.Deconstruct(System.Guid@,System.String@,System.String@,System.DateTimeOffset@,System.Collections.Generic.IReadOnlyList{PublisherStudio.Services.LiveDataColumn}@,System.Collections.Generic.IReadOnlyList{System.Collections.Generic.Dictionary{System.String,System.String}}@)
+  commentId: M:PublisherStudio.Services.LiveDataObjectSnapshot.Deconstruct(System.Guid@,System.String@,System.String@,System.DateTimeOffset@,System.Collections.Generic.IReadOnlyList{PublisherStudio.Services.LiveDataColumn}@,System.Collections.Generic.IReadOnlyList{System.Collections.Generic.Dictionary{System.String,System.String}}@)
+  id: Deconstruct(System.Guid@,System.String@,System.String@,System.DateTimeOffset@,System.Collections.Generic.IReadOnlyList{PublisherStudio.Services.LiveDataColumn}@,System.Collections.Generic.IReadOnlyList{System.Collections.Generic.Dictionary{System.String,System.String}}@)
+  parent: PublisherStudio.Services.LiveDataObjectSnapshot
+  langs:
+  - csharp
+  - vb
+  name: Deconstruct(out Guid, out string, out string, out DateTimeOffset, out IReadOnlyList<LiveDataColumn>, out IReadOnlyList<Dictionary<string, string>>)
+  nameWithType: LiveDataObjectSnapshot.Deconstruct(out Guid, out string, out string, out DateTimeOffset, out IReadOnlyList<LiveDataColumn>, out IReadOnlyList<Dictionary<string, string>>)
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.Deconstruct(out System.Guid, out string, out string, out System.DateTimeOffset, out System.Collections.Generic.IReadOnlyList<PublisherStudio.Services.LiveDataColumn>, out System.Collections.Generic.IReadOnlyList<System.Collections.Generic.Dictionary<string, string>>)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public void Deconstruct(out Guid Id, out string Name, out string SourceKind, out DateTimeOffset ModifiedUtc, out IReadOnlyList<LiveDataColumn> Columns, out IReadOnlyList<Dictionary<string, string>> Rows)
+    parameters:
+    - id: Id
+      type: System.Guid
+    - id: Name
+      type: System.String
+    - id: SourceKind
+      type: System.String
+    - id: ModifiedUtc
+      type: System.DateTimeOffset
+    - id: Columns
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.Services.LiveDataColumn}
+    - id: Rows
+      type: System.Collections.Generic.IReadOnlyList{System.Collections.Generic.Dictionary{System.String,System.String}}
+    content.vb: Public Sub Deconstruct(Id As Guid, Name As String, SourceKind As String, ModifiedUtc As DateTimeOffset, Columns As IReadOnlyList(Of LiveDataColumn), Rows As IReadOnlyList(Of Dictionary(Of String, String)))
+  overload: PublisherStudio.Services.LiveDataObjectSnapshot.Deconstruct*
+  nameWithType.vb: LiveDataObjectSnapshot.Deconstruct(Guid, String, String, DateTimeOffset, IReadOnlyList(Of LiveDataColumn), IReadOnlyList(Of Dictionary(Of String, String)))
+  fullName.vb: PublisherStudio.Services.LiveDataObjectSnapshot.Deconstruct(System.Guid, String, String, System.DateTimeOffset, System.Collections.Generic.IReadOnlyList(Of PublisherStudio.Services.LiveDataColumn), System.Collections.Generic.IReadOnlyList(Of System.Collections.Generic.Dictionary(Of String, String)))
+  name.vb: Deconstruct(Guid, String, String, DateTimeOffset, IReadOnlyList(Of LiveDataColumn), IReadOnlyList(Of Dictionary(Of String, String)))
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.Id
+  commentId: P:PublisherStudio.Services.LiveDataObjectSnapshot.Id
+  id: Id
+  parent: PublisherStudio.Services.LiveDataObjectSnapshot
+  langs:
+  - csharp
+  - vb
+  name: Id
+  nameWithType: LiveDataObjectSnapshot.Id
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.Id
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public Guid Id { get; init; }
+    parameters: []
+    return:
+      type: System.Guid
+    content.vb: Public Property Id As Guid
+  overload: PublisherStudio.Services.LiveDataObjectSnapshot.Id*
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.Name
+  commentId: P:PublisherStudio.Services.LiveDataObjectSnapshot.Name
+  id: Name
+  parent: PublisherStudio.Services.LiveDataObjectSnapshot
+  langs:
+  - csharp
+  - vb
+  name: Name
+  nameWithType: LiveDataObjectSnapshot.Name
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.Name
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public string Name { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Name As String
+  overload: PublisherStudio.Services.LiveDataObjectSnapshot.Name*
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.SourceKind
+  commentId: P:PublisherStudio.Services.LiveDataObjectSnapshot.SourceKind
+  id: SourceKind
+  parent: PublisherStudio.Services.LiveDataObjectSnapshot
+  langs:
+  - csharp
+  - vb
+  name: SourceKind
+  nameWithType: LiveDataObjectSnapshot.SourceKind
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.SourceKind
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public string SourceKind { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property SourceKind As String
+  overload: PublisherStudio.Services.LiveDataObjectSnapshot.SourceKind*
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.ModifiedUtc
+  commentId: P:PublisherStudio.Services.LiveDataObjectSnapshot.ModifiedUtc
+  id: ModifiedUtc
+  parent: PublisherStudio.Services.LiveDataObjectSnapshot
+  langs:
+  - csharp
+  - vb
+  name: ModifiedUtc
+  nameWithType: LiveDataObjectSnapshot.ModifiedUtc
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.ModifiedUtc
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public DateTimeOffset ModifiedUtc { get; init; }
+    parameters: []
+    return:
+      type: System.DateTimeOffset
+    content.vb: Public Property ModifiedUtc As DateTimeOffset
+  overload: PublisherStudio.Services.LiveDataObjectSnapshot.ModifiedUtc*
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.Columns
+  commentId: P:PublisherStudio.Services.LiveDataObjectSnapshot.Columns
+  id: Columns
+  parent: PublisherStudio.Services.LiveDataObjectSnapshot
+  langs:
+  - csharp
+  - vb
+  name: Columns
+  nameWithType: LiveDataObjectSnapshot.Columns
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.Columns
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public IReadOnlyList<LiveDataColumn> Columns { get; init; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.Services.LiveDataColumn}
+    content.vb: Public Property Columns As IReadOnlyList(Of LiveDataColumn)
+  overload: PublisherStudio.Services.LiveDataObjectSnapshot.Columns*
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.Rows
+  commentId: P:PublisherStudio.Services.LiveDataObjectSnapshot.Rows
+  id: Rows
+  parent: PublisherStudio.Services.LiveDataObjectSnapshot
+  langs:
+  - csharp
+  - vb
+  name: Rows
+  nameWithType: LiveDataObjectSnapshot.Rows
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.Rows
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public IReadOnlyList<Dictionary<string, string>> Rows { get; init; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.IReadOnlyList{System.Collections.Generic.Dictionary{System.String,System.String}}
+    content.vb: Public Property Rows As IReadOnlyList(Of Dictionary(Of String, String))
+  overload: PublisherStudio.Services.LiveDataObjectSnapshot.Rows*
+references:
+- uid: PublisherStudio.Services
+  commentId: N:PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services
+  nameWithType: PublisherStudio.Services
+  fullName: PublisherStudio.Services
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.IEquatable{PublisherStudio.Services.LiveDataObjectSnapshot}
+  commentId: T:System.IEquatable{PublisherStudio.Services.LiveDataObjectSnapshot}
+  parent: System
+  definition: System.IEquatable`1
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<LiveDataObjectSnapshot>
+  nameWithType: IEquatable<LiveDataObjectSnapshot>
+  fullName: System.IEquatable<PublisherStudio.Services.LiveDataObjectSnapshot>
+  nameWithType.vb: IEquatable(Of LiveDataObjectSnapshot)
+  fullName.vb: System.IEquatable(Of PublisherStudio.Services.LiveDataObjectSnapshot)
+  name.vb: IEquatable(Of LiveDataObjectSnapshot)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - uid: PublisherStudio.Services.LiveDataObjectSnapshot
+    name: LiveDataObjectSnapshot
+    isExternal: true
+    href: PublisherStudio.Services.LiveDataObjectSnapshot.html
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.LiveDataObjectSnapshot
+    name: LiveDataObjectSnapshot
+    isExternal: true
+    href: PublisherStudio.Services.LiveDataObjectSnapshot.html
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: System.IEquatable`1
+  commentId: T:System.IEquatable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<T>
+  nameWithType: IEquatable<T>
+  fullName: System.IEquatable<T>
+  nameWithType.vb: IEquatable(Of T)
+  fullName.vb: System.IEquatable(Of T)
+  name.vb: IEquatable(Of T)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.#ctor*
+  commentId: Overload:PublisherStudio.Services.LiveDataObjectSnapshot.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.LiveDataObjectSnapshot.html#PublisherStudio_Services_LiveDataObjectSnapshot__ctor_System_Guid_System_String_System_String_System_DateTimeOffset_System_Collections_Generic_IReadOnlyList_PublisherStudio_Services_LiveDataColumn__System_Collections_Generic_IReadOnlyList_System_Collections_Generic_Dictionary_System_String_System_String___
+  name: LiveDataObjectSnapshot
+  nameWithType: LiveDataObjectSnapshot.LiveDataObjectSnapshot
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.LiveDataObjectSnapshot
+  nameWithType.vb: LiveDataObjectSnapshot.New
+  fullName.vb: PublisherStudio.Services.LiveDataObjectSnapshot.New
+  name.vb: New
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System.DateTimeOffset
+  commentId: T:System.DateTimeOffset
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.datetimeoffset
+  name: DateTimeOffset
+  nameWithType: DateTimeOffset
+  fullName: System.DateTimeOffset
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.Services.LiveDataColumn}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.Services.LiveDataColumn}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<LiveDataColumn>
+  nameWithType: IReadOnlyList<LiveDataColumn>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.Services.LiveDataColumn>
+  nameWithType.vb: IReadOnlyList(Of LiveDataColumn)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.Services.LiveDataColumn)
+  name.vb: IReadOnlyList(Of LiveDataColumn)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.Services.LiveDataColumn
+    name: LiveDataColumn
+    isExternal: true
+    href: PublisherStudio.Services.LiveDataColumn.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.LiveDataColumn
+    name: LiveDataColumn
+    isExternal: true
+    href: PublisherStudio.Services.LiveDataColumn.html
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList{System.Collections.Generic.Dictionary{System.String,System.String}}
+  commentId: T:System.Collections.Generic.IReadOnlyList{System.Collections.Generic.Dictionary{System.String,System.String}}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<Dictionary<string, string>>
+  nameWithType: IReadOnlyList<Dictionary<string, string>>
+  fullName: System.Collections.Generic.IReadOnlyList<System.Collections.Generic.Dictionary<string, string>>
+  nameWithType.vb: IReadOnlyList(Of Dictionary(Of String, String))
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of System.Collections.Generic.Dictionary(Of String, String))
+  name.vb: IReadOnlyList(Of Dictionary(Of String, String))
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: System.Collections.Generic.Dictionary`2
+    name: Dictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.dictionary-2
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Collections.Generic.Dictionary`2
+    name: Dictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.dictionary-2
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.ToString*
+  commentId: Overload:PublisherStudio.Services.LiveDataObjectSnapshot.ToString
+  isExternal: true
+  href: PublisherStudio.Services.LiveDataObjectSnapshot.html#PublisherStudio_Services_LiveDataObjectSnapshot_ToString
+  name: ToString
+  nameWithType: LiveDataObjectSnapshot.ToString
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.ToString
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.op_Inequality*
+  commentId: Overload:PublisherStudio.Services.LiveDataObjectSnapshot.op_Inequality
+  isExternal: true
+  href: PublisherStudio.Services.LiveDataObjectSnapshot.html#PublisherStudio_Services_LiveDataObjectSnapshot_op_Inequality_PublisherStudio_Services_LiveDataObjectSnapshot_PublisherStudio_Services_LiveDataObjectSnapshot_
+  name: operator !=
+  nameWithType: LiveDataObjectSnapshot.operator !=
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.operator !=
+  nameWithType.vb: LiveDataObjectSnapshot.<>
+  fullName.vb: PublisherStudio.Services.LiveDataObjectSnapshot.<>
+  name.vb: <>
+  spec.csharp:
+  - name: operator
+  - name: " "
+  - uid: PublisherStudio.Services.LiveDataObjectSnapshot.op_Inequality*
+    name: '!='
+    isExternal: true
+    href: PublisherStudio.Services.LiveDataObjectSnapshot.html#PublisherStudio_Services_LiveDataObjectSnapshot_op_Inequality_PublisherStudio_Services_LiveDataObjectSnapshot_PublisherStudio_Services_LiveDataObjectSnapshot_
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot
+  commentId: T:PublisherStudio.Services.LiveDataObjectSnapshot
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.LiveDataObjectSnapshot.html
+  name: LiveDataObjectSnapshot
+  nameWithType: LiveDataObjectSnapshot
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.op_Equality*
+  commentId: Overload:PublisherStudio.Services.LiveDataObjectSnapshot.op_Equality
+  isExternal: true
+  href: PublisherStudio.Services.LiveDataObjectSnapshot.html#PublisherStudio_Services_LiveDataObjectSnapshot_op_Equality_PublisherStudio_Services_LiveDataObjectSnapshot_PublisherStudio_Services_LiveDataObjectSnapshot_
+  name: operator ==
+  nameWithType: LiveDataObjectSnapshot.operator ==
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.operator ==
+  nameWithType.vb: LiveDataObjectSnapshot.=
+  fullName.vb: PublisherStudio.Services.LiveDataObjectSnapshot.=
+  name.vb: =
+  spec.csharp:
+  - name: operator
+  - name: " "
+  - uid: PublisherStudio.Services.LiveDataObjectSnapshot.op_Equality*
+    name: ==
+    isExternal: true
+    href: PublisherStudio.Services.LiveDataObjectSnapshot.html#PublisherStudio_Services_LiveDataObjectSnapshot_op_Equality_PublisherStudio_Services_LiveDataObjectSnapshot_PublisherStudio_Services_LiveDataObjectSnapshot_
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.GetHashCode*
+  commentId: Overload:PublisherStudio.Services.LiveDataObjectSnapshot.GetHashCode
+  isExternal: true
+  href: PublisherStudio.Services.LiveDataObjectSnapshot.html#PublisherStudio_Services_LiveDataObjectSnapshot_GetHashCode
+  name: GetHashCode
+  nameWithType: LiveDataObjectSnapshot.GetHashCode
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.GetHashCode
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.Equals*
+  commentId: Overload:PublisherStudio.Services.LiveDataObjectSnapshot.Equals
+  isExternal: true
+  href: PublisherStudio.Services.LiveDataObjectSnapshot.html#PublisherStudio_Services_LiveDataObjectSnapshot_Equals_System_Object_
+  name: Equals
+  nameWithType: LiveDataObjectSnapshot.Equals
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.Equals
+- uid: System.IEquatable{PublisherStudio.Services.LiveDataObjectSnapshot}.Equals(PublisherStudio.Services.LiveDataObjectSnapshot)
+  commentId: M:System.IEquatable{PublisherStudio.Services.LiveDataObjectSnapshot}.Equals(PublisherStudio.Services.LiveDataObjectSnapshot)
+  parent: System.IEquatable{PublisherStudio.Services.LiveDataObjectSnapshot}
+  definition: System.IEquatable`1.Equals(`0)
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  name: Equals(LiveDataObjectSnapshot)
+  nameWithType: IEquatable<LiveDataObjectSnapshot>.Equals(LiveDataObjectSnapshot)
+  fullName: System.IEquatable<PublisherStudio.Services.LiveDataObjectSnapshot>.Equals(PublisherStudio.Services.LiveDataObjectSnapshot)
+  nameWithType.vb: IEquatable(Of LiveDataObjectSnapshot).Equals(LiveDataObjectSnapshot)
+  fullName.vb: System.IEquatable(Of PublisherStudio.Services.LiveDataObjectSnapshot).Equals(PublisherStudio.Services.LiveDataObjectSnapshot)
+  spec.csharp:
+  - uid: System.IEquatable{PublisherStudio.Services.LiveDataObjectSnapshot}.Equals(PublisherStudio.Services.LiveDataObjectSnapshot)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - uid: PublisherStudio.Services.LiveDataObjectSnapshot
+    name: LiveDataObjectSnapshot
+    isExternal: true
+    href: PublisherStudio.Services.LiveDataObjectSnapshot.html
+  - name: )
+  spec.vb:
+  - uid: System.IEquatable{PublisherStudio.Services.LiveDataObjectSnapshot}.Equals(PublisherStudio.Services.LiveDataObjectSnapshot)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - uid: PublisherStudio.Services.LiveDataObjectSnapshot
+    name: LiveDataObjectSnapshot
+    isExternal: true
+    href: PublisherStudio.Services.LiveDataObjectSnapshot.html
+  - name: )
+- uid: System.IEquatable`1.Equals(`0)
+  commentId: M:System.IEquatable`1.Equals(`0)
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  name: Equals(T)
+  nameWithType: IEquatable<T>.Equals(T)
+  fullName: System.IEquatable<T>.Equals(T)
+  nameWithType.vb: IEquatable(Of T).Equals(T)
+  fullName.vb: System.IEquatable(Of T).Equals(T)
+  spec.csharp:
+  - uid: System.IEquatable`1.Equals(`0)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - name: T
+  - name: )
+  spec.vb:
+  - uid: System.IEquatable`1.Equals(`0)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - name: T
+  - name: )
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.Deconstruct*
+  commentId: Overload:PublisherStudio.Services.LiveDataObjectSnapshot.Deconstruct
+  isExternal: true
+  href: PublisherStudio.Services.LiveDataObjectSnapshot.html#PublisherStudio_Services_LiveDataObjectSnapshot_Deconstruct_System_Guid__System_String__System_String__System_DateTimeOffset__System_Collections_Generic_IReadOnlyList_PublisherStudio_Services_LiveDataColumn___System_Collections_Generic_IReadOnlyList_System_Collections_Generic_Dictionary_System_String_System_String____
+  name: Deconstruct
+  nameWithType: LiveDataObjectSnapshot.Deconstruct
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.Deconstruct
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.Id*
+  commentId: Overload:PublisherStudio.Services.LiveDataObjectSnapshot.Id
+  isExternal: true
+  href: PublisherStudio.Services.LiveDataObjectSnapshot.html#PublisherStudio_Services_LiveDataObjectSnapshot_Id
+  name: Id
+  nameWithType: LiveDataObjectSnapshot.Id
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.Id
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.Name*
+  commentId: Overload:PublisherStudio.Services.LiveDataObjectSnapshot.Name
+  isExternal: true
+  href: PublisherStudio.Services.LiveDataObjectSnapshot.html#PublisherStudio_Services_LiveDataObjectSnapshot_Name
+  name: Name
+  nameWithType: LiveDataObjectSnapshot.Name
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.Name
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.SourceKind*
+  commentId: Overload:PublisherStudio.Services.LiveDataObjectSnapshot.SourceKind
+  isExternal: true
+  href: PublisherStudio.Services.LiveDataObjectSnapshot.html#PublisherStudio_Services_LiveDataObjectSnapshot_SourceKind
+  name: SourceKind
+  nameWithType: LiveDataObjectSnapshot.SourceKind
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.SourceKind
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.ModifiedUtc*
+  commentId: Overload:PublisherStudio.Services.LiveDataObjectSnapshot.ModifiedUtc
+  isExternal: true
+  href: PublisherStudio.Services.LiveDataObjectSnapshot.html#PublisherStudio_Services_LiveDataObjectSnapshot_ModifiedUtc
+  name: ModifiedUtc
+  nameWithType: LiveDataObjectSnapshot.ModifiedUtc
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.ModifiedUtc
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.Columns*
+  commentId: Overload:PublisherStudio.Services.LiveDataObjectSnapshot.Columns
+  isExternal: true
+  href: PublisherStudio.Services.LiveDataObjectSnapshot.html#PublisherStudio_Services_LiveDataObjectSnapshot_Columns
+  name: Columns
+  nameWithType: LiveDataObjectSnapshot.Columns
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.Columns
+- uid: PublisherStudio.Services.LiveDataObjectSnapshot.Rows*
+  commentId: Overload:PublisherStudio.Services.LiveDataObjectSnapshot.Rows
+  isExternal: true
+  href: PublisherStudio.Services.LiveDataObjectSnapshot.html#PublisherStudio_Services_LiveDataObjectSnapshot_Rows
+  name: Rows
+  nameWithType: LiveDataObjectSnapshot.Rows
+  fullName: PublisherStudio.Services.LiveDataObjectSnapshot.Rows

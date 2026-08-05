@@ -1,7 +1,10 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace PublisherStudio.Services;
 
+/// <summary>
+/// Represents a publication recovery snapshot.
+/// </summary>
 public sealed record PublicationRecoverySnapshot(
     Guid DocumentId,
     string DocumentName,
@@ -21,6 +24,9 @@ public sealed class PublicationRecoveryService
     private readonly string _root;
     private readonly string _manifestPath;
 
+    /// <summary>
+    /// Runs the publication recovery service operation.
+    /// </summary>
     public PublicationRecoveryService()
     {
         _root = Path.Combine(
@@ -30,6 +36,9 @@ public sealed class PublicationRecoveryService
         _manifestPath = Path.Combine(_root, "latest.json");
     }
 
+    /// <summary>
+    /// Saves async.
+    /// </summary>
     public async Task SaveAsync(Guid documentId, string documentName, DateTimeOffset modifiedUtc, string json, CancellationToken cancellationToken = default)
     {
         if (documentId == Guid.Empty || string.IsNullOrWhiteSpace(json)) return;
@@ -57,6 +66,9 @@ public sealed class PublicationRecoveryService
         }
     }
 
+    /// <summary>
+    /// Attempts to read latest.
+    /// </summary>
     public PublicationRecoverySnapshot? TryReadLatest()
     {
         try
@@ -77,6 +89,9 @@ public sealed class PublicationRecoveryService
         }
     }
 
+    /// <summary>
+    /// Deletes async.
+    /// </summary>
     public async Task DeleteAsync(Guid documentId, CancellationToken cancellationToken = default)
     {
         if (documentId == Guid.Empty) return;

@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services;
@@ -15,8 +15,14 @@ public sealed class PublicationLiveDataRegistry
     private readonly ConcurrentDictionary<Guid, HashSet<Guid>> _documentWebhookBindings = new();
     private readonly PublicationWebhookStore _webhooks;
 
+    /// <summary>
+    /// Runs the publication live data registry operation.
+    /// </summary>
     public PublicationLiveDataRegistry(PublicationWebhookStore webhooks) => _webhooks = webhooks;
 
+    /// <summary>
+    /// Runs the register operation.
+    /// </summary>
     public void Register(PublicationDocument document, PublicationDataService dataService, Guid? currentPageId = null)
     {
         foreach (var key in _exportTokens.Keys.Where(key => key.DocumentId == document.Id))
@@ -98,6 +104,9 @@ public sealed class PublicationLiveDataRegistry
             && string.Equals(snapshot.Name, item.Name, StringComparison.Ordinal)
             && string.Equals(snapshot.SourceKind, item.SourceKind.ToString(), StringComparison.Ordinal);
 
+    /// <summary>
+    /// Runs the unregister operation.
+    /// </summary>
     public void Unregister(Guid documentId)
     {
         _documents.TryRemove(documentId, out _);
@@ -113,9 +122,15 @@ public sealed class PublicationLiveDataRegistry
         _webhooks.Unregister(bindingId);
     }
 
+    /// <summary>
+    /// Attempts to get.
+    /// </summary>
     public bool TryGet(Guid documentId, out LivePublicationSnapshot snapshot)
         => _documents.TryGetValue(documentId, out snapshot!);
 
+    /// <summary>
+    /// Attempts to get export rows.
+    /// </summary>
     public bool TryGetExportRows(Guid documentId, Guid dataId, string token, out IReadOnlyList<Dictionary<string, string>> rows)
     {
         rows = [];
@@ -127,6 +142,9 @@ public sealed class PublicationLiveDataRegistry
         return true;
     }
 
+    /// <summary>
+    /// Runs the summaries operation.
+    /// </summary>
     public IReadOnlyList<LivePublicationSummary> Summaries()
         => _documents.Values
             .OrderByDescending(item => item.ModifiedUtc)
@@ -134,12 +152,30 @@ public sealed class PublicationLiveDataRegistry
             .ToArray();
 }
 
+/// <summary>
+/// Represents a live publication summary.
+/// </summary>
 public sealed record LivePublicationSummary(Guid Id, string Name, DateTimeOffset ModifiedUtc, int PageCount, int DataObjectCount);
+/// <summary>
+/// Represents a live publication snapshot.
+/// </summary>
 public sealed record LivePublicationSnapshot(Guid Id, string Name, DateTimeOffset ModifiedUtc,
     IReadOnlyDictionary<Guid, LiveDataObjectSnapshot> DataObjects, IReadOnlyList<LivePageSnapshot> Pages);
+/// <summary>
+/// Represents a live data object snapshot.
+/// </summary>
 public sealed record LiveDataObjectSnapshot(Guid Id, string Name, string SourceKind, DateTimeOffset ModifiedUtc,
     IReadOnlyList<LiveDataColumn> Columns, IReadOnlyList<Dictionary<string, string>> Rows);
+/// <summary>
+/// Represents a live data column.
+/// </summary>
 public sealed record LiveDataColumn(string Name, string ValueKind);
+/// <summary>
+/// Represents a live page snapshot.
+/// </summary>
 public sealed record LivePageSnapshot(Guid Id, string Name, double WidthMm, double HeightMm, IReadOnlyList<LiveElementSnapshot> Elements);
+/// <summary>
+/// Represents a live element snapshot.
+/// </summary>
 public sealed record LiveElementSnapshot(Guid Id, string Name, string Kind, double X, double Y, double Width, double Height,
     double Rotation, int Layer, bool Visible, bool Locked);

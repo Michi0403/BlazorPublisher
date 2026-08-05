@@ -1,0 +1,706 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.SpreadsheetEditorSession
+  commentId: T:PublisherStudio.Services.SpreadsheetEditorSession
+  id: SpreadsheetEditorSession
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.SpreadsheetEditorSession.#ctor
+  - PublisherStudio.Services.SpreadsheetEditorSession.ActiveSheetName
+  - PublisherStudio.Services.SpreadsheetEditorSession.Clone
+  - PublisherStudio.Services.SpreadsheetEditorSession.Content
+  - PublisherStudio.Services.SpreadsheetEditorSession.DocumentId
+  - PublisherStudio.Services.SpreadsheetEditorSession.ElementId
+  - PublisherStudio.Services.SpreadsheetEditorSession.FileName
+  - PublisherStudio.Services.SpreadsheetEditorSession.Id
+  - PublisherStudio.Services.SpreadsheetEditorSession.PreviewHtml
+  - PublisherStudio.Services.SpreadsheetEditorSession.SourceFormat
+  - PublisherStudio.Services.SpreadsheetEditorSession.UpdatedUtc
+  langs:
+  - csharp
+  - vb
+  name: SpreadsheetEditorSession
+  nameWithType: SpreadsheetEditorSession
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Represents a spreadsheet editor session.
+  example: []
+  syntax:
+    content: public sealed class SpreadsheetEditorSession
+    content.vb: Public NotInheritable Class SpreadsheetEditorSession
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.SpreadsheetEditorSession.Clone
+  commentId: M:PublisherStudio.Services.SpreadsheetEditorSession.Clone
+  id: Clone
+  parent: PublisherStudio.Services.SpreadsheetEditorSession
+  langs:
+  - csharp
+  - vb
+  name: Clone()
+  nameWithType: SpreadsheetEditorSession.Clone()
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession.Clone()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the clone operation.
+  example: []
+  syntax:
+    content: public SpreadsheetEditorSession Clone()
+    return:
+      type: PublisherStudio.Services.SpreadsheetEditorSession
+    content.vb: Public Function Clone() As SpreadsheetEditorSession
+  overload: PublisherStudio.Services.SpreadsheetEditorSession.Clone*
+- uid: PublisherStudio.Services.SpreadsheetEditorSession.#ctor
+  commentId: M:PublisherStudio.Services.SpreadsheetEditorSession.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.Services.SpreadsheetEditorSession
+  langs:
+  - csharp
+  - vb
+  name: SpreadsheetEditorSession()
+  nameWithType: SpreadsheetEditorSession.SpreadsheetEditorSession()
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession.SpreadsheetEditorSession()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public SpreadsheetEditorSession()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.Services.SpreadsheetEditorSession.#ctor*
+  nameWithType.vb: SpreadsheetEditorSession.New()
+  fullName.vb: PublisherStudio.Services.SpreadsheetEditorSession.New()
+  name.vb: New()
+- uid: PublisherStudio.Services.SpreadsheetEditorSession.Id
+  commentId: P:PublisherStudio.Services.SpreadsheetEditorSession.Id
+  id: Id
+  parent: PublisherStudio.Services.SpreadsheetEditorSession
+  langs:
+  - csharp
+  - vb
+  name: Id
+  nameWithType: SpreadsheetEditorSession.Id
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession.Id
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Gets or sets the stable identifier.
+  example: []
+  syntax:
+    content: public Guid Id { get; init; }
+    parameters: []
+    return:
+      type: System.Guid
+    content.vb: Public Property Id As Guid
+  overload: PublisherStudio.Services.SpreadsheetEditorSession.Id*
+- uid: PublisherStudio.Services.SpreadsheetEditorSession.ElementId
+  commentId: P:PublisherStudio.Services.SpreadsheetEditorSession.ElementId
+  id: ElementId
+  parent: PublisherStudio.Services.SpreadsheetEditorSession
+  langs:
+  - csharp
+  - vb
+  name: ElementId
+  nameWithType: SpreadsheetEditorSession.ElementId
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession.ElementId
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Gets or sets element identifier.
+  example: []
+  syntax:
+    content: public Guid ElementId { get; init; }
+    parameters: []
+    return:
+      type: System.Guid
+    content.vb: Public Property ElementId As Guid
+  overload: PublisherStudio.Services.SpreadsheetEditorSession.ElementId*
+- uid: PublisherStudio.Services.SpreadsheetEditorSession.DocumentId
+  commentId: P:PublisherStudio.Services.SpreadsheetEditorSession.DocumentId
+  id: DocumentId
+  parent: PublisherStudio.Services.SpreadsheetEditorSession
+  langs:
+  - csharp
+  - vb
+  name: DocumentId
+  nameWithType: SpreadsheetEditorSession.DocumentId
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession.DocumentId
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Gets or sets document identifier.
+  example: []
+  syntax:
+    content: public string DocumentId { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property DocumentId As String
+  overload: PublisherStudio.Services.SpreadsheetEditorSession.DocumentId*
+- uid: PublisherStudio.Services.SpreadsheetEditorSession.FileName
+  commentId: P:PublisherStudio.Services.SpreadsheetEditorSession.FileName
+  id: FileName
+  parent: PublisherStudio.Services.SpreadsheetEditorSession
+  langs:
+  - csharp
+  - vb
+  name: FileName
+  nameWithType: SpreadsheetEditorSession.FileName
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession.FileName
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Gets or sets file name.
+  example: []
+  syntax:
+    content: public string FileName { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property FileName As String
+  overload: PublisherStudio.Services.SpreadsheetEditorSession.FileName*
+- uid: PublisherStudio.Services.SpreadsheetEditorSession.SourceFormat
+  commentId: P:PublisherStudio.Services.SpreadsheetEditorSession.SourceFormat
+  id: SourceFormat
+  parent: PublisherStudio.Services.SpreadsheetEditorSession
+  langs:
+  - csharp
+  - vb
+  name: SourceFormat
+  nameWithType: SpreadsheetEditorSession.SourceFormat
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession.SourceFormat
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Gets or sets source format.
+  example: []
+  syntax:
+    content: public SpreadsheetStorageFormat SourceFormat { get; set; }
+    parameters: []
+    return:
+      type: PublisherStudio.BusinessObjects.SpreadsheetStorageFormat
+    content.vb: Public Property SourceFormat As SpreadsheetStorageFormat
+  overload: PublisherStudio.Services.SpreadsheetEditorSession.SourceFormat*
+- uid: PublisherStudio.Services.SpreadsheetEditorSession.Content
+  commentId: P:PublisherStudio.Services.SpreadsheetEditorSession.Content
+  id: Content
+  parent: PublisherStudio.Services.SpreadsheetEditorSession
+  langs:
+  - csharp
+  - vb
+  name: Content
+  nameWithType: SpreadsheetEditorSession.Content
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession.Content
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Gets or sets content.
+  example: []
+  syntax:
+    content: public byte[] Content { get; set; }
+    parameters: []
+    return:
+      type: System.Byte[]
+    content.vb: Public Property Content As Byte()
+  overload: PublisherStudio.Services.SpreadsheetEditorSession.Content*
+- uid: PublisherStudio.Services.SpreadsheetEditorSession.PreviewHtml
+  commentId: P:PublisherStudio.Services.SpreadsheetEditorSession.PreviewHtml
+  id: PreviewHtml
+  parent: PublisherStudio.Services.SpreadsheetEditorSession
+  langs:
+  - csharp
+  - vb
+  name: PreviewHtml
+  nameWithType: SpreadsheetEditorSession.PreviewHtml
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession.PreviewHtml
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Gets or sets preview HTML.
+  example: []
+  syntax:
+    content: public string PreviewHtml { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property PreviewHtml As String
+  overload: PublisherStudio.Services.SpreadsheetEditorSession.PreviewHtml*
+- uid: PublisherStudio.Services.SpreadsheetEditorSession.ActiveSheetName
+  commentId: P:PublisherStudio.Services.SpreadsheetEditorSession.ActiveSheetName
+  id: ActiveSheetName
+  parent: PublisherStudio.Services.SpreadsheetEditorSession
+  langs:
+  - csharp
+  - vb
+  name: ActiveSheetName
+  nameWithType: SpreadsheetEditorSession.ActiveSheetName
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession.ActiveSheetName
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Gets or sets active sheet name.
+  example: []
+  syntax:
+    content: public string ActiveSheetName { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property ActiveSheetName As String
+  overload: PublisherStudio.Services.SpreadsheetEditorSession.ActiveSheetName*
+- uid: PublisherStudio.Services.SpreadsheetEditorSession.UpdatedUtc
+  commentId: P:PublisherStudio.Services.SpreadsheetEditorSession.UpdatedUtc
+  id: UpdatedUtc
+  parent: PublisherStudio.Services.SpreadsheetEditorSession
+  langs:
+  - csharp
+  - vb
+  name: UpdatedUtc
+  nameWithType: SpreadsheetEditorSession.UpdatedUtc
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession.UpdatedUtc
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Gets or sets the UTC update time.
+  example: []
+  syntax:
+    content: public DateTimeOffset UpdatedUtc { get; set; }
+    parameters: []
+    return:
+      type: System.DateTimeOffset
+    content.vb: Public Property UpdatedUtc As DateTimeOffset
+  overload: PublisherStudio.Services.SpreadsheetEditorSession.UpdatedUtc*
+references:
+- uid: PublisherStudio.Services
+  commentId: N:PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services
+  nameWithType: PublisherStudio.Services
+  fullName: PublisherStudio.Services
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.SpreadsheetEditorSession.Clone*
+  commentId: Overload:PublisherStudio.Services.SpreadsheetEditorSession.Clone
+  isExternal: true
+  href: PublisherStudio.Services.SpreadsheetEditorSession.html#PublisherStudio_Services_SpreadsheetEditorSession_Clone
+  name: Clone
+  nameWithType: SpreadsheetEditorSession.Clone
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession.Clone
+- uid: PublisherStudio.Services.SpreadsheetEditorSession
+  commentId: T:PublisherStudio.Services.SpreadsheetEditorSession
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.SpreadsheetEditorSession.html
+  name: SpreadsheetEditorSession
+  nameWithType: SpreadsheetEditorSession
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession
+- uid: PublisherStudio.Services.SpreadsheetEditorSession.#ctor*
+  commentId: Overload:PublisherStudio.Services.SpreadsheetEditorSession.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.SpreadsheetEditorSession.html#PublisherStudio_Services_SpreadsheetEditorSession__ctor
+  name: SpreadsheetEditorSession
+  nameWithType: SpreadsheetEditorSession.SpreadsheetEditorSession
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession.SpreadsheetEditorSession
+  nameWithType.vb: SpreadsheetEditorSession.New
+  fullName.vb: PublisherStudio.Services.SpreadsheetEditorSession.New
+  name.vb: New
+- uid: PublisherStudio.Services.SpreadsheetEditorSession.Id*
+  commentId: Overload:PublisherStudio.Services.SpreadsheetEditorSession.Id
+  isExternal: true
+  href: PublisherStudio.Services.SpreadsheetEditorSession.html#PublisherStudio_Services_SpreadsheetEditorSession_Id
+  name: Id
+  nameWithType: SpreadsheetEditorSession.Id
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession.Id
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: PublisherStudio.Services.SpreadsheetEditorSession.ElementId*
+  commentId: Overload:PublisherStudio.Services.SpreadsheetEditorSession.ElementId
+  isExternal: true
+  href: PublisherStudio.Services.SpreadsheetEditorSession.html#PublisherStudio_Services_SpreadsheetEditorSession_ElementId
+  name: ElementId
+  nameWithType: SpreadsheetEditorSession.ElementId
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession.ElementId
+- uid: PublisherStudio.Services.SpreadsheetEditorSession.DocumentId*
+  commentId: Overload:PublisherStudio.Services.SpreadsheetEditorSession.DocumentId
+  isExternal: true
+  href: PublisherStudio.Services.SpreadsheetEditorSession.html#PublisherStudio_Services_SpreadsheetEditorSession_DocumentId
+  name: DocumentId
+  nameWithType: SpreadsheetEditorSession.DocumentId
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession.DocumentId
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.Services.SpreadsheetEditorSession.FileName*
+  commentId: Overload:PublisherStudio.Services.SpreadsheetEditorSession.FileName
+  isExternal: true
+  href: PublisherStudio.Services.SpreadsheetEditorSession.html#PublisherStudio_Services_SpreadsheetEditorSession_FileName
+  name: FileName
+  nameWithType: SpreadsheetEditorSession.FileName
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession.FileName
+- uid: PublisherStudio.Services.SpreadsheetEditorSession.SourceFormat*
+  commentId: Overload:PublisherStudio.Services.SpreadsheetEditorSession.SourceFormat
+  isExternal: true
+  href: PublisherStudio.Services.SpreadsheetEditorSession.html#PublisherStudio_Services_SpreadsheetEditorSession_SourceFormat
+  name: SourceFormat
+  nameWithType: SpreadsheetEditorSession.SourceFormat
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession.SourceFormat
+- uid: PublisherStudio.BusinessObjects.SpreadsheetStorageFormat
+  commentId: T:PublisherStudio.BusinessObjects.SpreadsheetStorageFormat
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.SpreadsheetStorageFormat.html
+  name: SpreadsheetStorageFormat
+  nameWithType: SpreadsheetStorageFormat
+  fullName: PublisherStudio.BusinessObjects.SpreadsheetStorageFormat
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.Services.SpreadsheetEditorSession.Content*
+  commentId: Overload:PublisherStudio.Services.SpreadsheetEditorSession.Content
+  isExternal: true
+  href: PublisherStudio.Services.SpreadsheetEditorSession.html#PublisherStudio_Services_SpreadsheetEditorSession_Content
+  name: Content
+  nameWithType: SpreadsheetEditorSession.Content
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession.Content
+- uid: System.Byte[]
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.byte
+  name: byte[]
+  nameWithType: byte[]
+  fullName: byte[]
+  nameWithType.vb: Byte()
+  fullName.vb: Byte()
+  name.vb: Byte()
+  spec.csharp:
+  - uid: System.Byte
+    name: byte
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.byte
+  - name: '['
+  - name: ']'
+  spec.vb:
+  - uid: System.Byte
+    name: Byte
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.byte
+  - name: (
+  - name: )
+- uid: PublisherStudio.Services.SpreadsheetEditorSession.PreviewHtml*
+  commentId: Overload:PublisherStudio.Services.SpreadsheetEditorSession.PreviewHtml
+  isExternal: true
+  href: PublisherStudio.Services.SpreadsheetEditorSession.html#PublisherStudio_Services_SpreadsheetEditorSession_PreviewHtml
+  name: PreviewHtml
+  nameWithType: SpreadsheetEditorSession.PreviewHtml
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession.PreviewHtml
+- uid: PublisherStudio.Services.SpreadsheetEditorSession.ActiveSheetName*
+  commentId: Overload:PublisherStudio.Services.SpreadsheetEditorSession.ActiveSheetName
+  isExternal: true
+  href: PublisherStudio.Services.SpreadsheetEditorSession.html#PublisherStudio_Services_SpreadsheetEditorSession_ActiveSheetName
+  name: ActiveSheetName
+  nameWithType: SpreadsheetEditorSession.ActiveSheetName
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession.ActiveSheetName
+- uid: PublisherStudio.Services.SpreadsheetEditorSession.UpdatedUtc*
+  commentId: Overload:PublisherStudio.Services.SpreadsheetEditorSession.UpdatedUtc
+  isExternal: true
+  href: PublisherStudio.Services.SpreadsheetEditorSession.html#PublisherStudio_Services_SpreadsheetEditorSession_UpdatedUtc
+  name: UpdatedUtc
+  nameWithType: SpreadsheetEditorSession.UpdatedUtc
+  fullName: PublisherStudio.Services.SpreadsheetEditorSession.UpdatedUtc
+- uid: System.DateTimeOffset
+  commentId: T:System.DateTimeOffset
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.datetimeoffset
+  name: DateTimeOffset
+  nameWithType: DateTimeOffset
+  fullName: System.DateTimeOffset

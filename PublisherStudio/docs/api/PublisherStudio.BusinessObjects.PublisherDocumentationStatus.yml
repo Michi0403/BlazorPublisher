@@ -1,0 +1,740 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus
+  commentId: T:PublisherStudio.BusinessObjects.PublisherDocumentationStatus
+  id: PublisherDocumentationStatus
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublisherDocumentationStatus.#ctor
+  - PublisherStudio.BusinessObjects.PublisherDocumentationStatus.CommentCount
+  - PublisherStudio.BusinessObjects.PublisherDocumentationStatus.CommentsUrl
+  - PublisherStudio.BusinessObjects.PublisherDocumentationStatus.GeneratedAtUtc
+  - PublisherStudio.BusinessObjects.PublisherDocumentationStatus.HtmlAvailable
+  - PublisherStudio.BusinessObjects.PublisherDocumentationStatus.HtmlUrl
+  - PublisherStudio.BusinessObjects.PublisherDocumentationStatus.InspectedAtUtc
+  - PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PdfAvailable
+  - PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PdfFileName
+  - PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PdfUrl
+  - PublisherStudio.BusinessObjects.PublisherDocumentationStatus.Version
+  - PublisherStudio.BusinessObjects.PublisherDocumentationStatus.XmlCommentsAvailable
+  langs:
+  - csharp
+  - vb
+  name: PublisherDocumentationStatus
+  nameWithType: PublisherDocumentationStatus
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Describes the generated documentation artifacts available to the running PublisherStudio build.
+  example: []
+  syntax:
+    content: public sealed class PublisherDocumentationStatus
+    content.vb: Public NotInheritable Class PublisherDocumentationStatus
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.#ctor
+  commentId: M:PublisherStudio.BusinessObjects.PublisherDocumentationStatus.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.BusinessObjects.PublisherDocumentationStatus
+  langs:
+  - csharp
+  - vb
+  name: PublisherDocumentationStatus()
+  nameWithType: PublisherDocumentationStatus.PublisherDocumentationStatus()
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PublisherDocumentationStatus()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public PublisherDocumentationStatus()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.#ctor*
+  nameWithType.vb: PublisherDocumentationStatus.New()
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.New()
+  name.vb: New()
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.Version
+  commentId: P:PublisherStudio.BusinessObjects.PublisherDocumentationStatus.Version
+  id: Version
+  parent: PublisherStudio.BusinessObjects.PublisherDocumentationStatus
+  langs:
+  - csharp
+  - vb
+  name: Version
+  nameWithType: PublisherDocumentationStatus.Version
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.Version
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets the application version represented by the documentation.
+  example: []
+  syntax:
+    content: public string Version { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Version As String
+  overload: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.Version*
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.InspectedAtUtc
+  commentId: P:PublisherStudio.BusinessObjects.PublisherDocumentationStatus.InspectedAtUtc
+  id: InspectedAtUtc
+  parent: PublisherStudio.BusinessObjects.PublisherDocumentationStatus
+  langs:
+  - csharp
+  - vb
+  name: InspectedAtUtc
+  nameWithType: PublisherDocumentationStatus.InspectedAtUtc
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.InspectedAtUtc
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets the UTC time at which the documentation status was inspected.
+  example: []
+  syntax:
+    content: public DateTime InspectedAtUtc { get; set; }
+    parameters: []
+    return:
+      type: System.DateTime
+    content.vb: Public Property InspectedAtUtc As Date
+  overload: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.InspectedAtUtc*
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.GeneratedAtUtc
+  commentId: P:PublisherStudio.BusinessObjects.PublisherDocumentationStatus.GeneratedAtUtc
+  id: GeneratedAtUtc
+  parent: PublisherStudio.BusinessObjects.PublisherDocumentationStatus
+  langs:
+  - csharp
+  - vb
+  name: GeneratedAtUtc
+  nameWithType: PublisherDocumentationStatus.GeneratedAtUtc
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.GeneratedAtUtc
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets the UTC time recorded by the documentation build manifest.
+  example: []
+  syntax:
+    content: public DateTime? GeneratedAtUtc { get; set; }
+    parameters: []
+    return:
+      type: System.Nullable{System.DateTime}
+    content.vb: Public Property GeneratedAtUtc As Date?
+  overload: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.GeneratedAtUtc*
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.HtmlAvailable
+  commentId: P:PublisherStudio.BusinessObjects.PublisherDocumentationStatus.HtmlAvailable
+  id: HtmlAvailable
+  parent: PublisherStudio.BusinessObjects.PublisherDocumentationStatus
+  langs:
+  - csharp
+  - vb
+  name: HtmlAvailable
+  nameWithType: PublisherDocumentationStatus.HtmlAvailable
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.HtmlAvailable
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets whether the generated DocFX entry page is available.
+  example: []
+  syntax:
+    content: public bool HtmlAvailable { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property HtmlAvailable As Boolean
+  overload: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.HtmlAvailable*
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PdfAvailable
+  commentId: P:PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PdfAvailable
+  id: PdfAvailable
+  parent: PublisherStudio.BusinessObjects.PublisherDocumentationStatus
+  langs:
+  - csharp
+  - vb
+  name: PdfAvailable
+  nameWithType: PublisherDocumentationStatus.PdfAvailable
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PdfAvailable
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets whether the versioned PDF book is available.
+  example: []
+  syntax:
+    content: public bool PdfAvailable { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property PdfAvailable As Boolean
+  overload: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PdfAvailable*
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.XmlCommentsAvailable
+  commentId: P:PublisherStudio.BusinessObjects.PublisherDocumentationStatus.XmlCommentsAvailable
+  id: XmlCommentsAvailable
+  parent: PublisherStudio.BusinessObjects.PublisherDocumentationStatus
+  langs:
+  - csharp
+  - vb
+  name: XmlCommentsAvailable
+  nameWithType: PublisherDocumentationStatus.XmlCommentsAvailable
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.XmlCommentsAvailable
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets whether compiler-generated XML documentation is available.
+  example: []
+  syntax:
+    content: public bool XmlCommentsAvailable { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property XmlCommentsAvailable As Boolean
+  overload: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.XmlCommentsAvailable*
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.CommentCount
+  commentId: P:PublisherStudio.BusinessObjects.PublisherDocumentationStatus.CommentCount
+  id: CommentCount
+  parent: PublisherStudio.BusinessObjects.PublisherDocumentationStatus
+  langs:
+  - csharp
+  - vb
+  name: CommentCount
+  nameWithType: PublisherDocumentationStatus.CommentCount
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.CommentCount
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets the number of documented XML members in the current catalog.
+  example: []
+  syntax:
+    content: public int CommentCount { get; set; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property CommentCount As Integer
+  overload: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.CommentCount*
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.HtmlUrl
+  commentId: P:PublisherStudio.BusinessObjects.PublisherDocumentationStatus.HtmlUrl
+  id: HtmlUrl
+  parent: PublisherStudio.BusinessObjects.PublisherDocumentationStatus
+  langs:
+  - csharp
+  - vb
+  name: HtmlUrl
+  nameWithType: PublisherDocumentationStatus.HtmlUrl
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.HtmlUrl
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets the application-relative URL of the generated HTML documentation.
+  example: []
+  syntax:
+    content: public string HtmlUrl { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property HtmlUrl As String
+  overload: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.HtmlUrl*
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PdfUrl
+  commentId: P:PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PdfUrl
+  id: PdfUrl
+  parent: PublisherStudio.BusinessObjects.PublisherDocumentationStatus
+  langs:
+  - csharp
+  - vb
+  name: PdfUrl
+  nameWithType: PublisherDocumentationStatus.PdfUrl
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PdfUrl
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets the application-relative URL of the versioned PDF book.
+  example: []
+  syntax:
+    content: public string PdfUrl { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property PdfUrl As String
+  overload: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PdfUrl*
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.CommentsUrl
+  commentId: P:PublisherStudio.BusinessObjects.PublisherDocumentationStatus.CommentsUrl
+  id: CommentsUrl
+  parent: PublisherStudio.BusinessObjects.PublisherDocumentationStatus
+  langs:
+  - csharp
+  - vb
+  name: CommentsUrl
+  nameWithType: PublisherDocumentationStatus.CommentsUrl
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.CommentsUrl
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets the application-relative URL of the searchable XML-comment catalog.
+  example: []
+  syntax:
+    content: public string CommentsUrl { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property CommentsUrl As String
+  overload: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.CommentsUrl*
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PdfFileName
+  commentId: P:PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PdfFileName
+  id: PdfFileName
+  parent: PublisherStudio.BusinessObjects.PublisherDocumentationStatus
+  langs:
+  - csharp
+  - vb
+  name: PdfFileName
+  nameWithType: PublisherDocumentationStatus.PdfFileName
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PdfFileName
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Gets or sets the generated PDF file name.
+  example: []
+  syntax:
+    content: public string PdfFileName { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property PdfFileName As String
+  overload: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PdfFileName*
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.#ctor*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherDocumentationStatus.#ctor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.html#PublisherStudio_BusinessObjects_PublisherDocumentationStatus__ctor
+  name: PublisherDocumentationStatus
+  nameWithType: PublisherDocumentationStatus.PublisherDocumentationStatus
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PublisherDocumentationStatus
+  nameWithType.vb: PublisherDocumentationStatus.New
+  fullName.vb: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.New
+  name.vb: New
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.Version*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherDocumentationStatus.Version
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.html#PublisherStudio_BusinessObjects_PublisherDocumentationStatus_Version
+  name: Version
+  nameWithType: PublisherDocumentationStatus.Version
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.Version
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.InspectedAtUtc*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherDocumentationStatus.InspectedAtUtc
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.html#PublisherStudio_BusinessObjects_PublisherDocumentationStatus_InspectedAtUtc
+  name: InspectedAtUtc
+  nameWithType: PublisherDocumentationStatus.InspectedAtUtc
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.InspectedAtUtc
+- uid: System.DateTime
+  commentId: T:System.DateTime
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.datetime
+  name: DateTime
+  nameWithType: DateTime
+  fullName: System.DateTime
+  nameWithType.vb: Date
+  fullName.vb: Date
+  name.vb: Date
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.GeneratedAtUtc*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherDocumentationStatus.GeneratedAtUtc
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.html#PublisherStudio_BusinessObjects_PublisherDocumentationStatus_GeneratedAtUtc
+  name: GeneratedAtUtc
+  nameWithType: PublisherDocumentationStatus.GeneratedAtUtc
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.GeneratedAtUtc
+- uid: System.Nullable{System.DateTime}
+  commentId: T:System.Nullable{System.DateTime}
+  parent: System
+  definition: System.Nullable`1
+  href: https://learn.microsoft.com/dotnet/api/system.datetime
+  name: DateTime?
+  nameWithType: DateTime?
+  fullName: System.DateTime?
+  nameWithType.vb: Date?
+  fullName.vb: Date?
+  name.vb: Date?
+  spec.csharp:
+  - uid: System.DateTime
+    name: DateTime
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.datetime
+  - name: '?'
+  spec.vb:
+  - uid: System.DateTime
+    name: Date
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.datetime
+  - name: '?'
+- uid: System.Nullable`1
+  commentId: T:System.Nullable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  name: Nullable<T>
+  nameWithType: Nullable<T>
+  fullName: System.Nullable<T>
+  nameWithType.vb: Nullable(Of T)
+  fullName.vb: System.Nullable(Of T)
+  name.vb: Nullable(Of T)
+  spec.csharp:
+  - uid: System.Nullable`1
+    name: Nullable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Nullable`1
+    name: Nullable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.HtmlAvailable*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherDocumentationStatus.HtmlAvailable
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.html#PublisherStudio_BusinessObjects_PublisherDocumentationStatus_HtmlAvailable
+  name: HtmlAvailable
+  nameWithType: PublisherDocumentationStatus.HtmlAvailable
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.HtmlAvailable
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PdfAvailable*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PdfAvailable
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.html#PublisherStudio_BusinessObjects_PublisherDocumentationStatus_PdfAvailable
+  name: PdfAvailable
+  nameWithType: PublisherDocumentationStatus.PdfAvailable
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PdfAvailable
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.XmlCommentsAvailable*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherDocumentationStatus.XmlCommentsAvailable
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.html#PublisherStudio_BusinessObjects_PublisherDocumentationStatus_XmlCommentsAvailable
+  name: XmlCommentsAvailable
+  nameWithType: PublisherDocumentationStatus.XmlCommentsAvailable
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.XmlCommentsAvailable
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.CommentCount*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherDocumentationStatus.CommentCount
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.html#PublisherStudio_BusinessObjects_PublisherDocumentationStatus_CommentCount
+  name: CommentCount
+  nameWithType: PublisherDocumentationStatus.CommentCount
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.CommentCount
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.HtmlUrl*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherDocumentationStatus.HtmlUrl
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.html#PublisherStudio_BusinessObjects_PublisherDocumentationStatus_HtmlUrl
+  name: HtmlUrl
+  nameWithType: PublisherDocumentationStatus.HtmlUrl
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.HtmlUrl
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PdfUrl*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PdfUrl
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.html#PublisherStudio_BusinessObjects_PublisherDocumentationStatus_PdfUrl
+  name: PdfUrl
+  nameWithType: PublisherDocumentationStatus.PdfUrl
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PdfUrl
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.CommentsUrl*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherDocumentationStatus.CommentsUrl
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.html#PublisherStudio_BusinessObjects_PublisherDocumentationStatus_CommentsUrl
+  name: CommentsUrl
+  nameWithType: PublisherDocumentationStatus.CommentsUrl
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.CommentsUrl
+- uid: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PdfFileName*
+  commentId: Overload:PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PdfFileName
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.html#PublisherStudio_BusinessObjects_PublisherDocumentationStatus_PdfFileName
+  name: PdfFileName
+  nameWithType: PublisherDocumentationStatus.PdfFileName
+  fullName: PublisherStudio.BusinessObjects.PublisherDocumentationStatus.PdfFileName

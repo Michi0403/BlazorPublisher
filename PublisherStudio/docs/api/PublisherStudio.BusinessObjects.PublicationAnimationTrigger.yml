@@ -1,0 +1,134 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationAnimationTrigger
+  commentId: T:PublisherStudio.BusinessObjects.PublicationAnimationTrigger
+  id: PublicationAnimationTrigger
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationAnimationTrigger.AfterPrevious
+  - PublisherStudio.BusinessObjects.PublicationAnimationTrigger.OnClick
+  - PublisherStudio.BusinessObjects.PublicationAnimationTrigger.OnPageEnter
+  - PublisherStudio.BusinessObjects.PublicationAnimationTrigger.WithPrevious
+  langs:
+  - csharp
+  - vb
+  name: PublicationAnimationTrigger
+  nameWithType: PublicationAnimationTrigger
+  fullName: PublisherStudio.BusinessObjects.PublicationAnimationTrigger
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication animation trigger values.
+  example: []
+  syntax:
+    content: public enum PublicationAnimationTrigger
+    content.vb: Public Enum PublicationAnimationTrigger
+- uid: PublisherStudio.BusinessObjects.PublicationAnimationTrigger.OnPageEnter
+  commentId: F:PublisherStudio.BusinessObjects.PublicationAnimationTrigger.OnPageEnter
+  id: OnPageEnter
+  parent: PublisherStudio.BusinessObjects.PublicationAnimationTrigger
+  langs:
+  - csharp
+  - vb
+  name: OnPageEnter
+  nameWithType: PublicationAnimationTrigger.OnPageEnter
+  fullName: PublisherStudio.BusinessObjects.PublicationAnimationTrigger.OnPageEnter
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: OnPageEnter = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationAnimationTrigger
+- uid: PublisherStudio.BusinessObjects.PublicationAnimationTrigger.WithPrevious
+  commentId: F:PublisherStudio.BusinessObjects.PublicationAnimationTrigger.WithPrevious
+  id: WithPrevious
+  parent: PublisherStudio.BusinessObjects.PublicationAnimationTrigger
+  langs:
+  - csharp
+  - vb
+  name: WithPrevious
+  nameWithType: PublicationAnimationTrigger.WithPrevious
+  fullName: PublisherStudio.BusinessObjects.PublicationAnimationTrigger.WithPrevious
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: WithPrevious = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationAnimationTrigger
+- uid: PublisherStudio.BusinessObjects.PublicationAnimationTrigger.AfterPrevious
+  commentId: F:PublisherStudio.BusinessObjects.PublicationAnimationTrigger.AfterPrevious
+  id: AfterPrevious
+  parent: PublisherStudio.BusinessObjects.PublicationAnimationTrigger
+  langs:
+  - csharp
+  - vb
+  name: AfterPrevious
+  nameWithType: PublicationAnimationTrigger.AfterPrevious
+  fullName: PublisherStudio.BusinessObjects.PublicationAnimationTrigger.AfterPrevious
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: AfterPrevious = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationAnimationTrigger
+- uid: PublisherStudio.BusinessObjects.PublicationAnimationTrigger.OnClick
+  commentId: F:PublisherStudio.BusinessObjects.PublicationAnimationTrigger.OnClick
+  id: OnClick
+  parent: PublisherStudio.BusinessObjects.PublicationAnimationTrigger
+  langs:
+  - csharp
+  - vb
+  name: OnClick
+  nameWithType: PublicationAnimationTrigger.OnClick
+  fullName: PublisherStudio.BusinessObjects.PublicationAnimationTrigger.OnClick
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: OnClick = 3
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationAnimationTrigger
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationAnimationTrigger
+  commentId: T:PublisherStudio.BusinessObjects.PublicationAnimationTrigger
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationAnimationTrigger.html
+  name: PublicationAnimationTrigger
+  nameWithType: PublicationAnimationTrigger
+  fullName: PublisherStudio.BusinessObjects.PublicationAnimationTrigger

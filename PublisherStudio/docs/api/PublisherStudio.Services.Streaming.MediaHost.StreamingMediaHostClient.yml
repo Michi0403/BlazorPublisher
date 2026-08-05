@@ -1,0 +1,1192 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient
+  commentId: T:PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient
+  id: StreamingMediaHostClient
+  parent: PublisherStudio.Services.Streaming.MediaHost
+  children:
+  - PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.#ctor(PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore,PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService,PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeUseCases,PublisherStudio.Services.Streaming.UseCases.Sessions.StreamingSessionUseCases)
+  - PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.DiscoverNativeDevicesAsync(System.Threading.CancellationToken)
+  - PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.IsAvailableAsync(System.Threading.CancellationToken)
+  - PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.ReadEventsAsync(System.Guid,System.Threading.CancellationToken)
+  - PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetOutputEnabledAsync(System.Guid,System.Guid,System.Boolean,System.Threading.CancellationToken)
+  - PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetProgramPageAsync(System.Guid,System.Guid,System.Threading.CancellationToken)
+  - PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetRecordingAsync(System.Guid,System.Boolean,System.Threading.CancellationToken)
+  - PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.StartAsync(PublisherStudio.BusinessObjects.PublicationDocument,System.Boolean,System.Threading.CancellationToken)
+  - PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.StopAsync(System.Guid,System.Threading.CancellationToken)
+  langs:
+  - csharp
+  - vb
+  name: StreamingMediaHostClient
+  nameWithType: StreamingMediaHostClient
+  fullName: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  summary: In-process facade over PublisherStudio's integrated streaming runtime. No second executable, loopback port, or HTTP client is involved. Browser-facing capture and ingest sockets remain available as same-origin application endpoints.
+  example: []
+  syntax:
+    content: public sealed class StreamingMediaHostClient
+    content.vb: Public NotInheritable Class StreamingMediaHostClient
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.#ctor(PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore,PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService,PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeUseCases,PublisherStudio.Services.Streaming.UseCases.Sessions.StreamingSessionUseCases)
+  commentId: M:PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.#ctor(PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore,PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService,PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeUseCases,PublisherStudio.Services.Streaming.UseCases.Sessions.StreamingSessionUseCases)
+  id: '#ctor(PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore,PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService,PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeUseCases,PublisherStudio.Services.Streaming.UseCases.Sessions.StreamingSessionUseCases)'
+  parent: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient
+  langs:
+  - csharp
+  - vb
+  name: StreamingMediaHostClient(StreamingProfileStore, TwitchOAuthService, StreamingRuntimeUseCases, StreamingSessionUseCases)
+  nameWithType: StreamingMediaHostClient.StreamingMediaHostClient(StreamingProfileStore, TwitchOAuthService, StreamingRuntimeUseCases, StreamingSessionUseCases)
+  fullName: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.StreamingMediaHostClient(PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore, PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService, PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeUseCases, PublisherStudio.Services.Streaming.UseCases.Sessions.StreamingSessionUseCases)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  summary: In-process facade over PublisherStudio's integrated streaming runtime. No second executable, loopback port, or HTTP client is involved. Browser-facing capture and ingest sockets remain available as same-origin application endpoints.
+  example: []
+  syntax:
+    content: public StreamingMediaHostClient(StreamingProfileStore profiles, TwitchOAuthService twitchOAuth, StreamingRuntimeUseCases runtime, StreamingSessionUseCases sessions)
+    parameters:
+    - id: profiles
+      type: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore
+    - id: twitchOAuth
+      type: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService
+    - id: runtime
+      type: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeUseCases
+    - id: sessions
+      type: PublisherStudio.Services.Streaming.UseCases.Sessions.StreamingSessionUseCases
+    content.vb: Public Sub New(profiles As StreamingProfileStore, twitchOAuth As TwitchOAuthService, runtime As StreamingRuntimeUseCases, sessions As StreamingSessionUseCases)
+  overload: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.#ctor*
+  nameWithType.vb: StreamingMediaHostClient.New(StreamingProfileStore, TwitchOAuthService, StreamingRuntimeUseCases, StreamingSessionUseCases)
+  fullName.vb: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.New(PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore, PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService, PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeUseCases, PublisherStudio.Services.Streaming.UseCases.Sessions.StreamingSessionUseCases)
+  name.vb: New(StreamingProfileStore, TwitchOAuthService, StreamingRuntimeUseCases, StreamingSessionUseCases)
+- uid: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.DiscoverNativeDevicesAsync(System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.DiscoverNativeDevicesAsync(System.Threading.CancellationToken)
+  id: DiscoverNativeDevicesAsync(System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient
+  langs:
+  - csharp
+  - vb
+  name: DiscoverNativeDevicesAsync(CancellationToken)
+  nameWithType: StreamingMediaHostClient.DiscoverNativeDevicesAsync(CancellationToken)
+  fullName: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.DiscoverNativeDevicesAsync(System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  summary: Runs the discover native devices async operation.
+  example: []
+  syntax:
+    content: public Task<List<NativeMediaDeviceInfo>> DiscoverNativeDevicesAsync(CancellationToken cancellationToken = default)
+    parameters:
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{System.Collections.Generic.List{PublisherStudio.BusinessObjects.NativeMediaDeviceInfo}}
+    content.vb: Public Function DiscoverNativeDevicesAsync(cancellationToken As CancellationToken = Nothing) As Task(Of List(Of NativeMediaDeviceInfo))
+  overload: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.DiscoverNativeDevicesAsync*
+- uid: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.IsAvailableAsync(System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.IsAvailableAsync(System.Threading.CancellationToken)
+  id: IsAvailableAsync(System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient
+  langs:
+  - csharp
+  - vb
+  name: IsAvailableAsync(CancellationToken)
+  nameWithType: StreamingMediaHostClient.IsAvailableAsync(CancellationToken)
+  fullName: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.IsAvailableAsync(System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  summary: Determines whether available async.
+  example: []
+  syntax:
+    content: public Task<bool> IsAvailableAsync(CancellationToken cancellationToken = default)
+    parameters:
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{System.Boolean}
+    content.vb: Public Function IsAvailableAsync(cancellationToken As CancellationToken = Nothing) As Task(Of Boolean)
+  overload: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.IsAvailableAsync*
+- uid: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.StartAsync(PublisherStudio.BusinessObjects.PublicationDocument,System.Boolean,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.StartAsync(PublisherStudio.BusinessObjects.PublicationDocument,System.Boolean,System.Threading.CancellationToken)
+  id: StartAsync(PublisherStudio.BusinessObjects.PublicationDocument,System.Boolean,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient
+  langs:
+  - csharp
+  - vb
+  name: StartAsync(PublicationDocument, bool, CancellationToken)
+  nameWithType: StreamingMediaHostClient.StartAsync(PublicationDocument, bool, CancellationToken)
+  fullName: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.StartAsync(PublisherStudio.BusinessObjects.PublicationDocument, bool, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  summary: Starts async.
+  example: []
+  syntax:
+    content: public Task<MediaHostSessionResponse?> StartAsync(PublicationDocument document, bool dryRun, CancellationToken cancellationToken = default)
+    parameters:
+    - id: document
+      type: PublisherStudio.BusinessObjects.PublicationDocument
+    - id: dryRun
+      type: System.Boolean
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{PublisherStudio.Services.Streaming.MediaHost.MediaHostSessionResponse}
+    content.vb: Public Function StartAsync(document As PublicationDocument, dryRun As Boolean, cancellationToken As CancellationToken = Nothing) As Task(Of MediaHostSessionResponse)
+  overload: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.StartAsync*
+  nameWithType.vb: StreamingMediaHostClient.StartAsync(PublicationDocument, Boolean, CancellationToken)
+  fullName.vb: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.StartAsync(PublisherStudio.BusinessObjects.PublicationDocument, Boolean, System.Threading.CancellationToken)
+  name.vb: StartAsync(PublicationDocument, Boolean, CancellationToken)
+- uid: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.StopAsync(System.Guid,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.StopAsync(System.Guid,System.Threading.CancellationToken)
+  id: StopAsync(System.Guid,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient
+  langs:
+  - csharp
+  - vb
+  name: StopAsync(Guid, CancellationToken)
+  nameWithType: StreamingMediaHostClient.StopAsync(Guid, CancellationToken)
+  fullName: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.StopAsync(System.Guid, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  summary: Stops async.
+  example: []
+  syntax:
+    content: public Task<bool> StopAsync(Guid sessionId, CancellationToken cancellationToken = default)
+    parameters:
+    - id: sessionId
+      type: System.Guid
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{System.Boolean}
+    content.vb: Public Function StopAsync(sessionId As Guid, cancellationToken As CancellationToken = Nothing) As Task(Of Boolean)
+  overload: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.StopAsync*
+- uid: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetOutputEnabledAsync(System.Guid,System.Guid,System.Boolean,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetOutputEnabledAsync(System.Guid,System.Guid,System.Boolean,System.Threading.CancellationToken)
+  id: SetOutputEnabledAsync(System.Guid,System.Guid,System.Boolean,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient
+  langs:
+  - csharp
+  - vb
+  name: SetOutputEnabledAsync(Guid, Guid, bool, CancellationToken)
+  nameWithType: StreamingMediaHostClient.SetOutputEnabledAsync(Guid, Guid, bool, CancellationToken)
+  fullName: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetOutputEnabledAsync(System.Guid, System.Guid, bool, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  summary: Sets output enabled async.
+  example: []
+  syntax:
+    content: public Task<bool> SetOutputEnabledAsync(Guid sessionId, Guid outputId, bool enabled, CancellationToken cancellationToken = default)
+    parameters:
+    - id: sessionId
+      type: System.Guid
+    - id: outputId
+      type: System.Guid
+    - id: enabled
+      type: System.Boolean
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{System.Boolean}
+    content.vb: Public Function SetOutputEnabledAsync(sessionId As Guid, outputId As Guid, enabled As Boolean, cancellationToken As CancellationToken = Nothing) As Task(Of Boolean)
+  overload: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetOutputEnabledAsync*
+  nameWithType.vb: StreamingMediaHostClient.SetOutputEnabledAsync(Guid, Guid, Boolean, CancellationToken)
+  fullName.vb: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetOutputEnabledAsync(System.Guid, System.Guid, Boolean, System.Threading.CancellationToken)
+  name.vb: SetOutputEnabledAsync(Guid, Guid, Boolean, CancellationToken)
+- uid: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetProgramPageAsync(System.Guid,System.Guid,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetProgramPageAsync(System.Guid,System.Guid,System.Threading.CancellationToken)
+  id: SetProgramPageAsync(System.Guid,System.Guid,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient
+  langs:
+  - csharp
+  - vb
+  name: SetProgramPageAsync(Guid, Guid, CancellationToken)
+  nameWithType: StreamingMediaHostClient.SetProgramPageAsync(Guid, Guid, CancellationToken)
+  fullName: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetProgramPageAsync(System.Guid, System.Guid, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  summary: Sets program page async.
+  example: []
+  syntax:
+    content: public Task<bool> SetProgramPageAsync(Guid sessionId, Guid pageId, CancellationToken cancellationToken = default)
+    parameters:
+    - id: sessionId
+      type: System.Guid
+    - id: pageId
+      type: System.Guid
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{System.Boolean}
+    content.vb: Public Function SetProgramPageAsync(sessionId As Guid, pageId As Guid, cancellationToken As CancellationToken = Nothing) As Task(Of Boolean)
+  overload: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetProgramPageAsync*
+- uid: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetRecordingAsync(System.Guid,System.Boolean,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetRecordingAsync(System.Guid,System.Boolean,System.Threading.CancellationToken)
+  id: SetRecordingAsync(System.Guid,System.Boolean,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient
+  langs:
+  - csharp
+  - vb
+  name: SetRecordingAsync(Guid, bool, CancellationToken)
+  nameWithType: StreamingMediaHostClient.SetRecordingAsync(Guid, bool, CancellationToken)
+  fullName: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetRecordingAsync(System.Guid, bool, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  summary: Sets recording async.
+  example: []
+  syntax:
+    content: public Task<bool> SetRecordingAsync(Guid sessionId, bool enabled, CancellationToken cancellationToken = default)
+    parameters:
+    - id: sessionId
+      type: System.Guid
+    - id: enabled
+      type: System.Boolean
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{System.Boolean}
+    content.vb: Public Function SetRecordingAsync(sessionId As Guid, enabled As Boolean, cancellationToken As CancellationToken = Nothing) As Task(Of Boolean)
+  overload: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetRecordingAsync*
+  nameWithType.vb: StreamingMediaHostClient.SetRecordingAsync(Guid, Boolean, CancellationToken)
+  fullName.vb: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetRecordingAsync(System.Guid, Boolean, System.Threading.CancellationToken)
+  name.vb: SetRecordingAsync(Guid, Boolean, CancellationToken)
+- uid: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.ReadEventsAsync(System.Guid,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.ReadEventsAsync(System.Guid,System.Threading.CancellationToken)
+  id: ReadEventsAsync(System.Guid,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient
+  langs:
+  - csharp
+  - vb
+  name: ReadEventsAsync(Guid, CancellationToken)
+  nameWithType: StreamingMediaHostClient.ReadEventsAsync(Guid, CancellationToken)
+  fullName: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.ReadEventsAsync(System.Guid, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.MediaHost
+  summary: Reads events async.
+  example: []
+  syntax:
+    content: public Task<IReadOnlyList<MediaHostHotkeyEvent>> ReadEventsAsync(Guid sessionId, CancellationToken cancellationToken = default)
+    parameters:
+    - id: sessionId
+      type: System.Guid
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.Streaming.MediaHostHotkeyEvent}}
+    content.vb: Public Function ReadEventsAsync(sessionId As Guid, cancellationToken As CancellationToken = Nothing) As Task(Of IReadOnlyList(Of MediaHostHotkeyEvent))
+  overload: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.ReadEventsAsync*
+references:
+- uid: PublisherStudio.Services.Streaming.MediaHost
+  commentId: N:PublisherStudio.Services.Streaming.MediaHost
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.MediaHost
+  nameWithType: PublisherStudio.Services.Streaming.MediaHost
+  fullName: PublisherStudio.Services.Streaming.MediaHost
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.MediaHost
+    name: MediaHost
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.MediaHost.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.MediaHost
+    name: MediaHost
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.MediaHost.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.#ctor*
+  commentId: Overload:PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.html#PublisherStudio_Services_Streaming_MediaHost_StreamingMediaHostClient__ctor_PublisherStudio_Services_Streaming_Profiles_StreamingProfileStore_PublisherStudio_Services_Streaming_OAuth_TwitchOAuthService_PublisherStudio_Services_Streaming_UseCases_Runtime_StreamingRuntimeUseCases_PublisherStudio_Services_Streaming_UseCases_Sessions_StreamingSessionUseCases_
+  name: StreamingMediaHostClient
+  nameWithType: StreamingMediaHostClient.StreamingMediaHostClient
+  fullName: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.StreamingMediaHostClient
+  nameWithType.vb: StreamingMediaHostClient.New
+  fullName.vb: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.New
+  name.vb: New
+- uid: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore
+  commentId: T:PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore
+  parent: PublisherStudio.Services.Streaming.Profiles
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore.html
+  name: StreamingProfileStore
+  nameWithType: StreamingProfileStore
+  fullName: PublisherStudio.Services.Streaming.Profiles.StreamingProfileStore
+- uid: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService
+  commentId: T:PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService
+  parent: PublisherStudio.Services.Streaming.OAuth
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService.html
+  name: TwitchOAuthService
+  nameWithType: TwitchOAuthService
+  fullName: PublisherStudio.Services.Streaming.OAuth.TwitchOAuthService
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeUseCases
+  commentId: T:PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeUseCases
+  parent: PublisherStudio.Services.Streaming.UseCases.Runtime
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeUseCases.html
+  name: StreamingRuntimeUseCases
+  nameWithType: StreamingRuntimeUseCases
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime.StreamingRuntimeUseCases
+- uid: PublisherStudio.Services.Streaming.UseCases.Sessions.StreamingSessionUseCases
+  commentId: T:PublisherStudio.Services.Streaming.UseCases.Sessions.StreamingSessionUseCases
+  parent: PublisherStudio.Services.Streaming.UseCases.Sessions
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Sessions.StreamingSessionUseCases.html
+  name: StreamingSessionUseCases
+  nameWithType: StreamingSessionUseCases
+  fullName: PublisherStudio.Services.Streaming.UseCases.Sessions.StreamingSessionUseCases
+- uid: PublisherStudio.Services.Streaming.Profiles
+  commentId: N:PublisherStudio.Services.Streaming.Profiles
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Profiles
+  nameWithType: PublisherStudio.Services.Streaming.Profiles
+  fullName: PublisherStudio.Services.Streaming.Profiles
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Profiles
+    name: Profiles
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Profiles.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Profiles
+    name: Profiles
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Profiles.html
+- uid: PublisherStudio.Services.Streaming.OAuth
+  commentId: N:PublisherStudio.Services.Streaming.OAuth
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.OAuth
+  nameWithType: PublisherStudio.Services.Streaming.OAuth
+  fullName: PublisherStudio.Services.Streaming.OAuth
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.OAuth
+    name: OAuth
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.OAuth.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.OAuth
+    name: OAuth
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.OAuth.html
+- uid: PublisherStudio.Services.Streaming.UseCases.Runtime
+  commentId: N:PublisherStudio.Services.Streaming.UseCases.Runtime
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.UseCases.Runtime
+  nameWithType: PublisherStudio.Services.Streaming.UseCases.Runtime
+  fullName: PublisherStudio.Services.Streaming.UseCases.Runtime
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases.Runtime
+    name: Runtime
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Runtime.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases.Runtime
+    name: Runtime
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Runtime.html
+- uid: PublisherStudio.Services.Streaming.UseCases.Sessions
+  commentId: N:PublisherStudio.Services.Streaming.UseCases.Sessions
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.UseCases.Sessions
+  nameWithType: PublisherStudio.Services.Streaming.UseCases.Sessions
+  fullName: PublisherStudio.Services.Streaming.UseCases.Sessions
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases.Sessions
+    name: Sessions
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Sessions.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases.Sessions
+    name: Sessions
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Sessions.html
+- uid: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.DiscoverNativeDevicesAsync*
+  commentId: Overload:PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.DiscoverNativeDevicesAsync
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.html#PublisherStudio_Services_Streaming_MediaHost_StreamingMediaHostClient_DiscoverNativeDevicesAsync_System_Threading_CancellationToken_
+  name: DiscoverNativeDevicesAsync
+  nameWithType: StreamingMediaHostClient.DiscoverNativeDevicesAsync
+  fullName: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.DiscoverNativeDevicesAsync
+- uid: System.Threading.CancellationToken
+  commentId: T:System.Threading.CancellationToken
+  parent: System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  name: CancellationToken
+  nameWithType: CancellationToken
+  fullName: System.Threading.CancellationToken
+- uid: System.Threading.Tasks.Task{System.Collections.Generic.List{PublisherStudio.BusinessObjects.NativeMediaDeviceInfo}}
+  commentId: T:System.Threading.Tasks.Task{System.Collections.Generic.List{PublisherStudio.BusinessObjects.NativeMediaDeviceInfo}}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<List<NativeMediaDeviceInfo>>
+  nameWithType: Task<List<NativeMediaDeviceInfo>>
+  fullName: System.Threading.Tasks.Task<System.Collections.Generic.List<PublisherStudio.BusinessObjects.NativeMediaDeviceInfo>>
+  nameWithType.vb: Task(Of List(Of NativeMediaDeviceInfo))
+  fullName.vb: System.Threading.Tasks.Task(Of System.Collections.Generic.List(Of PublisherStudio.BusinessObjects.NativeMediaDeviceInfo))
+  name.vb: Task(Of List(Of NativeMediaDeviceInfo))
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.NativeMediaDeviceInfo
+    name: NativeMediaDeviceInfo
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.NativeMediaDeviceInfo.html
+  - name: '>'
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.NativeMediaDeviceInfo
+    name: NativeMediaDeviceInfo
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.NativeMediaDeviceInfo.html
+  - name: )
+  - name: )
+- uid: System.Threading
+  commentId: N:System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading
+  nameWithType: System.Threading
+  fullName: System.Threading
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+- uid: System.Threading.Tasks.Task`1
+  commentId: T:System.Threading.Tasks.Task`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<TResult>
+  nameWithType: Task<TResult>
+  fullName: System.Threading.Tasks.Task<TResult>
+  nameWithType.vb: Task(Of TResult)
+  fullName.vb: System.Threading.Tasks.Task(Of TResult)
+  name.vb: Task(Of TResult)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - name: TResult
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TResult
+  - name: )
+- uid: System.Threading.Tasks
+  commentId: N:System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading.Tasks
+  nameWithType: System.Threading.Tasks
+  fullName: System.Threading.Tasks
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+- uid: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.IsAvailableAsync*
+  commentId: Overload:PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.IsAvailableAsync
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.html#PublisherStudio_Services_Streaming_MediaHost_StreamingMediaHostClient_IsAvailableAsync_System_Threading_CancellationToken_
+  name: IsAvailableAsync
+  nameWithType: StreamingMediaHostClient.IsAvailableAsync
+  fullName: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.IsAvailableAsync
+- uid: System.Threading.Tasks.Task{System.Boolean}
+  commentId: T:System.Threading.Tasks.Task{System.Boolean}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<bool>
+  nameWithType: Task<bool>
+  fullName: System.Threading.Tasks.Task<bool>
+  nameWithType.vb: Task(Of Boolean)
+  fullName.vb: System.Threading.Tasks.Task(Of Boolean)
+  name.vb: Task(Of Boolean)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: System.Boolean
+    name: bool
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.boolean
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Boolean
+    name: Boolean
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.boolean
+  - name: )
+- uid: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.StartAsync*
+  commentId: Overload:PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.StartAsync
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.html#PublisherStudio_Services_Streaming_MediaHost_StreamingMediaHostClient_StartAsync_PublisherStudio_BusinessObjects_PublicationDocument_System_Boolean_System_Threading_CancellationToken_
+  name: StartAsync
+  nameWithType: StreamingMediaHostClient.StartAsync
+  fullName: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.StartAsync
+- uid: PublisherStudio.BusinessObjects.PublicationDocument
+  commentId: T:PublisherStudio.BusinessObjects.PublicationDocument
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationDocument.html
+  name: PublicationDocument
+  nameWithType: PublicationDocument
+  fullName: PublisherStudio.BusinessObjects.PublicationDocument
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: System.Threading.Tasks.Task{PublisherStudio.Services.Streaming.MediaHost.MediaHostSessionResponse}
+  commentId: T:System.Threading.Tasks.Task{PublisherStudio.Services.Streaming.MediaHost.MediaHostSessionResponse}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<MediaHostSessionResponse>
+  nameWithType: Task<MediaHostSessionResponse>
+  fullName: System.Threading.Tasks.Task<PublisherStudio.Services.Streaming.MediaHost.MediaHostSessionResponse>
+  nameWithType.vb: Task(Of MediaHostSessionResponse)
+  fullName.vb: System.Threading.Tasks.Task(Of PublisherStudio.Services.Streaming.MediaHost.MediaHostSessionResponse)
+  name.vb: Task(Of MediaHostSessionResponse)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostSessionResponse
+    name: MediaHostSessionResponse
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.MediaHost.MediaHostSessionResponse.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.Streaming.MediaHost.MediaHostSessionResponse
+    name: MediaHostSessionResponse
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.MediaHost.MediaHostSessionResponse.html
+  - name: )
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.StopAsync*
+  commentId: Overload:PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.StopAsync
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.html#PublisherStudio_Services_Streaming_MediaHost_StreamingMediaHostClient_StopAsync_System_Guid_System_Threading_CancellationToken_
+  name: StopAsync
+  nameWithType: StreamingMediaHostClient.StopAsync
+  fullName: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.StopAsync
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetOutputEnabledAsync*
+  commentId: Overload:PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetOutputEnabledAsync
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.html#PublisherStudio_Services_Streaming_MediaHost_StreamingMediaHostClient_SetOutputEnabledAsync_System_Guid_System_Guid_System_Boolean_System_Threading_CancellationToken_
+  name: SetOutputEnabledAsync
+  nameWithType: StreamingMediaHostClient.SetOutputEnabledAsync
+  fullName: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetOutputEnabledAsync
+- uid: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetProgramPageAsync*
+  commentId: Overload:PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetProgramPageAsync
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.html#PublisherStudio_Services_Streaming_MediaHost_StreamingMediaHostClient_SetProgramPageAsync_System_Guid_System_Guid_System_Threading_CancellationToken_
+  name: SetProgramPageAsync
+  nameWithType: StreamingMediaHostClient.SetProgramPageAsync
+  fullName: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetProgramPageAsync
+- uid: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetRecordingAsync*
+  commentId: Overload:PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetRecordingAsync
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.html#PublisherStudio_Services_Streaming_MediaHost_StreamingMediaHostClient_SetRecordingAsync_System_Guid_System_Boolean_System_Threading_CancellationToken_
+  name: SetRecordingAsync
+  nameWithType: StreamingMediaHostClient.SetRecordingAsync
+  fullName: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.SetRecordingAsync
+- uid: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.ReadEventsAsync*
+  commentId: Overload:PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.ReadEventsAsync
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.html#PublisherStudio_Services_Streaming_MediaHost_StreamingMediaHostClient_ReadEventsAsync_System_Guid_System_Threading_CancellationToken_
+  name: ReadEventsAsync
+  nameWithType: StreamingMediaHostClient.ReadEventsAsync
+  fullName: PublisherStudio.Services.Streaming.MediaHost.StreamingMediaHostClient.ReadEventsAsync
+- uid: System.Threading.Tasks.Task{System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.Streaming.MediaHostHotkeyEvent}}
+  commentId: T:System.Threading.Tasks.Task{System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.Streaming.MediaHostHotkeyEvent}}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<IReadOnlyList<MediaHostHotkeyEvent>>
+  nameWithType: Task<IReadOnlyList<MediaHostHotkeyEvent>>
+  fullName: System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.Streaming.MediaHostHotkeyEvent>>
+  nameWithType.vb: Task(Of IReadOnlyList(Of MediaHostHotkeyEvent))
+  fullName.vb: System.Threading.Tasks.Task(Of System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.Streaming.MediaHostHotkeyEvent))
+  name.vb: Task(Of IReadOnlyList(Of MediaHostHotkeyEvent))
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.Streaming.MediaHostHotkeyEvent
+    name: MediaHostHotkeyEvent
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.Streaming.MediaHostHotkeyEvent.html
+  - name: '>'
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.Streaming.MediaHostHotkeyEvent
+    name: MediaHostHotkeyEvent
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.Streaming.MediaHostHotkeyEvent.html
+  - name: )
+  - name: )

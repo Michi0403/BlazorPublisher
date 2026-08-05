@@ -1,8 +1,11 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Services;
 
+/// <summary>
+/// Defines the publication markup service contract.
+/// </summary>
 public interface IPublicationMarkupService
 {
     string SafeFileName(string value);
@@ -10,10 +13,16 @@ public interface IPublicationMarkupService
     string SanitizePreviewHtml(string html);
 }
 
+/// <summary>
+/// Provides publication markup service operations.
+/// </summary>
 public sealed class PublicationMarkupService(
     IPublisherRuntimePatternService runtimePatterns,
     ILogger<PublicationMarkupService> logger) : IPublicationMarkupService
 {
+    /// <summary>
+    /// Runs the safe file name operation.
+    /// </summary>
     public string SafeFileName(string value)
     {
         try
@@ -30,6 +39,9 @@ public sealed class PublicationMarkupService(
         }
     }
 
+    /// <summary>
+    /// Normalizes CSS background.
+    /// </summary>
     public string NormalizeCssBackground(string? value)
     {
         try
@@ -54,6 +66,9 @@ public sealed class PublicationMarkupService(
         }
     }
 
+    /// <summary>
+    /// Runs the sanitize preview HTML operation.
+    /// </summary>
     public string SanitizePreviewHtml(string html)
     {
         try

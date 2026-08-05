@@ -1,29 +1,43 @@
-# BlazorPublisher InstallerConsole
+# PublisherStudio setup
 
-`PublisherStudio.Setup.exe` is the entry point of the Git-free, self-contained single-file release installer. Keep it in the published setup directory so the stable launchers, icon, protocol evidence and release manifest remain available.
+`PublisherStudio.Setup.exe` is the self-contained setup entry point. Its deployment contract intentionally matches LocalGPT, with PublisherStudio names and without Ollama or learning-base actions.
 
-A double-click with no arguments downloads the latest application ZIP from `Michi0403/BlazorPublisher`, installs it to `%LOCALAPPDATA%\Programs\BlazorPublisher`, generates `Install.cmd`, `Update.cmd`, `Start.cmd`, and `Uninstall.cmd`, creates a Start Menu folder, starts the web host, and opens its detected loopback URL.
+## One-click behavior
 
-Expected Windows x64 release assets from `Build-Release.ps1`:
+Double-clicking setup with no command-line arguments:
+
+1. downloads the release matching the current operating system and architecture;
+2. extracts the application ZIP into `%LOCALAPPDATA%\PublisherStudio`;
+3. extracts the setup ZIP into the same root;
+4. checks FFmpeg;
+5. creates the required Desktop and Start Menu entries;
+6. starts PublisherStudio on port `58071`.
+
+The installation keeps the runtime wrappers from the release ZIP. A Windows x64 installation therefore contains:
 
 ```text
-winx64.zip
-setupwinx64.zip
+%LOCALAPPDATA%\PublisherStudio\
+  winx64\
+    PublisherStudio.Web.exe
+  setupwinx64\
+    PublisherStudio.Setup.exe
+    Install.cmd
+    Update.cmd
+    Start.cmd
 ```
 
-The application ZIP contains the complete multi-file `PublisherStudio.Web` publish output. The setup ZIP contains the standalone setup executable plus launchers, repair executable, icon, protocol evidence and release manifest. Extract the setup ZIP as a unit so launcher repair remains available.
+## Maintained actions
 
 ```powershell
-.\PublisherStudio.Setup.exe --install-blazorpublisher
-.\PublisherStudio.Setup.exe --update-blazorpublisher
-.\PublisherStudio.Setup.exe --start-blazorpublisher
-.\PublisherStudio.Setup.exe --uninstall --force-delete
+.\PublisherStudio.Setup.exe --install-publisherstudio --start-publisherstudio --shortcuts
+.\PublisherStudio.Setup.exe --update-publisherstudio --start-publisherstudio --shortcuts
+.\PublisherStudio.Setup.exe --start-publisherstudio
 ```
 
-For the normal Windows workflow, run `Install.cmd`, `Update.cmd`, `Start.cmd`, or `Uninstall.cmd` from the extracted setup folder.
+The three command files above are the maintained launchers. Shortcut provisioning creates **Install**, **Update**, **Start**, and **Folder** entries on both Desktop and Start Menu. Older `--*-blazorpublisher` switches remain accepted only so an existing shortcut can reach the repaired setup.
 
-## Network and FFmpeg resilience
+## Update safety
 
-Release assets are downloaded to resumable `.part` files and validated before the installed application is changed. Re-running setup reuses a complete validated ZIP or resumes an incomplete transfer.
+Install and update extract over the existing PublisherStudio root and do not delete it unless `--force-delete` is explicitly supplied. When setup runs from its installed wrapper, it starts a temporary copy first so the setup executable and command files can be refreshed without changing the shortcut path.
 
-During a normal install/update, setup also checks FFmpeg. On Windows it uses `winget --source winget` for `Gyan.FFmpeg`, prints a heartbeat while the package manager is busy, retries once through the package-manager cache, and stops FFmpeg provisioning after a 15-minute total budget. FFmpeg failure is non-fatal; use `--skip-ffmpeg` to omit the check or `--install-ffmpeg` to retry it separately later.
+Release assets keep the LocalGPT wrapper shape, for example `winx64.zip` and `setupwinx64.zip`.

@@ -1,7 +1,10 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.MediaConversion;
 
+/// <summary>
+/// Defines the media conversion service contract.
+/// </summary>
 public interface IMediaConversionService
 {
     Task<MediaConversionCapabilities> GetCapabilitiesAsync(CancellationToken cancellationToken = default);

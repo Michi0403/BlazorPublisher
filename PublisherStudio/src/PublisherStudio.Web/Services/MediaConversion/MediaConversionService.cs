@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
@@ -11,25 +11,76 @@ using TextEncoding = global::System.Text.Encoding;
 
 namespace PublisherStudio.Services.MediaConversion;
 
+/// <summary>
+/// Provides media conversion service operations.
+/// </summary>
 public sealed class MediaConversionService : IMediaConversionService, IDisposable
 {
     private sealed class JobState
     {
+        /// <summary>
+        /// Gets or sets the stable identifier.
+        /// </summary>
         public required Guid Id { get; init; }
+        /// <summary>
+        /// Gets or sets source file name.
+        /// </summary>
         public required string SourceFileName { get; init; }
+        /// <summary>
+        /// Gets or sets source path.
+        /// </summary>
         public required string SourcePath { get; init; }
+        /// <summary>
+        /// Gets or sets output path.
+        /// </summary>
         public required string OutputPath { get; init; }
+        /// <summary>
+        /// Gets or sets output mime type.
+        /// </summary>
         public required string OutputMimeType { get; init; }
+        /// <summary>
+        /// Gets or sets preset.
+        /// </summary>
         public required MediaConversionPreset Preset { get; init; }
+        /// <summary>
+        /// Gets or sets options.
+        /// </summary>
         public required MediaConversionOptions Options { get; init; }
+        /// <summary>
+        /// Gets or sets cancellation.
+        /// </summary>
         public required CancellationTokenSource Cancellation { get; init; }
+        /// <summary>
+        /// Gets or sets status.
+        /// </summary>
         public MediaConversionJobStatus Status { get; set; } = MediaConversionJobStatus.Queued;
+        /// <summary>
+        /// Gets or sets progress.
+        /// </summary>
         public double Progress { get; set; }
+        /// <summary>
+        /// Gets or sets message.
+        /// </summary>
         public string Message { get; set; } = "Queued";
+        /// <summary>
+        /// Gets or sets output size.
+        /// </summary>
         public long OutputSize { get; set; }
+        /// <summary>
+        /// Gets or sets the UTC creation time.
+        /// </summary>
         public DateTimeOffset CreatedUtc { get; init; } = DateTimeOffset.UtcNow;
+        /// <summary>
+        /// Gets or sets completed UTC.
+        /// </summary>
         public DateTimeOffset? CompletedUtc { get; set; }
+        /// <summary>
+        /// Gets or sets process.
+        /// </summary>
         public Process? Process { get; set; }
+        /// <summary>
+        /// Gets sync.
+        /// </summary>
         public object Sync { get; } = new();
     }
 
@@ -48,6 +99,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     private List<MediaConversionProfile>? _userProfiles;
     private bool _disposed;
 
+    /// <summary>
+    /// Runs the media conversion service operation.
+    /// </summary>
     public MediaConversionService(
         FfmpegLocator ffmpegLocator,
         IPublisherRuntimePolicyDataService runtimePolicy,
@@ -67,6 +121,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         CleanupOldDirectories();
     }
 
+    /// <summary>
+    /// Gets capabilities async.
+    /// </summary>
     public async Task<MediaConversionCapabilities> GetCapabilitiesAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -127,6 +184,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Runs the queue async operation.
+    /// </summary>
     public Task<MediaConversionJobInfo> QueueAsync(Stream source, string fileName, string mimeType, string presetId, CancellationToken cancellationToken = default) {
         try
         {
@@ -140,6 +200,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Runs the queue async operation.
+    /// </summary>
     public async Task<MediaConversionJobInfo> QueueAsync(Stream source, string fileName, string mimeType, string presetId, MediaConversionOptions options, CancellationToken cancellationToken = default)
     {
         try
@@ -196,6 +259,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Gets job.
+    /// </summary>
     public MediaConversionJobInfo? GetJob(Guid id) {
         try
         {
@@ -209,6 +275,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Gets jobs.
+    /// </summary>
     public IReadOnlyList<MediaConversionJobInfo> GetJobs() {
         try
         {
@@ -225,6 +294,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Opens output async.
+    /// </summary>
     public Task<Stream?> OpenOutputAsync(Guid id, CancellationToken cancellationToken = default)
     {
         try
@@ -244,6 +316,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Gets profiles.
+    /// </summary>
     public IReadOnlyList<MediaConversionProfile> GetProfiles()
     {
         try
@@ -263,6 +338,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Saves profile.
+    /// </summary>
     public MediaConversionProfile SaveProfile(MediaConversionProfile profile)
     {
         try
@@ -294,6 +372,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Deletes profile.
+    /// </summary>
     public bool DeleteProfile(Guid id)
     {
         try
@@ -315,6 +396,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Determines whether cel.
+    /// </summary>
     public bool Cancel(Guid id)
     {
         try
@@ -338,6 +422,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Runs the remove operation.
+    /// </summary>
     public bool Remove(Guid id)
     {
         try
@@ -1131,6 +1218,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Runs the dispose operation.
+    /// </summary>
     public void Dispose()
     {
         try

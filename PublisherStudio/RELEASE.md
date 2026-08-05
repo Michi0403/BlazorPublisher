@@ -1,5 +1,36 @@
-# PublisherStudio 2.0.5 Windows build and release-script correction
+# PublisherStudio 2.1.1 installer healing release
 
-See `CHANGELOG-v2.0.5.md` and `docs/architecture/task-ledger.md`.
+PublisherStudio 2.1.1 replaces the broken custom deployment system with the working LocalGPT deployment pattern.
 
-PublisherStudio 2.0.5 corrects the Windows-only failures exposed after the 2.0.4 service-owned compiler repair. `SpreadsheetDocumentService` now has one DI constructor, `Build-Release.ps1` uses Windows PowerShell 5.1-safe variable delimiting, and deterministic instance services are explicitly classified by the maintained logging policy instead of receiving artificial catch-and-rethrow blocks. No application statics were introduced; shared data contracts remain under `PublisherStudio.BusinessObjects`.
+## Maintained deployment contract
+
+- Product root: `%LOCALAPPDATA%\PublisherStudio`.
+- Application ZIP and setup ZIP retain their runtime wrapper directories.
+- Both archives extract into the same PublisherStudio root.
+- Double-click performs install/update, FFmpeg preparation, shortcut creation, and start.
+- Desktop and Start Menu contain Install, Update, Start, and Folder entries.
+- Setup runs from a temporary copy when it must replace its installed executable.
+- Former `--*-blazorpublisher` command names remain compatibility aliases only.
+
+## Removed deployment contract
+
+The release no longer uses:
+
+- alternate product roots or automatic legacy-root selection;
+- release ownership manifests;
+- staged repair manifests;
+- application/setup transaction services;
+- the expanded Default, no-browser, FFmpeg, and uninstall launcher set.
+
+The application still supports explicit FFmpeg and uninstall command-line operations, but those are not mandatory launcher entries.
+
+## Release assets
+
+Each runtime publishes the same two wrapper ZIPs as LocalGPT, for example:
+
+```text
+winx64.zip
+setupwinx64.zip
+```
+
+The separately versioned `LocalGPT.WireProtocolVersion` package remains `2.1.1`.

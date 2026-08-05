@@ -1,0 +1,286 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationInteractionAction
+  commentId: T:PublisherStudio.BusinessObjects.PublicationInteractionAction
+  id: PublicationInteractionAction
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationInteractionAction.GoToPage
+  - PublisherStudio.BusinessObjects.PublicationInteractionAction.Hide
+  - PublisherStudio.BusinessObjects.PublicationInteractionAction.NextPage
+  - PublisherStudio.BusinessObjects.PublicationInteractionAction.None
+  - PublisherStudio.BusinessObjects.PublicationInteractionAction.OpenUrl
+  - PublisherStudio.BusinessObjects.PublicationInteractionAction.PauseMedia
+  - PublisherStudio.BusinessObjects.PublicationInteractionAction.PlayMedia
+  - PublisherStudio.BusinessObjects.PublicationInteractionAction.PreviousPage
+  - PublisherStudio.BusinessObjects.PublicationInteractionAction.ReplayAnimation
+  - PublisherStudio.BusinessObjects.PublicationInteractionAction.Show
+  - PublisherStudio.BusinessObjects.PublicationInteractionAction.ToggleMediaPlayback
+  - PublisherStudio.BusinessObjects.PublicationInteractionAction.ToggleVisibility
+  langs:
+  - csharp
+  - vb
+  name: PublicationInteractionAction
+  nameWithType: PublicationInteractionAction
+  fullName: PublisherStudio.BusinessObjects.PublicationInteractionAction
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication interaction action values.
+  example: []
+  syntax:
+    content: public enum PublicationInteractionAction
+    content.vb: Public Enum PublicationInteractionAction
+- uid: PublisherStudio.BusinessObjects.PublicationInteractionAction.None
+  commentId: F:PublisherStudio.BusinessObjects.PublicationInteractionAction.None
+  id: None
+  parent: PublisherStudio.BusinessObjects.PublicationInteractionAction
+  langs:
+  - csharp
+  - vb
+  name: None
+  nameWithType: PublicationInteractionAction.None
+  fullName: PublisherStudio.BusinessObjects.PublicationInteractionAction.None
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: None = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationInteractionAction
+- uid: PublisherStudio.BusinessObjects.PublicationInteractionAction.NextPage
+  commentId: F:PublisherStudio.BusinessObjects.PublicationInteractionAction.NextPage
+  id: NextPage
+  parent: PublisherStudio.BusinessObjects.PublicationInteractionAction
+  langs:
+  - csharp
+  - vb
+  name: NextPage
+  nameWithType: PublicationInteractionAction.NextPage
+  fullName: PublisherStudio.BusinessObjects.PublicationInteractionAction.NextPage
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: NextPage = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationInteractionAction
+- uid: PublisherStudio.BusinessObjects.PublicationInteractionAction.PreviousPage
+  commentId: F:PublisherStudio.BusinessObjects.PublicationInteractionAction.PreviousPage
+  id: PreviousPage
+  parent: PublisherStudio.BusinessObjects.PublicationInteractionAction
+  langs:
+  - csharp
+  - vb
+  name: PreviousPage
+  nameWithType: PublicationInteractionAction.PreviousPage
+  fullName: PublisherStudio.BusinessObjects.PublicationInteractionAction.PreviousPage
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: PreviousPage = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationInteractionAction
+- uid: PublisherStudio.BusinessObjects.PublicationInteractionAction.GoToPage
+  commentId: F:PublisherStudio.BusinessObjects.PublicationInteractionAction.GoToPage
+  id: GoToPage
+  parent: PublisherStudio.BusinessObjects.PublicationInteractionAction
+  langs:
+  - csharp
+  - vb
+  name: GoToPage
+  nameWithType: PublicationInteractionAction.GoToPage
+  fullName: PublisherStudio.BusinessObjects.PublicationInteractionAction.GoToPage
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: GoToPage = 3
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationInteractionAction
+- uid: PublisherStudio.BusinessObjects.PublicationInteractionAction.OpenUrl
+  commentId: F:PublisherStudio.BusinessObjects.PublicationInteractionAction.OpenUrl
+  id: OpenUrl
+  parent: PublisherStudio.BusinessObjects.PublicationInteractionAction
+  langs:
+  - csharp
+  - vb
+  name: OpenUrl
+  nameWithType: PublicationInteractionAction.OpenUrl
+  fullName: PublisherStudio.BusinessObjects.PublicationInteractionAction.OpenUrl
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: OpenUrl = 4
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationInteractionAction
+- uid: PublisherStudio.BusinessObjects.PublicationInteractionAction.ToggleVisibility
+  commentId: F:PublisherStudio.BusinessObjects.PublicationInteractionAction.ToggleVisibility
+  id: ToggleVisibility
+  parent: PublisherStudio.BusinessObjects.PublicationInteractionAction
+  langs:
+  - csharp
+  - vb
+  name: ToggleVisibility
+  nameWithType: PublicationInteractionAction.ToggleVisibility
+  fullName: PublisherStudio.BusinessObjects.PublicationInteractionAction.ToggleVisibility
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: ToggleVisibility = 5
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationInteractionAction
+- uid: PublisherStudio.BusinessObjects.PublicationInteractionAction.Show
+  commentId: F:PublisherStudio.BusinessObjects.PublicationInteractionAction.Show
+  id: Show
+  parent: PublisherStudio.BusinessObjects.PublicationInteractionAction
+  langs:
+  - csharp
+  - vb
+  name: Show
+  nameWithType: PublicationInteractionAction.Show
+  fullName: PublisherStudio.BusinessObjects.PublicationInteractionAction.Show
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Show = 6
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationInteractionAction
+- uid: PublisherStudio.BusinessObjects.PublicationInteractionAction.Hide
+  commentId: F:PublisherStudio.BusinessObjects.PublicationInteractionAction.Hide
+  id: Hide
+  parent: PublisherStudio.BusinessObjects.PublicationInteractionAction
+  langs:
+  - csharp
+  - vb
+  name: Hide
+  nameWithType: PublicationInteractionAction.Hide
+  fullName: PublisherStudio.BusinessObjects.PublicationInteractionAction.Hide
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Hide = 7
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationInteractionAction
+- uid: PublisherStudio.BusinessObjects.PublicationInteractionAction.ReplayAnimation
+  commentId: F:PublisherStudio.BusinessObjects.PublicationInteractionAction.ReplayAnimation
+  id: ReplayAnimation
+  parent: PublisherStudio.BusinessObjects.PublicationInteractionAction
+  langs:
+  - csharp
+  - vb
+  name: ReplayAnimation
+  nameWithType: PublicationInteractionAction.ReplayAnimation
+  fullName: PublisherStudio.BusinessObjects.PublicationInteractionAction.ReplayAnimation
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: ReplayAnimation = 8
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationInteractionAction
+- uid: PublisherStudio.BusinessObjects.PublicationInteractionAction.PlayMedia
+  commentId: F:PublisherStudio.BusinessObjects.PublicationInteractionAction.PlayMedia
+  id: PlayMedia
+  parent: PublisherStudio.BusinessObjects.PublicationInteractionAction
+  langs:
+  - csharp
+  - vb
+  name: PlayMedia
+  nameWithType: PublicationInteractionAction.PlayMedia
+  fullName: PublisherStudio.BusinessObjects.PublicationInteractionAction.PlayMedia
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: PlayMedia = 9
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationInteractionAction
+- uid: PublisherStudio.BusinessObjects.PublicationInteractionAction.PauseMedia
+  commentId: F:PublisherStudio.BusinessObjects.PublicationInteractionAction.PauseMedia
+  id: PauseMedia
+  parent: PublisherStudio.BusinessObjects.PublicationInteractionAction
+  langs:
+  - csharp
+  - vb
+  name: PauseMedia
+  nameWithType: PublicationInteractionAction.PauseMedia
+  fullName: PublisherStudio.BusinessObjects.PublicationInteractionAction.PauseMedia
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: PauseMedia = 10
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationInteractionAction
+- uid: PublisherStudio.BusinessObjects.PublicationInteractionAction.ToggleMediaPlayback
+  commentId: F:PublisherStudio.BusinessObjects.PublicationInteractionAction.ToggleMediaPlayback
+  id: ToggleMediaPlayback
+  parent: PublisherStudio.BusinessObjects.PublicationInteractionAction
+  langs:
+  - csharp
+  - vb
+  name: ToggleMediaPlayback
+  nameWithType: PublicationInteractionAction.ToggleMediaPlayback
+  fullName: PublisherStudio.BusinessObjects.PublicationInteractionAction.ToggleMediaPlayback
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: ToggleMediaPlayback = 11
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationInteractionAction
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationInteractionAction
+  commentId: T:PublisherStudio.BusinessObjects.PublicationInteractionAction
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationInteractionAction.html
+  name: PublicationInteractionAction
+  nameWithType: PublicationInteractionAction
+  fullName: PublisherStudio.BusinessObjects.PublicationInteractionAction

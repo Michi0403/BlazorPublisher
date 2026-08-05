@@ -1,4 +1,4 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Configuration;
 using System.Collections.Concurrent;
 using System.Text.Json;
@@ -6,16 +6,25 @@ using System.Threading.Channels;
 
 namespace PublisherStudio.Services.Streaming.Sessions;
 
+/// <summary>
+/// Defines the media session factory contract.
+/// </summary>
 public interface IMediaSessionFactory
 {
     MediaSession Create(JsonElement request);
 }
 
+/// <summary>
+/// Provides media session factory operations.
+/// </summary>
 public sealed class MediaSessionFactory(
     IPublisherRuntimePolicyDataService runtimePolicy,
     ILoggerFactory loggerFactory,
     ILogger<MediaSessionFactory> logger) : IMediaSessionFactory
 {
+    /// <summary>
+    /// Runs the create operation.
+    /// </summary>
     public MediaSession Create(JsonElement request)
     {
         try
@@ -37,6 +46,9 @@ public sealed class MediaSessionFactory(
     }
 }
 
+/// <summary>
+/// Represents a media session.
+/// </summary>
 public sealed class MediaSession
 {
     private readonly PublisherMediaSessionDefaultsPolicy defaults;
@@ -45,6 +57,9 @@ public sealed class MediaSession
     private readonly Dictionary<Guid, Channel<byte[]>> ingestSubscribers = [];
     private byte[]? webmInitializationChunk;
 
+    /// <summary>
+    /// Runs the media session operation.
+    /// </summary>
     public MediaSession(
         PublisherMediaSessionDefaultsPolicy defaults,
         ILogger<MediaSession> logger,
@@ -86,35 +101,122 @@ public sealed class MediaSession
         }
     }
 
+    /// <summary>
+    /// Gets or sets the stable identifier.
+    /// </summary>
     public Guid Id { get; private set; }
+    /// <summary>
+    /// Gets or sets the display name.
+    /// </summary>
     public string Name { get; private set; }
+    /// <summary>
+    /// Gets or sets dry run.
+    /// </summary>
     public bool DryRun { get; private set; }
+    /// <summary>
+    /// Gets or sets started UTC.
+    /// </summary>
     public DateTimeOffset StartedUtc { get; private set; }
+    /// <summary>
+    /// Gets or sets stopped UTC.
+    /// </summary>
     public DateTimeOffset? StoppedUtc { get; set; }
+    /// <summary>
+    /// Gets or sets recording.
+    /// </summary>
     public bool Recording { get; set; }
+    /// <summary>
+    /// Gets or sets program page identifier.
+    /// </summary>
     public Guid? ProgramPageId { get; set; }
+    /// <summary>
+    /// Gets LAN enabled.
+    /// </summary>
     public bool LanEnabled => LanDefinition.Enabled;
+    /// <summary>
+    /// Gets LAN definition.
+    /// </summary>
     public MediaLanDefinition LanDefinition { get; } = new();
+    /// <summary>
+    /// Gets or sets LAN server.
+    /// </summary>
     public LanStreamingServer? LanServer { get; set; }
+    /// <summary>
+    /// Gets or sets master width.
+    /// </summary>
     public int MasterWidth { get; private set; }
+    /// <summary>
+    /// Gets or sets master height.
+    /// </summary>
     public int MasterHeight { get; private set; }
+    /// <summary>
+    /// Gets or sets master frame rate.
+    /// </summary>
     public int MasterFrameRate { get; private set; }
+    /// <summary>
+    /// Gets or sets prefer device timestamps.
+    /// </summary>
     public bool PreferDeviceTimestamps { get; private set; }
+    /// <summary>
+    /// Gets or sets FFmpeg path.
+    /// </summary>
     public string FfmpegPath { get; private set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets hardware encoder.
+    /// </summary>
     public int HardwareEncoder { get; private set; }
+    /// <summary>
+    /// Gets outputs.
+    /// </summary>
     public ConcurrentDictionary<Guid, bool> Outputs { get; } = new();
+    /// <summary>
+    /// Gets output definitions.
+    /// </summary>
     public List<MediaOutputDefinition> OutputDefinitions { get; } = [];
+    /// <summary>
+    /// Gets recording definition.
+    /// </summary>
     public MediaRecordingDefinition RecordingDefinition { get; } = new();
+    /// <summary>
+    /// Gets hotkeys.
+    /// </summary>
     public List<MediaHotkey> Hotkeys { get; } = [];
+    /// <summary>
+    /// Gets or sets ingest.
+    /// </summary>
     public IngestAnnouncement? Ingest { get; private set; }
+    /// <summary>
+    /// Gets output ingests.
+    /// </summary>
     public ConcurrentDictionary<Guid, IngestAnnouncement> OutputIngests { get; } = new();
+    /// <summary>
+    /// Gets or sets encoder.
+    /// </summary>
     public EncoderSessionService? Encoder { get; set; }
+    /// <summary>
+    /// Gets or sets hls directory.
+    /// </summary>
     public string HlsDirectory { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets rtsp URL.
+    /// </summary>
     public string RtspUrl { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets rtsp relay port.
+    /// </summary>
     public int RtspRelayPort { get; set; }
+    /// <summary>
+    /// Gets web rtc.
+    /// </summary>
     public WebRtcSignalingService WebRtc { get; }
+    /// <summary>
+    /// Gets or sets chat.
+    /// </summary>
     public PlatformChatService? Chat { get; set; }
 
+    /// <summary>
+    /// Runs the apply operation.
+    /// </summary>
     public void Apply(JsonElement request)
     {
         try
@@ -144,6 +246,9 @@ public sealed class MediaSession
         }
     }
 
+    /// <summary>
+    /// Sets ingest.
+    /// </summary>
     public void SetIngest(Guid? outputId, IngestAnnouncement announcement)
     {
         try
@@ -165,6 +270,9 @@ public sealed class MediaSession
         }
     }
 
+    /// <summary>
+    /// Gets ingest.
+    /// </summary>
     public IngestAnnouncement? GetIngest(Guid? outputId)
     {
         try
@@ -182,6 +290,9 @@ public sealed class MediaSession
         }
     }
 
+    /// <summary>
+    /// Determines whether ingest.
+    /// </summary>
     public bool HasIngest(Guid? outputId)
     {
         try
@@ -197,6 +308,9 @@ public sealed class MediaSession
         }
     }
 
+    /// <summary>
+    /// Runs the subscribe ingest operation.
+    /// </summary>
     public (Guid Id, byte[]? InitializationChunk, ChannelReader<byte[]> Reader) SubscribeIngest()
     {
         try
@@ -222,6 +336,9 @@ public sealed class MediaSession
         }
     }
 
+    /// <summary>
+    /// Runs the unsubscribe ingest operation.
+    /// </summary>
     public void UnsubscribeIngest(Guid subscriberId)
     {
         try
@@ -245,6 +362,9 @@ public sealed class MediaSession
         }
     }
 
+    /// <summary>
+    /// Publishes ingest chunk.
+    /// </summary>
     public void PublishIngestChunk(byte[] chunk)
     {
         try
@@ -274,6 +394,9 @@ public sealed class MediaSession
         }
     }
 
+    /// <summary>
+    /// Runs the complete ingest subscribers operation.
+    /// </summary>
     public void CompleteIngestSubscribers()
     {
         try
@@ -298,6 +421,9 @@ public sealed class MediaSession
         }
     }
 
+    /// <summary>
+    /// Runs the public view operation.
+    /// </summary>
     public object PublicView()
     {
         try

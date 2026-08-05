@@ -1,0 +1,248 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+  commentId: T:PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+  id: PublicationLiveSourceKind
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationLiveSourceKind.ApplicationAudio
+  - PublisherStudio.BusinessObjects.PublicationLiveSourceKind.BrowserTab
+  - PublisherStudio.BusinessObjects.PublicationLiveSourceKind.Camera
+  - PublisherStudio.BusinessObjects.PublicationLiveSourceKind.CaptureDevice
+  - PublisherStudio.BusinessObjects.PublicationLiveSourceKind.Microphone
+  - PublisherStudio.BusinessObjects.PublicationLiveSourceKind.NetworkMedia
+  - PublisherStudio.BusinessObjects.PublicationLiveSourceKind.NowPlaying
+  - PublisherStudio.BusinessObjects.PublicationLiveSourceKind.Screen
+  - PublisherStudio.BusinessObjects.PublicationLiveSourceKind.SystemAudio
+  - PublisherStudio.BusinessObjects.PublicationLiveSourceKind.Window
+  langs:
+  - csharp
+  - vb
+  name: PublicationLiveSourceKind
+  nameWithType: PublicationLiveSourceKind
+  fullName: PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication live source kind values.
+  example: []
+  syntax:
+    content: public enum PublicationLiveSourceKind
+    content.vb: Public Enum PublicationLiveSourceKind
+- uid: PublisherStudio.BusinessObjects.PublicationLiveSourceKind.Camera
+  commentId: F:PublisherStudio.BusinessObjects.PublicationLiveSourceKind.Camera
+  id: Camera
+  parent: PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+  langs:
+  - csharp
+  - vb
+  name: Camera
+  nameWithType: PublicationLiveSourceKind.Camera
+  fullName: PublisherStudio.BusinessObjects.PublicationLiveSourceKind.Camera
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Camera = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+- uid: PublisherStudio.BusinessObjects.PublicationLiveSourceKind.Screen
+  commentId: F:PublisherStudio.BusinessObjects.PublicationLiveSourceKind.Screen
+  id: Screen
+  parent: PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+  langs:
+  - csharp
+  - vb
+  name: Screen
+  nameWithType: PublicationLiveSourceKind.Screen
+  fullName: PublisherStudio.BusinessObjects.PublicationLiveSourceKind.Screen
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Screen = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+- uid: PublisherStudio.BusinessObjects.PublicationLiveSourceKind.Window
+  commentId: F:PublisherStudio.BusinessObjects.PublicationLiveSourceKind.Window
+  id: Window
+  parent: PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+  langs:
+  - csharp
+  - vb
+  name: Window
+  nameWithType: PublicationLiveSourceKind.Window
+  fullName: PublisherStudio.BusinessObjects.PublicationLiveSourceKind.Window
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Window = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+- uid: PublisherStudio.BusinessObjects.PublicationLiveSourceKind.BrowserTab
+  commentId: F:PublisherStudio.BusinessObjects.PublicationLiveSourceKind.BrowserTab
+  id: BrowserTab
+  parent: PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+  langs:
+  - csharp
+  - vb
+  name: BrowserTab
+  nameWithType: PublicationLiveSourceKind.BrowserTab
+  fullName: PublisherStudio.BusinessObjects.PublicationLiveSourceKind.BrowserTab
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: BrowserTab = 3
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+- uid: PublisherStudio.BusinessObjects.PublicationLiveSourceKind.CaptureDevice
+  commentId: F:PublisherStudio.BusinessObjects.PublicationLiveSourceKind.CaptureDevice
+  id: CaptureDevice
+  parent: PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+  langs:
+  - csharp
+  - vb
+  name: CaptureDevice
+  nameWithType: PublicationLiveSourceKind.CaptureDevice
+  fullName: PublisherStudio.BusinessObjects.PublicationLiveSourceKind.CaptureDevice
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: CaptureDevice = 4
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+- uid: PublisherStudio.BusinessObjects.PublicationLiveSourceKind.Microphone
+  commentId: F:PublisherStudio.BusinessObjects.PublicationLiveSourceKind.Microphone
+  id: Microphone
+  parent: PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+  langs:
+  - csharp
+  - vb
+  name: Microphone
+  nameWithType: PublicationLiveSourceKind.Microphone
+  fullName: PublisherStudio.BusinessObjects.PublicationLiveSourceKind.Microphone
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Microphone = 5
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+- uid: PublisherStudio.BusinessObjects.PublicationLiveSourceKind.SystemAudio
+  commentId: F:PublisherStudio.BusinessObjects.PublicationLiveSourceKind.SystemAudio
+  id: SystemAudio
+  parent: PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+  langs:
+  - csharp
+  - vb
+  name: SystemAudio
+  nameWithType: PublicationLiveSourceKind.SystemAudio
+  fullName: PublisherStudio.BusinessObjects.PublicationLiveSourceKind.SystemAudio
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: SystemAudio = 6
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+- uid: PublisherStudio.BusinessObjects.PublicationLiveSourceKind.ApplicationAudio
+  commentId: F:PublisherStudio.BusinessObjects.PublicationLiveSourceKind.ApplicationAudio
+  id: ApplicationAudio
+  parent: PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+  langs:
+  - csharp
+  - vb
+  name: ApplicationAudio
+  nameWithType: PublicationLiveSourceKind.ApplicationAudio
+  fullName: PublisherStudio.BusinessObjects.PublicationLiveSourceKind.ApplicationAudio
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: ApplicationAudio = 7
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+- uid: PublisherStudio.BusinessObjects.PublicationLiveSourceKind.NetworkMedia
+  commentId: F:PublisherStudio.BusinessObjects.PublicationLiveSourceKind.NetworkMedia
+  id: NetworkMedia
+  parent: PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+  langs:
+  - csharp
+  - vb
+  name: NetworkMedia
+  nameWithType: PublicationLiveSourceKind.NetworkMedia
+  fullName: PublisherStudio.BusinessObjects.PublicationLiveSourceKind.NetworkMedia
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: NetworkMedia = 8
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+- uid: PublisherStudio.BusinessObjects.PublicationLiveSourceKind.NowPlaying
+  commentId: F:PublisherStudio.BusinessObjects.PublicationLiveSourceKind.NowPlaying
+  id: NowPlaying
+  parent: PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+  langs:
+  - csharp
+  - vb
+  name: NowPlaying
+  nameWithType: PublicationLiveSourceKind.NowPlaying
+  fullName: PublisherStudio.BusinessObjects.PublicationLiveSourceKind.NowPlaying
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: NowPlaying = 9
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+  commentId: T:PublisherStudio.BusinessObjects.PublicationLiveSourceKind
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationLiveSourceKind.html
+  name: PublicationLiveSourceKind
+  nameWithType: PublicationLiveSourceKind
+  fullName: PublisherStudio.BusinessObjects.PublicationLiveSourceKind

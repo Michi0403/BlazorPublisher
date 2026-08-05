@@ -1,0 +1,221 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter
+  commentId: T:PublisherStudio.Services.OpenScad.IOpenScadValueFormatter
+  id: IOpenScadValueFormatter
+  parent: PublisherStudio.Services.OpenScad
+  children:
+  - PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Format(PublisherStudio.BusinessObjects.OpenScadValue,System.String)
+  - PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Identifier(System.String,System.String)
+  - PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Quote(System.String)
+  langs:
+  - csharp
+  - vb
+  name: IOpenScadValueFormatter
+  nameWithType: IOpenScadValueFormatter
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter
+  type: Interface
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OpenScad
+  summary: Defines the open scad value formatter contract.
+  example: []
+  syntax:
+    content: public interface IOpenScadValueFormatter
+    content.vb: Public Interface IOpenScadValueFormatter
+  derivedClasses:
+  - PublisherStudio.Services.OpenScad.OpenScadValueFormatter
+- uid: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Format(PublisherStudio.BusinessObjects.OpenScadValue,System.String)
+  commentId: M:PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Format(PublisherStudio.BusinessObjects.OpenScadValue,System.String)
+  id: Format(PublisherStudio.BusinessObjects.OpenScadValue,System.String)
+  parent: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter
+  langs:
+  - csharp
+  - vb
+  name: Format(OpenScadValue?, string)
+  nameWithType: IOpenScadValueFormatter.Format(OpenScadValue?, string)
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Format(PublisherStudio.BusinessObjects.OpenScadValue?, string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OpenScad
+  syntax:
+    content: string Format(OpenScadValue? value, string fallbackExpression = "undef")
+    parameters:
+    - id: value
+      type: PublisherStudio.BusinessObjects.OpenScadValue
+    - id: fallbackExpression
+      type: System.String
+    return:
+      type: System.String
+    content.vb: Function Format(value As OpenScadValue, fallbackExpression As String = "undef") As String
+  overload: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Format*
+  nameWithType.vb: IOpenScadValueFormatter.Format(OpenScadValue, String)
+  fullName.vb: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Format(PublisherStudio.BusinessObjects.OpenScadValue, String)
+  name.vb: Format(OpenScadValue, String)
+- uid: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Quote(System.String)
+  commentId: M:PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Quote(System.String)
+  id: Quote(System.String)
+  parent: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter
+  langs:
+  - csharp
+  - vb
+  name: Quote(string)
+  nameWithType: IOpenScadValueFormatter.Quote(string)
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Quote(string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OpenScad
+  syntax:
+    content: string Quote(string value)
+    parameters:
+    - id: value
+      type: System.String
+    return:
+      type: System.String
+    content.vb: Function Quote(value As String) As String
+  overload: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Quote*
+  nameWithType.vb: IOpenScadValueFormatter.Quote(String)
+  fullName.vb: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Quote(String)
+  name.vb: Quote(String)
+- uid: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Identifier(System.String,System.String)
+  commentId: M:PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Identifier(System.String,System.String)
+  id: Identifier(System.String,System.String)
+  parent: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter
+  langs:
+  - csharp
+  - vb
+  name: Identifier(string, string)
+  nameWithType: IOpenScadValueFormatter.Identifier(string, string)
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Identifier(string, string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OpenScad
+  syntax:
+    content: string Identifier(string value, string fallback = "part")
+    parameters:
+    - id: value
+      type: System.String
+    - id: fallback
+      type: System.String
+    return:
+      type: System.String
+    content.vb: Function Identifier(value As String, fallback As String = "part") As String
+  overload: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Identifier*
+  nameWithType.vb: IOpenScadValueFormatter.Identifier(String, String)
+  fullName.vb: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Identifier(String, String)
+  name.vb: Identifier(String, String)
+references:
+- uid: PublisherStudio.Services.OpenScad
+  commentId: N:PublisherStudio.Services.OpenScad
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.OpenScad
+  nameWithType: PublisherStudio.Services.OpenScad
+  fullName: PublisherStudio.Services.OpenScad
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OpenScad
+    name: OpenScad
+    isExternal: true
+    href: PublisherStudio.Services.OpenScad.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OpenScad
+    name: OpenScad
+    isExternal: true
+    href: PublisherStudio.Services.OpenScad.html
+- uid: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Format*
+  commentId: Overload:PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Format
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.html#PublisherStudio_Services_OpenScad_IOpenScadValueFormatter_Format_PublisherStudio_BusinessObjects_OpenScadValue_System_String_
+  name: Format
+  nameWithType: IOpenScadValueFormatter.Format
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Format
+- uid: PublisherStudio.BusinessObjects.OpenScadValue
+  commentId: T:PublisherStudio.BusinessObjects.OpenScadValue
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OpenScadValue.html
+  name: OpenScadValue
+  nameWithType: OpenScadValue
+  fullName: PublisherStudio.BusinessObjects.OpenScadValue
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Quote*
+  commentId: Overload:PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Quote
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.html#PublisherStudio_Services_OpenScad_IOpenScadValueFormatter_Quote_System_String_
+  name: Quote
+  nameWithType: IOpenScadValueFormatter.Quote
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Quote
+- uid: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Identifier*
+  commentId: Overload:PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Identifier
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.html#PublisherStudio_Services_OpenScad_IOpenScadValueFormatter_Identifier_System_String_System_String_
+  name: Identifier
+  nameWithType: IOpenScadValueFormatter.Identifier
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.Identifier

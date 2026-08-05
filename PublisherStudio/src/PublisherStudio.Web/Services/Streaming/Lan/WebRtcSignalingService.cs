@@ -1,16 +1,22 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 
 namespace PublisherStudio.Services.Streaming.Lan;
 
+/// <summary>
+/// Provides web rtc signaling service operations.
+/// </summary>
 public sealed class WebRtcSignalingService
 {
     private readonly ConcurrentDictionary<Guid, ViewerConnection> _viewers = new();
     private readonly SemaphoreSlim _publisherSend = new(1, 1);
     private WebSocket? _publisher;
 
+    /// <summary>
+    /// Runs the run publisher async operation.
+    /// </summary>
     public async Task RunPublisherAsync(WebSocket socket, CancellationToken cancellationToken)
     {
         var previous = Interlocked.Exchange(ref _publisher, socket);
@@ -46,6 +52,9 @@ public sealed class WebRtcSignalingService
         }
     }
 
+    /// <summary>
+    /// Runs the run viewer async operation.
+    /// </summary>
     public async Task RunViewerAsync(WebSocket socket, CancellationToken cancellationToken)
     {
         var viewerId = Guid.NewGuid();
@@ -81,6 +90,9 @@ public sealed class WebRtcSignalingService
         }
     }
 
+    /// <summary>
+    /// Closes async.
+    /// </summary>
     public async Task CloseAsync()
     {
         var publisher = Interlocked.Exchange(ref _publisher, null);
@@ -199,6 +211,9 @@ public sealed class WebRtcSignalingService
         private readonly WebSocket _socket = socket;
         private readonly SemaphoreSlim _send = new(1, 1);
 
+        /// <summary>
+        /// Runs the send async operation.
+        /// </summary>
         public async Task SendAsync(byte[] payload, CancellationToken cancellationToken)
         {
             if (_socket.State != WebSocketState.Open) return;
@@ -212,6 +227,9 @@ public sealed class WebRtcSignalingService
             finally { _send.Release(); }
         }
 
+        /// <summary>
+        /// Runs the dispose async operation.
+        /// </summary>
         public async ValueTask DisposeAsync()
         {
             try

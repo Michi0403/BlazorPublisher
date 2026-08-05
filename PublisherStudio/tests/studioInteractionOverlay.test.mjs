@@ -12,8 +12,8 @@ const pictureEditor = read('src', 'PublisherStudio.Web', 'Components', 'Editor',
 const pictureInterop = read('src', 'PublisherStudio.Web', 'wwwroot', 'js', 'pictureStudioInterop.js');
 const css = read('src', 'PublisherStudio.Web', 'wwwroot', 'css', 'site.css');
 const agents = read('AGENTS.md');
-const architecture = read('docs', 'architecture', 'media-gesture-editing.md');
-const adr = read('docs', 'decisions', 'ADR-010-local-studio-interaction-overlays.md');
+const architecture = read('docs', 'articles', 'architecture.md');
+const adr = read('docs', 'articles', 'architecture.md');
 
 // Video's spatial overlay owns input only while its explicit mode is active.
 assert.match(mediaStudio, /media-studio-frame-overlay-host @\(_mouseMode == MediaStudioMouseMode\.FrameRegion \? "active"/);
@@ -64,6 +64,6 @@ assert.match(agents, /Editor interaction overlays are transient frontend project
 assert.match(agents, /Do not use an application-wide Z-index to solve a local editor problem/);
 assert.match(agents, /High-frequency pointer movement stays in browser JavaScript\/CSS/);
 assert.match(architecture, /local positioned stacking context/);
-assert.match(adr, /No global Z-index or publication-layer mutation is allowed/);
+assert.match(adr, /never change publication layer order/);
 
 console.log('PublisherStudio local Studio overlay, source-frame alignment and short-recording range contracts passed.');

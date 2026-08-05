@@ -24,7 +24,9 @@ const ribbon = fs.readFileSync(ribbonPath, 'utf8');
 const editor = fs.readFileSync(editorPath, 'utf8');
 const view = fs.readFileSync(viewPath, 'utf8');
 const state = fs.readFileSync(statePath, 'utf8');
-const devExtreme = fs.readFileSync(devExtremePath, 'utf8');
+const hasPreparedDevExtremeRuntime = fs.existsSync(devExtremePath);
+const devExtreme = hasPreparedDevExtremeRuntime ? fs.readFileSync(devExtremePath, 'utf8') : '';
+const assetPreparation = fs.readFileSync(path.join(root, 'Prepare-DevExpressAssets.ps1'), 'utf8');
 const css = fs.readFileSync(cssPath, 'utf8');
 
 const dataModel = fs.readFileSync(path.join(root, 'src', 'PublisherStudio.Web', 'BusinessObjects', 'PublicationDataModels.cs'), 'utf8');
@@ -65,7 +67,10 @@ for (const [kind, plugin] of Object.entries(components)) {
   assert.match(model, new RegExp(`\\b${kind}\\b`), `${kind} is missing from the publication model.`);
   assert.match(runtime, new RegExp(`${kind}:\\s*"${plugin}"`), `${kind} is missing from the browser runtime.`);
   assert.match(ribbon, new RegExp(`AddComponent${kind}`), `${kind} is missing from the Insert ribbon.`);
-  assert.ok(devExtreme.includes(plugin), `${plugin} is missing from the bundled DevExtreme runtime.`);
+  if (hasPreparedDevExtremeRuntime)
+    assert.ok(devExtreme.includes(plugin), `${plugin} is missing from the bundled DevExtreme runtime.`);
+  else
+    assert.match(assetPreparation, /devextreme-dist/, 'The sanitized source package must retain the pinned DevExtreme preparation path.');
 }
 
 for (const contract of [

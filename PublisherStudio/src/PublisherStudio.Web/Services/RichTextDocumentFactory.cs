@@ -1,11 +1,17 @@
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using System.Security;
 using System.Text;
 // logging-policy: pure-helper
 namespace PublisherStudio.Services;
 
+/// <summary>
+/// Provides rich text document factory operations.
+/// </summary>
 public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> logger)
 {
+    /// <summary>
+    /// Creates open XML.
+    /// </summary>
     public byte[] CreateOpenXml(string title, string? subtitle = null)
     {
         logger.LogTrace("Creating a RichEdit OpenXML document.");
@@ -25,6 +31,9 @@ public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> log
         return CreateOpenXmlPackage(paragraphs);
     }
 
+    /// <summary>
+    /// Creates open XML from plain text.
+    /// </summary>
     public byte[] CreateOpenXmlFromPlainText(string text)
     {
         var paragraphs = NormalizeLines(text)
@@ -37,6 +46,9 @@ public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> log
         return CreateOpenXmlPackage(paragraphs);
     }
 
+    /// <summary>
+    /// Creates open XML from markdown.
+    /// </summary>
     public byte[] CreateOpenXmlFromMarkdown(string markdown)
     {
         var paragraphs = new List<string>();

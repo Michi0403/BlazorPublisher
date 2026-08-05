@@ -1,0 +1,134 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationDataValueKind
+  commentId: T:PublisherStudio.BusinessObjects.PublicationDataValueKind
+  id: PublicationDataValueKind
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationDataValueKind.Boolean
+  - PublisherStudio.BusinessObjects.PublicationDataValueKind.DateTime
+  - PublisherStudio.BusinessObjects.PublicationDataValueKind.Number
+  - PublisherStudio.BusinessObjects.PublicationDataValueKind.Text
+  langs:
+  - csharp
+  - vb
+  name: PublicationDataValueKind
+  nameWithType: PublicationDataValueKind
+  fullName: PublisherStudio.BusinessObjects.PublicationDataValueKind
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication data value kind values.
+  example: []
+  syntax:
+    content: public enum PublicationDataValueKind
+    content.vb: Public Enum PublicationDataValueKind
+- uid: PublisherStudio.BusinessObjects.PublicationDataValueKind.Text
+  commentId: F:PublisherStudio.BusinessObjects.PublicationDataValueKind.Text
+  id: Text
+  parent: PublisherStudio.BusinessObjects.PublicationDataValueKind
+  langs:
+  - csharp
+  - vb
+  name: Text
+  nameWithType: PublicationDataValueKind.Text
+  fullName: PublisherStudio.BusinessObjects.PublicationDataValueKind.Text
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Text = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationDataValueKind
+- uid: PublisherStudio.BusinessObjects.PublicationDataValueKind.Number
+  commentId: F:PublisherStudio.BusinessObjects.PublicationDataValueKind.Number
+  id: Number
+  parent: PublisherStudio.BusinessObjects.PublicationDataValueKind
+  langs:
+  - csharp
+  - vb
+  name: Number
+  nameWithType: PublicationDataValueKind.Number
+  fullName: PublisherStudio.BusinessObjects.PublicationDataValueKind.Number
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Number = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationDataValueKind
+- uid: PublisherStudio.BusinessObjects.PublicationDataValueKind.Boolean
+  commentId: F:PublisherStudio.BusinessObjects.PublicationDataValueKind.Boolean
+  id: Boolean
+  parent: PublisherStudio.BusinessObjects.PublicationDataValueKind
+  langs:
+  - csharp
+  - vb
+  name: Boolean
+  nameWithType: PublicationDataValueKind.Boolean
+  fullName: PublisherStudio.BusinessObjects.PublicationDataValueKind.Boolean
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Boolean = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationDataValueKind
+- uid: PublisherStudio.BusinessObjects.PublicationDataValueKind.DateTime
+  commentId: F:PublisherStudio.BusinessObjects.PublicationDataValueKind.DateTime
+  id: DateTime
+  parent: PublisherStudio.BusinessObjects.PublicationDataValueKind
+  langs:
+  - csharp
+  - vb
+  name: DateTime
+  nameWithType: PublicationDataValueKind.DateTime
+  fullName: PublisherStudio.BusinessObjects.PublicationDataValueKind.DateTime
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: DateTime = 3
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationDataValueKind
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationDataValueKind
+  commentId: T:PublisherStudio.BusinessObjects.PublicationDataValueKind
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationDataValueKind.html
+  name: PublicationDataValueKind
+  nameWithType: PublicationDataValueKind
+  fullName: PublisherStudio.BusinessObjects.PublicationDataValueKind

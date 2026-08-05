@@ -6,7 +6,9 @@
     <Nullable>enable</Nullable>
     <InvariantGlobalization>true</InvariantGlobalization>
     <AssemblyName>PublisherStudio.Setup</AssemblyName>
-    <Version>2.0.5</Version>
+    <Version>2.1.1</Version>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
     <ApplicationIcon>..\..\assets\PublisherStudio.ico</ApplicationIcon>
     <RuntimeIdentifiers>
       win-x64;
@@ -30,40 +32,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- The wildcard keeps future reviewed launchers deployable. The explicit entries are the stable, architecture-reviewed launcher inventory. -->
-    <None Update="*.cmd" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
-    <None Update="Default.cmd">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-    </None>
-    <None Update="Install.cmd">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-    </None>
-    <None Update="Update.cmd">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-    </None>
-    <None Update="Start.cmd">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-    </None>
-    <None Update="Start-NoBrowser.cmd">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-    </None>
-    <None Update="Check-FFmpeg.cmd">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-    </None>
-    <None Update="Install-FFmpeg.cmd">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-    </None>
-    <None Update="Uninstall.cmd">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-    </None>
+    <None Update="Install.cmd" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
+    <None Update="Update.cmd" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
+    <None Update="Start.cmd" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
     <Content Include="..\..\assets\PublisherStudio.ico" Link="PublisherStudio.ico" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
   </ItemGroup>
 

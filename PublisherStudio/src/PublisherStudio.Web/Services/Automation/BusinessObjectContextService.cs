@@ -1,14 +1,20 @@
-using System.Reflection;
+﻿using System.Reflection;
 using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Automation;
 
+/// <summary>
+/// Provides business object context service operations.
+/// </summary>
 public sealed class BusinessObjectContextService(
     IServiceArchitectureRegistry architecture,
     IApiSurfaceCatalogService apiSurfaceCatalog) : IBusinessObjectContextService
 {
     private readonly Assembly _assembly = typeof(BusinessObjectContextService).Assembly;
 
+    /// <summary>
+    /// Creates snapshot.
+    /// </summary>
     public BusinessObjectContextSnapshot CreateSnapshot()
     {
         var domainTypes = _assembly.GetExportedTypes()
@@ -91,8 +97,14 @@ public sealed class BusinessObjectContextService(
     }
 }
 
+/// <summary>
+/// Represents a service architecture descriptor.
+/// </summary>
 public sealed record ServiceArchitectureDescriptor
 {
+    /// <summary>
+    /// Runs the service architecture descriptor operation.
+    /// </summary>
     public ServiceArchitectureDescriptor(Type? interfaceType, Type implementationType, string lifetime)
     {
         InterfaceType = interfaceType;
@@ -100,18 +112,36 @@ public sealed record ServiceArchitectureDescriptor
         Lifetime = string.IsNullOrWhiteSpace(lifetime) ? "Unknown" : lifetime;
     }
 
+    /// <summary>
+    /// Gets interface type.
+    /// </summary>
     public Type? InterfaceType { get; }
+    /// <summary>
+    /// Gets implementation type.
+    /// </summary>
     public Type ImplementationType { get; }
+    /// <summary>
+    /// Gets lifetime.
+    /// </summary>
     public string Lifetime { get; }
 }
 
+/// <summary>
+/// Defines the service architecture registry contract.
+/// </summary>
 public interface IServiceArchitectureRegistry
 {
     IReadOnlyList<ServiceArchitectureDescriptor> Descriptors { get; }
 }
 
+/// <summary>
+/// Provides service architecture registry operations.
+/// </summary>
 public sealed class ServiceArchitectureRegistry(IEnumerable<ServiceArchitectureDescriptor> descriptors) : IServiceArchitectureRegistry
 {
+    /// <summary>
+    /// Gets descriptors.
+    /// </summary>
     public IReadOnlyList<ServiceArchitectureDescriptor> Descriptors { get; } = descriptors
         .Where(descriptor => descriptor is not null)
         .DistinctBy(descriptor => (descriptor.InterfaceType, descriptor.ImplementationType, descriptor.Lifetime))

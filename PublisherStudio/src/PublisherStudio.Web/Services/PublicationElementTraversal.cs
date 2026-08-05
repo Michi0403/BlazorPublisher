@@ -1,8 +1,14 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 namespace PublisherStudio.Services;
 
+/// <summary>
+/// Represents a publication element traversal.
+/// </summary>
 public sealed class PublicationElementTraversal(ILogger<PublicationElementTraversal> logger)
 {
+    /// <summary>
+    /// Runs the descendants operation.
+    /// </summary>
     public IEnumerable<PublicationElement> Descendants(IEnumerable<PublicationElement> elements)
     {
         ArgumentNullException.ThrowIfNull(elements);
@@ -21,6 +27,9 @@ public sealed class PublicationElementTraversal(ILogger<PublicationElementTraver
         }
     }
 
+    /// <summary>
+    /// Runs the descendants operation.
+    /// </summary>
     public IEnumerable<PublicationElement> Descendants(PublicationDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);

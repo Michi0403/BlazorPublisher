@@ -1,7 +1,10 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services;
 
+/// <summary>
+/// Provides picture editor state service operations.
+/// </summary>
 public sealed class PictureEditorStateService
 {
     private readonly PictureDocumentService _documents;
@@ -11,6 +14,9 @@ public sealed class PictureEditorStateService
     private string? _liveEditKey;
     private PictureLayer? _clipboard;
 
+    /// <summary>
+    /// Runs the picture editor state service operation.
+    /// </summary>
     public PictureEditorStateService(PictureDocumentService documents, IPublisherDocumentFactory documentFactory)
     {
         _documents = documents;
@@ -18,14 +24,38 @@ public sealed class PictureEditorStateService
         Document = _documentFactory.CreatePicture();
     }
 
+    /// <summary>
+    /// Occurs when changed.
+    /// </summary>
     public event Action? Changed;
+    /// <summary>
+    /// Gets or sets document.
+    /// </summary>
     public PictureDocument Document { get; private set; }
+    /// <summary>
+    /// Gets or sets selected layer identifier.
+    /// </summary>
     public Guid? SelectedLayerId { get; private set; }
+    /// <summary>
+    /// Gets selected layer.
+    /// </summary>
     public PictureLayer? SelectedLayer => Document.Layers.FirstOrDefault(layer => layer.Id == SelectedLayerId);
+    /// <summary>
+    /// Gets can undo.
+    /// </summary>
     public bool CanUndo => _undo.Count > 0;
+    /// <summary>
+    /// Gets can redo.
+    /// </summary>
     public bool CanRedo => _redo.Count > 0;
+    /// <summary>
+    /// Gets can paste.
+    /// </summary>
     public bool CanPaste => _clipboard is not null;
 
+    /// <summary>
+    /// Starts new.
+    /// </summary>
     public void StartNew(int widthPx = 1200, int heightPx = 800, bool transparent = true)
     {
         Document = _documentFactory.CreatePicture(widthPx, heightPx, transparent);
@@ -34,6 +64,9 @@ public sealed class PictureEditorStateService
         Notify();
     }
 
+    /// <summary>
+    /// Starts from document.
+    /// </summary>
     public void StartFromDocument(PictureDocument document)
     {
         Document = _documents.Clone(document);
@@ -42,6 +75,9 @@ public sealed class PictureEditorStateService
         Notify();
     }
 
+    /// <summary>
+    /// Starts from raster.
+    /// </summary>
     public void StartFromRaster(string dataUrl, string name, int widthPx = 1200, int heightPx = 800)
     {
         Document = _documentFactory.CreatePictureFromRaster(dataUrl, name, widthPx, heightPx);
@@ -50,8 +86,14 @@ public sealed class PictureEditorStateService
         Notify();
     }
 
+    /// <summary>
+    /// Runs the clone document operation.
+    /// </summary>
     public PictureDocument CloneDocument() => _documents.Clone(Document);
 
+    /// <summary>
+    /// Sets document name.
+    /// </summary>
     public void SetDocumentName(string name)
     {
         name = string.IsNullOrWhiteSpace(name) ? "Untitled Picture" : name.Trim();
@@ -61,6 +103,9 @@ public sealed class PictureEditorStateService
         Notify();
     }
 
+    /// <summary>
+    /// Sets document size.
+    /// </summary>
     public void SetDocumentSize(int widthPx, int heightPx)
     {
         widthPx = Math.Clamp(widthPx, 16, 8192);
@@ -83,6 +128,9 @@ public sealed class PictureEditorStateService
         Notify();
     }
 
+    /// <summary>
+    /// Sets background.
+    /// </summary>
     public void SetBackground(string value)
     {
         value = string.IsNullOrWhiteSpace(value) ? "transparent" : value;
@@ -92,16 +140,31 @@ public sealed class PictureEditorStateService
         Notify();
     }
 
+    /// <summary>
+    /// Sets zoom.
+    /// </summary>
     public void SetZoom(double zoom)
     {
         Document.Zoom = Math.Clamp(zoom, .05, 4);
         Notify(false);
     }
 
+    /// <summary>
+    /// Sets grid.
+    /// </summary>
     public void SetGrid(bool visible) { Document.GridVisible = visible; Notify(false); }
+    /// <summary>
+    /// Sets snap.
+    /// </summary>
     public void SetSnap(bool enabled) { Document.SnapToGrid = enabled; Notify(false); }
+    /// <summary>
+    /// Sets grid spacing.
+    /// </summary>
     public void SetGridSpacing(int pixels) { Document.GridSpacingPx = Math.Clamp(pixels, 2, 1000); Notify(false); }
 
+    /// <summary>
+    /// Runs the select layer operation.
+    /// </summary>
     public void SelectLayer(Guid? id)
     {
         if (id is not null && Document.Layers.All(layer => layer.Id != id)) return;
@@ -110,6 +173,9 @@ public sealed class PictureEditorStateService
         Notify(false);
     }
 
+    /// <summary>
+    /// Adds raster.
+    /// </summary>
     public RasterPictureLayer AddRaster(
         string dataUrl,
         string name,
@@ -125,6 +191,9 @@ public sealed class PictureEditorStateService
         return layer;
     }
 
+    /// <summary>
+    /// Adds imported layers.
+    /// </summary>
     public int AddImportedLayers(
         PictureDocument importedDocument,
         string? groupName = null,
@@ -163,6 +232,9 @@ public sealed class PictureEditorStateService
         return imported.Layers.Count;
     }
 
+    /// <summary>
+    /// Runs the replace raster operation.
+    /// </summary>
     public bool ReplaceRaster(Guid id, string dataUrl)
     {
         var layer = Document.Layers.OfType<RasterPictureLayer>().FirstOrDefault(item => item.Id == id);
@@ -173,6 +245,9 @@ public sealed class PictureEditorStateService
         return true;
     }
 
+    /// <summary>
+    /// Adds text.
+    /// </summary>
     public TextPictureLayer AddText()
     {
         Capture();
@@ -191,6 +266,9 @@ public sealed class PictureEditorStateService
         return layer;
     }
 
+    /// <summary>
+    /// Adds shape.
+    /// </summary>
     public ShapePictureLayer AddShape(PictureShapeKind shape = PictureShapeKind.Rectangle)
     {
         return AddShapeAt(
@@ -202,6 +280,9 @@ public sealed class PictureEditorStateService
             0);
     }
 
+    /// <summary>
+    /// Adds shape at.
+    /// </summary>
     public ShapePictureLayer AddShapeAt(PictureShapeKind shape, double x, double y, double width, double height, double rotation = 0)
     {
         Capture();
@@ -221,6 +302,9 @@ public sealed class PictureEditorStateService
         return layer;
     }
 
+    /// <summary>
+    /// Adds path.
+    /// </summary>
     public ShapePictureLayer AddPath(IReadOnlyList<PicturePoint> points, string strokeColor, double strokeWidth, bool closed = false, bool smooth = true)
     {
         if (points.Count < 2) return AddShape(PictureShapeKind.Path);
@@ -252,6 +336,9 @@ public sealed class PictureEditorStateService
         return layer;
     }
 
+    /// <summary>
+    /// Adds area fill.
+    /// </summary>
     public ShapePictureLayer AddAreaFill(string selectionKind, IReadOnlyList<PicturePoint> points, string primaryColor, string secondaryColor, bool gradient)
     {
         if (points.Count < 2) return AddShape(PictureShapeKind.Rectangle);
@@ -291,6 +378,9 @@ public sealed class PictureEditorStateService
         return layer;
     }
 
+    /// <summary>
+    /// Adds fill.
+    /// </summary>
     public FillPictureLayer AddFill(PictureFillKind fillKind = PictureFillKind.LinearGradient)
     {
         Capture();
@@ -309,6 +399,9 @@ public sealed class PictureEditorStateService
         return layer;
     }
 
+    /// <summary>
+    /// Adds render.
+    /// </summary>
     public RenderPictureLayer AddRender(PictureRenderKind renderKind = PictureRenderKind.Clouds)
     {
         Capture();
@@ -328,6 +421,9 @@ public sealed class PictureEditorStateService
         return layer;
     }
 
+    /// <summary>
+    /// Adds paint.
+    /// </summary>
     public PaintPictureLayer AddPaint(string name = "Paint")
     {
         Capture();
@@ -336,6 +432,9 @@ public sealed class PictureEditorStateService
         return layer;
     }
 
+    /// <summary>
+    /// Adds stroke.
+    /// </summary>
     public void AddStroke(PictureStrokeKind kind, IReadOnlyList<PicturePoint> points, string color, double widthPx, double opacity, double hardness)
     {
         if (points.Count < 2) return;
@@ -362,6 +461,9 @@ public sealed class PictureEditorStateService
         Notify();
     }
 
+    /// <summary>
+    /// Runs the clear selected paint operation.
+    /// </summary>
     public void ClearSelectedPaint()
     {
         if (SelectedLayer is not PaintPictureLayer paint || paint.Locked || paint.Strokes.Count == 0) return;
@@ -370,6 +472,9 @@ public sealed class PictureEditorStateService
         Notify();
     }
 
+    /// <summary>
+    /// Deletes selected.
+    /// </summary>
     public void DeleteSelected()
     {
         var layer = SelectedLayer;
@@ -381,6 +486,9 @@ public sealed class PictureEditorStateService
         Notify();
     }
 
+    /// <summary>
+    /// Runs the copy selected operation.
+    /// </summary>
     public void CopySelected()
     {
         var layer = SelectedLayer;
@@ -389,6 +497,9 @@ public sealed class PictureEditorStateService
         Notify(false);
     }
 
+    /// <summary>
+    /// Runs the copy selected region operation.
+    /// </summary>
     public bool CopySelectedRegion(IReadOnlyList<PicturePoint> points, bool inverted = false)
     {
         var layer = SelectedLayer;
@@ -401,6 +512,9 @@ public sealed class PictureEditorStateService
         return true;
     }
 
+    /// <summary>
+    /// Applies selected clip.
+    /// </summary>
     public bool ApplySelectedClip(IReadOnlyList<PicturePoint> points, bool inverted)
     {
         var layer = SelectedLayer;
@@ -414,6 +528,9 @@ public sealed class PictureEditorStateService
         return true;
     }
 
+    /// <summary>
+    /// Runs the clear selected clip operation.
+    /// </summary>
     public bool ClearSelectedClip()
     {
         var layer = SelectedLayer;
@@ -425,6 +542,9 @@ public sealed class PictureEditorStateService
         return true;
     }
 
+    /// <summary>
+    /// Runs the paste operation.
+    /// </summary>
     public void Paste()
     {
         if (_clipboard is null) return;
@@ -439,6 +559,9 @@ public sealed class PictureEditorStateService
         Notify();
     }
 
+    /// <summary>
+    /// Runs the duplicate selected operation.
+    /// </summary>
     public void DuplicateSelected()
     {
         var layer = SelectedLayer;
@@ -454,6 +577,9 @@ public sealed class PictureEditorStateService
         Notify();
     }
 
+    /// <summary>
+    /// Runs the center selected operation.
+    /// </summary>
     public void CenterSelected()
     {
         var layer = SelectedLayer;
@@ -464,6 +590,9 @@ public sealed class PictureEditorStateService
         Notify();
     }
 
+    /// <summary>
+    /// Runs the fit selected to canvas operation.
+    /// </summary>
     public void FitSelectedToCanvas()
     {
         var layer = SelectedLayer;
@@ -477,6 +606,9 @@ public sealed class PictureEditorStateService
         Notify();
     }
 
+    /// <summary>
+    /// Runs the move selected layer operation.
+    /// </summary>
     public void MoveSelectedLayer(int delta)
     {
         var layer = SelectedLayer;
@@ -490,6 +622,9 @@ public sealed class PictureEditorStateService
         Notify();
     }
 
+    /// <summary>
+    /// Runs the bring selected to front operation.
+    /// </summary>
     public void BringSelectedToFront()
     {
         var layer = SelectedLayer;
@@ -500,6 +635,9 @@ public sealed class PictureEditorStateService
         Notify();
     }
 
+    /// <summary>
+    /// Runs the send selected to back operation.
+    /// </summary>
     public void SendSelectedToBack()
     {
         var layer = SelectedLayer;
@@ -510,6 +648,9 @@ public sealed class PictureEditorStateService
         Notify();
     }
 
+    /// <summary>
+    /// Runs the toggle visibility operation.
+    /// </summary>
     public void ToggleVisibility(Guid id)
     {
         var layer = Document.Layers.FirstOrDefault(item => item.Id == id);
@@ -519,6 +660,9 @@ public sealed class PictureEditorStateService
         Notify();
     }
 
+    /// <summary>
+    /// Runs the toggle lock operation.
+    /// </summary>
     public void ToggleLock(Guid id)
     {
         var layer = Document.Layers.FirstOrDefault(item => item.Id == id);
@@ -528,6 +672,9 @@ public sealed class PictureEditorStateService
         Notify();
     }
 
+    /// <summary>
+    /// Runs the commit transform operation.
+    /// </summary>
     public void CommitTransform(Guid id, double x, double y, double width, double height, double rotation)
     {
         var layer = Document.Layers.FirstOrDefault(item => item.Id == id);
@@ -558,6 +705,9 @@ public sealed class PictureEditorStateService
         Notify();
     }
 
+    /// <summary>
+    /// Updates selected.
+    /// </summary>
     public void UpdateSelected(Action<PictureLayer> update, bool capture = true, bool allowLocked = false)
     {
         var layer = SelectedLayer;
@@ -568,6 +718,9 @@ public sealed class PictureEditorStateService
         Notify();
     }
 
+    /// <summary>
+    /// Updates selected live.
+    /// </summary>
     public void UpdateSelectedLive(string key, Action<PictureLayer> update)
     {
         var layer = SelectedLayer;
@@ -582,8 +735,14 @@ public sealed class PictureEditorStateService
         Notify();
     }
 
+    /// <summary>
+    /// Runs the end live edit operation.
+    /// </summary>
     public void EndLiveEdit() => _liveEditKey = null;
 
+    /// <summary>
+    /// Runs the undo operation.
+    /// </summary>
     public void Undo()
     {
         if (_undo.Count == 0) return;
@@ -591,6 +750,9 @@ public sealed class PictureEditorStateService
         Restore(_undo.Pop());
     }
 
+    /// <summary>
+    /// Runs the redo operation.
+    /// </summary>
     public void Redo()
     {
         if (_redo.Count == 0) return;

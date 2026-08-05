@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using PublisherStudio.BusinessObjects;
 
@@ -21,6 +21,9 @@ public sealed class PublicationComponentService
         Converters = { new JsonStringEnumConverter() }
     };
 
+    /// <summary>
+    /// Runs the publication component service operation.
+    /// </summary>
     public PublicationComponentService(PublicationDataService data, IPublicationMarkupService markup, ILogger<PublicationComponentService> logger)
     {
         _data = data;
@@ -28,6 +31,9 @@ public sealed class PublicationComponentService
         this.logger = logger;
     }
 
+    /// <summary>
+    /// Runs the clone operation.
+    /// </summary>
     public DevExtremeComponentElement Clone(DevExtremeComponentElement source)
     {
         try
@@ -44,6 +50,9 @@ public sealed class PublicationComponentService
         }
     }
 
+    /// <summary>
+    /// Runs the copy configuration operation.
+    /// </summary>
     public void CopyConfiguration(DevExtremeComponentElement source, DevExtremeComponentElement target, bool preservePlacement = true)
     {
         try
@@ -88,6 +97,9 @@ public sealed class PublicationComponentService
         }
     }
 
+    /// <summary>
+    /// Runs the create operation.
+    /// </summary>
     public DevExtremeComponentElement Create(PublicationDocument document, PublicationComponentKind kind)
     {
         try
@@ -147,6 +159,9 @@ public sealed class PublicationComponentService
         }
     }
 
+    /// <summary>
+    /// Runs the normalize operation.
+    /// </summary>
     public void Normalize(PublicationDocument document, DevExtremeComponentElement item)
     {
         try
@@ -342,6 +357,9 @@ public sealed class PublicationComponentService
         }
     }
 
+    /// <summary>
+    /// Applies fields from data object.
+    /// </summary>
     public void ApplyFieldsFromDataObject(PublicationDocument document, DevExtremeComponentElement item, bool replace)
     {
         try
@@ -372,6 +390,9 @@ public sealed class PublicationComponentService
         }
     }
 
+    /// <summary>
+    /// Builds client configuration.
+    /// </summary>
     public object BuildClientConfiguration(PublicationDocument document, DevExtremeComponentElement item, Guid currentPageId, bool designerMode = false, string designerInteractionMode = "content")
     {
         try
@@ -512,6 +533,9 @@ public sealed class PublicationComponentService
         }
     }
 
+    /// <summary>
+    /// Builds client configuration base64.
+    /// </summary>
     public string BuildClientConfigurationBase64(PublicationDocument document, DevExtremeComponentElement item, Guid currentPageId, bool designerMode = false, string designerInteractionMode = "content") {
         try
         {
@@ -1026,6 +1050,9 @@ public sealed class PublicationComponentService
         _ => (160, 95)
     };
 
+    /// <summary>
+    /// Runs the component name operation.
+    /// </summary>
     public string ComponentName(PublicationComponentKind kind) {
         try
         {
@@ -1061,6 +1088,9 @@ public sealed class PublicationComponentService
         }
     }
 
+    /// <summary>
+    /// Runs the friendly operation.
+    /// </summary>
     public string Friendly(string value)
     {
         try

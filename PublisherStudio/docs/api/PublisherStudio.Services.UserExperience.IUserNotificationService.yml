@@ -1,0 +1,533 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.UserExperience.IUserNotificationService
+  commentId: T:PublisherStudio.Services.UserExperience.IUserNotificationService
+  id: IUserNotificationService
+  parent: PublisherStudio.Services.UserExperience
+  children:
+  - PublisherStudio.Services.UserExperience.IUserNotificationService.Changed
+  - PublisherStudio.Services.UserExperience.IUserNotificationService.Clear
+  - PublisherStudio.Services.UserExperience.IUserNotificationService.Dismiss(System.Guid)
+  - PublisherStudio.Services.UserExperience.IUserNotificationService.Error(System.String,System.String,System.String,System.Boolean)
+  - PublisherStudio.Services.UserExperience.IUserNotificationService.Information(System.String,System.String,System.String)
+  - PublisherStudio.Services.UserExperience.IUserNotificationService.Messages
+  - PublisherStudio.Services.UserExperience.IUserNotificationService.Publish(PublisherStudio.BusinessObjects.UserNotificationMessage)
+  - PublisherStudio.Services.UserExperience.IUserNotificationService.Success(System.String,System.String,System.String)
+  - PublisherStudio.Services.UserExperience.IUserNotificationService.Warning(System.String,System.String,System.String)
+  langs:
+  - csharp
+  - vb
+  name: IUserNotificationService
+  nameWithType: IUserNotificationService
+  fullName: PublisherStudio.Services.UserExperience.IUserNotificationService
+  type: Interface
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.UserExperience
+  summary: Defines the user notification service contract.
+  example: []
+  syntax:
+    content: public interface IUserNotificationService
+    content.vb: Public Interface IUserNotificationService
+  derivedClasses:
+  - PublisherStudio.Services.UserExperience.UserNotificationService
+- uid: PublisherStudio.Services.UserExperience.IUserNotificationService.Publish(PublisherStudio.BusinessObjects.UserNotificationMessage)
+  commentId: M:PublisherStudio.Services.UserExperience.IUserNotificationService.Publish(PublisherStudio.BusinessObjects.UserNotificationMessage)
+  id: Publish(PublisherStudio.BusinessObjects.UserNotificationMessage)
+  parent: PublisherStudio.Services.UserExperience.IUserNotificationService
+  langs:
+  - csharp
+  - vb
+  name: Publish(UserNotificationMessage)
+  nameWithType: IUserNotificationService.Publish(UserNotificationMessage)
+  fullName: PublisherStudio.Services.UserExperience.IUserNotificationService.Publish(PublisherStudio.BusinessObjects.UserNotificationMessage)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.UserExperience
+  syntax:
+    content: UserNotificationMessage Publish(UserNotificationMessage message)
+    parameters:
+    - id: message
+      type: PublisherStudio.BusinessObjects.UserNotificationMessage
+    return:
+      type: PublisherStudio.BusinessObjects.UserNotificationMessage
+    content.vb: Function Publish(message As UserNotificationMessage) As UserNotificationMessage
+  overload: PublisherStudio.Services.UserExperience.IUserNotificationService.Publish*
+- uid: PublisherStudio.Services.UserExperience.IUserNotificationService.Information(System.String,System.String,System.String)
+  commentId: M:PublisherStudio.Services.UserExperience.IUserNotificationService.Information(System.String,System.String,System.String)
+  id: Information(System.String,System.String,System.String)
+  parent: PublisherStudio.Services.UserExperience.IUserNotificationService
+  langs:
+  - csharp
+  - vb
+  name: Information(string, string, string)
+  nameWithType: IUserNotificationService.Information(string, string, string)
+  fullName: PublisherStudio.Services.UserExperience.IUserNotificationService.Information(string, string, string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.UserExperience
+  syntax:
+    content: UserNotificationMessage Information(string message, string title = "PublisherStudio", string source = "")
+    parameters:
+    - id: message
+      type: System.String
+    - id: title
+      type: System.String
+    - id: source
+      type: System.String
+    return:
+      type: PublisherStudio.BusinessObjects.UserNotificationMessage
+    content.vb: Function Information(message As String, title As String = "PublisherStudio", source As String = "") As UserNotificationMessage
+  overload: PublisherStudio.Services.UserExperience.IUserNotificationService.Information*
+  nameWithType.vb: IUserNotificationService.Information(String, String, String)
+  fullName.vb: PublisherStudio.Services.UserExperience.IUserNotificationService.Information(String, String, String)
+  name.vb: Information(String, String, String)
+- uid: PublisherStudio.Services.UserExperience.IUserNotificationService.Success(System.String,System.String,System.String)
+  commentId: M:PublisherStudio.Services.UserExperience.IUserNotificationService.Success(System.String,System.String,System.String)
+  id: Success(System.String,System.String,System.String)
+  parent: PublisherStudio.Services.UserExperience.IUserNotificationService
+  langs:
+  - csharp
+  - vb
+  name: Success(string, string, string)
+  nameWithType: IUserNotificationService.Success(string, string, string)
+  fullName: PublisherStudio.Services.UserExperience.IUserNotificationService.Success(string, string, string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.UserExperience
+  syntax:
+    content: UserNotificationMessage Success(string message, string title = "Completed", string source = "")
+    parameters:
+    - id: message
+      type: System.String
+    - id: title
+      type: System.String
+    - id: source
+      type: System.String
+    return:
+      type: PublisherStudio.BusinessObjects.UserNotificationMessage
+    content.vb: Function Success(message As String, title As String = "Completed", source As String = "") As UserNotificationMessage
+  overload: PublisherStudio.Services.UserExperience.IUserNotificationService.Success*
+  nameWithType.vb: IUserNotificationService.Success(String, String, String)
+  fullName.vb: PublisherStudio.Services.UserExperience.IUserNotificationService.Success(String, String, String)
+  name.vb: Success(String, String, String)
+- uid: PublisherStudio.Services.UserExperience.IUserNotificationService.Warning(System.String,System.String,System.String)
+  commentId: M:PublisherStudio.Services.UserExperience.IUserNotificationService.Warning(System.String,System.String,System.String)
+  id: Warning(System.String,System.String,System.String)
+  parent: PublisherStudio.Services.UserExperience.IUserNotificationService
+  langs:
+  - csharp
+  - vb
+  name: Warning(string, string, string)
+  nameWithType: IUserNotificationService.Warning(string, string, string)
+  fullName: PublisherStudio.Services.UserExperience.IUserNotificationService.Warning(string, string, string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.UserExperience
+  syntax:
+    content: UserNotificationMessage Warning(string message, string title = "Attention", string source = "")
+    parameters:
+    - id: message
+      type: System.String
+    - id: title
+      type: System.String
+    - id: source
+      type: System.String
+    return:
+      type: PublisherStudio.BusinessObjects.UserNotificationMessage
+    content.vb: Function Warning(message As String, title As String = "Attention", source As String = "") As UserNotificationMessage
+  overload: PublisherStudio.Services.UserExperience.IUserNotificationService.Warning*
+  nameWithType.vb: IUserNotificationService.Warning(String, String, String)
+  fullName.vb: PublisherStudio.Services.UserExperience.IUserNotificationService.Warning(String, String, String)
+  name.vb: Warning(String, String, String)
+- uid: PublisherStudio.Services.UserExperience.IUserNotificationService.Error(System.String,System.String,System.String,System.Boolean)
+  commentId: M:PublisherStudio.Services.UserExperience.IUserNotificationService.Error(System.String,System.String,System.String,System.Boolean)
+  id: Error(System.String,System.String,System.String,System.Boolean)
+  parent: PublisherStudio.Services.UserExperience.IUserNotificationService
+  langs:
+  - csharp
+  - vb
+  name: Error(string, string, string, bool)
+  nameWithType: IUserNotificationService.Error(string, string, string, bool)
+  fullName: PublisherStudio.Services.UserExperience.IUserNotificationService.Error(string, string, string, bool)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.UserExperience
+  syntax:
+    content: UserNotificationMessage Error(string message, string title = "Something went wrong", string source = "", bool persistent = false)
+    parameters:
+    - id: message
+      type: System.String
+    - id: title
+      type: System.String
+    - id: source
+      type: System.String
+    - id: persistent
+      type: System.Boolean
+    return:
+      type: PublisherStudio.BusinessObjects.UserNotificationMessage
+    content.vb: Function [Error](message As String, title As String = "Something went wrong", source As String = "", persistent As Boolean = False) As UserNotificationMessage
+  overload: PublisherStudio.Services.UserExperience.IUserNotificationService.Error*
+  nameWithType.vb: IUserNotificationService.Error(String, String, String, Boolean)
+  fullName.vb: PublisherStudio.Services.UserExperience.IUserNotificationService.Error(String, String, String, Boolean)
+  name.vb: Error(String, String, String, Boolean)
+- uid: PublisherStudio.Services.UserExperience.IUserNotificationService.Dismiss(System.Guid)
+  commentId: M:PublisherStudio.Services.UserExperience.IUserNotificationService.Dismiss(System.Guid)
+  id: Dismiss(System.Guid)
+  parent: PublisherStudio.Services.UserExperience.IUserNotificationService
+  langs:
+  - csharp
+  - vb
+  name: Dismiss(Guid)
+  nameWithType: IUserNotificationService.Dismiss(Guid)
+  fullName: PublisherStudio.Services.UserExperience.IUserNotificationService.Dismiss(System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.UserExperience
+  syntax:
+    content: bool Dismiss(Guid id)
+    parameters:
+    - id: id
+      type: System.Guid
+    return:
+      type: System.Boolean
+    content.vb: Function Dismiss(id As Guid) As Boolean
+  overload: PublisherStudio.Services.UserExperience.IUserNotificationService.Dismiss*
+- uid: PublisherStudio.Services.UserExperience.IUserNotificationService.Clear
+  commentId: M:PublisherStudio.Services.UserExperience.IUserNotificationService.Clear
+  id: Clear
+  parent: PublisherStudio.Services.UserExperience.IUserNotificationService
+  langs:
+  - csharp
+  - vb
+  name: Clear()
+  nameWithType: IUserNotificationService.Clear()
+  fullName: PublisherStudio.Services.UserExperience.IUserNotificationService.Clear()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.UserExperience
+  syntax:
+    content: void Clear()
+    content.vb: Sub Clear()
+  overload: PublisherStudio.Services.UserExperience.IUserNotificationService.Clear*
+- uid: PublisherStudio.Services.UserExperience.IUserNotificationService.Messages
+  commentId: P:PublisherStudio.Services.UserExperience.IUserNotificationService.Messages
+  id: Messages
+  parent: PublisherStudio.Services.UserExperience.IUserNotificationService
+  langs:
+  - csharp
+  - vb
+  name: Messages
+  nameWithType: IUserNotificationService.Messages
+  fullName: PublisherStudio.Services.UserExperience.IUserNotificationService.Messages
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.UserExperience
+  syntax:
+    content: IReadOnlyList<UserNotificationMessage> Messages { get; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.UserNotificationMessage}
+    content.vb: ReadOnly Property Messages As IReadOnlyList(Of UserNotificationMessage)
+  overload: PublisherStudio.Services.UserExperience.IUserNotificationService.Messages*
+- uid: PublisherStudio.Services.UserExperience.IUserNotificationService.Changed
+  commentId: E:PublisherStudio.Services.UserExperience.IUserNotificationService.Changed
+  id: Changed
+  parent: PublisherStudio.Services.UserExperience.IUserNotificationService
+  langs:
+  - csharp
+  - vb
+  name: Changed
+  nameWithType: IUserNotificationService.Changed
+  fullName: PublisherStudio.Services.UserExperience.IUserNotificationService.Changed
+  type: Event
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.UserExperience
+  syntax:
+    content: event Action? Changed
+    return:
+      type: System.Action
+    content.vb: Event Changed As Action
+references:
+- uid: PublisherStudio.Services.UserExperience
+  commentId: N:PublisherStudio.Services.UserExperience
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.UserExperience
+  nameWithType: PublisherStudio.Services.UserExperience
+  fullName: PublisherStudio.Services.UserExperience
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.UserExperience
+    name: UserExperience
+    isExternal: true
+    href: PublisherStudio.Services.UserExperience.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.UserExperience
+    name: UserExperience
+    isExternal: true
+    href: PublisherStudio.Services.UserExperience.html
+- uid: PublisherStudio.Services.UserExperience.IUserNotificationService.Publish*
+  commentId: Overload:PublisherStudio.Services.UserExperience.IUserNotificationService.Publish
+  isExternal: true
+  href: PublisherStudio.Services.UserExperience.IUserNotificationService.html#PublisherStudio_Services_UserExperience_IUserNotificationService_Publish_PublisherStudio_BusinessObjects_UserNotificationMessage_
+  name: Publish
+  nameWithType: IUserNotificationService.Publish
+  fullName: PublisherStudio.Services.UserExperience.IUserNotificationService.Publish
+- uid: PublisherStudio.BusinessObjects.UserNotificationMessage
+  commentId: T:PublisherStudio.BusinessObjects.UserNotificationMessage
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.UserNotificationMessage.html
+  name: UserNotificationMessage
+  nameWithType: UserNotificationMessage
+  fullName: PublisherStudio.BusinessObjects.UserNotificationMessage
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.Services.UserExperience.IUserNotificationService.Information*
+  commentId: Overload:PublisherStudio.Services.UserExperience.IUserNotificationService.Information
+  isExternal: true
+  href: PublisherStudio.Services.UserExperience.IUserNotificationService.html#PublisherStudio_Services_UserExperience_IUserNotificationService_Information_System_String_System_String_System_String_
+  name: Information
+  nameWithType: IUserNotificationService.Information
+  fullName: PublisherStudio.Services.UserExperience.IUserNotificationService.Information
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.UserExperience.IUserNotificationService.Success*
+  commentId: Overload:PublisherStudio.Services.UserExperience.IUserNotificationService.Success
+  isExternal: true
+  href: PublisherStudio.Services.UserExperience.IUserNotificationService.html#PublisherStudio_Services_UserExperience_IUserNotificationService_Success_System_String_System_String_System_String_
+  name: Success
+  nameWithType: IUserNotificationService.Success
+  fullName: PublisherStudio.Services.UserExperience.IUserNotificationService.Success
+- uid: PublisherStudio.Services.UserExperience.IUserNotificationService.Warning*
+  commentId: Overload:PublisherStudio.Services.UserExperience.IUserNotificationService.Warning
+  isExternal: true
+  href: PublisherStudio.Services.UserExperience.IUserNotificationService.html#PublisherStudio_Services_UserExperience_IUserNotificationService_Warning_System_String_System_String_System_String_
+  name: Warning
+  nameWithType: IUserNotificationService.Warning
+  fullName: PublisherStudio.Services.UserExperience.IUserNotificationService.Warning
+- uid: PublisherStudio.Services.UserExperience.IUserNotificationService.Error*
+  commentId: Overload:PublisherStudio.Services.UserExperience.IUserNotificationService.Error
+  isExternal: true
+  href: PublisherStudio.Services.UserExperience.IUserNotificationService.html#PublisherStudio_Services_UserExperience_IUserNotificationService_Error_System_String_System_String_System_String_System_Boolean_
+  name: Error
+  nameWithType: IUserNotificationService.Error
+  fullName: PublisherStudio.Services.UserExperience.IUserNotificationService.Error
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.Services.UserExperience.IUserNotificationService.Dismiss*
+  commentId: Overload:PublisherStudio.Services.UserExperience.IUserNotificationService.Dismiss
+  isExternal: true
+  href: PublisherStudio.Services.UserExperience.IUserNotificationService.html#PublisherStudio_Services_UserExperience_IUserNotificationService_Dismiss_System_Guid_
+  name: Dismiss
+  nameWithType: IUserNotificationService.Dismiss
+  fullName: PublisherStudio.Services.UserExperience.IUserNotificationService.Dismiss
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: PublisherStudio.Services.UserExperience.IUserNotificationService.Clear*
+  commentId: Overload:PublisherStudio.Services.UserExperience.IUserNotificationService.Clear
+  isExternal: true
+  href: PublisherStudio.Services.UserExperience.IUserNotificationService.html#PublisherStudio_Services_UserExperience_IUserNotificationService_Clear
+  name: Clear
+  nameWithType: IUserNotificationService.Clear
+  fullName: PublisherStudio.Services.UserExperience.IUserNotificationService.Clear
+- uid: PublisherStudio.Services.UserExperience.IUserNotificationService.Messages*
+  commentId: Overload:PublisherStudio.Services.UserExperience.IUserNotificationService.Messages
+  isExternal: true
+  href: PublisherStudio.Services.UserExperience.IUserNotificationService.html#PublisherStudio_Services_UserExperience_IUserNotificationService_Messages
+  name: Messages
+  nameWithType: IUserNotificationService.Messages
+  fullName: PublisherStudio.Services.UserExperience.IUserNotificationService.Messages
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.UserNotificationMessage}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.UserNotificationMessage}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<UserNotificationMessage>
+  nameWithType: IReadOnlyList<UserNotificationMessage>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.UserNotificationMessage>
+  nameWithType.vb: IReadOnlyList(Of UserNotificationMessage)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.UserNotificationMessage)
+  name.vb: IReadOnlyList(Of UserNotificationMessage)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.UserNotificationMessage
+    name: UserNotificationMessage
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.UserNotificationMessage.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.UserNotificationMessage
+    name: UserNotificationMessage
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.UserNotificationMessage.html
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: System.Action
+  commentId: T:System.Action
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.action
+  name: Action
+  nameWithType: Action
+  fullName: System.Action

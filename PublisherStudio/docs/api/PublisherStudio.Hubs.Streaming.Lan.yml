@@ -1,0 +1,73 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Hubs.Streaming.Lan
+  commentId: N:PublisherStudio.Hubs.Streaming.Lan
+  id: Lan
+  parent: PublisherStudio.Hubs.Streaming
+  children:
+  - PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.Hubs.Streaming.Lan
+  nameWithType: PublisherStudio.Hubs.Streaming.Lan
+  fullName: PublisherStudio.Hubs.Streaming.Lan
+  type: Namespace
+  assemblies:
+  - PublisherStudio.Web
+references:
+- uid: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub
+  commentId: T:PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub
+  parent: PublisherStudio.Hubs.Streaming.Lan
+  isExternal: true
+  href: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub.html
+  name: WebRtcSignalingHub
+  nameWithType: WebRtcSignalingHub
+  fullName: PublisherStudio.Hubs.Streaming.Lan.WebRtcSignalingHub
+- uid: PublisherStudio.Hubs.Streaming.Lan
+  commentId: N:PublisherStudio.Hubs.Streaming.Lan
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Hubs.Streaming.Lan
+  nameWithType: PublisherStudio.Hubs.Streaming.Lan
+  fullName: PublisherStudio.Hubs.Streaming.Lan
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Hubs
+    name: Hubs
+    isExternal: true
+    href: PublisherStudio.Hubs.html
+  - name: .
+  - uid: PublisherStudio.Hubs.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Hubs.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Hubs.Streaming.Lan
+    name: Lan
+    isExternal: true
+    href: PublisherStudio.Hubs.Streaming.Lan.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Hubs
+    name: Hubs
+    isExternal: true
+    href: PublisherStudio.Hubs.html
+  - name: .
+  - uid: PublisherStudio.Hubs.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Hubs.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Hubs.Streaming.Lan
+    name: Lan
+    isExternal: true
+    href: PublisherStudio.Hubs.Streaming.Lan.html

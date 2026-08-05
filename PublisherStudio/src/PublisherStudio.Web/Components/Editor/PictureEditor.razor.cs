@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
@@ -16,6 +16,9 @@ using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Components.Editor;
 
+/// <summary>
+/// Represents a picture editor.
+/// </summary>
 public partial class PictureEditor
 {
     private readonly string[] PictureColors =
@@ -25,6 +28,9 @@ public partial class PictureEditor
 
     [Inject] private IJSRuntime JS { get; set; } = default!;
     [Inject] private SystemFontCatalog SystemFonts { get; set; } = default!;
+    /// <summary>
+    /// Gets or sets state.
+    /// </summary>
     [Inject] public PictureEditorStateService State { get; set; } = default!;
     [Inject] private OpenRasterImportService OpenRasterImporter { get; set; } = default!;
     [Inject] private ILocalGptConnectionService LocalGptConnection { get; set; } = default!;
@@ -33,13 +39,37 @@ public partial class PictureEditor
     [Inject] private IPublisherRuntimePolicyDataService RuntimePolicy { get; set; } = default!;
     [Inject] private PublicationFileService Files { get; set; } = default!;
 
+    /// <summary>
+    /// Gets or sets whether the item is visible.
+    /// </summary>
     [Parameter] public bool Visible { get; set; }
+    /// <summary>
+    /// Gets or sets session identifier.
+    /// </summary>
     [Parameter] public Guid SessionId { get; set; }
+    /// <summary>
+    /// Gets or sets initial document.
+    /// </summary>
     [Parameter] public PictureDocument? InitialDocument { get; set; }
+    /// <summary>
+    /// Gets or sets initial raster data URL.
+    /// </summary>
     [Parameter] public string? InitialRasterDataUrl { get; set; }
+    /// <summary>
+    /// Gets or sets initial name.
+    /// </summary>
     [Parameter] public string InitialName { get; set; } = "Picture";
+    /// <summary>
+    /// Gets or sets editing existing.
+    /// </summary>
     [Parameter] public bool EditingExisting { get; set; }
+    /// <summary>
+    /// Gets or sets saved.
+    /// </summary>
     [Parameter] public EventCallback<PictureEditorResult> Saved { get; set; }
+    /// <summary>
+    /// Gets or sets cancelled.
+    /// </summary>
     [Parameter] public EventCallback Cancelled { get; set; }
 
     private IReadOnlyList<string> PictureFonts => SystemFonts.FontFamilies;
@@ -139,6 +169,9 @@ public partial class PictureEditor
             ? $"{_drawTool} tool · {_drawWidth:0.#} px · {_drawColor}"
             : State.SelectedLayer is null ? "No layer selected" : $"{State.SelectedLayer.Kind}: {State.SelectedLayer.Name}");
 
+    /// <summary>
+    /// Runs the on initialized operation.
+    /// </summary>
     protected override void OnInitialized()
     {
         State.Changed += StateChanged;
@@ -147,6 +180,9 @@ public partial class PictureEditor
 
     private void LocalGptConnectionChanged() => _ = InvokeAsync(StateHasChanged);
 
+    /// <summary>
+    /// Runs the on parameters set operation.
+    /// </summary>
     protected override void OnParametersSet()
     {
         if (!Visible)
@@ -182,6 +218,9 @@ public partial class PictureEditor
         _renderRequested = true;
     }
 
+    /// <summary>
+    /// Runs the on after render async operation.
+    /// </summary>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!Visible) return;
@@ -263,12 +302,18 @@ public partial class PictureEditor
         }
     }
 
+    /// <summary>
+    /// Runs the picture layer selected operation.
+    /// </summary>
     [JSInvokable]
     public void PictureLayerSelected(string? id)
     {
         State.SelectLayer(Guid.TryParse(id, out var parsed) ? parsed : null);
     }
 
+    /// <summary>
+    /// Runs the picture transform committed operation.
+    /// </summary>
     [JSInvokable]
     public void PictureTransformCommitted(string id, double x, double y, double width, double height, double rotation)
     {
@@ -276,6 +321,9 @@ public partial class PictureEditor
             State.CommitTransform(parsed, x, y, width, height, rotation);
     }
 
+    /// <summary>
+    /// Runs the picture stroke committed operation.
+    /// </summary>
     [JSInvokable]
     public void PictureStrokeCommitted(string tool, double[] coordinates, string color, double width, double opacity, double hardness)
     {
@@ -286,6 +334,9 @@ public partial class PictureEditor
         State.AddStroke(kind, points, color, width, opacity, hardness);
     }
 
+    /// <summary>
+    /// Runs the picture shape committed operation.
+    /// </summary>
     [JSInvokable]
     public void PictureShapeCommitted(string tool, double x, double y, double width, double height, double rotation)
     {
@@ -299,6 +350,9 @@ public partial class PictureEditor
         SetDrawTool(PictureDrawTool.Select);
     }
 
+    /// <summary>
+    /// Runs the picture path committed operation.
+    /// </summary>
     [JSInvokable]
     public void PicturePathCommitted(double[] coordinates, bool closed, bool smooth)
     {
@@ -310,6 +364,9 @@ public partial class PictureEditor
         SetDrawTool(PictureDrawTool.Select);
     }
 
+    /// <summary>
+    /// Runs the picture area fill committed operation.
+    /// </summary>
     [JSInvokable]
     public void PictureAreaFillCommitted(string selectionKind, double[] coordinates, string primaryColor, string secondaryColor, bool gradient)
     {
@@ -321,6 +378,9 @@ public partial class PictureEditor
         SetDrawTool(PictureDrawTool.Select);
     }
 
+    /// <summary>
+    /// Runs the picture color picked operation.
+    /// </summary>
     [JSInvokable]
     public void PictureColorPicked(string color)
     {
@@ -330,6 +390,9 @@ public partial class PictureEditor
         _ = InvokeAsync(StateHasChanged);
     }
 
+    /// <summary>
+    /// Runs the picture shortcut requested operation.
+    /// </summary>
     [JSInvokable]
     public async Task PictureShortcutRequested(string command)
     {
@@ -351,6 +414,9 @@ public partial class PictureEditor
         }
     }
 
+    /// <summary>
+    /// Runs the picture render failed operation.
+    /// </summary>
     [JSInvokable]
     public void PictureRenderFailed(string message)
     {
@@ -359,6 +425,9 @@ public partial class PictureEditor
         _ = InvokeAsync(StateHasChanged);
     }
 
+    /// <summary>
+    /// Runs the picture render recovered operation.
+    /// </summary>
     [JSInvokable]
     public void PictureRenderRecovered()
     {
@@ -515,6 +584,9 @@ public partial class PictureEditor
         }
     }
 
+    /// <summary>
+    /// Runs the picture studio file drop positioned operation.
+    /// </summary>
     [JSInvokable]
     public void PictureStudioFileDropPositioned(double? x, double? y)
     {
@@ -528,6 +600,9 @@ public partial class PictureEditor
         _pendingDropY = null;
     }
 
+    /// <summary>
+    /// Runs the picture studio file drop rejected operation.
+    /// </summary>
     [JSInvokable]
     public void PictureStudioFileDropRejected(string? message)
     {
@@ -609,6 +684,9 @@ public partial class PictureEditor
         }
     }
 
+    /// <summary>
+    /// Runs the begin picture export operation.
+    /// </summary>
     [JSInvokable]
     public bool BeginPictureExport(string exportId, int totalLength, int chunkCount)
     {
@@ -631,6 +709,9 @@ public partial class PictureEditor
         return true;
     }
 
+    /// <summary>
+    /// Runs the append picture export chunk operation.
+    /// </summary>
     [JSInvokable]
     public bool AppendPictureExportChunk(string exportId, int chunkIndex, string chunk)
     {
@@ -645,6 +726,9 @@ public partial class PictureEditor
         return true;
     }
 
+    /// <summary>
+    /// Runs the complete picture export operation.
+    /// </summary>
     [JSInvokable]
     public async Task CompletePictureExport(string exportId)
     {
@@ -677,6 +761,9 @@ public partial class PictureEditor
         await InvokeAsync(() => Saved.InvokeAsync(new PictureEditorResult(dataUrl, sourceDocument, name)));
     }
 
+    /// <summary>
+    /// Runs the fail picture export operation.
+    /// </summary>
     [JSInvokable]
     public void FailPictureExport(string exportId, string? message)
     {
@@ -1534,12 +1621,18 @@ public partial class PictureEditor
     private string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
     private string SafeColor(string value) => value.StartsWith('#') && value.Length is 4 or 7 ? value : "#000000";
 
+    /// <summary>
+    /// Runs the dispose operation.
+    /// </summary>
     public void Dispose()
     {
         State.Changed -= StateChanged;
         LocalGptConnection.Changed -= LocalGptConnectionChanged;
     }
 
+    /// <summary>
+    /// Runs the dispose async operation.
+    /// </summary>
     public async ValueTask DisposeAsync()
     {
         State.Changed -= StateChanged;
@@ -1556,23 +1649,53 @@ public partial class PictureEditor
 
     private sealed class PictureAreaSelection
     {
+        /// <summary>
+        /// Gets or sets kind.
+        /// </summary>
         public string Kind { get; set; } = "polygon";
+        /// <summary>
+        /// Gets or sets points.
+        /// </summary>
         public List<PicturePoint> Points { get; set; } = [];
     }
 
     private sealed class PictureOcrResult
     {
+        /// <summary>
+        /// Gets or sets text.
+        /// </summary>
         public string Text { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets model name.
+        /// </summary>
         public string ModelName { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets provider URI.
+        /// </summary>
         public string ProviderUri { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets media type.
+        /// </summary>
         public string MediaType { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets needs human review.
+        /// </summary>
         public bool NeedsHumanReview { get; set; } = true;
     }
 
     private sealed class PictureImageSize
     {
+        /// <summary>
+        /// Runs the picture image size operation.
+        /// </summary>
         public PictureImageSize() { }
+        /// <summary>
+        /// Gets or sets width.
+        /// </summary>
         public int Width { get; set; }
+        /// <summary>
+        /// Gets or sets height.
+        /// </summary>
         public int Height { get; set; }
     }
 }

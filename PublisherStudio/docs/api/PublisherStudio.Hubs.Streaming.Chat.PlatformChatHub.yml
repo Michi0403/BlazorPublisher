@@ -1,0 +1,665 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub
+  commentId: T:PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub
+  id: PlatformChatHub
+  parent: PublisherStudio.Hubs.Streaming.Chat
+  children:
+  - PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.#ctor(PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatUseCases)
+  - PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.CanOpen(System.Guid)
+  - PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.RunSubscriberAsync(System.Guid,System.Guid,System.Net.WebSockets.WebSocket,System.Threading.CancellationToken)
+  langs:
+  - csharp
+  - vb
+  name: PlatformChatHub
+  nameWithType: PlatformChatHub
+  fullName: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Hubs.Streaming.Chat
+  summary: WebSocket entry point for platform-chat subscriptions. Reusable provider, history and session processing stays in Services/Streaming; controllers only own HTTP negotiation.
+  example: []
+  syntax:
+    content: public sealed class PlatformChatHub
+    content.vb: Public NotInheritable Class PlatformChatHub
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.#ctor(PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatUseCases)
+  commentId: M:PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.#ctor(PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatUseCases)
+  id: '#ctor(PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatUseCases)'
+  parent: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub
+  langs:
+  - csharp
+  - vb
+  name: PlatformChatHub(StreamingChatUseCases)
+  nameWithType: PlatformChatHub.PlatformChatHub(StreamingChatUseCases)
+  fullName: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.PlatformChatHub(PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatUseCases)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Hubs.Streaming.Chat
+  summary: WebSocket entry point for platform-chat subscriptions. Reusable provider, history and session processing stays in Services/Streaming; controllers only own HTTP negotiation.
+  example: []
+  syntax:
+    content: public PlatformChatHub(StreamingChatUseCases useCases)
+    parameters:
+    - id: useCases
+      type: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatUseCases
+    content.vb: Public Sub New(useCases As StreamingChatUseCases)
+  overload: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.#ctor*
+  nameWithType.vb: PlatformChatHub.New(StreamingChatUseCases)
+  fullName.vb: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.New(PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatUseCases)
+  name.vb: New(StreamingChatUseCases)
+- uid: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.CanOpen(System.Guid)
+  commentId: M:PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.CanOpen(System.Guid)
+  id: CanOpen(System.Guid)
+  parent: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub
+  langs:
+  - csharp
+  - vb
+  name: CanOpen(Guid)
+  nameWithType: PlatformChatHub.CanOpen(Guid)
+  fullName: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.CanOpen(System.Guid)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Hubs.Streaming.Chat
+  summary: Determines whether open.
+  example: []
+  syntax:
+    content: public bool CanOpen(Guid sessionId)
+    parameters:
+    - id: sessionId
+      type: System.Guid
+    return:
+      type: System.Boolean
+    content.vb: Public Function CanOpen(sessionId As Guid) As Boolean
+  overload: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.CanOpen*
+- uid: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.RunSubscriberAsync(System.Guid,System.Guid,System.Net.WebSockets.WebSocket,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.RunSubscriberAsync(System.Guid,System.Guid,System.Net.WebSockets.WebSocket,System.Threading.CancellationToken)
+  id: RunSubscriberAsync(System.Guid,System.Guid,System.Net.WebSockets.WebSocket,System.Threading.CancellationToken)
+  parent: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub
+  langs:
+  - csharp
+  - vb
+  name: RunSubscriberAsync(Guid, Guid, WebSocket, CancellationToken)
+  nameWithType: PlatformChatHub.RunSubscriberAsync(Guid, Guid, WebSocket, CancellationToken)
+  fullName: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.RunSubscriberAsync(System.Guid, System.Guid, System.Net.WebSockets.WebSocket, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Hubs.Streaming.Chat
+  summary: Runs the run subscriber async operation.
+  example: []
+  syntax:
+    content: public Task<bool> RunSubscriberAsync(Guid sessionId, Guid outputId, WebSocket socket, CancellationToken cancellationToken)
+    parameters:
+    - id: sessionId
+      type: System.Guid
+    - id: outputId
+      type: System.Guid
+    - id: socket
+      type: System.Net.WebSockets.WebSocket
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{System.Boolean}
+    content.vb: Public Function RunSubscriberAsync(sessionId As Guid, outputId As Guid, socket As WebSocket, cancellationToken As CancellationToken) As Task(Of Boolean)
+  overload: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.RunSubscriberAsync*
+references:
+- uid: PublisherStudio.Hubs.Streaming.Chat
+  commentId: N:PublisherStudio.Hubs.Streaming.Chat
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Hubs.Streaming.Chat
+  nameWithType: PublisherStudio.Hubs.Streaming.Chat
+  fullName: PublisherStudio.Hubs.Streaming.Chat
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Hubs
+    name: Hubs
+    isExternal: true
+    href: PublisherStudio.Hubs.html
+  - name: .
+  - uid: PublisherStudio.Hubs.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Hubs.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Hubs.Streaming.Chat
+    name: Chat
+    isExternal: true
+    href: PublisherStudio.Hubs.Streaming.Chat.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Hubs
+    name: Hubs
+    isExternal: true
+    href: PublisherStudio.Hubs.html
+  - name: .
+  - uid: PublisherStudio.Hubs.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Hubs.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Hubs.Streaming.Chat
+    name: Chat
+    isExternal: true
+    href: PublisherStudio.Hubs.Streaming.Chat.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.#ctor*
+  commentId: Overload:PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.#ctor
+  isExternal: true
+  href: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.html#PublisherStudio_Hubs_Streaming_Chat_PlatformChatHub__ctor_PublisherStudio_Services_Streaming_UseCases_Chat_StreamingChatUseCases_
+  name: PlatformChatHub
+  nameWithType: PlatformChatHub.PlatformChatHub
+  fullName: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.PlatformChatHub
+  nameWithType.vb: PlatformChatHub.New
+  fullName.vb: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.New
+  name.vb: New
+- uid: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatUseCases
+  commentId: T:PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatUseCases
+  parent: PublisherStudio.Services.Streaming.UseCases.Chat
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatUseCases.html
+  name: StreamingChatUseCases
+  nameWithType: StreamingChatUseCases
+  fullName: PublisherStudio.Services.Streaming.UseCases.Chat.StreamingChatUseCases
+- uid: PublisherStudio.Services.Streaming.UseCases.Chat
+  commentId: N:PublisherStudio.Services.Streaming.UseCases.Chat
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.UseCases.Chat
+  nameWithType: PublisherStudio.Services.Streaming.UseCases.Chat
+  fullName: PublisherStudio.Services.Streaming.UseCases.Chat
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases.Chat
+    name: Chat
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Chat.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases
+    name: UseCases
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.UseCases.Chat
+    name: Chat
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.UseCases.Chat.html
+- uid: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.CanOpen*
+  commentId: Overload:PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.CanOpen
+  isExternal: true
+  href: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.html#PublisherStudio_Hubs_Streaming_Chat_PlatformChatHub_CanOpen_System_Guid_
+  name: CanOpen
+  nameWithType: PlatformChatHub.CanOpen
+  fullName: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.CanOpen
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.RunSubscriberAsync*
+  commentId: Overload:PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.RunSubscriberAsync
+  isExternal: true
+  href: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.html#PublisherStudio_Hubs_Streaming_Chat_PlatformChatHub_RunSubscriberAsync_System_Guid_System_Guid_System_Net_WebSockets_WebSocket_System_Threading_CancellationToken_
+  name: RunSubscriberAsync
+  nameWithType: PlatformChatHub.RunSubscriberAsync
+  fullName: PublisherStudio.Hubs.Streaming.Chat.PlatformChatHub.RunSubscriberAsync
+- uid: System.Net.WebSockets.WebSocket
+  commentId: T:System.Net.WebSockets.WebSocket
+  parent: System.Net.WebSockets
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.net.websockets.websocket
+  name: WebSocket
+  nameWithType: WebSocket
+  fullName: System.Net.WebSockets.WebSocket
+- uid: System.Threading.CancellationToken
+  commentId: T:System.Threading.CancellationToken
+  parent: System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  name: CancellationToken
+  nameWithType: CancellationToken
+  fullName: System.Threading.CancellationToken
+- uid: System.Threading.Tasks.Task{System.Boolean}
+  commentId: T:System.Threading.Tasks.Task{System.Boolean}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<bool>
+  nameWithType: Task<bool>
+  fullName: System.Threading.Tasks.Task<bool>
+  nameWithType.vb: Task(Of Boolean)
+  fullName.vb: System.Threading.Tasks.Task(Of Boolean)
+  name.vb: Task(Of Boolean)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: System.Boolean
+    name: bool
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.boolean
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Boolean
+    name: Boolean
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.boolean
+  - name: )
+- uid: System.Net.WebSockets
+  commentId: N:System.Net.WebSockets
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Net.WebSockets
+  nameWithType: System.Net.WebSockets
+  fullName: System.Net.WebSockets
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Net
+    name: Net
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.net
+  - name: .
+  - uid: System.Net.WebSockets
+    name: WebSockets
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.net.websockets
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Net
+    name: Net
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.net
+  - name: .
+  - uid: System.Net.WebSockets
+    name: WebSockets
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.net.websockets
+- uid: System.Threading
+  commentId: N:System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading
+  nameWithType: System.Threading
+  fullName: System.Threading
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+- uid: System.Threading.Tasks.Task`1
+  commentId: T:System.Threading.Tasks.Task`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<TResult>
+  nameWithType: Task<TResult>
+  fullName: System.Threading.Tasks.Task<TResult>
+  nameWithType.vb: Task(Of TResult)
+  fullName.vb: System.Threading.Tasks.Task(Of TResult)
+  name.vb: Task(Of TResult)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - name: TResult
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TResult
+  - name: )
+- uid: System.Threading.Tasks
+  commentId: N:System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading.Tasks
+  nameWithType: System.Threading.Tasks
+  fullName: System.Threading.Tasks
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks

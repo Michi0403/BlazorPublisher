@@ -1,0 +1,635 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.OpenScad.OpenScadRenderContext
+  commentId: T:PublisherStudio.Services.OpenScad.OpenScadRenderContext
+  id: OpenScadRenderContext
+  parent: PublisherStudio.Services.OpenScad
+  children:
+  - PublisherStudio.Services.OpenScad.OpenScadRenderContext.#ctor
+  - PublisherStudio.Services.OpenScad.OpenScadRenderContext.ChildBlock(PublisherStudio.BusinessObjects.OpenScadNode)
+  - PublisherStudio.Services.OpenScad.OpenScadRenderContext.Depth
+  - PublisherStudio.Services.OpenScad.OpenScadRenderContext.Indent
+  - PublisherStudio.Services.OpenScad.OpenScadRenderContext.RenderNode
+  - PublisherStudio.Services.OpenScad.OpenScadRenderContext.Values
+  langs:
+  - csharp
+  - vb
+  name: OpenScadRenderContext
+  nameWithType: OpenScadRenderContext
+  fullName: PublisherStudio.Services.OpenScad.OpenScadRenderContext
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OpenScad
+  summary: Represents an open scad render context.
+  example: []
+  syntax:
+    content: public sealed class OpenScadRenderContext
+    content.vb: Public NotInheritable Class OpenScadRenderContext
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.OpenScad.OpenScadRenderContext.ChildBlock(PublisherStudio.BusinessObjects.OpenScadNode)
+  commentId: M:PublisherStudio.Services.OpenScad.OpenScadRenderContext.ChildBlock(PublisherStudio.BusinessObjects.OpenScadNode)
+  id: ChildBlock(PublisherStudio.BusinessObjects.OpenScadNode)
+  parent: PublisherStudio.Services.OpenScad.OpenScadRenderContext
+  langs:
+  - csharp
+  - vb
+  name: ChildBlock(OpenScadNode)
+  nameWithType: OpenScadRenderContext.ChildBlock(OpenScadNode)
+  fullName: PublisherStudio.Services.OpenScad.OpenScadRenderContext.ChildBlock(PublisherStudio.BusinessObjects.OpenScadNode)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OpenScad
+  summary: Runs the child block operation.
+  example: []
+  syntax:
+    content: public string ChildBlock(OpenScadNode node)
+    parameters:
+    - id: node
+      type: PublisherStudio.BusinessObjects.OpenScadNode
+    return:
+      type: System.String
+    content.vb: Public Function ChildBlock(node As OpenScadNode) As String
+  overload: PublisherStudio.Services.OpenScad.OpenScadRenderContext.ChildBlock*
+- uid: PublisherStudio.Services.OpenScad.OpenScadRenderContext.#ctor
+  commentId: M:PublisherStudio.Services.OpenScad.OpenScadRenderContext.#ctor
+  id: '#ctor'
+  parent: PublisherStudio.Services.OpenScad.OpenScadRenderContext
+  langs:
+  - csharp
+  - vb
+  name: OpenScadRenderContext()
+  nameWithType: OpenScadRenderContext.OpenScadRenderContext()
+  fullName: PublisherStudio.Services.OpenScad.OpenScadRenderContext.OpenScadRenderContext()
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OpenScad
+  syntax:
+    content: public OpenScadRenderContext()
+    content.vb: Public Sub New()
+  overload: PublisherStudio.Services.OpenScad.OpenScadRenderContext.#ctor*
+  nameWithType.vb: OpenScadRenderContext.New()
+  fullName.vb: PublisherStudio.Services.OpenScad.OpenScadRenderContext.New()
+  name.vb: New()
+- uid: PublisherStudio.Services.OpenScad.OpenScadRenderContext.Values
+  commentId: P:PublisherStudio.Services.OpenScad.OpenScadRenderContext.Values
+  id: Values
+  parent: PublisherStudio.Services.OpenScad.OpenScadRenderContext
+  langs:
+  - csharp
+  - vb
+  name: Values
+  nameWithType: OpenScadRenderContext.Values
+  fullName: PublisherStudio.Services.OpenScad.OpenScadRenderContext.Values
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OpenScad
+  summary: Gets or sets values.
+  example: []
+  syntax:
+    content: public required IOpenScadValueFormatter Values { get; init; }
+    parameters: []
+    return:
+      type: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter
+    content.vb: Public Property Values As IOpenScadValueFormatter
+  overload: PublisherStudio.Services.OpenScad.OpenScadRenderContext.Values*
+- uid: PublisherStudio.Services.OpenScad.OpenScadRenderContext.RenderNode
+  commentId: P:PublisherStudio.Services.OpenScad.OpenScadRenderContext.RenderNode
+  id: RenderNode
+  parent: PublisherStudio.Services.OpenScad.OpenScadRenderContext
+  langs:
+  - csharp
+  - vb
+  name: RenderNode
+  nameWithType: OpenScadRenderContext.RenderNode
+  fullName: PublisherStudio.Services.OpenScad.OpenScadRenderContext.RenderNode
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OpenScad
+  summary: Gets or sets render node.
+  example: []
+  syntax:
+    content: public required Func<OpenScadNode, int, string> RenderNode { get; init; }
+    parameters: []
+    return:
+      type: System.Func{PublisherStudio.BusinessObjects.OpenScadNode,System.Int32,System.String}
+    content.vb: Public Property RenderNode As Func(Of OpenScadNode, Integer, String)
+  overload: PublisherStudio.Services.OpenScad.OpenScadRenderContext.RenderNode*
+- uid: PublisherStudio.Services.OpenScad.OpenScadRenderContext.Depth
+  commentId: P:PublisherStudio.Services.OpenScad.OpenScadRenderContext.Depth
+  id: Depth
+  parent: PublisherStudio.Services.OpenScad.OpenScadRenderContext
+  langs:
+  - csharp
+  - vb
+  name: Depth
+  nameWithType: OpenScadRenderContext.Depth
+  fullName: PublisherStudio.Services.OpenScad.OpenScadRenderContext.Depth
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OpenScad
+  summary: Gets or sets depth.
+  example: []
+  syntax:
+    content: public int Depth { get; init; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property Depth As Integer
+  overload: PublisherStudio.Services.OpenScad.OpenScadRenderContext.Depth*
+- uid: PublisherStudio.Services.OpenScad.OpenScadRenderContext.Indent
+  commentId: P:PublisherStudio.Services.OpenScad.OpenScadRenderContext.Indent
+  id: Indent
+  parent: PublisherStudio.Services.OpenScad.OpenScadRenderContext
+  langs:
+  - csharp
+  - vb
+  name: Indent
+  nameWithType: OpenScadRenderContext.Indent
+  fullName: PublisherStudio.Services.OpenScad.OpenScadRenderContext.Indent
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.OpenScad
+  summary: Gets indent.
+  example: []
+  syntax:
+    content: public string Indent { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public ReadOnly Property Indent As String
+  overload: PublisherStudio.Services.OpenScad.OpenScadRenderContext.Indent*
+references:
+- uid: PublisherStudio.Services.OpenScad
+  commentId: N:PublisherStudio.Services.OpenScad
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.OpenScad
+  nameWithType: PublisherStudio.Services.OpenScad
+  fullName: PublisherStudio.Services.OpenScad
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OpenScad
+    name: OpenScad
+    isExternal: true
+    href: PublisherStudio.Services.OpenScad.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.OpenScad
+    name: OpenScad
+    isExternal: true
+    href: PublisherStudio.Services.OpenScad.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.OpenScad.OpenScadRenderContext.ChildBlock*
+  commentId: Overload:PublisherStudio.Services.OpenScad.OpenScadRenderContext.ChildBlock
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.OpenScadRenderContext.html#PublisherStudio_Services_OpenScad_OpenScadRenderContext_ChildBlock_PublisherStudio_BusinessObjects_OpenScadNode_
+  name: ChildBlock
+  nameWithType: OpenScadRenderContext.ChildBlock
+  fullName: PublisherStudio.Services.OpenScad.OpenScadRenderContext.ChildBlock
+- uid: PublisherStudio.BusinessObjects.OpenScadNode
+  commentId: T:PublisherStudio.BusinessObjects.OpenScadNode
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.OpenScadNode.html
+  name: OpenScadNode
+  nameWithType: OpenScadNode
+  fullName: PublisherStudio.BusinessObjects.OpenScadNode
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.Services.OpenScad.OpenScadRenderContext.#ctor*
+  commentId: Overload:PublisherStudio.Services.OpenScad.OpenScadRenderContext.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.OpenScadRenderContext.html#PublisherStudio_Services_OpenScad_OpenScadRenderContext__ctor
+  name: OpenScadRenderContext
+  nameWithType: OpenScadRenderContext.OpenScadRenderContext
+  fullName: PublisherStudio.Services.OpenScad.OpenScadRenderContext.OpenScadRenderContext
+  nameWithType.vb: OpenScadRenderContext.New
+  fullName.vb: PublisherStudio.Services.OpenScad.OpenScadRenderContext.New
+  name.vb: New
+- uid: PublisherStudio.Services.OpenScad.OpenScadRenderContext.Values*
+  commentId: Overload:PublisherStudio.Services.OpenScad.OpenScadRenderContext.Values
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.OpenScadRenderContext.html#PublisherStudio_Services_OpenScad_OpenScadRenderContext_Values
+  name: Values
+  nameWithType: OpenScadRenderContext.Values
+  fullName: PublisherStudio.Services.OpenScad.OpenScadRenderContext.Values
+- uid: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter
+  commentId: T:PublisherStudio.Services.OpenScad.IOpenScadValueFormatter
+  parent: PublisherStudio.Services.OpenScad
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter.html
+  name: IOpenScadValueFormatter
+  nameWithType: IOpenScadValueFormatter
+  fullName: PublisherStudio.Services.OpenScad.IOpenScadValueFormatter
+- uid: PublisherStudio.Services.OpenScad.OpenScadRenderContext.RenderNode*
+  commentId: Overload:PublisherStudio.Services.OpenScad.OpenScadRenderContext.RenderNode
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.OpenScadRenderContext.html#PublisherStudio_Services_OpenScad_OpenScadRenderContext_RenderNode
+  name: RenderNode
+  nameWithType: OpenScadRenderContext.RenderNode
+  fullName: PublisherStudio.Services.OpenScad.OpenScadRenderContext.RenderNode
+- uid: System.Func{PublisherStudio.BusinessObjects.OpenScadNode,System.Int32,System.String}
+  commentId: T:System.Func{PublisherStudio.BusinessObjects.OpenScadNode,System.Int32,System.String}
+  parent: System
+  definition: System.Func`3
+  href: https://learn.microsoft.com/dotnet/api/system.func-3
+  name: Func<OpenScadNode, int, string>
+  nameWithType: Func<OpenScadNode, int, string>
+  fullName: System.Func<PublisherStudio.BusinessObjects.OpenScadNode, int, string>
+  nameWithType.vb: Func(Of OpenScadNode, Integer, String)
+  fullName.vb: System.Func(Of PublisherStudio.BusinessObjects.OpenScadNode, Integer, String)
+  name.vb: Func(Of OpenScadNode, Integer, String)
+  spec.csharp:
+  - uid: System.Func`3
+    name: Func
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.func-3
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.OpenScadNode
+    name: OpenScadNode
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.OpenScadNode.html
+  - name: ','
+  - name: " "
+  - uid: System.Int32
+    name: int
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.int32
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  spec.vb:
+  - uid: System.Func`3
+    name: Func
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.func-3
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.OpenScadNode
+    name: OpenScadNode
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.OpenScadNode.html
+  - name: ','
+  - name: " "
+  - uid: System.Int32
+    name: Integer
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.int32
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: System.Func`3
+  commentId: T:System.Func`3
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.func-3
+  name: Func<T1, T2, TResult>
+  nameWithType: Func<T1, T2, TResult>
+  fullName: System.Func<T1, T2, TResult>
+  nameWithType.vb: Func(Of T1, T2, TResult)
+  fullName.vb: System.Func(Of T1, T2, TResult)
+  name.vb: Func(Of T1, T2, TResult)
+  spec.csharp:
+  - uid: System.Func`3
+    name: Func
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.func-3
+  - name: <
+  - name: T1
+  - name: ','
+  - name: " "
+  - name: T2
+  - name: ','
+  - name: " "
+  - name: TResult
+  - name: '>'
+  spec.vb:
+  - uid: System.Func`3
+    name: Func
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.func-3
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T1
+  - name: ','
+  - name: " "
+  - name: T2
+  - name: ','
+  - name: " "
+  - name: TResult
+  - name: )
+- uid: PublisherStudio.Services.OpenScad.OpenScadRenderContext.Depth*
+  commentId: Overload:PublisherStudio.Services.OpenScad.OpenScadRenderContext.Depth
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.OpenScadRenderContext.html#PublisherStudio_Services_OpenScad_OpenScadRenderContext_Depth
+  name: Depth
+  nameWithType: OpenScadRenderContext.Depth
+  fullName: PublisherStudio.Services.OpenScad.OpenScadRenderContext.Depth
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: PublisherStudio.Services.OpenScad.OpenScadRenderContext.Indent*
+  commentId: Overload:PublisherStudio.Services.OpenScad.OpenScadRenderContext.Indent
+  isExternal: true
+  href: PublisherStudio.Services.OpenScad.OpenScadRenderContext.html#PublisherStudio_Services_OpenScad_OpenScadRenderContext_Indent
+  name: Indent
+  nameWithType: OpenScadRenderContext.Indent
+  fullName: PublisherStudio.Services.OpenScad.OpenScadRenderContext.Indent

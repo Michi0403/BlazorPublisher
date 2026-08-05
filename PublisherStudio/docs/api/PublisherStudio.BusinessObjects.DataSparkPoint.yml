@@ -1,0 +1,792 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.DataSparkPoint
+  commentId: T:PublisherStudio.BusinessObjects.DataSparkPoint
+  id: DataSparkPoint
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.DataSparkPoint.#ctor(System.String,System.Double)
+  - PublisherStudio.BusinessObjects.DataSparkPoint.Argument
+  - PublisherStudio.BusinessObjects.DataSparkPoint.Deconstruct(System.String@,System.Double@)
+  - PublisherStudio.BusinessObjects.DataSparkPoint.Equals(PublisherStudio.BusinessObjects.DataSparkPoint)
+  - PublisherStudio.BusinessObjects.DataSparkPoint.Equals(System.Object)
+  - PublisherStudio.BusinessObjects.DataSparkPoint.GetHashCode
+  - PublisherStudio.BusinessObjects.DataSparkPoint.ToString
+  - PublisherStudio.BusinessObjects.DataSparkPoint.Value
+  - PublisherStudio.BusinessObjects.DataSparkPoint.op_Equality(PublisherStudio.BusinessObjects.DataSparkPoint,PublisherStudio.BusinessObjects.DataSparkPoint)
+  - PublisherStudio.BusinessObjects.DataSparkPoint.op_Inequality(PublisherStudio.BusinessObjects.DataSparkPoint,PublisherStudio.BusinessObjects.DataSparkPoint)
+  langs:
+  - csharp
+  - vb
+  name: DataSparkPoint
+  nameWithType: DataSparkPoint
+  fullName: PublisherStudio.BusinessObjects.DataSparkPoint
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents a data spark point.
+  example: []
+  syntax:
+    content: 'public sealed record DataSparkPoint : IEquatable<DataSparkPoint>'
+    content.vb: Public NotInheritable Class DataSparkPoint Implements IEquatable(Of DataSparkPoint)
+  inheritance:
+  - System.Object
+  implements:
+  - System.IEquatable{PublisherStudio.BusinessObjects.DataSparkPoint}
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+- uid: PublisherStudio.BusinessObjects.DataSparkPoint.#ctor(System.String,System.Double)
+  commentId: M:PublisherStudio.BusinessObjects.DataSparkPoint.#ctor(System.String,System.Double)
+  id: '#ctor(System.String,System.Double)'
+  parent: PublisherStudio.BusinessObjects.DataSparkPoint
+  langs:
+  - csharp
+  - vb
+  name: DataSparkPoint(string, double)
+  nameWithType: DataSparkPoint.DataSparkPoint(string, double)
+  fullName: PublisherStudio.BusinessObjects.DataSparkPoint.DataSparkPoint(string, double)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Represents a data spark point.
+  example: []
+  syntax:
+    content: public DataSparkPoint(string Argument, double Value)
+    parameters:
+    - id: Argument
+      type: System.String
+    - id: Value
+      type: System.Double
+    content.vb: Public Sub New(Argument As String, Value As Double)
+  overload: PublisherStudio.BusinessObjects.DataSparkPoint.#ctor*
+  nameWithType.vb: DataSparkPoint.New(String, Double)
+  fullName.vb: PublisherStudio.BusinessObjects.DataSparkPoint.New(String, Double)
+  name.vb: New(String, Double)
+- uid: PublisherStudio.BusinessObjects.DataSparkPoint.ToString
+  commentId: M:PublisherStudio.BusinessObjects.DataSparkPoint.ToString
+  id: ToString
+  parent: PublisherStudio.BusinessObjects.DataSparkPoint
+  langs:
+  - csharp
+  - vb
+  name: ToString()
+  nameWithType: DataSparkPoint.ToString()
+  fullName: PublisherStudio.BusinessObjects.DataSparkPoint.ToString()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  example: []
+  syntax:
+    content: public override string ToString()
+    return:
+      type: System.String
+    content.vb: Public Overrides Function ToString() As String
+  overridden: System.Object.ToString
+  overload: PublisherStudio.BusinessObjects.DataSparkPoint.ToString*
+- uid: PublisherStudio.BusinessObjects.DataSparkPoint.op_Inequality(PublisherStudio.BusinessObjects.DataSparkPoint,PublisherStudio.BusinessObjects.DataSparkPoint)
+  commentId: M:PublisherStudio.BusinessObjects.DataSparkPoint.op_Inequality(PublisherStudio.BusinessObjects.DataSparkPoint,PublisherStudio.BusinessObjects.DataSparkPoint)
+  id: op_Inequality(PublisherStudio.BusinessObjects.DataSparkPoint,PublisherStudio.BusinessObjects.DataSparkPoint)
+  parent: PublisherStudio.BusinessObjects.DataSparkPoint
+  langs:
+  - csharp
+  - vb
+  name: operator !=(DataSparkPoint?, DataSparkPoint?)
+  nameWithType: DataSparkPoint.operator !=(DataSparkPoint?, DataSparkPoint?)
+  fullName: PublisherStudio.BusinessObjects.DataSparkPoint.operator !=(PublisherStudio.BusinessObjects.DataSparkPoint?, PublisherStudio.BusinessObjects.DataSparkPoint?)
+  type: Operator
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public static bool operator !=(DataSparkPoint? left, DataSparkPoint? right)
+    parameters:
+    - id: left
+      type: PublisherStudio.BusinessObjects.DataSparkPoint
+    - id: right
+      type: PublisherStudio.BusinessObjects.DataSparkPoint
+    return:
+      type: System.Boolean
+    content.vb: Public Shared Operator <>(left As DataSparkPoint, right As DataSparkPoint) As Boolean
+  overload: PublisherStudio.BusinessObjects.DataSparkPoint.op_Inequality*
+  nameWithType.vb: DataSparkPoint.<>(DataSparkPoint, DataSparkPoint)
+  fullName.vb: PublisherStudio.BusinessObjects.DataSparkPoint.<>(PublisherStudio.BusinessObjects.DataSparkPoint, PublisherStudio.BusinessObjects.DataSparkPoint)
+  name.vb: <>(DataSparkPoint, DataSparkPoint)
+- uid: PublisherStudio.BusinessObjects.DataSparkPoint.op_Equality(PublisherStudio.BusinessObjects.DataSparkPoint,PublisherStudio.BusinessObjects.DataSparkPoint)
+  commentId: M:PublisherStudio.BusinessObjects.DataSparkPoint.op_Equality(PublisherStudio.BusinessObjects.DataSparkPoint,PublisherStudio.BusinessObjects.DataSparkPoint)
+  id: op_Equality(PublisherStudio.BusinessObjects.DataSparkPoint,PublisherStudio.BusinessObjects.DataSparkPoint)
+  parent: PublisherStudio.BusinessObjects.DataSparkPoint
+  langs:
+  - csharp
+  - vb
+  name: operator ==(DataSparkPoint?, DataSparkPoint?)
+  nameWithType: DataSparkPoint.operator ==(DataSparkPoint?, DataSparkPoint?)
+  fullName: PublisherStudio.BusinessObjects.DataSparkPoint.operator ==(PublisherStudio.BusinessObjects.DataSparkPoint?, PublisherStudio.BusinessObjects.DataSparkPoint?)
+  type: Operator
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public static bool operator ==(DataSparkPoint? left, DataSparkPoint? right)
+    parameters:
+    - id: left
+      type: PublisherStudio.BusinessObjects.DataSparkPoint
+    - id: right
+      type: PublisherStudio.BusinessObjects.DataSparkPoint
+    return:
+      type: System.Boolean
+    content.vb: Public Shared Operator =(left As DataSparkPoint, right As DataSparkPoint) As Boolean
+  overload: PublisherStudio.BusinessObjects.DataSparkPoint.op_Equality*
+  nameWithType.vb: DataSparkPoint.=(DataSparkPoint, DataSparkPoint)
+  fullName.vb: PublisherStudio.BusinessObjects.DataSparkPoint.=(PublisherStudio.BusinessObjects.DataSparkPoint, PublisherStudio.BusinessObjects.DataSparkPoint)
+  name.vb: =(DataSparkPoint, DataSparkPoint)
+- uid: PublisherStudio.BusinessObjects.DataSparkPoint.GetHashCode
+  commentId: M:PublisherStudio.BusinessObjects.DataSparkPoint.GetHashCode
+  id: GetHashCode
+  parent: PublisherStudio.BusinessObjects.DataSparkPoint
+  langs:
+  - csharp
+  - vb
+  name: GetHashCode()
+  nameWithType: DataSparkPoint.GetHashCode()
+  fullName: PublisherStudio.BusinessObjects.DataSparkPoint.GetHashCode()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  example: []
+  syntax:
+    content: public override int GetHashCode()
+    return:
+      type: System.Int32
+    content.vb: Public Overrides Function GetHashCode() As Integer
+  overridden: System.Object.GetHashCode
+  overload: PublisherStudio.BusinessObjects.DataSparkPoint.GetHashCode*
+- uid: PublisherStudio.BusinessObjects.DataSparkPoint.Equals(System.Object)
+  commentId: M:PublisherStudio.BusinessObjects.DataSparkPoint.Equals(System.Object)
+  id: Equals(System.Object)
+  parent: PublisherStudio.BusinessObjects.DataSparkPoint
+  langs:
+  - csharp
+  - vb
+  name: Equals(object?)
+  nameWithType: DataSparkPoint.Equals(object?)
+  fullName: PublisherStudio.BusinessObjects.DataSparkPoint.Equals(object?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  example: []
+  syntax:
+    content: public override bool Equals(object? obj)
+    parameters:
+    - id: obj
+      type: System.Object
+    return:
+      type: System.Boolean
+    content.vb: Public Overrides Function Equals(obj As Object) As Boolean
+  overridden: System.Object.Equals(System.Object)
+  overload: PublisherStudio.BusinessObjects.DataSparkPoint.Equals*
+  nameWithType.vb: DataSparkPoint.Equals(Object)
+  fullName.vb: PublisherStudio.BusinessObjects.DataSparkPoint.Equals(Object)
+  name.vb: Equals(Object)
+- uid: PublisherStudio.BusinessObjects.DataSparkPoint.Equals(PublisherStudio.BusinessObjects.DataSparkPoint)
+  commentId: M:PublisherStudio.BusinessObjects.DataSparkPoint.Equals(PublisherStudio.BusinessObjects.DataSparkPoint)
+  id: Equals(PublisherStudio.BusinessObjects.DataSparkPoint)
+  parent: PublisherStudio.BusinessObjects.DataSparkPoint
+  langs:
+  - csharp
+  - vb
+  name: Equals(DataSparkPoint?)
+  nameWithType: DataSparkPoint.Equals(DataSparkPoint?)
+  fullName: PublisherStudio.BusinessObjects.DataSparkPoint.Equals(PublisherStudio.BusinessObjects.DataSparkPoint?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  example: []
+  syntax:
+    content: public bool Equals(DataSparkPoint? other)
+    parameters:
+    - id: other
+      type: PublisherStudio.BusinessObjects.DataSparkPoint
+    return:
+      type: System.Boolean
+    content.vb: Public Function Equals(other As DataSparkPoint) As Boolean
+  overload: PublisherStudio.BusinessObjects.DataSparkPoint.Equals*
+  implements:
+  - System.IEquatable{PublisherStudio.BusinessObjects.DataSparkPoint}.Equals(PublisherStudio.BusinessObjects.DataSparkPoint)
+  nameWithType.vb: DataSparkPoint.Equals(DataSparkPoint)
+  fullName.vb: PublisherStudio.BusinessObjects.DataSparkPoint.Equals(PublisherStudio.BusinessObjects.DataSparkPoint)
+  name.vb: Equals(DataSparkPoint)
+- uid: PublisherStudio.BusinessObjects.DataSparkPoint.Deconstruct(System.String@,System.Double@)
+  commentId: M:PublisherStudio.BusinessObjects.DataSparkPoint.Deconstruct(System.String@,System.Double@)
+  id: Deconstruct(System.String@,System.Double@)
+  parent: PublisherStudio.BusinessObjects.DataSparkPoint
+  langs:
+  - csharp
+  - vb
+  name: Deconstruct(out string, out double)
+  nameWithType: DataSparkPoint.Deconstruct(out string, out double)
+  fullName: PublisherStudio.BusinessObjects.DataSparkPoint.Deconstruct(out string, out double)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public void Deconstruct(out string Argument, out double Value)
+    parameters:
+    - id: Argument
+      type: System.String
+    - id: Value
+      type: System.Double
+    content.vb: Public Sub Deconstruct(Argument As String, Value As Double)
+  overload: PublisherStudio.BusinessObjects.DataSparkPoint.Deconstruct*
+  nameWithType.vb: DataSparkPoint.Deconstruct(String, Double)
+  fullName.vb: PublisherStudio.BusinessObjects.DataSparkPoint.Deconstruct(String, Double)
+  name.vb: Deconstruct(String, Double)
+- uid: PublisherStudio.BusinessObjects.DataSparkPoint.Argument
+  commentId: P:PublisherStudio.BusinessObjects.DataSparkPoint.Argument
+  id: Argument
+  parent: PublisherStudio.BusinessObjects.DataSparkPoint
+  langs:
+  - csharp
+  - vb
+  name: Argument
+  nameWithType: DataSparkPoint.Argument
+  fullName: PublisherStudio.BusinessObjects.DataSparkPoint.Argument
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public string Argument { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Argument As String
+  overload: PublisherStudio.BusinessObjects.DataSparkPoint.Argument*
+- uid: PublisherStudio.BusinessObjects.DataSparkPoint.Value
+  commentId: P:PublisherStudio.BusinessObjects.DataSparkPoint.Value
+  id: Value
+  parent: PublisherStudio.BusinessObjects.DataSparkPoint
+  langs:
+  - csharp
+  - vb
+  name: Value
+  nameWithType: DataSparkPoint.Value
+  fullName: PublisherStudio.BusinessObjects.DataSparkPoint.Value
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: public double Value { get; init; }
+    parameters: []
+    return:
+      type: System.Double
+    content.vb: Public Property Value As Double
+  overload: PublisherStudio.BusinessObjects.DataSparkPoint.Value*
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.IEquatable{PublisherStudio.BusinessObjects.DataSparkPoint}
+  commentId: T:System.IEquatable{PublisherStudio.BusinessObjects.DataSparkPoint}
+  parent: System
+  definition: System.IEquatable`1
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<DataSparkPoint>
+  nameWithType: IEquatable<DataSparkPoint>
+  fullName: System.IEquatable<PublisherStudio.BusinessObjects.DataSparkPoint>
+  nameWithType.vb: IEquatable(Of DataSparkPoint)
+  fullName.vb: System.IEquatable(Of PublisherStudio.BusinessObjects.DataSparkPoint)
+  name.vb: IEquatable(Of DataSparkPoint)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.DataSparkPoint
+    name: DataSparkPoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.DataSparkPoint.html
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.DataSparkPoint
+    name: DataSparkPoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.DataSparkPoint.html
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: System.IEquatable`1
+  commentId: T:System.IEquatable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<T>
+  nameWithType: IEquatable<T>
+  fullName: System.IEquatable<T>
+  nameWithType.vb: IEquatable(Of T)
+  fullName.vb: System.IEquatable(Of T)
+  name.vb: IEquatable(Of T)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: PublisherStudio.BusinessObjects.DataSparkPoint.#ctor*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataSparkPoint.#ctor
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataSparkPoint.html#PublisherStudio_BusinessObjects_DataSparkPoint__ctor_System_String_System_Double_
+  name: DataSparkPoint
+  nameWithType: DataSparkPoint.DataSparkPoint
+  fullName: PublisherStudio.BusinessObjects.DataSparkPoint.DataSparkPoint
+  nameWithType.vb: DataSparkPoint.New
+  fullName.vb: PublisherStudio.BusinessObjects.DataSparkPoint.New
+  name.vb: New
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System.Double
+  commentId: T:System.Double
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.double
+  name: double
+  nameWithType: double
+  fullName: double
+  nameWithType.vb: Double
+  fullName.vb: Double
+  name.vb: Double
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: PublisherStudio.BusinessObjects.DataSparkPoint.ToString*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataSparkPoint.ToString
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataSparkPoint.html#PublisherStudio_BusinessObjects_DataSparkPoint_ToString
+  name: ToString
+  nameWithType: DataSparkPoint.ToString
+  fullName: PublisherStudio.BusinessObjects.DataSparkPoint.ToString
+- uid: PublisherStudio.BusinessObjects.DataSparkPoint.op_Inequality*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataSparkPoint.op_Inequality
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataSparkPoint.html#PublisherStudio_BusinessObjects_DataSparkPoint_op_Inequality_PublisherStudio_BusinessObjects_DataSparkPoint_PublisherStudio_BusinessObjects_DataSparkPoint_
+  name: operator !=
+  nameWithType: DataSparkPoint.operator !=
+  fullName: PublisherStudio.BusinessObjects.DataSparkPoint.operator !=
+  nameWithType.vb: DataSparkPoint.<>
+  fullName.vb: PublisherStudio.BusinessObjects.DataSparkPoint.<>
+  name.vb: <>
+  spec.csharp:
+  - name: operator
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.DataSparkPoint.op_Inequality*
+    name: '!='
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.DataSparkPoint.html#PublisherStudio_BusinessObjects_DataSparkPoint_op_Inequality_PublisherStudio_BusinessObjects_DataSparkPoint_PublisherStudio_BusinessObjects_DataSparkPoint_
+- uid: PublisherStudio.BusinessObjects.DataSparkPoint
+  commentId: T:PublisherStudio.BusinessObjects.DataSparkPoint
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataSparkPoint.html
+  name: DataSparkPoint
+  nameWithType: DataSparkPoint
+  fullName: PublisherStudio.BusinessObjects.DataSparkPoint
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.BusinessObjects.DataSparkPoint.op_Equality*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataSparkPoint.op_Equality
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataSparkPoint.html#PublisherStudio_BusinessObjects_DataSparkPoint_op_Equality_PublisherStudio_BusinessObjects_DataSparkPoint_PublisherStudio_BusinessObjects_DataSparkPoint_
+  name: operator ==
+  nameWithType: DataSparkPoint.operator ==
+  fullName: PublisherStudio.BusinessObjects.DataSparkPoint.operator ==
+  nameWithType.vb: DataSparkPoint.=
+  fullName.vb: PublisherStudio.BusinessObjects.DataSparkPoint.=
+  name.vb: =
+  spec.csharp:
+  - name: operator
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.DataSparkPoint.op_Equality*
+    name: ==
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.DataSparkPoint.html#PublisherStudio_BusinessObjects_DataSparkPoint_op_Equality_PublisherStudio_BusinessObjects_DataSparkPoint_PublisherStudio_BusinessObjects_DataSparkPoint_
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: PublisherStudio.BusinessObjects.DataSparkPoint.GetHashCode*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataSparkPoint.GetHashCode
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataSparkPoint.html#PublisherStudio_BusinessObjects_DataSparkPoint_GetHashCode
+  name: GetHashCode
+  nameWithType: DataSparkPoint.GetHashCode
+  fullName: PublisherStudio.BusinessObjects.DataSparkPoint.GetHashCode
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: PublisherStudio.BusinessObjects.DataSparkPoint.Equals*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataSparkPoint.Equals
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataSparkPoint.html#PublisherStudio_BusinessObjects_DataSparkPoint_Equals_System_Object_
+  name: Equals
+  nameWithType: DataSparkPoint.Equals
+  fullName: PublisherStudio.BusinessObjects.DataSparkPoint.Equals
+- uid: System.IEquatable{PublisherStudio.BusinessObjects.DataSparkPoint}.Equals(PublisherStudio.BusinessObjects.DataSparkPoint)
+  commentId: M:System.IEquatable{PublisherStudio.BusinessObjects.DataSparkPoint}.Equals(PublisherStudio.BusinessObjects.DataSparkPoint)
+  parent: System.IEquatable{PublisherStudio.BusinessObjects.DataSparkPoint}
+  definition: System.IEquatable`1.Equals(`0)
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  name: Equals(DataSparkPoint)
+  nameWithType: IEquatable<DataSparkPoint>.Equals(DataSparkPoint)
+  fullName: System.IEquatable<PublisherStudio.BusinessObjects.DataSparkPoint>.Equals(PublisherStudio.BusinessObjects.DataSparkPoint)
+  nameWithType.vb: IEquatable(Of DataSparkPoint).Equals(DataSparkPoint)
+  fullName.vb: System.IEquatable(Of PublisherStudio.BusinessObjects.DataSparkPoint).Equals(PublisherStudio.BusinessObjects.DataSparkPoint)
+  spec.csharp:
+  - uid: System.IEquatable{PublisherStudio.BusinessObjects.DataSparkPoint}.Equals(PublisherStudio.BusinessObjects.DataSparkPoint)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - uid: PublisherStudio.BusinessObjects.DataSparkPoint
+    name: DataSparkPoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.DataSparkPoint.html
+  - name: )
+  spec.vb:
+  - uid: System.IEquatable{PublisherStudio.BusinessObjects.DataSparkPoint}.Equals(PublisherStudio.BusinessObjects.DataSparkPoint)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - uid: PublisherStudio.BusinessObjects.DataSparkPoint
+    name: DataSparkPoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.DataSparkPoint.html
+  - name: )
+- uid: System.IEquatable`1.Equals(`0)
+  commentId: M:System.IEquatable`1.Equals(`0)
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  name: Equals(T)
+  nameWithType: IEquatable<T>.Equals(T)
+  fullName: System.IEquatable<T>.Equals(T)
+  nameWithType.vb: IEquatable(Of T).Equals(T)
+  fullName.vb: System.IEquatable(Of T).Equals(T)
+  spec.csharp:
+  - uid: System.IEquatable`1.Equals(`0)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - name: T
+  - name: )
+  spec.vb:
+  - uid: System.IEquatable`1.Equals(`0)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - name: T
+  - name: )
+- uid: PublisherStudio.BusinessObjects.DataSparkPoint.Deconstruct*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataSparkPoint.Deconstruct
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataSparkPoint.html#PublisherStudio_BusinessObjects_DataSparkPoint_Deconstruct_System_String__System_Double__
+  name: Deconstruct
+  nameWithType: DataSparkPoint.Deconstruct
+  fullName: PublisherStudio.BusinessObjects.DataSparkPoint.Deconstruct
+- uid: PublisherStudio.BusinessObjects.DataSparkPoint.Argument*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataSparkPoint.Argument
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataSparkPoint.html#PublisherStudio_BusinessObjects_DataSparkPoint_Argument
+  name: Argument
+  nameWithType: DataSparkPoint.Argument
+  fullName: PublisherStudio.BusinessObjects.DataSparkPoint.Argument
+- uid: PublisherStudio.BusinessObjects.DataSparkPoint.Value*
+  commentId: Overload:PublisherStudio.BusinessObjects.DataSparkPoint.Value
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.DataSparkPoint.html#PublisherStudio_BusinessObjects_DataSparkPoint_Value
+  name: Value
+  nameWithType: DataSparkPoint.Value
+  fullName: PublisherStudio.BusinessObjects.DataSparkPoint.Value

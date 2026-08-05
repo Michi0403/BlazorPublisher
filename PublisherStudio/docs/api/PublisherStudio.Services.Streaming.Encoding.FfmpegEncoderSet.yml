@@ -1,0 +1,490 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet
+  commentId: T:PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet
+  id: FfmpegEncoderSet
+  parent: PublisherStudio.Services.Streaming.Encoding
+  children:
+  - PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet.#ctor(PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder,PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder,PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderResolver})
+  - PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet.ForCodec(System.Int32)
+  langs:
+  - csharp
+  - vb
+  name: FfmpegEncoderSet
+  nameWithType: FfmpegEncoderSet
+  fullName: PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Encoding
+  summary: Represents a FFmpeg encoder set.
+  example: []
+  syntax:
+    content: public sealed class FfmpegEncoderSet
+    content.vb: Public NotInheritable Class FfmpegEncoderSet
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet.#ctor(PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder,PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder,PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderResolver})
+  commentId: M:PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet.#ctor(PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder,PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder,PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderResolver})
+  id: '#ctor(PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder,PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder,PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderResolver})'
+  parent: PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet
+  langs:
+  - csharp
+  - vb
+  name: FfmpegEncoderSet(FfmpegVideoEncoder, FfmpegVideoEncoder, FfmpegVideoEncoder, ILogger<FfmpegEncoderResolver>)
+  nameWithType: FfmpegEncoderSet.FfmpegEncoderSet(FfmpegVideoEncoder, FfmpegVideoEncoder, FfmpegVideoEncoder, ILogger<FfmpegEncoderResolver>)
+  fullName: PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet.FfmpegEncoderSet(PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder, PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder, PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder, Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderResolver>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Encoding
+  summary: Represents a FFmpeg encoder set.
+  example: []
+  syntax:
+    content: public FfmpegEncoderSet(FfmpegVideoEncoder h264, FfmpegVideoEncoder hevc, FfmpegVideoEncoder av1, ILogger<FfmpegEncoderResolver> logger)
+    parameters:
+    - id: h264
+      type: PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder
+    - id: hevc
+      type: PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder
+    - id: av1
+      type: PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderResolver}
+    content.vb: Public Sub New(h264 As FfmpegVideoEncoder, hevc As FfmpegVideoEncoder, av1 As FfmpegVideoEncoder, logger As ILogger(Of FfmpegEncoderResolver))
+  overload: PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet.#ctor*
+  nameWithType.vb: FfmpegEncoderSet.New(FfmpegVideoEncoder, FfmpegVideoEncoder, FfmpegVideoEncoder, ILogger(Of FfmpegEncoderResolver))
+  fullName.vb: PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet.New(PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder, PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder, PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder, Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderResolver))
+  name.vb: New(FfmpegVideoEncoder, FfmpegVideoEncoder, FfmpegVideoEncoder, ILogger(Of FfmpegEncoderResolver))
+- uid: PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet.ForCodec(System.Int32)
+  commentId: M:PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet.ForCodec(System.Int32)
+  id: ForCodec(System.Int32)
+  parent: PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet
+  langs:
+  - csharp
+  - vb
+  name: ForCodec(int)
+  nameWithType: FfmpegEncoderSet.ForCodec(int)
+  fullName: PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet.ForCodec(int)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.Streaming.Encoding
+  summary: Runs the for codec operation.
+  example: []
+  syntax:
+    content: public FfmpegVideoEncoder ForCodec(int codec)
+    parameters:
+    - id: codec
+      type: System.Int32
+    return:
+      type: PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder
+    content.vb: Public Function ForCodec(codec As Integer) As FfmpegVideoEncoder
+  overload: PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet.ForCodec*
+  nameWithType.vb: FfmpegEncoderSet.ForCodec(Integer)
+  fullName.vb: PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet.ForCodec(Integer)
+  name.vb: ForCodec(Integer)
+references:
+- uid: PublisherStudio.Services.Streaming.Encoding
+  commentId: N:PublisherStudio.Services.Streaming.Encoding
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Encoding
+  nameWithType: PublisherStudio.Services.Streaming.Encoding
+  fullName: PublisherStudio.Services.Streaming.Encoding
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Encoding
+    name: Encoding
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Encoding.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Encoding
+    name: Encoding
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Encoding.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet.#ctor*
+  commentId: Overload:PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet.html#PublisherStudio_Services_Streaming_Encoding_FfmpegEncoderSet__ctor_PublisherStudio_Services_Streaming_Encoding_FfmpegVideoEncoder_PublisherStudio_Services_Streaming_Encoding_FfmpegVideoEncoder_PublisherStudio_Services_Streaming_Encoding_FfmpegVideoEncoder_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_Streaming_Encoding_FfmpegEncoderResolver__
+  name: FfmpegEncoderSet
+  nameWithType: FfmpegEncoderSet.FfmpegEncoderSet
+  fullName: PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet.FfmpegEncoderSet
+  nameWithType.vb: FfmpegEncoderSet.New
+  fullName.vb: PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet.New
+  name.vb: New
+- uid: PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder
+  commentId: T:PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder
+  parent: PublisherStudio.Services.Streaming.Encoding
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder.html
+  name: FfmpegVideoEncoder
+  nameWithType: FfmpegVideoEncoder
+  fullName: PublisherStudio.Services.Streaming.Encoding.FfmpegVideoEncoder
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderResolver}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderResolver}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<FfmpegEncoderResolver>
+  nameWithType: ILogger<FfmpegEncoderResolver>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderResolver>
+  nameWithType.vb: ILogger(Of FfmpegEncoderResolver)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderResolver)
+  name.vb: ILogger(Of FfmpegEncoderResolver)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderResolver
+    name: FfmpegEncoderResolver
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderResolver.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderResolver
+    name: FfmpegEncoderResolver
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderResolver.html
+  - name: )
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet.ForCodec*
+  commentId: Overload:PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet.ForCodec
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet.html#PublisherStudio_Services_Streaming_Encoding_FfmpegEncoderSet_ForCodec_System_Int32_
+  name: ForCodec
+  nameWithType: FfmpegEncoderSet.ForCodec
+  fullName: PublisherStudio.Services.Streaming.Encoding.FfmpegEncoderSet.ForCodec
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer

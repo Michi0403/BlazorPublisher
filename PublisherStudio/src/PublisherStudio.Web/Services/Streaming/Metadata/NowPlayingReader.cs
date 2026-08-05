@@ -1,13 +1,19 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Services.Streaming.Metadata;
 
+/// <summary>
+/// Provides now playing reader operations.
+/// </summary>
 public sealed class NowPlayingReader(
     IPublisherRuntimePolicyDataService runtimePolicy,
     ILogger<NowPlayingReader> logger)
 {
 
+    /// <summary>
+    /// Runs the read operation.
+    /// </summary>
     public object? Read(string directory)
     {
         try
@@ -276,12 +282,33 @@ public sealed class NowPlayingReader(
 
     private sealed class AudioTags
     {
+        /// <summary>
+        /// Gets or sets title.
+        /// </summary>
         public string Title { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets artist.
+        /// </summary>
         public string Artist { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets album.
+        /// </summary>
         public string Album { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets year.
+        /// </summary>
         public string Year { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets track.
+        /// </summary>
         public string Track { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets genre.
+        /// </summary>
         public string Genre { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets cover image.
+        /// </summary>
         public string CoverImage { get; set; } = string.Empty;
     }
 }

@@ -1,7 +1,10 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Configuration;
 
+/// <summary>
+/// Defines the publisher runtime policy data service contract.
+/// </summary>
 public interface IPublisherRuntimePolicyDataService
 {
     TimeSpan SpreadsheetSessionLifetime { get; }

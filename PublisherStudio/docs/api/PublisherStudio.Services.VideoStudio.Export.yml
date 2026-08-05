@@ -1,0 +1,115 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.VideoStudio.Export
+  commentId: N:PublisherStudio.Services.VideoStudio.Export
+  id: Export
+  parent: PublisherStudio.Services.VideoStudio
+  children:
+  - PublisherStudio.Services.VideoStudio.Export.BrowserRuntimeTemplateService
+  - PublisherStudio.Services.VideoStudio.Export.IBrowserRuntimeTemplateService
+  - PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService
+  - PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService
+  - PublisherStudio.Services.VideoStudio.Export.PolygonGeometryService
+  - PublisherStudio.Services.VideoStudio.Export.VideoLayerInterchangeService
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.Services.VideoStudio.Export
+  nameWithType: PublisherStudio.Services.VideoStudio.Export
+  fullName: PublisherStudio.Services.VideoStudio.Export
+  type: Namespace
+  assemblies:
+  - PublisherStudio.Web
+references:
+- uid: PublisherStudio.Services.VideoStudio.Export.BrowserRuntimeTemplateService
+  commentId: T:PublisherStudio.Services.VideoStudio.Export.BrowserRuntimeTemplateService
+  isExternal: true
+  href: PublisherStudio.Services.VideoStudio.Export.BrowserRuntimeTemplateService.html
+  name: BrowserRuntimeTemplateService
+  nameWithType: BrowserRuntimeTemplateService
+  fullName: PublisherStudio.Services.VideoStudio.Export.BrowserRuntimeTemplateService
+- uid: PublisherStudio.Services.VideoStudio.Export.IBrowserRuntimeTemplateService
+  commentId: T:PublisherStudio.Services.VideoStudio.Export.IBrowserRuntimeTemplateService
+  parent: PublisherStudio.Services.VideoStudio.Export
+  isExternal: true
+  href: PublisherStudio.Services.VideoStudio.Export.IBrowserRuntimeTemplateService.html
+  name: IBrowserRuntimeTemplateService
+  nameWithType: IBrowserRuntimeTemplateService
+  fullName: PublisherStudio.Services.VideoStudio.Export.IBrowserRuntimeTemplateService
+- uid: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService
+  commentId: T:PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService
+  parent: PublisherStudio.Services.VideoStudio.Export
+  isExternal: true
+  href: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService.html
+  name: IPolygonGeometryService
+  nameWithType: IPolygonGeometryService
+  fullName: PublisherStudio.Services.VideoStudio.Export.IPolygonGeometryService
+- uid: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService
+  commentId: T:PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService
+  parent: PublisherStudio.Services.VideoStudio.Export
+  isExternal: true
+  href: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService.html
+  name: IVideoLayerInterchangeService
+  nameWithType: IVideoLayerInterchangeService
+  fullName: PublisherStudio.Services.VideoStudio.Export.IVideoLayerInterchangeService
+- uid: PublisherStudio.Services.VideoStudio.Export.PolygonGeometryService
+  commentId: T:PublisherStudio.Services.VideoStudio.Export.PolygonGeometryService
+  isExternal: true
+  href: PublisherStudio.Services.VideoStudio.Export.PolygonGeometryService.html
+  name: PolygonGeometryService
+  nameWithType: PolygonGeometryService
+  fullName: PublisherStudio.Services.VideoStudio.Export.PolygonGeometryService
+- uid: PublisherStudio.Services.VideoStudio.Export.VideoLayerInterchangeService
+  commentId: T:PublisherStudio.Services.VideoStudio.Export.VideoLayerInterchangeService
+  isExternal: true
+  href: PublisherStudio.Services.VideoStudio.Export.VideoLayerInterchangeService.html
+  name: VideoLayerInterchangeService
+  nameWithType: VideoLayerInterchangeService
+  fullName: PublisherStudio.Services.VideoStudio.Export.VideoLayerInterchangeService
+- uid: PublisherStudio.Services.VideoStudio.Export
+  commentId: N:PublisherStudio.Services.VideoStudio.Export
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.VideoStudio.Export
+  nameWithType: PublisherStudio.Services.VideoStudio.Export
+  fullName: PublisherStudio.Services.VideoStudio.Export
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio
+    name: VideoStudio
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio.Export
+    name: Export
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.Export.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio
+    name: VideoStudio
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio.Export
+    name: Export
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.Export.html

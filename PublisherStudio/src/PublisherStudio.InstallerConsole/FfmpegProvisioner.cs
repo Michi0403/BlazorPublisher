@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -14,6 +14,9 @@ internal static class FfmpegProvisioner
 {
     private static readonly TimeSpan ProgressHeartbeat = TimeSpan.FromSeconds(30);
 
+    /// <summary>
+    /// Finds executable.
+    /// </summary>
     public static string? FindExecutable()
     {
         var executable = OperatingSystem.IsWindows() ? "ffmpeg.exe" : "ffmpeg";
@@ -92,6 +95,9 @@ internal static class FfmpegProvisioner
         }
     }
 
+    /// <summary>
+    /// Ensures installed async.
+    /// </summary>
     public static async Task<bool> EnsureInstalledAsync(ILogger logger, CancellationToken cancellationToken = default)
     {
         var existing = FindExecutable();
@@ -163,6 +169,9 @@ ProvisioningFinished:
         return false;
     }
 
+    /// <summary>
+    /// Runs the report status operation.
+    /// </summary>
     public static bool ReportStatus(ILogger logger)
     {
         var executable = FindExecutable();

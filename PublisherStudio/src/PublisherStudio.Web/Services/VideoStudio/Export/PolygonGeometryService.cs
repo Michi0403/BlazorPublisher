@@ -1,8 +1,11 @@
-using System.Globalization;
+﻿using System.Globalization;
 using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.VideoStudio.Export;
 
+/// <summary>
+/// Defines the polygon geometry service contract.
+/// </summary>
 public interface IPolygonGeometryService
 {
     List<MediaFramePoint> Normalize(IEnumerable<MediaFramePoint>? points);
@@ -14,8 +17,14 @@ public interface IPolygonGeometryService
     string Number(double value);
 }
 
+/// <summary>
+/// Provides polygon geometry service operations.
+/// </summary>
 public sealed class PolygonGeometryService : IPolygonGeometryService
 {
+    /// <summary>
+    /// Runs the normalize operation.
+    /// </summary>
     public List<MediaFramePoint> Normalize(IEnumerable<MediaFramePoint>? points) =>
     [
         .. (points ?? [])
@@ -28,12 +37,18 @@ public sealed class PolygonGeometryService : IPolygonGeometryService
             })
     ];
 
+    /// <summary>
+    /// Runs the full frame operation.
+    /// </summary>
     public List<MediaFramePoint> FullFrame() =>
     [
         new() { X = .12, Y = .12 }, new() { X = .88, Y = .12 },
         new() { X = .88, Y = .88 }, new() { X = .12, Y = .88 }
     ];
 
+    /// <summary>
+    /// Runs the resample operation.
+    /// </summary>
     public List<MediaFramePoint> Resample(IReadOnlyList<MediaFramePoint> points, int count)
     {
         if (points.Count < 3 || count < 3) return [];
@@ -65,8 +80,14 @@ public sealed class PolygonGeometryService : IPolygonGeometryService
         return result;
     }
 
+    /// <summary>
+    /// Runs the clone operation.
+    /// </summary>
     public MediaFramePoint Clone(MediaFramePoint point) => new() { X = point.X, Y = point.Y };
 
+    /// <summary>
+    /// Runs the distance operation.
+    /// </summary>
     public double Distance(double deltaX, double deltaY)
     {
         var x = Math.Abs(deltaX); var y = Math.Abs(deltaY);
@@ -76,8 +97,14 @@ public sealed class PolygonGeometryService : IPolygonGeometryService
         return x * Math.Sqrt(1 + ratio * ratio);
     }
 
+    /// <summary>
+    /// Runs the to open scad points operation.
+    /// </summary>
     public string ToOpenScadPoints(IEnumerable<MediaFramePoint> points) =>
         $"[{string.Join(", ", points.Select(point => $"[{Number(point.X * 100)}, {Number((1 - point.Y) * 100)}]"))}]";
 
+    /// <summary>
+    /// Runs the number operation.
+    /// </summary>
     public string Number(double value) => (double.IsFinite(value) ? value : 0).ToString("0.######", CultureInfo.InvariantCulture);
 }

@@ -1,14 +1,20 @@
-using System.Collections.Frozen;
+﻿using System.Collections.Frozen;
 using System.Text.RegularExpressions;
 using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Configuration;
 
+/// <summary>
+/// Provides publisher runtime pattern service operations.
+/// </summary>
 public sealed class PublisherRuntimePatternService : IPublisherRuntimePatternService
 {
     private readonly FrozenDictionary<PublisherRuntimePattern, Regex> patterns;
     private readonly ILogger<PublisherRuntimePatternService> logger;
 
+    /// <summary>
+    /// Publishes er runtime pattern service.
+    /// </summary>
     public PublisherRuntimePatternService(
         PublisherRuntimePolicyOptions options,
         ILogger<PublisherRuntimePatternService> logger)
@@ -28,6 +34,9 @@ public sealed class PublisherRuntimePatternService : IPublisherRuntimePatternSer
         }
     }
 
+    /// <summary>
+    /// Gets regex.
+    /// </summary>
     public Regex GetRegex(PublisherRuntimePattern pattern)
     {
         try

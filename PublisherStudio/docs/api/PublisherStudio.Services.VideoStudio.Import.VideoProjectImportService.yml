@@ -1,0 +1,838 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService
+  commentId: T:PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService
+  id: VideoProjectImportService
+  parent: PublisherStudio.Services.VideoStudio.Import
+  children:
+  - PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.#ctor(PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService,PublisherStudio.Services.Configuration.IPublisherRuntimePatternService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService})
+  - PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.ImportAsync(System.IO.Stream,System.String,System.Threading.CancellationToken)
+  - PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.SupportedExtensions
+  langs:
+  - csharp
+  - vb
+  name: VideoProjectImportService
+  nameWithType: VideoProjectImportService
+  fullName: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.VideoStudio.Import
+  summary: Imports openly documented timeline/project formats into PublisherStudio's canonical video-project model. The adapter never mutates an active publication and reports every known approximation or loss.
+  example: []
+  syntax:
+    content: public sealed class VideoProjectImportService
+    content.vb: Public NotInheritable Class VideoProjectImportService
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.#ctor(PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService,PublisherStudio.Services.Configuration.IPublisherRuntimePatternService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService})
+  commentId: M:PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.#ctor(PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService,PublisherStudio.Services.Configuration.IPublisherRuntimePatternService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService})
+  id: '#ctor(PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService,PublisherStudio.Services.Configuration.IPublisherRuntimePatternService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService})'
+  parent: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService
+  langs:
+  - csharp
+  - vb
+  name: VideoProjectImportService(IPublisherRuntimePolicyDataService, IPublisherRuntimePatternService, ILogger<VideoProjectImportService>)
+  nameWithType: VideoProjectImportService.VideoProjectImportService(IPublisherRuntimePolicyDataService, IPublisherRuntimePatternService, ILogger<VideoProjectImportService>)
+  fullName: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.VideoProjectImportService(PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService, PublisherStudio.Services.Configuration.IPublisherRuntimePatternService, Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.VideoStudio.Import
+  summary: Imports openly documented timeline/project formats into PublisherStudio's canonical video-project model. The adapter never mutates an active publication and reports every known approximation or loss.
+  example: []
+  syntax:
+    content: public VideoProjectImportService(IPublisherRuntimePolicyDataService runtimePolicy, IPublisherRuntimePatternService runtimePatterns, ILogger<VideoProjectImportService> logger)
+    parameters:
+    - id: runtimePolicy
+      type: PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService
+    - id: runtimePatterns
+      type: PublisherStudio.Services.Configuration.IPublisherRuntimePatternService
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService}
+    content.vb: Public Sub New(runtimePolicy As IPublisherRuntimePolicyDataService, runtimePatterns As IPublisherRuntimePatternService, logger As ILogger(Of VideoProjectImportService))
+  overload: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.#ctor*
+  nameWithType.vb: VideoProjectImportService.New(IPublisherRuntimePolicyDataService, IPublisherRuntimePatternService, ILogger(Of VideoProjectImportService))
+  fullName.vb: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.New(PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService, PublisherStudio.Services.Configuration.IPublisherRuntimePatternService, Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService))
+  name.vb: New(IPublisherRuntimePolicyDataService, IPublisherRuntimePatternService, ILogger(Of VideoProjectImportService))
+- uid: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.ImportAsync(System.IO.Stream,System.String,System.Threading.CancellationToken)
+  commentId: M:PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.ImportAsync(System.IO.Stream,System.String,System.Threading.CancellationToken)
+  id: ImportAsync(System.IO.Stream,System.String,System.Threading.CancellationToken)
+  parent: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService
+  langs:
+  - csharp
+  - vb
+  name: ImportAsync(Stream, string, CancellationToken)
+  nameWithType: VideoProjectImportService.ImportAsync(Stream, string, CancellationToken)
+  fullName: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.ImportAsync(System.IO.Stream, string, System.Threading.CancellationToken)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.VideoStudio.Import
+  summary: Imports async.
+  example: []
+  syntax:
+    content: public Task<VideoProjectImportResult> ImportAsync(Stream source, string fileName, CancellationToken cancellationToken = default)
+    parameters:
+    - id: source
+      type: System.IO.Stream
+    - id: fileName
+      type: System.String
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.VideoProjectImportResult}
+    content.vb: Public Function ImportAsync(source As Stream, fileName As String, cancellationToken As CancellationToken = Nothing) As Task(Of VideoProjectImportResult)
+  overload: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.ImportAsync*
+  nameWithType.vb: VideoProjectImportService.ImportAsync(Stream, String, CancellationToken)
+  fullName.vb: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.ImportAsync(System.IO.Stream, String, System.Threading.CancellationToken)
+  name.vb: ImportAsync(Stream, String, CancellationToken)
+- uid: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.SupportedExtensions
+  commentId: P:PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.SupportedExtensions
+  id: SupportedExtensions
+  parent: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService
+  langs:
+  - csharp
+  - vb
+  name: SupportedExtensions
+  nameWithType: VideoProjectImportService.SupportedExtensions
+  fullName: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.SupportedExtensions
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services.VideoStudio.Import
+  summary: Gets supported extensions.
+  example: []
+  syntax:
+    content: public IReadOnlyList<string> SupportedExtensions { get; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.IReadOnlyList{System.String}
+    content.vb: Public ReadOnly Property SupportedExtensions As IReadOnlyList(Of String)
+  overload: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.SupportedExtensions*
+references:
+- uid: PublisherStudio.Services.VideoStudio.Import
+  commentId: N:PublisherStudio.Services.VideoStudio.Import
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.VideoStudio.Import
+  nameWithType: PublisherStudio.Services.VideoStudio.Import
+  fullName: PublisherStudio.Services.VideoStudio.Import
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio
+    name: VideoStudio
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio.Import
+    name: Import
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.Import.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio
+    name: VideoStudio
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio.Import
+    name: Import
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.Import.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.#ctor*
+  commentId: Overload:PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.html#PublisherStudio_Services_VideoStudio_Import_VideoProjectImportService__ctor_PublisherStudio_Services_Configuration_IPublisherRuntimePolicyDataService_PublisherStudio_Services_Configuration_IPublisherRuntimePatternService_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_VideoStudio_Import_VideoProjectImportService__
+  name: VideoProjectImportService
+  nameWithType: VideoProjectImportService.VideoProjectImportService
+  fullName: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.VideoProjectImportService
+  nameWithType.vb: VideoProjectImportService.New
+  fullName.vb: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.New
+  name.vb: New
+- uid: PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService
+  commentId: T:PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService
+  parent: PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService.html
+  name: IPublisherRuntimePolicyDataService
+  nameWithType: IPublisherRuntimePolicyDataService
+  fullName: PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService
+- uid: PublisherStudio.Services.Configuration.IPublisherRuntimePatternService
+  commentId: T:PublisherStudio.Services.Configuration.IPublisherRuntimePatternService
+  parent: PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IPublisherRuntimePatternService.html
+  name: IPublisherRuntimePatternService
+  nameWithType: IPublisherRuntimePatternService
+  fullName: PublisherStudio.Services.Configuration.IPublisherRuntimePatternService
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<VideoProjectImportService>
+  nameWithType: ILogger<VideoProjectImportService>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService>
+  nameWithType.vb: ILogger(Of VideoProjectImportService)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService)
+  name.vb: ILogger(Of VideoProjectImportService)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService
+    name: VideoProjectImportService
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService
+    name: VideoProjectImportService
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.html
+  - name: )
+- uid: PublisherStudio.Services.Configuration
+  commentId: N:PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Configuration
+  nameWithType: PublisherStudio.Services.Configuration
+  fullName: PublisherStudio.Services.Configuration
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.ImportAsync*
+  commentId: Overload:PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.ImportAsync
+  isExternal: true
+  href: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.html#PublisherStudio_Services_VideoStudio_Import_VideoProjectImportService_ImportAsync_System_IO_Stream_System_String_System_Threading_CancellationToken_
+  name: ImportAsync
+  nameWithType: VideoProjectImportService.ImportAsync
+  fullName: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.ImportAsync
+- uid: System.IO.Stream
+  commentId: T:System.IO.Stream
+  parent: System.IO
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.io.stream
+  name: Stream
+  nameWithType: Stream
+  fullName: System.IO.Stream
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System.Threading.CancellationToken
+  commentId: T:System.Threading.CancellationToken
+  parent: System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  name: CancellationToken
+  nameWithType: CancellationToken
+  fullName: System.Threading.CancellationToken
+- uid: System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.VideoProjectImportResult}
+  commentId: T:System.Threading.Tasks.Task{PublisherStudio.BusinessObjects.VideoProjectImportResult}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<VideoProjectImportResult>
+  nameWithType: Task<VideoProjectImportResult>
+  fullName: System.Threading.Tasks.Task<PublisherStudio.BusinessObjects.VideoProjectImportResult>
+  nameWithType.vb: Task(Of VideoProjectImportResult)
+  fullName.vb: System.Threading.Tasks.Task(Of PublisherStudio.BusinessObjects.VideoProjectImportResult)
+  name.vb: Task(Of VideoProjectImportResult)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.VideoProjectImportResult
+    name: VideoProjectImportResult
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.VideoProjectImportResult.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.VideoProjectImportResult
+    name: VideoProjectImportResult
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.VideoProjectImportResult.html
+  - name: )
+- uid: System.IO
+  commentId: N:System.IO
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.IO
+  nameWithType: System.IO
+  fullName: System.IO
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.IO
+    name: IO
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.io
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.IO
+    name: IO
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.io
+- uid: System.Threading
+  commentId: N:System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading
+  nameWithType: System.Threading
+  fullName: System.Threading
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+- uid: System.Threading.Tasks.Task`1
+  commentId: T:System.Threading.Tasks.Task`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<TResult>
+  nameWithType: Task<TResult>
+  fullName: System.Threading.Tasks.Task<TResult>
+  nameWithType.vb: Task(Of TResult)
+  fullName.vb: System.Threading.Tasks.Task(Of TResult)
+  name.vb: Task(Of TResult)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - name: TResult
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TResult
+  - name: )
+- uid: System.Threading.Tasks
+  commentId: N:System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading.Tasks
+  nameWithType: System.Threading.Tasks
+  fullName: System.Threading.Tasks
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+- uid: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.SupportedExtensions*
+  commentId: Overload:PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.SupportedExtensions
+  isExternal: true
+  href: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.html#PublisherStudio_Services_VideoStudio_Import_VideoProjectImportService_SupportedExtensions
+  name: SupportedExtensions
+  nameWithType: VideoProjectImportService.SupportedExtensions
+  fullName: PublisherStudio.Services.VideoStudio.Import.VideoProjectImportService.SupportedExtensions
+- uid: System.Collections.Generic.IReadOnlyList{System.String}
+  commentId: T:System.Collections.Generic.IReadOnlyList{System.String}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<string>
+  nameWithType: IReadOnlyList<string>
+  fullName: System.Collections.Generic.IReadOnlyList<string>
+  nameWithType.vb: IReadOnlyList(Of String)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of String)
+  name.vb: IReadOnlyList(Of String)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic

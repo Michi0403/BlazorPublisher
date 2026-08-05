@@ -1,0 +1,495 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle
+  commentId: T:PublisherStudio.BusinessObjects.CartesianChartStyle
+  id: CartesianChartStyle
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.CartesianChartStyle.Area
+  - PublisherStudio.BusinessObjects.CartesianChartStyle.Bar
+  - PublisherStudio.BusinessObjects.CartesianChartStyle.Bubble
+  - PublisherStudio.BusinessObjects.CartesianChartStyle.Candlestick
+  - PublisherStudio.BusinessObjects.CartesianChartStyle.FullStackedArea
+  - PublisherStudio.BusinessObjects.CartesianChartStyle.FullStackedBar
+  - PublisherStudio.BusinessObjects.CartesianChartStyle.FullStackedLine
+  - PublisherStudio.BusinessObjects.CartesianChartStyle.FullStackedSpline
+  - PublisherStudio.BusinessObjects.CartesianChartStyle.FullStackedSplineArea
+  - PublisherStudio.BusinessObjects.CartesianChartStyle.Line
+  - PublisherStudio.BusinessObjects.CartesianChartStyle.RangeArea
+  - PublisherStudio.BusinessObjects.CartesianChartStyle.RangeBar
+  - PublisherStudio.BusinessObjects.CartesianChartStyle.Scatter
+  - PublisherStudio.BusinessObjects.CartesianChartStyle.Spline
+  - PublisherStudio.BusinessObjects.CartesianChartStyle.SplineArea
+  - PublisherStudio.BusinessObjects.CartesianChartStyle.StackedArea
+  - PublisherStudio.BusinessObjects.CartesianChartStyle.StackedBar
+  - PublisherStudio.BusinessObjects.CartesianChartStyle.StackedLine
+  - PublisherStudio.BusinessObjects.CartesianChartStyle.StackedSpline
+  - PublisherStudio.BusinessObjects.CartesianChartStyle.StackedSplineArea
+  - PublisherStudio.BusinessObjects.CartesianChartStyle.StepArea
+  - PublisherStudio.BusinessObjects.CartesianChartStyle.StepLine
+  - PublisherStudio.BusinessObjects.CartesianChartStyle.Stock
+  langs:
+  - csharp
+  - vb
+  name: CartesianChartStyle
+  nameWithType: CartesianChartStyle
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported cartesian chart style values.
+  example: []
+  syntax:
+    content: public enum CartesianChartStyle
+    content.vb: Public Enum CartesianChartStyle
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle.Bar
+  commentId: F:PublisherStudio.BusinessObjects.CartesianChartStyle.Bar
+  id: Bar
+  parent: PublisherStudio.BusinessObjects.CartesianChartStyle
+  langs:
+  - csharp
+  - vb
+  name: Bar
+  nameWithType: CartesianChartStyle.Bar
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle.Bar
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Bar = 0
+    return:
+      type: PublisherStudio.BusinessObjects.CartesianChartStyle
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle.Line
+  commentId: F:PublisherStudio.BusinessObjects.CartesianChartStyle.Line
+  id: Line
+  parent: PublisherStudio.BusinessObjects.CartesianChartStyle
+  langs:
+  - csharp
+  - vb
+  name: Line
+  nameWithType: CartesianChartStyle.Line
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle.Line
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Line = 1
+    return:
+      type: PublisherStudio.BusinessObjects.CartesianChartStyle
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle.Spline
+  commentId: F:PublisherStudio.BusinessObjects.CartesianChartStyle.Spline
+  id: Spline
+  parent: PublisherStudio.BusinessObjects.CartesianChartStyle
+  langs:
+  - csharp
+  - vb
+  name: Spline
+  nameWithType: CartesianChartStyle.Spline
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle.Spline
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Spline = 2
+    return:
+      type: PublisherStudio.BusinessObjects.CartesianChartStyle
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle.Scatter
+  commentId: F:PublisherStudio.BusinessObjects.CartesianChartStyle.Scatter
+  id: Scatter
+  parent: PublisherStudio.BusinessObjects.CartesianChartStyle
+  langs:
+  - csharp
+  - vb
+  name: Scatter
+  nameWithType: CartesianChartStyle.Scatter
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle.Scatter
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Scatter = 3
+    return:
+      type: PublisherStudio.BusinessObjects.CartesianChartStyle
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle.Area
+  commentId: F:PublisherStudio.BusinessObjects.CartesianChartStyle.Area
+  id: Area
+  parent: PublisherStudio.BusinessObjects.CartesianChartStyle
+  langs:
+  - csharp
+  - vb
+  name: Area
+  nameWithType: CartesianChartStyle.Area
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle.Area
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Area = 4
+    return:
+      type: PublisherStudio.BusinessObjects.CartesianChartStyle
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle.SplineArea
+  commentId: F:PublisherStudio.BusinessObjects.CartesianChartStyle.SplineArea
+  id: SplineArea
+  parent: PublisherStudio.BusinessObjects.CartesianChartStyle
+  langs:
+  - csharp
+  - vb
+  name: SplineArea
+  nameWithType: CartesianChartStyle.SplineArea
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle.SplineArea
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: SplineArea = 5
+    return:
+      type: PublisherStudio.BusinessObjects.CartesianChartStyle
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle.StepLine
+  commentId: F:PublisherStudio.BusinessObjects.CartesianChartStyle.StepLine
+  id: StepLine
+  parent: PublisherStudio.BusinessObjects.CartesianChartStyle
+  langs:
+  - csharp
+  - vb
+  name: StepLine
+  nameWithType: CartesianChartStyle.StepLine
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle.StepLine
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: StepLine = 6
+    return:
+      type: PublisherStudio.BusinessObjects.CartesianChartStyle
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle.StepArea
+  commentId: F:PublisherStudio.BusinessObjects.CartesianChartStyle.StepArea
+  id: StepArea
+  parent: PublisherStudio.BusinessObjects.CartesianChartStyle
+  langs:
+  - csharp
+  - vb
+  name: StepArea
+  nameWithType: CartesianChartStyle.StepArea
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle.StepArea
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: StepArea = 7
+    return:
+      type: PublisherStudio.BusinessObjects.CartesianChartStyle
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle.StackedBar
+  commentId: F:PublisherStudio.BusinessObjects.CartesianChartStyle.StackedBar
+  id: StackedBar
+  parent: PublisherStudio.BusinessObjects.CartesianChartStyle
+  langs:
+  - csharp
+  - vb
+  name: StackedBar
+  nameWithType: CartesianChartStyle.StackedBar
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle.StackedBar
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: StackedBar = 8
+    return:
+      type: PublisherStudio.BusinessObjects.CartesianChartStyle
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle.FullStackedBar
+  commentId: F:PublisherStudio.BusinessObjects.CartesianChartStyle.FullStackedBar
+  id: FullStackedBar
+  parent: PublisherStudio.BusinessObjects.CartesianChartStyle
+  langs:
+  - csharp
+  - vb
+  name: FullStackedBar
+  nameWithType: CartesianChartStyle.FullStackedBar
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle.FullStackedBar
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: FullStackedBar = 9
+    return:
+      type: PublisherStudio.BusinessObjects.CartesianChartStyle
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle.StackedArea
+  commentId: F:PublisherStudio.BusinessObjects.CartesianChartStyle.StackedArea
+  id: StackedArea
+  parent: PublisherStudio.BusinessObjects.CartesianChartStyle
+  langs:
+  - csharp
+  - vb
+  name: StackedArea
+  nameWithType: CartesianChartStyle.StackedArea
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle.StackedArea
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: StackedArea = 10
+    return:
+      type: PublisherStudio.BusinessObjects.CartesianChartStyle
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle.FullStackedArea
+  commentId: F:PublisherStudio.BusinessObjects.CartesianChartStyle.FullStackedArea
+  id: FullStackedArea
+  parent: PublisherStudio.BusinessObjects.CartesianChartStyle
+  langs:
+  - csharp
+  - vb
+  name: FullStackedArea
+  nameWithType: CartesianChartStyle.FullStackedArea
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle.FullStackedArea
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: FullStackedArea = 11
+    return:
+      type: PublisherStudio.BusinessObjects.CartesianChartStyle
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle.StackedLine
+  commentId: F:PublisherStudio.BusinessObjects.CartesianChartStyle.StackedLine
+  id: StackedLine
+  parent: PublisherStudio.BusinessObjects.CartesianChartStyle
+  langs:
+  - csharp
+  - vb
+  name: StackedLine
+  nameWithType: CartesianChartStyle.StackedLine
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle.StackedLine
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: StackedLine = 12
+    return:
+      type: PublisherStudio.BusinessObjects.CartesianChartStyle
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle.FullStackedLine
+  commentId: F:PublisherStudio.BusinessObjects.CartesianChartStyle.FullStackedLine
+  id: FullStackedLine
+  parent: PublisherStudio.BusinessObjects.CartesianChartStyle
+  langs:
+  - csharp
+  - vb
+  name: FullStackedLine
+  nameWithType: CartesianChartStyle.FullStackedLine
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle.FullStackedLine
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: FullStackedLine = 13
+    return:
+      type: PublisherStudio.BusinessObjects.CartesianChartStyle
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle.StackedSpline
+  commentId: F:PublisherStudio.BusinessObjects.CartesianChartStyle.StackedSpline
+  id: StackedSpline
+  parent: PublisherStudio.BusinessObjects.CartesianChartStyle
+  langs:
+  - csharp
+  - vb
+  name: StackedSpline
+  nameWithType: CartesianChartStyle.StackedSpline
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle.StackedSpline
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: StackedSpline = 14
+    return:
+      type: PublisherStudio.BusinessObjects.CartesianChartStyle
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle.FullStackedSpline
+  commentId: F:PublisherStudio.BusinessObjects.CartesianChartStyle.FullStackedSpline
+  id: FullStackedSpline
+  parent: PublisherStudio.BusinessObjects.CartesianChartStyle
+  langs:
+  - csharp
+  - vb
+  name: FullStackedSpline
+  nameWithType: CartesianChartStyle.FullStackedSpline
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle.FullStackedSpline
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: FullStackedSpline = 15
+    return:
+      type: PublisherStudio.BusinessObjects.CartesianChartStyle
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle.StackedSplineArea
+  commentId: F:PublisherStudio.BusinessObjects.CartesianChartStyle.StackedSplineArea
+  id: StackedSplineArea
+  parent: PublisherStudio.BusinessObjects.CartesianChartStyle
+  langs:
+  - csharp
+  - vb
+  name: StackedSplineArea
+  nameWithType: CartesianChartStyle.StackedSplineArea
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle.StackedSplineArea
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: StackedSplineArea = 16
+    return:
+      type: PublisherStudio.BusinessObjects.CartesianChartStyle
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle.FullStackedSplineArea
+  commentId: F:PublisherStudio.BusinessObjects.CartesianChartStyle.FullStackedSplineArea
+  id: FullStackedSplineArea
+  parent: PublisherStudio.BusinessObjects.CartesianChartStyle
+  langs:
+  - csharp
+  - vb
+  name: FullStackedSplineArea
+  nameWithType: CartesianChartStyle.FullStackedSplineArea
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle.FullStackedSplineArea
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: FullStackedSplineArea = 17
+    return:
+      type: PublisherStudio.BusinessObjects.CartesianChartStyle
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle.RangeArea
+  commentId: F:PublisherStudio.BusinessObjects.CartesianChartStyle.RangeArea
+  id: RangeArea
+  parent: PublisherStudio.BusinessObjects.CartesianChartStyle
+  langs:
+  - csharp
+  - vb
+  name: RangeArea
+  nameWithType: CartesianChartStyle.RangeArea
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle.RangeArea
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: RangeArea = 18
+    return:
+      type: PublisherStudio.BusinessObjects.CartesianChartStyle
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle.RangeBar
+  commentId: F:PublisherStudio.BusinessObjects.CartesianChartStyle.RangeBar
+  id: RangeBar
+  parent: PublisherStudio.BusinessObjects.CartesianChartStyle
+  langs:
+  - csharp
+  - vb
+  name: RangeBar
+  nameWithType: CartesianChartStyle.RangeBar
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle.RangeBar
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: RangeBar = 19
+    return:
+      type: PublisherStudio.BusinessObjects.CartesianChartStyle
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle.Bubble
+  commentId: F:PublisherStudio.BusinessObjects.CartesianChartStyle.Bubble
+  id: Bubble
+  parent: PublisherStudio.BusinessObjects.CartesianChartStyle
+  langs:
+  - csharp
+  - vb
+  name: Bubble
+  nameWithType: CartesianChartStyle.Bubble
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle.Bubble
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Bubble = 20
+    return:
+      type: PublisherStudio.BusinessObjects.CartesianChartStyle
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle.Candlestick
+  commentId: F:PublisherStudio.BusinessObjects.CartesianChartStyle.Candlestick
+  id: Candlestick
+  parent: PublisherStudio.BusinessObjects.CartesianChartStyle
+  langs:
+  - csharp
+  - vb
+  name: Candlestick
+  nameWithType: CartesianChartStyle.Candlestick
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle.Candlestick
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Candlestick = 21
+    return:
+      type: PublisherStudio.BusinessObjects.CartesianChartStyle
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle.Stock
+  commentId: F:PublisherStudio.BusinessObjects.CartesianChartStyle.Stock
+  id: Stock
+  parent: PublisherStudio.BusinessObjects.CartesianChartStyle
+  langs:
+  - csharp
+  - vb
+  name: Stock
+  nameWithType: CartesianChartStyle.Stock
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle.Stock
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Stock = 22
+    return:
+      type: PublisherStudio.BusinessObjects.CartesianChartStyle
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.CartesianChartStyle
+  commentId: T:PublisherStudio.BusinessObjects.CartesianChartStyle
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.CartesianChartStyle.html
+  name: CartesianChartStyle
+  nameWithType: CartesianChartStyle
+  fullName: PublisherStudio.BusinessObjects.CartesianChartStyle

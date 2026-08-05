@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using PublisherStudio.BusinessObjects;
@@ -11,6 +11,9 @@ public sealed class ApiSurfaceCatalogService(ILogger<ApiSurfaceCatalogService> l
 {
     private readonly Assembly assembly = typeof(ApiSurfaceCatalogService).Assembly;
 
+    /// <summary>
+    /// Gets surfaces.
+    /// </summary>
     public IReadOnlyList<ApiSurfaceDescriptor> GetSurfaces()
     {
         try

@@ -1,4 +1,4 @@
-namespace PublisherStudio.HostedServices.Streaming;
+﻿namespace PublisherStudio.HostedServices.Streaming;
 
 /// <summary>
 /// Owns application-lifetime startup and shutdown for the reusable global-hotkey service.
@@ -7,7 +7,13 @@ namespace PublisherStudio.HostedServices.Streaming;
 /// </summary>
 public sealed class GlobalHotkeyHostedService(GlobalHotkeyService hotkeys) : IHostedService
 {
+    /// <summary>
+    /// Starts async.
+    /// </summary>
     public Task StartAsync(CancellationToken cancellationToken) => hotkeys.StartAsync(cancellationToken);
 
+    /// <summary>
+    /// Stops async.
+    /// </summary>
     public Task StopAsync(CancellationToken cancellationToken) => hotkeys.StopAsync(cancellationToken);
 }

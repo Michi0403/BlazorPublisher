@@ -1,0 +1,108 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.Streaming.Hotkeys
+  commentId: N:PublisherStudio.Services.Streaming.Hotkeys
+  id: Hotkeys
+  parent: PublisherStudio.Services.Streaming
+  children:
+  - PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService
+  - PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService
+  - PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage
+  - PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativePoint
+  - PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.Services.Streaming.Hotkeys
+  nameWithType: PublisherStudio.Services.Streaming.Hotkeys
+  fullName: PublisherStudio.Services.Streaming.Hotkeys
+  type: Namespace
+  assemblies:
+  - PublisherStudio.Web
+references:
+- uid: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService
+  commentId: T:PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService
+  parent: PublisherStudio.Services.Streaming.Hotkeys
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService.html
+  name: GlobalHotkeyService
+  nameWithType: GlobalHotkeyService
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.GlobalHotkeyService
+- uid: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService
+  commentId: T:PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService
+  parent: PublisherStudio.Services.Streaming.Hotkeys
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService.html
+  name: IWindowsHotkeyNativeService
+  nameWithType: IWindowsHotkeyNativeService
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.IWindowsHotkeyNativeService
+- uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage
+  commentId: T:PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage
+  parent: PublisherStudio.Services.Streaming.Hotkeys
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage.html
+  name: WindowsHotkeyNativeMessage
+  nameWithType: WindowsHotkeyNativeMessage
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeMessage
+- uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativePoint
+  commentId: T:PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativePoint
+  parent: PublisherStudio.Services.Streaming.Hotkeys
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativePoint.html
+  name: WindowsHotkeyNativePoint
+  nameWithType: WindowsHotkeyNativePoint
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativePoint
+- uid: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService
+  commentId: T:PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService
+  isExternal: true
+  href: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService.html
+  name: WindowsHotkeyNativeService
+  nameWithType: WindowsHotkeyNativeService
+  fullName: PublisherStudio.Services.Streaming.Hotkeys.WindowsHotkeyNativeService
+- uid: PublisherStudio.Services.Streaming.Hotkeys
+  commentId: N:PublisherStudio.Services.Streaming.Hotkeys
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Streaming.Hotkeys
+  nameWithType: PublisherStudio.Services.Streaming.Hotkeys
+  fullName: PublisherStudio.Services.Streaming.Hotkeys
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Hotkeys
+    name: Hotkeys
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Hotkeys.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Services.Streaming.Hotkeys
+    name: Hotkeys
+    isExternal: true
+    href: PublisherStudio.Services.Streaming.Hotkeys.html

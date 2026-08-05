@@ -1,0 +1,108 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.VideoStudio
+  id: VideoStudio
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.VideoStudio.Export
+  - PublisherStudio.Services.VideoStudio.Import
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.Services.VideoStudio
+  type: Namespace
+references:
+- uid: PublisherStudio.Services.VideoStudio.Export
+  commentId: N:PublisherStudio.Services.VideoStudio.Export
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.VideoStudio.Export
+  nameWithType: PublisherStudio.Services.VideoStudio.Export
+  fullName: PublisherStudio.Services.VideoStudio.Export
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio
+    name: VideoStudio
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio.Export
+    name: Export
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.Export.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio
+    name: VideoStudio
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio.Export
+    name: Export
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.Export.html
+- uid: PublisherStudio.Services.VideoStudio.Import
+  commentId: N:PublisherStudio.Services.VideoStudio.Import
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.VideoStudio.Import
+  nameWithType: PublisherStudio.Services.VideoStudio.Import
+  fullName: PublisherStudio.Services.VideoStudio.Import
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio
+    name: VideoStudio
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio.Import
+    name: Import
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.Import.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio
+    name: VideoStudio
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.html
+  - name: .
+  - uid: PublisherStudio.Services.VideoStudio.Import
+    name: Import
+    isExternal: true
+    href: PublisherStudio.Services.VideoStudio.Import.html

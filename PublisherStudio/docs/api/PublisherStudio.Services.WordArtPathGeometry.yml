@@ -1,0 +1,884 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.WordArtPathGeometry
+  commentId: T:PublisherStudio.Services.WordArtPathGeometry
+  id: WordArtPathGeometry
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.WordArtPathGeometry.#ctor(PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.WordArtPathGeometry})
+  - PublisherStudio.Services.WordArtPathGeometry.Build(PublisherStudio.BusinessObjects.WordArtElement)
+  - PublisherStudio.Services.WordArtPathGeometry.Build(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.WordArtPathPoint})
+  - PublisherStudio.Services.WordArtPathGeometry.CreatePreset(System.String)
+  - PublisherStudio.Services.WordArtPathGeometry.Normalize(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.WordArtPathPoint})
+  - PublisherStudio.Services.WordArtPathGeometry.Reduce(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.WordArtPathPoint},System.Int32)
+  - PublisherStudio.Services.WordArtPathGeometry.Reverse(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.WordArtPathPoint})
+  langs:
+  - csharp
+  - vb
+  name: WordArtPathGeometry
+  nameWithType: WordArtPathGeometry
+  fullName: PublisherStudio.Services.WordArtPathGeometry
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Represents a word art path geometry.
+  example: []
+  syntax:
+    content: public sealed class WordArtPathGeometry
+    content.vb: Public NotInheritable Class WordArtPathGeometry
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.ToString
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.GetHashCode
+- uid: PublisherStudio.Services.WordArtPathGeometry.#ctor(PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.WordArtPathGeometry})
+  commentId: M:PublisherStudio.Services.WordArtPathGeometry.#ctor(PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.WordArtPathGeometry})
+  id: '#ctor(PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService,Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.WordArtPathGeometry})'
+  parent: PublisherStudio.Services.WordArtPathGeometry
+  langs:
+  - csharp
+  - vb
+  name: WordArtPathGeometry(IPublisherRuntimePolicyDataService, ILogger<WordArtPathGeometry>)
+  nameWithType: WordArtPathGeometry.WordArtPathGeometry(IPublisherRuntimePolicyDataService, ILogger<WordArtPathGeometry>)
+  fullName: PublisherStudio.Services.WordArtPathGeometry.WordArtPathGeometry(PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService, Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.WordArtPathGeometry>)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Represents a word art path geometry.
+  example: []
+  syntax:
+    content: public WordArtPathGeometry(IPublisherRuntimePolicyDataService runtimePolicy, ILogger<WordArtPathGeometry> logger)
+    parameters:
+    - id: runtimePolicy
+      type: PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.WordArtPathGeometry}
+    content.vb: Public Sub New(runtimePolicy As IPublisherRuntimePolicyDataService, logger As ILogger(Of WordArtPathGeometry))
+  overload: PublisherStudio.Services.WordArtPathGeometry.#ctor*
+  nameWithType.vb: WordArtPathGeometry.New(IPublisherRuntimePolicyDataService, ILogger(Of WordArtPathGeometry))
+  fullName.vb: PublisherStudio.Services.WordArtPathGeometry.New(PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService, Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.WordArtPathGeometry))
+  name.vb: New(IPublisherRuntimePolicyDataService, ILogger(Of WordArtPathGeometry))
+- uid: PublisherStudio.Services.WordArtPathGeometry.CreatePreset(System.String)
+  commentId: M:PublisherStudio.Services.WordArtPathGeometry.CreatePreset(System.String)
+  id: CreatePreset(System.String)
+  parent: PublisherStudio.Services.WordArtPathGeometry
+  langs:
+  - csharp
+  - vb
+  name: CreatePreset(string)
+  nameWithType: WordArtPathGeometry.CreatePreset(string)
+  fullName: PublisherStudio.Services.WordArtPathGeometry.CreatePreset(string)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Creates preset.
+  example: []
+  syntax:
+    content: public List<WordArtPathPoint> CreatePreset(string key)
+    parameters:
+    - id: key
+      type: System.String
+    return:
+      type: System.Collections.Generic.List{PublisherStudio.BusinessObjects.WordArtPathPoint}
+    content.vb: Public Function CreatePreset(key As String) As List(Of WordArtPathPoint)
+  overload: PublisherStudio.Services.WordArtPathGeometry.CreatePreset*
+  nameWithType.vb: WordArtPathGeometry.CreatePreset(String)
+  fullName.vb: PublisherStudio.Services.WordArtPathGeometry.CreatePreset(String)
+  name.vb: CreatePreset(String)
+- uid: PublisherStudio.Services.WordArtPathGeometry.Build(PublisherStudio.BusinessObjects.WordArtElement)
+  commentId: M:PublisherStudio.Services.WordArtPathGeometry.Build(PublisherStudio.BusinessObjects.WordArtElement)
+  id: Build(PublisherStudio.BusinessObjects.WordArtElement)
+  parent: PublisherStudio.Services.WordArtPathGeometry
+  langs:
+  - csharp
+  - vb
+  name: Build(WordArtElement)
+  nameWithType: WordArtPathGeometry.Build(WordArtElement)
+  fullName: PublisherStudio.Services.WordArtPathGeometry.Build(PublisherStudio.BusinessObjects.WordArtElement)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the build operation.
+  example: []
+  syntax:
+    content: public string Build(WordArtElement item)
+    parameters:
+    - id: item
+      type: PublisherStudio.BusinessObjects.WordArtElement
+    return:
+      type: System.String
+    content.vb: Public Function Build(item As WordArtElement) As String
+  overload: PublisherStudio.Services.WordArtPathGeometry.Build*
+- uid: PublisherStudio.Services.WordArtPathGeometry.Build(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.WordArtPathPoint})
+  commentId: M:PublisherStudio.Services.WordArtPathGeometry.Build(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.WordArtPathPoint})
+  id: Build(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.WordArtPathPoint})
+  parent: PublisherStudio.Services.WordArtPathGeometry
+  langs:
+  - csharp
+  - vb
+  name: Build(IReadOnlyList<WordArtPathPoint>?)
+  nameWithType: WordArtPathGeometry.Build(IReadOnlyList<WordArtPathPoint>?)
+  fullName: PublisherStudio.Services.WordArtPathGeometry.Build(System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.WordArtPathPoint>?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the build operation.
+  example: []
+  syntax:
+    content: public string Build(IReadOnlyList<WordArtPathPoint>? points)
+    parameters:
+    - id: points
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.WordArtPathPoint}
+    return:
+      type: System.String
+    content.vb: Public Function Build(points As IReadOnlyList(Of WordArtPathPoint)) As String
+  overload: PublisherStudio.Services.WordArtPathGeometry.Build*
+  nameWithType.vb: WordArtPathGeometry.Build(IReadOnlyList(Of WordArtPathPoint))
+  fullName.vb: PublisherStudio.Services.WordArtPathGeometry.Build(System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.WordArtPathPoint))
+  name.vb: Build(IReadOnlyList(Of WordArtPathPoint))
+- uid: PublisherStudio.Services.WordArtPathGeometry.Normalize(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.WordArtPathPoint})
+  commentId: M:PublisherStudio.Services.WordArtPathGeometry.Normalize(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.WordArtPathPoint})
+  id: Normalize(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.WordArtPathPoint})
+  parent: PublisherStudio.Services.WordArtPathGeometry
+  langs:
+  - csharp
+  - vb
+  name: Normalize(IReadOnlyList<WordArtPathPoint>?)
+  nameWithType: WordArtPathGeometry.Normalize(IReadOnlyList<WordArtPathPoint>?)
+  fullName: PublisherStudio.Services.WordArtPathGeometry.Normalize(System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.WordArtPathPoint>?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the normalize operation.
+  example: []
+  syntax:
+    content: public List<WordArtPathPoint> Normalize(IReadOnlyList<WordArtPathPoint>? points)
+    parameters:
+    - id: points
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.WordArtPathPoint}
+    return:
+      type: System.Collections.Generic.List{PublisherStudio.BusinessObjects.WordArtPathPoint}
+    content.vb: Public Function Normalize(points As IReadOnlyList(Of WordArtPathPoint)) As List(Of WordArtPathPoint)
+  overload: PublisherStudio.Services.WordArtPathGeometry.Normalize*
+  nameWithType.vb: WordArtPathGeometry.Normalize(IReadOnlyList(Of WordArtPathPoint))
+  fullName.vb: PublisherStudio.Services.WordArtPathGeometry.Normalize(System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.WordArtPathPoint))
+  name.vb: Normalize(IReadOnlyList(Of WordArtPathPoint))
+- uid: PublisherStudio.Services.WordArtPathGeometry.Reverse(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.WordArtPathPoint})
+  commentId: M:PublisherStudio.Services.WordArtPathGeometry.Reverse(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.WordArtPathPoint})
+  id: Reverse(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.WordArtPathPoint})
+  parent: PublisherStudio.Services.WordArtPathGeometry
+  langs:
+  - csharp
+  - vb
+  name: Reverse(IReadOnlyList<WordArtPathPoint>?)
+  nameWithType: WordArtPathGeometry.Reverse(IReadOnlyList<WordArtPathPoint>?)
+  fullName: PublisherStudio.Services.WordArtPathGeometry.Reverse(System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.WordArtPathPoint>?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the reverse operation.
+  example: []
+  syntax:
+    content: public List<WordArtPathPoint> Reverse(IReadOnlyList<WordArtPathPoint>? points)
+    parameters:
+    - id: points
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.WordArtPathPoint}
+    return:
+      type: System.Collections.Generic.List{PublisherStudio.BusinessObjects.WordArtPathPoint}
+    content.vb: Public Function Reverse(points As IReadOnlyList(Of WordArtPathPoint)) As List(Of WordArtPathPoint)
+  overload: PublisherStudio.Services.WordArtPathGeometry.Reverse*
+  nameWithType.vb: WordArtPathGeometry.Reverse(IReadOnlyList(Of WordArtPathPoint))
+  fullName.vb: PublisherStudio.Services.WordArtPathGeometry.Reverse(System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.WordArtPathPoint))
+  name.vb: Reverse(IReadOnlyList(Of WordArtPathPoint))
+- uid: PublisherStudio.Services.WordArtPathGeometry.Reduce(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.WordArtPathPoint},System.Int32)
+  commentId: M:PublisherStudio.Services.WordArtPathGeometry.Reduce(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.WordArtPathPoint},System.Int32)
+  id: Reduce(System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.WordArtPathPoint},System.Int32)
+  parent: PublisherStudio.Services.WordArtPathGeometry
+  langs:
+  - csharp
+  - vb
+  name: Reduce(IReadOnlyList<WordArtPathPoint>?, int)
+  nameWithType: WordArtPathGeometry.Reduce(IReadOnlyList<WordArtPathPoint>?, int)
+  fullName: PublisherStudio.Services.WordArtPathGeometry.Reduce(System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.WordArtPathPoint>?, int)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Runs the reduce operation.
+  example: []
+  syntax:
+    content: public List<WordArtPathPoint> Reduce(IReadOnlyList<WordArtPathPoint>? points, int maximum = 10)
+    parameters:
+    - id: points
+      type: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.WordArtPathPoint}
+    - id: maximum
+      type: System.Int32
+    return:
+      type: System.Collections.Generic.List{PublisherStudio.BusinessObjects.WordArtPathPoint}
+    content.vb: Public Function Reduce(points As IReadOnlyList(Of WordArtPathPoint), maximum As Integer = 10) As List(Of WordArtPathPoint)
+  overload: PublisherStudio.Services.WordArtPathGeometry.Reduce*
+  nameWithType.vb: WordArtPathGeometry.Reduce(IReadOnlyList(Of WordArtPathPoint), Integer)
+  fullName.vb: PublisherStudio.Services.WordArtPathGeometry.Reduce(System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.WordArtPathPoint), Integer)
+  name.vb: Reduce(IReadOnlyList(Of WordArtPathPoint), Integer)
+references:
+- uid: PublisherStudio.Services
+  commentId: N:PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services
+  nameWithType: PublisherStudio.Services
+  fullName: PublisherStudio.Services
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: PublisherStudio.Services.WordArtPathGeometry.#ctor*
+  commentId: Overload:PublisherStudio.Services.WordArtPathGeometry.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.WordArtPathGeometry.html#PublisherStudio_Services_WordArtPathGeometry__ctor_PublisherStudio_Services_Configuration_IPublisherRuntimePolicyDataService_Microsoft_Extensions_Logging_ILogger_PublisherStudio_Services_WordArtPathGeometry__
+  name: WordArtPathGeometry
+  nameWithType: WordArtPathGeometry.WordArtPathGeometry
+  fullName: PublisherStudio.Services.WordArtPathGeometry.WordArtPathGeometry
+  nameWithType.vb: WordArtPathGeometry.New
+  fullName.vb: PublisherStudio.Services.WordArtPathGeometry.New
+  name.vb: New
+- uid: PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService
+  commentId: T:PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService
+  parent: PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService.html
+  name: IPublisherRuntimePolicyDataService
+  nameWithType: IPublisherRuntimePolicyDataService
+  fullName: PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService
+- uid: Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.WordArtPathGeometry}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{PublisherStudio.Services.WordArtPathGeometry}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<WordArtPathGeometry>
+  nameWithType: ILogger<WordArtPathGeometry>
+  fullName: Microsoft.Extensions.Logging.ILogger<PublisherStudio.Services.WordArtPathGeometry>
+  nameWithType.vb: ILogger(Of WordArtPathGeometry)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of PublisherStudio.Services.WordArtPathGeometry)
+  name.vb: ILogger(Of WordArtPathGeometry)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: PublisherStudio.Services.WordArtPathGeometry
+    name: WordArtPathGeometry
+    isExternal: true
+    href: PublisherStudio.Services.WordArtPathGeometry.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.WordArtPathGeometry
+    name: WordArtPathGeometry
+    isExternal: true
+    href: PublisherStudio.Services.WordArtPathGeometry.html
+  - name: )
+- uid: PublisherStudio.Services.Configuration
+  commentId: N:PublisherStudio.Services.Configuration
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services.Configuration
+  nameWithType: PublisherStudio.Services.Configuration
+  fullName: PublisherStudio.Services.Configuration
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  - name: .
+  - uid: PublisherStudio.Services.Configuration
+    name: Configuration
+    isExternal: true
+    href: PublisherStudio.Services.Configuration.html
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: PublisherStudio.Services.WordArtPathGeometry.CreatePreset*
+  commentId: Overload:PublisherStudio.Services.WordArtPathGeometry.CreatePreset
+  isExternal: true
+  href: PublisherStudio.Services.WordArtPathGeometry.html#PublisherStudio_Services_WordArtPathGeometry_CreatePreset_System_String_
+  name: CreatePreset
+  nameWithType: WordArtPathGeometry.CreatePreset
+  fullName: PublisherStudio.Services.WordArtPathGeometry.CreatePreset
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System.Collections.Generic.List{PublisherStudio.BusinessObjects.WordArtPathPoint}
+  commentId: T:System.Collections.Generic.List{PublisherStudio.BusinessObjects.WordArtPathPoint}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.List`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<WordArtPathPoint>
+  nameWithType: List<WordArtPathPoint>
+  fullName: System.Collections.Generic.List<PublisherStudio.BusinessObjects.WordArtPathPoint>
+  nameWithType.vb: List(Of WordArtPathPoint)
+  fullName.vb: System.Collections.Generic.List(Of PublisherStudio.BusinessObjects.WordArtPathPoint)
+  name.vb: List(Of WordArtPathPoint)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.WordArtPathPoint
+    name: WordArtPathPoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.WordArtPathPoint.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.WordArtPathPoint
+    name: WordArtPathPoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.WordArtPathPoint.html
+  - name: )
+- uid: System.Collections.Generic.List`1
+  commentId: T:System.Collections.Generic.List`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  name: List<T>
+  nameWithType: List<T>
+  fullName: System.Collections.Generic.List<T>
+  nameWithType.vb: List(Of T)
+  fullName.vb: System.Collections.Generic.List(Of T)
+  name.vb: List(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.List`1
+    name: List
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: PublisherStudio.Services.WordArtPathGeometry.Build*
+  commentId: Overload:PublisherStudio.Services.WordArtPathGeometry.Build
+  isExternal: true
+  href: PublisherStudio.Services.WordArtPathGeometry.html#PublisherStudio_Services_WordArtPathGeometry_Build_PublisherStudio_BusinessObjects_WordArtElement_
+  name: Build
+  nameWithType: WordArtPathGeometry.Build
+  fullName: PublisherStudio.Services.WordArtPathGeometry.Build
+- uid: PublisherStudio.BusinessObjects.WordArtElement
+  commentId: T:PublisherStudio.BusinessObjects.WordArtElement
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.WordArtElement.html
+  name: WordArtElement
+  nameWithType: WordArtElement
+  fullName: PublisherStudio.BusinessObjects.WordArtElement
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.WordArtPathPoint}
+  commentId: T:System.Collections.Generic.IReadOnlyList{PublisherStudio.BusinessObjects.WordArtPathPoint}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<WordArtPathPoint>
+  nameWithType: IReadOnlyList<WordArtPathPoint>
+  fullName: System.Collections.Generic.IReadOnlyList<PublisherStudio.BusinessObjects.WordArtPathPoint>
+  nameWithType.vb: IReadOnlyList(Of WordArtPathPoint)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of PublisherStudio.BusinessObjects.WordArtPathPoint)
+  name.vb: IReadOnlyList(Of WordArtPathPoint)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: PublisherStudio.BusinessObjects.WordArtPathPoint
+    name: WordArtPathPoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.WordArtPathPoint.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.BusinessObjects.WordArtPathPoint
+    name: WordArtPathPoint
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.WordArtPathPoint.html
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: PublisherStudio.Services.WordArtPathGeometry.Normalize*
+  commentId: Overload:PublisherStudio.Services.WordArtPathGeometry.Normalize
+  isExternal: true
+  href: PublisherStudio.Services.WordArtPathGeometry.html#PublisherStudio_Services_WordArtPathGeometry_Normalize_System_Collections_Generic_IReadOnlyList_PublisherStudio_BusinessObjects_WordArtPathPoint__
+  name: Normalize
+  nameWithType: WordArtPathGeometry.Normalize
+  fullName: PublisherStudio.Services.WordArtPathGeometry.Normalize
+- uid: PublisherStudio.Services.WordArtPathGeometry.Reverse*
+  commentId: Overload:PublisherStudio.Services.WordArtPathGeometry.Reverse
+  isExternal: true
+  href: PublisherStudio.Services.WordArtPathGeometry.html#PublisherStudio_Services_WordArtPathGeometry_Reverse_System_Collections_Generic_IReadOnlyList_PublisherStudio_BusinessObjects_WordArtPathPoint__
+  name: Reverse
+  nameWithType: WordArtPathGeometry.Reverse
+  fullName: PublisherStudio.Services.WordArtPathGeometry.Reverse
+- uid: PublisherStudio.Services.WordArtPathGeometry.Reduce*
+  commentId: Overload:PublisherStudio.Services.WordArtPathGeometry.Reduce
+  isExternal: true
+  href: PublisherStudio.Services.WordArtPathGeometry.html#PublisherStudio_Services_WordArtPathGeometry_Reduce_System_Collections_Generic_IReadOnlyList_PublisherStudio_BusinessObjects_WordArtPathPoint__System_Int32_
+  name: Reduce
+  nameWithType: WordArtPathGeometry.Reduce
+  fullName: PublisherStudio.Services.WordArtPathGeometry.Reduce
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer

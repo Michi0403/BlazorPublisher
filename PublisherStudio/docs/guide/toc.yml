@@ -1,0 +1,31 @@
+items:
+- name: Documentation home
+  href: ../index.md
+- name: Getting started
+  href: ../articles/getting-started.md
+- name: Editor workspace
+  href: ../articles/editor-workspace.md
+- name: Stories and spreadsheets
+  href: ../articles/stories-and-spreadsheets.md
+- name: Pictures and media
+  href: ../articles/pictures-and-media.md
+- name: Animation and interaction
+  href: ../articles/animation-and-interaction.md
+- name: Streaming and recording
+  href: ../articles/streaming-and-recording.md
+- name: Publishing and export
+  href: ../articles/publishing-and-export.md
+- name: Installer and updates
+  href: ../articles/installer-and-updates.md
+- name: LocalGPT and 1-Wire
+  href: ../articles/localgpt-and-onewire.md
+- name: Privacy and security
+  href: ../articles/privacy-and-security.md
+- name: Architecture
+  href: ../articles/architecture.md
+- name: Developer build
+  href: ../articles/developer-build.md
+- name: Troubleshooting
+  href: ../articles/troubleshooting.md
+- name: Documentation system
+  href: ../articles/documentation-system.md

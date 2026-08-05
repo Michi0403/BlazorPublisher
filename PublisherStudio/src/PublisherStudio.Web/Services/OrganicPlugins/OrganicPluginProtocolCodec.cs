@@ -1,4 +1,4 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace PublisherStudio.Services.OrganicPlugins;
 
+/// <summary>
+/// Represents an organic plugin protocol codec.
+/// </summary>
 public sealed class OrganicPluginProtocolCodec : IOrganicPluginProtocolCodec
 {
     private readonly JsonSerializerOptions jsonOptions = new()
@@ -15,8 +18,14 @@ public sealed class OrganicPluginProtocolCodec : IOrganicPluginProtocolCodec
         Converters = { new JsonStringEnumConverter() }
     };
 
+    /// <summary>
+    /// Gets JSON options.
+    /// </summary>
     public JsonSerializerOptions JsonOptions => jsonOptions;
 
+    /// <summary>
+    /// Runs the serialize operation.
+    /// </summary>
     public string Serialize(OrganicWireEnvelope envelope, bool seal = true)
     {
         ArgumentNullException.ThrowIfNull(envelope);
@@ -31,6 +40,9 @@ public sealed class OrganicPluginProtocolCodec : IOrganicPluginProtocolCodec
         return JsonSerializer.Serialize(envelope, JsonOptions);
     }
 
+    /// <summary>
+    /// Runs the deserialize and validate operation.
+    /// </summary>
     public OrganicWireEnvelope DeserializeAndValidate(string json)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(json);
@@ -42,6 +54,9 @@ public sealed class OrganicPluginProtocolCodec : IOrganicPluginProtocolCodec
         return envelope;
     }
 
+    /// <summary>
+    /// Runs the validate operation.
+    /// </summary>
     public bool Validate(OrganicWireEnvelope envelope, out string error)
     {
         try

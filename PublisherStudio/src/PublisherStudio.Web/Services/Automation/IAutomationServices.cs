@@ -1,7 +1,10 @@
-using PublisherStudio.BusinessObjects;
+﻿using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Automation;
 
+/// <summary>
+/// Defines the user input automation service contract.
+/// </summary>
 public interface IUserInputAutomationService
 {
     BrowserAutomationCommand Enqueue(BrowserAutomationCommand command);
@@ -11,6 +14,9 @@ public interface IUserInputAutomationService
     bool Cancel(Guid id);
 }
 
+/// <summary>
+/// Defines the screenshot capture service contract.
+/// </summary>
 public interface IScreenshotCaptureService
 {
     BrowserScreenshotRequest Enqueue(BrowserScreenshotRequest request);
@@ -21,11 +27,17 @@ public interface IScreenshotCaptureService
     bool Cancel(Guid id);
 }
 
+/// <summary>
+/// Defines the business object context service contract.
+/// </summary>
 public interface IBusinessObjectContextService
 {
     BusinessObjectContextSnapshot CreateSnapshot();
 }
 
+/// <summary>
+/// Defines the API surface catalog service contract.
+/// </summary>
 public interface IApiSurfaceCatalogService
 {
     IReadOnlyList<ApiSurfaceDescriptor> GetSurfaces();

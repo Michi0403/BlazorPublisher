@@ -1,0 +1,108 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Hubs.Streaming
+  id: Hubs.Streaming
+  parent: PublisherStudio
+  children:
+  - PublisherStudio.Hubs.Streaming.Chat
+  - PublisherStudio.Hubs.Streaming.Lan
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio.Hubs.Streaming
+  type: Namespace
+references:
+- uid: PublisherStudio.Hubs.Streaming.Chat
+  commentId: N:PublisherStudio.Hubs.Streaming.Chat
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Hubs.Streaming.Chat
+  nameWithType: PublisherStudio.Hubs.Streaming.Chat
+  fullName: PublisherStudio.Hubs.Streaming.Chat
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Hubs
+    name: Hubs
+    isExternal: true
+    href: PublisherStudio.Hubs.html
+  - name: .
+  - uid: PublisherStudio.Hubs.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Hubs.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Hubs.Streaming.Chat
+    name: Chat
+    isExternal: true
+    href: PublisherStudio.Hubs.Streaming.Chat.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Hubs
+    name: Hubs
+    isExternal: true
+    href: PublisherStudio.Hubs.html
+  - name: .
+  - uid: PublisherStudio.Hubs.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Hubs.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Hubs.Streaming.Chat
+    name: Chat
+    isExternal: true
+    href: PublisherStudio.Hubs.Streaming.Chat.html
+- uid: PublisherStudio.Hubs.Streaming.Lan
+  commentId: N:PublisherStudio.Hubs.Streaming.Lan
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Hubs.Streaming.Lan
+  nameWithType: PublisherStudio.Hubs.Streaming.Lan
+  fullName: PublisherStudio.Hubs.Streaming.Lan
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Hubs
+    name: Hubs
+    isExternal: true
+    href: PublisherStudio.Hubs.html
+  - name: .
+  - uid: PublisherStudio.Hubs.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Hubs.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Hubs.Streaming.Lan
+    name: Lan
+    isExternal: true
+    href: PublisherStudio.Hubs.Streaming.Lan.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Hubs
+    name: Hubs
+    isExternal: true
+    href: PublisherStudio.Hubs.html
+  - name: .
+  - uid: PublisherStudio.Hubs.Streaming
+    name: Streaming
+    isExternal: true
+    href: PublisherStudio.Hubs.Streaming.html
+  - name: .
+  - uid: PublisherStudio.Hubs.Streaming.Lan
+    name: Lan
+    isExternal: true
+    href: PublisherStudio.Hubs.Streaming.Lan.html

@@ -1,0 +1,115 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.BusinessObjects.PublicationHtmlExportSupport
+  commentId: T:PublisherStudio.BusinessObjects.PublicationHtmlExportSupport
+  id: PublicationHtmlExportSupport
+  parent: PublisherStudio.BusinessObjects
+  children:
+  - PublisherStudio.BusinessObjects.PublicationHtmlExportSupport.CanvasRuntime
+  - PublisherStudio.BusinessObjects.PublicationHtmlExportSupport.Native
+  - PublisherStudio.BusinessObjects.PublicationHtmlExportSupport.RenderBeforeExport
+  langs:
+  - csharp
+  - vb
+  name: PublicationHtmlExportSupport
+  nameWithType: PublicationHtmlExportSupport
+  fullName: PublisherStudio.BusinessObjects.PublicationHtmlExportSupport
+  type: Enum
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  summary: Lists supported publication HTML export support values.
+  example: []
+  syntax:
+    content: public enum PublicationHtmlExportSupport
+    content.vb: Public Enum PublicationHtmlExportSupport
+- uid: PublisherStudio.BusinessObjects.PublicationHtmlExportSupport.Native
+  commentId: F:PublisherStudio.BusinessObjects.PublicationHtmlExportSupport.Native
+  id: Native
+  parent: PublisherStudio.BusinessObjects.PublicationHtmlExportSupport
+  langs:
+  - csharp
+  - vb
+  name: Native
+  nameWithType: PublicationHtmlExportSupport.Native
+  fullName: PublisherStudio.BusinessObjects.PublicationHtmlExportSupport.Native
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: Native = 0
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationHtmlExportSupport
+- uid: PublisherStudio.BusinessObjects.PublicationHtmlExportSupport.CanvasRuntime
+  commentId: F:PublisherStudio.BusinessObjects.PublicationHtmlExportSupport.CanvasRuntime
+  id: CanvasRuntime
+  parent: PublisherStudio.BusinessObjects.PublicationHtmlExportSupport
+  langs:
+  - csharp
+  - vb
+  name: CanvasRuntime
+  nameWithType: PublicationHtmlExportSupport.CanvasRuntime
+  fullName: PublisherStudio.BusinessObjects.PublicationHtmlExportSupport.CanvasRuntime
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: CanvasRuntime = 1
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationHtmlExportSupport
+- uid: PublisherStudio.BusinessObjects.PublicationHtmlExportSupport.RenderBeforeExport
+  commentId: F:PublisherStudio.BusinessObjects.PublicationHtmlExportSupport.RenderBeforeExport
+  id: RenderBeforeExport
+  parent: PublisherStudio.BusinessObjects.PublicationHtmlExportSupport
+  langs:
+  - csharp
+  - vb
+  name: RenderBeforeExport
+  nameWithType: PublicationHtmlExportSupport.RenderBeforeExport
+  fullName: PublisherStudio.BusinessObjects.PublicationHtmlExportSupport.RenderBeforeExport
+  type: Field
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.BusinessObjects
+  syntax:
+    content: RenderBeforeExport = 2
+    return:
+      type: PublisherStudio.BusinessObjects.PublicationHtmlExportSupport
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.BusinessObjects.PublicationHtmlExportSupport
+  commentId: T:PublisherStudio.BusinessObjects.PublicationHtmlExportSupport
+  parent: PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.BusinessObjects.PublicationHtmlExportSupport.html
+  name: PublicationHtmlExportSupport
+  nameWithType: PublicationHtmlExportSupport
+  fullName: PublisherStudio.BusinessObjects.PublicationHtmlExportSupport

@@ -1,4 +1,4 @@
-using System.Net.WebSockets;
+﻿using System.Net.WebSockets;
 
 namespace PublisherStudio.Hubs.Streaming.Lan;
 
@@ -8,8 +8,14 @@ namespace PublisherStudio.Hubs.Streaming.Lan;
 /// </summary>
 public sealed class WebRtcSignalingHub(StreamingIngestUseCases useCases)
 {
+    /// <summary>
+    /// Determines whether publish.
+    /// </summary>
     public bool CanPublish(Guid sessionId) => useCases.CanPublishWebRtc(sessionId);
 
+    /// <summary>
+    /// Runs the run publisher async operation.
+    /// </summary>
     public Task<bool> RunPublisherAsync(
         Guid sessionId,
         WebSocket socket,

@@ -1,0 +1,206 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio
+  commentId: N:PublisherStudio
+  id: PublisherStudio
+  children:
+  - PublisherStudio.BusinessObjects
+  - PublisherStudio.Components
+  - PublisherStudio.Controllers
+  - PublisherStudio.Diagnostics
+  - PublisherStudio.HostedServices
+  - PublisherStudio.Hubs.Streaming
+  - PublisherStudio.Models
+  - PublisherStudio.Program
+  - PublisherStudio.Services
+  - PublisherStudio.StreamingServiceCollectionExtensions
+  langs:
+  - csharp
+  - vb
+  name: PublisherStudio
+  nameWithType: PublisherStudio
+  fullName: PublisherStudio
+  type: Namespace
+  assemblies:
+  - PublisherStudio.Web
+references:
+- uid: PublisherStudio.BusinessObjects
+  commentId: N:PublisherStudio.BusinessObjects
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.BusinessObjects
+  nameWithType: PublisherStudio.BusinessObjects
+  fullName: PublisherStudio.BusinessObjects
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.BusinessObjects
+    name: BusinessObjects
+    isExternal: true
+    href: PublisherStudio.BusinessObjects.html
+- uid: PublisherStudio.Components
+  commentId: N:PublisherStudio.Components
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Components
+  nameWithType: PublisherStudio.Components
+  fullName: PublisherStudio.Components
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Components
+    name: Components
+    isExternal: true
+    href: PublisherStudio.Components.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Components
+    name: Components
+    isExternal: true
+    href: PublisherStudio.Components.html
+- uid: PublisherStudio.Controllers
+  commentId: N:PublisherStudio.Controllers
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Controllers
+  nameWithType: PublisherStudio.Controllers
+  fullName: PublisherStudio.Controllers
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Controllers
+    name: Controllers
+    isExternal: true
+    href: PublisherStudio.Controllers.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Controllers
+    name: Controllers
+    isExternal: true
+    href: PublisherStudio.Controllers.html
+- uid: PublisherStudio.Diagnostics
+  commentId: N:PublisherStudio.Diagnostics
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Diagnostics
+  nameWithType: PublisherStudio.Diagnostics
+  fullName: PublisherStudio.Diagnostics
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Diagnostics
+    name: Diagnostics
+    isExternal: true
+    href: PublisherStudio.Diagnostics.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Diagnostics
+    name: Diagnostics
+    isExternal: true
+    href: PublisherStudio.Diagnostics.html
+- uid: PublisherStudio.HostedServices
+  isExternal: true
+- uid: PublisherStudio.Models
+  commentId: N:PublisherStudio.Models
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Models
+  nameWithType: PublisherStudio.Models
+  fullName: PublisherStudio.Models
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Models
+    name: Models
+    isExternal: true
+    href: PublisherStudio.Models.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Models
+    name: Models
+    isExternal: true
+    href: PublisherStudio.Models.html
+- uid: PublisherStudio.Services
+  commentId: N:PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services
+  nameWithType: PublisherStudio.Services
+  fullName: PublisherStudio.Services
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+- uid: PublisherStudio.Program
+  commentId: T:PublisherStudio.Program
+  isExternal: true
+  href: PublisherStudio.Program.html
+  name: Program
+  nameWithType: Program
+  fullName: PublisherStudio.Program
+- uid: PublisherStudio.StreamingServiceCollectionExtensions
+  commentId: T:PublisherStudio.StreamingServiceCollectionExtensions
+  isExternal: true
+  href: PublisherStudio.StreamingServiceCollectionExtensions.html
+  name: StreamingServiceCollectionExtensions
+  nameWithType: StreamingServiceCollectionExtensions
+  fullName: PublisherStudio.StreamingServiceCollectionExtensions
+- uid: PublisherStudio.Hubs.Streaming
+  isExternal: true

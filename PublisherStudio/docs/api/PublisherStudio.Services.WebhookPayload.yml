@@ -1,0 +1,822 @@
+### YamlMime:ManagedReference
+items:
+- uid: PublisherStudio.Services.WebhookPayload
+  commentId: T:PublisherStudio.Services.WebhookPayload
+  id: WebhookPayload
+  parent: PublisherStudio.Services
+  children:
+  - PublisherStudio.Services.WebhookPayload.#ctor(System.String,System.String,System.DateTimeOffset)
+  - PublisherStudio.Services.WebhookPayload.Content
+  - PublisherStudio.Services.WebhookPayload.ContentType
+  - PublisherStudio.Services.WebhookPayload.Deconstruct(System.String@,System.String@,System.DateTimeOffset@)
+  - PublisherStudio.Services.WebhookPayload.Equals(PublisherStudio.Services.WebhookPayload)
+  - PublisherStudio.Services.WebhookPayload.Equals(System.Object)
+  - PublisherStudio.Services.WebhookPayload.GetHashCode
+  - PublisherStudio.Services.WebhookPayload.ReceivedUtc
+  - PublisherStudio.Services.WebhookPayload.ToString
+  - PublisherStudio.Services.WebhookPayload.op_Equality(PublisherStudio.Services.WebhookPayload,PublisherStudio.Services.WebhookPayload)
+  - PublisherStudio.Services.WebhookPayload.op_Inequality(PublisherStudio.Services.WebhookPayload,PublisherStudio.Services.WebhookPayload)
+  langs:
+  - csharp
+  - vb
+  name: WebhookPayload
+  nameWithType: WebhookPayload
+  fullName: PublisherStudio.Services.WebhookPayload
+  type: Class
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Represents a webhook payload.
+  example: []
+  syntax:
+    content: 'public sealed record WebhookPayload : IEquatable<WebhookPayload>'
+    content.vb: Public NotInheritable Class WebhookPayload Implements IEquatable(Of WebhookPayload)
+  inheritance:
+  - System.Object
+  implements:
+  - System.IEquatable{PublisherStudio.Services.WebhookPayload}
+  inheritedMembers:
+  - System.Object.GetType
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+- uid: PublisherStudio.Services.WebhookPayload.#ctor(System.String,System.String,System.DateTimeOffset)
+  commentId: M:PublisherStudio.Services.WebhookPayload.#ctor(System.String,System.String,System.DateTimeOffset)
+  id: '#ctor(System.String,System.String,System.DateTimeOffset)'
+  parent: PublisherStudio.Services.WebhookPayload
+  langs:
+  - csharp
+  - vb
+  name: WebhookPayload(string, string, DateTimeOffset)
+  nameWithType: WebhookPayload.WebhookPayload(string, string, DateTimeOffset)
+  fullName: PublisherStudio.Services.WebhookPayload.WebhookPayload(string, string, System.DateTimeOffset)
+  type: Constructor
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  summary: Represents a webhook payload.
+  example: []
+  syntax:
+    content: public WebhookPayload(string Content, string ContentType, DateTimeOffset ReceivedUtc)
+    parameters:
+    - id: Content
+      type: System.String
+    - id: ContentType
+      type: System.String
+    - id: ReceivedUtc
+      type: System.DateTimeOffset
+    content.vb: Public Sub New(Content As String, ContentType As String, ReceivedUtc As DateTimeOffset)
+  overload: PublisherStudio.Services.WebhookPayload.#ctor*
+  nameWithType.vb: WebhookPayload.New(String, String, DateTimeOffset)
+  fullName.vb: PublisherStudio.Services.WebhookPayload.New(String, String, System.DateTimeOffset)
+  name.vb: New(String, String, DateTimeOffset)
+- uid: PublisherStudio.Services.WebhookPayload.ToString
+  commentId: M:PublisherStudio.Services.WebhookPayload.ToString
+  id: ToString
+  parent: PublisherStudio.Services.WebhookPayload
+  langs:
+  - csharp
+  - vb
+  name: ToString()
+  nameWithType: WebhookPayload.ToString()
+  fullName: PublisherStudio.Services.WebhookPayload.ToString()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  example: []
+  syntax:
+    content: public override string ToString()
+    return:
+      type: System.String
+    content.vb: Public Overrides Function ToString() As String
+  overridden: System.Object.ToString
+  overload: PublisherStudio.Services.WebhookPayload.ToString*
+- uid: PublisherStudio.Services.WebhookPayload.op_Inequality(PublisherStudio.Services.WebhookPayload,PublisherStudio.Services.WebhookPayload)
+  commentId: M:PublisherStudio.Services.WebhookPayload.op_Inequality(PublisherStudio.Services.WebhookPayload,PublisherStudio.Services.WebhookPayload)
+  id: op_Inequality(PublisherStudio.Services.WebhookPayload,PublisherStudio.Services.WebhookPayload)
+  parent: PublisherStudio.Services.WebhookPayload
+  langs:
+  - csharp
+  - vb
+  name: operator !=(WebhookPayload?, WebhookPayload?)
+  nameWithType: WebhookPayload.operator !=(WebhookPayload?, WebhookPayload?)
+  fullName: PublisherStudio.Services.WebhookPayload.operator !=(PublisherStudio.Services.WebhookPayload?, PublisherStudio.Services.WebhookPayload?)
+  type: Operator
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public static bool operator !=(WebhookPayload? left, WebhookPayload? right)
+    parameters:
+    - id: left
+      type: PublisherStudio.Services.WebhookPayload
+    - id: right
+      type: PublisherStudio.Services.WebhookPayload
+    return:
+      type: System.Boolean
+    content.vb: Public Shared Operator <>(left As WebhookPayload, right As WebhookPayload) As Boolean
+  overload: PublisherStudio.Services.WebhookPayload.op_Inequality*
+  nameWithType.vb: WebhookPayload.<>(WebhookPayload, WebhookPayload)
+  fullName.vb: PublisherStudio.Services.WebhookPayload.<>(PublisherStudio.Services.WebhookPayload, PublisherStudio.Services.WebhookPayload)
+  name.vb: <>(WebhookPayload, WebhookPayload)
+- uid: PublisherStudio.Services.WebhookPayload.op_Equality(PublisherStudio.Services.WebhookPayload,PublisherStudio.Services.WebhookPayload)
+  commentId: M:PublisherStudio.Services.WebhookPayload.op_Equality(PublisherStudio.Services.WebhookPayload,PublisherStudio.Services.WebhookPayload)
+  id: op_Equality(PublisherStudio.Services.WebhookPayload,PublisherStudio.Services.WebhookPayload)
+  parent: PublisherStudio.Services.WebhookPayload
+  langs:
+  - csharp
+  - vb
+  name: operator ==(WebhookPayload?, WebhookPayload?)
+  nameWithType: WebhookPayload.operator ==(WebhookPayload?, WebhookPayload?)
+  fullName: PublisherStudio.Services.WebhookPayload.operator ==(PublisherStudio.Services.WebhookPayload?, PublisherStudio.Services.WebhookPayload?)
+  type: Operator
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public static bool operator ==(WebhookPayload? left, WebhookPayload? right)
+    parameters:
+    - id: left
+      type: PublisherStudio.Services.WebhookPayload
+    - id: right
+      type: PublisherStudio.Services.WebhookPayload
+    return:
+      type: System.Boolean
+    content.vb: Public Shared Operator =(left As WebhookPayload, right As WebhookPayload) As Boolean
+  overload: PublisherStudio.Services.WebhookPayload.op_Equality*
+  nameWithType.vb: WebhookPayload.=(WebhookPayload, WebhookPayload)
+  fullName.vb: PublisherStudio.Services.WebhookPayload.=(PublisherStudio.Services.WebhookPayload, PublisherStudio.Services.WebhookPayload)
+  name.vb: =(WebhookPayload, WebhookPayload)
+- uid: PublisherStudio.Services.WebhookPayload.GetHashCode
+  commentId: M:PublisherStudio.Services.WebhookPayload.GetHashCode
+  id: GetHashCode
+  parent: PublisherStudio.Services.WebhookPayload
+  langs:
+  - csharp
+  - vb
+  name: GetHashCode()
+  nameWithType: WebhookPayload.GetHashCode()
+  fullName: PublisherStudio.Services.WebhookPayload.GetHashCode()
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  example: []
+  syntax:
+    content: public override int GetHashCode()
+    return:
+      type: System.Int32
+    content.vb: Public Overrides Function GetHashCode() As Integer
+  overridden: System.Object.GetHashCode
+  overload: PublisherStudio.Services.WebhookPayload.GetHashCode*
+- uid: PublisherStudio.Services.WebhookPayload.Equals(System.Object)
+  commentId: M:PublisherStudio.Services.WebhookPayload.Equals(System.Object)
+  id: Equals(System.Object)
+  parent: PublisherStudio.Services.WebhookPayload
+  langs:
+  - csharp
+  - vb
+  name: Equals(object?)
+  nameWithType: WebhookPayload.Equals(object?)
+  fullName: PublisherStudio.Services.WebhookPayload.Equals(object?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  example: []
+  syntax:
+    content: public override bool Equals(object? obj)
+    parameters:
+    - id: obj
+      type: System.Object
+    return:
+      type: System.Boolean
+    content.vb: Public Overrides Function Equals(obj As Object) As Boolean
+  overridden: System.Object.Equals(System.Object)
+  overload: PublisherStudio.Services.WebhookPayload.Equals*
+  nameWithType.vb: WebhookPayload.Equals(Object)
+  fullName.vb: PublisherStudio.Services.WebhookPayload.Equals(Object)
+  name.vb: Equals(Object)
+- uid: PublisherStudio.Services.WebhookPayload.Equals(PublisherStudio.Services.WebhookPayload)
+  commentId: M:PublisherStudio.Services.WebhookPayload.Equals(PublisherStudio.Services.WebhookPayload)
+  id: Equals(PublisherStudio.Services.WebhookPayload)
+  parent: PublisherStudio.Services.WebhookPayload
+  langs:
+  - csharp
+  - vb
+  name: Equals(WebhookPayload?)
+  nameWithType: WebhookPayload.Equals(WebhookPayload?)
+  fullName: PublisherStudio.Services.WebhookPayload.Equals(PublisherStudio.Services.WebhookPayload?)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  example: []
+  syntax:
+    content: public bool Equals(WebhookPayload? other)
+    parameters:
+    - id: other
+      type: PublisherStudio.Services.WebhookPayload
+    return:
+      type: System.Boolean
+    content.vb: Public Function Equals(other As WebhookPayload) As Boolean
+  overload: PublisherStudio.Services.WebhookPayload.Equals*
+  implements:
+  - System.IEquatable{PublisherStudio.Services.WebhookPayload}.Equals(PublisherStudio.Services.WebhookPayload)
+  nameWithType.vb: WebhookPayload.Equals(WebhookPayload)
+  fullName.vb: PublisherStudio.Services.WebhookPayload.Equals(PublisherStudio.Services.WebhookPayload)
+  name.vb: Equals(WebhookPayload)
+- uid: PublisherStudio.Services.WebhookPayload.Deconstruct(System.String@,System.String@,System.DateTimeOffset@)
+  commentId: M:PublisherStudio.Services.WebhookPayload.Deconstruct(System.String@,System.String@,System.DateTimeOffset@)
+  id: Deconstruct(System.String@,System.String@,System.DateTimeOffset@)
+  parent: PublisherStudio.Services.WebhookPayload
+  langs:
+  - csharp
+  - vb
+  name: Deconstruct(out string, out string, out DateTimeOffset)
+  nameWithType: WebhookPayload.Deconstruct(out string, out string, out DateTimeOffset)
+  fullName: PublisherStudio.Services.WebhookPayload.Deconstruct(out string, out string, out System.DateTimeOffset)
+  type: Method
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public void Deconstruct(out string Content, out string ContentType, out DateTimeOffset ReceivedUtc)
+    parameters:
+    - id: Content
+      type: System.String
+    - id: ContentType
+      type: System.String
+    - id: ReceivedUtc
+      type: System.DateTimeOffset
+    content.vb: Public Sub Deconstruct(Content As String, ContentType As String, ReceivedUtc As DateTimeOffset)
+  overload: PublisherStudio.Services.WebhookPayload.Deconstruct*
+  nameWithType.vb: WebhookPayload.Deconstruct(String, String, DateTimeOffset)
+  fullName.vb: PublisherStudio.Services.WebhookPayload.Deconstruct(String, String, System.DateTimeOffset)
+  name.vb: Deconstruct(String, String, DateTimeOffset)
+- uid: PublisherStudio.Services.WebhookPayload.Content
+  commentId: P:PublisherStudio.Services.WebhookPayload.Content
+  id: Content
+  parent: PublisherStudio.Services.WebhookPayload
+  langs:
+  - csharp
+  - vb
+  name: Content
+  nameWithType: WebhookPayload.Content
+  fullName: PublisherStudio.Services.WebhookPayload.Content
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public string Content { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Content As String
+  overload: PublisherStudio.Services.WebhookPayload.Content*
+- uid: PublisherStudio.Services.WebhookPayload.ContentType
+  commentId: P:PublisherStudio.Services.WebhookPayload.ContentType
+  id: ContentType
+  parent: PublisherStudio.Services.WebhookPayload
+  langs:
+  - csharp
+  - vb
+  name: ContentType
+  nameWithType: WebhookPayload.ContentType
+  fullName: PublisherStudio.Services.WebhookPayload.ContentType
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public string ContentType { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property ContentType As String
+  overload: PublisherStudio.Services.WebhookPayload.ContentType*
+- uid: PublisherStudio.Services.WebhookPayload.ReceivedUtc
+  commentId: P:PublisherStudio.Services.WebhookPayload.ReceivedUtc
+  id: ReceivedUtc
+  parent: PublisherStudio.Services.WebhookPayload
+  langs:
+  - csharp
+  - vb
+  name: ReceivedUtc
+  nameWithType: WebhookPayload.ReceivedUtc
+  fullName: PublisherStudio.Services.WebhookPayload.ReceivedUtc
+  type: Property
+  assemblies:
+  - PublisherStudio.Web
+  namespace: PublisherStudio.Services
+  syntax:
+    content: public DateTimeOffset ReceivedUtc { get; init; }
+    parameters: []
+    return:
+      type: System.DateTimeOffset
+    content.vb: Public Property ReceivedUtc As DateTimeOffset
+  overload: PublisherStudio.Services.WebhookPayload.ReceivedUtc*
+references:
+- uid: PublisherStudio.Services
+  commentId: N:PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.html
+  name: PublisherStudio.Services
+  nameWithType: PublisherStudio.Services
+  fullName: PublisherStudio.Services
+  spec.csharp:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+  spec.vb:
+  - uid: PublisherStudio
+    name: PublisherStudio
+    isExternal: true
+    href: PublisherStudio.html
+  - name: .
+  - uid: PublisherStudio.Services
+    name: Services
+    isExternal: true
+    href: PublisherStudio.Services.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.IEquatable{PublisherStudio.Services.WebhookPayload}
+  commentId: T:System.IEquatable{PublisherStudio.Services.WebhookPayload}
+  parent: System
+  definition: System.IEquatable`1
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<WebhookPayload>
+  nameWithType: IEquatable<WebhookPayload>
+  fullName: System.IEquatable<PublisherStudio.Services.WebhookPayload>
+  nameWithType.vb: IEquatable(Of WebhookPayload)
+  fullName.vb: System.IEquatable(Of PublisherStudio.Services.WebhookPayload)
+  name.vb: IEquatable(Of WebhookPayload)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - uid: PublisherStudio.Services.WebhookPayload
+    name: WebhookPayload
+    isExternal: true
+    href: PublisherStudio.Services.WebhookPayload.html
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: PublisherStudio.Services.WebhookPayload
+    name: WebhookPayload
+    isExternal: true
+    href: PublisherStudio.Services.WebhookPayload.html
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: System.IEquatable`1
+  commentId: T:System.IEquatable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<T>
+  nameWithType: IEquatable<T>
+  fullName: System.IEquatable<T>
+  nameWithType.vb: IEquatable(Of T)
+  fullName.vb: System.IEquatable(Of T)
+  name.vb: IEquatable(Of T)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: PublisherStudio.Services.WebhookPayload.#ctor*
+  commentId: Overload:PublisherStudio.Services.WebhookPayload.#ctor
+  isExternal: true
+  href: PublisherStudio.Services.WebhookPayload.html#PublisherStudio_Services_WebhookPayload__ctor_System_String_System_String_System_DateTimeOffset_
+  name: WebhookPayload
+  nameWithType: WebhookPayload.WebhookPayload
+  fullName: PublisherStudio.Services.WebhookPayload.WebhookPayload
+  nameWithType.vb: WebhookPayload.New
+  fullName.vb: PublisherStudio.Services.WebhookPayload.New
+  name.vb: New
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System.DateTimeOffset
+  commentId: T:System.DateTimeOffset
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.datetimeoffset
+  name: DateTimeOffset
+  nameWithType: DateTimeOffset
+  fullName: System.DateTimeOffset
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: PublisherStudio.Services.WebhookPayload.ToString*
+  commentId: Overload:PublisherStudio.Services.WebhookPayload.ToString
+  isExternal: true
+  href: PublisherStudio.Services.WebhookPayload.html#PublisherStudio_Services_WebhookPayload_ToString
+  name: ToString
+  nameWithType: WebhookPayload.ToString
+  fullName: PublisherStudio.Services.WebhookPayload.ToString
+- uid: PublisherStudio.Services.WebhookPayload.op_Inequality*
+  commentId: Overload:PublisherStudio.Services.WebhookPayload.op_Inequality
+  isExternal: true
+  href: PublisherStudio.Services.WebhookPayload.html#PublisherStudio_Services_WebhookPayload_op_Inequality_PublisherStudio_Services_WebhookPayload_PublisherStudio_Services_WebhookPayload_
+  name: operator !=
+  nameWithType: WebhookPayload.operator !=
+  fullName: PublisherStudio.Services.WebhookPayload.operator !=
+  nameWithType.vb: WebhookPayload.<>
+  fullName.vb: PublisherStudio.Services.WebhookPayload.<>
+  name.vb: <>
+  spec.csharp:
+  - name: operator
+  - name: " "
+  - uid: PublisherStudio.Services.WebhookPayload.op_Inequality*
+    name: '!='
+    isExternal: true
+    href: PublisherStudio.Services.WebhookPayload.html#PublisherStudio_Services_WebhookPayload_op_Inequality_PublisherStudio_Services_WebhookPayload_PublisherStudio_Services_WebhookPayload_
+- uid: PublisherStudio.Services.WebhookPayload
+  commentId: T:PublisherStudio.Services.WebhookPayload
+  parent: PublisherStudio.Services
+  isExternal: true
+  href: PublisherStudio.Services.WebhookPayload.html
+  name: WebhookPayload
+  nameWithType: WebhookPayload
+  fullName: PublisherStudio.Services.WebhookPayload
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: PublisherStudio.Services.WebhookPayload.op_Equality*
+  commentId: Overload:PublisherStudio.Services.WebhookPayload.op_Equality
+  isExternal: true
+  href: PublisherStudio.Services.WebhookPayload.html#PublisherStudio_Services_WebhookPayload_op_Equality_PublisherStudio_Services_WebhookPayload_PublisherStudio_Services_WebhookPayload_
+  name: operator ==
+  nameWithType: WebhookPayload.operator ==
+  fullName: PublisherStudio.Services.WebhookPayload.operator ==
+  nameWithType.vb: WebhookPayload.=
+  fullName.vb: PublisherStudio.Services.WebhookPayload.=
+  name.vb: =
+  spec.csharp:
+  - name: operator
+  - name: " "
+  - uid: PublisherStudio.Services.WebhookPayload.op_Equality*
+    name: ==
+    isExternal: true
+    href: PublisherStudio.Services.WebhookPayload.html#PublisherStudio_Services_WebhookPayload_op_Equality_PublisherStudio_Services_WebhookPayload_PublisherStudio_Services_WebhookPayload_
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: PublisherStudio.Services.WebhookPayload.GetHashCode*
+  commentId: Overload:PublisherStudio.Services.WebhookPayload.GetHashCode
+  isExternal: true
+  href: PublisherStudio.Services.WebhookPayload.html#PublisherStudio_Services_WebhookPayload_GetHashCode
+  name: GetHashCode
+  nameWithType: WebhookPayload.GetHashCode
+  fullName: PublisherStudio.Services.WebhookPayload.GetHashCode
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: PublisherStudio.Services.WebhookPayload.Equals*
+  commentId: Overload:PublisherStudio.Services.WebhookPayload.Equals
+  isExternal: true
+  href: PublisherStudio.Services.WebhookPayload.html#PublisherStudio_Services_WebhookPayload_Equals_System_Object_
+  name: Equals
+  nameWithType: WebhookPayload.Equals
+  fullName: PublisherStudio.Services.WebhookPayload.Equals
+- uid: System.IEquatable{PublisherStudio.Services.WebhookPayload}.Equals(PublisherStudio.Services.WebhookPayload)
+  commentId: M:System.IEquatable{PublisherStudio.Services.WebhookPayload}.Equals(PublisherStudio.Services.WebhookPayload)
+  parent: System.IEquatable{PublisherStudio.Services.WebhookPayload}
+  definition: System.IEquatable`1.Equals(`0)
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  name: Equals(WebhookPayload)
+  nameWithType: IEquatable<WebhookPayload>.Equals(WebhookPayload)
+  fullName: System.IEquatable<PublisherStudio.Services.WebhookPayload>.Equals(PublisherStudio.Services.WebhookPayload)
+  nameWithType.vb: IEquatable(Of WebhookPayload).Equals(WebhookPayload)
+  fullName.vb: System.IEquatable(Of PublisherStudio.Services.WebhookPayload).Equals(PublisherStudio.Services.WebhookPayload)
+  spec.csharp:
+  - uid: System.IEquatable{PublisherStudio.Services.WebhookPayload}.Equals(PublisherStudio.Services.WebhookPayload)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - uid: PublisherStudio.Services.WebhookPayload
+    name: WebhookPayload
+    isExternal: true
+    href: PublisherStudio.Services.WebhookPayload.html
+  - name: )
+  spec.vb:
+  - uid: System.IEquatable{PublisherStudio.Services.WebhookPayload}.Equals(PublisherStudio.Services.WebhookPayload)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - uid: PublisherStudio.Services.WebhookPayload
+    name: WebhookPayload
+    isExternal: true
+    href: PublisherStudio.Services.WebhookPayload.html
+  - name: )
+- uid: System.IEquatable`1.Equals(`0)
+  commentId: M:System.IEquatable`1.Equals(`0)
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  name: Equals(T)
+  nameWithType: IEquatable<T>.Equals(T)
+  fullName: System.IEquatable<T>.Equals(T)
+  nameWithType.vb: IEquatable(Of T).Equals(T)
+  fullName.vb: System.IEquatable(Of T).Equals(T)
+  spec.csharp:
+  - uid: System.IEquatable`1.Equals(`0)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - name: T
+  - name: )
+  spec.vb:
+  - uid: System.IEquatable`1.Equals(`0)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1.equals
+  - name: (
+  - name: T
+  - name: )
+- uid: PublisherStudio.Services.WebhookPayload.Deconstruct*
+  commentId: Overload:PublisherStudio.Services.WebhookPayload.Deconstruct
+  isExternal: true
+  href: PublisherStudio.Services.WebhookPayload.html#PublisherStudio_Services_WebhookPayload_Deconstruct_System_String__System_String__System_DateTimeOffset__
+  name: Deconstruct
+  nameWithType: WebhookPayload.Deconstruct
+  fullName: PublisherStudio.Services.WebhookPayload.Deconstruct
+- uid: PublisherStudio.Services.WebhookPayload.Content*
+  commentId: Overload:PublisherStudio.Services.WebhookPayload.Content
+  isExternal: true
+  href: PublisherStudio.Services.WebhookPayload.html#PublisherStudio_Services_WebhookPayload_Content
+  name: Content
+  nameWithType: WebhookPayload.Content
+  fullName: PublisherStudio.Services.WebhookPayload.Content
+- uid: PublisherStudio.Services.WebhookPayload.ContentType*
+  commentId: Overload:PublisherStudio.Services.WebhookPayload.ContentType
+  isExternal: true
+  href: PublisherStudio.Services.WebhookPayload.html#PublisherStudio_Services_WebhookPayload_ContentType
+  name: ContentType
+  nameWithType: WebhookPayload.ContentType
+  fullName: PublisherStudio.Services.WebhookPayload.ContentType
+- uid: PublisherStudio.Services.WebhookPayload.ReceivedUtc*
+  commentId: Overload:PublisherStudio.Services.WebhookPayload.ReceivedUtc
+  isExternal: true
+  href: PublisherStudio.Services.WebhookPayload.html#PublisherStudio_Services_WebhookPayload_ReceivedUtc
+  name: ReceivedUtc
+  nameWithType: WebhookPayload.ReceivedUtc
+  fullName: PublisherStudio.Services.WebhookPayload.ReceivedUtc

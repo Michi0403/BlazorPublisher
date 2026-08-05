@@ -15,13 +15,15 @@ const governance = [
   read('src/PublisherStudio.InstallerConsole/README.md'),
 ].join('\n');
 
-test('PublisherStudio follows the LocalGPT application then setup extraction order', () => {
+test('PublisherStudio acquires and validates both exact assets before changing AppData', () => {
   const appDownload = installer.indexOf('setupAsset: false');
   const appExtract = installer.indexOf('ExtractZipWithFallback(zipPath, targetPath, logger)');
   const setupDownload = installer.indexOf('setupAsset: true');
   const setupExtract = installer.indexOf('ExtractZipWithFallback(setupZipPath, targetPath, logger)');
-  assert.ok(appDownload >= 0 && appDownload < appExtract);
-  assert.ok(appExtract < setupDownload && setupDownload < setupExtract);
+  assert.ok(appDownload >= 0 && appDownload < setupDownload);
+  assert.ok(setupDownload < appExtract && appExtract < setupExtract);
+  assert.match(installer, /ValidateReleaseArchive\(zipPath, GetRuntimeFolderName\(\), logger\)/);
+  assert.match(installer, /ValidateReleaseArchive\(setupZipPath, "setup" \+ GetRuntimeFolderName\(\), logger\)/);
   assert.match(installer, /var targetPath = Path\.Combine\(localAppData, "PublisherStudio"\)/);
   assert.equal((installer.match(/ExtractZipWithFallback\([^;]+targetPath, logger\)/g) ?? []).length, 2);
 });

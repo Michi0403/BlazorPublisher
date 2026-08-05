@@ -87,9 +87,9 @@ assert.match(applicationComposition, /AddSingleton<IMediaConversionService, Medi
 assert.match(applicationComposition, /AddSingleton<PanelDocumentService, PanelDocumentService>/);
 assert.equal(appsettings.PublisherStudio.FFmpegPath, '');
 
-assert.equal(packageJson.version, '2.1.7');
-assert.equal(lockJson.version, '2.1.7');
-assert.equal(lockJson.packages[''].version, '2.1.7');
+assert.equal(packageJson.version, '2.1.8');
+assert.equal(lockJson.version, '2.1.8');
+assert.equal(lockJson.packages[''].version, '2.1.8');
 assert.match(webProject, /<Version>2\.1\.7<\/Version>/);
 assert.match(installerProject, /<Version>2\.1\.7<\/Version>/);
 

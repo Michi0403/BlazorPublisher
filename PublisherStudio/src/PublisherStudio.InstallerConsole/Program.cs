@@ -207,15 +207,32 @@ internal static class Program
         {
             var runtimeIdentifier = GetRuntimeIdentifier();
             var expectedApplicationAsset = GetExpectedReleaseAssetName(runtimeIdentifier, setupAsset: false);
+            var expectedSetupAsset = GetExpectedReleaseAssetName(runtimeIdentifier, setupAsset: true);
             var zipPath = options.PublisherStudioZipPath ?? Path.Combine(Environment.CurrentDirectory, expectedApplicationAsset);
+            var setupZipPath = options.PublisherStudioSetupZipPath ?? Path.Combine(Environment.CurrentDirectory, expectedSetupAsset);
 
-            await DownloadLatestReleaseAssetAsync(
+            await EnsureReleaseAssetAsync(
                 PublisherStudioRepo,
+                expectedApplicationAsset,
                 zipPath,
+                options.PublisherStudioZipPath,
                 logger,
                 options,
                 setupAsset: false,
                 runtimeIdentifier: runtimeIdentifier).ConfigureAwait(false);
+
+            await EnsureReleaseAssetAsync(
+                PublisherStudioRepo,
+                expectedSetupAsset,
+                setupZipPath,
+                options.PublisherStudioSetupZipPath,
+                logger,
+                options,
+                setupAsset: true,
+                runtimeIdentifier: runtimeIdentifier).ConfigureAwait(false);
+
+            ValidateReleaseArchive(zipPath, GetRuntimeFolderName(), logger);
+            ValidateReleaseArchive(setupZipPath, "setup" + GetRuntimeFolderName(), logger);
 
             var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             if (string.IsNullOrWhiteSpace(localAppData))
@@ -228,25 +245,14 @@ internal static class Program
 
             Directory.CreateDirectory(targetPath);
 
-            logger.LogInformation($"Extracting PublisherStudio app '{zipPath}' to '{targetPath}'");
-            ExtractZipWithFallback(zipPath, targetPath, logger);
-
-            var expectedSetupAsset = GetExpectedReleaseAssetName(runtimeIdentifier, setupAsset: true);
-            var setupZipPath = options.PublisherStudioSetupZipPath ?? Path.Combine(Environment.CurrentDirectory, expectedSetupAsset);
-
             logger.LogInformation(
-                "PublisherStudio runtime {RuntimeIdentifier} requires release assets {ApplicationAsset} and {SetupAsset}.",
+                "PublisherStudio runtime {RuntimeIdentifier} uses release assets {ApplicationAsset} and {SetupAsset}.",
                 runtimeIdentifier,
                 expectedApplicationAsset,
                 expectedSetupAsset);
 
-            await DownloadLatestReleaseAssetAsync(
-                PublisherStudioRepo,
-                setupZipPath,
-                logger,
-                options,
-                setupAsset: true,
-                runtimeIdentifier: runtimeIdentifier).ConfigureAwait(false);
+            logger.LogInformation($"Extracting PublisherStudio app '{zipPath}' to '{targetPath}'");
+            ExtractZipWithFallback(zipPath, targetPath, logger);
 
             logger.LogInformation($"Extracting PublisherStudio setup/bootstrap '{setupZipPath}' to '{targetPath}'");
             ExtractZipWithFallback(setupZipPath, targetPath, logger);
@@ -1061,6 +1067,76 @@ internal static class Program
             logger.LogError(ex, $"Could not open default browser for URL: {url}");
             throw;
         }
+    }
+
+
+    private static async Task EnsureReleaseAssetAsync(
+        string repo,
+        string expectedAssetName,
+        string destinationPath,
+        string? explicitSourcePath,
+        ILogger logger,
+        CliOptions options,
+        bool setupAsset,
+        string runtimeIdentifier)
+    {
+        if (!string.IsNullOrWhiteSpace(explicitSourcePath))
+        {
+            var sourcePath = Path.GetFullPath(Environment.ExpandEnvironmentVariables(explicitSourcePath));
+            if (!File.Exists(sourcePath))
+                throw new FileNotFoundException($"The explicitly supplied release archive does not exist: {sourcePath}", sourcePath);
+
+            if (!string.Equals(sourcePath, Path.GetFullPath(destinationPath), StringComparison.OrdinalIgnoreCase))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(destinationPath))!);
+                File.Copy(sourcePath, destinationPath, overwrite: true);
+            }
+
+            logger.LogInformation("Using explicitly supplied PublisherStudio release archive: {ArchivePath}", destinationPath);
+            return;
+        }
+
+        var directUrl = $"https://github.com/{repo}/releases/latest/download/{Uri.EscapeDataString(expectedAssetName)}";
+        try
+        {
+            logger.LogInformation("Downloading exact latest-release asset {AssetName} directly from GitHub.", expectedAssetName);
+            await DownloadFileAsync(directUrl, destinationPath, logger, options, expectedSize: null).ConfigureAwait(false);
+            return;
+        }
+        catch (Exception directException)
+        {
+            logger.LogWarning(directException,
+                "Direct latest-release download for {AssetName} failed. Falling back to the GitHub release API.",
+                expectedAssetName);
+        }
+
+        await DownloadLatestReleaseAssetAsync(
+            repo,
+            destinationPath,
+            logger,
+            options,
+            setupAsset,
+            runtimeIdentifier).ConfigureAwait(false);
+    }
+
+    private static void ValidateReleaseArchive(string archivePath, string expectedRootDirectory, ILogger logger)
+    {
+        if (!File.Exists(archivePath))
+            throw new FileNotFoundException($"PublisherStudio release archive was not found: {archivePath}", archivePath);
+
+        using var archive = ZipFile.OpenRead(archivePath);
+        if (archive.Entries.Count == 0)
+            throw new InvalidDataException($"PublisherStudio release archive is empty: {archivePath}");
+
+        var expectedPrefix = expectedRootDirectory.TrimEnd('/', '\\') + "/";
+        var hasExpectedRoot = archive.Entries.Any(entry =>
+            entry.FullName.Replace('\\', '/').StartsWith(expectedPrefix, StringComparison.OrdinalIgnoreCase));
+
+        if (!hasExpectedRoot)
+            throw new InvalidDataException(
+                $"PublisherStudio release archive '{archivePath}' does not contain the required wrapper directory '{expectedRootDirectory}'.");
+
+        logger.LogInformation("Validated release archive {ArchivePath} with wrapper directory {WrapperDirectory}.", archivePath, expectedRootDirectory);
     }
 
     private static async Task DownloadLatestReleaseAssetAsync(

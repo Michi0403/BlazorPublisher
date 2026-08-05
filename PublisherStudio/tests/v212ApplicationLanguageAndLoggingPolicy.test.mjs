@@ -51,9 +51,9 @@ test('repository ownership rules keep data in BusinessObjects and localization o
   assert.doesNotMatch(agents, /Domain \/ Models/);
 });
 
-test('2.1.7 application version advances without changing wire protocol 2.1.1', () => {
+test('2.1.8 application version advances without changing wire protocol 2.1.1', () => {
   assert.match(read('src/PublisherStudio.Web/PublisherStudio.Web.csproj'), /<Version>2\.1\.7<\/Version>/);
   assert.match(read('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'), /<Version>2\.1\.7<\/Version>/);
-  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package.json')).version, '2.1.7');
+  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package.json')).version, '2.1.8');
   assert.match(read('Directory.Build.props'), /<LocalGptWireProtocolVersion>2\.1\.1<\/LocalGptWireProtocolVersion>/);
 });

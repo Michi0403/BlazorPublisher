@@ -23,7 +23,7 @@ const runtimeCapabilities = read('src/PublisherStudio.Web/Services/Streaming/Use
 
 assert.match(webProject, /<Version>2\.1\.7<\/Version>/);
 assert.match(installerProject, /<Version>2\.1\.7<\/Version>/);
-assert.equal(packageJson.version, '2.1.7');
+assert.equal(packageJson.version, '2.1.8');
 assert.match(runtimeCapabilities, /Version = "2\.1\.7"/);
 
 assert.match(applicationComposition, /AddSingleton<SystemFontCatalog, SystemFontCatalog>/);

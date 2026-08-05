@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (...parts) => fs.readFileSync(path.join(root, ...parts), 'utf8');
-const changelog = read('CHANGELOG-v2.1.7.md');
+const changelog = read('CHANGELOG-v2.1.8.md');
 const validation = read('VALIDATION.md');
 const developer = read('docs','articles','developer-build.md');
 const release = read('RELEASE.md');

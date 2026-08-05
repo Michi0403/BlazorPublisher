@@ -63,9 +63,9 @@ assert.match(doctrine, /FFV1/);
 assert.match(doctrine, /FFmpeg\.wasm/);
 assert.match(doctrine, /Blazor.*JavaScript interop/is);
 
-assert.equal(packageJson.version, '2.1.7');
-assert.equal(lockJson.version, '2.1.7');
-assert.equal(lockJson.packages[''].version, '2.1.7');
+assert.equal(packageJson.version, '2.1.8');
+assert.equal(lockJson.version, '2.1.8');
+assert.equal(lockJson.packages[''].version, '2.1.8');
 assert.match(webProject, /<Version>2\.1\.7<\/Version>/);
 assert.match(installerProject, /<Version>2\.1\.7<\/Version>/);
 assert.match(streamingRuntime, /Version = "2\.1\.7"/);

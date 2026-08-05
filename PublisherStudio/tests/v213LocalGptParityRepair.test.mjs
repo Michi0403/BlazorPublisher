@@ -7,7 +7,7 @@ import { execFileSync } from 'node:child_process';
 const root = path.resolve(import.meta.dirname, '..');
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 
-test('2.1.7 repairs the installer compiler expression and the orphan XML comment', () => {
+test('2.1.8 repairs the installer compiler expression and the orphan XML comment', () => {
   const installer = read('src/PublisherStudio.InstallerConsole/Program.cs');
   assert.match(installer, /_ = Process\.Start\(startInfo\)\s*\?\? throw new InvalidOperationException/);
   assert.doesNotMatch(installer, /(?<!_ = )Process\.Start\(startInfo\) \?\? throw/);

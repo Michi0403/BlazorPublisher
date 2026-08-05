@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 
-test('2.1.7 keeps SpreadsheetDocumentService constructor-owned and DI-resolvable', () => {
+test('2.1.8 keeps SpreadsheetDocumentService constructor-owned and DI-resolvable', () => {
   const source = read('src/PublisherStudio.Web/Services/SpreadsheetDocumentService.cs');
   assert.match(source, /public sealed class SpreadsheetDocumentService\s*\{/);
   assert.match(source, /public SpreadsheetDocumentService\(IPublicationMarkupService markup\)/);
@@ -16,13 +16,13 @@ test('2.1.7 keeps SpreadsheetDocumentService constructor-owned and DI-resolvable
   assert.match(source, /_markup = markup \?\? throw new ArgumentNullException\(nameof\(markup\)\)/);
 });
 
-test('2.1.7 release script uses Windows PowerShell-safe archive diagnostics', () => {
+test('2.1.8 release script uses Windows PowerShell-safe archive diagnostics', () => {
   const release = read('Build-Release.ps1');
   assert.match(release, /Release archive does not contain \$\{expectedExecutable\}: \$ArchivePath/);
   assert.doesNotMatch(release, /\$[A-Za-z_][A-Za-z0-9_]*: \$ArchivePath/);
 });
 
-test('2.1.7 logging guard classifies deterministic instance services without statics', () => {
+test('2.1.8 logging guard classifies deterministic instance services without statics', () => {
   const helpers = [
     'src/PublisherStudio.Web/Services/ConnectorGeometry.cs',
     'src/PublisherStudio.Web/Services/PublicationAnimationData.cs',
@@ -42,6 +42,6 @@ test('2.1.7 logging guard classifies deterministic instance services without sta
 test('active version surfaces are aligned', () => {
   assert.match(read('src/PublisherStudio.Web/PublisherStudio.Web.csproj'), /<Version>2\.1\.7<\/Version>/);
   assert.match(read('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'), /<Version>2\.1\.7<\/Version>/);
-  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package.json')).version, '2.1.7');
-  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package-lock.json')).version, '2.1.7');
+  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package.json')).version, '2.1.8');
+  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package-lock.json')).version, '2.1.8');
 });

@@ -12,11 +12,11 @@ function expectContains(relative, values) {
   return text;
 }
 
-test('2.1.7 application and setup versions are aligned', () => {
+test('2.1.8 application and setup versions are aligned', () => {
   assert.match(read('src/PublisherStudio.Web/PublisherStudio.Web.csproj'), /<Version>2\.1\.7<\/Version>/);
   assert.match(read('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'), /<Version>2\.1\.7<\/Version>/);
-  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package.json')).version, '2.1.7');
-  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package-lock.json')).version, '2.1.7');
+  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package.json')).version, '2.1.8');
+  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package-lock.json')).version, '2.1.8');
 });
 
 test('compiler XML documentation is generated and guarded', () => {

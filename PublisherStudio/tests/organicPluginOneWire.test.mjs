@@ -158,7 +158,7 @@ assert.match(ribbon, /Navigation\.NavigateTo\("\/organic-plugins"\)/);
 assert.equal(settings.OrganicPlugins.DiscoveryPort, 51141);
 assert.equal(settings.OrganicPlugins.DiscoveryReceivePollSeconds, 5);
 assert.equal(settings.OrganicPlugins.Enabled, true);
-assert.equal(packageJson.version, '2.1.7');
+assert.equal(packageJson.version, '2.1.8');
 assert.match(webProject, /<Version>2\.1\.7<\/Version>/);
 assert.match(installerProject, /<Version>2\.1\.7<\/Version>/);
 

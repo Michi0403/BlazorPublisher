@@ -1,29 +1,29 @@
-# PublisherStudio 2.1.2 validation
+# PublisherStudio 2.1.7 validation
 
-The source package is validated structurally in this environment. The final Windows build and one-click installation remain the release authority.
+PublisherStudio 2.1.7 is a source-validated documentation-layout milestone. The owner-side Windows build, publish, installer, browser, and GitHub Actions runs remain authoritative.
 
-## Completed source checks
+## Completed checks
 
-- Complete repository contract suite: **118 passed, 0 failed**.
-- XML documentation coverage: **3,407 public/protected declarations**.
-- Repository contract tests cover the LocalGPT-aligned installer, application architecture, documentation, localization, streaming, editors, and release workflow.
-- Architecture audit passes in combined PublisherStudio mode.
-- XML documentation coverage protects maintained public and protected C# declarations.
-- English and German localization catalogs have matching keys, and the global selector uses the same flat JSON catalogs as the localization editor.
-- JSON, XML/MSBuild, YAML, JavaScript, Python, and Markdown link checks pass.
-- The installer contract fixes the root to `%LOCALAPPDATA%\PublisherStudio`, extracts application and setup wrappers into that root, and maintains only Install, Update, Start, and Folder shortcuts.
-- GitHub Pages extraction and the Kawaii system/dark/light documentation theme remain covered.
+- Complete repository contract suite: **134 passed, 0 failed**.
+- Architecture policy audit: passed.
+- XML documentation coverage remains enforced for public and protected declarations.
+- English and German application localization catalogs remain synchronized.
+- The Kawaii desktop shell uses one rail-width variable for both side panels and one gap variable for both center gaps.
+- The center article has no fixed maximum width and consumes the remaining layout column.
+- The desktop shell fills the available viewport for short pages and grows through normal document scrolling for longer pages.
+- The pinned GitHub Pages snapshot includes the same CSS, an explicit left documentation rail, the right in-article rail, and the current 2.1.7 PDF.
+- The Pages artifact preparation validator passed for **52 HTML pages** and **37 API pages**.
+- Kawaii Auto, Light, and Dark persistence, paw branding, path safety, and snapshot hashes remain validated.
+- Normal install/update preservation and the `%LOCALAPPDATA%\PublisherStudio` product root remain unchanged.
 
-## Required Windows checks
+## Required owner-side checks
 
 1. Run `Prepare-DevExpressAssets.cmd`.
-2. Run `Build-LocalDevelopment.cmd` with every guard enabled.
-3. Confirm `bin/Debug/net10.0/wwwroot/help-docs/index.html`, `documentation-status.json`, `PublisherStudio.Web.xml`, and `PublisherStudio-2.1.2.pdf` exist.
-4. Run `Build-Release.cmd` and `Build-AllRuntimes.cmd`.
-5. Delete or rename any test installation, then double-click the published `PublisherStudio.Setup.exe` with no arguments.
-6. Confirm the only product root is `%LOCALAPPDATA%\PublisherStudio` and that the application and setup runtime wrappers are both present there.
-7. Confirm Desktop and Start Menu contain working PublisherStudio Install, Update, Start, and Folder entries.
-8. Run Update while setup is installed, confirm the temporary-copy handoff replaces setup successfully, and confirm the application starts on `http://127.0.0.1:58071`.
-9. Change the application language from the upper-right selector, confirm the current route reloads in the selected complete JSON catalog, and confirm the choice persists after restart.
-10. Open `/help`, HTML documentation, API reference, and PDF; test system, dark, and light modes at 100% zoom without horizontal page scrollbars.
-11. Publish a GitHub release and run **Publish shipped PublisherStudio documentation** with GitHub Pages set to **GitHub Actions**.
+2. Run `Build-LocalDevelopment.cmd` with all guards enabled.
+3. Run `Build-Release.cmd` and `Build-AllRuntimes.cmd`.
+4. Open `/help-docs/articles/getting-started.html` at 100% zoom on a desktop-width window.
+5. Confirm the two rails have equal width and equal distance from the article.
+6. Confirm a short article fills one page without an unnecessary vertical scrollbar.
+7. Confirm a long article uses only normal document scrolling and no nested panel scrollbar.
+8. Confirm Auto, Light, and Dark modes retain the same geometry.
+9. Publish a GitHub release and run the pinned-snapshot Pages workflow.

@@ -20,9 +20,9 @@ const webProject = read('src','PublisherStudio.Web','PublisherStudio.Web.csproj'
 const installerProject = read('src','PublisherStudio.InstallerConsole','PublisherStudio.InstallerConsole.csproj');
 const packageJson = json('src','PublisherStudio.Web','package.json');
 
-assert.match(webProject, /<Version>2\.1\.2<\/Version>/);
-assert.match(installerProject, /<Version>2\.1\.2<\/Version>/);
-assert.equal(packageJson.version, '2.1.2');
+assert.match(webProject, /<Version>2\.1\.7<\/Version>/);
+assert.match(installerProject, /<Version>2\.1\.7<\/Version>/);
+assert.equal(packageJson.version, '2.1.7');
 
 assert.match(interop, /const liveElement = Array\.from\(element\.querySelectorAll\('\.publication-panel-element\[data-element-id\]'\)\)/);
 for (const property of ['left','top','width','height'])

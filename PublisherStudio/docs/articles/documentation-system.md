@@ -24,4 +24,6 @@ The decoration is a smile, not a fog machine: headings stay clear, code remains 
 
 ## GitHub Pages
 
-The workflow publishes the documentation already shipped inside a release archive. It validates the manifest, theme assets, relative links, API index, and optional PDF before deploying. This keeps the public site tied to a real PublisherStudio release rather than an unrelated documentation-only build.
+GitHub Pages uses the same pinned-snapshot workflow as LocalGPT. The tracked `.github/pages/publisherstudio-kawaii-docs.zip` is validated for path safety, the persistent theme selector, the cat-paw favicon, relative project-page links, and API pages before deployment.
+
+After a successful application build, run `Update-GitHubPagesSnapshot.cmd` to refresh that snapshot from the exact generated `wwwroot/help-docs` tree. GitHub Actions publishes the validated snapshot and never guesses that ignored build output exists in a clean checkout.

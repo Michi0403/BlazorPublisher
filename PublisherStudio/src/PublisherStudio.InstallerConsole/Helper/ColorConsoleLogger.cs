@@ -1,12 +1,11 @@
-﻿
+
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Concurrent;
 using System.Text;
-///
-///https://github.com/dotnet/docs/tree/main/docs/core/extensions/snippets/configuration/console-custom-logging
-///
+// Based on the .NET custom console logging sample:
+// https://github.com/dotnet/docs/tree/main/docs/core/extensions/snippets/configuration/console-custom-logging
 namespace PublisherStudio.InstallerConsole.Helper
 {
     /// <summary>

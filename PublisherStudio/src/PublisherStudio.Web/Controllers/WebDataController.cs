@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using PublisherStudio.Services;
@@ -88,13 +88,10 @@ public sealed class WebDataController : ControllerBase
     public IActionResult Pages(Guid documentId)
         => _registry.TryGet(documentId, out var publication) ? Ok(publication.Pages) : NotFound();
 
-    /// <summary>
-    /// Exports rows.
-    /// </summary>
     // A tokenized, read-only CORS route lets a file:// or separately hosted HTML export
     // reconnect to the user's local monolith without exposing every open publication.
     /// <summary>
-    /// Exports rows.
+    /// Exports rows for one token-authorized publication data source.
     /// </summary>
     [HttpGet("exports/{documentId:guid}/data/{dataId:guid}/{token}/rows")]
     [EnableCors("PublisherExport")]

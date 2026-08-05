@@ -17,7 +17,8 @@ foreach ($required in @(
     'ExtractZipWithFallback(setupZipPath, targetPath, logger)',
     'PublisherStudio app and setup/bootstrap files now reside',
     'Running the default install, update, shortcut, and start routine.',
-    'TryStartDetachedSetup(args)'
+    'TryStartDetachedSetup(args)',
+    '_ = Process.Start(startInfo)'
 )) {
     if (-not $program.Contains($required)) { Fail "Program.cs is missing the LocalGPT-aligned deployment contract: $required" }
 }
@@ -26,10 +27,45 @@ foreach ($forbidden in @(
     'PublisherStudioInstallLayout',
     'PublisherStudioDeploymentService',
     'PublisherStudioReleaseManifest',
-    'preservation-first'
+    'preservation-first',
+    'Falling back to first matching setup mode'
 )) {
     if ($program.Contains($forbidden)) { Fail "Program.cs still contains the superseded installer contract: $forbidden" }
 }
+
+foreach ($required in @(
+    'https://api.github.com/repos/{repo}/releases/latest',
+    'GetExpectedReleaseAssetName(runtimeIdentifier, setupAsset)',
+    'string.Equals(name, expectedAssetName, StringComparison.OrdinalIgnoreCase)',
+    'Refusing to guess or deploy another runtime'
+)) {
+    if (-not $program.Contains($required)) { Fail "Program.cs is missing exact latest-release asset selection: $required" }
+}
+
+$runtimeAssets = @(
+    @{ Runtime = 'win-x64'; Folder = 'winx64' },
+    @{ Runtime = 'win-x86'; Folder = 'winx86' },
+    @{ Runtime = 'win-arm64'; Folder = 'winarm64' },
+    @{ Runtime = 'linux-x64'; Folder = 'linx64' },
+    @{ Runtime = 'linux-arm64'; Folder = 'linarm64' },
+    @{ Runtime = 'osx-x64'; Folder = 'macosx64' },
+    @{ Runtime = 'osx-arm64'; Folder = 'macosarm64' }
+)
+foreach ($runtimeAsset in $runtimeAssets) {
+    $mapping = '"' + $runtimeAsset.Runtime + '" => "' + $runtimeAsset.Folder + '"'
+    if (-not $program.Contains($mapping)) { Fail "Program.cs is missing exact release asset mapping: $mapping" }
+}
+
+$installStart = $program.IndexOf('private static async Task InstallPublisherStudioAsync', [StringComparison]::Ordinal)
+$uninstallStart = $program.IndexOf('private static void UninstallPublisherStudioWindows', [StringComparison]::Ordinal)
+if ($installStart -lt 0 -or $uninstallStart -le $installStart) { Fail 'InstallPublisherStudioAsync could not be isolated for preservation validation.' }
+$installText = $program.Substring($installStart, $uninstallStart - $installStart)
+$deleteCalls = [Regex]::Matches($installText, 'DeleteIfExists\(targetPath, logger\)').Count
+if ($deleteCalls -ne 1) { Fail "Normal installation contains $deleteCalls product-root delete calls; exactly one force-delete-gated call is required." }
+if (-not [Regex]::IsMatch($installText, 'if\s*\(options\.ForceDelete\)\s*DeleteIfExists\(targetPath, logger\)', [Text.RegularExpressions.RegexOptions]::CultureInvariant)) {
+    Fail 'The product-root delete call is not gated directly by options.ForceDelete.'
+}
+if ($installText.Contains('Directory.Delete(')) { Fail 'Normal install/update may not recursively delete the PublisherStudio product root.' }
 
 $parseStart = $program.IndexOf('public static CliOptions Parse(string[] args)', [StringComparison]::Ordinal)
 if ($parseStart -lt 0) { Fail 'CliOptions.Parse was not found.' }

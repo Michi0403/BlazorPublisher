@@ -41,7 +41,7 @@ const releaseScript = fs.readFileSync(path.join(root, 'Build-Release.ps1'), 'utf
 assert.match(releaseScript, /Ensure-WireProtocolPackage\.ps1/);
 assert.doesNotMatch(releaseScript, /dotnet pack|"pack"/);
 assert.match(releaseScript, /--disable-parallel/);
-assert.match(releaseScript, /Copy-Item \$wireProtocolPackage \(Join-Path \$protocolAppDirectory \$wireProtocolPackageName\)/);
-assert.match(releaseScript, /Copy-Item \$wireProtocolPackage \(Join-Path \$protocolSetupDirectory \$wireProtocolPackageName\)/);
+assert.match(releaseScript, /Copy-Item -LiteralPath \$wireProtocolPackage -Destination \(Join-Path \$protocolAppDirectory \$wireProtocolPackageName\) -Force/);
+assert.match(releaseScript, /Copy-Item -LiteralPath \$wireProtocolPackage -Destination \(Join-Path \$protocolSetupDirectory \$wireProtocolPackageName\) -Force/);
 
 console.log('PublisherStudio runtime/bootstrap safety contracts passed.');

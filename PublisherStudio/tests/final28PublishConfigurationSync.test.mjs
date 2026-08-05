@@ -55,8 +55,10 @@ test('developer profiles and scripted release lane share runtime and folder cont
     assert.ok(release.includes(`"${runtime}"`), runtime);
     assert.ok(release.includes(`AppFolder = "${appFolder}"`), appFolder);
     assert.ok(release.includes(`SetupFolder = "${setupFolder}"`), setupFolder);
-    assert.ok(release.includes(`SetupAsset = "${setupFolder}"`), setupFolder);
-    assert.ok(allRuntimes.includes(`"${runtime}"`), `Build-AllRuntimes:${runtime}`);
+    assert.ok(release.includes(`AppAsset = "${appFolder}.zip"`), appFolder);
+    assert.ok(release.includes(`SetupAsset = "${setupFolder}.zip"`), setupFolder);
   }
+  assert.match(release, /\[string\]\$Runtime = "all"/);
+  assert.match(allRuntimes, /Runtime = "all"/);
   assert.doesNotMatch(release, /PublishSingleFile=true|IncludeNativeLibrariesForSelfExtract=true|EnableCompressionInSingleFile=true/);
 });

@@ -36,3 +36,15 @@ packages/*.download
 !tests/*.mjs
 !src/PublisherStudio.Web/Localization/
 !src/PublisherStudio.Web/Localization/*.json
+
+# Generated DocFX inputs and outputs
+docs/input/
+docs/api/
+docs/_site/
+src/PublisherStudio.Web/wwwroot/help-docs/
+
+# The validated GitHub Pages snapshot is source-controlled intentionally.
+!.github/pages/
+!.github/pages/publisherstudio-kawaii-docs.zip
+
+!Update-GitHubPagesSnapshot.cmd

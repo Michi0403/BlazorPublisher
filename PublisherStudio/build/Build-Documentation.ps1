@@ -1,4 +1,4 @@
-﻿param(
+param(
     [Parameter(Mandatory)][string]$RepositoryRoot,
     [Parameter(Mandatory)][string]$AssemblyPath,
     [Parameter(Mandatory)][string]$XmlDocumentationPath,
@@ -397,9 +397,13 @@ function Install-PublisherStudioWebsiteThemeAssets {
     $themeSourceRoot = Join-Path $docsRoot "templates\publisherstudio\public"
     $cssSource = Join-Path $themeSourceRoot "main.css"
     $javascriptSource = Join-Path $themeSourceRoot "main.js"
-    if (-not (Test-Path -LiteralPath $cssSource -PathType Leaf) -or
-        -not (Test-Path -LiteralPath $javascriptSource -PathType Leaf)) {
-        throw "The PublisherStudio DocFX website theme source is incomplete: $themeSourceRoot"
+    $faviconSource = Join-Path $themeSourceRoot "favicon.ico"
+    $faviconSvgSource = Join-Path $themeSourceRoot "favicon.svg"
+    $logoSource = Join-Path $themeSourceRoot "logo.svg"
+    foreach ($requiredThemeSource in @($cssSource, $javascriptSource, $faviconSource, $faviconSvgSource, $logoSource)) {
+        if (-not (Test-Path -LiteralPath $requiredThemeSource -PathType Leaf)) {
+            throw "The PublisherStudio DocFX website theme source is incomplete: $requiredThemeSource"
+        }
     }
 
     $assetRoot = Join-Path $SiteRoot "styles"
@@ -408,24 +412,65 @@ function Install-PublisherStudioWebsiteThemeAssets {
     $javascriptTarget = Join-Path $assetRoot "publisherstudio-kawaii.js"
     Copy-Item -LiteralPath $cssSource -Destination $cssTarget -Force
     Copy-Item -LiteralPath $javascriptSource -Destination $javascriptTarget -Force
+    Copy-Item -LiteralPath $faviconSource -Destination (Join-Path $SiteRoot "favicon.ico") -Force
+    Copy-Item -LiteralPath $faviconSvgSource -Destination (Join-Path $SiteRoot "favicon.svg") -Force
+    Copy-Item -LiteralPath $logoSource -Destination (Join-Path $SiteRoot "logo.svg") -Force
 
     $cssHash = (Get-FileHash -LiteralPath $cssTarget -Algorithm SHA256).Hash.Substring(0, 12).ToLowerInvariant()
     $javascriptHash = (Get-FileHash -LiteralPath $javascriptTarget -Algorithm SHA256).Hash.Substring(0, 12).ToLowerInvariant()
+    $faviconSvgHash = (Get-FileHash -LiteralPath (Join-Path $SiteRoot "favicon.svg") -Algorithm SHA256).Hash.Substring(0, 12).ToLowerInvariant()
+    $faviconIcoHash = (Get-FileHash -LiteralPath (Join-Path $SiteRoot "favicon.ico") -Algorithm SHA256).Hash.Substring(0, 12).ToLowerInvariant()
+    $themeBootstrap = @'
+<script data-publisherstudio-theme-bootstrap="true">
+(function () {
+  var cookieName = "publisherstudio-docs-theme";
+  var valid = { light: true, dark: true, auto: true };
+  var preference = null;
+  var prefix = encodeURIComponent(cookieName) + "=";
+  try {
+    document.cookie.split(";").some(function (part) {
+      part = part.trim();
+      if (part.indexOf(prefix) === 0) {
+        try { preference = decodeURIComponent(part.substring(prefix.length)); }
+        catch (_) { preference = null; }
+        return true;
+      }
+      return false;
+    });
+    if (!valid[preference]) preference = localStorage.getItem(cookieName);
+    if (!valid[preference]) preference = localStorage.getItem("theme");
+  } catch (_) { }
+  if (!valid[preference]) preference = "auto";
+  var resolved = preference === "auto"
+    ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+    : preference;
+  document.documentElement.dataset.publisherstudioThemePreference = preference;
+  document.documentElement.setAttribute("data-bs-theme", resolved);
+  try {
+    localStorage.setItem(cookieName, preference);
+    localStorage.setItem("theme", preference);
+  } catch (_) { }
+  var secure = location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = prefix + encodeURIComponent(preference) + "; Max-Age=31536000; Path=/; SameSite=Lax" + secure;
+})();
+</script>
+'@
+
     $siteRootFull = [IO.Path]::GetFullPath($SiteRoot)
     $updatedCount = 0
     foreach ($file in @(Get-ChildItem -LiteralPath $siteRootFull -Filter "*.html" -File -Recurse -ErrorAction SilentlyContinue)) {
         if ($file.FullName -like "*\.print-book\*") { continue }
         $relative = (Get-PublisherStudioRelativePath -Root $siteRootFull -Path $file.FullName).Replace('\', '/')
         $depth = [Math]::Max(0, @($relative.Split('/') | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }).Count - 1)
-        $prefix = if ($depth -gt 0) { ("../" * $depth) -join "" } else { "" }
-        $cssHref = $prefix + "styles/publisherstudio-kawaii.css?v=$cssHash"
-        $javascriptHref = $prefix + "styles/publisherstudio-kawaii.js?v=$javascriptHash"
+        $prefixPath = if ($depth -gt 0) { ("../" * $depth) -join "" } else { "" }
+        $cssHref = $prefixPath + "styles/publisherstudio-kawaii.css?v=$cssHash"
+        $javascriptHref = $prefixPath + "styles/publisherstudio-kawaii.js?v=$javascriptHash"
+        # Version favicon URLs because browsers cache site icons more aggressively than normal assets.
+        $faviconSvgHref = $prefixPath + "favicon.svg?v=$faviconSvgHash"
+        $faviconIcoHref = $prefixPath + "favicon.ico?v=$faviconIcoHash"
         $html = Get-Content -LiteralPath $file.FullName -Raw -Encoding UTF8
         $updated = $html
 
-        # Activate the visual shell in the generated markup itself. The website remains
-        # themed even when a WebView delays or blocks module execution, while main.js
-        # continues to provide the optional decorations and animations.
         if ($updated -notmatch '(?i)<html\b[^>]*\bpublisherstudio-kawaii-docs\b') {
             if ($updated -match '(?i)<html\b[^>]*\bclass\s*=\s*"') {
                 $updated = [regex]::Replace($updated, '(?i)(<html\b[^>]*\bclass\s*=\s*")', '${1}publisherstudio-kawaii-docs ', 1)
@@ -436,6 +481,21 @@ function Install-PublisherStudioWebsiteThemeAssets {
             else {
                 $updated = [regex]::Replace($updated, '(?i)<html\b', '<html class="publisherstudio-kawaii-docs"', 1)
             }
+        }
+
+        if ($updated -notmatch '(?i)data-publisherstudio-theme-bootstrap') {
+            if ($updated -match '(?i)</head>') {
+                $updated = [regex]::Replace($updated, '(?i)</head>', $themeBootstrap + "`r`n</head>", 1)
+            }
+        }
+
+        $iconTags = '<link rel="icon" type="image/svg+xml" href="' + $faviconSvgHref + '" data-publisherstudio-favicon="true" />' + "`r`n" +
+            '<link rel="alternate icon" href="' + $faviconIcoHref + '" />'
+        if ($updated -match '(?i)<link\s+rel=["'']icon["''][^>]*>') {
+            $updated = [regex]::Replace($updated, '(?i)<link\s+rel=["'']icon["''][^>]*>', $iconTags, 1)
+        }
+        elseif ($updated -notmatch '(?i)data-publisherstudio-favicon' -and $updated -match '(?i)</head>') {
+            $updated = [regex]::Replace($updated, '(?i)</head>', $iconTags + "`r`n</head>", 1)
         }
 
         if ($updated -notmatch '(?i)data-publisherstudio-kawaii-style') {
@@ -2356,6 +2416,9 @@ foreach ($publishRoot in $publishRoots) {
     if ($documentationMode -eq "docfx") {
         $requiredArtifacts.Add((Join-Path $publishRoot "styles\publisherstudio-kawaii.css"))
         $requiredArtifacts.Add((Join-Path $publishRoot "styles\publisherstudio-kawaii.js"))
+        $requiredArtifacts.Add((Join-Path $publishRoot "favicon.svg"))
+        $requiredArtifacts.Add((Join-Path $publishRoot "favicon.ico"))
+        $requiredArtifacts.Add((Join-Path $publishRoot "logo.svg"))
     }
     if ($RequirePdf -or $pdfGenerated) {
         $requiredArtifacts.Add((Join-Path $publishRoot $pdfName))
@@ -2367,7 +2430,7 @@ foreach ($publishRoot in $publishRoots) {
     }
     if ($documentationMode -eq "docfx") {
         $publishedIndex = Get-Content -LiteralPath (Join-Path $publishRoot "index.html") -Raw -Encoding UTF8
-        foreach ($themeMarker in @("publisherstudio-kawaii-docs", "data-publisherstudio-kawaii-style", "data-publisherstudio-kawaii-script")) {
+        foreach ($themeMarker in @("publisherstudio-kawaii-docs", "data-publisherstudio-theme-bootstrap", "data-publisherstudio-favicon", "data-publisherstudio-kawaii-style", "data-publisherstudio-kawaii-script")) {
             if ($publishedIndex -notmatch [regex]::Escape($themeMarker)) {
                 throw "The generated DocFX home page is missing the required Kawaii theme marker: $themeMarker"
             }

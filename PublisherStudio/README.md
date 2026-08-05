@@ -2,7 +2,7 @@
 
 PublisherStudio is a local-first publishing studio for documents, stories, pictures, spreadsheets, presentations, websites, video, streaming, and reusable interactive panels.
 
-Version **2.1.2** keeps the LocalGPT-aligned one-click deployment contract, restores the enabled logging-policy source, and adds an always-visible JSON-backed application language selector. The Kawaii DocFX documentation introduced in 2.1.0 remains included.
+Version **2.1.7** adds bounded development exception diagnostics without changing release logging. PublisherStudio now records first-chance application exceptions, expected circuit teardown, host termination, and endpoint-cleanup failures with structured context while preserving the LocalGPT-shaped publish, deployment, documentation, and optional 1-Wire contracts.
 
 ## A gentle first path
 
@@ -46,7 +46,7 @@ A normal Windows build generates the documentation shipped with a release:
 - complete API reference from compiler XML comments;
 - `documentation-status.json` for the app and GitHub Pages workflow.
 
-Inside PublisherStudio, open **Help** to launch the HTML guide, PDF book, API reference, or documentation status page. GitHub Pages deploys the themed documentation already contained in a release ZIP.
+Inside PublisherStudio, open **Help** to launch the HTML guide, PDF book, API reference, or documentation status page. GitHub Pages deploys the same validated pinned Kawaii snapshot model as LocalGPT. Run `Update-GitHubPagesSnapshot.cmd` after a successful documentation build to refresh the tracked snapshot.
 
 ## Build and release
 

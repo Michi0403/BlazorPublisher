@@ -10,14 +10,14 @@ const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 test('PublisherStudio release uses the RID-neutral protocol package and explicit RID restore', () => {
   const release = read('Build-Release.ps1');
   assert.match(release, /WireProtocolVersion = "2\.1\.1"/);
-  assert.match(release, /"restore", \$webProject, "-r", \$Runtime/);
+  assert.match(release, /"restore", \$webProject, "-r", \$Rid/);
   assert.doesNotMatch(release, /UseLocalWireProtocolProject/);
   assert.match(release, /Ensure-WireProtocolPackage\.ps1/);
   assert.match(release, /RestoreAdditionalProjectSources/);
   assert.match(release, /"publish", \$webProject/);
   assert.ok(fs.existsSync(path.join(root, 'Build-AllRuntimes.ps1')));
   const all = read('Build-AllRuntimes.ps1');
-  for (const rid of ['win-x64','win-arm64','linux-x64','linux-arm64','osx-x64','osx-arm64']) assert.match(all, new RegExp(rid));
+  assert.match(all, /Runtime = "all"/);
   const local = read('Build-LocalDevelopment.ps1');
   assert.match(local, /Ensure-WireProtocolPackage\.ps1/);
   assert.match(local, /--disable-parallel/);

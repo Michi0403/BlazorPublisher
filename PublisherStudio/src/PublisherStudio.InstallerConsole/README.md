@@ -40,4 +40,4 @@ The three command files above are the maintained launchers. Shortcut provisionin
 
 Install and update extract over the existing PublisherStudio root and do not delete it unless `--force-delete` is explicitly supplied. When setup runs from its installed wrapper, it starts a temporary copy first so the setup executable and command files can be refreshed without changing the shortcut path.
 
-Release assets keep the LocalGPT wrapper shape, for example `winx64.zip` and `setupwinx64.zip`.
+Release assets keep the LocalGPT wrapper shape, for example `winx64.zip` and `setupwinx64.zip`. The setup queries the newest published GitHub release and requires those exact names for Windows x64; it does not guess or fall back to another runtime.

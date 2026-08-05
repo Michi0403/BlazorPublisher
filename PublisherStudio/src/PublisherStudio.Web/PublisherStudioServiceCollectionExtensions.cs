@@ -1,6 +1,7 @@
-﻿using PublisherStudio.Controllers;
+using PublisherStudio.Controllers;
 using PublisherStudio.Diagnostics;
 using PublisherStudio.BusinessObjects;
+using PublisherStudio.BusinessObjects.Diagnostics;
 using PublisherStudio.HostedServices.Streaming;
 using PublisherStudio.HostedServices.OrganicPlugins;
 using PublisherStudio.Services.Automation;
@@ -150,6 +151,8 @@ public static class PublisherStudioServiceCollectionExtensions
         AddScoped<EditorStateService, EditorStateService>(services);
         AddScoped<PictureEditorStateService, PictureEditorStateService>(services);
         AddArchitectureDescriptors(services);
+        services.Configure<DebugExceptionDiagnosticsOptions>(configuration.GetSection("PublisherStudio:DebugExceptionDiagnostics"));
+        services.AddHostedService<DebugFirstChanceExceptionLoggingHostedService>();
         services.AddHostedService<ServiceRegistrationLoggingHostedService>();
         logger.LogInformation($"Registered PublisherStudio application services and architecture descriptors.");
         return services;

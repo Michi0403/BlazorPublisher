@@ -165,7 +165,8 @@ $requiredAssets = @(
     "wwwroot\vendor\jquery\jquery.min.js",
     "wwwroot\vendor\devextreme-license.js",
     "wwwroot\vendor\devextreme-license.meta.json",
-    "wwwroot\vendor\devextreme-license.version"
+    "wwwroot\vendor\devextreme-license.version",
+    "wwwroot\vendor\devextreme-assets.meta.json"
 )
 $missingAssets = @($requiredAssets | Where-Object { -not (Test-Path (Join-Path $webDirectory $_)) })
 if ($missingAssets.Count -gt 0) {
@@ -178,6 +179,34 @@ $versionMarkerPath = Join-Path $vendorDirectory "devextreme-license.version"
 $versionMarker = (Get-Content $versionMarkerPath -Raw).Trim()
 if ($metadata.devExtremeVersion -ne $devExtremeVersion -or $versionMarker -ne $devExtremeVersion) {
     throw "The generated runtime-license metadata does not match DevExtreme $devExtremeVersion."
+}
+
+$assetMetadataPath = Join-Path $vendorDirectory "devextreme-assets.meta.json"
+$assetMetadata = Get-Content $assetMetadataPath -Raw | ConvertFrom-Json
+if ($assetMetadata.schemaVersion -ne 1 -or $assetMetadata.devExtremeVersion -ne $devExtremeVersion) {
+    throw "The DevExtreme client-asset metadata does not match DevExtreme $devExtremeVersion."
+}
+
+$expectedAssetEntries = @(
+    @{ RelativePath = "devextreme-dist\js\dx.all.js"; ManifestPath = "devextreme-dist/js/dx.all.js" },
+    @{ RelativePath = "devextreme-dist\css\dx.light.css"; ManifestPath = "devextreme-dist/css/dx.light.css" }
+)
+foreach ($expectedAsset in $expectedAssetEntries) {
+    $entries = @($assetMetadata.assets | Where-Object { $_.path -eq $expectedAsset.ManifestPath })
+    if ($entries.Count -ne 1) {
+        throw "The DevExtreme client-asset metadata must contain exactly one entry for $($expectedAsset.ManifestPath)."
+    }
+
+    $assetPath = Join-Path $vendorDirectory $expectedAsset.RelativePath
+    $assetFile = Get-Item -LiteralPath $assetPath
+    if ([long]$entries[0].bytes -ne [long]$assetFile.Length) {
+        throw "The DevExtreme client-asset size does not match its metadata: $($expectedAsset.ManifestPath)."
+    }
+
+    $actualHash = (Get-FileHash -LiteralPath $assetPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($entries[0].sha256 -ne $actualHash) {
+        throw "The DevExtreme client-asset hash does not match its metadata: $($expectedAsset.ManifestPath)."
+    }
 }
 
 Write-Host "DevExpress client assets and the public runtime license are ready." -ForegroundColor Green

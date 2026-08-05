@@ -1,4 +1,4 @@
-﻿/* Keep DocFX's built-in default + modern templates and only refine PublisherStudio typography and print output. */
+/* Keep DocFX's built-in default + modern templates and only refine PublisherStudio typography and print output. */
 :root {
   --bs-font-sans-serif: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --bs-link-color-rgb: 0, 103, 184;
@@ -1770,9 +1770,7 @@ html.publisherstudio-kawaii-docs summary {
   cursor: none !important;
 }
 
-html.publisherstudio-kawaii-docs .publisherstudio-theme-toggle-hidden {
-  display: none !important;
-}
+/* The current documentation keeps a visible, independent theme control. */
 
 html.publisherstudio-kawaii-docs .navbar .publisherstudio-heart-glimmer {
   animation: publisherstudio-heart-glimmer 3.6s ease-in-out infinite;
@@ -1948,79 +1946,340 @@ html.publisherstudio-kawaii-docs[data-bs-theme="dark"] .publisherstudio-heart-gl
   }
 }
 
+/* Documentation rework: reliable theme selector, real paw branding, and curated cards. */
+html.publisherstudio-kawaii-docs header,
+html.publisherstudio-kawaii-docs .navbar,
+html.publisherstudio-kawaii-docs .navbar .container-xxl,
+html.publisherstudio-kawaii-docs .navbar-collapse,
+html.publisherstudio-kawaii-docs .navbar-nav {
+  overflow: visible !important;
+  position: relative;
+  z-index: 1100 !important;
+}
 
-/* PublisherStudio documentation layout guardrails. */
-html,
-body {
+/* DocFX's own Bootstrap dropdown is replaced by a native details control. This
+   avoids the close/re-open race that can occur when Bootstrap, DocFX and an
+   embedded WebView all observe the same dropdown classes. */
+html.publisherstudio-kawaii-docs .publisherstudio-native-theme-picker {
+  display: none !important;
+}
+
+html.publisherstudio-kawaii-docs .navbar .publisherstudio-theme-control {
+  display: inline-block;
+  margin: 0 .18rem;
+  position: relative;
+  z-index: 1200;
+}
+
+html.publisherstudio-kawaii-docs .navbar .publisherstudio-theme-control > summary {
+  align-items: center;
+  border-radius: 999px;
+  color: #fff !important;
+  cursor: pointer !important;
+  display: inline-flex;
+  height: 2.25rem;
+  justify-content: center;
+  list-style: none;
+  min-width: 2.25rem;
+  padding: .35rem .55rem;
+  user-select: none;
+}
+
+html.publisherstudio-kawaii-docs .navbar .publisherstudio-theme-control > summary::-webkit-details-marker {
+  display: none;
+}
+
+html.publisherstudio-kawaii-docs .navbar .publisherstudio-theme-control > summary::after {
+  content: none !important;
+  display: none !important;
+}
+
+html.publisherstudio-kawaii-docs .navbar .publisherstudio-theme-control > summary:hover,
+html.publisherstudio-kawaii-docs .navbar .publisherstudio-theme-control > summary:focus-visible,
+html.publisherstudio-kawaii-docs .navbar .publisherstudio-theme-control[open] > summary {
+  background: rgba(255,255,255,.18) !important;
+  box-shadow: 0 0 0 .18rem rgba(255,255,255,.22);
+  outline: none;
+}
+
+html.publisherstudio-kawaii-docs .navbar .publisherstudio-theme-control-menu {
+  background: var(--publisherstudio-site-shell-strong) !important;
+  border: 1px solid var(--publisherstudio-site-border) !important;
+  border-radius: .9rem;
+  box-shadow: 0 .8rem 2rem var(--publisherstudio-site-shadow) !important;
+  color: var(--publisherstudio-site-ink) !important;
+  display: grid;
+  gap: .18rem;
+  min-width: 10.5rem;
+  padding: .42rem;
+  position: absolute;
+  right: 0;
+  top: calc(100% + .5rem);
+  z-index: 2147483000 !important;
+}
+
+html.publisherstudio-kawaii-docs .navbar .publisherstudio-theme-control-option {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: .62rem;
+  color: var(--publisherstudio-site-ink) !important;
+  cursor: pointer !important;
+  display: grid;
+  font: inherit;
+  gap: .55rem;
+  grid-template-columns: 1.35rem 1fr;
+  padding: .48rem .62rem;
+  text-align: left;
+  width: 100%;
+}
+
+html.publisherstudio-kawaii-docs .navbar .publisherstudio-theme-control-option:hover,
+html.publisherstudio-kawaii-docs .navbar .publisherstudio-theme-control-option:focus-visible {
+  background: color-mix(in srgb, var(--publisherstudio-site-link) 18%, transparent) !important;
+  color: var(--publisherstudio-site-link-hover) !important;
+  outline: none;
+}
+
+html.publisherstudio-kawaii-docs .navbar .publisherstudio-theme-control-option.active {
+  background: linear-gradient(90deg,
+    color-mix(in srgb, #f472b6 25%, transparent),
+    color-mix(in srgb, #8b5cf6 20%, transparent)) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--publisherstudio-site-link) 24%, transparent);
+  font-weight: 700;
+}
+
+html.publisherstudio-kawaii-docs .navbar-brand::before {
+  content: none !important;
+  display: none !important;
+}
+
+html.publisherstudio-kawaii-docs .navbar-brand > img#logo,
+html.publisherstudio-kawaii-docs .navbar-brand > img[src*="logo.svg"] {
+  background: rgba(255,255,255,.94);
+  border: 1px solid rgba(255,255,255,.82);
+  border-radius: 999px;
+  box-shadow: 0 .2rem .7rem rgba(69,29,90,.24);
+  display: inline-block !important;
+  height: 2rem !important;
+  margin-right: .48rem;
+  object-fit: contain;
+  padding: .12rem;
+  width: 2rem !important;
+}
+
+html.publisherstudio-kawaii-docs .publisherstudio-doc-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  margin: 1.2rem 0 1.6rem;
+}
+
+html.publisherstudio-kawaii-docs .publisherstudio-doc-card {
+  background: var(--publisherstudio-site-surface-soft);
+  border: 1px solid var(--publisherstudio-site-border);
+  border-radius: 1rem;
+  box-shadow: 0 .45rem 1.2rem var(--publisherstudio-site-shadow);
+  padding: 1rem 1.05rem;
+}
+
+html.publisherstudio-kawaii-docs .publisherstudio-doc-card > :first-child { margin-top: 0; }
+html.publisherstudio-kawaii-docs .publisherstudio-doc-card > :last-child { margin-bottom: 0; }
+
+@media (max-width: 767.98px) {
+  html.publisherstudio-kawaii-docs .navbar .dropdown-menu {
+    position: absolute !important;
+    right: 0 !important;
+    left: auto !important;
+  }
+}
+
+/* Shared documentation viewport guard: prevent DocFX rails and decorative layers
+   from creating a horizontal page scrollbar at normal desktop zoom. */
+html.publisherstudio-kawaii-docs,
+html.publisherstudio-kawaii-docs body {
   max-width: 100%;
   overflow-x: clip;
 }
 
-body > .container-fluid,
-body > .container-xxl,
-main,
-article,
-.content,
-.layout,
-.toc,
-.sidetoc,
-.sidefilter {
-  min-width: 0;
+/* Shared Kawaii documentation shell -------------------------------------------------
+   PublisherStudio and its companion application use the same three-panel geometry so moving between
+   the two documentation sites does not require a new visual model. At desktop width
+   both navigation rails have exactly the same width and exactly the same gap to the
+   article. The article consumes every remaining column pixel and all three surfaces
+   fill one viewport when their content is short. The document itself grows normally
+   when real content needs more room; no fake nested page scrollbar is introduced. */
+@media (min-width: 1141px) {
+  html.publisherstudio-kawaii-docs {
+    --kawaii-docs-rail-width: clamp(15rem, 16vw, 18rem);
+    --kawaii-docs-panel-gap: clamp(1.25rem, 2vw, 2.5rem);
+    --kawaii-docs-shell-min-height: max(24rem, calc(100vh - 60px - 1.6rem - 4.5rem));
+  }
+
+  html.publisherstudio-kawaii-docs body:not([data-search])[data-layout=""] > main.container-xxl,
+  html.publisherstudio-kawaii-docs body:not([data-search])[data-layout="conceptual"] > main.container-xxl {
+    align-items: stretch !important;
+    box-sizing: border-box;
+    column-gap: var(--kawaii-docs-panel-gap) !important;
+    display: grid !important;
+    grid-template-columns:
+      var(--kawaii-docs-rail-width)
+      minmax(0, 1fr)
+      var(--kawaii-docs-rail-width) !important;
+    margin-inline: auto !important;
+    max-width: 112rem !important;
+    min-height: var(--kawaii-docs-shell-min-height) !important;
+    width: calc(100% - clamp(2rem, 6vw, 6rem)) !important;
+  }
+
+  html.publisherstudio-kawaii-docs body:not([data-search])[data-layout=""] > main > .toc-offcanvas,
+  html.publisherstudio-kawaii-docs body:not([data-search])[data-layout="conceptual"] > main > .toc-offcanvas,
+  html.publisherstudio-kawaii-docs body:not([data-search])[data-layout=""] > main > .affix,
+  html.publisherstudio-kawaii-docs body:not([data-search])[data-layout="conceptual"] > main > .affix {
+    align-self: stretch !important;
+    box-sizing: border-box;
+    display: block !important;
+    flex: none !important;
+    max-height: none !important;
+    max-width: none !important;
+    min-height: var(--kawaii-docs-shell-min-height);
+    min-width: 0;
+    overflow: visible !important;
+    width: auto !important;
+  }
+
+  html.publisherstudio-kawaii-docs body:not([data-search])[data-layout=""] > main > .toc-offcanvas,
+  html.publisherstudio-kawaii-docs body:not([data-search])[data-layout="conceptual"] > main > .toc-offcanvas {
+    grid-column: 1;
+  }
+
+  html.publisherstudio-kawaii-docs body:not([data-search])[data-layout=""] > main > .affix,
+  html.publisherstudio-kawaii-docs body:not([data-search])[data-layout="conceptual"] > main > .affix {
+    grid-column: 3;
+  }
+
+  html.publisherstudio-kawaii-docs body:not([data-search])[data-layout=""] > main > .toc-offcanvas .offcanvas-md,
+  html.publisherstudio-kawaii-docs body:not([data-search])[data-layout="conceptual"] > main > .toc-offcanvas .offcanvas-md,
+  html.publisherstudio-kawaii-docs body:not([data-search])[data-layout=""] > main > .toc-offcanvas .offcanvas-body,
+  html.publisherstudio-kawaii-docs body:not([data-search])[data-layout="conceptual"] > main > .toc-offcanvas .offcanvas-body {
+    height: 100%;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  html.publisherstudio-kawaii-docs body:not([data-search])[data-layout=""] > main > .affix > nav,
+  html.publisherstudio-kawaii-docs body:not([data-search])[data-layout="conceptual"] > main > .affix > nav {
+    max-height: none !important;
+    overflow: visible !important;
+    position: static !important;
+  }
+
+  html.publisherstudio-kawaii-docs body:not([data-search])[data-layout=""] > main > .content,
+  html.publisherstudio-kawaii-docs body:not([data-search])[data-layout="conceptual"] > main > .content {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    grid-column: 2;
+    margin-inline: 0 !important;
+    min-width: 0;
+    padding-bottom: 0;
+  }
+
+  html.publisherstudio-kawaii-docs body:not([data-search])[data-layout=""] > main > .content > article,
+  html.publisherstudio-kawaii-docs body:not([data-search])[data-layout="conceptual"] > main > .content > article {
+    box-sizing: border-box;
+    flex: 1 0 auto;
+    margin-bottom: 0;
+    max-width: none !important;
+    min-height: var(--kawaii-docs-shell-min-height);
+    width: 100%;
+  }
 }
 
-article pre,
-article table,
-article img,
-article svg,
-article video,
-article iframe {
-  max-width: 100%;
+/* Pinned PublisherStudio Pages snapshot --------------------------------------------
+   The source snapshot intentionally has no DocFX runtime dependency. Its fallback
+   shell uses the same rail width, center gap, viewport fill, and document-growth
+   contract as generated DocFX pages. */
+@media (min-width: 1141px) {
+  html.publisherstudio-kawaii-docs .publisherstudio-snapshot-layout {
+    align-items: stretch;
+    box-sizing: border-box;
+    column-gap: var(--kawaii-docs-panel-gap);
+    display: grid;
+    grid-template-columns:
+      var(--kawaii-docs-rail-width)
+      minmax(0, 1fr)
+      var(--kawaii-docs-rail-width);
+    margin-inline: auto;
+    max-width: 112rem;
+    min-height: var(--kawaii-docs-shell-min-height);
+    width: calc(100% - clamp(2rem, 6vw, 6rem));
+  }
+
+  html.publisherstudio-kawaii-docs .publisherstudio-snapshot-nav,
+  html.publisherstudio-kawaii-docs .publisherstudio-snapshot-layout > .toc,
+  html.publisherstudio-kawaii-docs .publisherstudio-snapshot-layout > .main {
+    align-self: stretch;
+    box-sizing: border-box;
+    min-height: var(--kawaii-docs-shell-min-height);
+    min-width: 0;
+  }
+
+  html.publisherstudio-kawaii-docs .publisherstudio-snapshot-nav {
+    backdrop-filter: blur(18px) saturate(1.18);
+    background: var(--publisherstudio-site-shell);
+    border: 1px solid var(--publisherstudio-site-border);
+    border-radius: 1rem;
+    box-shadow: 0 .55rem 1.45rem var(--publisherstudio-site-shadow);
+    grid-column: 1;
+    padding: .9rem .75rem;
+  }
+
+  html.publisherstudio-kawaii-docs .publisherstudio-snapshot-layout > .main {
+    grid-column: 2;
+  }
+
+  html.publisherstudio-kawaii-docs .publisherstudio-snapshot-layout > .main > article {
+    margin-bottom: 0;
+    max-width: none;
+    min-height: var(--kawaii-docs-shell-min-height);
+    width: 100%;
+  }
+
+  html.publisherstudio-kawaii-docs .publisherstudio-snapshot-layout > .toc {
+    grid-column: 3;
+    margin: 0;
+    width: auto;
+  }
 }
 
-article pre {
-  overflow-x: auto;
+html.publisherstudio-kawaii-docs .publisherstudio-snapshot-nav h5 {
+  color: var(--publisherstudio-site-muted);
+  font-size: .72rem;
+  letter-spacing: .1em;
+  margin: 0 0 .55rem;
+  text-transform: uppercase;
 }
 
-.publisherstudio-brand-paw {
-  display: inline-grid;
-  place-items: center;
-  width: 2rem;
-  height: 2rem;
-  margin-inline-end: .55rem;
-  border-radius: 42% 58% 55% 45%;
-  background: linear-gradient(145deg, #f472b6, #8b5cf6);
-  color: #fff;
-  box-shadow: 0 .25rem .75rem rgba(139, 92, 246, .28);
-  font-size: 1rem;
-  transform: rotate(-6deg);
+html.publisherstudio-kawaii-docs .publisherstudio-snapshot-nav a {
+  border-radius: .68rem;
+  color: var(--publisherstudio-site-link);
+  display: block;
+  line-height: 1.28;
+  margin: .08rem 0;
+  padding: .34rem .5rem;
+  text-decoration: none;
 }
 
-.publisherstudio-theme-control {
-  display: inline-flex;
-  align-items: center;
-  gap: .35rem;
-  margin-inline-start: .5rem;
-  padding: .38rem .62rem;
-  border: 1px solid color-mix(in srgb, var(--bs-border-color) 78%, #f9a8d4);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--bs-body-bg) 90%, #fdf2f8);
-  color: var(--bs-body-color);
-  cursor: pointer;
-  font: inherit;
-  line-height: 1;
-  position: relative;
-  z-index: 1100;
+html.publisherstudio-kawaii-docs .publisherstudio-snapshot-nav a:hover,
+html.publisherstudio-kawaii-docs .publisherstudio-snapshot-nav a[aria-current="page"] {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--publisherstudio-site-link) 20%, transparent), color-mix(in srgb, #a855f7 17%, transparent));
+  color: var(--publisherstudio-site-link-hover);
 }
 
-.publisherstudio-theme-control:hover,
-.publisherstudio-theme-control:focus-visible {
-  border-color: #ec4899;
-  box-shadow: 0 0 0 .2rem rgba(236, 72, 153, .16);
-  outline: 0;
-}
-
-@media (max-width: 767.98px) {
-  .publisherstudio-theme-control .publisherstudio-theme-label {
+@media (max-width: 1140.98px) {
+  html.publisherstudio-kawaii-docs .publisherstudio-snapshot-nav {
     display: none;
   }
 }
+

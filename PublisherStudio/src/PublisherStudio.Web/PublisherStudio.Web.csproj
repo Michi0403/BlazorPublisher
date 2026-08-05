@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
@@ -6,7 +6,7 @@
     <InvariantGlobalization>false</InvariantGlobalization>
     <RootNamespace>PublisherStudio</RootNamespace>
     <AssemblyName>PublisherStudio.Web</AssemblyName>
-    <Version>2.1.2</Version>
+    <Version>2.1.7</Version>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
     <ApplicationIcon>..\..\assets\PublisherStudio.ico</ApplicationIcon>
@@ -21,6 +21,7 @@
     <DevExtremeRuntimeLicenseAsset>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-license.js</DevExtremeRuntimeLicenseAsset>
     <DevExtremeRuntimeLicenseMetadata>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-license.meta.json</DevExtremeRuntimeLicenseMetadata>
     <DevExtremeRuntimeLicenseVersionFile>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-license.version</DevExtremeRuntimeLicenseVersionFile>
+    <DevExtremeClientAssetMetadata>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-assets.meta.json</DevExtremeClientAssetMetadata>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="LocalGPT.WireProtocolVersion" Version="$(LocalGptWireProtocolVersion)" />
@@ -57,14 +58,14 @@
   -->
   <Target Name="PrepareSpreadsheetClientAssets"
           BeforeTargets="PrepareForBuild"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(PrepareSpreadsheetAssetsOnBuild)' == 'true' and (!Exists('$(SpreadsheetClientAsset)') or !Exists('$(DevExtremeRuntimeLicenseAsset)') or !Exists('$(DevExtremeRuntimeLicenseMetadata)') or !Exists('$(DevExtremeRuntimeLicenseVersionFile)'))">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(PrepareSpreadsheetAssetsOnBuild)' == 'true' and (!Exists('$(SpreadsheetClientAsset)') or !Exists('$(DevExtremeRuntimeLicenseAsset)') or !Exists('$(DevExtremeRuntimeLicenseMetadata)') or !Exists('$(DevExtremeRuntimeLicenseVersionFile)') or !Exists('$(DevExtremeClientAssetMetadata)'))">
     <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\..\Prepare-DevExpressAssets.ps1&quot;"
           WorkingDirectory="$(MSBuildProjectDirectory)" />
   </Target>
 
   <Target Name="SpreadsheetClientAssetBuildNotice"
           BeforeTargets="PrepareForBuild"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(PrepareSpreadsheetAssetsOnBuild)' != 'true' and (!Exists('$(SpreadsheetClientAsset)') or !Exists('$(DevExtremeRuntimeLicenseAsset)') or !Exists('$(DevExtremeRuntimeLicenseMetadata)') or !Exists('$(DevExtremeRuntimeLicenseVersionFile)'))">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(PrepareSpreadsheetAssetsOnBuild)' != 'true' and (!Exists('$(SpreadsheetClientAsset)') or !Exists('$(DevExtremeRuntimeLicenseAsset)') or !Exists('$(DevExtremeRuntimeLicenseMetadata)') or !Exists('$(DevExtremeRuntimeLicenseVersionFile)') or !Exists('$(DevExtremeClientAssetMetadata)'))">
     <Warning Text="DevExpress browser assets or the generated public DevExtreme runtime license are not prepared. Run Prepare-DevExpressAssets.cmd once from the solution root on a licensed developer/build machine. The .NET solution may compile without them, but Spreadsheet Studio and standalone HTML export will not be release-ready." />
   </Target>
 
@@ -79,6 +80,8 @@
            Text="The DevExtreme runtime-license metadata is missing. Run Prepare-DevExpressAssets.cmd again before publishing." />
     <Error Condition="!Exists('$(DevExtremeRuntimeLicenseVersionFile)')"
            Text="The DevExtreme runtime-license version marker is missing. Run Prepare-DevExpressAssets.cmd again before publishing." />
+    <Error Condition="!Exists('$(DevExtremeClientAssetMetadata)')"
+           Text="The DevExtreme client-asset metadata is missing. Run Prepare-DevExpressAssets.cmd again before publishing." />
     <ReadLinesFromFile File="$(DevExtremeRuntimeLicenseVersionFile)"
                        Condition="Exists('$(DevExtremeRuntimeLicenseVersionFile)')">
       <Output TaskParameter="Lines" ItemName="DevExtremeRuntimeLicenseVersionLines" />

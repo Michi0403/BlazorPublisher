@@ -31,8 +31,10 @@ assert.match(installer, /ExtractZipWithFallback\(zipPath, targetPath, logger\)/)
 assert.match(installer, /ExtractZipWithFallback\(setupZipPath, targetPath, logger\)/);
 assert.match(installer, /TryStartDetachedSetup/);
 assert.match(installer, /PUBLISHERSTUDIO_SETUP_DETACHED/);
-assert.match(installer, /runtimeIdentifier: GetRuntimeIdentifier\(\)/);
-assert.match(installer, /GetReleaseAssetTokens\(runtimeIdentifier\)/);
+assert.match(installer, /var runtimeIdentifier = GetRuntimeIdentifier\(\)/);
+assert.match(installer, /GetExpectedReleaseAssetName\(runtimeIdentifier, setupAsset:/);
+assert.match(installer, /string\.Equals\(name, expectedAssetName, StringComparison\.OrdinalIgnoreCase\)/);
+assert.doesNotMatch(installer, /GetReleaseAssetTokens\(runtimeIdentifier\)/);
 assert.match(installer, /Timeout\.InfiniteTimeSpan/);
 assert.doesNotMatch(installer, /PublisherStudioInstallLayout|PublisherStudioDeploymentService|PublisherStudioReleaseManifest/);
 assert.doesNotMatch(installer, /RemoveLegacyMediaHostPayload|PublisherStudio\.MediaHost\*/);

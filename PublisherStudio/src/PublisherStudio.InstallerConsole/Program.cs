@@ -1,4 +1,4 @@
-﻿using PublisherStudio.InstallerConsole.Helper;
+using PublisherStudio.InstallerConsole.Helper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -21,8 +21,6 @@ namespace PublisherStudio.InstallerConsole;
 internal static class Program
 {
     private const string PublisherStudioRepo = "Michi0403/BlazorPublisher";
-    private const string PublisherStudioZipName = "PublisherStudioByMichi0403.zip";
-    private const string PublisherStudioSetupZipName = "PublisherStudioSetupByMichi0403.zip";
     private static readonly HttpClient Http = CreateHttpClient();
     private const string DetachedSetupEnvironmentVariable = "PUBLISHERSTUDIO_SETUP_DETACHED";
 
@@ -63,7 +61,7 @@ internal static class Program
             startInfo.ArgumentList.Add(arg);
         startInfo.Environment[DetachedSetupEnvironmentVariable] = "1";
 
-        Process.Start(startInfo)
+        _ = Process.Start(startInfo)
             ?? throw new InvalidOperationException("PublisherStudio detached setup process could not be started.");
         Console.WriteLine("PublisherStudio setup continued from a temporary copy so the installed setup can be replaced.");
         return true;
@@ -79,7 +77,7 @@ internal static class Program
 
         var launchedByDoubleClick = args.Length == 0 && Environment.UserInteractive;
 
-        Console.WriteLine("PublisherStudio Setup 2.1.2");
+        Console.WriteLine("PublisherStudio Setup 2.1.7");
         var options = CliOptions.Parse(args);
         if (args.Length == 0)
             Console.WriteLine("No command-line action was supplied. Running the default install, update, shortcut, and start routine.");
@@ -207,7 +205,9 @@ internal static class Program
     {
         try
         {
-            var zipPath = options.PublisherStudioZipPath ?? Path.Combine(Environment.CurrentDirectory, PublisherStudioZipName);
+            var runtimeIdentifier = GetRuntimeIdentifier();
+            var expectedApplicationAsset = GetExpectedReleaseAssetName(runtimeIdentifier, setupAsset: false);
+            var zipPath = options.PublisherStudioZipPath ?? Path.Combine(Environment.CurrentDirectory, expectedApplicationAsset);
 
             await DownloadLatestReleaseAssetAsync(
                 PublisherStudioRepo,
@@ -215,7 +215,7 @@ internal static class Program
                 logger,
                 options,
                 setupAsset: false,
-                runtimeIdentifier: GetRuntimeIdentifier()).ConfigureAwait(false);
+                runtimeIdentifier: runtimeIdentifier).ConfigureAwait(false);
 
             var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             if (string.IsNullOrWhiteSpace(localAppData))
@@ -231,7 +231,14 @@ internal static class Program
             logger.LogInformation($"Extracting PublisherStudio app '{zipPath}' to '{targetPath}'");
             ExtractZipWithFallback(zipPath, targetPath, logger);
 
-            var setupZipPath = options.PublisherStudioSetupZipPath ?? Path.Combine(Environment.CurrentDirectory, PublisherStudioSetupZipName);
+            var expectedSetupAsset = GetExpectedReleaseAssetName(runtimeIdentifier, setupAsset: true);
+            var setupZipPath = options.PublisherStudioSetupZipPath ?? Path.Combine(Environment.CurrentDirectory, expectedSetupAsset);
+
+            logger.LogInformation(
+                "PublisherStudio runtime {RuntimeIdentifier} requires release assets {ApplicationAsset} and {SetupAsset}.",
+                runtimeIdentifier,
+                expectedApplicationAsset,
+                expectedSetupAsset);
 
             await DownloadLatestReleaseAssetAsync(
                 PublisherStudioRepo,
@@ -239,7 +246,7 @@ internal static class Program
                 logger,
                 options,
                 setupAsset: true,
-                runtimeIdentifier: GetRuntimeIdentifier()).ConfigureAwait(false);
+                runtimeIdentifier: runtimeIdentifier).ConfigureAwait(false);
 
             logger.LogInformation($"Extracting PublisherStudio setup/bootstrap '{setupZipPath}' to '{targetPath}'");
             ExtractZipWithFallback(setupZipPath, targetPath, logger);
@@ -1077,27 +1084,20 @@ internal static class Program
             if (!root.TryGetProperty("assets", out var assets) || assets.GetArrayLength() == 0)
                 throw new InvalidOperationException($"No downloadable release assets found for {repo}.");
 
-            var (platform, arch) = GetReleaseAssetTokens(runtimeIdentifier);
-
+            var expectedAssetName = GetExpectedReleaseAssetName(runtimeIdentifier, setupAsset);
             JsonElement? selected = null;
 
             foreach (var asset in assets.EnumerateArray())
             {
                 var name = asset.GetProperty("name").GetString() ?? string.Empty;
-
-                var isPlatformMatch =
-                    name.Contains(platform, StringComparison.OrdinalIgnoreCase)
-                    && name.Contains(arch, StringComparison.OrdinalIgnoreCase);
-
-                var isSetupAsset =
-                    name.Contains("setup", StringComparison.OrdinalIgnoreCase)
-                    || name.Contains("installer", StringComparison.OrdinalIgnoreCase)
-                    || name.Contains("bootstrap", StringComparison.OrdinalIgnoreCase);
-
+                var isExactMatch = string.Equals(name, expectedAssetName, StringComparison.OrdinalIgnoreCase);
                 logger.LogInformation(
-                    $"Checking asset '{name}'. PlatformMatch={isPlatformMatch}, SetupAsset={isSetupAsset}, WantedSetupAsset={setupAsset}");
+                    "Checking release asset {AssetName}. ExactMatch={ExactMatch}; Expected={ExpectedAssetName}.",
+                    name,
+                    isExactMatch,
+                    expectedAssetName);
 
-                if (isPlatformMatch && isSetupAsset == setupAsset)
+                if (isExactMatch)
                 {
                     selected = asset;
                     break;
@@ -1107,7 +1107,7 @@ internal static class Program
             if (selected is null)
             {
                 throw new InvalidOperationException(
-                    $"No safe PublisherStudio release asset matched setupAsset={setupAsset}, platform={platform}, arch={arch}. Refusing to deploy an asset for another runtime.");
+                    $"The latest PublisherStudio release does not contain required asset '{expectedAssetName}'. Refusing to guess or deploy another runtime.");
             }
 
             var downloadUrl = selected.Value.GetProperty("browser_download_url").GetString();
@@ -1493,20 +1493,22 @@ internal static class Program
 
     }
 
-    private static (string Platform, string Architecture) GetReleaseAssetTokens(string runtimeIdentifier)
+    private static string GetExpectedReleaseAssetName(string runtimeIdentifier, bool setupAsset)
     {
-        var normalized = runtimeIdentifier.Trim().ToLowerInvariant();
-        var separator = normalized.LastIndexOf('-');
-        if (separator <= 0 || separator == normalized.Length - 1)
-            throw new ArgumentException($"Invalid PublisherStudio runtime identifier '{runtimeIdentifier}'.", nameof(runtimeIdentifier));
-        var platform = normalized[..separator] switch
+        var runtimeFolder = runtimeIdentifier.Trim().ToLowerInvariant() switch
         {
-            "win" => "win",
-            "linux" => "lin",
-            "osx" => "macos",
-            _ => throw new PlatformNotSupportedException($"PublisherStudio release runtime '{runtimeIdentifier}' is not supported.")
+            "win-x64" => "winx64",
+            "win-x86" => "winx86",
+            "win-arm64" => "winarm64",
+            "linux-x64" => "linx64",
+            "linux-arm64" => "linarm64",
+            "osx-x64" => "macosx64",
+            "osx-arm64" => "macosarm64",
+            _ => throw new PlatformNotSupportedException(
+                $"PublisherStudio release runtime '{runtimeIdentifier}' is not supported.")
         };
-        return (platform, normalized[(separator + 1)..]);
+
+        return $"{(setupAsset ? "setup" : string.Empty)}{runtimeFolder}.zip";
     }
 
     private static string GetPlatformToken()

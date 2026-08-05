@@ -37,6 +37,8 @@ Double-clicking `PublisherStudio.Setup.exe` performs the normal install/update p
 6. start PublisherStudio on port `58071`.
 
 No command-line argument is required.
+The setup queries the newest published GitHub release and requires exact runtime assets. On Windows x64 those assets are `winx64.zip` and `setupwinx64.zip`; a missing pair is an error rather than permission to install another architecture.
+
 
 ## Updates
 

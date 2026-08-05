@@ -12,11 +12,11 @@ function expectContains(relative, values) {
   return text;
 }
 
-test('2.1.2 application and setup versions are aligned', () => {
-  assert.match(read('src/PublisherStudio.Web/PublisherStudio.Web.csproj'), /<Version>2\.1\.2<\/Version>/);
-  assert.match(read('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'), /<Version>2\.1\.2<\/Version>/);
-  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package.json')).version, '2.1.2');
-  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package-lock.json')).version, '2.1.2');
+test('2.1.7 application and setup versions are aligned', () => {
+  assert.match(read('src/PublisherStudio.Web/PublisherStudio.Web.csproj'), /<Version>2\.1\.7<\/Version>/);
+  assert.match(read('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'), /<Version>2\.1\.7<\/Version>/);
+  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package.json')).version, '2.1.7');
+  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package-lock.json')).version, '2.1.7');
 });
 
 test('compiler XML documentation is generated and guarded', () => {
@@ -85,37 +85,40 @@ test('DocFX website and PDF share the Kawaii design contract', () => {
   const css = expectContains('docs/templates/publisherstudio/public/main.css', [
     'publisherstudio-kawaii-docs',
     'publisherstudio-theme-control',
-    'publisherstudio-brand-paw',
+    'publisherstudio-cursor-paw',
     'overflow-x: clip',
     'data-bs-theme="dark"'
   ]);
   assert.doesNotMatch(css, /width:\s*100vw/);
   expectContains('docs/templates/publisherstudio/public/main.js', [
     'publisherstudio-docs-theme',
-    'hideBuiltInThemePickers',
-    'cycleTheme',
-    'publisherstudio-brand-paw',
+    'mountThemeControl',
+    'persistTheme',
+    'publisherstudio-cursor-paw',
     'applyTheme'
   ]);
   expectContains('docs/pdf-cover.html', ['PublisherStudio', 'Kawaii']);
 });
 
-test('GitHub Pages deploys the exact shipped documentation tree', () => {
+test('GitHub Pages uses the same pinned snapshot workflow as LocalGPT', () => {
   expectContains('.github/workflows/publish-shipped-docs.yml', [
     'actions/checkout@v6',
+    'actions/configure-pages@v5',
     'actions/upload-pages-artifact@v4',
     'actions/deploy-pages@v4',
-    'extract-shipped-docs.py',
-    "--pattern '*.zip'"
+    'prepare-pages-artifact.py',
+    '.github/pages/publisherstudio-kawaii-docs.zip'
   ]);
-  expectContains('.github/scripts/extract-shipped-docs.py', [
-    'build_member_index',
-    'zipfile.ZipInfo',
+  assert.equal(fs.existsSync(path.join(root, '.github/scripts/extract-shipped-docs.py')), false);
+  expectContains('.github/scripts/prepare-pages-artifact.py', [
     'publisherstudio-kawaii.css',
     'publisherstudio-kawaii.js',
     'documentation-status.json',
-    'projectRelativeAssetsVerified'
+    'favicon.svg',
+    'logo.svg',
+    'data-publisherstudio-theme-bootstrap'
   ]);
+  assert.ok(fs.existsSync(path.join(root, '.github/pages/publisherstudio-kawaii-docs.zip')));
 });
 
 test('the documentation milestone publish warnings remain repaired', () => {

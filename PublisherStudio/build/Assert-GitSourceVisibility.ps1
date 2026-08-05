@@ -1,4 +1,4 @@
-﻿Set-StrictMode -Version Latest
+Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 function Fail([string]$Message) { throw "Git source visibility validation failed: $Message" }
@@ -11,8 +11,10 @@ $protectedPaths = @(
     'Build-AllRuntimes.ps1',
     'Build-Release.ps1',
     'New-VerifiedSourcePackage.ps1',
+    'Update-GitHubPagesSnapshot.cmd',
     'build/Assert-GitSourceVisibility.ps1',
     'build/Build-Documentation.ps1',
+    'build/Update-GitHubPagesSnapshot.ps1',
     'build/Add-XmlDocumentation.py',
     'build/Assert-XmlDocumentationCoverage.py',
     'build/Assert-XmlDocumentationCoverage.ps1',
@@ -51,12 +53,15 @@ $protectedPaths = @(
     'CHANGELOG-v2.1.0.md',
     'CHANGELOG-v2.1.1.md',
     'CHANGELOG-v2.1.2.md',
+    'CHANGELOG-v2.1.7.md',
+    'DOCUMENTATION-PUBLISHING-R4.md',
     'AGENTS.md',
     'src/PublisherStudio.InstallerConsole/README.md',
     'RELEASE.md',
     '.config/dotnet-tools.json',
     '.github/workflows/publish-shipped-docs.yml',
-    '.github/scripts/extract-shipped-docs.py',
+    '.github/scripts/prepare-pages-artifact.py',
+    '.github/pages/publisherstudio-kawaii-docs.zip',
     'docs/docfx.json',
     'docs/toc.yml',
     'docs/guide/toc.yml',
@@ -64,6 +69,9 @@ $protectedPaths = @(
     'docs/pdf-cover.html',
     'docs/templates/publisherstudio/public/main.css',
     'docs/templates/publisherstudio/public/main.js',
+    'docs/templates/publisherstudio/public/favicon.svg',
+    'docs/templates/publisherstudio/public/favicon.ico',
+    'docs/templates/publisherstudio/public/logo.svg',
     'docs/index.md',
     'docs/articles/getting-started.md',
     'docs/articles/editor-workspace.md',
@@ -87,6 +95,7 @@ $protectedPaths = @(
     'src/PublisherStudio.Web/Components/Pages/Help.razor.css',
     'tests/v210KawaiiDocumentation.test.mjs',
     'tests/v211LocalGptInstallerHealing.test.mjs',
+    'tests/v213LocalGptParityRepair.test.mjs',
     'tests/applicationArchitecturePolicy.test.mjs',
     'tests/final14RenderModeGuard.test.mjs',
     'tests/final16BuildGuardRegressions.test.mjs',
@@ -104,6 +113,7 @@ $requiredIgnoreRules = @(
     '!Build-LocalDevelopment.ps1',
     '!Build-Release.ps1',
     '!New-VerifiedSourcePackage.ps1',
+    '!Update-GitHubPagesSnapshot.cmd',
     '!build/',
     '!build/*.ps1',
     '!build/*.json',
@@ -111,7 +121,9 @@ $requiredIgnoreRules = @(
     '!tests/',
     '!tests/*.mjs',
     '!src/PublisherStudio.Web/Localization/',
-    '!src/PublisherStudio.Web/Localization/*.json'
+    '!src/PublisherStudio.Web/Localization/*.json',
+    '!.github/pages/',
+    '!.github/pages/publisherstudio-kawaii-docs.zip'
 )
 
 if (-not (Test-Path -LiteralPath $ignorePath -PathType Leaf)) { Fail "Missing $ignorePath" }

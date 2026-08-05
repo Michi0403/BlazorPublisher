@@ -1,36 +1,27 @@
-# PublisherStudio 2.1.2 application-language and build-policy release
+# PublisherStudio 2.1.7 development diagnostics release
 
-PublisherStudio 2.1.2 keeps the working LocalGPT deployment pattern from 2.1.1, restores the logging-integrity policy required by the Windows build, and exposes the application language selector globally.
+PublisherStudio 2.1.7 keeps the working 2.1.5 publish, installer, DevExpress, DocFX, GitHub Pages, localization, and optional 1-Wire contracts. This release adds observable development exception handling without changing production log volume.
 
-## Maintained deployment contract
+## Development diagnostics
 
-- Product root: `%LOCALAPPDATA%\PublisherStudio`.
-- Application ZIP and setup ZIP retain their runtime wrapper directories.
-- Both archives extract into the same PublisherStudio root.
-- Double-click performs install/update, FFmpeg preparation, shortcut creation, and start.
-- Desktop and Start Menu contain Install, Update, Start, and Folder entries.
-- Setup runs from a temporary copy when it must replace its installed executable.
-- Former `--*-blazorpublisher` command names remain compatibility aliases only.
+- A DI-owned hosted service subscribes to the framework first-chance exception boundary only in the Development environment.
+- PublisherStudio-originated exceptions are logged with their exception object and resolved call site, even when a component later handles them.
+- Expected cancellation, disposal, and disconnected-circuit exceptions use Debug level.
+- Framework lifecycle `InvalidOperationException` instances use Debug level.
+- Unexpected PublisherStudio exceptions use Warning level.
+- Repeated call sites receive a bounded number of detailed records followed by interval and shutdown summaries.
+- Host cancellation, unexpected termination, and runtime-endpoint cleanup failures have explicit logs.
+- No application static logger, static exception registry, or static convenience factory was introduced.
 
-## Removed deployment contract
+## Release and deployment
 
-The release no longer uses:
+The release lane and one-click installer remain unchanged from 2.1.5:
 
-- alternate product roots or automatic legacy-root selection;
-- release ownership manifests;
-- staged repair manifests;
-- application/setup transaction services;
-- the expanded Default, no-browser, FFmpeg, and uninstall launcher set.
+1. publish the exact application and setup runtime assets;
+2. preserve their wrapper folders;
+3. install beneath `%LOCALAPPDATA%\PublisherStudio`;
+4. update matching files without deleting unrelated data;
+5. require explicit `--force-delete` before whole-root deletion;
+6. maintain Install, Update, Start, and Folder shortcuts.
 
-The application still supports explicit FFmpeg and uninstall command-line operations, but those are not mandatory launcher entries.
-
-## Release assets
-
-Each runtime publishes the same two wrapper ZIPs as LocalGPT, for example:
-
-```text
-winx64.zip
-setupwinx64.zip
-```
-
-The separately versioned `LocalGPT.WireProtocolVersion` package remains `2.1.1`.
+The LocalGPT wire protocol remains independently pinned to version 2.1.1.

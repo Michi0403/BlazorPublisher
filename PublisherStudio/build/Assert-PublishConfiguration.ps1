@@ -106,7 +106,7 @@ foreach ($profile in $profiles) {
     $runtimeLiteral = [Regex]::Escape('"' + $profile.Runtime + '"')
     $mappingMatch = [Regex]::Match(
         $release,
-        "(?s)$runtimeLiteral\s*\{\s*@\{(?<Body>.*?)\}\s*\}",
+        "(?s)$runtimeLiteral\s*\{\s*(?:return\s+)?@\{(?<Body>.*?)\}\s*\}",
         [Text.RegularExpressions.RegexOptions]::CultureInvariant)
     if (-not $mappingMatch.Success) {
         Fail "Build-Release.ps1 is missing the release mapping block for $($profile.Runtime)."
@@ -114,16 +114,27 @@ foreach ($profile in $profiles) {
 
     $mappingBody = $mappingMatch.Groups['Body'].Value
     foreach ($property in @(
+        @{ Name = 'AppAsset'; Value = $profile.App + '.zip' },
+        @{ Name = 'SetupAsset'; Value = $profile.Setup + '.zip' },
+        @{ Name = 'AppProfile'; Value = [IO.Path]::GetFileNameWithoutExtension($profile.File) },
+        @{ Name = 'SetupProfile'; Value = [IO.Path]::GetFileNameWithoutExtension($profile.File) },
         @{ Name = 'AppFolder'; Value = $profile.App },
-        @{ Name = 'SetupFolder'; Value = $profile.Setup },
-        @{ Name = 'SetupAsset'; Value = $profile.Setup }
+        @{ Name = 'SetupFolder'; Value = $profile.Setup }
     )) {
         $propertyPattern = '(?m)\b' + [Regex]::Escape($property.Name) + '\s*=\s*"' + [Regex]::Escape($property.Value) + '"'
         if (-not [Regex]::IsMatch($mappingBody, $propertyPattern, [Text.RegularExpressions.RegexOptions]::CultureInvariant)) {
             Fail "Build-Release.ps1 maps $($profile.Runtime) without $($property.Name)='$($property.Value)'."
         }
     }
-    if (-not $allRuntimes.Contains('"' + $profile.Runtime + '"')) { Fail "Build-AllRuntimes.ps1 is missing runtime $($profile.Runtime)." }
+}
+if (-not $allRuntimes.Contains('Runtime = "all"')) {
+    Fail 'Build-AllRuntimes.ps1 must delegate to the shared Build-Release.ps1 all-runtime lane.'
+}
+if (-not $release.Contains('[string]$Runtime = "all"')) {
+    Fail 'Build-Release.ps1 must use the same all-runtime entry point as LocalGPT.'
+}
+if ($release -match '\.Contains\([^\r\n,]+,\s*\[(?:System\.)?StringComparison\]::') {
+    Fail 'Build-Release.ps1 must remain compatible with Windows PowerShell 5.1; use String.IndexOf for comparison-aware substring checks.'
 }
 if (-not $webProject.Contains('win-x64;win-x86;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64')) {
     Fail 'PublisherStudio.Web.csproj must expose the same seven runtime identifiers as both publish lanes.'
@@ -149,4 +160,4 @@ foreach ($forbidden in @(
     if ($release.Contains($forbidden)) { Fail "Build-Release.ps1 still contains the superseded custom deployment contract: $forbidden" }
 }
 
-Write-Host 'Publish configuration validation passed for 7 multi-file application profiles, 7 standalone setup profiles and the LocalGPT-aligned scripted release lane.'
+Write-Host 'Publish configuration validation passed for 7 multi-file application profiles, 7 standalone setup profiles and the LocalGPT-shaped shared release lane.'

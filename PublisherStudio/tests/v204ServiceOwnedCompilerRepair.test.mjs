@@ -85,14 +85,13 @@ test('2.0.4 validates release mappings semantically and keeps synchronized folde
   assert.match(guard, /SetupAsset/);
 
   const releaseScript = read('Build-Release.ps1');
-  const windowsMapping = releaseScript.match(/"win-x64"\s*\{\s*@\{(?<body>[\s\S]*?)\}\s*\}/)?.groups?.body ?? '';
-  assert.match(windowsMapping, /AppFolder\s*=\s*"winx64"/);
-  assert.match(windowsMapping, /SetupFolder\s*=\s*"setupwinx64"/);
-  assert.match(windowsMapping, /SetupAsset\s*=\s*"setupwinx64"/);
+  assert.match(releaseScript, /"win-x64"[\s\S]*?AppFolder\s*=\s*"winx64"/);
+  assert.match(releaseScript, /"win-x64"[\s\S]*?SetupFolder\s*=\s*"setupwinx64"/);
+  assert.match(releaseScript, /"win-x64"[\s\S]*?SetupAsset\s*=\s*"setupwinx64\.zip"/);
 });
 
 test('active version is aligned across release surfaces', () => {
-  assert.match(read('src/PublisherStudio.Web/PublisherStudio.Web.csproj'), /<Version>2\.1\.2<\/Version>/);
-  assert.match(read('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'), /<Version>2\.1\.2<\/Version>/);
-  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package.json')).version, '2.1.2');
+  assert.match(read('src/PublisherStudio.Web/PublisherStudio.Web.csproj'), /<Version>2\.1\.7<\/Version>/);
+  assert.match(read('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'), /<Version>2\.1\.7<\/Version>/);
+  assert.equal(JSON.parse(read('src/PublisherStudio.Web/package.json')).version, '2.1.7');
 });

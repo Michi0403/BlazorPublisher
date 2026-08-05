@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Net;
 using DevExpress.AspNetCore;
 using DevExpress.Blazor;
@@ -28,15 +28,32 @@ public static class Program
     {
         await using var app = BuildWebApp(args);
         var endpointWriter = app.Services.GetRequiredService<IRuntimeEndpointWriter>();
+        var hostLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("PublisherStudio.Host");
         try
         {
             await app.StartAsync();
             endpointWriter.Write(app);
             await app.WaitForShutdownAsync();
         }
+        catch (OperationCanceledException exception) when (app.Lifetime.ApplicationStopping.IsCancellationRequested)
+        {
+            hostLogger.LogDebug(exception, "PublisherStudio host shutdown was canceled as part of the requested application stop.");
+        }
+        catch (Exception exception)
+        {
+            hostLogger.LogCritical(exception, "PublisherStudio host terminated unexpectedly.");
+            throw;
+        }
         finally
         {
-            endpointWriter.DeleteOwnedEndpoint();
+            try
+            {
+                endpointWriter.DeleteOwnedEndpoint();
+            }
+            catch (Exception exception)
+            {
+                hostLogger.LogError(exception, "PublisherStudio could not remove its owned runtime endpoint during shutdown.");
+            }
         }
     }
 

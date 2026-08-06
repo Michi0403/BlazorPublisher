@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Documentation;
 
@@ -45,6 +46,30 @@ public sealed class DocumentationController(
         {
             logger.LogError(exception, "Searching PublisherStudio XML documentation failed.");
             return Problem(statusCode: StatusCodes.Status500InternalServerError, title: "Documentation search failed");
+        }
+    }
+
+    /// <summary>Serves generated DocFX HTML and supporting assets from the installed documentation root.</summary>
+    /// <param name="relativePath">Optional path below the generated documentation root.</param>
+    [HttpGet("/help-docs")]
+    [HttpGet("/help-docs/{**relativePath}")]
+    public IActionResult Html([FromRoute] string? relativePath = null)
+    {
+        try
+        {
+            var path = documentation.GetHtmlFilePath(relativePath);
+            if (path is null)
+                return NotFound(new { error = "Generated PublisherStudio documentation was not found in this build." });
+
+            var contentTypes = new FileExtensionContentTypeProvider();
+            if (!contentTypes.TryGetContentType(path, out var contentType))
+                contentType = "application/octet-stream";
+            return new PhysicalFileResult(path, contentType) { EnableRangeProcessing = true };
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Serving a PublisherStudio documentation asset failed.");
+            return Problem(statusCode: StatusCodes.Status500InternalServerError, title: "Documentation asset failed");
         }
     }
 

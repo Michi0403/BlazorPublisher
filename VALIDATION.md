@@ -1,4 +1,4 @@
-# PublisherStudio 2.1.9 validation
+# PublisherStudio 2.2.2 validation
 
 The maintained-source validation covers installer asset selection, exact AppData layout, archive wrappers, deterministic release ZIP creation, version alignment, idempotent documentation source rewriting, repository-root GitHub Pages discovery, pinned snapshot version/PDF/link validation, DocFX namespace-page repair, byte-identical `/docs` branch mirroring, build-guard consistency, architecture policies, and application regression contracts.
 

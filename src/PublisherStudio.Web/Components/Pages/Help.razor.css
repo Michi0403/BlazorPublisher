@@ -72,7 +72,7 @@
     gap: .65rem;
 }
 
-.publisher-help-actions a,
+.publisher-help-actions button,
 .publisher-help-footer button {
     min-height: 2.9rem;
     display: inline-flex;
@@ -80,14 +80,16 @@
     justify-content: center;
     padding: .65rem .9rem;
     border-radius: .85rem;
+    border: 0;
     text-decoration: none;
     text-align: center;
+    cursor: pointer;
     font-weight: 750;
     transition: transform .14s ease, box-shadow .14s ease;
 }
 
-.publisher-help-actions a:hover,
-.publisher-help-actions a:focus-visible,
+.publisher-help-actions button:hover,
+.publisher-help-actions button:focus-visible,
 .publisher-help-footer button:hover,
 .publisher-help-footer button:focus-visible {
     transform: translateY(-1px);
@@ -117,7 +119,9 @@
     border-radius: 1rem;
     background: rgba(255, 255, 255, .86);
     color: #49304f;
-    text-decoration: none;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
     box-shadow: 0 .5rem 1.4rem rgba(91, 57, 99, .08);
 }
 
@@ -169,4 +173,116 @@
 
 @media (max-width: 850px) {
     .publisher-help-hero { grid-template-columns: 1fr; }
+}
+
+
+.publisher-documentation-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 4000;
+    display: grid;
+    place-items: center;
+    padding: clamp(.5rem, 1.5vw, 1.5rem);
+    background: rgba(31, 18, 37, .72);
+    backdrop-filter: blur(8px);
+}
+
+.publisher-documentation-dialog {
+    width: min(96vw, 120rem);
+    height: min(94vh, 80rem);
+    min-width: 0;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    overflow: hidden;
+    border: 1px solid rgba(244, 174, 224, .45);
+    border-radius: 1rem;
+    background: #fff;
+    box-shadow: 0 1.5rem 5rem rgba(20, 10, 24, .42);
+}
+
+.publisher-documentation-dialog > header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .75rem 1rem;
+    border-bottom: 1px solid rgba(190, 117, 173, .28);
+    background: linear-gradient(135deg, #fff7fb, #f5f1ff);
+}
+
+.publisher-documentation-dialog h2 {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    font-size: 1rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.publisher-documentation-dialog header > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    justify-content: flex-end;
+}
+
+.publisher-documentation-dialog header a,
+.publisher-documentation-dialog header button {
+    min-height: 2.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: .45rem .8rem;
+    border: 1px solid #d8b4d8;
+    border-radius: .65rem;
+    background: #fff;
+    color: #66336f;
+    text-decoration: none;
+    font: inherit;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.publisher-documentation-dialog header button {
+    border-color: transparent;
+    background: #5b3766;
+    color: #fff;
+}
+
+.publisher-documentation-dialog iframe {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    border: 0;
+    background: #fff;
+}
+
+@media (prefers-color-scheme: dark) {
+    .publisher-documentation-dialog {
+        background: #18131c;
+    }
+
+    .publisher-documentation-dialog > header {
+        border-color: rgba(244, 174, 224, .22);
+        background: linear-gradient(135deg, #241a29, #1d1a2f);
+    }
+
+    .publisher-documentation-dialog header a {
+        border-color: #76517b;
+        background: #2b2031;
+        color: #f6d8f4;
+    }
+}
+
+@media (max-width: 640px) {
+    .publisher-documentation-backdrop { padding: 0; }
+    .publisher-documentation-dialog {
+        width: 100vw;
+        height: 100dvh;
+        border: 0;
+        border-radius: 0;
+    }
+    .publisher-documentation-dialog > header { align-items: flex-start; }
+    .publisher-documentation-dialog h2 { white-space: normal; }
 }

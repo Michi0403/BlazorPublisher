@@ -13,7 +13,7 @@
         <div class="publisher-help-copy">
             <p class="publisher-help-kicker">PublisherStudio @Status.Version · documentation nook 🐾</p>
             <h1>Help and documentation</h1>
-            <p>Open the complete guide, keep a PDF nearby, or jump straight to the part of the studio you are using now.</p>
+            <p>Open the complete guide inside PublisherStudio, keep a PDF nearby, or jump straight to the part of the studio you are using now.</p>
             <div class="publisher-help-status" aria-label="Documentation status">
                 <span class="publisher-help-badge @(Status.HtmlAvailable ? "ready" : "missing")">HTML @(Status.HtmlAvailable ? "ready" : "not built")</span>
                 <span class="publisher-help-badge @(Status.PdfAvailable ? "ready" : "missing")">PDF @(Status.PdfAvailable ? "ready" : "not built")</span>
@@ -25,48 +25,66 @@
             </div>
         </div>
         <div class="publisher-help-actions" aria-label="Documentation actions">
-            <a class="publisher-help-primary" href="/help-docs/index.html" target="_blank" rel="noopener">Open HTML guide</a>
-            <a class="publisher-help-secondary" href="@Status.PdfUrl" target="_blank" rel="noopener" data-enhance-nav="false">Open PDF book</a>
-            <a class="publisher-help-secondary" href="/help-docs/api/index.html" target="_blank" rel="noopener">Browse API reference</a>
-            <a class="publisher-help-secondary" href="/api/documentation/status" target="_blank" rel="noopener">Build status</a>
+            <button class="publisher-help-primary" type="button" @onclick="OpenHtmlGuide">Open HTML guide</button>
+            <button class="publisher-help-secondary" type="button" @onclick="OpenPdfBook">Open PDF book</button>
+            <button class="publisher-help-secondary" type="button" @onclick="OpenApiReference">Browse API reference</button>
+            <button class="publisher-help-secondary" type="button" @onclick="OpenBuildStatus">Build status</button>
         </div>
     </header>
 
     <section class="publisher-help-grid" aria-label="Documentation chapters">
-        <a class="publisher-help-card" href="/help-docs/articles/getting-started.html" target="_blank" rel="noopener">
+        <button class="publisher-help-card" type="button" @onclick="OpenGettingStarted">
             <span aria-hidden="true">🌸</span><strong>Getting started</strong><small>Create a publication and learn the main flow.</small>
-        </a>
-        <a class="publisher-help-card" href="/help-docs/articles/editor-workspace.html" target="_blank" rel="noopener">
+        </button>
+        <button class="publisher-help-card" type="button" @onclick="OpenEditorWorkspace">
             <span aria-hidden="true">🖋️</span><strong>Editor workspace</strong><small>Pages, Mainframe, inspector, timeline, and arranging.</small>
-        </a>
-        <a class="publisher-help-card" href="/help-docs/articles/pictures-and-media.html" target="_blank" rel="noopener">
+        </button>
+        <button class="publisher-help-card" type="button" @onclick="OpenPicturesAndMedia">
             <span aria-hidden="true">🎨</span><strong>Pictures and media</strong><small>Picture Studio, video, audio, selections, and preview behavior.</small>
-        </a>
-        <a class="publisher-help-card" href="/help-docs/articles/streaming-and-recording.html" target="_blank" rel="noopener">
+        </button>
+        <button class="publisher-help-card" type="button" @onclick="OpenStreamingAndRecording">
             <span aria-hidden="true">🎥</span><strong>Streaming and recording</strong><small>Profiles, sources, dry runs, recording, and outputs.</small>
-        </a>
-        <a class="publisher-help-card" href="/help-docs/articles/publishing-and-export.html" target="_blank" rel="noopener">
+        </button>
+        <button class="publisher-help-card" type="button" @onclick="OpenPublishingAndExport">
             <span aria-hidden="true">✨</span><strong>Publishing and export</strong><small>PDF, images, websites, and recorded presentations.</small>
-        </a>
-        <a class="publisher-help-card" href="/help-docs/articles/localgpt-and-onewire.html" target="_blank" rel="noopener">
+        </button>
+        <button class="publisher-help-card" type="button" @onclick="OpenLocalGptAndOneWire">
             <span aria-hidden="true">🐾</span><strong>LocalGPT and 1-Wire</strong><small>The optional connection, ports, and approval boundaries.</small>
-        </a>
-        <a class="publisher-help-card" href="/help-docs/articles/installer-and-updates.html" target="_blank" rel="noopener">
+        </button>
+        <button class="publisher-help-card" type="button" @onclick="OpenInstallerAndUpdates">
             <span aria-hidden="true">📦</span><strong>Installer and updates</strong><small>One-click AppData install, update, start, and shortcuts.</small>
-        </a>
-        <a class="publisher-help-card" href="/help-docs/articles/troubleshooting.html" target="_blank" rel="noopener">
+        </button>
+        <button class="publisher-help-card" type="button" @onclick="OpenTroubleshooting">
             <span aria-hidden="true">🛟</span><strong>Troubleshooting</strong><small>Build assets, ports, circuits, recording previews, and docs.</small>
-        </a>
+        </button>
     </section>
 
     <footer class="publisher-help-footer">
         <button type="button" @onclick="BackToStudio">Back to PublisherStudio</button>
-        <p>The HTML site and PDF are generated from the same maintained articles and C# XML comments used by the release build.</p>
+        <p>The documentation opens in an in-app viewer, so closing it returns to the unchanged studio state.</p>
     </footer>
 </main>
 
+@if (DocumentationUrl is not null)
+{
+    <div class="publisher-documentation-backdrop" role="presentation" @onclick="CloseDocumentation">
+        <section class="publisher-documentation-dialog" role="dialog" aria-modal="true" aria-labelledby="publisher-documentation-title" @onclick:stopPropagation>
+            <header>
+                <h2 id="publisher-documentation-title">@DocumentationTitle</h2>
+                <div>
+                    <a href="@DocumentationUrl" target="_blank" rel="noopener noreferrer" data-enhance-nav="false">Open in browser tab</a>
+                    <button type="button" @onclick="CloseDocumentation" aria-label="Close documentation">Close</button>
+                </div>
+            </header>
+            <iframe src="@DocumentationUrl" title="@DocumentationTitle" loading="eager"></iframe>
+        </section>
+    </div>
+}
+
 @code {
     private PublisherDocumentationStatus Status { get; set; } = new();
+    private string? DocumentationUrl { get; set; }
+    private string DocumentationTitle { get; set; } = "PublisherStudio documentation";
 
     protected override void OnInitialized()
     {
@@ -80,6 +98,57 @@
             Logger.LogError(exception, "Loading PublisherStudio documentation status failed.");
             Notifications.Warning("The generated guide is not available yet. Run a normal build or release build to create it.", "Documentation is not ready", nameof(Help));
         }
+    }
+
+    private void OpenHtmlGuide() => OpenDocumentation(Status.HtmlUrl, "PublisherStudio HTML guide", Status.HtmlAvailable);
+
+    private void OpenPdfBook() => OpenDocumentation(Status.PdfUrl, "PublisherStudio PDF book", Status.PdfAvailable);
+
+    private void OpenApiReference() => OpenDocumentation("/help-docs/api/index.html", "PublisherStudio API reference", Status.HtmlAvailable);
+
+    private void OpenBuildStatus() => OpenDocumentation("/api/documentation/status", "PublisherStudio documentation build status");
+
+    private void OpenGettingStarted() => OpenDocumentation("/help-docs/articles/getting-started.html", "Getting started");
+
+    private void OpenEditorWorkspace() => OpenDocumentation("/help-docs/articles/editor-workspace.html", "Editor workspace");
+
+    private void OpenPicturesAndMedia() => OpenDocumentation("/help-docs/articles/pictures-and-media.html", "Pictures and media");
+
+    private void OpenStreamingAndRecording() => OpenDocumentation("/help-docs/articles/streaming-and-recording.html", "Streaming and recording");
+
+    private void OpenPublishingAndExport() => OpenDocumentation("/help-docs/articles/publishing-and-export.html", "Publishing and export");
+
+    private void OpenLocalGptAndOneWire() => OpenDocumentation("/help-docs/articles/localgpt-and-onewire.html", "LocalGPT and 1-Wire");
+
+    private void OpenInstallerAndUpdates() => OpenDocumentation("/help-docs/articles/installer-and-updates.html", "Installer and updates");
+
+    private void OpenTroubleshooting() => OpenDocumentation("/help-docs/articles/troubleshooting.html", "Troubleshooting");
+
+    private void OpenDocumentation(string url, string title, bool available = true)
+    {
+        try
+        {
+            if (!available)
+            {
+                Notifications.Warning("The requested documentation artifact is not available in this build.", "Documentation is not ready", nameof(Help));
+                return;
+            }
+
+            DocumentationUrl = url;
+            DocumentationTitle = title;
+            Logger.LogInformation("Opened PublisherStudio documentation view {DocumentationTitle} at {DocumentationUrl}.", title, url);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Opening PublisherStudio documentation failed for {DocumentationUrl}.", url);
+            Notifications.Warning("The documentation viewer could not be opened.", "Documentation viewer", nameof(Help));
+        }
+    }
+
+    private void CloseDocumentation()
+    {
+        DocumentationUrl = null;
+        DocumentationTitle = "PublisherStudio documentation";
     }
 
     private void BackToStudio() => Navigation.NavigateTo("/");

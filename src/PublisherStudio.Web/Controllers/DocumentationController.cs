@@ -30,6 +30,27 @@ public sealed class DocumentationController(
         }
     }
 
+    /// <summary>Returns the documentation routes and accessible viewer features exposed by the running application.</summary>
+    [HttpGet("profile")]
+    public ActionResult<PublisherDocumentationProfile> Profile()
+    {
+        try
+        {
+            var status = documentation.GetStatus();
+            return Ok(new PublisherDocumentationProfile
+            {
+                Status = status,
+                HtmlRoute = status.HtmlUrl,
+                PdfRoute = status.PdfUrl
+            });
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Reading the PublisherStudio documentation profile failed.");
+            return Problem(statusCode: StatusCodes.Status500InternalServerError, title: "Documentation profile failed");
+        }
+    }
+
     /// <summary>Searches the compiler XML documentation shipped with the running build.</summary>
     /// <param name="query">Optional case-insensitive member, summary, or remarks text.</param>
     /// <param name="limit">Maximum number of matching members to return.</param>

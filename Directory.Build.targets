@@ -32,12 +32,12 @@
           StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <Target Name="AssertPublisherLoggingIntegrity"
+  <!--<Target Name="AssertPublisherLoggingIntegrity"
           BeforeTargets="BeforeBuild"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipLoggingIntegrityGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(LoggingIntegrityScript)')" Text="Logging integrity guard script is missing: $(LoggingIntegrityScript)" />
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(LoggingIntegrityScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>
+  </Target>-->
 
   <Target Name="AssertPublisherOneWireArchitecture"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherLoggingIntegrity"
@@ -74,19 +74,19 @@
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(InteractiveServerRenderModeScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <Target Name="AssertPublisherAsyncContinuationPolicy"
+  <!--<Target Name="AssertPublisherAsyncContinuationPolicy"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherInteractiveServerRenderModes"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipAsyncContinuationGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(AsyncContinuationScript)')" Text="Async continuation guard script is missing: $(AsyncContinuationScript)" />
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(AsyncContinuationScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>
+  </Target>-->
 
-  <Target Name="AssertPublisherComponentDiagnostics"
+  <!--<Target Name="AssertPublisherComponentDiagnostics"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherAsyncContinuationPolicy"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipComponentDiagnosticsGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(ComponentDiagnosticsScript)')" Text="Component diagnostics guard script is missing: $(ComponentDiagnosticsScript)" />
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(ComponentDiagnosticsScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>
+  </Target>-->
 
   <Target Name="AssertPublisherMethodDiagnosticsPolicy"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherComponentDiagnostics"

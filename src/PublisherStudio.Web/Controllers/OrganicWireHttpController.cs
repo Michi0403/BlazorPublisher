@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.OrganicPlugins;
 using PublisherStudio.Services.Automation;
 using System.Security.Cryptography;
@@ -22,29 +24,36 @@ public sealed class OrganicWireHttpController(
     IOrganicTransportSecurityPolicy transportSecurityPolicy,
     IOrganicWireEnvelopeFactory envelopeFactory,
     IApiSurfaceCatalogService apiSurfaces,
+    IOptions<OrganicPluginOptions> configuredOptions,
     ILogger<OrganicWireHttpController> logger) : ControllerBase
 {
     /// <summary>
     /// Runs the profile operation.
     /// </summary>
     [HttpGet("profile")]
-    public async Task<ActionResult<object>> Profile(CancellationToken cancellationToken)
+    public async Task<ActionResult<OrganicProtocolProfile>> Profile(CancellationToken cancellationToken)
     {
         try
         {
-            return Ok(new
+            var options = configuredOptions.Value;
+            return Ok(new OrganicProtocolProfile
             {
-                ProtocolVersion = OrganicWireProtocol.Version,
-                OrganicWireProtocol.MinimumCompatibleVersion,
-                Transport = "http-json",
-                PostEnvelope = "/api/organic/onewire/http-json",
-                PollWork = "/api/organic/onewire/http-json/work/{correlationId}",
-                MaximumMessageBytes = OrganicWireProtocol.MaximumMessageBytes,
                 Security = await security.GetPublicDescriptorAsync(cancellationToken).ConfigureAwait(false),
-                Capabilities = await capabilities.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false),
-                Skills = await capabilities.GetSkillsAsync(cancellationToken).ConfigureAwait(false),
-                UiFeatures = await capabilities.GetUiFeaturesAsync(cancellationToken).ConfigureAwait(false),
-                ControllerSurfaces = apiSurfaces.GetSurfaces()
+                Capabilities = (await capabilities.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false)).ToList(),
+                Skills = (await capabilities.GetSkillsAsync(cancellationToken).ConfigureAwait(false)).ToList(),
+                UiFeatures = (await capabilities.GetUiFeaturesAsync(cancellationToken).ConfigureAwait(false)).ToList(),
+                Hardware = (await capabilities.GetHardwareAsync(cancellationToken).ConfigureAwait(false)).ToList(),
+                ControllerSurfaces = apiSurfaces.GetSurfaces().ToList(),
+                Settings = new OrganicProtocolSettings
+                {
+                    Enabled = options.Enabled,
+                    DiscoveryEnabled = options.EnableDiscovery,
+                    AutoConnectDiscoveredPeer = options.AutoConnectDiscoveredPeer,
+                    DiscoveryPort = options.DiscoveryPort,
+                    PeerExpirySeconds = options.PeerExpirySeconds,
+                    MaximumMessageBytes = options.MaximumMessageBytes,
+                    MinimumRecurringScreenReaderIntervalSeconds = options.MinimumRecurringScreenReaderIntervalSeconds
+                }
             });
         }
         catch (Exception ex)

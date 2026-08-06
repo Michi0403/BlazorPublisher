@@ -4,6 +4,7 @@
 @inject IUserNotificationService Notifications
 @inject ILogger<Help> Logger
 @inject NavigationManager Navigation
+@inject IPublisherDocumentationViewerService Viewer
 
 <PageTitle>PublisherStudio Documentation</PageTitle>
 <UserNotificationHost />
@@ -65,26 +66,8 @@
     </footer>
 </main>
 
-@if (DocumentationUrl is not null)
-{
-    <div class="publisher-documentation-backdrop" role="presentation" @onclick="CloseDocumentation">
-        <section class="publisher-documentation-dialog" role="dialog" aria-modal="true" aria-labelledby="publisher-documentation-title" @onclick:stopPropagation>
-            <header>
-                <h2 id="publisher-documentation-title">@DocumentationTitle</h2>
-                <div>
-                    <a href="@DocumentationUrl" target="_blank" rel="noopener noreferrer" data-enhance-nav="false">Open in browser tab</a>
-                    <button type="button" @onclick="CloseDocumentation" aria-label="Close documentation">Close</button>
-                </div>
-            </header>
-            <iframe src="@DocumentationUrl" title="@DocumentationTitle" loading="eager"></iframe>
-        </section>
-    </div>
-}
-
 @code {
     private PublisherDocumentationStatus Status { get; set; } = new();
-    private string? DocumentationUrl { get; set; }
-    private string DocumentationTitle { get; set; } = "PublisherStudio documentation";
 
     protected override void OnInitialized()
     {
@@ -134,8 +117,7 @@
                 return;
             }
 
-            DocumentationUrl = url;
-            DocumentationTitle = title;
+            Viewer.Open(new PublisherDocumentationViewerRequest { Url = url, Title = title });
             Logger.LogInformation("Opened PublisherStudio documentation view {DocumentationTitle} at {DocumentationUrl}.", title, url);
         }
         catch (Exception exception)
@@ -145,11 +127,6 @@
         }
     }
 
-    private void CloseDocumentation()
-    {
-        DocumentationUrl = null;
-        DocumentationTitle = "PublisherStudio documentation";
-    }
 
     private void BackToStudio() => Navigation.NavigateTo("/");
 }

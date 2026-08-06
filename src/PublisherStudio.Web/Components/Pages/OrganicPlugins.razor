@@ -13,6 +13,7 @@
 @inject ILogger<OrganicPlugins> Logger
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
+@inject IOptions<OrganicPluginOptions> OrganicOptions
 
 <PageTitle>LocalGPT Organic Plugins</PageTitle>
 <UserNotificationHost />
@@ -132,11 +133,8 @@
     {
         <section class="organic-card">
             <h2>Negotiated LocalGPT surface</h2>
+            <p class="organic-note">These are the active methods received from LocalGPT during the current 1-Wire handshake. Routes, methods and policy keys remain visible so a user can verify what either application may call.</p>
             <div class="organic-capability-grid">
-                <article class="organic-capability">
-                    <strong>Remote capabilities</strong>
-                    <p>@string.Join(", ", Connection.State.RemoteCapabilities.Where(item => item.IsEnabled && item.IsOnline).Select(item => item.Key).OrderBy(item => item))</p>
-                </article>
                 <article class="organic-capability">
                     <strong>Remote skills</strong>
                     <p>@string.Join(", ", Connection.State.RemoteSkills.Where(item => item.IsEnabled && item.IsOnline).Select(item => item.Key).OrderBy(item => item))</p>
@@ -146,8 +144,35 @@
                     <p>@(Connection.State.RemoteHardware.Count == 0 ? "Not advertised" : string.Join(", ", Connection.State.RemoteHardware.Where(item => item.IsOnline).Select(item => item.LaneKey)))</p>
                 </article>
             </div>
+            <div class="organic-protocol-table-wrap" role="region" aria-label="Active LocalGPT 1-Wire methods" tabindex="0">
+                <table class="organic-protocol-table">
+                    <thead><tr><th>Capability</th><th>Method and route</th><th>Configuration</th><th>Approval</th></tr></thead>
+                    <tbody>
+                        @foreach (var capability in Connection.State.RemoteCapabilities.Where(item => item.IsEnabled && item.IsOnline).OrderBy(item => item.Key))
+                        {
+                            <tr @key="capability.Key">
+                                <td><strong>@capability.DisplayName</strong><small>@capability.Key</small></td>
+                                <td><code>@capability.Method @capability.Route</code></td>
+                                <td><code>@capability.ConfigurationKey</code></td>
+                                <td>@(capability.RequiresFrontendUserConfirmation ? "Receiving frontend" : capability.RequiresHumanConfirmation ? "Required" : "Read-only / policy")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </section>
     }
+
+    <section class="organic-card">
+        <h2>Active PublisherStudio protocol settings</h2>
+        <div class="organic-capability-grid">
+            <article class="organic-capability"><strong>Protocol</strong><p>1-Wire @OrganicWireProtocol.Version (minimum @OrganicWireProtocol.MinimumCompatibleVersion)</p></article>
+            <article class="organic-capability"><strong>Runtime</strong><p>@(OrganicOptions.Value.Enabled ? "enabled" : "disabled") · discovery @(OrganicOptions.Value.EnableDiscovery ? "enabled" : "disabled") · auto-connect @(OrganicOptions.Value.AutoConnectDiscoveredPeer ? "enabled" : "disabled")</p></article>
+            <article class="organic-capability"><strong>Transports</strong><p>TCP and HTTP/JSON · discovery UDP @OrganicOptions.Value.DiscoveryPort</p></article>
+            <article class="organic-capability"><strong>Limits</strong><p>@OrganicOptions.Value.MaximumMessageBytes bytes · peer expiry @OrganicOptions.Value.PeerExpirySeconds seconds · screen reader minimum @OrganicOptions.Value.MinimumRecurringScreenReaderIntervalSeconds seconds</p></article>
+        </div>
+        <p class="organic-note">Machine-readable profile: <code>GET /api/organic/onewire/http-json/profile</code>. Documentation profile: <code>GET /api/documentation/profile</code>.</p>
+    </section>
 
     <section class="organic-card">
         <h2>PublisherStudio organ capabilities</h2>
@@ -160,7 +185,7 @@
                         <span class="organic-badge">@string.Join(" / ", capability.Organs)</span>
                     </div>
                     <p>@capability.Description</p>
-                    <small>@capability.Key · @(capability.RequiresHumanConfirmation ? "confirmation required by default" : "read-only/no confirmation")</small>
+                    <small>@capability.Key · <code>@capability.Method @capability.Route</code> · <code>@capability.ConfigurationKey</code> · @(capability.RequiresHumanConfirmation ? "confirmation required by default" : "read-only/no confirmation")</small>
                 </article>
             }
         </div>
@@ -466,7 +491,11 @@
             var capabilityCount = result.Properties is not null && result.Properties.TryGetValue("Capabilities", out var value) && value.ValueKind == JsonValueKind.Array
                 ? value.GetArrayLength()
                 : Connection.State.RemoteCapabilities.Count;
-            _roundTripStatus = $"1-Wire {result.ProtocolVersion} round trip succeeded; LocalGPT reported {capabilityCount} capabilities.";
+            var ocrCapability = Connection.State.RemoteCapabilities.FirstOrDefault(item => string.Equals(item.Key, "localgpt.vision.ocr", StringComparison.OrdinalIgnoreCase));
+            var ocrState = ocrCapability is null
+                ? "DeepSeek-compatible OCR was not advertised"
+                : $"OCR advertised as {ocrCapability.Method} {ocrCapability.Route} ({ocrCapability.ConfigurationKey})";
+            _roundTripStatus = $"1-Wire {result.ProtocolVersion} round trip succeeded; LocalGPT reported {capabilityCount} capabilities; {ocrState}.";
             Notifications.Success(_roundTripStatus, "Organic connection verified", nameof(OrganicPlugins));
         }
         catch (Exception exception)

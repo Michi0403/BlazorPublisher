@@ -1,0 +1,37 @@
+
+.organic-protocol-table-wrap {
+    border: 1px solid color-mix(in srgb, var(--bs-border-color, #ced4da) 78%, transparent);
+    border-radius: .85rem;
+    margin-top: 1rem;
+    max-width: 100%;
+    overflow: auto;
+}
+
+.organic-protocol-table {
+    border-collapse: collapse;
+    min-width: 52rem;
+    width: 100%;
+}
+
+.organic-protocol-table th,
+.organic-protocol-table td {
+    border-bottom: 1px solid color-mix(in srgb, var(--bs-border-color, #ced4da) 72%, transparent);
+    padding: .72rem .8rem;
+    text-align: left;
+    vertical-align: top;
+}
+
+.organic-protocol-table th {
+    background: color-mix(in srgb, var(--bs-body-bg, #fff) 82%, var(--bs-primary, #6f42c1));
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.organic-protocol-table td small {
+    display: block;
+    margin-top: .18rem;
+    overflow-wrap: anywhere;
+}
+
+.organic-protocol-table code { overflow-wrap: anywhere; white-space: normal; }

@@ -2407,12 +2407,15 @@ html.publisherstudio-kawaii-docs body > footer.footer > .container-xxl {
 
 @media (max-width: 767.98px) {
   html.publisherstudio-kawaii-docs body > header.navbar > .container-xxl {
-    align-items: flex-start;
-    flex-direction: column;
+    align-items: center;
+    flex-direction: row;
+    min-height: 3.2rem;
   }
 
+  /* Match the proven LocalGPT mobile shell: keep the brand compact and move
+     full navigation into the accessible in-content disclosure. */
   html.publisherstudio-kawaii-docs body > header.navbar .navbar-nav {
-    width: 100%;
+    display: none !important;
   }
 }
 
@@ -2488,4 +2491,134 @@ html.publisherstudio-kawaii-docs .publisherstudio-architecture-map span {
     align-self: stretch !important;
     min-height: var(--kawaii-docs-shell-min-height) !important;
   }
+}
+
+/* Accessible compact navigation for the self-contained source snapshot. */
+.publisherstudio-mobile-navigation {
+  display: none;
+}
+
+@media (max-width: 1140.98px) {
+  html.publisherstudio-kawaii-docs .publisherstudio-snapshot-layout > .publisherstudio-snapshot-nav {
+    display: none !important;
+  }
+
+  html.publisherstudio-kawaii-docs .publisherstudio-mobile-navigation {
+    background: var(--publisherstudio-site-shell);
+    border: 1px solid var(--publisherstudio-site-border);
+    border-radius: .9rem;
+    box-shadow: 0 .45rem 1.1rem var(--publisherstudio-site-shadow);
+    display: block;
+    margin: 0 0 1rem;
+    padding: .25rem .65rem .65rem;
+  }
+
+  html.publisherstudio-kawaii-docs .publisherstudio-mobile-navigation > summary {
+    color: var(--publisherstudio-site-link);
+    cursor: pointer;
+    font-weight: 750;
+    padding: .65rem .25rem;
+  }
+
+  html.publisherstudio-kawaii-docs .publisherstudio-mobile-navigation nav {
+    display: grid;
+    gap: .15rem;
+    padding-bottom: .25rem;
+  }
+
+  html.publisherstudio-kawaii-docs .publisherstudio-mobile-navigation a {
+    border-radius: .65rem;
+    color: var(--publisherstudio-site-link);
+    padding: .42rem .55rem;
+    text-decoration: none;
+  }
+
+  html.publisherstudio-kawaii-docs .publisherstudio-mobile-navigation a:hover,
+  html.publisherstudio-kawaii-docs .publisherstudio-mobile-navigation a:focus-visible {
+    background: var(--publisherstudio-site-surface-soft);
+  }
+}
+
+/* Keep the in-article rail comfortably inside its glass panel. */
+@media (min-width: 1141px) {
+  html.publisherstudio-kawaii-docs .publisherstudio-snapshot-layout > .toc,
+  html.publisherstudio-kawaii-docs body:not([data-search]) > main > .affix > nav {
+    box-sizing: border-box;
+    padding: 1rem 1.15rem 1.2rem;
+  }
+
+  html.publisherstudio-kawaii-docs .publisherstudio-snapshot-layout > .toc a,
+  html.publisherstudio-kawaii-docs body:not([data-search]) > main > .affix a {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Source-snapshot API preview: keep the namespace/type inventory as readable
+   cards until the owner build replaces it with compiled DocFX member pages. */
+html.publisherstudio-kawaii-docs .publisherstudio-api-source-preview .publisherstudio-home-grid {
+  display: grid;
+  gap: .9rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  margin: 1rem 0 1.5rem;
+}
+
+html.publisherstudio-kawaii-docs .publisherstudio-api-source-preview .publisherstudio-home-card {
+  background: color-mix(in srgb, var(--publisherstudio-site-surface) 92%, #fff0f8);
+  border: 1px solid var(--publisherstudio-site-border);
+  border-radius: .9rem;
+  box-shadow: 0 .4rem 1rem var(--publisherstudio-site-shadow);
+  color: var(--publisherstudio-site-text);
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  min-width: 0;
+  padding: .9rem 1rem;
+  text-decoration: none;
+}
+
+html.publisherstudio-kawaii-docs .publisherstudio-api-source-preview .publisherstudio-home-card strong {
+  color: var(--publisherstudio-site-link);
+  overflow-wrap: anywhere;
+}
+
+html.publisherstudio-kawaii-docs .publisherstudio-api-source-preview .publisherstudio-home-card span {
+  color: var(--publisherstudio-site-muted);
+}
+
+html.publisherstudio-kawaii-docs .publisherstudio-api-source-preview .publisherstudio-home-card:hover,
+html.publisherstudio-kawaii-docs .publisherstudio-api-source-preview .publisherstudio-home-card:focus-visible {
+  border-color: var(--publisherstudio-site-link);
+  box-shadow: 0 .7rem 1.4rem var(--publisherstudio-site-shadow);
+  transform: translateY(-1px);
+}
+
+html.publisherstudio-kawaii-docs .publisherstudio-api-source-preview > h1 code {
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  overflow-wrap: anywhere;
+  padding: 0;
+  white-space: normal;
+}
+
+html.publisherstudio-kawaii-docs .publisherstudio-api-source-preview > h2 + ul {
+  display: grid;
+  gap: .65rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 25rem), 1fr));
+  list-style: none;
+  padding-left: 0;
+}
+
+html.publisherstudio-kawaii-docs .publisherstudio-api-source-preview > h2 + ul > li {
+  background: color-mix(in srgb, var(--publisherstudio-site-surface) 94%, #fff0f8);
+  border: 1px solid var(--publisherstudio-site-border);
+  border-radius: .75rem;
+  min-width: 0;
+  padding: .65rem .8rem;
+}
+
+html.publisherstudio-kawaii-docs .publisherstudio-api-source-preview > h2 + ul > li code {
+  overflow-wrap: anywhere;
+  white-space: normal;
 }

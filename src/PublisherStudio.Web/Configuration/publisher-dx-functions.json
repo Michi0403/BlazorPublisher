@@ -686,6 +686,51 @@
       "interactionEditor": 0,
       "configurationKey": "publisher:publisher.media.capabilities",
       "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.documentation.profile",
+      "displayName": "PublisherStudio documentation profile",
+      "description": "Returns the active same-origin HTML, PDF and API documentation routes and availability state without opening a browser or exposing filesystem paths.",
+      "controller": "Documentation",
+      "method": "GET",
+      "route": "/api/documentation/profile",
+      "parameterSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "organs": [
+        "eyes"
+      ],
+      "skills": [
+        "documentation",
+        "api-discovery"
+      ],
+      "requiredSkillKeys": [
+        "documentation"
+      ],
+      "uiActivationKeys": [
+        "publisherstudio.help"
+      ],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": true,
+      "requiresHumanConfirmation": false,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": false,
+      "requiresAutomatedInteractionOnTargetSystem": false,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "No parameters. The result is limited to public same-origin documentation routes and availability metadata.",
+      "outputContract": "A JSON documentation profile containing version, HTML/API/PDF routes and availability flags.",
+      "securityContract": "Read-only and does not expose physical paths, private files or browser state.",
+      "organicUseCase": "Documentation discovery for LocalGPT, linked organic clients and the PublisherStudio help frontend.",
+      "suggestedCouncilRoles": [
+        "documentation navigator",
+        "API discovery specialist"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": false,
+      "interactionEditor": 0,
+      "configurationKey": "publisher:publisher.documentation.profile",
+      "source": "PublisherStudio object store"
     }
   ]
 }

@@ -1,4 +1,4 @@
-﻿namespace PublisherStudio.BusinessObjects;
+namespace PublisherStudio.BusinessObjects;
 
 /// <summary>
 /// Describes the generated documentation artifacts available to the running PublisherStudio build.
@@ -69,3 +69,52 @@ public sealed class PublisherDocumentationManifest
     /// <summary>Gets or sets the UTC time at which the documentation was generated.</summary>
     public DateTime? GeneratedAtUtc { get; set; }
 }
+
+/// <summary>Describes one safe same-origin documentation view requested by the PublisherStudio frontend.</summary>
+public sealed class PublisherDocumentationViewerRequest
+{
+    /// <summary>Gets or sets the application-relative documentation URL.</summary>
+    public string Url { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the accessible dialog and iframe title.</summary>
+    public string Title { get; set; } = "PublisherStudio documentation";
+}
+
+/// <summary>Represents the scoped in-application documentation viewer state for one Blazor circuit.</summary>
+public sealed class PublisherDocumentationViewerState
+{
+    /// <summary>Gets or sets whether the native modal dialog is open.</summary>
+    public bool IsOpen { get; set; }
+
+    /// <summary>Gets or sets the application-relative documentation URL.</summary>
+    public string Url { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the accessible dialog and iframe title.</summary>
+    public string Title { get; set; } = "PublisherStudio documentation";
+
+    /// <summary>Gets or sets a monotonic change token used by the viewer host.</summary>
+    public long Revision { get; set; }
+}
+
+/// <summary>Describes the documentation routes and availability exposed to local controllers and 1-Wire peers.</summary>
+public sealed class PublisherDocumentationProfile
+{
+    /// <summary>Gets or sets the current generated-documentation status.</summary>
+    public PublisherDocumentationStatus Status { get; set; } = new();
+
+    /// <summary>Gets or sets the in-application help route.</summary>
+    public string HelpRoute { get; set; } = "/help";
+
+    /// <summary>Gets or sets the HTML documentation route.</summary>
+    public string HtmlRoute { get; set; } = "/help-docs/index.html";
+
+    /// <summary>Gets or sets the API reference route.</summary>
+    public string ApiRoute { get; set; } = "/help-docs/api/index.html";
+
+    /// <summary>Gets or sets the inline PDF controller route.</summary>
+    public string PdfRoute { get; set; } = "/api/documentation/pdf";
+
+    /// <summary>Gets or sets whether the frontend uses a focus-managed native modal viewer.</summary>
+    public bool SupportsAccessibleModalViewer { get; set; } = true;
+}
+

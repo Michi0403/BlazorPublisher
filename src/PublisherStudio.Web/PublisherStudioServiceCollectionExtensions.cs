@@ -116,6 +116,7 @@ public static class PublisherStudioServiceCollectionExtensions
         AddSingleton<IApplicationPathService, ApplicationPathService>(services);
         AddSingleton<IFileLocalizationService, FileLocalizationService>(services);
         AddSingleton<IPublisherDocumentationCatalogService, PublisherDocumentationCatalogService>(services);
+        AddScoped<IPublisherDocumentationViewerService, PublisherDocumentationViewerService>(services);
         AddSingleton<IRenderExportCatalogService, RenderExportCatalogService>(services);
         AddSingleton<ICodeLanguageService, CodeLanguageService>(services);
         AddSingleton<ICodeFormattingService, CodeFormattingService>(services);

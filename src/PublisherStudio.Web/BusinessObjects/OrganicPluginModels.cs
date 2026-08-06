@@ -308,3 +308,45 @@ public sealed class OrganicConnectionRuntimeSnapshot
     /// </summary>
     public bool IsConnected { get; init; }
 }
+
+/// <summary>
+/// Describes the active PublisherStudio 1-Wire protocol surface without exposing private runtime material.
+/// </summary>
+public sealed class OrganicProtocolProfile
+{
+    /// <summary>Gets or sets the active protocol version.</summary>
+    public string ProtocolVersion { get; set; } = OrganicWireProtocol.Version;
+    /// <summary>Gets or sets the oldest compatible protocol version.</summary>
+    public string MinimumCompatibleVersion { get; set; } = OrganicWireProtocol.MinimumCompatibleVersion;
+    /// <summary>Gets or sets the HTTP/JSON envelope endpoint.</summary>
+    public string PostEnvelopeRoute { get; set; } = "/api/organic/onewire/http-json";
+    /// <summary>Gets or sets the HTTP/JSON work polling route.</summary>
+    public string PollWorkRoute { get; set; } = "/api/organic/onewire/http-json/work/{correlationId}";
+    /// <summary>Gets or sets the configured runtime options safe for a local UI or linked peer.</summary>
+    public OrganicProtocolSettings Settings { get; set; } = new();
+    /// <summary>Gets or sets public security metadata.</summary>
+    public OneWireSecurityDescriptor Security { get; set; } = new();
+    /// <summary>Gets or sets active capabilities.</summary>
+    public List<OrganicCapabilityDescriptor> Capabilities { get; set; } = [];
+    /// <summary>Gets or sets active skills.</summary>
+    public List<OrganicSkillDescriptor> Skills { get; set; } = [];
+    /// <summary>Gets or sets active frontend feature descriptors.</summary>
+    public List<OrganicUiFeatureDescriptor> UiFeatures { get; set; } = [];
+    /// <summary>Gets or sets active hardware descriptors.</summary>
+    public List<OrganicHardwareDescriptor> Hardware { get; set; } = [];
+    /// <summary>Gets or sets maintained controller surfaces.</summary>
+    public List<ApiSurfaceDescriptor> ControllerSurfaces { get; set; } = [];
+}
+
+/// <summary>Public PublisherStudio protocol settings used to explain and validate the current connection.</summary>
+public sealed class OrganicProtocolSettings
+{
+    public bool Enabled { get; set; }
+    public bool DiscoveryEnabled { get; set; }
+    public bool AutoConnectDiscoveredPeer { get; set; }
+    public int DiscoveryPort { get; set; }
+    public int PeerExpirySeconds { get; set; }
+    public int MaximumMessageBytes { get; set; }
+    public int MinimumRecurringScreenReaderIntervalSeconds { get; set; }
+    public List<string> SupportedTransports { get; set; } = ["tcp", "http-json"];
+}

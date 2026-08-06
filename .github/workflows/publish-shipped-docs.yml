@@ -3,6 +3,8 @@ name: Publish PublisherStudio Kawaii documentation
 on:
   push:
     paths:
+      - '.github/workflows/publish-shipped-docs.yml'
+      - '.github/scripts/prepare-pages-artifact.py'
       - '.github/pages/publisherstudio-kawaii-docs.zip'
   workflow_dispatch:
 

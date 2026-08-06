@@ -1,12 +1,7 @@
 # PublisherStudio GitHub Pages payload
 
-`publisherstudio-kawaii-docs.zip` is the tracked publishing snapshot for GitHub Pages.
+`publisherstudio-kawaii-docs.zip` is the single tracked publishing snapshot for GitHub Pages.
 
-The generated directories `docs/_site/` and
-`src/PublisherStudio.Web/wwwroot/help-docs/` are deliberately ignored by Git, so a
-clean GitHub Actions checkout cannot publish either directory directly. The workflow
-validates and extracts this ZIP instead.
+The authored `docs/` tree and generated `docs/_site/` output are not branch-deployment mirrors. GitHub Actions validates and extracts this ZIP, adds `.nojekyll`, and deploys the resulting static artifact directly.
 
-After a successful owner-side documentation build, run `Update-GitHubPagesSnapshot.cmd`
-to replace the snapshot with the complete contents of the app's `wwwroot/help-docs`
-directory, then commit the changed archive.
+After a successful owner-side documentation build, run `Update-GitHubPagesSnapshot.cmd` to replace the snapshot with the complete contents of `src/PublisherStudio.Web/wwwroot/help-docs/`, then commit only the changed archive and intentional source changes.

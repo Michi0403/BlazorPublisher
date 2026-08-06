@@ -1,7 +1,8 @@
-﻿@namespace PublisherStudio.Components.Editor
+@namespace PublisherStudio.Components.Editor
 @implements IDisposable
 @inject NavigationManager Navigation
 @inject ILocalGptConnectionService LocalGptConnection
+@inject IPublisherDocumentationViewerService DocumentationViewer
 
 <DxRibbon CssClass="publication-ribbon categorized-ribbon" SizeMode="SizeMode.Medium" AdaptivityAutoCollapseItemsToGroups="true">
     <DxRibbonApplicationTab Text="File">
@@ -642,9 +643,9 @@
 
     private void OpenOrganicPlugins() => Navigation.NavigateTo("/organic-plugins");
     private void OpenDocumentation() => Navigation.NavigateTo("/help");
-    private void OpenHtmlDocumentation() => Navigation.NavigateTo("/help-docs/index.html", forceLoad: true);
-    private void OpenPdfDocumentation() => Navigation.NavigateTo("/api/documentation/pdf", forceLoad: true);
-    private void OpenApiDocumentation() => Navigation.NavigateTo("/help-docs/api/index.html", forceLoad: true);
+    private void OpenHtmlDocumentation() => DocumentationViewer.Open(new PublisherDocumentationViewerRequest { Url = "/help-docs/index.html", Title = "PublisherStudio HTML guide" });
+    private void OpenPdfDocumentation() => DocumentationViewer.Open(new PublisherDocumentationViewerRequest { Url = "/api/documentation/pdf", Title = "PublisherStudio PDF book" });
+    private void OpenApiDocumentation() => DocumentationViewer.Open(new PublisherDocumentationViewerRequest { Url = "/help-docs/api/index.html", Title = "PublisherStudio API reference" });
 
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
     [Parameter] public bool TimelineVisible { get; set; }

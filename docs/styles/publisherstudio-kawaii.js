@@ -361,9 +361,27 @@ async function ensureRootDocumentationRail() {
   }
 }
 
+function ensureSnapshotMobileNavigation() {
+  const layout = document.querySelector('.publisherstudio-snapshot-layout');
+  const source = layout?.querySelector(':scope > .publisherstudio-snapshot-nav');
+  const main = layout?.querySelector(':scope > .main');
+  if (!layout || !source || !main || main.querySelector(':scope > .publisherstudio-mobile-navigation')) return;
+
+  const details = document.createElement('details');
+  details.className = 'publisherstudio-mobile-navigation';
+  const summary = document.createElement('summary');
+  summary.textContent = 'Browse documentation';
+  const navigation = source.querySelector('nav')?.cloneNode(true);
+  if (!navigation) return;
+  navigation.setAttribute('aria-label', 'Mobile documentation navigation');
+  details.append(summary, navigation);
+  main.insertBefore(details, main.firstChild);
+}
+
 function startKawaiiDocumentation() {
   document.documentElement.classList.add("publisherstudio-kawaii-docs");
   void ensureRootDocumentationRail();
+  ensureSnapshotMobileNavigation();
   installThemePersistence();
   createKawaiiSky();
   decorateBrand();

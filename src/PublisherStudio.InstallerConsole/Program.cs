@@ -77,7 +77,7 @@ internal static class Program
 
         var launchedByDoubleClick = args.Length == 0 && Environment.UserInteractive;
 
-        Console.WriteLine("PublisherStudio Setup 2.2.3");
+        Console.WriteLine("PublisherStudio Setup 2.2.4");
         var options = CliOptions.Parse(args);
         if (args.Length == 0)
             Console.WriteLine("No command-line action was supplied. Running the default install, update, shortcut, and start routine.");
@@ -1341,7 +1341,7 @@ internal static class Program
 
                 using var totalTimeout = new CancellationTokenSource(TimeSpan.FromMinutes(45));
                 using var request = new HttpRequestMessage(HttpMethod.Get, url);
-                request.Headers.UserAgent.ParseAdd("PublisherStudioSetupTool/2.2.3");
+                request.Headers.UserAgent.ParseAdd("PublisherStudioSetupTool/2.2.4");
                 request.Headers.Accept.ParseAdd("*/*");
                 if (resumeAt > 0)
                     request.Headers.Range = new RangeHeaderValue(resumeAt, null);
@@ -1704,7 +1704,7 @@ internal static class Program
         try
         {
             var client = new HttpClient();
-            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("PublisherStudioSetupTool", "2.2.3"));
+            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("PublisherStudioSetupTool", "2.2.4"));
             client.Timeout = Timeout.InfiniteTimeSpan;
             return client;
         }

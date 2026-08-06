@@ -32,41 +32,72 @@ public sealed class PublisherDocumentationViewerService(ILogger<PublisherDocumen
     /// <inheritdoc />
     public void Open(PublisherDocumentationViewerRequest request)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        var url = NormalizeUrl(request.Url);
-        var title = string.IsNullOrWhiteSpace(request.Title) ? "PublisherStudio documentation" : request.Title.Trim();
-        State = new PublisherDocumentationViewerState
+        try
         {
-            IsOpen = true,
-            Url = url,
-            Title = title,
-            Revision = Interlocked.Increment(ref revision)
-        };
-        logger.LogInformation("Opened the PublisherStudio documentation viewer for {DocumentationUrl}.", url);
-        StateChanged?.Invoke();
+            ArgumentNullException.ThrowIfNull(request);
+            var url = NormalizeUrl(request.Url);
+            var title = string.IsNullOrWhiteSpace(request.Title)
+                ? "PublisherStudio documentation"
+                : request.Title.Trim();
+
+            State = new PublisherDocumentationViewerState
+            {
+                IsOpen = true,
+                Url = url,
+                Title = title,
+                Revision = Interlocked.Increment(ref revision)
+            };
+
+            logger.LogInformation("Opened the PublisherStudio documentation viewer for {DocumentationUrl}.", url);
+            StateChanged?.Invoke();
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Opening the PublisherStudio documentation viewer failed.");
+            throw;
+        }
     }
 
     /// <inheritdoc />
     public void Close()
     {
-        if (!State.IsOpen) return;
-        State = new PublisherDocumentationViewerState
+        try
         {
-            IsOpen = false,
-            Revision = Interlocked.Increment(ref revision)
-        };
-        logger.LogDebug("Closed the PublisherStudio documentation viewer.");
-        StateChanged?.Invoke();
+            if (!State.IsOpen)
+                return;
+
+            State = new PublisherDocumentationViewerState
+            {
+                IsOpen = false,
+                Revision = Interlocked.Increment(ref revision)
+            };
+
+            logger.LogDebug("Closed the PublisherStudio documentation viewer.");
+            StateChanged?.Invoke();
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Closing the PublisherStudio documentation viewer failed.");
+            throw;
+        }
     }
 
     private string NormalizeUrl(string url)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(url);
         var normalized = url.Trim();
-        if (!normalized.StartsWith("/", StringComparison.Ordinal) || normalized.StartsWith("//", StringComparison.Ordinal) || normalized.Contains('\\'))
-            throw new ArgumentException("Documentation viewer URLs must be same-origin application-relative paths.", nameof(url));
+        if (!normalized.StartsWith('/', StringComparison.Ordinal) ||
+            normalized.StartsWith("//", StringComparison.Ordinal) ||
+            normalized.Contains('\\'))
+        {
+            throw new ArgumentException(
+                "Documentation viewer URLs must be same-origin application-relative paths.",
+                nameof(url));
+        }
+
         if (normalized.Any(char.IsControl))
             throw new ArgumentException("Documentation viewer URLs may not contain control characters.", nameof(url));
+
         return normalized;
     }
 }

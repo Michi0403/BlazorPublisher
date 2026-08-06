@@ -33,7 +33,8 @@ require('src/PublisherStudio.Web/Components/Pages/OrganicPlugins.razor','Method 
 require('src/PublisherStudio.Web/Components/Editor/PictureEditor.razor.cs','CapabilityKey = "localgpt.vision.ocr"','modelName = "deepseek-ocr"')
 require('docs/styles/publisherstudio-kawaii.js','ensureSnapshotMobileNavigation','ensureRootDocumentationRail')
 require('docs/styles/publisherstudio-kawaii.css','publisherstudio-mobile-navigation','padding: 1rem 1.15rem 1.2rem','body > header.navbar .navbar-nav','display: none !important')
-require('build/Build-Documentation.ps1','@page { size: A4 portrait','Complete API page inventory','html-browser-compact-handbook','https://michi0403.github.io/BlazorPublisher/')
+require('build/Build-Documentation.ps1','New-PublisherStudioHtmlPrintBook','Convert-PublisherStudioApiKawaiiDetails','html-browser-print','publisherstudio-kawaii-docs','Copy-Item -Path (Join-Path $siteRoot "*") -Destination $publishRoot -Recurse -Force')
+forbid('build/Build-Documentation.ps1','html-browser-compact-handbook')
 require('build/Update-GitHubPagesSnapshot.ps1','publisherstudio-kawaii-docs.zip','--expected-version')
 forbid('build/Update-GitHubPagesSnapshot.ps1','BranchPagesRoot','docs mirror','branch-publishing mirror')
 # The authored docs tree must not be a generated Pages mirror.
@@ -45,7 +46,7 @@ except Exception as e: failures.append(f"publisher-dx-functions.json invalid: {e
 validator=ROOT/'.github/scripts/prepare-pages-artifact.py'
 archive=ROOT/'.github/pages/publisherstudio-kawaii-docs.zip'
 with tempfile.TemporaryDirectory(prefix='publisher-contract-audit-') as tmp:
- result=subprocess.run([sys.executable,str(validator),'--archive',str(archive),'--output',tmp,'--expected-version','2.2.3'],capture_output=True,text=True)
+ result=subprocess.run([sys.executable,str(validator),'--archive',str(archive),'--output',tmp,'--expected-version','2.2.4'],capture_output=True,text=True)
  if result.returncode: failures.append(result.stderr.strip() or result.stdout.strip())
 if failures:
  print('PublisherStudio documentation/1-Wire contract audit failed:')

@@ -354,6 +354,11 @@
       "maxUnconfiguredAwaitCount": 0,
       "maxConfigureAwaitTrueCount": 1,
       "minConfigureAwaitFalseCount": 0
+    },
+    "Components/Shared/DocumentationViewerHost.razor": {
+      "maxUnconfiguredAwaitCount": 0,
+      "maxConfigureAwaitTrueCount": 6,
+      "minConfigureAwaitFalseCount": 0
     }
   },
   "policy": "Renderer sources stay on the Blazor context; service/controller continuations remain explicitly background-safe. Existing unconfigured awaits are a reviewed ceiling and may only decrease.",

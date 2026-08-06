@@ -1,5 +1,5 @@
 param(
-    [string]$OutputPath = (Join-Path $PSScriptRoot 'artifacts/source/PublisherStudio-v2.2.3-source.zip')
+    [string]$OutputPath = (Join-Path $PSScriptRoot 'artifacts/source/PublisherStudio-v2.2.4-source.zip')
 )
 
 $ErrorActionPreference = 'Stop'

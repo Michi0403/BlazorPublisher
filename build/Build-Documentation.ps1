@@ -559,8 +559,7 @@ function Test-PublisherStudioCompletePdf {
         if ($read -le 0) { return $false }
         $prefix = [Text.Encoding]::ASCII.GetString($buffer, 0, $read)
         return $prefix.StartsWith("%PDF-", [StringComparison]::Ordinal) -and
-            $prefix -notmatch 'Deterministic fallback documentation index' -and
-            $prefix -notmatch 'ReportLab'
+            $prefix -notmatch 'Deterministic fallback documentation index'
     }
     finally {
         $stream.Dispose()
@@ -1201,32 +1200,28 @@ function New-PublisherStudioHtmlPrintBook {
     }
     $printStyles = @'
 <style>
-@page { size: A4 portrait; margin: 12mm 13mm 14mm; }
-html, body { background: linear-gradient(180deg, #fff6fb, #fff0f8) !important; color: #4b2159 !important; font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif !important; font-size: 10pt; line-height: 1.45; }
+@page { size: A4 landscape; margin: 9mm 10mm 11mm; }
+html, body { background: linear-gradient(180deg, #fff6fb, #fff0f8) !important; color: #4b2159 !important; font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif !important; font-size: 9.35pt; line-height: 1.38; }
 body { margin: 0 !important; max-width: none !important; }
-.publisherstudio-print-cover { min-height: 250mm; display: flex; flex-direction: column; justify-content: center; break-after: page; }
+.publisherstudio-print-cover { min-height: 178mm; display: flex; flex-direction: column; justify-content: center; break-after: page; }
 .publisherstudio-print-cover::before { content: "🐾 🐱 🐶 PUBLISHERSTUDIO · KAWAII DOCS 2026"; color: #d946ef; font-family: "Segoe UI Emoji", "Segoe UI", sans-serif; font-size: 9pt; font-weight: 800; letter-spacing: .12em; margin-bottom: 12pt; }
-.publisherstudio-print-cover h1 { color: #ffffff; text-shadow: 0 1pt 0 rgba(155, 81, 224, .55), 0 0 8pt rgba(236, 72, 153, .18); font-size: 29pt; font-weight: 700; line-height: 1.06; margin: 0 0 12pt; }
-.publisherstudio-print-cover p { color: #6b3b79; font-size: 11pt; margin: 3pt 0; max-width: 64rem; }
+.publisherstudio-print-cover h1 { color: #ffffff; text-shadow: 0 1pt 0 rgba(155, 81, 224, .55), 0 0 8pt rgba(236, 72, 153, .18); font-size: 31pt; font-weight: 700; line-height: 1.06; margin: 0 0 12pt; }
+.publisherstudio-print-cover p { color: #6b3b79; font-size: 11.5pt; margin: 3pt 0; max-width: 64rem; }
 .publisherstudio-print-toc { break-after: page; }
 .publisherstudio-print-toc > h1 { border-bottom: 2px solid #d8b4fe; color: #171717; font-size: 24pt; margin: 0 0 13pt; padding-bottom: 6pt; }
 .publisherstudio-print-toc-section { margin: 0 0 14pt; }
 .publisherstudio-print-toc-section > h2 { color: #323130; font-size: 14pt; margin: 10pt 0 5pt; }
-.publisherstudio-print-toc-conceptual { columns: 2; column-gap: 1.35rem; padding-left: 1.2rem; }
-.publisherstudio-print-toc-conceptual li { break-inside: avoid; font-size: 9pt; line-height: 1.25; margin: 1.2pt 0; }
+.publisherstudio-print-toc-conceptual { columns: 3; column-gap: 1.35rem; padding-left: 1.2rem; }
+.publisherstudio-print-toc-conceptual li { break-inside: avoid; font-size: 8.5pt; line-height: 1.25; margin: 1.2pt 0; }
 .publisherstudio-print-api-overview-link { font-size: 9pt; font-weight: 600; margin: 3pt 0 8pt; }
 .publisherstudio-print-toc-namespace { background: linear-gradient(135deg, #fdf4ff, #f0f9ff 72%); border: 1px solid #eadcf8; border-radius: 8pt; break-inside: auto; margin-top: 8pt; padding: 6pt 7pt 7pt; }
 .publisherstudio-print-toc-namespace h3 { align-items: center; break-after: avoid; color: #7c3aed; display: flex; font-size: 11pt; gap: 4pt; margin: 0 0 5pt; }
-.publisherstudio-print-toc-kind-list { columns: 2; column-gap: 1.25rem; list-style: none; margin: 0; padding: 0; }
-.publisherstudio-print-toc-kind-list > li { break-inside: avoid; font-size: 7.4pt; line-height: 1.22; margin: 1.4pt 0; }
+.publisherstudio-print-toc-kind-list { columns: 3; column-gap: 1.25rem; list-style: none; margin: 0; padding: 0; }
+.publisherstudio-print-toc-kind-list > li { break-inside: avoid; font-size: 7.8pt; line-height: 1.22; margin: 1.4pt 0; }
 .publisherstudio-print-toc-kind { --publisherstudio-api-kind-accent: #8b5cf6; margin-top: 5pt; }
 .publisherstudio-print-toc-kind h4 { align-items: center; break-after: avoid; color: var(--publisherstudio-api-kind-accent); display: flex; font-size: 8.5pt; gap: 3pt; margin: 0 0 2pt; }
 .publisherstudio-print-toc-kind-icon { font-family: "Segoe UI Emoji", "Segoe UI Symbol", sans-serif; }
 .publisherstudio-print-toc-kind-count { background: #fff; border: 1px solid color-mix(in srgb, var(--publisherstudio-api-kind-accent) 22%, #e5e7eb); border-radius: 999px; color: #555; font-size: 6pt; margin-left: 2pt; padding: .5pt 3pt; }
-.publisherstudio-print-toc-api { break-before: page; page-break-before: always; }
-.publisherstudio-print-toc-api::before { content: "Complete API page inventory"; display: block; color: #ffffff; background: linear-gradient(90deg, #ec4899, #8b5cf6 56%, #60a5fa); border-radius: 7pt; font-size: 20pt; font-weight: 700; margin: 0 0 11pt; padding: 8pt 10pt; }
-.publisherstudio-print-toc-api > h2 { margin-top: 0; }
-.publisherstudio-print-api-inventory-note { color: #6b3b79; font-size: 8.5pt; margin: 0 0 8pt; }
 .publisherstudio-print-member-links { display: block; margin-left: 8pt; }
 .publisherstudio-print-member-links a { color: #5c5c5c !important; display: inline-block; font-size: 6.8pt; margin-right: 5pt; }
 .publisherstudio-print-document { break-before: page; page-break-before: always; }
@@ -1420,9 +1415,8 @@ html, body { background: #fff0f8 !important; color: #51285d !important; }
     [void]$builder.AppendLine($printStyles)
     [void]$builder.AppendLine('</head><body class="publisherstudio-print-book">')
     [void]$builder.AppendLine('<section class="publisherstudio-print-cover">')
-    [void]$builder.AppendLine("<h1>PublisherStudio documentation</h1>")
-    [void]$builder.AppendLine("<p><strong>Version $Version</strong></p>")
-    [void]$builder.AppendLine('<p>A readable portrait handbook containing every maintained PublisherStudio chapter plus a complete linked namespace and type inventory.</p>')
+    [void]$builder.AppendLine("<h1>PublisherStudio $Version</h1>")
+    [void]$builder.AppendLine('<p>A cozy, practical guide to creating, publishing, recording, and extending projects with PublisherStudio.</p>')
     [void]$builder.AppendLine("<p>&#x1F43E; $($pageModels.Count) HTML reference pages · carefully arranged in 2026 · generated $([DateTime]::UtcNow.ToString('u'))</p>")
     [void]$builder.AppendLine('</section>')
     [void]$builder.AppendLine('<section class="publisherstudio-print-toc"><h1>Contents</h1>')
@@ -1432,7 +1426,6 @@ html, body { background: #fff0f8 !important; color: #51285d !important; }
     }
     [void]$builder.AppendLine('</ol></div>')
     [void]$builder.AppendLine('<div class="publisherstudio-print-toc-section publisherstudio-print-toc-api"><h2>&#x1F431; API reference</h2>')
-    [void]$builder.AppendLine('<p class="publisherstudio-print-api-inventory-note">The HTML site contains the complete namespace, type, and member reference. This compact handbook keeps the full page inventory readable and links each type to the published HTML reference.</p>')
     $apiPages = @($pageModels | Where-Object { $_.IsApi })
     $apiOverview = @($apiPages | Where-Object { $_.Relative -eq 'api/index.html' } | Select-Object -First 1)
     if ($apiOverview.Count -gt 0) {
@@ -1458,7 +1451,7 @@ html, body { background: #fff0f8 !important; color: #51285d !important; }
              ([string]::IsNullOrWhiteSpace($_.ApiNamespace) -and $_.ApiDisplayName -eq $namespaceName))
         } | Select-Object -First 1)
         $namespaceHeading = if ($namespacePage.Count -gt 0) {
-            '<a href="https://michi0403.github.io/BlazorPublisher/' + $namespacePage[0].Relative + '">&#x1F431; ' + (ConvertTo-PublisherStudioHtml $namespaceName) + '</a>'
+            '<a href="#' + $namespacePage[0].Anchor + '">&#x1F431; ' + (ConvertTo-PublisherStudioHtml $namespaceName) + '</a>'
         }
         else { '&#x1F431; ' + (ConvertTo-PublisherStudioHtml $namespaceName) }
         [void]$builder.AppendLine('<section class="publisherstudio-print-toc-namespace"><h3>' + $namespaceHeading + '</h3>')
@@ -1479,7 +1472,14 @@ html, body { background: #fff0f8 !important; color: #51285d !important; }
             $presentation = $kindModel.Presentation
             [void]$builder.AppendLine('<section class="publisherstudio-print-toc-kind publisherstudio-print-toc-kind--' + (ConvertTo-PublisherStudioHtml ([string]$presentation.Key)) + '" style="--publisherstudio-api-kind-accent:' + [string]$presentation.Accent + ';"><h4><span class="publisherstudio-print-toc-kind-icon" aria-hidden="true">' + [string]$presentation.IconHtml + '</span><span>' + (ConvertTo-PublisherStudioHtml ([string]$presentation.Label)) + '</span><span class="publisherstudio-print-toc-kind-count">' + [string]$kindPages.Count + '</span></h4><ul class="publisherstudio-print-toc-kind-list">')
             foreach ($page in $kindPages) {
-                [void]$builder.Append('<li><a href="https://michi0403.github.io/BlazorPublisher/' + $page.Relative + '">' + (ConvertTo-PublisherStudioHtml $page.ApiDisplayName) + '</a>')
+                [void]$builder.Append('<li><a href="#' + $page.Anchor + '">' + (ConvertTo-PublisherStudioHtml $page.ApiDisplayName) + '</a>')
+                if (@($page.MemberSections).Count -gt 0) {
+                    [void]$builder.Append('<span class="publisherstudio-print-member-links">')
+                    foreach ($section in @($page.MemberSections)) {
+                        [void]$builder.Append('<a class="publisherstudio-print-member-link publisherstudio-print-member-link--' + (ConvertTo-PublisherStudioHtml ([string]$section.Key)) + '" href="#' + $page.Anchor + '-' + (ConvertTo-PublisherStudioHtml ([string]$section.Id)) + '"><span class="publisherstudio-print-member-icon" aria-hidden="true">' + [string]$section.IconHtml + '</span>' + (ConvertTo-PublisherStudioHtml ([string]$section.Name)) + ' <span class="publisherstudio-print-member-count">' + [string]$section.Count + '</span></a>')
+                    }
+                    [void]$builder.Append('</span>')
+                }
                 [void]$builder.AppendLine('</li>')
             }
             [void]$builder.AppendLine('</ul></section>')
@@ -1489,14 +1489,14 @@ html, body { background: #fff0f8 !important; color: #51285d !important; }
     [void]$builder.AppendLine('</div></section>')
 
     foreach ($page in $pageModels) {
-        if ($page.IsApi -and $page.Relative -ne 'api/index.html') { continue }
         $body = [string]$page.Body
         $body = [regex]::Replace($body, '(?i)\s+hidden(?:\s*=\s*(?:"hidden"|''hidden''|hidden))?', '')
         $body = [regex]::Replace($body, '(?i)<details\b(?![^>]*\bopen\b)', '<details open')
         $body = Convert-PublisherStudioPrintDocumentAnchors -Html $body -PageAnchor $page.Anchor
         $body = Convert-PublisherStudioPrintDocumentLinks -Html $body -PagePath $page.Path -SiteRoot $SiteRoot -AnchorMap $anchorMap
         if ($page.IsApi) {
-            $documentClass = 'publisherstudio-print-document publisherstudio-print-workspace publisherstudio-print-api-overview'
+            $kindClass = ([string]$page.ApiKind).ToLowerInvariant()
+            $documentClass = 'publisherstudio-print-document publisherstudio-print-api-document publisherstudio-print-api-' + $kindClass
         }
         else {
             $documentClass = 'publisherstudio-print-document publisherstudio-print-workspace'
@@ -1562,7 +1562,6 @@ function Invoke-PublisherStudioBrowserPdf {
                 "--disable-features=BackForwardCache,CalculateNativeWinOcclusion,MediaRouter,OptimizationHints,Translate,msEdgeStartupBoost,msEdgeBackgroundMode",
                 "--print-to-pdf-no-header",
                 "--no-pdf-header-footer",
-                "--generate-tagged-pdf",
                 "--user-data-dir=$profileRoot",
                 "--print-to-pdf=$PdfPath",
                 $inputUri
@@ -2236,6 +2235,15 @@ Use the grouped API navigation to browse namespaces, types, properties, methods,
         Copy-Item -LiteralPath $polishedXmlPath -Destination (Join-Path $siteRoot "PublisherStudio.Web.xml") -Force
     }
 
+    # Publish the current HTML tree before the long PDF render. This prevents a failed or
+    # interrupted PDF step from leaving the running PublisherStudio application with stale, blank,
+    # or unthemed help content. The final publication pass below adds status and PDF metadata.
+    foreach ($publishRoot in $publishRoots) {
+        Remove-Item -LiteralPath $publishRoot -Recurse -Force -ErrorAction SilentlyContinue
+        New-Item -ItemType Directory -Path $publishRoot -Force | Out-Null
+        Copy-Item -Path (Join-Path $siteRoot "*") -Destination $publishRoot -Recurse -Force
+    }
+
     [xml]$xmlForCount = Get-Content -LiteralPath $polishedXmlPath -Raw -Encoding UTF8
     $xmlMemberCount = @($xmlForCount.SelectNodes("/doc/members/member")).Count
     $pdfPath = Join-Path $siteRoot $pdfName
@@ -2254,7 +2262,7 @@ Use the grouped API navigation to browse namespaces, types, properties, methods,
                 $browser = Find-PublisherStudioDocumentationBrowser
                 if ($null -ne $browser) {
                     $pdfSourcePageCount = New-PublisherStudioHtmlPrintBook -SiteRoot $siteRoot -DestinationPath $printBookPath
-                    Write-Host "Printing $pdfSourcePageCount DocFX HTML pages as one compact PublisherStudio PDF with $($browser.Name)." -ForegroundColor Cyan
+                    Write-Host "Printing $pdfSourcePageCount DocFX HTML pages as one complete PublisherStudio PDF with $($browser.Name)." -ForegroundColor Cyan
                     $browserResult = Invoke-PublisherStudioBrowserPdf -BrowserPath $browser.Path -HtmlPath $printBookPath -PdfPath $pdfPath -WorkingRoot $printBookRoot
                     $pdfCandidateCount = if (Test-Path -LiteralPath $pdfPath -PathType Leaf) { 1 } else { 0 }
                     if ($browserResult.Succeeded) {
@@ -2262,7 +2270,7 @@ Use the grouped API navigation to browse namespaces, types, properties, methods,
                         if ($pdfGenerated) {
                             $resolvedPdf = Get-Item -LiteralPath $pdfPath
                             $pdfFileSize = $resolvedPdf.Length
-                            $pdfMode = "html-browser-compact-handbook"
+                            $pdfMode = "html-browser-print"
                             $pdfRenderer = [string]$browser.Name
                             $pdfGeneratedSourcePath = Get-PublisherStudioRelativePath -Root $docsRoot -Path $printBookPath
                         }

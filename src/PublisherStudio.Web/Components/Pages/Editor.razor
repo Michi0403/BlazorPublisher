@@ -335,6 +335,8 @@
     <div class="toast notice" @onclick="() => _notice = null">@_notice</div>
 }
 
+<DocumentationViewerHost />
+
 @code {
     private PageSurface? _pageSurface;
     private bool MainframeSelectionVisualsEnabled =>

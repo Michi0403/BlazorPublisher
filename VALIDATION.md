@@ -1,9 +1,7 @@
-# PublisherStudio 2.1.10 validation
+# PublisherStudio 2.1.9 validation
 
-This source revision restores the repository-local DocFX 2.78.5 tool manifest, keeps one authored documentation tree, and publishes GitHub Pages from one tracked ZIP artifact. The Pages workflow and validators are name-adapted from the maintained LocalGPT implementation.
+The maintained-source validation covers installer asset selection, exact AppData layout, archive wrappers, deterministic release ZIP creation, version alignment, idempotent documentation source rewriting, repository-root GitHub Pages discovery, pinned snapshot version/PDF/link validation, DocFX namespace-page repair, byte-identical `/docs` branch mirroring, build-guard consistency, architecture policies, and application regression contracts.
 
-The installer and release paths use the same runtime naming contract as LocalGPT, including `linuxx64` and `linuxarm64`, while retaining the PublisherStudio application and setup names and `%LOCALAPPDATA%\PublisherStudio` installation root. Both application and setup archives are acquired and validated before an existing installation is modified.
+The repository test suite passes 147 tests after the Pages repair. The exact eleven missing namespace-link cases reported from the owner build normalize into four generated namespace landing pages while an unrelated missing file remains a hard validation failure.
 
-Source-side checks in the delivered package cover XML and workflow parsing, Python validator syntax, safe Pages archive extraction, version alignment, publish-profile/runtime mapping, missing build-script references, absence of the removed JavaScript SHA allowlist, and absence of duplicate generated documentation trees.
-
-A successful owner-side Windows build is still required to verify .NET 10 compilation, licensed DevExpress assets, DocFX HTML generation, the complete HTML-backed PDF, every runtime publish, setup execution, GitHub release downloads, shortcuts, startup, Pages snapshot refresh, and the real GitHub Pages deployment.
+A successful owner-side Windows release build must still confirm the .NET 10 publishes, licensed DevExpress assets, complete DocFX HTML/PDF payload, all runtime archives, setup execution, exact GitHub release asset downloads, shortcuts, application startup, snapshot refresh, and one real GitHub Pages deployment.

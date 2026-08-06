@@ -143,13 +143,13 @@ When an external/local automation caller can reasonably use a new service capabi
 
 OpenSCAD work must use the canonical `OpenScadDocument`/`OpenScadNode` graph, catalog definitions and registered `IOpenScadNodeRenderer` implementations. Do not introduce a closed switch-only generator or a second visual-builder model. New primitives, transforms and exporters must be registrable without rewriting the document service. Animation targets stable node IDs and must declare native/HTML export limitations.
 
-## Release evidence
+## Release task ledger
 
-Incomplete release work must be recorded in the maintained release notes or validation report with Closed, Partial or Deferred status. A later release closes an item only when implementation evidence and an applicable maintained validation exist. Do not invent placeholder ledgers or reference deleted test suites.
+Every release that leaves incomplete work must update `docs/architecture/task-ledger.md` and its changelog with Closed, Partial or Deferred status. A later release closes a task only when implementation evidence and a maintained test exist. Do not silently drop open architecture tasks between ZIP releases.
 
 ## Interaction, stacking, input and frontend-failure release gate
 
-Every release that adds or changes a visual object, toolbar, overlay, editor mode, embedded web runtime or media interaction must document the applicable checklist in its maintained release notes or validation report. Do not mark an item complete until the relevant maintained validation passes.
+Every release that adds or changes a visual object, toolbar, overlay, editor mode, embedded web runtime or media interaction must begin with an explicit checklist in the current changelog. Do not mark an item complete until the relevant repository contract test passes.
 
 The checklist must cover, where applicable:
 

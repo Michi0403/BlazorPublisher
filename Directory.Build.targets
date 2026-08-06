@@ -1,4 +1,4 @@
-<Project>
+﻿<Project>
   <PropertyGroup>
     <WireProtocolBootstrapScript>$(MSBuildThisFileDirectory)build\Ensure-WireProtocolPackage.ps1</WireProtocolBootstrapScript>
     <LoggingIntegrityScript>$(MSBuildThisFileDirectory)build\Assert-LoggingIntegrity.ps1</LoggingIntegrityScript>
@@ -15,8 +15,11 @@
     <IteratorExceptionPolicyScript>$(MSBuildThisFileDirectory)build\Assert-IteratorExceptionPolicy.ps1</IteratorExceptionPolicyScript>
     <SystemVariableInitializationScript>$(MSBuildThisFileDirectory)build\Assert-SystemVariableInitialization.ps1</SystemVariableInitializationScript>
     <PanelStudioInteractionLifecycleScript>$(MSBuildThisFileDirectory)build\Assert-PanelStudioInteractionLifecycle.ps1</PanelStudioInteractionLifecycleScript>
+    <JavaScriptDiagnosticsScript>$(MSBuildThisFileDirectory)build\Assert-JavaScriptDiagnostics.ps1</JavaScriptDiagnosticsScript>
     <PublishConfigurationScript>$(MSBuildThisFileDirectory)build\Assert-PublishConfiguration.ps1</PublishConfigurationScript>
     <InstallerWorkflowScript>$(MSBuildThisFileDirectory)build\Assert-InstallerWorkflow.ps1</InstallerWorkflowScript>
+    <GitSourceVisibilityScript>$(MSBuildThisFileDirectory)build\Assert-GitSourceVisibility.ps1</GitSourceVisibilityScript>
+    <XmlDocumentationCoverageScript>$(MSBuildThisFileDirectory)build\Assert-XmlDocumentationCoverage.ps1</XmlDocumentationCoverageScript>
   </PropertyGroup>
 
   <Target Name="EnsurePublisherWireProtocolPackage"
@@ -128,7 +131,7 @@
   </Target>
 
   <Target Name="AssertPublisherPublishConfiguration"
-          BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherPanelStudioInteractionLifecycle"
+          BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherJavaScriptDiagnostics"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipPublishConfigurationGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(PublishConfigurationScript)')" Text="Publish configuration guard script is missing: $(PublishConfigurationScript)" />
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(PublishConfigurationScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />

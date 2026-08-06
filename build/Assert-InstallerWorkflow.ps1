@@ -48,8 +48,8 @@ $runtimeAssets = @(
     @{ Runtime = 'win-x64'; Folder = 'winx64' },
     @{ Runtime = 'win-x86'; Folder = 'winx86' },
     @{ Runtime = 'win-arm64'; Folder = 'winarm64' },
-    @{ Runtime = 'linux-x64'; Folder = 'linuxx64' },
-    @{ Runtime = 'linux-arm64'; Folder = 'linuxarm64' },
+    @{ Runtime = 'linux-x64'; Folder = 'linx64' },
+    @{ Runtime = 'linux-arm64'; Folder = 'linarm64' },
     @{ Runtime = 'osx-x64'; Folder = 'macosx64' },
     @{ Runtime = 'osx-arm64'; Folder = 'macosarm64' }
 )

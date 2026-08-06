@@ -72,8 +72,8 @@ $profiles = @(
     @{ File = 'winx64.pubxml'; Runtime = 'win-x64'; App = 'winx64'; Setup = 'setupwinx64' },
     @{ File = 'winx86.pubxml'; Runtime = 'win-x86'; App = 'winx86'; Setup = 'setupwinx86' },
     @{ File = 'winarm64.pubxml'; Runtime = 'win-arm64'; App = 'winarm64'; Setup = 'setupwinarm64' },
-    @{ File = 'linuxx64.pubxml'; Runtime = 'linux-x64'; App = 'linuxx64'; Setup = 'setuplinuxx64' },
-    @{ File = 'linuxarm64.pubxml'; Runtime = 'linux-arm64'; App = 'linuxarm64'; Setup = 'setuplinuxarm64' },
+    @{ File = 'linx64.pubxml'; Runtime = 'linux-x64'; App = 'linx64'; Setup = 'setuplinx64' },
+    @{ File = 'linarm64.pubxml'; Runtime = 'linux-arm64'; App = 'linarm64'; Setup = 'setuplinarm64' },
     @{ File = 'macosx64.pubxml'; Runtime = 'osx-x64'; App = 'macosx64'; Setup = 'setupmacosx64' },
     @{ File = 'macosarm64.pubxml'; Runtime = 'osx-arm64'; App = 'macosarm64'; Setup = 'setupmacosarm64' }
 )

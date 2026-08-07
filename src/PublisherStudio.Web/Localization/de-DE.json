@@ -2973,5 +2973,20 @@
   "Text.Troubleshooting": "Fehlerbehebung",
   "Text.Build␠assets,␠ports,␠circuits,␠recording␠previews,␠and␠docs.": "Build-Assets, Ports, Circuits, Aufnahmevorschau und Dokumentation.",
   "Text.Back␠to␠PublisherStudio": "Zurück zu PublisherStudio",
-  "Text.The␠HTML␠site␠and␠PDF␠are␠generated␠from␠the␠same␠maintained␠articles␠and␠C#␠XML␠comments␠used␠by␠the␠release␠build.": "HTML-Seite und PDF werden aus denselben gepflegten Artikeln und C#-XML-Kommentaren wie im Release-Build erzeugt."
+  "Text.The␠HTML␠site␠and␠PDF␠are␠generated␠from␠the␠same␠maintained␠articles␠and␠C#␠XML␠comments␠used␠by␠the␠release␠build.": "HTML-Seite und PDF werden aus denselben gepflegten Artikeln und C#-XML-Kommentaren wie im Release-Build erzeugt.",
+  "Text.The␠documentation␠opens␠in␠an␠in-app␠viewer,␠so␠closing␠it␠returns␠to␠the␠unchanged␠studio␠state.": "Die Dokumentation öffnet sich in einem integrierten Viewer; nach dem Schließen kehrst du zum unveränderten Studio-Zustand zurück.",
+  "Text.Active␠LocalGPT␠1-Wire␠methods": "Aktive LocalGPT-1-Wire-Methoden",
+  "Text.OrganicOptions": "OrganicOptions",
+  "Text.These␠are␠the␠active␠methods␠received␠from␠LocalGPT␠during␠the␠current␠1-Wire␠handshake.␠Routes,␠methods␠and␠policy␠keys␠remain␠visible␠so␠a␠user␠can␠verify␠what␠either␠application␠may␠call.": "Dies sind die aktiven Methoden, die während des aktuellen 1-Wire-Handshakes von LocalGPT empfangen wurden. Routen, Methoden und Richtlinienschlüssel bleiben sichtbar, damit geprüft werden kann, was die jeweilige Anwendung aufrufen darf.",
+  "Text.Method␠and␠route": "Methode und Route",
+  "Text.Configuration": "Konfiguration",
+  "Text.Active␠PublisherStudio␠protocol␠settings": "Aktive PublisherStudio-Protokolleinstellungen",
+  "Text.Protocol": "Protokoll",
+  "Text.Runtime": "Laufzeit",
+  "Text.Transports": "Transporte",
+  "Text.Limits": "Grenzwerte",
+  "Text.Machine-readable␠profile:": "Maschinenlesbares Profil:",
+  "Text..␠Documentation␠profile:": ". Dokumentationsprofil:",
+  "Text.Close␠documentation␠viewer": "Dokumentationsviewer schließen",
+  "Text.Open␠in␠browser␠tab": "In Browser-Tab öffnen"
 }

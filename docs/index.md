@@ -1,6 +1,6 @@
 # PublisherStudio documentation
 
-**Version 2.2.4**
+**Version 2.2.5**
 
 PublisherStudio is a local-first publishing workspace for page layout, stories, spreadsheets, pictures, audio, video, streaming, interactive content, and self-contained exports.
 
@@ -73,6 +73,6 @@ The editable publication remains authoritative. Browser runtimes accelerate inte
 
 The conceptual pages are built together with compiler-generated XML documentation for public types and members. The same themed HTML site is shipped inside PublisherStudio and published to GitHub Pages.
 
-The packaged PDF follows the same readable portrait handbook model as LocalGPT: it contains every maintained PublisherStudio chapter plus a complete linked namespace/type inventory. Detailed API members stay in the searchable HTML site, GitHub Pages, and the in-app viewer.
+The packaged PDF is built from the same reviewed Kawaii HTML tree as the website. It contains every maintained PublisherStudio chapter and every generated API namespace/type page; a tiny source-only or fallback PDF is rejected by the release and Pages gates.
 
-<a class="btn btn-primary" href="PublisherStudio-2.2.4.pdf" download>🐾 Download the Kawaii handbook</a>
+<a class="btn btn-primary" href="PublisherStudio-2.2.5.pdf" download>🐾 Download the Kawaii handbook</a>

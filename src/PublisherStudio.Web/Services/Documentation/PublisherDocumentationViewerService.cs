@@ -86,7 +86,7 @@ public sealed class PublisherDocumentationViewerService(ILogger<PublisherDocumen
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(url);
         var normalized = url.Trim();
-        if (!normalized.StartsWith("/", StringComparison.Ordinal) ||
+        if (!normalized.StartsWith('/', StringComparison.Ordinal) ||
             normalized.StartsWith("//", StringComparison.Ordinal) ||
             normalized.Contains('\\'))
         {

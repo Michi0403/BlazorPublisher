@@ -169,9 +169,10 @@ function Assert-PublisherStudioDocumentationPayload {
     if ([string]$status.documentationMode -ne "docfx") { throw "Published PublisherStudio documentation did not use the DocFX modern site." }
     if ([string]$status.pdfMode -notin @("html-browser-print", "docfx-pdf-plugin")) { throw "Published PublisherStudio documentation does not contain the complete HTML-backed documentation PDF." }
     if ([string]$status.pdfMode -eq "html-browser-print" -and [int]$status.pdfSourcePageCount -lt 10) { throw "The PublisherStudio documentation PDF did not include the expected HTML page set." }
+    if ([string]$status.pdfMode -eq "html-browser-print" -and [int]$status.apiHtmlCount -gt 0 -and [int]$status.pdfSourcePageCount -lt [int]$status.apiHtmlCount) { throw "The PublisherStudio documentation PDF omitted generated API pages." }
     if (-not ([bool]$status.completeApiReference)) { throw "Published PublisherStudio documentation is missing the complete XML-generated API reference." }
     if ([int]$status.apiYamlCount -le 1 -or [int]$status.apiHtmlCount -le 1) { throw "Published PublisherStudio documentation contains an incomplete API graph." }
-    if ([long]$status.pdfBytes -lt 65536) { throw "Published PublisherStudio documentation contains an unexpectedly small PDF." }
+    if ([long]$status.pdfBytes -lt 1048576) { throw "Published PublisherStudio documentation contains an unexpectedly small PDF." }
     if ([int]$status.pdfCandidateCount -lt 1 -or [string]::IsNullOrWhiteSpace([string]$status.pdfGeneratedSourcePath)) { throw "Published PublisherStudio documentation did not record a real documentation PDF source." }
 
     $index = Get-Content -LiteralPath (Join-Path $DocumentationRoot "index.html") -Raw

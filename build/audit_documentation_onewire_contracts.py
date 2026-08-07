@@ -31,8 +31,8 @@ require('src/PublisherStudio.Web/Configuration/publisher-dx-functions.json','pub
 require('src/PublisherStudio.Web/Services/OrganicPlugins/OrganicCapabilityAndExecutionServices.cs','publisher.documentation.profile','publisherstudio.picture.ocr','localgpt.vision.ocr')
 require('src/PublisherStudio.Web/Components/Pages/OrganicPlugins.razor','Method and route','Configuration','Runtime','MaximumMessageBytes','PeerExpirySeconds','AutoConnectDiscoveredPeer','RemoteCapabilities','localgpt.vision.ocr','/api/organic/onewire/http-json/profile')
 require('src/PublisherStudio.Web/Components/Editor/PictureEditor.razor.cs','CapabilityKey = "localgpt.vision.ocr"','modelName = "deepseek-ocr"')
-require('docs/styles/publisherstudio-kawaii.js','ensureSnapshotMobileNavigation','ensureRootDocumentationRail')
-require('docs/styles/publisherstudio-kawaii.css','publisherstudio-mobile-navigation','padding: 1rem 1.15rem 1.2rem','body > header.navbar .navbar-nav','display: none !important')
+require('docs/styles/publisherstudio-kawaii.js','mountThemeControl','publisherstudio-docs-theme','publisherstudio-cursor-paw')
+require('docs/styles/publisherstudio-kawaii.css','--kawaii-docs-rail-width: clamp(15rem, 16vw, 18rem)','--kawaii-docs-panel-gap: clamp(1.25rem, 2vw, 2.5rem)','publisherstudio-snapshot-layout')
 require('build/Build-Documentation.ps1','New-PublisherStudioHtmlPrintBook','Convert-PublisherStudioApiKawaiiDetails','html-browser-print','publisherstudio-kawaii-docs','Copy-Item -Path (Join-Path $siteRoot "*") -Destination $publishRoot -Recurse -Force')
 forbid('build/Build-Documentation.ps1','html-browser-compact-handbook')
 require('build/Update-GitHubPagesSnapshot.ps1','publisherstudio-kawaii-docs.zip','--expected-version')
@@ -46,10 +46,10 @@ except Exception as e: failures.append(f"publisher-dx-functions.json invalid: {e
 validator=ROOT/'.github/scripts/prepare-pages-artifact.py'
 archive=ROOT/'.github/pages/publisherstudio-kawaii-docs.zip'
 with tempfile.TemporaryDirectory(prefix='publisher-contract-audit-') as tmp:
- result=subprocess.run([sys.executable,str(validator),'--archive',str(archive),'--output',tmp,'--expected-version','2.2.4'],capture_output=True,text=True)
+ result=subprocess.run([sys.executable,str(validator),'--archive',str(archive),'--output',tmp,'--expected-version','2.2.5'],capture_output=True,text=True)
  if result.returncode: failures.append(result.stderr.strip() or result.stdout.strip())
 if failures:
  print('PublisherStudio documentation/1-Wire contract audit failed:')
  for failure in failures: print(' -',failure)
  raise SystemExit(1)
-print('PublisherStudio documentation/1-Wire contract audit passed: modal access, mobile Pages, tagged PDF, protocol profile, method/settings disclosure and DeepSeek OCR handoff are wired.')
+print('PublisherStudio documentation/1-Wire contract audit passed: modal access, Kawaii Pages, tagged PDF, protocol profile, method/settings disclosure and DeepSeek OCR handoff are wired.')

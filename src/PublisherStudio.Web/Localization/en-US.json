@@ -2973,5 +2973,20 @@
   "Text.Troubleshooting": "Troubleshooting",
   "Text.Build␠assets,␠ports,␠circuits,␠recording␠previews,␠and␠docs.": "Build assets, ports, circuits, recording previews, and docs.",
   "Text.Back␠to␠PublisherStudio": "Back to PublisherStudio",
-  "Text.The␠HTML␠site␠and␠PDF␠are␠generated␠from␠the␠same␠maintained␠articles␠and␠C#␠XML␠comments␠used␠by␠the␠release␠build.": "The HTML site and PDF are generated from the same maintained articles and C# XML comments used by the release build."
+  "Text.The␠HTML␠site␠and␠PDF␠are␠generated␠from␠the␠same␠maintained␠articles␠and␠C#␠XML␠comments␠used␠by␠the␠release␠build.": "The HTML site and PDF are generated from the same maintained articles and C# XML comments used by the release build.",
+  "Text.The␠documentation␠opens␠in␠an␠in-app␠viewer,␠so␠closing␠it␠returns␠to␠the␠unchanged␠studio␠state.": "The documentation opens in an in-app viewer, so closing it returns to the unchanged studio state.",
+  "Text.Active␠LocalGPT␠1-Wire␠methods": "Active LocalGPT 1-Wire methods",
+  "Text.OrganicOptions": "OrganicOptions",
+  "Text.These␠are␠the␠active␠methods␠received␠from␠LocalGPT␠during␠the␠current␠1-Wire␠handshake.␠Routes,␠methods␠and␠policy␠keys␠remain␠visible␠so␠a␠user␠can␠verify␠what␠either␠application␠may␠call.": "These are the active methods received from LocalGPT during the current 1-Wire handshake. Routes, methods and policy keys remain visible so a user can verify what either application may call.",
+  "Text.Method␠and␠route": "Method and route",
+  "Text.Configuration": "Configuration",
+  "Text.Active␠PublisherStudio␠protocol␠settings": "Active PublisherStudio protocol settings",
+  "Text.Protocol": "Protocol",
+  "Text.Runtime": "Runtime",
+  "Text.Transports": "Transports",
+  "Text.Limits": "Limits",
+  "Text.Machine-readable␠profile:": "Machine-readable profile:",
+  "Text..␠Documentation␠profile:": ". Documentation profile:",
+  "Text.Close␠documentation␠viewer": "Close documentation viewer",
+  "Text.Open␠in␠browser␠tab": "Open in browser tab"
 }

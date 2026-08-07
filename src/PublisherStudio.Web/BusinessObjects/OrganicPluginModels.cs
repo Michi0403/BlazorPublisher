@@ -1,4 +1,4 @@
-﻿namespace PublisherStudio.BusinessObjects;
+namespace PublisherStudio.BusinessObjects;
 
 /// <summary>
 /// Represents an organic plugin work item.
@@ -341,12 +341,20 @@ public sealed class OrganicProtocolProfile
 /// <summary>Public PublisherStudio protocol settings used to explain and validate the current connection.</summary>
 public sealed class OrganicProtocolSettings
 {
+    /// <summary>Gets or sets whether the organic connection runtime is enabled.</summary>
     public bool Enabled { get; set; }
+    /// <summary>Gets or sets whether local peer discovery is enabled.</summary>
     public bool DiscoveryEnabled { get; set; }
+    /// <summary>Gets or sets whether an already approved discovered peer may be connected automatically.</summary>
     public bool AutoConnectDiscoveredPeer { get; set; }
+    /// <summary>Gets or sets the UDP discovery port exposed by the public runtime profile.</summary>
     public int DiscoveryPort { get; set; }
+    /// <summary>Gets or sets how long a discovered peer may remain idle before it expires.</summary>
     public int PeerExpirySeconds { get; set; }
+    /// <summary>Gets or sets the maximum accepted organic transport message size in bytes.</summary>
     public int MaximumMessageBytes { get; set; }
+    /// <summary>Gets or sets the minimum allowed interval for recurring screen-reader requests.</summary>
     public int MinimumRecurringScreenReaderIntervalSeconds { get; set; }
+    /// <summary>Gets or sets the transport names advertised by the public runtime profile.</summary>
     public List<string> SupportedTransports { get; set; } = ["tcp", "http-json"];
 }

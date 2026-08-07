@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
   <PropertyGroup>
     <WireProtocolBootstrapScript>$(MSBuildThisFileDirectory)build\Ensure-WireProtocolPackage.ps1</WireProtocolBootstrapScript>
     <LoggingIntegrityScript>$(MSBuildThisFileDirectory)build\Assert-LoggingIntegrity.ps1</LoggingIntegrityScript>
@@ -18,7 +18,6 @@
     <JavaScriptDiagnosticsScript>$(MSBuildThisFileDirectory)build\Assert-JavaScriptDiagnostics.ps1</JavaScriptDiagnosticsScript>
     <PublishConfigurationScript>$(MSBuildThisFileDirectory)build\Assert-PublishConfiguration.ps1</PublishConfigurationScript>
     <InstallerWorkflowScript>$(MSBuildThisFileDirectory)build\Assert-InstallerWorkflow.ps1</InstallerWorkflowScript>
-    <GitSourceVisibilityScript>$(MSBuildThisFileDirectory)build\Assert-GitSourceVisibility.ps1</GitSourceVisibilityScript>
     <XmlDocumentationCoverageScript>$(MSBuildThisFileDirectory)build\Assert-XmlDocumentationCoverage.ps1</XmlDocumentationCoverageScript>
   </PropertyGroup>
 
@@ -130,6 +129,13 @@
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(PanelStudioInteractionLifecycleScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
+  <Target Name="AssertPublisherJavaScriptDiagnostics"
+          BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherPanelStudioInteractionLifecycle"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipJavaScriptDiagnosticsGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+    <Error Condition="!Exists('$(JavaScriptDiagnosticsScript)')" Text="JavaScript diagnostics guard script is missing: $(JavaScriptDiagnosticsScript)" />
+    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(JavaScriptDiagnosticsScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+  </Target>
+
   <Target Name="AssertPublisherPublishConfiguration"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherJavaScriptDiagnostics"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipPublishConfigurationGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
@@ -142,6 +148,14 @@
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipInstallerWorkflowGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(InstallerWorkflowScript)')" Text="Installer workflow guard script is missing: $(InstallerWorkflowScript)" />
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(InstallerWorkflowScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+  </Target>
+
+  <Target Name="AssertPublisherXmlDocumentationCoverage"
+          BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherInstallerWorkflow"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipXmlDocumentationCoverageGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+    <Error Condition="!Exists('$(XmlDocumentationCoverageScript)')" Text="XML documentation coverage guard script is missing: $(XmlDocumentationCoverageScript)" />
+    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(XmlDocumentationCoverageScript)&quot;"
+          WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
   <PropertyGroup>

@@ -48,7 +48,7 @@ public sealed class PublisherDocumentationViewerService(ILogger<PublisherDocumen
                 Revision = Interlocked.Increment(ref revision)
             };
 
-            logger.LogInformation("Opened the PublisherStudio documentation viewer for {DocumentationUrl}.", url);
+            logger.LogDebug("Opened the PublisherStudio documentation viewer for {DocumentationUrl}.", url);
             StateChanged?.Invoke();
         }
         catch (Exception exception)
@@ -88,7 +88,7 @@ public sealed class PublisherDocumentationViewerService(ILogger<PublisherDocumen
     {
             ArgumentException.ThrowIfNullOrWhiteSpace(url);
             var normalized = url.Trim();
-            if (!normalized.StartsWith('/', StringComparison.Ordinal) ||
+            if (!normalized.StartsWith('/') ||
                 normalized.StartsWith("//", StringComparison.Ordinal) ||
                 normalized.Contains('\\'))
             {

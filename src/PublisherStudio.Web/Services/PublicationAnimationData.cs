@@ -23,7 +23,7 @@ public sealed class PublicationAnimationData(ILogger<PublicationAnimationData> l
     {
     try
     {
-            logger.LogTrace("Serializing publication animations for element {ElementId}.", element.Id);
+            logger.LogDebug("Serializing publication animations for element {ElementId}.", element.Id);
             return JsonSerializer.Serialize(
             element.Animations.OrderBy(item => item.Order), Options);
     

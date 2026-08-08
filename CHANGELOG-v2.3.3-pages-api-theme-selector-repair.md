@@ -1,4 +1,4 @@
-# PublisherStudio 2.3.3
+# PublisherStudio 2.3.4
 
 - Keeps the Kawaii documentation theme selector inside the navbar and viewport on generated and static snapshot pages.
 - Publishes `api/index.html` and the complete `api` tree explicitly into every application documentation root.

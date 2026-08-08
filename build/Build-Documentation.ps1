@@ -514,6 +514,9 @@ function Install-PublisherStudioWebsiteThemeAssets {
         $faviconIcoHref = $prefixPath + "favicon.ico?v=$faviconIcoHash"
         $html = Get-Content -LiteralPath $file.FullName -Raw -Encoding UTF8
         $updated = $html
+        # Keep the generated document envelope canonical. Some repaired PublisherStudio pages
+        # inherited a duplicated DOCTYPE while LocalGPT emits exactly one.
+        $updated = [regex]::Replace($updated, '(?is)^\s*(?:<!DOCTYPE\s+html>\s*){2,}', "<!DOCTYPE html>`r`n")
 
         if ($updated -notmatch '(?i)<html\b[^>]*\bpublisherstudio-kawaii-docs\b') {
             if ($updated -match '(?i)<html\b[^>]*\bclass\s*=\s*"') {
@@ -2261,32 +2264,21 @@ Use the grouped API navigation to browse namespaces, types, properties, methods,
         Copy-Item -LiteralPath $polishedXmlPath -Destination (Join-Path $siteRoot "PublisherStudio.Web.xml") -Force
     }
 
-    # Publish the current HTML tree before the long PDF render. This prevents a failed or
-    # interrupted PDF step from leaving the running PublisherStudio application with stale, blank,
-    # or unthemed help content. The final publication pass below adds status and PDF metadata.
+    # Publish the current HTML tree before the long PDF render. This mirrors the proven LocalGPT
+    # documentation path: the complete DocFX site is the single authoritative publication tree.
+    # Do not special-case or reconstruct the api directory here; doing so can make build-time
+    # validation disagree with the final Pages artifact.
+    $sourceApiIndex = Join-Path $siteRoot "api\index.html"
+    if (-not (Test-Path -LiteralPath $sourceApiIndex -PathType Leaf)) {
+        throw "PublisherStudio documentation API entry point is missing before publication: $sourceApiIndex"
+    }
     foreach ($publishRoot in $publishRoots) {
         Remove-Item -LiteralPath $publishRoot -Recurse -Force -ErrorAction SilentlyContinue
         New-Item -ItemType Directory -Path $publishRoot -Force | Out-Null
         Copy-Item -Path (Join-Path $siteRoot "*") -Destination $publishRoot -Recurse -Force
-    $sourceApiIndex = Join-Path $siteRoot "api\index.html"
-    if (-not (Test-Path -LiteralPath $sourceApiIndex -PathType Leaf)) {
-        throw "PublisherStudio documentation API entry point is missing before final publication: $sourceApiIndex"
-    }
-    $publishedApiRoot = Join-Path $publishRoot "api"
-    New-Item -ItemType Directory -Path $publishedApiRoot -Force | Out-Null
-    Copy-Item -Path (Join-Path $siteRoot "api\*") -Destination $publishedApiRoot -Recurse -Force
-    if (-not (Test-Path -LiteralPath (Join-Path $publishedApiRoot "index.html") -PathType Leaf)) {
-        throw "PublisherStudio documentation API entry point was not published to $publishedApiRoot"
-    }
-        $sourceApiIndex = Join-Path $siteRoot "api\index.html"
-        if (-not (Test-Path -LiteralPath $sourceApiIndex -PathType Leaf)) {
-            throw "PublisherStudio documentation API entry point is missing before publication: $sourceApiIndex"
-        }
-        $publishedApiRoot = Join-Path $publishRoot "api"
-        New-Item -ItemType Directory -Path $publishedApiRoot -Force | Out-Null
-        Copy-Item -Path (Join-Path $siteRoot "api\*") -Destination $publishedApiRoot -Recurse -Force
-        if (-not (Test-Path -LiteralPath (Join-Path $publishedApiRoot "index.html") -PathType Leaf)) {
-            throw "PublisherStudio documentation API entry point was not published to $publishedApiRoot"
+        $publishedApiIndex = Join-Path $publishRoot "api\index.html"
+        if (-not (Test-Path -LiteralPath $publishedApiIndex -PathType Leaf)) {
+            throw "PublisherStudio documentation API entry point was not published: $publishedApiIndex"
         }
     }
 

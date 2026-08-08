@@ -2491,7 +2491,7 @@ html.publisherstudio-kawaii-docs .publisherstudio-architecture-map span {
 }
 
 
-/* PublisherStudio 2.3.3: keep the generated theme picker inside the viewport even on static snapshot pages. */
+/* PublisherStudio 2.3.4: keep the generated theme picker inside the viewport even on static snapshot pages. */
 html.publisherstudio-kawaii-docs .publisherstudio-theme-control {
   flex: 0 0 auto !important;
   margin-left: auto !important;

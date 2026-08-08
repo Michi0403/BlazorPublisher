@@ -188,6 +188,7 @@ def validate_source(source: Path, expected_version: str | None = None) -> dict[s
         "kawaiiStyleSha256": sha256(source / STYLE_FILE),
         "kawaiiScriptSha256": sha256(source / SCRIPT_FILE),
         "faviconSvgSha256": sha256(source / "favicon.svg"),
+        "apiIndexSha256": sha256(source / "api/index.html"),
     }
 
 def safe_extract_zip(archive: Path, destination: Path) -> Path:

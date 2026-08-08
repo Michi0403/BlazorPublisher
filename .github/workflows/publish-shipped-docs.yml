@@ -52,6 +52,21 @@ jobs:
           API_HTML_COUNT="$(find pages-artifact/api -type f -name '*.html' | wc -l)"
           test "$API_HTML_COUNT" -gt 1
           echo "Validated PublisherStudio Pages API entry point with $API_HTML_COUNT HTML file(s)."
+          python3 - <<'PY_MARKER'
+          import json, os
+          from pathlib import Path
+          marker = {
+              "repository": os.environ["GITHUB_REPOSITORY"],
+              "sha": os.environ["GITHUB_SHA"],
+              "runId": os.environ["GITHUB_RUN_ID"],
+              "runAttempt": os.environ.get("GITHUB_RUN_ATTEMPT", "1"),
+          }
+          Path("pages-artifact/deployment-marker.json").write_text(
+              json.dumps(marker, indent=2) + "\n", encoding="utf-8")
+          PY_MARKER
+          find pages-artifact -type d -exec chmod 755 {} +
+          find pages-artifact -type f -exec chmod 644 {} +
+          test -r pages-artifact/api/index.html
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
@@ -85,7 +100,51 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy Kawaii documentation
         id: deployment
         uses: actions/deploy-pages@v4
+
+  verify-served-site:
+    name: Verify served PublisherStudio Pages API
+    needs: deploy
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for the current deployment and verify API reference
+        shell: bash
+        env:
+          PAGE_URL: ${{ needs.deploy.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$PAGE_URL" ]]; then
+            echo "GitHub Pages deployment did not return a page URL." >&2
+            exit 1
+          fi
+          case "$PAGE_URL" in
+            */) ;;
+            *) PAGE_URL="$PAGE_URL/" ;;
+          esac
+          marker_url="${PAGE_URL}deployment-marker.json?sha=${GITHUB_SHA}"
+          api_url="${PAGE_URL}api/index.html?sha=${GITHUB_SHA}"
+          root_url="${PAGE_URL}index.html?sha=${GITHUB_SHA}"
+          for attempt in {1..30}; do
+            marker="$(curl --silent --show-error --fail --location --connect-timeout 10 --max-time 30 "$marker_url" 2>/dev/null || true)"
+            if printf '%s' "$marker" | grep -Fq "\"sha\": \"${GITHUB_SHA}\""; then
+              echo "Current Pages deployment marker is visible on attempt $attempt."
+              break
+            fi
+            if [[ "$attempt" -eq 30 ]]; then
+              echo "The current PublisherStudio Pages deployment marker never became visible: $marker_url" >&2
+              exit 1
+            fi
+            sleep 10
+          done
+          curl --silent --show-error --fail --location --connect-timeout 10 --max-time 30 "$root_url" | grep -Fq 'publisherstudio-kawaii-docs'
+          api_html="$(curl --silent --show-error --fail --location --connect-timeout 10 --max-time 30 "$api_url")"
+          printf '%s' "$api_html" | grep -Fq 'PublisherStudio API reference'
+          printf '%s' "$api_html" | grep -Fq 'publisherstudio-kawaii-docs'
+          echo "Served PublisherStudio API reference verified: $api_url"

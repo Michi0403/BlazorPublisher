@@ -1,88 +1,45 @@
-@implements IAsyncDisposable
+@implements IDisposable
 @inject IPublisherDocumentationViewerService Viewer
-@inject IJSRuntime JS
 @inject ILogger<DocumentationViewerHost> Logger
 @inject IUserNotificationService Notifications
 
-<dialog @ref="dialog"
-        class="publisher-documentation-native-dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="publisher-documentation-viewer-title">
-    <section class="publisher-documentation-dialog">
-        <header>
-            <h2 id="publisher-documentation-viewer-title">@Viewer.State.Title</h2>
-            <div>
-                @if (Viewer.State.IsOpen)
-                {
-                    <a href="@Viewer.State.Url"
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       data-enhance-nav="false">Open in browser tab</a>
-                }
-                <button data-documentation-viewer-close
-                        type="button"
-                        aria-label="Close documentation viewer"
-                        @onclick="Close">Close</button>
-            </div>
-        </header>
-        @if (Viewer.State.IsOpen)
-        {
-            <iframe @key="Viewer.State.Revision"
-                    src="@Viewer.State.Url"
-                    title="@Viewer.State.Title"
-                    loading="eager"></iframe>
-        }
-    </section>
-</dialog>
+@if (Viewer.State.IsOpen)
+{
+    <dialog open
+            class="publisher-documentation-native-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="publisher-documentation-viewer-title"
+            @onclick="Close">
+        <section class="publisher-documentation-dialog" @onclick:stopPropagation="true">
+            <header>
+                <h2 id="publisher-documentation-viewer-title">@Viewer.State.Title</h2>
+                <div>
+                    <a href="@Viewer.State.Url" target="_blank" rel="noopener noreferrer" data-enhance-nav="false">Open in browser tab</a>
+                    <button data-documentation-viewer-close type="button" aria-label="Close documentation viewer" @onclick="Close">Close</button>
+                </div>
+            </header>
+            <iframe @key="Viewer.State.Revision" src="@Viewer.State.Url" title="@Viewer.State.Title" loading="eager"></iframe>
+        </section>
+    </dialog>
+}
 
 @code {
-    private ElementReference dialog;
-    private IJSObjectReference? module;
-    private DotNetObjectReference<DocumentationViewerHost>? self;
-    private bool synchronizeDialog = true;
-
     protected override void OnInitialized()
-    {
-        Viewer.StateChanged += OnViewerStateChanged;
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         try
         {
-            if (firstRender)
-            {
-                module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/documentationViewer.js")
-                    .ConfigureAwait(true);
-                self = DotNetObjectReference.Create(this);
-                await module.InvokeVoidAsync("connect", dialog, self).ConfigureAwait(true);
-            }
-
-            if (module is null || !synchronizeDialog)
-                return;
-
-            synchronizeDialog = false;
-            await module.InvokeVoidAsync(Viewer.State.IsOpen ? "show" : "close", dialog)
-                .ConfigureAwait(true);
-        }
-        catch (JSDisconnectedException exception)
-        {
-            Logger.LogDebug(exception, "The PublisherStudio documentation viewer disconnected with the Blazor circuit.");
+            Viewer.StateChanged += OnViewerStateChanged;
         }
         catch (Exception exception)
         {
-            Logger.LogError(exception, "Synchronizing the PublisherStudio documentation viewer failed.");
-            Notifications.Error(
-                "The documentation viewer could not be opened. Use the browser-tab action or rebuild the documentation payload.",
-                "Documentation viewer",
-                nameof(DocumentationViewerHost));
+            Logger.LogError(exception, "Subscribing the PublisherStudio documentation viewer failed.");
+            Notifications.Error("PublisherStudio could not attach the documentation viewer.", "Documentation viewer", nameof(DocumentationViewerHost));
         }
     }
 
     private void OnViewerStateChanged()
     {
-        synchronizeDialog = true;
         _ = RefreshViewerAsync();
     }
 
@@ -95,46 +52,28 @@
         catch (Exception exception)
         {
             Logger.LogError(exception, "Refreshing the PublisherStudio documentation viewer state failed.");
-            Notifications.Error(
-                "PublisherStudio could not refresh the documentation viewer.",
-                "Documentation viewer",
-                nameof(DocumentationViewerHost));
+            Notifications.Error("PublisherStudio could not refresh the documentation viewer.", "Documentation viewer", nameof(DocumentationViewerHost));
         }
     }
 
     private void Close()
     {
-        Viewer.Close();
-    }
-
-    [JSInvokable]
-    public void CloseFromBrowser()
-    {
-        Viewer.Close();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        Viewer.StateChanged -= OnViewerStateChanged;
         try
         {
-            if (module is not null)
-            {
-                await module.InvokeVoidAsync("disconnect", dialog).ConfigureAwait(true);
-                await module.DisposeAsync().ConfigureAwait(true);
-            }
-        }
-        catch (JSDisconnectedException exception)
-        {
-            Logger.LogDebug(exception, "The PublisherStudio documentation viewer module was already disconnected during disposal.");
+            Viewer.Close();
         }
         catch (Exception exception)
         {
-            Logger.LogWarning(exception, "Disposing the PublisherStudio documentation viewer module failed.");
+            Logger.LogError(exception, "Closing the PublisherStudio documentation viewer failed.");
+            Notifications.Error("PublisherStudio could not close the documentation viewer.", "Documentation viewer", nameof(DocumentationViewerHost));
         }
-        finally
-        {
-            self?.Dispose();
-        }
+    }
+
+    [Microsoft.JSInterop.JSInvokable]
+    public void CloseFromBrowser() => Close();
+
+    public void Dispose()
+    {
+        Viewer.StateChanged -= OnViewerStateChanged;
     }
 }

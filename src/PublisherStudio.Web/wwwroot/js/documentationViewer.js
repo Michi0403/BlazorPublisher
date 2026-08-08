@@ -8,6 +8,7 @@ const publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnosti
 
 const previousFocus = new WeakMap();
 const callbacks = new WeakMap();
+const handlers = new WeakMap();
 
 function report(context, error) {
   try { publisherStudioDiagnostics.report(`js/documentationViewer.js:${context}`, error); }
@@ -30,17 +31,29 @@ export function connect(dialog, callback) {
   try {
     if (!dialog || !callback || callbacks.has(dialog)) return;
     callbacks.set(dialog, callback);
-    dialog.addEventListener("cancel", event => {
+
+    const requestClose = context => {
       try {
-        event.preventDefault();
-        void callback.invokeMethodAsync("CloseFromBrowser").catch(error => report("cancel.invoke", error));
-      } catch (error) { report("cancel", error); }
-    });
-    dialog.addEventListener("click", event => {
-      try {
-        if (event.target === dialog) void callback.invokeMethodAsync("CloseFromBrowser").catch(error => report("backdrop.invoke", error));
-      } catch (error) { report("backdrop", error); }
-    });
+        void callback.invokeMethodAsync("CloseFromBrowser").catch(error => report(`${context}.invoke`, error));
+      } catch (error) {
+        report(context, error);
+      }
+    };
+
+    const cancelHandler = event => {
+      event.preventDefault();
+      requestClose("cancel");
+    };
+    const backdropHandler = event => {
+      if (event.target === dialog) requestClose("backdrop");
+    };
+    const closeButton = dialog.querySelector("[data-documentation-viewer-close]");
+    const closeButtonHandler = () => requestClose("closeButton");
+
+    dialog.addEventListener("cancel", cancelHandler);
+    dialog.addEventListener("click", backdropHandler);
+    closeButton?.addEventListener("click", closeButtonHandler);
+    handlers.set(dialog, { cancelHandler, backdropHandler, closeButton, closeButtonHandler });
   } catch (error) {
     report("connect", error);
     throw error;
@@ -76,6 +89,13 @@ export function close(dialog) {
 
 export function disconnect(dialog) {
   try {
+    const registered = handlers.get(dialog);
+    if (registered) {
+      dialog?.removeEventListener("cancel", registered.cancelHandler);
+      dialog?.removeEventListener("click", registered.backdropHandler);
+      registered.closeButton?.removeEventListener("click", registered.closeButtonHandler);
+      handlers.delete(dialog);
+    }
     callbacks.delete(dialog);
     previousFocus.delete(dialog);
   } catch (error) {

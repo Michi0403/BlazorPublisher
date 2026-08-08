@@ -165,8 +165,11 @@ function createThemeControl() {
 
 function mountThemeControl() {
   try {
-      const nativeToggle = document.querySelector(
-        ".navbar .dropdown > a[title*='theme' i], .navbar .dropdown > button[title*='theme' i], .navbar .dropdown > [aria-label*='theme' i]"
+      const navbar = document.querySelector("header.navbar, .navbar");
+      if (!navbar) return false;
+      const insertionParent = navbar.querySelector(":scope > .container-xxl, :scope > .container-fluid, :scope > .container") || navbar;
+      const nativeToggle = navbar.querySelector(
+        ".dropdown > a[title*='theme' i], .dropdown > button[title*='theme' i], .dropdown > [aria-label*='theme' i]"
       );
       const nativePicker = nativeToggle?.closest(".dropdown");
       let control = document.querySelector("[data-publisherstudio-theme-control]");
@@ -175,16 +178,10 @@ function mountThemeControl() {
         nativePicker.classList.add("publisherstudio-native-theme-picker");
         nativePicker.setAttribute("aria-hidden", "true");
         nativePicker.setAttribute("inert", "");
-        if (control && control.nextElementSibling !== nativePicker) nativePicker.before(control);
       }
 
-      if (!control) {
-        const insertionParent = nativePicker?.parentElement || document.querySelector(".navbar .navbar-collapse, .navbar .container-xxl, .navbar");
-        if (!insertionParent) return false;
-        control = createThemeControl();
-        if (nativePicker) nativePicker.before(control);
-        else insertionParent.appendChild(control);
-      }
+      if (!control) control = createThemeControl();
+      if (control.parentElement !== insertionParent) insertionParent.appendChild(control);
 
       updateThemeControl(readStoredTheme());
       return true;

@@ -2489,3 +2489,38 @@ html.publisherstudio-kawaii-docs .publisherstudio-architecture-map span {
     min-height: var(--kawaii-docs-shell-min-height) !important;
   }
 }
+
+
+/* PublisherStudio 2.3.3: keep the generated theme picker inside the viewport even on static snapshot pages. */
+html.publisherstudio-kawaii-docs .publisherstudio-theme-control {
+  flex: 0 0 auto !important;
+  margin-left: auto !important;
+  max-width: min(12rem, calc(100vw - 1rem));
+  position: relative !important;
+  z-index: 2147483000 !important;
+}
+html.publisherstudio-kawaii-docs .publisherstudio-theme-control > summary {
+  align-items: center;
+  display: inline-flex !important;
+  justify-content: center;
+  min-width: 2.25rem;
+  width: auto !important;
+}
+html.publisherstudio-kawaii-docs .publisherstudio-theme-control-menu {
+  box-sizing: border-box;
+  left: auto !important;
+  max-width: calc(100vw - 1rem) !important;
+  right: 0 !important;
+  width: max-content;
+}
+html.publisherstudio-kawaii-docs header.navbar > .container-xxl {
+  flex-wrap: nowrap !important;
+}
+@media (max-width: 767.98px) {
+  html.publisherstudio-kawaii-docs header.navbar > .container-xxl {
+    flex-wrap: wrap !important;
+  }
+  html.publisherstudio-kawaii-docs .publisherstudio-theme-control {
+    margin-left: .5rem !important;
+  }
+}

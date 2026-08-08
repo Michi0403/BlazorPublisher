@@ -2268,6 +2268,26 @@ Use the grouped API navigation to browse namespaces, types, properties, methods,
         Remove-Item -LiteralPath $publishRoot -Recurse -Force -ErrorAction SilentlyContinue
         New-Item -ItemType Directory -Path $publishRoot -Force | Out-Null
         Copy-Item -Path (Join-Path $siteRoot "*") -Destination $publishRoot -Recurse -Force
+    $sourceApiIndex = Join-Path $siteRoot "api\index.html"
+    if (-not (Test-Path -LiteralPath $sourceApiIndex -PathType Leaf)) {
+        throw "PublisherStudio documentation API entry point is missing before final publication: $sourceApiIndex"
+    }
+    $publishedApiRoot = Join-Path $publishRoot "api"
+    New-Item -ItemType Directory -Path $publishedApiRoot -Force | Out-Null
+    Copy-Item -Path (Join-Path $siteRoot "api\*") -Destination $publishedApiRoot -Recurse -Force
+    if (-not (Test-Path -LiteralPath (Join-Path $publishedApiRoot "index.html") -PathType Leaf)) {
+        throw "PublisherStudio documentation API entry point was not published to $publishedApiRoot"
+    }
+        $sourceApiIndex = Join-Path $siteRoot "api\index.html"
+        if (-not (Test-Path -LiteralPath $sourceApiIndex -PathType Leaf)) {
+            throw "PublisherStudio documentation API entry point is missing before publication: $sourceApiIndex"
+        }
+        $publishedApiRoot = Join-Path $publishRoot "api"
+        New-Item -ItemType Directory -Path $publishedApiRoot -Force | Out-Null
+        Copy-Item -Path (Join-Path $siteRoot "api\*") -Destination $publishedApiRoot -Recurse -Force
+        if (-not (Test-Path -LiteralPath (Join-Path $publishedApiRoot "index.html") -PathType Leaf)) {
+            throw "PublisherStudio documentation API entry point was not published to $publishedApiRoot"
+        }
     }
 
     [xml]$xmlForCount = Get-Content -LiteralPath $polishedXmlPath -Raw -Encoding UTF8

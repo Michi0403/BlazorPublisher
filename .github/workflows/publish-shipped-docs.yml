@@ -49,6 +49,9 @@ jobs:
           test -f pages-artifact/index.html
           test -f pages-artifact/api/index.html
           test -f pages-artifact/documentation-status.json
+          API_HTML_COUNT="$(find pages-artifact/api -type f -name '*.html' | wc -l)"
+          test "$API_HTML_COUNT" -gt 1
+          echo "Validated PublisherStudio Pages API entry point with $API_HTML_COUNT HTML file(s)."
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5

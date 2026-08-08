@@ -160,6 +160,9 @@
 
   <PropertyGroup>
     <PublisherStudioDocumentationScript>$(MSBuildThisFileDirectory)build\Build-Documentation.ps1</PublisherStudioDocumentationScript>
+    <PublisherStudioPagesSnapshotScript>$(MSBuildThisFileDirectory)build\Update-GitHubPagesSnapshot.ps1</PublisherStudioPagesSnapshotScript>
+    <PublisherStudioPagesSnapshotArchive>$(MSBuildThisFileDirectory).github\pages\publisherstudio-kawaii-docs.zip</PublisherStudioPagesSnapshotArchive>
+    <SeedPublisherStudioGitHubPagesSnapshotOnBuild Condition="'$(SeedPublisherStudioGitHubPagesSnapshotOnBuild)' == ''">true</SeedPublisherStudioGitHubPagesSnapshotOnBuild>
     <!-- The dot prevents a trailing Windows backslash from escaping later PowerShell arguments. -->
     <PublisherStudioDocumentationRepositoryRoot>$(MSBuildThisFileDirectory).</PublisherStudioDocumentationRepositoryRoot>
     <PublisherStudioDocumentationOutputRoot>$(TargetDir)wwwroot\help-docs</PublisherStudioDocumentationOutputRoot>
@@ -179,9 +182,28 @@
           WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true"
           StandardOutputImportance="High" StandardErrorImportance="High" />
     <Error Condition="!Exists('$(PublisherStudioDocumentationOutputRoot)\index.html')" Text="PublisherStudio documentation generation completed without index.html: $(PublisherStudioDocumentationOutputRoot)" />
+    <Error Condition="!Exists('$(PublisherStudioDocumentationOutputRoot)\api\index.html')" Text="PublisherStudio documentation generation completed without the API reference root: $(PublisherStudioDocumentationOutputRoot)\api\index.html" />
     <Error Condition="!Exists('$(PublisherStudioDocumentationOutputRoot)\documentation-status.json')" Text="PublisherStudio documentation generation completed without documentation-status.json: $(PublisherStudioDocumentationOutputRoot)" />
     <Error Condition="!Exists('$(PublisherStudioDocumentationOutputRoot)\PublisherStudio.Web.xml')" Text="PublisherStudio documentation generation completed without PublisherStudio.Web.xml: $(PublisherStudioDocumentationOutputRoot)" />
     <Error Condition="'$(RequirePublisherStudioDocumentationPdf)' == 'true' and !Exists('$(PublisherStudioDocumentationOutputRoot)\PublisherStudio-$(Version).pdf')" Text="PublisherStudio documentation generation completed without the complete versioned PDF: $(PublisherStudioDocumentationOutputRoot)\PublisherStudio-$(Version).pdf" />
+  </Target>
+
+  <!--
+    Keep the tracked GitHub Pages ZIP synchronized with the exact documentation produced by
+    the current Debug/Release build. Passing DocumentationRoot explicitly prevents an older
+    Release output from winning over a fresh Debug build (or vice versa).
+  -->
+  <Target Name="SeedPublisherStudioGitHubPagesSnapshot"
+          AfterTargets="BuildPublisherStudioDocumentation"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SeedPublisherStudioGitHubPagesSnapshotOnBuild)' == 'true' and ('$(Configuration)' == 'Debug' or '$(Configuration)' == 'Release') and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+    <Error Condition="!Exists('$(PublisherStudioPagesSnapshotScript)')" Text="PublisherStudio GitHub Pages snapshot script is missing: $(PublisherStudioPagesSnapshotScript)" />
+    <Message Importance="High" Text="Validating and seeding the PublisherStudio $(Version) GitHub Pages snapshot from $(PublisherStudioDocumentationOutputRoot)" />
+    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(PublisherStudioPagesSnapshotScript)&quot; -DocumentationRoot &quot;$(PublisherStudioDocumentationOutputRoot)&quot; -OutputArchive &quot;$(PublisherStudioPagesSnapshotArchive)&quot;"
+          WorkingDirectory="$(MSBuildThisFileDirectory)"
+          ConsoleToMSBuild="true"
+          StandardOutputImportance="High"
+          StandardErrorImportance="High" />
+    <Error Condition="!Exists('$(PublisherStudioPagesSnapshotArchive)')" Text="PublisherStudio GitHub Pages snapshot was not created: $(PublisherStudioPagesSnapshotArchive)" />
   </Target>
 
   <Target Name="IncludePublisherStudioDocumentationInPublish"

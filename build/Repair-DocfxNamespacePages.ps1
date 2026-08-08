@@ -70,7 +70,7 @@ function Repair-PublisherStudioDocfxNamespacePages {
 
         $pageHtml = @"
 <!DOCTYPE html>
-<html class="publisherstudio-kawaii-docs" data-bs-theme="light" data-publisherstudio-generated-namespace-page="true">
+<html lang="en" class="publisherstudio-kawaii-docs" data-bs-theme="light" data-publisherstudio-generated-namespace-page="true">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />

@@ -4,6 +4,7 @@
 
 - .NET 10 SDK
 - Windows PowerShell 5.1 or newer for the maintained scripts
+- Python 3 for version-matched GitHub Pages snapshot validation and seeding
 - Node.js for preparing licensed DevExpress browser assets and documentation PDF generation
 - A licensed DevExpress build identity for preparing runtime assets
 

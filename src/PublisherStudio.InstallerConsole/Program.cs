@@ -265,6 +265,18 @@ internal static class Program
             logger.LogInformation($"Extracting PublisherStudio setup/bootstrap '{setupZipPath}' to '{targetPath}'");
             ExtractZipWithFallback(setupZipPath, targetPath, logger);
 
+            var installedDocumentationRoot = Path.Combine(targetPath, GetRuntimeFolderName(), "wwwroot", "help-docs");
+            var installedDocumentationFiles = new[]
+            {
+                Path.Combine(installedDocumentationRoot, "index.html"),
+                Path.Combine(installedDocumentationRoot, "api", "index.html"),
+                Path.Combine(installedDocumentationRoot, "documentation-status.json")
+            };
+            var missingInstalledDocumentation = installedDocumentationFiles.Where(path => !File.Exists(path)).ToArray();
+            if (missingInstalledDocumentation.Length > 0)
+                throw new InvalidDataException($"PublisherStudio installation is missing required documentation files: {string.Join(", ", missingInstalledDocumentation)}");
+            logger.LogInformation("Verified installed PublisherStudio HTML and API documentation at {DocumentationRoot}.", installedDocumentationRoot);
+
             logger.LogDebug($"PublisherStudio installed to '{targetPath}'.");
             logger.LogInformation($"PublisherStudio app and setup/bootstrap files now reside in '{targetPath}'.");
         }
@@ -1176,6 +1188,21 @@ internal static class Program
         {
             throw new InvalidDataException(
                 $"PublisherStudio release archive '{archivePath}' does not contain required executable '{expectedExecutablePath}'.");
+        }
+
+        if (expectedExecutable.StartsWith("PublisherStudio.Web", StringComparison.OrdinalIgnoreCase))
+        {
+            var requiredDocumentationEntries = new[]
+            {
+                expectedPrefix + "wwwroot/help-docs/index.html",
+                expectedPrefix + "wwwroot/help-docs/api/index.html",
+                expectedPrefix + "wwwroot/help-docs/documentation-status.json"
+            };
+            foreach (var requiredDocumentationEntry in requiredDocumentationEntries)
+            {
+                if (!normalizedNames.Contains(requiredDocumentationEntry))
+                    throw new InvalidDataException($"PublisherStudio application archive is missing installed documentation '{requiredDocumentationEntry}'.");
+            }
         }
 
         logger.LogInformation(

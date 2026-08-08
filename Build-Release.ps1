@@ -205,7 +205,8 @@ function Assert-ReleaseArchiveLayout {
     param(
         [Parameter(Mandatory)][string]$ArchivePath,
         [Parameter(Mandatory)][string]$RootFolderName,
-        [Parameter(Mandatory)][string]$Executable
+        [Parameter(Mandatory)][string]$Executable,
+        [switch]$RequireDocumentation
     )
 
     Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -215,6 +216,22 @@ function Assert-ReleaseArchiveLayout {
         $expectedExecutable = "$RootFolderName/$Executable"
         if (-not ($names -contains $expectedExecutable)) {
             throw "Release archive does not contain ${expectedExecutable}: $ArchivePath"
+        }
+        if ($RequireDocumentation) {
+            $requiredDocumentation = @(
+                "$RootFolderName/wwwroot/help-docs/index.html",
+                "$RootFolderName/wwwroot/help-docs/api/index.html",
+                "$RootFolderName/wwwroot/help-docs/documentation-status.json"
+            )
+            foreach ($requiredDocumentationEntry in $requiredDocumentation) {
+                if (-not ($names -contains $requiredDocumentationEntry)) {
+                    throw "Release archive is missing required installed documentation entry ${requiredDocumentationEntry}: $ArchivePath"
+                }
+            }
+            $pdfPrefix = "$RootFolderName/wwwroot/help-docs/PublisherStudio-"
+            if (-not ($names | Where-Object { $_.StartsWith($pdfPrefix, [StringComparison]::OrdinalIgnoreCase) -and $_.EndsWith('.pdf', [StringComparison]::OrdinalIgnoreCase) } | Select-Object -First 1)) {
+                throw "Release archive does not contain the versioned PublisherStudio documentation PDF below $RootFolderName/wwwroot/help-docs."
+            }
         }
         foreach ($name in $names) {
             if ([string]::IsNullOrWhiteSpace($name)) { continue }
@@ -493,7 +510,7 @@ function Publish-Runtime {
 
     New-PublisherStudioReleaseArchive -SourceDirectory $appFolder -DestinationPath $appZip -RootFolderName $profile.AppFolder
     New-PublisherStudioReleaseArchive -SourceDirectory $setupFolder -DestinationPath $setupZip -RootFolderName $profile.SetupFolder
-    Assert-ReleaseArchiveLayout -ArchivePath $appZip -RootFolderName $profile.AppFolder -Executable $appExecutable
+    Assert-ReleaseArchiveLayout -ArchivePath $appZip -RootFolderName $profile.AppFolder -Executable $appExecutable -RequireDocumentation
     Assert-ReleaseArchiveLayout -ArchivePath $setupZip -RootFolderName $profile.SetupFolder -Executable $setupExecutable
     Write-Host "Created $appZip" -ForegroundColor Green
     Write-Host "Created $setupZip" -ForegroundColor Green

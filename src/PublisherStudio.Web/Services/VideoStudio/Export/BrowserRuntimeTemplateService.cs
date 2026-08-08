@@ -1,4 +1,4 @@
-﻿namespace PublisherStudio.Services.VideoStudio.Export;
+namespace PublisherStudio.Services.VideoStudio.Export;
 
 /// <summary>
 /// Defines the browser runtime template service contract.
@@ -16,7 +16,10 @@ public sealed class BrowserRuntimeTemplateService : IBrowserRuntimeTemplateServi
     /// <summary>
     /// Creates blob runtime.
     /// </summary>
-    public string CreateBlobRuntime(string payload) => """
+    public string CreateBlobRuntime(string payload) {
+    try
+    {
+        return """
 (() => {
   const config = __PUBLISHERSTUDIO_BLOB_RUNTIME_PAYLOAD__;
   const canvas = document.querySelector('.publisher-3d-blob');
@@ -44,4 +47,11 @@ public sealed class BrowserRuntimeTemplateService : IBrowserRuntimeTemplateServi
     "__PUBLISHERSTUDIO_BLOB_RUNTIME_PAYLOAD__",
     payload,
     StringComparison.Ordinal);
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method BrowserRuntimeTemplateService.CreateBlobRuntime failed: {__serviceMethodException}");
+        throw;
+    }
+}
 }

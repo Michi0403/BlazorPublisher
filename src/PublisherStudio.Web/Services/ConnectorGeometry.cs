@@ -1,4 +1,4 @@
-﻿using PublisherStudio.BusinessObjects;
+using PublisherStudio.BusinessObjects;
 using System.Globalization;
 
 // logging-policy: pure-helper
@@ -14,104 +14,164 @@ public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
     /// </summary>
     public bool TryResolve(PublicationPage page, ConnectorElement connector, out PublicationPoint source, out PublicationPoint target)
     {
-        logger.LogTrace("Resolving connector geometry for page {PageId}.", page.Id);
-        if (!TryResolveEndpoint(page, connector.Source, out source))
-        {
-            target = default;
-            return false;
-        }
+    try
+    {
+            logger.LogTrace("Resolving connector geometry for page {PageId}.", page.Id);
+            if (!TryResolveEndpoint(page, connector.Source, out source))
+            {
+                target = default;
+                return false;
+            }
 
-        return TryResolveEndpoint(page, connector.Target, out target);
+            return TryResolveEndpoint(page, connector.Target, out target);
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ConnectorGeometry)}.{nameof(TryResolve)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ConnectorGeometry)}.{nameof(TryResolve)} failed.");
+        throw;
+    }
+}
 
     /// <summary>
     /// Attempts to resolve endpoint.
     /// </summary>
     public bool TryResolveEndpoint(PublicationPage page, ConnectorEndpoint endpoint, out PublicationPoint point)
     {
-        if (endpoint.Kind == ConnectorEndpointKind.Canvas)
-        {
-            point = new PublicationPoint(
-                Math.Clamp(endpoint.X, 0, Math.Max(0, page.WidthMm)),
-                Math.Clamp(endpoint.Y, 0, Math.Max(0, page.HeightMm)));
-            return true;
-        }
-
-        var element = page.Elements.FirstOrDefault(item =>
-            item.Id == endpoint.ElementId &&
-            item is not ConnectorElement &&
-            item.Visible);
-        if (element is null)
-        {
-            point = default;
-            return false;
-        }
-
-        if (endpoint.PortId is { } portId)
-        {
-            var port = element.ConnectorPorts.FirstOrDefault(candidate => candidate.Id == portId);
-            if (port is not null)
+    try
+    {
+            if (endpoint.Kind == ConnectorEndpointKind.Canvas)
             {
-                point = Resolve(element, port.XPercent, port.YPercent);
+                point = new PublicationPoint(
+                    Math.Clamp(endpoint.X, 0, Math.Max(0, page.WidthMm)),
+                    Math.Clamp(endpoint.Y, 0, Math.Max(0, page.HeightMm)));
                 return true;
             }
-        }
 
-        point = Resolve(element, endpoint.Anchor);
-        return true;
+            var element = page.Elements.FirstOrDefault(item =>
+                item.Id == endpoint.ElementId &&
+                item is not ConnectorElement &&
+                item.Visible);
+            if (element is null)
+            {
+                point = default;
+                return false;
+            }
+
+            if (endpoint.PortId is { } portId)
+            {
+                var port = element.ConnectorPorts.FirstOrDefault(candidate => candidate.Id == portId);
+                if (port is not null)
+                {
+                    point = Resolve(element, port.XPercent, port.YPercent);
+                    return true;
+                }
+            }
+
+            point = Resolve(element, endpoint.Anchor);
+            return true;
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ConnectorGeometry)}.{nameof(TryResolveEndpoint)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ConnectorGeometry)}.{nameof(TryResolveEndpoint)} failed.");
+        throw;
+    }
+}
 
     /// <summary>
     /// Runs the resolve operation.
     /// </summary>
     public PublicationPoint Resolve(PublicationElement element, ConnectorAnchor anchor)
     {
-        var relative = anchor switch
-        {
-            ConnectorAnchor.TopLeft => new PublicationPoint(0, 0),
-            ConnectorAnchor.Top => new PublicationPoint(.5, 0),
-            ConnectorAnchor.TopRight => new PublicationPoint(1, 0),
-            ConnectorAnchor.Right => new PublicationPoint(1, .5),
-            ConnectorAnchor.BottomRight => new PublicationPoint(1, 1),
-            ConnectorAnchor.Bottom => new PublicationPoint(.5, 1),
-            ConnectorAnchor.BottomLeft => new PublicationPoint(0, 1),
-            ConnectorAnchor.Left => new PublicationPoint(0, .5),
-            _ => new PublicationPoint(.5, .5)
-        };
-        return Resolve(element, relative.X, relative.Y);
+    try
+    {
+            var relative = anchor switch
+            {
+                ConnectorAnchor.TopLeft => new PublicationPoint(0, 0),
+                ConnectorAnchor.Top => new PublicationPoint(.5, 0),
+                ConnectorAnchor.TopRight => new PublicationPoint(1, 0),
+                ConnectorAnchor.Right => new PublicationPoint(1, .5),
+                ConnectorAnchor.BottomRight => new PublicationPoint(1, 1),
+                ConnectorAnchor.Bottom => new PublicationPoint(.5, 1),
+                ConnectorAnchor.BottomLeft => new PublicationPoint(0, 1),
+                ConnectorAnchor.Left => new PublicationPoint(0, .5),
+                _ => new PublicationPoint(.5, .5)
+            };
+            return Resolve(element, relative.X, relative.Y);
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ConnectorGeometry)}.{nameof(Resolve)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ConnectorGeometry)}.{nameof(Resolve)} failed.");
+        throw;
+    }
+}
 
     /// <summary>
     /// Runs the resolve operation.
     /// </summary>
     public PublicationPoint Resolve(PublicationElement element, double xPercent, double yPercent)
     {
-        var rawX = element.X + element.Width * Math.Clamp(xPercent, 0, 1);
-        var rawY = element.Y + element.Height * Math.Clamp(yPercent, 0, 1);
-        if (Math.Abs(element.Rotation) < .001) return new PublicationPoint(rawX, rawY);
+    try
+    {
+            var rawX = element.X + element.Width * Math.Clamp(xPercent, 0, 1);
+            var rawY = element.Y + element.Height * Math.Clamp(yPercent, 0, 1);
+            if (Math.Abs(element.Rotation) < .001) return new PublicationPoint(rawX, rawY);
 
-        var centerX = element.X + element.Width / 2;
-        var centerY = element.Y + element.Height / 2;
-        var radians = element.Rotation * Math.PI / 180d;
-        var dx = rawX - centerX;
-        var dy = rawY - centerY;
-        return new PublicationPoint(
-            centerX + dx * Math.Cos(radians) - dy * Math.Sin(radians),
-            centerY + dx * Math.Sin(radians) + dy * Math.Cos(radians));
+            var centerX = element.X + element.Width / 2;
+            var centerY = element.Y + element.Height / 2;
+            var radians = element.Rotation * Math.PI / 180d;
+            var dx = rawX - centerX;
+            var dy = rawY - centerY;
+            return new PublicationPoint(
+                centerX + dx * Math.Cos(radians) - dy * Math.Sin(radians),
+                centerY + dx * Math.Sin(radians) + dy * Math.Cos(radians));
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ConnectorGeometry)}.{nameof(Resolve)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ConnectorGeometry)}.{nameof(Resolve)} failed.");
+        throw;
+    }
+}
 
     /// <summary>
     /// Runs the path operation.
     /// </summary>
     public string Path(ConnectorElement connector, PublicationPoint source, PublicationPoint target)
     {
-        return connector.PathKind switch
-        {
-            ConnectorPathKind.Elbow => ElbowPath(source, target),
-            ConnectorPathKind.Curved => CurvedPath(connector, source, target),
-            _ => $"M {Inv(source.X)} {Inv(source.Y)} L {Inv(target.X)} {Inv(target.Y)}"
-        };
+    try
+    {
+            return connector.PathKind switch
+            {
+                ConnectorPathKind.Elbow => ElbowPath(source, target),
+                ConnectorPathKind.Curved => CurvedPath(connector, source, target),
+                _ => $"M {Inv(source.X)} {Inv(source.Y)} L {Inv(target.X)} {Inv(target.Y)}"
+            };
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ConnectorGeometry)}.{nameof(Path)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ConnectorGeometry)}.{nameof(Path)} failed.");
+        throw;
+    }
+}
 
     /// <summary>
     /// Runs the control points operation.
@@ -134,25 +194,52 @@ public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
 
     private string ElbowPath(PublicationPoint source, PublicationPoint target)
     {
-        var dx = Math.Abs(target.X - source.X);
-        var dy = Math.Abs(target.Y - source.Y);
-        if (dx >= dy)
-        {
-            var middle = (source.X + target.X) / 2;
-            return $"M {Inv(source.X)} {Inv(source.Y)} L {Inv(middle)} {Inv(source.Y)} L {Inv(middle)} {Inv(target.Y)} L {Inv(target.X)} {Inv(target.Y)}";
-        }
+    try
+    {
+            var dx = Math.Abs(target.X - source.X);
+            var dy = Math.Abs(target.Y - source.Y);
+            if (dx >= dy)
+            {
+                var middle = (source.X + target.X) / 2;
+                return $"M {Inv(source.X)} {Inv(source.Y)} L {Inv(middle)} {Inv(source.Y)} L {Inv(middle)} {Inv(target.Y)} L {Inv(target.X)} {Inv(target.Y)}";
+            }
 
-        var verticalMiddle = (source.Y + target.Y) / 2;
-        return $"M {Inv(source.X)} {Inv(source.Y)} L {Inv(source.X)} {Inv(verticalMiddle)} L {Inv(target.X)} {Inv(verticalMiddle)} L {Inv(target.X)} {Inv(target.Y)}";
+            var verticalMiddle = (source.Y + target.Y) / 2;
+            return $"M {Inv(source.X)} {Inv(source.Y)} L {Inv(source.X)} {Inv(verticalMiddle)} L {Inv(target.X)} {Inv(verticalMiddle)} L {Inv(target.X)} {Inv(target.Y)}";
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ConnectorGeometry)}.{nameof(ElbowPath)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ConnectorGeometry)}.{nameof(ElbowPath)} failed.");
+        throw;
+    }
+}
 
     private string CurvedPath(ConnectorElement connector, PublicationPoint source, PublicationPoint target)
     {
-        var controls = ControlPoints(connector, source, target);
-        return $"M {Inv(source.X)} {Inv(source.Y)} C {Inv(controls.First.X)} {Inv(controls.First.Y)} {Inv(controls.Second.X)} {Inv(controls.Second.Y)} {Inv(target.X)} {Inv(target.Y)}";
+    try
+    {
+            var controls = ControlPoints(connector, source, target);
+            return $"M {Inv(source.X)} {Inv(source.Y)} C {Inv(controls.First.X)} {Inv(controls.First.Y)} {Inv(controls.Second.X)} {Inv(controls.Second.Y)} {Inv(target.X)} {Inv(target.Y)}";
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ConnectorGeometry)}.{nameof(CurvedPath)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ConnectorGeometry)}.{nameof(CurvedPath)} failed.");
+        throw;
+    }
+}
 
-    private PublicationPoint ControlPoint(PublicationPoint point, ConnectorAnchor anchor, double distance) => anchor switch
+    private PublicationPoint ControlPoint(PublicationPoint point, ConnectorAnchor anchor, double distance) {
+    try
+    {
+        return anchor switch
     {
         ConnectorAnchor.TopLeft or ConnectorAnchor.Top or ConnectorAnchor.TopRight => point with { Y = point.Y - distance },
         ConnectorAnchor.BottomLeft or ConnectorAnchor.Bottom or ConnectorAnchor.BottomRight => point with { Y = point.Y + distance },
@@ -160,16 +247,52 @@ public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
         ConnectorAnchor.Right => point with { X = point.X + distance },
         _ => point
     };
+    }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ConnectorGeometry)}.{nameof(ControlPoint)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ConnectorGeometry)}.{nameof(ControlPoint)} failed.");
+        throw;
+    }
+}
 
     /// <summary>
     /// Runs the dash array operation.
     /// </summary>
-    public string DashArray(ConnectorElement connector) => connector.DashStyle switch
+    public string DashArray(ConnectorElement connector) {
+    try
+    {
+        return connector.DashStyle switch
     {
         ConnectorDashStyle.Dash => $"{Inv(connector.StrokeWidthMm * 5)} {Inv(connector.StrokeWidthMm * 3)}",
         ConnectorDashStyle.Dot => $"{Inv(connector.StrokeWidthMm)} {Inv(connector.StrokeWidthMm * 2.5)}",
         _ => string.Empty
     };
+    }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ConnectorGeometry)}.{nameof(DashArray)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ConnectorGeometry)}.{nameof(DashArray)} failed.");
+        throw;
+    }
+}
 
-    private string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+    private string Inv(double value) {
+    try
+    {
+        return value.ToString("0.###", CultureInfo.InvariantCulture);
+    }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ConnectorGeometry)}.{nameof(Inv)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ConnectorGeometry)}.{nameof(Inv)} failed.");
+        throw;
+    }
+}
 }

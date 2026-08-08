@@ -16,10 +16,11 @@
     <link href="~/vendor/devextreme-dist/css/dx.light.css" rel="stylesheet" />
     <link href="~/vendor/devexpress-aspnetcore-spreadsheet/dist/dx-aspnetcore-spreadsheet.css" rel="stylesheet" />
     <link href="~/css/spreadsheet-island.css" rel="stylesheet" />
+    <script src="~/js/javascript-diagnostics.js"></script>
     <script src="~/vendor/jquery/jquery.min.js"></script>
     <script src="~/vendor/devextreme-dist/js/dx.all.js"></script>
     <script src="~/vendor/devextreme-license.js"
-            onerror="console.error('PublisherStudio: the generated DevExtreme runtime license is missing. Run Prepare-DevExpressAssets.cmd on the licensed build machine.')"></script>
+            onerror="try { globalThis.publisherStudioJavaScriptDiagnostics?.report?.('devextreme-license.load', new Error('PublisherStudio: the generated DevExtreme runtime license is missing. Run Prepare-DevExpressAssets.cmd on the licensed build machine.')); } catch (error) { console.error('PublisherStudio: the generated DevExtreme runtime license is missing. Run Prepare-DevExpressAssets.cmd on the licensed build machine.', error); }"></script>
     <script src="~/vendor/devexpress-aspnetcore-spreadsheet/dist/dx-aspnetcore-spreadsheet.js"></script>
     <script>
         "use strict";
@@ -86,7 +87,7 @@
                 this.post("publisher-spreadsheet-opening", { fileName: "Spreadsheet.xlsx" });
                 try {
                     const response = await fetch("@Url.Action("New", "Spreadsheet", new { sessionId = Model.SessionId })", { method: "POST", headers: { RequestVerificationToken: publisherSpreadsheetRequestToken }, credentials: "same-origin" });
-                    let result = null; try { result = await response.json(); } catch (_) { }
+                    let result = null; try { result = await response.json(); } catch (error) { globalThis.publisherStudioJavaScriptDiagnostics?.report?.("spreadsheet.recovered-operation", error); }
                     if (!response.ok || !result?.success) throw new Error(result?.message || `A blank workbook could not be created (${response.status}).`);
                     this.dirty = false; window.location.replace(result.reloadUrl || `${window.location.pathname}?revision=${Date.now()}`);
                 } catch (error) { this.openingWorkbook = false; this.post("publisher-spreadsheet-error", { message: error?.message || "A blank workbook could not be created." }); }
@@ -101,7 +102,7 @@
 
                 this.openingWorkbook = true;
                 this.post("publisher-spreadsheet-opening", { fileName: file.name });
-                try { this.control?.applyCellEdit(); } catch (_) { }
+                try { this.control?.applyCellEdit(); } catch (error) { globalThis.publisherStudioJavaScriptDiagnostics?.report?.("spreadsheet.recovered-operation", error); }
 
                 const formData = new FormData();
                 formData.append("workbook", file, file.name);
@@ -113,7 +114,7 @@
                         credentials: "same-origin"
                     });
                     let result = null;
-                    try { result = await response.json(); } catch (_) { }
+                    try { result = await response.json(); } catch (error) { globalThis.publisherStudioJavaScriptDiagnostics?.report?.("spreadsheet.recovered-operation", error); }
                     if (!response.ok || !result?.success)
                         throw new Error(result?.message || `The workbook could not be opened (${response.status}).`);
                     this.dirty = false;
@@ -130,7 +131,7 @@
                 this.control = spreadsheet || window.publisherSpreadsheet;
                 this.notifyReady();
                 window.setTimeout(() => {
-                    try { this.control?.focus(); } catch (_) { }
+                    try { this.control?.focus(); } catch (error) { globalThis.publisherStudioJavaScriptDiagnostics?.report?.("spreadsheet.recovered-operation", error); }
                     publisherSpreadsheetRenameRibbonTabs();
                     publisherSpreadsheetApplySystemFonts(this.control);
                     window.setTimeout(() => publisherSpreadsheetApplySystemFonts(this.control), 400);
@@ -141,13 +142,13 @@
                 if (this.inFlight) return;
                 this.pendingIntent = intent || "apply";
                 this.saveStartedAt = Date.now();
-                try { this.control?.applyCellEdit(); } catch (_) { }
+                try { this.control?.applyCellEdit(); } catch (error) { globalThis.publisherStudioJavaScriptDiagnostics?.report?.("spreadsheet.recovered-operation", error); }
                 this.scheduleSave(120);
             },
 
             createDataObject() {
                 if (!this.control || this.openingWorkbook || this.inFlight) return;
-                try { this.control.applyCellEdit(); } catch (_) { }
+                try { this.control.applyCellEdit(); } catch (error) { globalThis.publisherStudioJavaScriptDiagnostics?.report?.("spreadsheet.recovered-operation", error); }
 
                 let selection;
                 try { selection = this.control.getSelection(); }
@@ -183,7 +184,7 @@
                     const row = [];
                     for (let columnIndex = left; columnIndex <= right; columnIndex++) {
                         let value = "";
-                        try { value = cellText(this.control.getCellValue(columnIndex, rowIndex)); } catch (_) { }
+                        try { value = cellText(this.control.getCellValue(columnIndex, rowIndex)); } catch (error) { globalThis.publisherStudioJavaScriptDiagnostics?.report?.("spreadsheet.recovered-operation", error); }
                         row.push(value);
                         if (value.trim().length > 0)
                             lastNonEmptyColumn = Math.max(lastNonEmptyColumn, columnIndex - left);
@@ -271,7 +272,7 @@
                     },
                     error: request => {
                         let message = "The spreadsheet could not be saved.";
-                        try { message = request.responseJSON?.message || request.responseText || message; } catch (_) { }
+                        try { message = request.responseJSON?.message || request.responseText || message; } catch (error) { globalThis.publisherStudioJavaScriptDiagnostics?.report?.("spreadsheet.recovered-operation", error); }
                         this.post("publisher-spreadsheet-error", { intent, message });
                     },
                     complete: () => {
@@ -338,6 +339,27 @@
             bridge.synchronizing = false;
             bridge.awaitingSynchronization = false;
             if (bridge.pendingIntent) bridge.scheduleSave(60);
+        }
+
+        try {
+            const diagnostics = globalThis.publisherStudioJavaScriptDiagnostics;
+            diagnostics?.guardObject?.("spreadsheet.bridge", window.publisherSpreadsheetBridge);
+            for (const callbackName of [
+                "publisherSpreadsheetApplySystemFonts",
+                "publisherSpreadsheetBeforeSend",
+                "publisherSpreadsheetOnInit",
+                "publisherSpreadsheetRenameRibbonTabs",
+                "publisherSpreadsheetOnDocumentChanged",
+                "publisherSpreadsheetOnCustomCommandExecuted",
+                "publisherSpreadsheetOnBeginSynchronization",
+                "publisherSpreadsheetOnEndSynchronization"
+            ]) {
+                const callback = window[callbackName];
+                if (typeof callback === "function" && diagnostics?.guard)
+                    window[callbackName] = diagnostics.guard(`spreadsheet.${callbackName}`, callback);
+            }
+        } catch (error) {
+            globalThis.publisherStudioJavaScriptDiagnostics?.report?.("spreadsheet.install-guards", error);
         }
     </script>
 </head>
@@ -444,7 +466,7 @@
                 if (event.data.type === "publisher-spreadsheet-save") bridge.queueSave(event.data.intent || "apply");
                 if (event.data.type === "publisher-spreadsheet-create-data-object") bridge.createDataObject();
                 if (event.data.type === "publisher-spreadsheet-focus") {
-                    try { bridge.control?.focus(); } catch (_) { }
+                    try { bridge.control?.focus(); } catch (error) { globalThis.publisherStudioJavaScriptDiagnostics?.report?.("spreadsheet.recovered-operation", error); }
                 }
             });
         })();

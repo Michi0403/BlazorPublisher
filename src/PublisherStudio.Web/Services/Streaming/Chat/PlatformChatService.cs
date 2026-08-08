@@ -1,4 +1,4 @@
-﻿using PublisherStudio.BusinessObjects;
+using PublisherStudio.BusinessObjects;
 using System.Collections.Concurrent;
 using System.Net.Security;
 using System.Net.Sockets;
@@ -70,10 +70,22 @@ public sealed class PlatformChatService : IAsyncDisposable
     /// </summary>
     public async Task<bool> SendAsync(Guid outputId, string message, CancellationToken cancellationToken)
     {
-        if (!_adapters.TryGetValue(outputId, out var adapter) || string.IsNullOrWhiteSpace(message)) return false;
-        await adapter.SendAsync(message.Trim(), cancellationToken);
-        return true;
+    try
+    {
+            if (!_adapters.TryGetValue(outputId, out var adapter) || string.IsNullOrWhiteSpace(message)) return false;
+            await adapter.SendAsync(message.Trim(), cancellationToken);
+            return true;
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            _logger.LogDebug(__serviceMethodException, $"Service method {nameof(PlatformChatService)}.{nameof(SendAsync)} was canceled.");
+        else
+            _logger.LogError(__serviceMethodException, $"Service method {nameof(PlatformChatService)}.{nameof(SendAsync)} failed.");
+        throw;
+    }
+}
 
     /// <summary>
     /// Runs the run subscriber async operation.
@@ -120,19 +132,43 @@ public sealed class PlatformChatService : IAsyncDisposable
         }
     }
 
-    private bool HasChatConfiguration(MediaOutputDefinition output) =>
-        !string.IsNullOrWhiteSpace(output.ChannelId)
+    private bool HasChatConfiguration(MediaOutputDefinition output) {
+    try
+    {
+        return !string.IsNullOrWhiteSpace(output.ChannelId)
         && !string.IsNullOrWhiteSpace(output.ChatSecret)
         && (output.Provider != 0 || !string.IsNullOrWhiteSpace(output.AccountName));
+    }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            _logger.LogDebug(__serviceMethodException, $"Service method {nameof(PlatformChatService)}.{nameof(HasChatConfiguration)} was canceled.");
+        else
+            _logger.LogError(__serviceMethodException, $"Service method {nameof(PlatformChatService)}.{nameof(HasChatConfiguration)} failed.");
+        throw;
+    }
+}
 
     private void Publish(PlatformChatMessage message)
     {
-        var history = _history.GetOrAdd(message.OutputId, _ => new ConcurrentQueue<PlatformChatMessage>());
-        history.Enqueue(message);
-        while (history.Count > 200 && history.TryDequeue(out _)) { }
-        if (!_subscribers.TryGetValue(message.OutputId, out var subscribers)) return;
-        foreach (var subscriber in subscribers.Values) subscriber.Writer.TryWrite(message);
+    try
+    {
+            var history = _history.GetOrAdd(message.OutputId, _ => new ConcurrentQueue<PlatformChatMessage>());
+            history.Enqueue(message);
+            while (history.Count > 200 && history.TryDequeue(out _)) { }
+            if (!_subscribers.TryGetValue(message.OutputId, out var subscribers)) return;
+            foreach (var subscriber in subscribers.Values) subscriber.Writer.TryWrite(message);
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            _logger.LogDebug(__serviceMethodException, $"Service method {nameof(PlatformChatService)}.{nameof(Publish)} was canceled.");
+        else
+            _logger.LogError(__serviceMethodException, $"Service method {nameof(PlatformChatService)}.{nameof(Publish)} failed.");
+        throw;
+    }
+}
 
     /// <summary>
     /// Runs the dispose async operation.
@@ -184,129 +220,215 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
     /// <summary>
     /// Runs the start operation.
     /// </summary>
-    public void Start() => _runTask ??= Task.Run(RunAsync);
+    public void Start() {
+    try
+    {
+        _runTask ??= Task.Run(RunAsync);
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method TwitchIrcChatAdapter.Start failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     /// <summary>
     /// Runs the send async operation.
     /// </summary>
     public async Task SendAsync(string message, CancellationToken cancellationToken)
     {
-        var writer = _writer ?? throw new InvalidOperationException("Twitch Chat is not connected.");
-        await _sendGate.WaitAsync(cancellationToken);
-        try { await writer.WriteLineAsync($"PRIVMSG #{NormalizeChannel(_output.ChannelId)} :{SanitizeMessage(message)}"); }
-        finally { _sendGate.Release(); }
+    try
+    {
+            var writer = _writer ?? throw new InvalidOperationException("Twitch Chat is not connected.");
+            await _sendGate.WaitAsync(cancellationToken);
+            try { await writer.WriteLineAsync($"PRIVMSG #{NormalizeChannel(_output.ChannelId)} :{SanitizeMessage(message)}"); }
+            finally { _sendGate.Release(); }
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method TwitchIrcChatAdapter.SendAsync failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     private async Task RunAsync()
     {
-        var attempt = 0;
-        while (!_lifetime.IsCancellationRequested)
-        {
-            try
+    try
+    {
+            var attempt = 0;
+            while (!_lifetime.IsCancellationRequested)
             {
-                Status = "connecting";
-                using var client = new TcpClient();
-                await client.ConnectAsync("irc.chat.twitch.tv", 6697, _lifetime.Token);
-                await using var ssl = new SslStream(client.GetStream(), false);
-                await ssl.AuthenticateAsClientAsync(new SslClientAuthenticationOptions
+                try
                 {
-                    TargetHost = "irc.chat.twitch.tv",
-                    EnabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13
-                }, _lifetime.Token);
-                using var reader = new StreamReader(ssl, TextEncoding.UTF8, false, 1024, leaveOpen: true);
-                await using var writer = new StreamWriter(ssl, new UTF8Encoding(false), 1024, leaveOpen: true) { AutoFlush = true, NewLine = "\r\n" };
-                _writer = writer;
-                var token = _output.ChatSecret.StartsWith("oauth:", StringComparison.OrdinalIgnoreCase)
-                    ? _output.ChatSecret
-                    : "oauth:" + _output.ChatSecret;
-                await writer.WriteLineAsync("CAP REQ :twitch.tv/tags twitch.tv/commands");
-                await writer.WriteLineAsync("PASS " + token);
-                await writer.WriteLineAsync("NICK " + NormalizeAccount(_output.AccountName));
-                await writer.WriteLineAsync("JOIN #" + NormalizeChannel(_output.ChannelId));
-                Status = "connected";
-                attempt = 0;
-
-                while (!_lifetime.IsCancellationRequested && await reader.ReadLineAsync(_lifetime.Token) is { } line)
-                {
-                    if (line.StartsWith("PING ", StringComparison.OrdinalIgnoreCase))
+                    Status = "connecting";
+                    using var client = new TcpClient();
+                    await client.ConnectAsync("irc.chat.twitch.tv", 6697, _lifetime.Token);
+                    await using var ssl = new SslStream(client.GetStream(), false);
+                    await ssl.AuthenticateAsClientAsync(new SslClientAuthenticationOptions
                     {
-                        await writer.WriteLineAsync("PONG " + line[5..]);
-                        continue;
-                    }
-                    if (TryParsePrivMsg(line, out var message)) _publish(message);
-                }
-            }
-            catch (OperationCanceledException) when (_lifetime.IsCancellationRequested) { break; }
-            catch (Exception exception)
-            {
-                Status = "error: " + exception.Message;
-            }
-            finally { _writer = null; }
+                        TargetHost = "irc.chat.twitch.tv",
+                        EnabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13
+                    }, _lifetime.Token);
+                    using var reader = new StreamReader(ssl, TextEncoding.UTF8, false, 1024, leaveOpen: true);
+                    await using var writer = new StreamWriter(ssl, new UTF8Encoding(false), 1024, leaveOpen: true) { AutoFlush = true, NewLine = "\r\n" };
+                    _writer = writer;
+                    var token = _output.ChatSecret.StartsWith("oauth:", StringComparison.OrdinalIgnoreCase)
+                        ? _output.ChatSecret
+                        : "oauth:" + _output.ChatSecret;
+                    await writer.WriteLineAsync("CAP REQ :twitch.tv/tags twitch.tv/commands");
+                    await writer.WriteLineAsync("PASS " + token);
+                    await writer.WriteLineAsync("NICK " + NormalizeAccount(_output.AccountName));
+                    await writer.WriteLineAsync("JOIN #" + NormalizeChannel(_output.ChannelId));
+                    Status = "connected";
+                    attempt = 0;
 
-            attempt = Math.Min(6, attempt + 1);
-            try { await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, attempt)), _lifetime.Token); }
-            catch (OperationCanceledException) { break; }
-        }
-        Status = "stopped";
+                    while (!_lifetime.IsCancellationRequested && await reader.ReadLineAsync(_lifetime.Token) is { } line)
+                    {
+                        if (line.StartsWith("PING ", StringComparison.OrdinalIgnoreCase))
+                        {
+                            await writer.WriteLineAsync("PONG " + line[5..]);
+                            continue;
+                        }
+                        if (TryParsePrivMsg(line, out var message)) _publish(message);
+                    }
+                }
+                catch (OperationCanceledException) when (_lifetime.IsCancellationRequested) { break; }
+                catch (Exception exception)
+                {
+                    Status = "error: " + exception.Message;
+                }
+                finally { _writer = null; }
+
+                attempt = Math.Min(6, attempt + 1);
+                try { await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, attempt)), _lifetime.Token); }
+                catch (OperationCanceledException) { break; }
+            }
+            Status = "stopped";
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method TwitchIrcChatAdapter.RunAsync failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     private bool TryParsePrivMsg(string line, out PlatformChatMessage message)
     {
-        message = default!;
-        var tags = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        var cursor = line;
-        if (cursor.StartsWith('@'))
-        {
-            var separator = cursor.IndexOf(' ');
-            if (separator < 0) return false;
-            foreach (var pair in cursor[1..separator].Split(';'))
+    try
+    {
+            message = default!;
+            var tags = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var cursor = line;
+            if (cursor.StartsWith('@'))
             {
-                var equals = pair.IndexOf('=');
-                tags[equals < 0 ? pair : pair[..equals]] = equals < 0 ? string.Empty : DecodeTag(pair[(equals + 1)..]);
+                var separator = cursor.IndexOf(' ');
+                if (separator < 0) return false;
+                foreach (var pair in cursor[1..separator].Split(';'))
+                {
+                    var equals = pair.IndexOf('=');
+                    tags[equals < 0 ? pair : pair[..equals]] = equals < 0 ? string.Empty : DecodeTag(pair[(equals + 1)..]);
+                }
+                cursor = cursor[(separator + 1)..];
             }
-            cursor = cursor[(separator + 1)..];
-        }
-        var marker = " PRIVMSG #";
-        var command = cursor.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
-        if (command < 0) return false;
-        var messageSeparator = cursor.IndexOf(" :", command, StringComparison.Ordinal);
-        if (messageSeparator < 0) return false;
-        var prefixEnd = cursor.IndexOf('!');
-        var fallbackName = prefixEnd > 1 ? cursor[1..prefixEnd] : "Viewer";
-        var author = tags.GetValueOrDefault("display-name", fallbackName);
-        var timestamp = DateTimeOffset.UtcNow;
-        if (long.TryParse(tags.GetValueOrDefault("tmi-sent-ts"), out var milliseconds))
-            timestamp = DateTimeOffset.FromUnixTimeMilliseconds(milliseconds);
-        message = new PlatformChatMessage(
-            tags.GetValueOrDefault("id", Guid.NewGuid().ToString("N")),
-            _output.OutputId,
-            "Twitch",
-            _output.ChannelId,
-            tags.GetValueOrDefault("user-id", fallbackName),
-            author,
-            string.Empty,
-            cursor[(messageSeparator + 2)..],
-            timestamp,
-            tags.GetValueOrDefault("color", string.Empty),
-            tags.GetValueOrDefault("badges", string.Empty));
-        return true;
+            var marker = " PRIVMSG #";
+            var command = cursor.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+            if (command < 0) return false;
+            var messageSeparator = cursor.IndexOf(" :", command, StringComparison.Ordinal);
+            if (messageSeparator < 0) return false;
+            var prefixEnd = cursor.IndexOf('!');
+            var fallbackName = prefixEnd > 1 ? cursor[1..prefixEnd] : "Viewer";
+            var author = tags.GetValueOrDefault("display-name", fallbackName);
+            var timestamp = DateTimeOffset.UtcNow;
+            if (long.TryParse(tags.GetValueOrDefault("tmi-sent-ts"), out var milliseconds))
+                timestamp = DateTimeOffset.FromUnixTimeMilliseconds(milliseconds);
+            message = new PlatformChatMessage(
+                tags.GetValueOrDefault("id", Guid.NewGuid().ToString("N")),
+                _output.OutputId,
+                "Twitch",
+                _output.ChannelId,
+                tags.GetValueOrDefault("user-id", fallbackName),
+                author,
+                string.Empty,
+                cursor[(messageSeparator + 2)..],
+                timestamp,
+                tags.GetValueOrDefault("color", string.Empty),
+                tags.GetValueOrDefault("badges", string.Empty));
+            return true;
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method TwitchIrcChatAdapter.TryParsePrivMsg failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
-    private string NormalizeAccount(string value) => new(value.Trim().ToLowerInvariant().Where(ch => char.IsLetterOrDigit(ch) || ch == '_').ToArray());
-    private string NormalizeChannel(string value) => NormalizeAccount(value.TrimStart('#'));
-    private string SanitizeMessage(string value) => value.Replace('\r', ' ').Replace('\n', ' ').Trim();
-    private string DecodeTag(string value) => value.Replace("\\s", " ").Replace("\\:", ";").Replace("\\r", "\r").Replace("\\n", "\n").Replace("\\\\", "\\");
+    private string NormalizeAccount(string value) {
+    try
+    {
+        return new(value.Trim().ToLowerInvariant().Where(ch => char.IsLetterOrDigit(ch) || ch == '_').ToArray());
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method TwitchIrcChatAdapter.NormalizeAccount failed: {__serviceMethodException}");
+        throw;
+    }
+}
+    private string NormalizeChannel(string value) {
+    try
+    {
+        return NormalizeAccount(value.TrimStart('#'));
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method TwitchIrcChatAdapter.NormalizeChannel failed: {__serviceMethodException}");
+        throw;
+    }
+}
+    private string SanitizeMessage(string value) {
+    try
+    {
+        return value.Replace('\r', ' ').Replace('\n', ' ').Trim();
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method TwitchIrcChatAdapter.SanitizeMessage failed: {__serviceMethodException}");
+        throw;
+    }
+}
+    private string DecodeTag(string value) {
+    try
+    {
+        return value.Replace("\\s", " ").Replace("\\:", ";").Replace("\\r", "\r").Replace("\\n", "\n").Replace("\\\\", "\\");
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method TwitchIrcChatAdapter.DecodeTag failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     /// <summary>
     /// Runs the dispose async operation.
     /// </summary>
     public async ValueTask DisposeAsync()
     {
-        _lifetime.Cancel();
-        if (_runTask is not null) try { await _runTask; } catch { }
-        _sendGate.Dispose();
-        _lifetime.Dispose();
+    try
+    {
+            _lifetime.Cancel();
+            if (_runTask is not null) try { await _runTask; } catch { }
+            _sendGate.Dispose();
+            _lifetime.Dispose();
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method TwitchIrcChatAdapter.DisposeAsync failed: {__serviceMethodException}");
+        throw;
+    }
+}
 }
 
 internal sealed class YouTubeLiveChatAdapter : IPlatformChatAdapter
@@ -338,95 +460,141 @@ internal sealed class YouTubeLiveChatAdapter : IPlatformChatAdapter
     /// <summary>
     /// Runs the start operation.
     /// </summary>
-    public void Start() => _runTask ??= Task.Run(RunAsync);
+    public void Start() {
+    try
+    {
+        _runTask ??= Task.Run(RunAsync);
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method YouTubeLiveChatAdapter.Start failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     /// <summary>
     /// Runs the send async operation.
     /// </summary>
     public async Task SendAsync(string message, CancellationToken cancellationToken)
     {
-        var body = JsonSerializer.Serialize(new
-        {
-            snippet = new
+    try
+    {
+            var body = JsonSerializer.Serialize(new
             {
-                liveChatId = _output.ChannelId,
-                type = "textMessageEvent",
-                textMessageDetails = new { messageText = message }
-            }
-        }, JsonOptions);
-        using var request = new HttpRequestMessage(HttpMethod.Post, "https://www.googleapis.com/youtube/v3/liveChat/messages?part=snippet")
-        {
-            Content = new StringContent(body, TextEncoding.UTF8, "application/json")
-        };
-        using var response = await _http.SendAsync(request, cancellationToken);
-        if (!response.IsSuccessStatusCode)
-            throw new InvalidOperationException($"YouTube Chat send failed ({(int)response.StatusCode}): {await response.Content.ReadAsStringAsync(cancellationToken)}");
+                snippet = new
+                {
+                    liveChatId = _output.ChannelId,
+                    type = "textMessageEvent",
+                    textMessageDetails = new { messageText = message }
+                }
+            }, JsonOptions);
+            using var request = new HttpRequestMessage(HttpMethod.Post, "https://www.googleapis.com/youtube/v3/liveChat/messages?part=snippet")
+            {
+                Content = new StringContent(body, TextEncoding.UTF8, "application/json")
+            };
+            using var response = await _http.SendAsync(request, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+                throw new InvalidOperationException($"YouTube Chat send failed ({(int)response.StatusCode}): {await response.Content.ReadAsStringAsync(cancellationToken)}");
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method YouTubeLiveChatAdapter.SendAsync failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     private async Task RunAsync()
     {
-        var delay = TimeSpan.FromSeconds(2);
-        while (!_lifetime.IsCancellationRequested)
-        {
-            try
+    try
+    {
+            var delay = TimeSpan.FromSeconds(2);
+            while (!_lifetime.IsCancellationRequested)
             {
-                Status = "connecting";
-                var url = new StringBuilder("https://www.googleapis.com/youtube/v3/liveChat/messages?part=id,snippet,authorDetails&maxResults=200&profileImageSize=64&liveChatId=")
-                    .Append(Uri.EscapeDataString(_output.ChannelId));
-                if (!string.IsNullOrWhiteSpace(_pageToken)) url.Append("&pageToken=").Append(Uri.EscapeDataString(_pageToken));
-                using var response = await _http.GetAsync(url.ToString(), _lifetime.Token);
-                var json = await response.Content.ReadAsStringAsync(_lifetime.Token);
-                if (!response.IsSuccessStatusCode) throw new InvalidOperationException($"YouTube Chat read failed ({(int)response.StatusCode}): {json}");
-                using var document = JsonDocument.Parse(json);
-                var root = document.RootElement;
-                _pageToken = root.TryGetProperty("nextPageToken", out var pageToken) ? pageToken.GetString() ?? string.Empty : _pageToken;
-                var interval = root.TryGetProperty("pollingIntervalMillis", out var polling) && polling.TryGetInt32(out var milliseconds)
-                    ? Math.Clamp(milliseconds, 1000, 30000)
-                    : 2000;
-                delay = TimeSpan.FromMilliseconds(interval);
-                if (root.TryGetProperty("items", out var items) && items.ValueKind == JsonValueKind.Array)
-                    foreach (var item in items.EnumerateArray()) PublishItem(item);
-                Status = "connected";
+                try
+                {
+                    Status = "connecting";
+                    var url = new StringBuilder("https://www.googleapis.com/youtube/v3/liveChat/messages?part=id,snippet,authorDetails&maxResults=200&profileImageSize=64&liveChatId=")
+                        .Append(Uri.EscapeDataString(_output.ChannelId));
+                    if (!string.IsNullOrWhiteSpace(_pageToken)) url.Append("&pageToken=").Append(Uri.EscapeDataString(_pageToken));
+                    using var response = await _http.GetAsync(url.ToString(), _lifetime.Token);
+                    var json = await response.Content.ReadAsStringAsync(_lifetime.Token);
+                    if (!response.IsSuccessStatusCode) throw new InvalidOperationException($"YouTube Chat read failed ({(int)response.StatusCode}): {json}");
+                    using var document = JsonDocument.Parse(json);
+                    var root = document.RootElement;
+                    _pageToken = root.TryGetProperty("nextPageToken", out var pageToken) ? pageToken.GetString() ?? string.Empty : _pageToken;
+                    var interval = root.TryGetProperty("pollingIntervalMillis", out var polling) && polling.TryGetInt32(out var milliseconds)
+                        ? Math.Clamp(milliseconds, 1000, 30000)
+                        : 2000;
+                    delay = TimeSpan.FromMilliseconds(interval);
+                    if (root.TryGetProperty("items", out var items) && items.ValueKind == JsonValueKind.Array)
+                        foreach (var item in items.EnumerateArray()) PublishItem(item);
+                    Status = "connected";
+                }
+                catch (OperationCanceledException) when (_lifetime.IsCancellationRequested) { break; }
+                catch (Exception exception)
+                {
+                    Status = "error: " + exception.Message;
+                    delay = TimeSpan.FromSeconds(Math.Min(30, Math.Max(3, delay.TotalSeconds * 1.5)));
+                }
+                try { await Task.Delay(delay, _lifetime.Token); }
+                catch (OperationCanceledException) { break; }
             }
-            catch (OperationCanceledException) when (_lifetime.IsCancellationRequested) { break; }
-            catch (Exception exception)
-            {
-                Status = "error: " + exception.Message;
-                delay = TimeSpan.FromSeconds(Math.Min(30, Math.Max(3, delay.TotalSeconds * 1.5)));
-            }
-            try { await Task.Delay(delay, _lifetime.Token); }
-            catch (OperationCanceledException) { break; }
-        }
-        Status = "stopped";
+            Status = "stopped";
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method YouTubeLiveChatAdapter.RunAsync failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     private void PublishItem(JsonElement item)
     {
-        var id = item.TryGetProperty("id", out var idProperty) ? idProperty.GetString() ?? string.Empty : string.Empty;
-        if (string.IsNullOrWhiteSpace(id) || !_seen.Add(id)) return;
-        if (_seen.Count > 4000) _seen.Clear();
-        if (!item.TryGetProperty("snippet", out var snippet)) return;
-        var type = snippet.TryGetProperty("type", out var typeProperty) ? typeProperty.GetString() : string.Empty;
-        if (!string.Equals(type, "textMessageEvent", StringComparison.OrdinalIgnoreCase)) return;
-        var text = snippet.TryGetProperty("displayMessage", out var displayMessage) ? displayMessage.GetString() ?? string.Empty : string.Empty;
-        var timestamp = DateTimeOffset.UtcNow;
-        if (snippet.TryGetProperty("publishedAt", out var publishedAt)
-            && DateTimeOffset.TryParse(publishedAt.GetString(), out var parsedTimestamp)) timestamp = parsedTimestamp;
-        var author = item.TryGetProperty("authorDetails", out var details) ? details : default;
-        var authorId = author.ValueKind == JsonValueKind.Object && author.TryGetProperty("channelId", out var channelId) ? channelId.GetString() ?? string.Empty : string.Empty;
-        var authorName = author.ValueKind == JsonValueKind.Object && author.TryGetProperty("displayName", out var displayName) ? displayName.GetString() ?? "Viewer" : "Viewer";
-        var avatar = author.ValueKind == JsonValueKind.Object && author.TryGetProperty("profileImageUrl", out var profileImage) ? profileImage.GetString() ?? string.Empty : string.Empty;
-        _publish(new PlatformChatMessage(id, _output.OutputId, "YouTube", _output.ChannelId, authorId, authorName, avatar, text, timestamp));
+    try
+    {
+            var id = item.TryGetProperty("id", out var idProperty) ? idProperty.GetString() ?? string.Empty : string.Empty;
+            if (string.IsNullOrWhiteSpace(id) || !_seen.Add(id)) return;
+            if (_seen.Count > 4000) _seen.Clear();
+            if (!item.TryGetProperty("snippet", out var snippet)) return;
+            var type = snippet.TryGetProperty("type", out var typeProperty) ? typeProperty.GetString() : string.Empty;
+            if (!string.Equals(type, "textMessageEvent", StringComparison.OrdinalIgnoreCase)) return;
+            var text = snippet.TryGetProperty("displayMessage", out var displayMessage) ? displayMessage.GetString() ?? string.Empty : string.Empty;
+            var timestamp = DateTimeOffset.UtcNow;
+            if (snippet.TryGetProperty("publishedAt", out var publishedAt)
+                && DateTimeOffset.TryParse(publishedAt.GetString(), out var parsedTimestamp)) timestamp = parsedTimestamp;
+            var author = item.TryGetProperty("authorDetails", out var details) ? details : default;
+            var authorId = author.ValueKind == JsonValueKind.Object && author.TryGetProperty("channelId", out var channelId) ? channelId.GetString() ?? string.Empty : string.Empty;
+            var authorName = author.ValueKind == JsonValueKind.Object && author.TryGetProperty("displayName", out var displayName) ? displayName.GetString() ?? "Viewer" : "Viewer";
+            var avatar = author.ValueKind == JsonValueKind.Object && author.TryGetProperty("profileImageUrl", out var profileImage) ? profileImage.GetString() ?? string.Empty : string.Empty;
+            _publish(new PlatformChatMessage(id, _output.OutputId, "YouTube", _output.ChannelId, authorId, authorName, avatar, text, timestamp));
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method YouTubeLiveChatAdapter.PublishItem failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     /// <summary>
     /// Runs the dispose async operation.
     /// </summary>
     public async ValueTask DisposeAsync()
     {
-        _lifetime.Cancel();
-        if (_runTask is not null) try { await _runTask; } catch { }
-        _http.Dispose();
-        _lifetime.Dispose();
+    try
+    {
+            _lifetime.Cancel();
+            if (_runTask is not null) try { await _runTask; } catch { }
+            _http.Dispose();
+            _lifetime.Dispose();
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method YouTubeLiveChatAdapter.DisposeAsync failed: {__serviceMethodException}");
+        throw;
+    }
+}
 }

@@ -1,4 +1,4 @@
-﻿using PublisherStudio.BusinessObjects;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Services;
@@ -131,16 +131,40 @@ public sealed class StoryPageLayoutService(
         }
     }
 
-    private double NormalizeMargin(double value, double pageSize) =>
-        Math.Clamp(double.IsFinite(value) ? value : 0, 0, Math.Max(0, pageSize - 1));
+    private double NormalizeMargin(double value, double pageSize) {
+    try
+    {
+        return Math.Clamp(double.IsFinite(value) ? value : 0, 0, Math.Max(0, pageSize - 1));
+    }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(StoryPageLayoutService)}.{nameof(NormalizeMargin)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(StoryPageLayoutService)}.{nameof(NormalizeMargin)} failed.");
+        throw;
+    }
+}
 
     private void NormalizePair(ref double first, ref double second, double pageSize)
     {
-        var maximum = Math.Max(1, pageSize - 1);
-        var sum = first + second;
-        if (sum <= maximum || sum <= 0) return;
-        var scale = maximum / sum;
-        first *= scale;
-        second *= scale;
+    try
+    {
+            var maximum = Math.Max(1, pageSize - 1);
+            var sum = first + second;
+            if (sum <= maximum || sum <= 0) return;
+            var scale = maximum / sum;
+            first *= scale;
+            second *= scale;
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(StoryPageLayoutService)}.{nameof(NormalizePair)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(StoryPageLayoutService)}.{nameof(NormalizePair)} failed.");
+        throw;
+    }
+}
 }

@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Streaming.MediaHost;
@@ -25,137 +25,210 @@ public sealed class StreamingMediaHostClient(
     /// </summary>
     public async Task<List<PublisherStudio.BusinessObjects.NativeMediaDeviceInfo>> DiscoverNativeDevicesAsync(CancellationToken cancellationToken = default)
     {
-        var settings = await _profiles.LoadAsync(cancellationToken);
-        var devices = await _runtime.DiscoverDevicesAsync(settings.FfmpegPath, cancellationToken);
-        return devices.ToList();
+    try
+    {
+            var settings = await _profiles.LoadAsync(cancellationToken);
+            var devices = await _runtime.DiscoverDevicesAsync(settings.FfmpegPath, cancellationToken);
+            return devices.ToList();
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method StreamingMediaHostClient.DiscoverNativeDevicesAsync failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     /// <summary>
     /// Determines whether available async.
     /// </summary>
-    public Task<bool> IsAvailableAsync(CancellationToken cancellationToken = default) => Task.FromResult(true);
+    public Task<bool> IsAvailableAsync(CancellationToken cancellationToken = default) {
+    try
+    {
+        return Task.FromResult(true);
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method StreamingMediaHostClient.IsAvailableAsync failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     /// <summary>
     /// Starts async.
     /// </summary>
     public async Task<MediaHostSessionResponse?> StartAsync(PublicationDocument document, bool dryRun, CancellationToken cancellationToken = default)
     {
-        var settings = await _profiles.LoadAsync(cancellationToken);
-        var providers = new List<MediaHostOutputRequest>();
-        foreach (var output in document.Streaming.Outputs)
-        {
-            var profile = settings.Providers.FirstOrDefault(item => item.Id == output.ProfileId && item.Enabled);
-            var chatSecret = string.Empty;
-            var twitchOAuthChat = profile?.Provider == PublicationStreamProvider.Twitch
-                && profile.AuthenticationMode == StreamingProviderAuthenticationMode.OAuth;
-            var twitchOAuthHasChatScopes = profile is not null
-                && profile.OAuthScopes.Contains("chat:read", StringComparison.OrdinalIgnoreCase)
-                && profile.OAuthScopes.Contains("chat:edit", StringComparison.OrdinalIgnoreCase);
-            if (profile?.ChatEnabled == true && (!twitchOAuthChat || twitchOAuthHasChatScopes))
+    try
+    {
+            var settings = await _profiles.LoadAsync(cancellationToken);
+            var providers = new List<MediaHostOutputRequest>();
+            foreach (var output in document.Streaming.Outputs)
             {
-                chatSecret = twitchOAuthChat
-                    ? await _twitchOAuth.EnsureValidAccessTokenAsync(profile.Id, cancellationToken) ?? string.Empty
-                    : await _profiles.ResolveChatSecretAsync(profile.Id, cancellationToken) ?? string.Empty;
+                var profile = settings.Providers.FirstOrDefault(item => item.Id == output.ProfileId && item.Enabled);
+                var chatSecret = string.Empty;
+                var twitchOAuthChat = profile?.Provider == PublicationStreamProvider.Twitch
+                    && profile.AuthenticationMode == StreamingProviderAuthenticationMode.OAuth;
+                var twitchOAuthHasChatScopes = profile is not null
+                    && profile.OAuthScopes.Contains("chat:read", StringComparison.OrdinalIgnoreCase)
+                    && profile.OAuthScopes.Contains("chat:edit", StringComparison.OrdinalIgnoreCase);
+                if (profile?.ChatEnabled == true && (!twitchOAuthChat || twitchOAuthHasChatScopes))
+                {
+                    chatSecret = twitchOAuthChat
+                        ? await _twitchOAuth.EnsureValidAccessTokenAsync(profile.Id, cancellationToken) ?? string.Empty
+                        : await _profiles.ResolveChatSecretAsync(profile.Id, cancellationToken) ?? string.Empty;
+                }
+                providers.Add(new MediaHostOutputRequest
+                {
+                    OutputId = output.Id,
+                    Name = output.Name,
+                    Enabled = output.Enabled && profile is not null,
+                    Provider = output.Provider,
+                    Transport = profile?.Transport ?? PublicationStreamTransport.Rtmp,
+                    Endpoint = profile?.Endpoint ?? string.Empty,
+                    ChannelId = string.IsNullOrWhiteSpace(output.ChatChannel) ? profile?.ChannelId ?? string.Empty : output.ChatChannel,
+                    AccountName = profile?.AccountName ?? string.Empty,
+                    Secret = profile is null ? string.Empty : await _profiles.ResolveSecretAsync(profile.Id, cancellationToken) ?? string.Empty,
+                    ChatEnabled = profile?.ChatEnabled == true && !string.IsNullOrWhiteSpace(chatSecret),
+                    ChatSecret = chatSecret,
+                    TestMode = dryRun || output.UseProviderTestMode,
+                    Width = output.Width,
+                    Height = output.Height,
+                    FrameRate = output.FrameRate,
+                    VideoBitrateKbps = output.VideoBitrateKbps,
+                    AudioBitrateKbps = output.AudioBitrateKbps,
+                    KeyFrameIntervalSeconds = output.KeyFrameIntervalSeconds,
+                    VideoCodec = output.VideoCodec,
+                    AudioCodec = output.AudioCodec
+                });
             }
-            providers.Add(new MediaHostOutputRequest
+
+            var recording = new PublicationRecordingSettings
             {
-                OutputId = output.Id,
-                Name = output.Name,
-                Enabled = output.Enabled && profile is not null,
-                Provider = output.Provider,
-                Transport = profile?.Transport ?? PublicationStreamTransport.Rtmp,
-                Endpoint = profile?.Endpoint ?? string.Empty,
-                ChannelId = string.IsNullOrWhiteSpace(output.ChatChannel) ? profile?.ChannelId ?? string.Empty : output.ChatChannel,
-                AccountName = profile?.AccountName ?? string.Empty,
-                Secret = profile is null ? string.Empty : await _profiles.ResolveSecretAsync(profile.Id, cancellationToken) ?? string.Empty,
-                ChatEnabled = profile?.ChatEnabled == true && !string.IsNullOrWhiteSpace(chatSecret),
-                ChatSecret = chatSecret,
-                TestMode = dryRun || output.UseProviderTestMode,
-                Width = output.Width,
-                Height = output.Height,
-                FrameRate = output.FrameRate,
-                VideoBitrateKbps = output.VideoBitrateKbps,
-                AudioBitrateKbps = output.AudioBitrateKbps,
-                KeyFrameIntervalSeconds = output.KeyFrameIntervalSeconds,
-                VideoCodec = output.VideoCodec,
-                AudioCodec = output.AudioCodec
-            });
-        }
-
-        var recording = new PublicationRecordingSettings
-        {
-            Enabled = document.Streaming.Recording.Enabled,
-            DestinationDirectory = string.IsNullOrWhiteSpace(document.Streaming.Recording.DestinationDirectory)
-                ? settings.DefaultRecordingDirectory
-                : document.Streaming.Recording.DestinationDirectory,
-            Variant = document.Streaming.Recording.Variant,
-            SelectedOutputIds = [.. document.Streaming.Recording.SelectedOutputIds],
-            Container = document.Streaming.Recording.Container,
-            SegmentSeconds = document.Streaming.Recording.SegmentSeconds,
-            RemuxToMp4AfterStop = document.Streaming.Recording.RemuxToMp4AfterStop
-        };
-
-        var request = new MediaHostStartSessionRequest
-        {
-            PublicationId = document.Id,
-            PublicationName = document.Name,
-            DryRun = dryRun,
-            MasterWidth = document.Streaming.MasterWidth,
-            MasterHeight = document.Streaming.MasterHeight,
-            MasterFrameRate = document.Streaming.MasterFrameRate,
-            PreferDeviceTimestamps = document.Streaming.PreferDeviceTimestamps,
-            FfmpegPath = settings.FfmpegPath,
-            HardwareEncoder = settings.HardwareEncoder,
-            Outputs = providers,
-            Recording = recording,
-            Lan = document.Streaming.Lan,
-            Hotkeys = document.Streaming.Hotkeys
-        };
-
-        try
-        {
-            var session = _sessions.Create(JsonSerializer.SerializeToElement(request, WebJson));
-            return new MediaHostSessionResponse
-            {
-                SessionId = session.Id,
-                Status = session.DryRun ? "dry-run" : "prepared"
+                Enabled = document.Streaming.Recording.Enabled,
+                DestinationDirectory = string.IsNullOrWhiteSpace(document.Streaming.Recording.DestinationDirectory)
+                    ? settings.DefaultRecordingDirectory
+                    : document.Streaming.Recording.DestinationDirectory,
+                Variant = document.Streaming.Recording.Variant,
+                SelectedOutputIds = [.. document.Streaming.Recording.SelectedOutputIds],
+                Container = document.Streaming.Recording.Container,
+                SegmentSeconds = document.Streaming.Recording.SegmentSeconds,
+                RemuxToMp4AfterStop = document.Streaming.Recording.RemuxToMp4AfterStop
             };
-        }
-        catch
-        {
-            return null;
-        }
+
+            var request = new MediaHostStartSessionRequest
+            {
+                PublicationId = document.Id,
+                PublicationName = document.Name,
+                DryRun = dryRun,
+                MasterWidth = document.Streaming.MasterWidth,
+                MasterHeight = document.Streaming.MasterHeight,
+                MasterFrameRate = document.Streaming.MasterFrameRate,
+                PreferDeviceTimestamps = document.Streaming.PreferDeviceTimestamps,
+                FfmpegPath = settings.FfmpegPath,
+                HardwareEncoder = settings.HardwareEncoder,
+                Outputs = providers,
+                Recording = recording,
+                Lan = document.Streaming.Lan,
+                Hotkeys = document.Streaming.Hotkeys
+            };
+
+            try
+            {
+                var session = _sessions.Create(JsonSerializer.SerializeToElement(request, WebJson));
+                return new MediaHostSessionResponse
+                {
+                    SessionId = session.Id,
+                    Status = session.DryRun ? "dry-run" : "prepared"
+                };
+            }
+            catch
+            {
+                return null;
+            }
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method StreamingMediaHostClient.StartAsync failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     /// <summary>
     /// Stops async.
     /// </summary>
-    public Task<bool> StopAsync(Guid sessionId, CancellationToken cancellationToken = default) =>
-        Task.FromResult(_sessions.Stop(sessionId));
+    public Task<bool> StopAsync(Guid sessionId, CancellationToken cancellationToken = default) {
+    try
+    {
+        return Task.FromResult(_sessions.Stop(sessionId));
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method StreamingMediaHostClient.StopAsync failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     /// <summary>
     /// Sets output enabled async.
     /// </summary>
-    public Task<bool> SetOutputEnabledAsync(Guid sessionId, Guid outputId, bool enabled, CancellationToken cancellationToken = default) =>
-        Task.FromResult(_sessions.SetOutput(sessionId, outputId, enabled));
+    public Task<bool> SetOutputEnabledAsync(Guid sessionId, Guid outputId, bool enabled, CancellationToken cancellationToken = default) {
+    try
+    {
+        return Task.FromResult(_sessions.SetOutput(sessionId, outputId, enabled));
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method StreamingMediaHostClient.SetOutputEnabledAsync failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     /// <summary>
     /// Sets program page async.
     /// </summary>
-    public Task<bool> SetProgramPageAsync(Guid sessionId, Guid pageId, CancellationToken cancellationToken = default) =>
-        Task.FromResult(_sessions.SetProgramPage(sessionId, pageId));
+    public Task<bool> SetProgramPageAsync(Guid sessionId, Guid pageId, CancellationToken cancellationToken = default) {
+    try
+    {
+        return Task.FromResult(_sessions.SetProgramPage(sessionId, pageId));
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method StreamingMediaHostClient.SetProgramPageAsync failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     /// <summary>
     /// Sets recording async.
     /// </summary>
-    public Task<bool> SetRecordingAsync(Guid sessionId, bool enabled, CancellationToken cancellationToken = default) =>
-        Task.FromResult(_sessions.SetRecording(sessionId, enabled));
+    public Task<bool> SetRecordingAsync(Guid sessionId, bool enabled, CancellationToken cancellationToken = default) {
+    try
+    {
+        return Task.FromResult(_sessions.SetRecording(sessionId, enabled));
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method StreamingMediaHostClient.SetRecordingAsync failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     /// <summary>
     /// Reads events async.
     /// </summary>
-    public Task<IReadOnlyList<MediaHostHotkeyEvent>> ReadEventsAsync(Guid sessionId, CancellationToken cancellationToken = default) =>
-        Task.FromResult(_sessions.DrainEvents(sessionId));
+    public Task<IReadOnlyList<MediaHostHotkeyEvent>> ReadEventsAsync(Guid sessionId, CancellationToken cancellationToken = default) {
+    try
+    {
+        return Task.FromResult(_sessions.DrainEvents(sessionId));
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method StreamingMediaHostClient.ReadEventsAsync failed: {__serviceMethodException}");
+        throw;
+    }
+}
 }
 
 /// <summary>

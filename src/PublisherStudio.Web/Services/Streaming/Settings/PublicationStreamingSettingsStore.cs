@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.DataProtection;
 using PublisherStudio.BusinessObjects;
@@ -43,71 +43,125 @@ public sealed class PublicationStreamingSettingsStore
     /// </summary>
     public bool TryLoad(Guid publicationId, out PublicationStreamingSettings settings)
     {
-        lock (_gate)
-        {
-            var values = LoadCore();
-            if (publicationId != Guid.Empty && values.TryGetValue(publicationId, out var stored))
+    try
+    {
+            lock (_gate)
             {
-                settings = Clone(stored);
-                return true;
+                var values = LoadCore();
+                if (publicationId != Guid.Empty && values.TryGetValue(publicationId, out var stored))
+                {
+                    settings = Clone(stored);
+                    return true;
+                }
             }
-        }
 
-        settings = new PublicationStreamingSettings();
-        return false;
+            settings = new PublicationStreamingSettings();
+            return false;
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method PublicationStreamingSettingsStore.TryLoad failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     /// <summary>
     /// Loads or default.
     /// </summary>
-    public PublicationStreamingSettings LoadOrDefault(Guid publicationId) =>
-        TryLoad(publicationId, out var settings) ? settings : new PublicationStreamingSettings();
+    public PublicationStreamingSettings LoadOrDefault(Guid publicationId) {
+    try
+    {
+        return TryLoad(publicationId, out var settings) ? settings : new PublicationStreamingSettings();
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method PublicationStreamingSettingsStore.LoadOrDefault failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     /// <summary>
     /// Runs the save operation.
     /// </summary>
     public void Save(Guid publicationId, PublicationStreamingSettings settings)
     {
-        ArgumentNullException.ThrowIfNull(settings);
-        if (publicationId == Guid.Empty) return;
+    try
+    {
+            ArgumentNullException.ThrowIfNull(settings);
+            if (publicationId == Guid.Empty) return;
 
-        lock (_gate)
-        {
-            var values = LoadCore();
-            values[publicationId] = Clone(settings);
-            SaveCore(values);
-        }
+            lock (_gate)
+            {
+                var values = LoadCore();
+                values[publicationId] = Clone(settings);
+                SaveCore(values);
+            }
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method PublicationStreamingSettingsStore.Save failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     private Dictionary<Guid, PublicationStreamingSettings> LoadCore()
     {
-        if (_cache is not null) return _cache;
-        if (!File.Exists(_filePath)) return _cache = [];
+    try
+    {
+            if (_cache is not null) return _cache;
+            if (!File.Exists(_filePath)) return _cache = [];
 
-        try
-        {
-            var protectedPayload = File.ReadAllText(_filePath);
-            var json = _protector.Unprotect(protectedPayload);
-            return _cache = JsonSerializer.Deserialize<Dictionary<Guid, PublicationStreamingSettings>>(json, _json) ?? [];
-        }
-        catch
-        {
-            var backup = _filePath + ".invalid-" + DateTimeOffset.UtcNow.ToString("yyyyMMddHHmmss");
-            try { File.Move(_filePath, backup, overwrite: true); } catch { }
-            return _cache = [];
-        }
+            try
+            {
+                var protectedPayload = File.ReadAllText(_filePath);
+                var json = _protector.Unprotect(protectedPayload);
+                return _cache = JsonSerializer.Deserialize<Dictionary<Guid, PublicationStreamingSettings>>(json, _json) ?? [];
+            }
+            catch
+            {
+                var backup = _filePath + ".invalid-" + DateTimeOffset.UtcNow.ToString("yyyyMMddHHmmss");
+                try { File.Move(_filePath, backup, overwrite: true); } catch { }
+                return _cache = [];
+            }
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method PublicationStreamingSettingsStore.LoadCore failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     private void SaveCore(Dictionary<Guid, PublicationStreamingSettings> values)
     {
-        var json = JsonSerializer.Serialize(values, _json);
-        var protectedPayload = _protector.Protect(json);
-        var temporary = _filePath + ".tmp";
-        File.WriteAllText(temporary, protectedPayload);
-        File.Move(temporary, _filePath, overwrite: true);
+    try
+    {
+            var json = JsonSerializer.Serialize(values, _json);
+            var protectedPayload = _protector.Protect(json);
+            var temporary = _filePath + ".tmp";
+            File.WriteAllText(temporary, protectedPayload);
+            File.Move(temporary, _filePath, overwrite: true);
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method PublicationStreamingSettingsStore.SaveCore failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
-    private PublicationStreamingSettings Clone(PublicationStreamingSettings settings) =>
-        JsonSerializer.Deserialize<PublicationStreamingSettings>(
+    private PublicationStreamingSettings Clone(PublicationStreamingSettings settings) {
+    try
+    {
+        return JsonSerializer.Deserialize<PublicationStreamingSettings>(
             JsonSerializer.Serialize(settings, _json), _json) ?? new PublicationStreamingSettings();
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method PublicationStreamingSettingsStore.Clone failed: {__serviceMethodException}");
+        throw;
+    }
+}
 }

@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Configuration;
 
@@ -29,91 +29,146 @@ public sealed class SpreadsheetSessionStore
     /// </summary>
     public SpreadsheetEditorSession Create(Guid elementId, string fileName, SpreadsheetStorageFormat format, byte[] content)
     {
-        CleanupExpired();
-        _documents.ValidateWorkbookContent(content, format);
-        var preview = _documents.RenderPreviewHtml(content, format, out var activeSheet);
-        var session = new SpreadsheetEditorSession
-        {
-            Id = Guid.NewGuid(),
-            ElementId = elementId,
-            DocumentId = $"publisher-spreadsheet-{Guid.NewGuid():N}",
-            FileName = _documents.NormalizeWorkbookFileName(fileName, format),
-            SourceFormat = format,
-            Content = content.ToArray(),
-            PreviewHtml = preview,
-            ActiveSheetName = activeSheet,
-            UpdatedUtc = DateTimeOffset.UtcNow
-        };
-        _sessions[session.Id] = session;
-        return session.Clone();
+    try
+    {
+            CleanupExpired();
+            _documents.ValidateWorkbookContent(content, format);
+            var preview = _documents.RenderPreviewHtml(content, format, out var activeSheet);
+            var session = new SpreadsheetEditorSession
+            {
+                Id = Guid.NewGuid(),
+                ElementId = elementId,
+                DocumentId = $"publisher-spreadsheet-{Guid.NewGuid():N}",
+                FileName = _documents.NormalizeWorkbookFileName(fileName, format),
+                SourceFormat = format,
+                Content = content.ToArray(),
+                PreviewHtml = preview,
+                ActiveSheetName = activeSheet,
+                UpdatedUtc = DateTimeOffset.UtcNow
+            };
+            _sessions[session.Id] = session;
+            return session.Clone();
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method SpreadsheetSessionStore.Create failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     /// <summary>
     /// Attempts to get.
     /// </summary>
     public bool TryGet(Guid id, out SpreadsheetEditorSession session)
     {
-        CleanupExpired();
-        if (_sessions.TryGetValue(id, out var stored))
-        {
-            stored.UpdatedUtc = DateTimeOffset.UtcNow;
-            session = stored.Clone();
-            return true;
-        }
-        session = default!;
-        return false;
+    try
+    {
+            CleanupExpired();
+            if (_sessions.TryGetValue(id, out var stored))
+            {
+                stored.UpdatedUtc = DateTimeOffset.UtcNow;
+                session = stored.Clone();
+                return true;
+            }
+            session = default!;
+            return false;
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method SpreadsheetSessionStore.TryGet failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     /// <summary>
     /// Runs the replace operation.
     /// </summary>
     public SpreadsheetEditorSession Replace(Guid id, string fileName, SpreadsheetStorageFormat format, byte[] workbookContent)
     {
-        if (!_sessions.TryGetValue(id, out var session)) throw new KeyNotFoundException("Spreadsheet editing session expired.");
-        _documents.ValidateWorkbookContent(workbookContent, format);
-        lock (session.SyncRoot)
-        {
-            session.DocumentId = $"publisher-spreadsheet-{Guid.NewGuid():N}";
-            session.FileName = _documents.NormalizeWorkbookFileName(fileName, format);
-            session.SourceFormat = format;
-            session.Content = workbookContent.ToArray();
-            session.PreviewHtml = _documents.RenderPreviewHtml(session.Content, format, out var activeSheetName);
-            session.ActiveSheetName = activeSheetName;
-            session.UpdatedUtc = DateTimeOffset.UtcNow;
-            return session.Clone();
-        }
+    try
+    {
+            if (!_sessions.TryGetValue(id, out var session)) throw new KeyNotFoundException("Spreadsheet editing session expired.");
+            _documents.ValidateWorkbookContent(workbookContent, format);
+            lock (session.SyncRoot)
+            {
+                session.DocumentId = $"publisher-spreadsheet-{Guid.NewGuid():N}";
+                session.FileName = _documents.NormalizeWorkbookFileName(fileName, format);
+                session.SourceFormat = format;
+                session.Content = workbookContent.ToArray();
+                session.PreviewHtml = _documents.RenderPreviewHtml(session.Content, format, out var activeSheetName);
+                session.ActiveSheetName = activeSheetName;
+                session.UpdatedUtc = DateTimeOffset.UtcNow;
+                return session.Clone();
+            }
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method SpreadsheetSessionStore.Replace failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     /// <summary>
     /// Runs the update operation.
     /// </summary>
     public SpreadsheetEditorSession Update(Guid id, byte[] workbookContent, SpreadsheetStorageFormat format, string? activeSheetName = null)
     {
-        if (!_sessions.TryGetValue(id, out var session)) throw new KeyNotFoundException("Spreadsheet editing session expired.");
-        _documents.ValidateWorkbookContent(workbookContent, format);
-        lock (session.SyncRoot)
-        {
-            session.Content = workbookContent.ToArray();
-            session.SourceFormat = format;
-            session.FileName = _documents.NormalizeWorkbookFileName(session.FileName, format);
-            session.PreviewHtml = _documents.RenderPreviewHtml(session.Content, format, out var parsedSheetName);
-            session.ActiveSheetName = string.IsNullOrWhiteSpace(activeSheetName) ? parsedSheetName : activeSheetName;
-            session.UpdatedUtc = DateTimeOffset.UtcNow;
-            return session.Clone();
-        }
+    try
+    {
+            if (!_sessions.TryGetValue(id, out var session)) throw new KeyNotFoundException("Spreadsheet editing session expired.");
+            _documents.ValidateWorkbookContent(workbookContent, format);
+            lock (session.SyncRoot)
+            {
+                session.Content = workbookContent.ToArray();
+                session.SourceFormat = format;
+                session.FileName = _documents.NormalizeWorkbookFileName(session.FileName, format);
+                session.PreviewHtml = _documents.RenderPreviewHtml(session.Content, format, out var parsedSheetName);
+                session.ActiveSheetName = string.IsNullOrWhiteSpace(activeSheetName) ? parsedSheetName : activeSheetName;
+                session.UpdatedUtc = DateTimeOffset.UtcNow;
+                return session.Clone();
+            }
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method SpreadsheetSessionStore.Update failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     /// <summary>
     /// Runs the remove operation.
     /// </summary>
-    public bool Remove(Guid id) => _sessions.TryRemove(id, out _);
+    public bool Remove(Guid id) {
+    try
+    {
+        return _sessions.TryRemove(id, out _);
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method SpreadsheetSessionStore.Remove failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     private void CleanupExpired()
     {
-        var cutoff = DateTimeOffset.UtcNow - runtimePolicy.SpreadsheetSessionLifetime;
-        foreach (var session in _sessions.Where(item => item.Value.UpdatedUtc < cutoff).Select(item => item.Key).ToArray())
-            _sessions.TryRemove(session, out _);
+    try
+    {
+            var cutoff = DateTimeOffset.UtcNow - runtimePolicy.SpreadsheetSessionLifetime;
+            foreach (var session in _sessions.Where(item => item.Value.UpdatedUtc < cutoff).Select(item => item.Key).ToArray())
+                _sessions.TryRemove(session, out _);
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method SpreadsheetSessionStore.CleanupExpired failed: {__serviceMethodException}");
+        throw;
+    }
+}
 }
 
 /// <summary>
@@ -162,7 +217,10 @@ public sealed class SpreadsheetEditorSession
     /// <summary>
     /// Runs the clone operation.
     /// </summary>
-    public SpreadsheetEditorSession Clone() => new()
+    public SpreadsheetEditorSession Clone() {
+    try
+    {
+        return new()
     {
         Id = Id,
         ElementId = ElementId,
@@ -174,4 +232,11 @@ public sealed class SpreadsheetEditorSession
         ActiveSheetName = ActiveSheetName,
         UpdatedUtc = UpdatedUtc
     };
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method SpreadsheetEditorSession.Clone failed: {__serviceMethodException}");
+        throw;
+    }
+}
 }

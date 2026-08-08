@@ -1,4 +1,4 @@
-﻿using PublisherStudio.BusinessObjects;
+using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.OpenScad;
 
@@ -83,7 +83,16 @@ public sealed class OpenScadRenderContext
     /// </summary>
     public string ChildBlock(OpenScadNode node)
     {
-        var children = node.Children.Where(child => child.Enabled).Select(child => RenderNode(child, Depth + 1)).Where(code => !string.IsNullOrWhiteSpace(code));
-        return string.Join(Environment.NewLine, children);
+    try
+    {
+            var children = node.Children.Where(child => child.Enabled).Select(child => RenderNode(child, Depth + 1)).Where(code => !string.IsNullOrWhiteSpace(code));
+            return string.Join(Environment.NewLine, children);
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method OpenScadRenderContext.ChildBlock failed: {__serviceMethodException}");
+        throw;
+    }
+}
 }

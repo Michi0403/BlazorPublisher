@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.WebSockets;
 using System.Text.Json;
 using System.Security.Cryptography;
@@ -93,17 +93,29 @@ public sealed class LanStreamingServer : IAsyncDisposable
     /// </summary>
     public void Start()
     {
-        if (_runTask is not null || !_session.LanDefinition.Enabled) return;
-        if (_session.LanDefinition.EnableRtsp && _rtspServer is null)
-        {
-            var address = ResolveAddress(_session.LanDefinition.BindAddress);
-            _rtspServer = new RtspLanServer(address, _session.LanDefinition.RtspPort, AccessToken);
-            _session.RtspRelayPort = _rtspServer.RtpInputPort;
-            _session.RtspUrl = RtspUrl ?? string.Empty;
-            _rtspServer.Start();
-        }
-        _runTask = Task.Run(StartCoreAsync);
+    try
+    {
+            if (_runTask is not null || !_session.LanDefinition.Enabled) return;
+            if (_session.LanDefinition.EnableRtsp && _rtspServer is null)
+            {
+                var address = ResolveAddress(_session.LanDefinition.BindAddress);
+                _rtspServer = new RtspLanServer(address, _session.LanDefinition.RtspPort, AccessToken);
+                _session.RtspRelayPort = _rtspServer.RtpInputPort;
+                _session.RtspUrl = RtspUrl ?? string.Empty;
+                _rtspServer.Start();
+            }
+            _runTask = Task.Run(StartCoreAsync);
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            _logger.LogDebug(__serviceMethodException, $"Service method {nameof(LanStreamingServer)}.{nameof(Start)} was canceled.");
+        else
+            _logger.LogError(__serviceMethodException, $"Service method {nameof(LanStreamingServer)}.{nameof(Start)} failed.");
+        throw;
+    }
+}
 
     private async Task StartCoreAsync()
     {
@@ -248,147 +260,219 @@ public sealed class LanStreamingServer : IAsyncDisposable
 
     private string BuildWatchPage()
     {
-        var playlist = $"/stream/{_session.Id:D}/index.m3u8{TokenQuery}";
-        var websocket = $"/live/{_session.Id:D}{TokenQuery}";
-        var webRtc = $"/webrtc/{_session.Id:D}{TokenQuery}";
-        var hlsParagraph = _session.LanDefinition.EnableHls
-            ? $"<p>VLC can open <a href=\"{WebUtility.HtmlEncode(playlist)}\">the HLS network stream</a>.</p>"
-            : string.Empty;
-        var rtspParagraph = _session.LanDefinition.EnableRtsp
-            ? $"<p>VLC can also open <code>{WebUtility.HtmlEncode(RtspUrl)}</code>.</p>"
-            : string.Empty;
-        var announcedMime = string.IsNullOrWhiteSpace(_session.Ingest?.Codec)
-            ? "video/webm;codecs=vp9,opus"
-            : _session.Ingest.Codec;
-        var mimeJson = JsonSerializer.Serialize(announcedMime);
-        return $$"""
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{{WebUtility.HtmlEncode(_session.Name)}}</title>
-<style>html,body{margin:0;background:#050b16;color:#e5eefc;font:16px system-ui;height:100%}main{display:grid;place-items:center;min-height:100%}section{width:min(96vw,1200px)}video{display:block;width:100%;background:#000;box-shadow:0 18px 60px #0008}p{color:#a9bad2}a,code{color:#7dd3fc}#status[data-state=error]{color:#fda4af}</style></head>
-<body><main><section><h1>{{WebUtility.HtmlEncode(_session.Name)}}</h1><video id="program" controls autoplay playsinline></video><p id="status">Connecting to PublisherStudio…</p>{{hlsParagraph}}{{rtspParagraph}}</section></main>
-<script>
-(() => {
-  const video = document.getElementById('program');
-  const status = document.getElementById('status');
-  const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const setError = text => { status.textContent = text; status.dataset.state = 'error'; };
-  const startWebM = () => {
-    const announced = {{mimeJson}};
-    const candidates = [announced, 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
-    if (!window.MediaSource) { setError('This browser has no MediaSource support. Open the HLS or RTSP address in VLC.'); return; }
-    const mime = candidates.find(value => value && MediaSource.isTypeSupported(value));
-    if (!mime) { setError('This browser cannot play the fallback WebM profile. Open HLS or RTSP in VLC.'); return; }
-    const mediaSource = new MediaSource(); const queue = []; let sourceBuffer;
-    const pump = () => {
-      if (!sourceBuffer || sourceBuffer.updating || mediaSource.readyState !== 'open') return;
-      try {
-        if (sourceBuffer.buffered.length && sourceBuffer.buffered.end(0) - sourceBuffer.buffered.start(0) > 45) {
-          sourceBuffer.remove(sourceBuffer.buffered.start(0), Math.max(sourceBuffer.buffered.start(0), sourceBuffer.buffered.end(0) - 30)); return;
-        }
-        const next = queue.shift(); if (next) sourceBuffer.appendBuffer(next);
-      } catch (error) { setError(error.message || String(error)); }
-    };
-    mediaSource.addEventListener('sourceopen', () => {
-      sourceBuffer = mediaSource.addSourceBuffer(mime); try { sourceBuffer.mode = 'sequence'; } catch { } sourceBuffer.addEventListener('updateend', pump);
-      const socket = new WebSocket(protocol + '//' + location.host + '{{websocket}}'); socket.binaryType = 'arraybuffer';
-      socket.addEventListener('open', () => { status.textContent = 'Live · WebM fallback'; });
-      socket.addEventListener('message', event => { queue.push(new Uint8Array(event.data)); pump(); });
-      socket.addEventListener('close', () => { status.textContent = 'Stream ended.'; });
-      socket.addEventListener('error', () => setError('The browser stream failed. VLC/HLS or RTSP may still be available.'));
-    }, { once:true });
-    video.src = URL.createObjectURL(mediaSource); video.play().catch(() => undefined);
-  };
-  const startWebRtc = async () => {
-    if (typeof RTCPeerConnection === 'undefined') { startWebM(); return; }
-    const peer = new RTCPeerConnection({ iceServers: [] });
-    peer.addTransceiver('video', { direction:'recvonly' }); peer.addTransceiver('audio', { direction:'recvonly' });
-    peer.addEventListener('track', event => { if (event.streams[0]) video.srcObject = event.streams[0]; else video.srcObject = new MediaStream([event.track]); video.play().catch(() => undefined); });
-    const socket = new WebSocket(protocol + '//' + location.host + '{{webRtc}}');
-    const pendingCandidates = [];
-    const send = value => { if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(value)); };
-    peer.addEventListener('icecandidate', event => { if (event.candidate) send({ type:'viewer-candidate', candidate:event.candidate }); });
-    socket.addEventListener('open', async () => {
-      try { const offer = await peer.createOffer(); await peer.setLocalDescription(offer); send({ type:'viewer-offer', sdp:offer.sdp }); status.textContent = 'Connecting · WebRTC'; }
-      catch (error) { socket.close(); peer.close(); startWebM(); }
-    });
-    socket.addEventListener('message', async event => {
-      let message; try { message = JSON.parse(event.data); } catch { return; }
-      try {
-        if (message.type === 'publisher-answer') { await peer.setRemoteDescription({ type:'answer', sdp:message.sdp }); while (pendingCandidates.length) await peer.addIceCandidate(pendingCandidates.shift()); status.textContent = 'Live · WebRTC'; }
-        else if (message.type === 'publisher-candidate' && message.candidate) { if (peer.remoteDescription) await peer.addIceCandidate(message.candidate); else pendingCandidates.push(message.candidate); }
-        else if (message.type === 'publisher-unavailable' || message.type === 'publisher-error') { throw new Error(message.message || 'Publisher unavailable'); }
-      } catch { try { socket.close(); peer.close(); } catch { } startWebM(); }
-    });
-    socket.addEventListener('error', () => { try { peer.close(); } catch { } startWebM(); });
-    peer.addEventListener('connectionstatechange', () => { if (peer.connectionState === 'failed') { try { socket.close(); peer.close(); } catch { } startWebM(); } });
-  };
-  startWebRtc();
-})();
-</script></body></html>
-""";
+    try
+    {
+            var playlist = $"/stream/{_session.Id:D}/index.m3u8{TokenQuery}";
+            var websocket = $"/live/{_session.Id:D}{TokenQuery}";
+            var webRtc = $"/webrtc/{_session.Id:D}{TokenQuery}";
+            var hlsParagraph = _session.LanDefinition.EnableHls
+                ? $"<p>VLC can open <a href=\"{WebUtility.HtmlEncode(playlist)}\">the HLS network stream</a>.</p>"
+                : string.Empty;
+            var rtspParagraph = _session.LanDefinition.EnableRtsp
+                ? $"<p>VLC can also open <code>{WebUtility.HtmlEncode(RtspUrl)}</code>.</p>"
+                : string.Empty;
+            var announcedMime = string.IsNullOrWhiteSpace(_session.Ingest?.Codec)
+                ? "video/webm;codecs=vp9,opus"
+                : _session.Ingest.Codec;
+            var mimeJson = JsonSerializer.Serialize(announcedMime);
+            return $$"""
+    <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>{{WebUtility.HtmlEncode(_session.Name)}}</title>
+    <style>html,body{margin:0;background:#050b16;color:#e5eefc;font:16px system-ui;height:100%}main{display:grid;place-items:center;min-height:100%}section{width:min(96vw,1200px)}video{display:block;width:100%;background:#000;box-shadow:0 18px 60px #0008}p{color:#a9bad2}a,code{color:#7dd3fc}#status[data-state=error]{color:#fda4af}</style></head>
+    <body><main><section><h1>{{WebUtility.HtmlEncode(_session.Name)}}</h1><video id="program" controls autoplay playsinline></video><p id="status">Connecting to PublisherStudio…</p>{{hlsParagraph}}{{rtspParagraph}}</section></main>
+    <script>
+    (() => {
+      const video = document.getElementById('program');
+      const status = document.getElementById('status');
+      const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const setError = text => { status.textContent = text; status.dataset.state = 'error'; };
+      const startWebM = () => {
+        const announced = {{mimeJson}};
+        const candidates = [announced, 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+        if (!window.MediaSource) { setError('This browser has no MediaSource support. Open the HLS or RTSP address in VLC.'); return; }
+        const mime = candidates.find(value => value && MediaSource.isTypeSupported(value));
+        if (!mime) { setError('This browser cannot play the fallback WebM profile. Open HLS or RTSP in VLC.'); return; }
+        const mediaSource = new MediaSource(); const queue = []; let sourceBuffer;
+        const pump = () => {
+          if (!sourceBuffer || sourceBuffer.updating || mediaSource.readyState !== 'open') return;
+          try {
+            if (sourceBuffer.buffered.length && sourceBuffer.buffered.end(0) - sourceBuffer.buffered.start(0) > 45) {
+              sourceBuffer.remove(sourceBuffer.buffered.start(0), Math.max(sourceBuffer.buffered.start(0), sourceBuffer.buffered.end(0) - 30)); return;
+            }
+            const next = queue.shift(); if (next) sourceBuffer.appendBuffer(next);
+          } catch (error) { setError(error.message || String(error)); }
+        };
+        mediaSource.addEventListener('sourceopen', () => {
+          sourceBuffer = mediaSource.addSourceBuffer(mime); try { sourceBuffer.mode = 'sequence'; } catch { } sourceBuffer.addEventListener('updateend', pump);
+          const socket = new WebSocket(protocol + '//' + location.host + '{{websocket}}'); socket.binaryType = 'arraybuffer';
+          socket.addEventListener('open', () => { status.textContent = 'Live · WebM fallback'; });
+          socket.addEventListener('message', event => { queue.push(new Uint8Array(event.data)); pump(); });
+          socket.addEventListener('close', () => { status.textContent = 'Stream ended.'; });
+          socket.addEventListener('error', () => setError('The browser stream failed. VLC/HLS or RTSP may still be available.'));
+        }, { once:true });
+        video.src = URL.createObjectURL(mediaSource); video.play().catch(() => undefined);
+      };
+      const startWebRtc = async () => {
+        if (typeof RTCPeerConnection === 'undefined') { startWebM(); return; }
+        const peer = new RTCPeerConnection({ iceServers: [] });
+        peer.addTransceiver('video', { direction:'recvonly' }); peer.addTransceiver('audio', { direction:'recvonly' });
+        peer.addEventListener('track', event => { if (event.streams[0]) video.srcObject = event.streams[0]; else video.srcObject = new MediaStream([event.track]); video.play().catch(() => undefined); });
+        const socket = new WebSocket(protocol + '//' + location.host + '{{webRtc}}');
+        const pendingCandidates = [];
+        const send = value => { if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(value)); };
+        peer.addEventListener('icecandidate', event => { if (event.candidate) send({ type:'viewer-candidate', candidate:event.candidate }); });
+        socket.addEventListener('open', async () => {
+          try { const offer = await peer.createOffer(); await peer.setLocalDescription(offer); send({ type:'viewer-offer', sdp:offer.sdp }); status.textContent = 'Connecting · WebRTC'; }
+          catch (error) { socket.close(); peer.close(); startWebM(); }
+        });
+        socket.addEventListener('message', async event => {
+          let message; try { message = JSON.parse(event.data); } catch { return; }
+          try {
+            if (message.type === 'publisher-answer') { await peer.setRemoteDescription({ type:'answer', sdp:message.sdp }); while (pendingCandidates.length) await peer.addIceCandidate(pendingCandidates.shift()); status.textContent = 'Live · WebRTC'; }
+            else if (message.type === 'publisher-candidate' && message.candidate) { if (peer.remoteDescription) await peer.addIceCandidate(message.candidate); else pendingCandidates.push(message.candidate); }
+            else if (message.type === 'publisher-unavailable' || message.type === 'publisher-error') { throw new Error(message.message || 'Publisher unavailable'); }
+          } catch { try { socket.close(); peer.close(); } catch { } startWebM(); }
+        });
+        socket.addEventListener('error', () => { try { peer.close(); } catch { } startWebM(); });
+        peer.addEventListener('connectionstatechange', () => { if (peer.connectionState === 'failed') { try { socket.close(); peer.close(); } catch { } startWebM(); } });
+      };
+      startWebRtc();
+    })();
+    </script></body></html>
+    """;
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            _logger.LogDebug(__serviceMethodException, $"Service method {nameof(LanStreamingServer)}.{nameof(BuildWatchPage)} was canceled.");
+        else
+            _logger.LogError(__serviceMethodException, $"Service method {nameof(LanStreamingServer)}.{nameof(BuildWatchPage)} failed.");
+        throw;
+    }
+}
 
     private bool Authorize(HttpContext context)
     {
-        if (string.IsNullOrWhiteSpace(AccessToken)) return true;
-        var query = context.Request.Query["token"].ToString();
-        if (CryptographicOperations.FixedTimeEquals(
-            System.Text.Encoding.UTF8.GetBytes(query),
-            System.Text.Encoding.UTF8.GetBytes(AccessToken))) return true;
-        var authorization = context.Request.Headers.Authorization.ToString();
-        return authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)
-            && CryptographicOperations.FixedTimeEquals(
-                System.Text.Encoding.UTF8.GetBytes(authorization[7..].Trim()),
-                System.Text.Encoding.UTF8.GetBytes(AccessToken));
+    try
+    {
+            if (string.IsNullOrWhiteSpace(AccessToken)) return true;
+            var query = context.Request.Query["token"].ToString();
+            if (CryptographicOperations.FixedTimeEquals(
+                System.Text.Encoding.UTF8.GetBytes(query),
+                System.Text.Encoding.UTF8.GetBytes(AccessToken))) return true;
+            var authorization = context.Request.Headers.Authorization.ToString();
+            return authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)
+                && CryptographicOperations.FixedTimeEquals(
+                    System.Text.Encoding.UTF8.GetBytes(authorization[7..].Trim()),
+                    System.Text.Encoding.UTF8.GetBytes(AccessToken));
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            _logger.LogDebug(__serviceMethodException, $"Service method {nameof(LanStreamingServer)}.{nameof(Authorize)} was canceled.");
+        else
+            _logger.LogError(__serviceMethodException, $"Service method {nameof(LanStreamingServer)}.{nameof(Authorize)} failed.");
+        throw;
+    }
+}
 
     private string AppendToken(string uri)
     {
-        var separator = uri.Contains('?') ? '&' : '?';
-        return $"{uri}{separator}token={Uri.EscapeDataString(AccessToken)}";
+    try
+    {
+            var separator = uri.Contains('?') ? '&' : '?';
+            return $"{uri}{separator}token={Uri.EscapeDataString(AccessToken)}";
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            _logger.LogDebug(__serviceMethodException, $"Service method {nameof(LanStreamingServer)}.{nameof(AppendToken)} was canceled.");
+        else
+            _logger.LogError(__serviceMethodException, $"Service method {nameof(LanStreamingServer)}.{nameof(AppendToken)} failed.");
+        throw;
+    }
+}
 
     private IPAddress ResolveAddress(string value)
     {
-        if (IPAddress.TryParse(value, out var address)) return address;
-        if (string.Equals(value, "localhost", StringComparison.OrdinalIgnoreCase)) return IPAddress.Loopback;
-        throw new InvalidOperationException("LAN bind address must be an explicit IPv4 or IPv6 address.");
+    try
+    {
+            if (IPAddress.TryParse(value, out var address)) return address;
+            if (string.Equals(value, "localhost", StringComparison.OrdinalIgnoreCase)) return IPAddress.Loopback;
+            throw new InvalidOperationException("LAN bind address must be an explicit IPv4 or IPv6 address.");
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            _logger.LogDebug(__serviceMethodException, $"Service method {nameof(LanStreamingServer)}.{nameof(ResolveAddress)} was canceled.");
+        else
+            _logger.LogError(__serviceMethodException, $"Service method {nameof(LanStreamingServer)}.{nameof(ResolveAddress)} failed.");
+        throw;
+    }
+}
 
     private string? SafeAssetPath(string rootDirectory, string? asset)
     {
-        var root = Path.GetFullPath(rootDirectory);
-        var rootWithSeparator = root.EndsWith(Path.DirectorySeparatorChar) ? root : root + Path.DirectorySeparatorChar;
-        var relative = string.IsNullOrWhiteSpace(asset) ? "index.m3u8" : asset.Replace('/', Path.DirectorySeparatorChar);
-        var candidate = Path.GetFullPath(Path.Combine(root, relative));
-        return candidate.StartsWith(rootWithSeparator, StringComparison.OrdinalIgnoreCase) ? candidate : null;
+    try
+    {
+            var root = Path.GetFullPath(rootDirectory);
+            var rootWithSeparator = root.EndsWith(Path.DirectorySeparatorChar) ? root : root + Path.DirectorySeparatorChar;
+            var relative = string.IsNullOrWhiteSpace(asset) ? "index.m3u8" : asset.Replace('/', Path.DirectorySeparatorChar);
+            var candidate = Path.GetFullPath(Path.Combine(root, relative));
+            return candidate.StartsWith(rootWithSeparator, StringComparison.OrdinalIgnoreCase) ? candidate : null;
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            _logger.LogDebug(__serviceMethodException, $"Service method {nameof(LanStreamingServer)}.{nameof(SafeAssetPath)} was canceled.");
+        else
+            _logger.LogError(__serviceMethodException, $"Service method {nameof(LanStreamingServer)}.{nameof(SafeAssetPath)} failed.");
+        throw;
+    }
+}
 
     /// <summary>
     /// Runs the dispose async operation.
     /// </summary>
     public async ValueTask DisposeAsync()
     {
-        _cancellation.Cancel();
-        if (_app is not null)
-        {
-            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(2));
-            try { await _app.StopAsync(timeout.Token); } catch { }
-            await _app.DisposeAsync();
-        }
-        if (_runTask is not null)
-        {
-            try { await _runTask.WaitAsync(TimeSpan.FromSeconds(3)); } catch { }
-        }
-        if (_rtspServer is not null)
-        {
-            try { await _rtspServer.DisposeAsync(); } catch { }
-            _rtspServer = null;
-        }
-        _viewerGate.Dispose();
-        _cancellation.Dispose();
-        Status = "stopped";
+    try
+    {
+            _cancellation.Cancel();
+            if (_app is not null)
+            {
+                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+                try { await _app.StopAsync(timeout.Token); } catch { }
+                await _app.DisposeAsync();
+            }
+            if (_runTask is not null)
+            {
+                try { await _runTask.WaitAsync(TimeSpan.FromSeconds(3)); } catch { }
+            }
+            if (_rtspServer is not null)
+            {
+                try { await _rtspServer.DisposeAsync(); } catch { }
+                _rtspServer = null;
+            }
+            _viewerGate.Dispose();
+            _cancellation.Dispose();
+            Status = "stopped";
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            _logger.LogDebug(__serviceMethodException, $"Service method {nameof(LanStreamingServer)}.{nameof(DisposeAsync)} was canceled.");
+        else
+            _logger.LogError(__serviceMethodException, $"Service method {nameof(LanStreamingServer)}.{nameof(DisposeAsync)} failed.");
+        throw;
+    }
+}
 }
 
 /// <summary>

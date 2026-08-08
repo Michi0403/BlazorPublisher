@@ -1,4 +1,4 @@
-﻿using PublisherStudio.BusinessObjects;
+using PublisherStudio.BusinessObjects;
 namespace PublisherStudio.Services;
 
 /// <summary>
@@ -49,12 +49,24 @@ public sealed class PublicationElementTraversal(ILogger<PublicationElementTraver
         IEnumerable<PublicationElement> elements,
         ICollection<PublicationElement> descendants)
     {
-        foreach (var element in elements)
-        {
-            descendants.Add(element);
-            if (element is not PanelElement panel) continue;
-            foreach (var view in panel.Views)
-                CollectDescendants(view.Elements, descendants);
-        }
+    try
+    {
+            foreach (var element in elements)
+            {
+                descendants.Add(element);
+                if (element is not PanelElement panel) continue;
+                foreach (var view in panel.Views)
+                    CollectDescendants(view.Elements, descendants);
+            }
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(PublicationElementTraversal)}.{nameof(CollectDescendants)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(PublicationElementTraversal)}.{nameof(CollectDescendants)} failed.");
+        throw;
+    }
+}
 }

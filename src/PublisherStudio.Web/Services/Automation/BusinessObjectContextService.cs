@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Automation;
@@ -17,68 +17,86 @@ public sealed class BusinessObjectContextService(
     /// </summary>
     public BusinessObjectContextSnapshot CreateSnapshot()
     {
-        var domainTypes = _assembly.GetExportedTypes()
-            .Where(type => type.Namespace?.StartsWith("PublisherStudio.BusinessObjects", StringComparison.Ordinal) == true)
-            .OrderBy(type => type.FullName)
-            .Select(type => new BusinessObjectDescriptor
+    try
+    {
+            var domainTypes = _assembly.GetExportedTypes()
+                .Where(type => type.Namespace?.StartsWith("PublisherStudio.BusinessObjects", StringComparison.Ordinal) == true)
+                .OrderBy(type => type.FullName)
+                .Select(type => new BusinessObjectDescriptor
+                {
+                    Name = type.Name,
+                    FullName = type.FullName ?? type.Name,
+                    Kind = type.IsEnum ? "enum" : type.IsInterface ? "interface" : type.IsValueType ? "value" : "class",
+                    Properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                        .Select(property => $"{property.Name}: {FriendlyName(property.PropertyType)}")
+                        .ToList()
+                }).ToList();
+
+            var apiSurfaces = apiSurfaceCatalog.GetSurfaces();
+            var services = architecture.Descriptors.Select(descriptor =>
             {
-                Name = type.Name,
-                FullName = type.FullName ?? type.Name,
-                Kind = type.IsEnum ? "enum" : type.IsInterface ? "interface" : type.IsValueType ? "value" : "class",
-                Properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                    .Select(property => $"{property.Name}: {FriendlyName(property.PropertyType)}")
-                    .ToList()
+                var contract = descriptor.InterfaceType ?? descriptor.ImplementationType;
+                var contractNames = new HashSet<string>(StringComparer.Ordinal)
+                {
+                    contract.FullName ?? contract.Name,
+                    descriptor.ImplementationType.FullName ?? descriptor.ImplementationType.Name
+                };
+                var relatedControllers = apiSurfaces
+                    .Where(surface => surface.ServiceContracts.Any(contractNames.Contains))
+                    .Select(surface => surface.Controller)
+                    .Distinct(StringComparer.Ordinal)
+                    .OrderBy(name => name)
+                    .ToList();
+                var domainObjects = descriptor.ImplementationType
+                    .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
+                    .SelectMany(method => method.GetParameters().Select(parameter => parameter.ParameterType).Append(method.ReturnType))
+                    .SelectMany(UnwrapTypes)
+                    .Where(type => type.Namespace?.StartsWith("PublisherStudio.BusinessObjects", StringComparison.Ordinal) == true)
+                    .Select(type => type.Name)
+                    .Distinct()
+                    .OrderBy(name => name)
+                    .ToList();
+                return new ServiceApiDescriptor
+                {
+                    Service = descriptor.ImplementationType.FullName ?? descriptor.ImplementationType.Name,
+                    Interface = descriptor.InterfaceType?.FullName ?? string.Empty,
+                    Lifetime = descriptor.Lifetime,
+                    DomainObjects = domainObjects,
+                    Methods = contract.GetMethods().Select(method => method.Name).Distinct().OrderBy(name => name).ToList(),
+                    Controllers = relatedControllers
+                };
             }).ToList();
 
-        var apiSurfaces = apiSurfaceCatalog.GetSurfaces();
-        var services = architecture.Descriptors.Select(descriptor =>
-        {
-            var contract = descriptor.InterfaceType ?? descriptor.ImplementationType;
-            var contractNames = new HashSet<string>(StringComparer.Ordinal)
+            return new BusinessObjectContextSnapshot
             {
-                contract.FullName ?? contract.Name,
-                descriptor.ImplementationType.FullName ?? descriptor.ImplementationType.Name
+                DomainObjects = domainTypes,
+                Services = services,
+                ControllerRoutes = apiSurfaces.SelectMany(surface => surface.Routes).Distinct().OrderBy(route => route).ToList()
             };
-            var relatedControllers = apiSurfaces
-                .Where(surface => surface.ServiceContracts.Any(contractNames.Contains))
-                .Select(surface => surface.Controller)
-                .Distinct(StringComparer.Ordinal)
-                .OrderBy(name => name)
-                .ToList();
-            var domainObjects = descriptor.ImplementationType
-                .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
-                .SelectMany(method => method.GetParameters().Select(parameter => parameter.ParameterType).Append(method.ReturnType))
-                .SelectMany(UnwrapTypes)
-                .Where(type => type.Namespace?.StartsWith("PublisherStudio.BusinessObjects", StringComparison.Ordinal) == true)
-                .Select(type => type.Name)
-                .Distinct()
-                .OrderBy(name => name)
-                .ToList();
-            return new ServiceApiDescriptor
-            {
-                Service = descriptor.ImplementationType.FullName ?? descriptor.ImplementationType.Name,
-                Interface = descriptor.InterfaceType?.FullName ?? string.Empty,
-                Lifetime = descriptor.Lifetime,
-                DomainObjects = domainObjects,
-                Methods = contract.GetMethods().Select(method => method.Name).Distinct().OrderBy(name => name).ToList(),
-                Controllers = relatedControllers
-            };
-        }).ToList();
-
-        return new BusinessObjectContextSnapshot
-        {
-            DomainObjects = domainTypes,
-            Services = services,
-            ControllerRoutes = apiSurfaces.SelectMany(surface => surface.Routes).Distinct().OrderBy(route => route).ToList()
-        };
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method BusinessObjectContextService.CreateSnapshot failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     private string FriendlyName(Type type)
     {
-        if (!type.IsGenericType) return type.Name;
-        var baseName = type.Name.Split('`')[0];
-        return $"{baseName}<{string.Join(", ", type.GetGenericArguments().Select(FriendlyName))}>";
+    try
+    {
+            if (!type.IsGenericType) return type.Name;
+            var baseName = type.Name.Split('`')[0];
+            return $"{baseName}<{string.Join(", ", type.GetGenericArguments().Select(FriendlyName))}>";
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method BusinessObjectContextService.FriendlyName failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     private IEnumerable<Type> UnwrapTypes(Type type)
     {

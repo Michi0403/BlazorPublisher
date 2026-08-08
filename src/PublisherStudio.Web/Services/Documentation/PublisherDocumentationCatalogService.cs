@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Text.Json;
 using System.Xml.Linq;
 using PublisherStudio.BusinessObjects;
@@ -20,69 +20,117 @@ public sealed class PublisherDocumentationCatalogService(
     /// <inheritdoc />
     public PublisherDocumentationStatus GetStatus()
     {
-        var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "unknown";
-        var root = ResolveDocumentationRoot();
-        var manifest = ReadManifest(root);
-        var comments = LoadComments(root);
-        var pdfPath = GetPdfPath();
-        return new PublisherDocumentationStatus
-        {
-            Version = manifest?.Version ?? version,
-            GeneratedAtUtc = manifest?.GeneratedAtUtc,
-            HtmlAvailable = root is not null && File.Exists(Path.Combine(root, "index.html")),
-            PdfAvailable = pdfPath is not null,
-            XmlCommentsAvailable = comments.Count > 0,
-            CommentCount = comments.Count,
-            PdfFileName = pdfPath is null ? $"PublisherStudio-{version}.pdf" : Path.GetFileName(pdfPath)
-        };
+    try
+    {
+            var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "unknown";
+            var root = ResolveDocumentationRoot();
+            var manifest = ReadManifest(root);
+            var comments = LoadComments(root);
+            var pdfPath = GetPdfPath();
+            return new PublisherDocumentationStatus
+            {
+                Version = manifest?.Version ?? version,
+                GeneratedAtUtc = manifest?.GeneratedAtUtc,
+                HtmlAvailable = root is not null && File.Exists(Path.Combine(root, "index.html")),
+                PdfAvailable = pdfPath is not null,
+                XmlCommentsAvailable = comments.Count > 0,
+                CommentCount = comments.Count,
+                PdfFileName = pdfPath is null ? $"PublisherStudio-{version}.pdf" : Path.GetFileName(pdfPath)
+            };
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(PublisherDocumentationCatalogService)}.{nameof(GetStatus)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(PublisherDocumentationCatalogService)}.{nameof(GetStatus)} failed.");
+        throw;
+    }
+}
 
     /// <inheritdoc />
     public string? GetHtmlFilePath(string? relativePath)
     {
-        var root = ResolveDocumentationRoot();
-        if (root is null) return null;
+    try
+    {
+            var root = ResolveDocumentationRoot();
+            if (root is null) return null;
 
-        var normalized = string.IsNullOrWhiteSpace(relativePath)
-            ? "index.html"
-            : relativePath.Replace('\\', '/').TrimStart('/');
-        if (normalized.Length == 0) normalized = "index.html";
+            var normalized = string.IsNullOrWhiteSpace(relativePath)
+                ? "index.html"
+                : relativePath.Replace('\\', '/').TrimStart('/');
+            if (normalized.Length == 0) normalized = "index.html";
 
-        var segments = normalized.Split('/', StringSplitOptions.RemoveEmptyEntries);
-        if (segments.Any(segment => segment is "." or "..")) return null;
+            var segments = normalized.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            if (segments.Any(segment => segment is "." or "..")) return null;
 
-        var rootPath = Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
-        var candidate = Path.GetFullPath(Path.Combine(root, Path.Combine(segments)));
-        if (!candidate.StartsWith(rootPath, StringComparison.OrdinalIgnoreCase)) return null;
-        if (Directory.Exists(candidate)) candidate = Path.Combine(candidate, "index.html");
-        return File.Exists(candidate) ? candidate : null;
+            var rootPath = Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+            var candidate = Path.GetFullPath(Path.Combine(root, Path.Combine(segments)));
+            if (!candidate.StartsWith(rootPath, StringComparison.OrdinalIgnoreCase)) return null;
+            if (Directory.Exists(candidate)) candidate = Path.Combine(candidate, "index.html");
+            return File.Exists(candidate) ? candidate : null;
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(PublisherDocumentationCatalogService)}.{nameof(GetHtmlFilePath)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(PublisherDocumentationCatalogService)}.{nameof(GetHtmlFilePath)} failed.");
+        throw;
+    }
+}
 
     /// <inheritdoc />
     public string? GetPdfPath()
     {
-        var root = ResolveDocumentationRoot();
-        if (root is null) return null;
-        var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? string.Empty;
-        var exact = Path.Combine(root, $"PublisherStudio-{version}.pdf");
-        if (File.Exists(exact)) return exact;
-        return Directory.EnumerateFiles(root, "PublisherStudio-*.pdf", SearchOption.TopDirectoryOnly)
-            .OrderByDescending(File.GetLastWriteTimeUtc)
-            .FirstOrDefault();
+    try
+    {
+            var root = ResolveDocumentationRoot();
+            if (root is null) return null;
+            var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? string.Empty;
+            var exact = Path.Combine(root, $"PublisherStudio-{version}.pdf");
+            if (File.Exists(exact)) return exact;
+            return Directory.EnumerateFiles(root, "PublisherStudio-*.pdf", SearchOption.TopDirectoryOnly)
+                .OrderByDescending(File.GetLastWriteTimeUtc)
+                .FirstOrDefault();
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(PublisherDocumentationCatalogService)}.{nameof(GetPdfPath)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(PublisherDocumentationCatalogService)}.{nameof(GetPdfPath)} failed.");
+        throw;
+    }
+}
 
     /// <inheritdoc />
     public IReadOnlyList<PublisherDocumentationComment> SearchComments(string? query, int limit)
     {
-        var boundedLimit = Math.Clamp(limit, 1, 500);
-        var comments = LoadComments(ResolveDocumentationRoot());
-        if (string.IsNullOrWhiteSpace(query)) return comments.Take(boundedLimit).ToArray();
-        var search = query.Trim();
-        return comments
-            .Where(comment => CommentMatches(comment, search))
-            .Take(boundedLimit)
-            .ToArray();
+    try
+    {
+            var boundedLimit = Math.Clamp(limit, 1, 500);
+            var comments = LoadComments(ResolveDocumentationRoot());
+            if (string.IsNullOrWhiteSpace(query)) return comments.Take(boundedLimit).ToArray();
+            var search = query.Trim();
+            return comments
+                .Where(comment => CommentMatches(comment, search))
+                .Take(boundedLimit)
+                .ToArray();
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(PublisherDocumentationCatalogService)}.{nameof(SearchComments)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(PublisherDocumentationCatalogService)}.{nameof(SearchComments)} failed.");
+        throw;
+    }
+}
 
     private IReadOnlyList<PublisherDocumentationComment> LoadComments(string? documentationRoot)
     {
@@ -120,51 +168,99 @@ public sealed class PublisherDocumentationCatalogService(
 
     private PublisherDocumentationComment? CreateComment(XElement member)
     {
-        var memberId = member.Attribute("name")?.Value?.Trim();
-        if (string.IsNullOrWhiteSpace(memberId)) return null;
-        var summary = NormalizeComment(member.Element("summary")?.Value);
-        var remarks = NormalizeComment(member.Element("remarks")?.Value);
-        if (summary.Length == 0 && remarks.Length == 0) return null;
-        return new PublisherDocumentationComment
-        {
-            MemberId = memberId,
-            DisplayName = BuildDisplayName(memberId),
-            Summary = summary,
-            Remarks = remarks
-        };
+    try
+    {
+            var memberId = member.Attribute("name")?.Value?.Trim();
+            if (string.IsNullOrWhiteSpace(memberId)) return null;
+            var summary = NormalizeComment(member.Element("summary")?.Value);
+            var remarks = NormalizeComment(member.Element("remarks")?.Value);
+            if (summary.Length == 0 && remarks.Length == 0) return null;
+            return new PublisherDocumentationComment
+            {
+                MemberId = memberId,
+                DisplayName = BuildDisplayName(memberId),
+                Summary = summary,
+                Remarks = remarks
+            };
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(PublisherDocumentationCatalogService)}.{nameof(CreateComment)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(PublisherDocumentationCatalogService)}.{nameof(CreateComment)} failed.");
+        throw;
+    }
+}
 
-    private bool CommentMatches(PublisherDocumentationComment comment, string query) =>
-        comment.MemberId.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+    private bool CommentMatches(PublisherDocumentationComment comment, string query) {
+    try
+    {
+        return comment.MemberId.Contains(query, StringComparison.OrdinalIgnoreCase) ||
         comment.DisplayName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
         comment.Summary.Contains(query, StringComparison.OrdinalIgnoreCase) ||
         comment.Remarks.Contains(query, StringComparison.OrdinalIgnoreCase);
+    }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(PublisherDocumentationCatalogService)}.{nameof(CommentMatches)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(PublisherDocumentationCatalogService)}.{nameof(CommentMatches)} failed.");
+        throw;
+    }
+}
 
     private string? ResolveDocumentationRoot()
     {
-        var candidates = new[]
-        {
-            Path.Combine(environment.WebRootPath ?? string.Empty, "help-docs"),
-            Path.Combine(AppContext.BaseDirectory, "wwwroot", "help-docs"),
-            Path.Combine(environment.ContentRootPath, "wwwroot", "help-docs")
-        };
-        return candidates
-            .Where(path => !string.IsNullOrWhiteSpace(path))
-            .Select(Path.GetFullPath)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .FirstOrDefault(path => File.Exists(Path.Combine(path, "index.html")));
+    try
+    {
+            var candidates = new[]
+            {
+                Path.Combine(environment.WebRootPath ?? string.Empty, "help-docs"),
+                Path.Combine(AppContext.BaseDirectory, "wwwroot", "help-docs"),
+                Path.Combine(environment.ContentRootPath, "wwwroot", "help-docs")
+            };
+            return candidates
+                .Where(path => !string.IsNullOrWhiteSpace(path))
+                .Select(Path.GetFullPath)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .FirstOrDefault(path => File.Exists(Path.Combine(path, "index.html")));
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(PublisherDocumentationCatalogService)}.{nameof(ResolveDocumentationRoot)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(PublisherDocumentationCatalogService)}.{nameof(ResolveDocumentationRoot)} failed.");
+        throw;
+    }
+}
 
     private string? ResolveXmlDocumentationPath(string? documentationRoot)
     {
-        var candidates = new[]
-        {
-            documentationRoot is null ? null : Path.Combine(documentationRoot, "PublisherStudio.Web.xml"),
-            Path.Combine(AppContext.BaseDirectory, "PublisherStudio.Web.xml"),
-            Path.Combine(AppContext.BaseDirectory, "wwwroot", "help-docs", "PublisherStudio.Web.xml")
-        };
-        return candidates.FirstOrDefault(path => path is not null && File.Exists(path));
+    try
+    {
+            var candidates = new[]
+            {
+                documentationRoot is null ? null : Path.Combine(documentationRoot, "PublisherStudio.Web.xml"),
+                Path.Combine(AppContext.BaseDirectory, "PublisherStudio.Web.xml"),
+                Path.Combine(AppContext.BaseDirectory, "wwwroot", "help-docs", "PublisherStudio.Web.xml")
+            };
+            return candidates.FirstOrDefault(path => path is not null && File.Exists(path));
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(PublisherDocumentationCatalogService)}.{nameof(ResolveXmlDocumentationPath)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(PublisherDocumentationCatalogService)}.{nameof(ResolveXmlDocumentationPath)} failed.");
+        throw;
+    }
+}
 
     private PublisherDocumentationManifest? ReadManifest(string? documentationRoot)
     {
@@ -185,15 +281,39 @@ public sealed class PublisherDocumentationCatalogService(
 
     private string BuildDisplayName(string memberId)
     {
-        var value = memberId.Length > 2 && memberId[1] == ':' ? memberId[2..] : memberId;
-        var parameter = value.IndexOf('(');
-        if (parameter >= 0) value = value[..parameter];
-        return value.Replace('#', '.');
+    try
+    {
+            var value = memberId.Length > 2 && memberId[1] == ':' ? memberId[2..] : memberId;
+            var parameter = value.IndexOf('(');
+            if (parameter >= 0) value = value[..parameter];
+            return value.Replace('#', '.');
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(PublisherDocumentationCatalogService)}.{nameof(BuildDisplayName)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(PublisherDocumentationCatalogService)}.{nameof(BuildDisplayName)} failed.");
+        throw;
+    }
+}
 
     private string NormalizeComment(string? value)
     {
-        if (string.IsNullOrWhiteSpace(value)) return string.Empty;
-        return string.Join(" ", value.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)).Trim();
+    try
+    {
+            if (string.IsNullOrWhiteSpace(value)) return string.Empty;
+            return string.Join(" ", value.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)).Trim();
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(PublisherDocumentationCatalogService)}.{nameof(NormalizeComment)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(PublisherDocumentationCatalogService)}.{nameof(NormalizeComment)} failed.");
+        throw;
+    }
+}
 }

@@ -1,4 +1,4 @@
-﻿using PublisherStudio.BusinessObjects;
+using PublisherStudio.BusinessObjects;
 
 // logging-policy: pure-helper
 namespace PublisherStudio.Services.Streaming.UseCases.Chat;
@@ -24,34 +24,82 @@ public sealed class StreamingChatResultFactory(ILogger<StreamingChatResultFactor
     /// </summary>
     public StreamingChatSendResult CreateNotFound()
     {
-        logger.LogTrace("Creating a streaming-chat not-found result.");
-        return new StreamingChatSendResult(false, false, string.Empty);
+    try
+    {
+            logger.LogTrace("Creating a streaming-chat not-found result.");
+            return new StreamingChatSendResult(false, false, string.Empty);
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(StreamingChatResultFactory)}.{nameof(CreateNotFound)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(StreamingChatResultFactory)}.{nameof(CreateNotFound)} failed.");
+        throw;
+    }
+}
 
     /// <summary>
     /// Creates accepted.
     /// </summary>
     public StreamingChatSendResult CreateAccepted()
     {
-        logger.LogTrace("Creating a streaming-chat accepted result.");
-        return new StreamingChatSendResult(true, true, string.Empty);
+    try
+    {
+            logger.LogTrace("Creating a streaming-chat accepted result.");
+            return new StreamingChatSendResult(true, true, string.Empty);
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(StreamingChatResultFactory)}.{nameof(CreateAccepted)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(StreamingChatResultFactory)}.{nameof(CreateAccepted)} failed.");
+        throw;
+    }
+}
 
     /// <summary>
     /// Creates not configured.
     /// </summary>
     public StreamingChatSendResult CreateNotConfigured()
     {
-        logger.LogTrace("Creating a streaming-chat not-configured result.");
-        return new StreamingChatSendResult(true, false, "Chat is not configured for this output.");
+    try
+    {
+            logger.LogTrace("Creating a streaming-chat not-configured result.");
+            return new StreamingChatSendResult(true, false, "Chat is not configured for this output.");
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(StreamingChatResultFactory)}.{nameof(CreateNotConfigured)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(StreamingChatResultFactory)}.{nameof(CreateNotConfigured)} failed.");
+        throw;
+    }
+}
 
     /// <summary>
     /// Creates failure.
     /// </summary>
     public StreamingChatSendResult CreateFailure(string error)
     {
-        logger.LogTrace("Creating a streaming-chat failure result.");
-        return new StreamingChatSendResult(true, false, error ?? string.Empty);
+    try
+    {
+            logger.LogTrace("Creating a streaming-chat failure result.");
+            return new StreamingChatSendResult(true, false, error ?? string.Empty);
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(StreamingChatResultFactory)}.{nameof(CreateFailure)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(StreamingChatResultFactory)}.{nameof(CreateFailure)} failed.");
+        throw;
+    }
+}
 }

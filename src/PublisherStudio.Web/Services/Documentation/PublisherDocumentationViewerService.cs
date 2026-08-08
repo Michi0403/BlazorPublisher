@@ -84,20 +84,32 @@ public sealed class PublisherDocumentationViewerService(ILogger<PublisherDocumen
 
     private string NormalizeUrl(string url)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(url);
-        var normalized = url.Trim();
-        if (!normalized.StartsWith('/', StringComparison.Ordinal) ||
-            normalized.StartsWith("//", StringComparison.Ordinal) ||
-            normalized.Contains('\\'))
-        {
-            throw new ArgumentException(
-                "Documentation viewer URLs must be same-origin application-relative paths.",
-                nameof(url));
-        }
+    try
+    {
+            ArgumentException.ThrowIfNullOrWhiteSpace(url);
+            var normalized = url.Trim();
+            if (!normalized.StartsWith('/', StringComparison.Ordinal) ||
+                normalized.StartsWith("//", StringComparison.Ordinal) ||
+                normalized.Contains('\\'))
+            {
+                throw new ArgumentException(
+                    "Documentation viewer URLs must be same-origin application-relative paths.",
+                    nameof(url));
+            }
 
-        if (normalized.Any(char.IsControl))
-            throw new ArgumentException("Documentation viewer URLs may not contain control characters.", nameof(url));
+            if (normalized.Any(char.IsControl))
+                throw new ArgumentException("Documentation viewer URLs may not contain control characters.", nameof(url));
 
-        return normalized;
+            return normalized;
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(PublisherDocumentationViewerService)}.{nameof(NormalizeUrl)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(PublisherDocumentationViewerService)}.{nameof(NormalizeUrl)} failed.");
+        throw;
+    }
+}
 }

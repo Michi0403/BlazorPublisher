@@ -1,4 +1,4 @@
-﻿using PublisherStudio.Services.Configuration;
+using PublisherStudio.Services.Configuration;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
@@ -117,12 +117,24 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
     /// </summary>
     public void Start()
     {
-        _thread.Start();
-        if (!_started.Wait(TimeSpan.FromSeconds(15)))
-            throw new TimeoutException("Windows did not initialize process audio loopback in time.");
-        if (_startupError is not null)
-            throw new InvalidOperationException("Windows process audio loopback could not start.", _startupError);
+    try
+    {
+            _thread.Start();
+            if (!_started.Wait(TimeSpan.FromSeconds(15)))
+                throw new TimeoutException("Windows did not initialize process audio loopback in time.");
+            if (_startupError is not null)
+                throw new InvalidOperationException("Windows process audio loopback could not start.", _startupError);
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            _logger.LogDebug(__serviceMethodException, $"Service method {nameof(WindowsProcessLoopbackCapture)}.{nameof(Start)} was canceled.");
+        else
+            _logger.LogError(__serviceMethodException, $"Service method {nameof(WindowsProcessLoopbackCapture)}.{nameof(Start)} failed.");
+        throw;
+    }
+}
 
     private void CaptureThread()
     {
@@ -217,71 +229,119 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
 
     private IAudioClient ActivateAudioClient(uint processId)
     {
-        var parameters = new AudioClientActivationParams
-        {
-            ActivationType = 1,
-            ProcessLoopbackParams = new AudioClientProcessLoopbackParams
+    try
+    {
+            var parameters = new AudioClientActivationParams
             {
-                TargetProcessId = processId,
-                ProcessLoopbackMode = 0
-            }
-        };
-        var parametersPointer = Marshal.AllocCoTaskMem(Marshal.SizeOf<AudioClientActivationParams>());
-        var propertyPointer = Marshal.AllocCoTaskMem(Marshal.SizeOf<PropVariant>());
-        try
-        {
-            Marshal.StructureToPtr(parameters, parametersPointer, false);
-            var property = new PropVariant
-            {
-                VariantType = VtBlob,
-                Blob = new Blob
+                ActivationType = 1,
+                ProcessLoopbackParams = new AudioClientProcessLoopbackParams
                 {
-                    Size = (uint)Marshal.SizeOf<AudioClientActivationParams>(),
-                    Data = parametersPointer
+                    TargetProcessId = processId,
+                    ProcessLoopbackMode = 0
                 }
             };
-            Marshal.StructureToPtr(property, propertyPointer, false);
-            var completion = new AudioActivationCompletionHandler(this);
-            var audioClientId = _audioClientInterfaceId;
-            ThrowIfFailed(_nativeService.ActivateAudioInterface(
-                VirtualAudioDeviceProcessLoopback,
-                ref audioClientId,
-                propertyPointer,
-                completion,
-                out var activationOperation));
-            try { return completion.Wait(TimeSpan.FromSeconds(12)); }
-            finally { ReleaseComObject(activationOperation); }
-        }
-        finally
-        {
-            Marshal.FreeCoTaskMem(propertyPointer);
-            Marshal.FreeCoTaskMem(parametersPointer);
-        }
+            var parametersPointer = Marshal.AllocCoTaskMem(Marshal.SizeOf<AudioClientActivationParams>());
+            var propertyPointer = Marshal.AllocCoTaskMem(Marshal.SizeOf<PropVariant>());
+            try
+            {
+                Marshal.StructureToPtr(parameters, parametersPointer, false);
+                var property = new PropVariant
+                {
+                    VariantType = VtBlob,
+                    Blob = new Blob
+                    {
+                        Size = (uint)Marshal.SizeOf<AudioClientActivationParams>(),
+                        Data = parametersPointer
+                    }
+                };
+                Marshal.StructureToPtr(property, propertyPointer, false);
+                var completion = new AudioActivationCompletionHandler(this);
+                var audioClientId = _audioClientInterfaceId;
+                ThrowIfFailed(_nativeService.ActivateAudioInterface(
+                    VirtualAudioDeviceProcessLoopback,
+                    ref audioClientId,
+                    propertyPointer,
+                    completion,
+                    out var activationOperation));
+                try { return completion.Wait(TimeSpan.FromSeconds(12)); }
+                finally { ReleaseComObject(activationOperation); }
+            }
+            finally
+            {
+                Marshal.FreeCoTaskMem(propertyPointer);
+                Marshal.FreeCoTaskMem(parametersPointer);
+            }
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            _logger.LogDebug(__serviceMethodException, $"Service method {nameof(WindowsProcessLoopbackCapture)}.{nameof(ActivateAudioClient)} was canceled.");
+        else
+            _logger.LogError(__serviceMethodException, $"Service method {nameof(WindowsProcessLoopbackCapture)}.{nameof(ActivateAudioClient)} failed.");
+        throw;
+    }
+}
 
     private void ThrowIfFailed(int hresult)
     {
-        if (hresult < 0) Marshal.ThrowExceptionForHR(hresult);
+    try
+    {
+            if (hresult < 0) Marshal.ThrowExceptionForHR(hresult);
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            _logger.LogDebug(__serviceMethodException, $"Service method {nameof(WindowsProcessLoopbackCapture)}.{nameof(ThrowIfFailed)} was canceled.");
+        else
+            _logger.LogError(__serviceMethodException, $"Service method {nameof(WindowsProcessLoopbackCapture)}.{nameof(ThrowIfFailed)} failed.");
+        throw;
+    }
+}
 
     private void ReleaseComObject(object? value)
     {
-        if (value is null || !Marshal.IsComObject(value)) return;
-        try { Marshal.FinalReleaseComObject(value); } catch { }
+    try
+    {
+            if (value is null || !Marshal.IsComObject(value)) return;
+            try { Marshal.FinalReleaseComObject(value); } catch { }
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            _logger.LogDebug(__serviceMethodException, $"Service method {nameof(WindowsProcessLoopbackCapture)}.{nameof(ReleaseComObject)} was canceled.");
+        else
+            _logger.LogError(__serviceMethodException, $"Service method {nameof(WindowsProcessLoopbackCapture)}.{nameof(ReleaseComObject)} failed.");
+        throw;
+    }
+}
 
     /// <summary>
     /// Runs the dispose operation.
     /// </summary>
     public void Dispose()
     {
-        if (_disposed) return;
-        _disposed = true;
-        _cancellation.Cancel();
-        if (_thread.IsAlive) _thread.Join(TimeSpan.FromSeconds(3));
-        _started.Dispose();
-        _cancellation.Dispose();
+    try
+    {
+            if (_disposed) return;
+            _disposed = true;
+            _cancellation.Cancel();
+            if (_thread.IsAlive) _thread.Join(TimeSpan.FromSeconds(3));
+            _started.Dispose();
+            _cancellation.Dispose();
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            _logger.LogDebug(__serviceMethodException, $"Service method {nameof(WindowsProcessLoopbackCapture)}.{nameof(Dispose)} was canceled.");
+        else
+            _logger.LogError(__serviceMethodException, $"Service method {nameof(WindowsProcessLoopbackCapture)}.{nameof(Dispose)} failed.");
+        throw;
+    }
+}
 
     private sealed class AudioActivationCompletionHandler(WindowsProcessLoopbackCapture owner)
         : IActivateAudioInterfaceCompletionHandler
@@ -293,24 +353,42 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
         /// </summary>
         public int ActivateCompleted(IActivateAudioInterfaceAsyncOperation operation)
         {
-            try
-            {
-                owner.ThrowIfFailed(operation.GetActivateResult(out var activationResult, out var activated));
-                owner.ThrowIfFailed(activationResult);
-                _completion.TrySetResult((IAudioClient)activated);
-            }
-            catch (Exception exception) { _completion.TrySetException(exception); }
-            return 0;
-        }
+    try
+    {
+                try
+                {
+                    owner.ThrowIfFailed(operation.GetActivateResult(out var activationResult, out var activated));
+                    owner.ThrowIfFailed(activationResult);
+                    _completion.TrySetResult((IAudioClient)activated);
+                }
+                catch (Exception exception) { _completion.TrySetException(exception); }
+                return 0;
+        
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method AudioActivationCompletionHandler.ActivateCompleted failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
         /// <summary>
         /// Runs the wait operation.
         /// </summary>
         public IAudioClient Wait(TimeSpan timeout)
         {
-            if (!_completion.Task.Wait(timeout)) throw new TimeoutException("Windows process audio activation timed out.");
-            return _completion.Task.GetAwaiter().GetResult();
-        }
+    try
+    {
+                if (!_completion.Task.Wait(timeout)) throw new TimeoutException("Windows process audio activation timed out.");
+                return _completion.Task.GetAwaiter().GetResult();
+        
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method AudioActivationCompletionHandler.Wait failed: {__serviceMethodException}");
+        throw;
+    }
+}
     }
 
     [StructLayout(LayoutKind.Sequential)]

@@ -1,4 +1,4 @@
-﻿using System.Net.WebSockets;
+using System.Net.WebSockets;
 
 namespace PublisherStudio.Services.Streaming.UseCases.Ingest;
 
@@ -12,25 +12,62 @@ public sealed class StreamingIngestUseCases(MediaSessionRegistry sessions)
     /// <summary>
     /// Runs the exists operation.
     /// </summary>
-    public bool Exists(Guid sessionId) => _sessions.TryGet(sessionId, out _);
+    public bool Exists(Guid sessionId) {
+    try
+    {
+        return _sessions.TryGet(sessionId, out _);
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method StreamingIngestUseCases.Exists failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     /// <summary>
     /// Runs the announce operation.
     /// </summary>
-    public bool Announce(Guid sessionId, Guid? outputId, IngestAnnouncement announcement) =>
-        _sessions.AnnounceIngest(sessionId, outputId, announcement);
+    public bool Announce(Guid sessionId, Guid? outputId, IngestAnnouncement announcement) {
+    try
+    {
+        return _sessions.AnnounceIngest(sessionId, outputId, announcement);
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method StreamingIngestUseCases.Announce failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     /// <summary>
     /// Runs the push operation.
     /// </summary>
-    public bool Push(Guid sessionId, Guid? outputId, byte[] payload) =>
-        _sessions.PushIngest(sessionId, outputId, payload);
+    public bool Push(Guid sessionId, Guid? outputId, byte[] payload) {
+    try
+    {
+        return _sessions.PushIngest(sessionId, outputId, payload);
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method StreamingIngestUseCases.Push failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     /// <summary>
     /// Determines whether publish web rtc.
     /// </summary>
-    public bool CanPublishWebRtc(Guid sessionId) =>
-        _sessions.TryGet(sessionId, out var session) && session.LanDefinition.EnableBrowserWebRtc;
+    public bool CanPublishWebRtc(Guid sessionId) {
+    try
+    {
+        return _sessions.TryGet(sessionId, out var session) && session.LanDefinition.EnableBrowserWebRtc;
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method StreamingIngestUseCases.CanPublishWebRtc failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     /// <summary>
     /// Runs the run web rtc publisher async operation.
@@ -40,9 +77,18 @@ public sealed class StreamingIngestUseCases(MediaSessionRegistry sessions)
         WebSocket socket,
         CancellationToken cancellationToken)
     {
-        if (!_sessions.TryGet(sessionId, out var session) || !session.LanDefinition.EnableBrowserWebRtc)
-            return false;
-        await session.WebRtc.RunPublisherAsync(socket, cancellationToken);
-        return true;
+    try
+    {
+            if (!_sessions.TryGet(sessionId, out var session) || !session.LanDefinition.EnableBrowserWebRtc)
+                return false;
+            await session.WebRtc.RunPublisherAsync(socket, cancellationToken);
+            return true;
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method StreamingIngestUseCases.RunWebRtcPublisherAsync failed: {__serviceMethodException}");
+        throw;
+    }
+}
 }

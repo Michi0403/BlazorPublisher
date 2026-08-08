@@ -1,4 +1,4 @@
-﻿using PublisherStudio.BusinessObjects;
+using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.CodeEditing;
 
@@ -22,29 +22,61 @@ public sealed class CodeLanguageService : ICodeLanguageService
     /// <summary>
     /// Gets profiles.
     /// </summary>
-    public IReadOnlyList<CodeLanguageProfile> GetProfiles() => _profiles;
+    public IReadOnlyList<CodeLanguageProfile> GetProfiles() {
+    try
+    {
+        return _profiles;
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method CodeLanguageService.GetProfiles failed: {__serviceMethodException}");
+        throw;
+    }
+}
     /// <summary>
     /// Runs the get operation.
     /// </summary>
-    public CodeLanguageProfile Get(string languageId) => _byId.GetValueOrDefault(languageId ?? string.Empty) ?? _byId["text"];
+    public CodeLanguageProfile Get(string languageId) {
+    try
+    {
+        return _byId.GetValueOrDefault(languageId ?? string.Empty) ?? _byId["text"];
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method CodeLanguageService.Get failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
     /// <summary>
     /// Runs the detect operation.
     /// </summary>
     public CodeLanguageProfile Detect(string fileNameOrExtension, string? content = null)
     {
-        var extension = Path.GetExtension(fileNameOrExtension ?? string.Empty);
-        if (string.IsNullOrWhiteSpace(extension) && (fileNameOrExtension ?? string.Empty).StartsWith('.')) extension = fileNameOrExtension;
-        var profile = _profiles.FirstOrDefault(candidate => candidate.Extensions.Contains(extension, StringComparer.OrdinalIgnoreCase));
-        if (profile is not null) return profile;
-        var sample = content ?? string.Empty;
-        if (sample.Contains("using System;", StringComparison.Ordinal) || sample.Contains("namespace ", StringComparison.Ordinal)) return Get("csharp");
-        if (sample.Contains("function ", StringComparison.Ordinal) || sample.Contains("const ", StringComparison.Ordinal)) return Get("javascript");
-        if (sample.Contains("$fn", StringComparison.Ordinal) || sample.Contains("linear_extrude", StringComparison.Ordinal)) return Get("openscad");
-        return Get("text");
+    try
+    {
+            var extension = Path.GetExtension(fileNameOrExtension ?? string.Empty);
+            if (string.IsNullOrWhiteSpace(extension) && (fileNameOrExtension ?? string.Empty).StartsWith('.')) extension = fileNameOrExtension;
+            var profile = _profiles.FirstOrDefault(candidate => candidate.Extensions.Contains(extension, StringComparer.OrdinalIgnoreCase));
+            if (profile is not null) return profile;
+            var sample = content ?? string.Empty;
+            if (sample.Contains("using System;", StringComparison.Ordinal) || sample.Contains("namespace ", StringComparison.Ordinal)) return Get("csharp");
+            if (sample.Contains("function ", StringComparison.Ordinal) || sample.Contains("const ", StringComparison.Ordinal)) return Get("javascript");
+            if (sample.Contains("$fn", StringComparison.Ordinal) || sample.Contains("linear_extrude", StringComparison.Ordinal)) return Get("openscad");
+            return Get("text");
+    
     }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method CodeLanguageService.Detect failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
-    private IReadOnlyList<CodeLanguageProfile> BuildProfiles() => new List<CodeLanguageProfile>
+    private IReadOnlyList<CodeLanguageProfile> BuildProfiles() {
+    try
+    {
+        return new List<CodeLanguageProfile>
     {
         Profile("text", "Plain text", [], "", "", "", [], false, false),
         Profile("csharp", "C#", [".cs", ".razor", ".cshtml"], "//", "/*", "*/", ["class","interface","record","public","private","protected","internal","static","sealed","abstract","async","await","using","namespace","new","return","if","else","switch","case","for","foreach","while","try","catch","finally","throw","var","string","int","double","bool","null","true","false"], true, false),
@@ -69,7 +101,23 @@ public sealed class CodeLanguageService : ICodeLanguageService
         Profile("swift", "Swift", [".swift"], "//", "/*", "*/", ["class","struct","enum","protocol","extension","func","var","let","public","private","internal","open","static","override","async","await","throws","return","if","else","switch","case","for","while","guard","defer","true","false","nil"], true, false),
         Profile("openscad", "OpenSCAD", [".scad"], "//", "/*", "*/", ["module","function","let","for","intersection_for","if","else","each","include","use","cube","sphere","cylinder","polyhedron","square","circle","polygon","text","translate","rotate","scale","resize","mirror","multmatrix","color","offset","minkowski","hull","union","difference","intersection","render","linear_extrude","rotate_extrude","projection","import","surface","children","true","false","undef"], true, false)
     }.AsReadOnly();
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method CodeLanguageService.BuildProfiles failed: {__serviceMethodException}");
+        throw;
+    }
+}
 
-    private CodeLanguageProfile Profile(string id, string name, List<string> extensions, string line, string blockStart, string blockEnd, List<string> keywords, bool braces, bool indentation) =>
-        new() { Id = id, DisplayName = name, Extensions = extensions, LineComment = line, BlockCommentStart = blockStart, BlockCommentEnd = blockEnd, Keywords = keywords, UsesBraces = braces, UsesIndentation = indentation };
+    private CodeLanguageProfile Profile(string id, string name, List<string> extensions, string line, string blockStart, string blockEnd, List<string> keywords, bool braces, bool indentation) {
+    try
+    {
+        return new() { Id = id, DisplayName = name, Extensions = extensions, LineComment = line, BlockCommentStart = blockStart, BlockCommentEnd = blockEnd, Keywords = keywords, UsesBraces = braces, UsesIndentation = indentation };
+    }
+    catch (Exception __serviceMethodException)
+    {
+        System.Diagnostics.Trace.TraceError($"Service method CodeLanguageService.Profile failed: {__serviceMethodException}");
+        throw;
+    }
+}
 }

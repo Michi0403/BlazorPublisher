@@ -32,7 +32,7 @@ require('src/PublisherStudio.Web/Services/OrganicPlugins/OrganicCapabilityAndExe
 require('src/PublisherStudio.Web/Components/Pages/OrganicPlugins.razor','Method and route','Configuration','Runtime','MaximumMessageBytes','PeerExpirySeconds','AutoConnectDiscoveredPeer','RemoteCapabilities','localgpt.vision.ocr','/api/organic/onewire/http-json/profile')
 require('src/PublisherStudio.Web/Components/Editor/PictureEditor.razor.cs','CapabilityKey = "localgpt.vision.ocr"','modelName = "deepseek-ocr"')
 require('docs/styles/publisherstudio-kawaii.js','mountThemeControl','publisherstudio-docs-theme','publisherstudio-cursor-paw')
-require('docs/styles/publisherstudio-kawaii.css','--kawaii-docs-rail-width: clamp(15rem, 16vw, 18rem)','--kawaii-docs-panel-gap: clamp(1.25rem, 2vw, 2.5rem)','publisherstudio-snapshot-layout')
+require('docs/styles/publisherstudio-kawaii.css','--kawaii-docs-rail-width: clamp(15rem, 13vw, 20rem)','--kawaii-docs-panel-gap: clamp(1rem, 1.35vw, 2.4rem)','publisherstudio-snapshot-layout')
 require('build/Build-Documentation.ps1','New-PublisherStudioHtmlPrintBook','Convert-PublisherStudioApiKawaiiDetails','html-browser-print','publisherstudio-kawaii-docs','Copy-Item -Path (Join-Path $siteRoot "*") -Destination $publishRoot -Recurse -Force')
 forbid('build/Build-Documentation.ps1','html-browser-compact-handbook')
 require('build/Update-GitHubPagesSnapshot.ps1','publisherstudio-kawaii-docs.zip','--expected-version')

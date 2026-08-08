@@ -161,7 +161,7 @@
   <PropertyGroup>
     <PublisherStudioDocumentationScript>$(MSBuildThisFileDirectory)build\Build-Documentation.ps1</PublisherStudioDocumentationScript>
     <PublisherStudioPagesSnapshotScript>$(MSBuildThisFileDirectory)build\Update-GitHubPagesSnapshot.ps1</PublisherStudioPagesSnapshotScript>
-    <PublisherStudioPagesSnapshotArchive>$(MSBuildThisFileDirectory).github\pages\publisherstudio-kawaii-docs.zip</PublisherStudioPagesSnapshotArchive>
+    <PublisherStudioPagesSnapshotArchive>$(MSBuildThisFileDirectory)\.github\pages\publisherstudio-kawaii-docs.zip</PublisherStudioPagesSnapshotArchive>
     <SeedPublisherStudioGitHubPagesSnapshotOnBuild Condition="'$(SeedPublisherStudioGitHubPagesSnapshotOnBuild)' == ''">true</SeedPublisherStudioGitHubPagesSnapshotOnBuild>
     <!-- The dot prevents a trailing Windows backslash from escaping later PowerShell arguments. -->
     <PublisherStudioDocumentationRepositoryRoot>$(MSBuildThisFileDirectory).</PublisherStudioDocumentationRepositoryRoot>

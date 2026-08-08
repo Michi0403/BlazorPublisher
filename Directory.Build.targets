@@ -161,7 +161,7 @@
   <PropertyGroup>
     <PublisherStudioDocumentationScript>$(MSBuildThisFileDirectory)build\Build-Documentation.ps1</PublisherStudioDocumentationScript>
     <PublisherStudioPagesSnapshotScript>$(MSBuildThisFileDirectory)build\Update-GitHubPagesSnapshot.ps1</PublisherStudioPagesSnapshotScript>
-    <PublisherStudioPagesSnapshotArchive>$(MSBuildThisFileDirectory)\.github\pages\publisherstudio-kawaii-docs.zip</PublisherStudioPagesSnapshotArchive>
+    <PublisherStudioPagesSnapshotArchive>$(MSBuildThisFileDirectory).github\pages\publisherstudio-kawaii-docs.zip</PublisherStudioPagesSnapshotArchive>
     <SeedPublisherStudioGitHubPagesSnapshotOnBuild Condition="'$(SeedPublisherStudioGitHubPagesSnapshotOnBuild)' == ''">true</SeedPublisherStudioGitHubPagesSnapshotOnBuild>
     <!-- The dot prevents a trailing Windows backslash from escaping later PowerShell arguments. -->
     <PublisherStudioDocumentationRepositoryRoot>$(MSBuildThisFileDirectory).</PublisherStudioDocumentationRepositoryRoot>
@@ -195,7 +195,7 @@
   -->
   <Target Name="SeedPublisherStudioGitHubPagesSnapshot"
           AfterTargets="BuildPublisherStudioDocumentation"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SeedPublisherStudioGitHubPagesSnapshotOnBuild)' == 'true' and ('$(Configuration)' == 'Debug' or '$(Configuration)' == 'Release') and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(BuildPublisherStudioDocumentation)' == 'true' and '$(SeedPublisherStudioGitHubPagesSnapshotOnBuild)' == 'true' and ('$(Configuration)' == 'Debug' or '$(Configuration)' == 'Release') and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(PublisherStudioPagesSnapshotScript)')" Text="PublisherStudio GitHub Pages snapshot script is missing: $(PublisherStudioPagesSnapshotScript)" />
     <Message Importance="High" Text="Validating and seeding the PublisherStudio $(Version) GitHub Pages snapshot from $(PublisherStudioDocumentationOutputRoot)" />
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(PublisherStudioPagesSnapshotScript)&quot; -DocumentationRoot &quot;$(PublisherStudioDocumentationOutputRoot)&quot; -OutputArchive &quot;$(PublisherStudioPagesSnapshotArchive)&quot;"

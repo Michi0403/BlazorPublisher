@@ -2,7 +2,7 @@
 
 PublisherStudio is a local-first publishing studio for documents, stories, pictures, spreadsheets, presentations, websites, video, streaming, and reusable interactive panels.
 
-Version **2.2.9** keeps the 2.2.8 repair baseline and adds version-matched automatic GitHub Pages snapshot seeding after successful Debug/Release documentation builds. The full-width DocFX viewer, API reference, service resilience, and user-confirmed documentation URL compiler fix remain intact.
+Version **2.2.10** keeps the proven 2.2.9 application/documentation baseline and fixes the console release wiring so assembly-only build steps cannot seed stale documentation. The full-width DocFX viewer, API reference, service resilience, and user-confirmed documentation URL compiler fix remain intact.
 
 ## Build
 

@@ -14,12 +14,19 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
+Write-Host "Clearing repository-local bin/obj build state for the authoritative release build..." -ForegroundColor Cyan
+Get-ChildItem (Join-Path $root "src") -Directory -Recurse -Force |
+    Where-Object { $_.Name -in @("bin", "obj") } |
+    Sort-Object FullName -Descending |
+    Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 $artifacts = Join-Path $root "artifacts\release"
 $packageDirectory = Join-Path $root "packages"
 $webProject = Join-Path $root "src\PublisherStudio.Web\PublisherStudio.Web.csproj"
 $webDirectory = Split-Path -Parent $webProject
 $setupProject = Join-Path $root "src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj"
 $documentationScript = Join-Path $root "build\Build-Documentation.ps1"
+$pagesSnapshotScript = Join-Path $root "build\Update-GitHubPagesSnapshot.ps1"
+$pagesSnapshotArchive = Join-Path $root ".github\pages\publisherstudio-kawaii-docs.zip"
 $wireProtocolPackageName = "LocalGPT.WireProtocolVersion.$WireProtocolVersion.nupkg"
 $wireProtocolPackage = Join-Path $packageDirectory $wireProtocolPackageName
 $documentationCacheRoot = Join-Path $artifacts ".documentation-cache"
@@ -376,6 +383,7 @@ function Prepare-PublisherStudioDocumentation {
         "-p:RuntimeIdentifier=",
         "-p:RuntimeIdentifiers=",
         "-p:BuildPublisherStudioDocumentation=false",
+        "-p:SeedPublisherStudioGitHubPagesSnapshotOnBuild=false",
         "-p:RequirePublisherStudioDocumentationPdf=false"
     )
 
@@ -396,6 +404,10 @@ function Prepare-PublisherStudioDocumentation {
         -RequirePdf
 
     Assert-PublisherStudioDocumentationPayload -DocumentationRoot $documentationOutput -Version $appVersion
+    if (-not (Test-Path -LiteralPath $pagesSnapshotScript -PathType Leaf)) { throw "GitHub Pages snapshot script not found: $pagesSnapshotScript" }
+    Write-Host "Validating and seeding the PublisherStudio $appVersion GitHub Pages snapshot from the release documentation payload..." -ForegroundColor Cyan
+    & $pagesSnapshotScript -DocumentationRoot $documentationOutput -OutputArchive $pagesSnapshotArchive
+    if (-not (Test-Path -LiteralPath $pagesSnapshotArchive -PathType Leaf)) { throw "PublisherStudio GitHub Pages snapshot update failed to create $pagesSnapshotArchive." }
     Remove-Item -LiteralPath $script:documentationCacheRoot -Recurse -Force -ErrorAction SilentlyContinue
     New-Item -ItemType Directory -Path $script:documentationCacheRoot -Force | Out-Null
     Copy-Item -Path (Join-Path $documentationOutput "*") -Destination $script:documentationCacheRoot -Recurse -Force
@@ -424,6 +436,7 @@ function Publish-Runtime {
         "-c", $Configuration,
         "-p:PublishProfile=$($profile.AppProfile)",
         "-p:BuildPublisherStudioDocumentation=false",
+        "-p:SeedPublisherStudioGitHubPagesSnapshotOnBuild=false",
         "-p:RequirePublisherStudioDocumentationPdf=false",
         "--no-restore",
         "-maxcpucount:1"

@@ -12,6 +12,11 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
+Write-Host "Clearing repository-local obj restore state before the ordered CLI build..." -ForegroundColor DarkCyan
+Get-ChildItem (Join-Path $root "src") -Directory -Recurse -Force |
+    Where-Object { $_.Name -eq "obj" } |
+    Sort-Object FullName -Descending |
+    Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 $webProject = Join-Path $root "src\PublisherStudio.Web\PublisherStudio.Web.csproj"
 $setupProject = Join-Path $root "src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj"
 $packageDirectory = Join-Path $root "packages"
@@ -50,7 +55,9 @@ $wireProperties = @(
     "-p:LocalGptWireProtocolVersion=$WireProtocolVersion",
     "-p:LocalGptWireProtocolPackageDirectory=$packageDirectory",
     "-p:RestoreAdditionalProjectSources=$packageDirectory",
-    "-p:SkipWireProtocolBootstrap=true"
+    "-p:SkipWireProtocolBootstrap=true",
+    "-p:BuildPublisherStudioDocumentation=true",
+    "-p:SeedPublisherStudioGitHubPagesSnapshotOnBuild=true"
 )
 
 Write-Host "Restoring PublisherStudio.Web after the protocol package is available..." -ForegroundColor Cyan

@@ -2,7 +2,7 @@
 
 PublisherStudio is a local-first publishing studio for documents, stories, pictures, spreadsheets, presentations, websites, video, streaming, and reusable interactive panels.
 
-Version **2.2.6** keeps the 2.2.5 repair baseline and restores broad service-method diagnostics, the generated Blazor scoped-style bundle, and a full-width three-rail PublisherStudio documentation shell aligned with the proven LocalGPT DocFX site. The checked-in 2.2.5 generated documentation snapshot is intentionally retained until the next real owner-side .NET/DocFX build regenerates it.
+Version **2.2.7** keeps the 2.2.5 repair baseline and restores broad service-method diagnostics, the generated Blazor scoped-style bundle, and a full-width three-rail PublisherStudio documentation shell aligned with the proven LocalGPT DocFX site. The checked-in 2.2.5 generated documentation snapshot is intentionally retained until the next real owner-side .NET/DocFX build regenerates it.
 
 ## Build
 

@@ -1,9 +1,11 @@
 .publisher-documentation-native-dialog {
-    width: min(96vw, 120rem);
-    height: min(94dvh, 80rem);
+    position: fixed;
+    inset: 2dvh 2vw;
+    width: auto;
+    height: auto;
     max-width: none;
     max-height: none;
-    margin: auto;
+    margin: 0;
     padding: 0;
     overflow: hidden;
     border: 0;
@@ -11,6 +13,7 @@
     background: transparent;
     color: inherit;
 }
+
 .publisher-documentation-native-dialog::backdrop { background: color-mix(in srgb, #000 72%, transparent); backdrop-filter: blur(8px); }
 .publisher-documentation-dialog { width: 100%; height: 100%; min-width: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); overflow: hidden; border: 1px solid rgba(90,55,98,.28); border-radius: .9rem; background: var(--bs-body-bg, #fff); box-shadow: 0 1.5rem 5rem rgba(0,0,0,.42); }
 .publisher-documentation-dialog > header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .75rem 1rem; border-bottom: 1px solid rgba(90,55,98,.2); background: color-mix(in srgb, var(--bs-body-bg, #fff) 90%, #f5d9ef); }
@@ -19,4 +22,4 @@
 .publisher-documentation-dialog header a, .publisher-documentation-dialog header button { min-height: 2.35rem; display: inline-flex; align-items: center; justify-content: center; padding: .45rem .8rem; border: 1px solid rgba(90,55,98,.28); border-radius: .6rem; background: var(--bs-body-bg, #fff); color: inherit; text-decoration: none; font: inherit; font-weight: 750; cursor: pointer; }
 .publisher-documentation-dialog header button { border-color: #7e22ce; background: #7e22ce; color: #fff; }
 .publisher-documentation-dialog iframe { width: 100%; height: 100%; min-width: 0; min-height: 0; border: 0; background: #fff; }
-@media (max-width: 640px) { .publisher-documentation-native-dialog { width: 100vw; height: 100dvh; border-radius: 0; } .publisher-documentation-dialog { border: 0; border-radius: 0; } .publisher-documentation-dialog > header { align-items: flex-start; } .publisher-documentation-dialog h2 { white-space: normal; } }
+@media (max-width: 640px) { .publisher-documentation-native-dialog { inset: 0; width: auto; height: auto; border-radius: 0; } .publisher-documentation-dialog { border: 0; border-radius: 0; } .publisher-documentation-dialog > header { align-items: flex-start; } .publisher-documentation-dialog h2 { white-space: normal; } }

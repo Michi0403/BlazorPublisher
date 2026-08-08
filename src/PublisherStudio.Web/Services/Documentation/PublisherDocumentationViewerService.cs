@@ -48,7 +48,7 @@ public sealed class PublisherDocumentationViewerService(ILogger<PublisherDocumen
                 Revision = Interlocked.Increment(ref revision)
             };
 
-            logger.LogDebug("Opened the PublisherStudio documentation viewer for {DocumentationUrl}.", url);
+            logger.LogInformation("Opened the PublisherStudio documentation viewer for {DocumentationUrl}.", url);
             StateChanged?.Invoke();
         }
         catch (Exception exception)

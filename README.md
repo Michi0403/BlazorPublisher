@@ -2,7 +2,7 @@
 
 PublisherStudio is a local-first publishing studio for documents, stories, pictures, spreadsheets, presentations, websites, video, streaming, and reusable interactive panels.
 
-Version **2.3.0** keeps the proven 2.2.10 application/documentation and console-release baseline, fixes the in-app documentation viewer Close action through an explicit native-browser callback path, and starts the next minor line instead of using two-digit minor/patch segments. The full-width DocFX viewer, API reference, service resilience, Pages seeding, and user-confirmed documentation URL compiler fix remain intact.
+Version **2.3.2** keeps the proven 2.2.10 application/documentation and console-release baseline plus the 2.3.0 documentation-viewer Close repair, and refreshes the reviewed JavaScript diagnostics manifest for that browser change. The full-width DocFX viewer, API reference, service resilience, Pages seeding, and user-confirmed documentation URL compiler fix remain intact.
 
 ## Build
 

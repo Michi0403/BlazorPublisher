@@ -11,6 +11,9 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
+Write-Host "Refreshing reviewed PublisherStudio frontend SHA-256 inventory before the ordered CLI build..." -ForegroundColor DarkCyan
+& (Join-Path $root 'build\Update-JavaScriptDiagnosticsManifest.ps1')
+& (Join-Path $root 'build\Assert-JavaScriptDiagnostics.ps1')
 $releaseScript = Join-Path $root "Build-Release.ps1"
 
 $arguments = @{

@@ -129,12 +129,12 @@
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(PanelStudioInteractionLifecycleScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <!--<Target Name="AssertPublisherJavaScriptDiagnostics"
+  <Target Name="AssertPublisherJavaScriptDiagnostics"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherPanelStudioInteractionLifecycle"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipJavaScriptDiagnosticsGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(JavaScriptDiagnosticsScript)')" Text="JavaScript diagnostics guard script is missing: $(JavaScriptDiagnosticsScript)" />
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(JavaScriptDiagnosticsScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>-->
+  </Target>
 
   <Target Name="AssertPublisherPublishConfiguration"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherJavaScriptDiagnostics"

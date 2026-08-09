@@ -4866,15 +4866,16 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 .panel-studio-canvas-shell.interaction-preview .publication-html-design-shield{display:none}
 
 /* v1.0.92 responsive reusable panels keep dashboards readable in narrow frames and HTML export. */
-.panel-layout-responsive .publication-panel-viewport{overflow:auto;container-type:inline-size}
-.panel-layout-responsive .responsive-panel-view{position:relative;inset:auto;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-auto-flow:row dense;align-content:start;gap:clamp(8px,1.2cqi,16px);min-height:100%;padding:clamp(10px,1.6cqi,22px);box-sizing:border-box;overflow:auto}
-.panel-layout-responsive .publication-panel-element{position:relative!important;left:auto!important;top:auto!important;width:auto!important;height:auto!important;transform:none!important;min-width:0;overflow:hidden;grid-column:span 4;background:var(--bs-body-bg,#fff);border-radius:8px}
-.panel-layout-responsive .publication-panel-element.panel-responsive-title{grid-column:1/-1;min-height:64px!important;background:transparent}
-.panel-layout-responsive .publication-panel-element.panel-responsive-wide{grid-column:span 8}
-.panel-layout-responsive .publication-panel-element.panel-responsive-card{grid-column:span 4}
-.panel-layout-responsive .publication-panel-element>*{width:100%;height:100%;min-width:0;box-sizing:border-box}
-@container (max-width:760px){.panel-layout-responsive .publication-panel-element,.panel-layout-responsive .publication-panel-element.panel-responsive-wide,.panel-layout-responsive .publication-panel-element.panel-responsive-card{grid-column:span 6}}
-@container (max-width:480px){.panel-layout-responsive .responsive-panel-view{grid-template-columns:1fr}.panel-layout-responsive .publication-panel-element,.panel-layout-responsive .publication-panel-element.panel-responsive-wide,.panel-layout-responsive .publication-panel-element.panel-responsive-card,.panel-layout-responsive .publication-panel-element.panel-responsive-title{grid-column:1/-1}}
+.panel-layout-responsive:not(.panel-force-canvas) .publication-panel-viewport{overflow:auto;container-type:inline-size}
+.panel-layout-responsive:not(.panel-force-canvas) .responsive-panel-view{position:relative;inset:auto;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-auto-flow:row dense;align-content:start;gap:clamp(8px,1.2cqi,16px);min-height:100%;padding:clamp(10px,1.6cqi,22px);box-sizing:border-box;overflow:auto}
+.panel-layout-responsive:not(.panel-force-canvas) .publication-panel-element{position:relative!important;left:auto!important;top:auto!important;width:auto!important;height:auto!important;transform:none!important;min-width:0;overflow:hidden;grid-column:span 4;background:var(--bs-body-bg,#fff);border-radius:8px}
+.panel-layout-responsive:not(.panel-force-canvas) .publication-panel-element.panel-responsive-title{grid-column:1/-1;min-height:64px!important;background:transparent}
+.panel-layout-responsive:not(.panel-force-canvas) .publication-panel-element.panel-responsive-wide{grid-column:span 8}
+.panel-layout-responsive:not(.panel-force-canvas) .publication-panel-element.panel-responsive-card{grid-column:span 4}
+.panel-layout-responsive:not(.panel-force-canvas) .publication-panel-element>*{width:100%;height:100%;min-width:0;box-sizing:border-box}
+@container (max-width:760px){.panel-layout-responsive:not(.panel-force-canvas) .publication-panel-element,.panel-layout-responsive:not(.panel-force-canvas) .publication-panel-element.panel-responsive-wide,.panel-layout-responsive:not(.panel-force-canvas) .publication-panel-element.panel-responsive-card{grid-column:span 6}}
+@container (max-width:480px){.panel-layout-responsive:not(.panel-force-canvas) .responsive-panel-view{grid-template-columns:1fr}.panel-layout-responsive:not(.panel-force-canvas) .publication-panel-element,.panel-layout-responsive:not(.panel-force-canvas) .publication-panel-element.panel-responsive-wide,.panel-layout-responsive:not(.panel-force-canvas) .publication-panel-element.panel-responsive-card,.panel-layout-responsive:not(.panel-force-canvas) .publication-panel-element.panel-responsive-title{grid-column:1/-1}}
+.panel-layout-responsive.panel-force-canvas .publication-panel-viewport{overflow:hidden;container-type:normal}
 
 /* v1.0.92 Video Studio: selectable sequence clips and two adjustable range boundaries. */
 .media-sequence-segment{pointer-events:auto;cursor:pointer}
@@ -4900,13 +4901,13 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 .media-sequence-selection-boundary::after{position:absolute;left:-9px;top:10px;min-width:18px;padding:1px 3px;border-radius:3px;background:#ef4444;color:#fff;content:"S";font:700 9px/1.3 "Segoe UI",sans-serif;text-align:center;box-shadow:0 1px 3px #0006}
 .media-sequence-selection-boundary.end::after{content:"E";background:#f97316}
 .media-sequence-segment{z-index:2}
-.panel-layout-responsive .publication-panel-element{display:flex;flex-direction:column;min-height:min(240px,45cqi)}
-.panel-layout-responsive .publication-panel-element>*{flex:1 1 auto;min-height:0;min-width:0}
-.panel-layout-responsive .publication-panel-element :is(.dashboard-card,.panel-dashboard,.publication-data-grid,.dx-widget){min-width:0;max-width:100%}
-.panel-layout-responsive .publication-panel-element :is(table,.dx-datagrid){width:100%;table-layout:auto}
-.panel-layout-responsive .publication-panel-element :is(svg,canvas,img,video){max-width:100%;object-fit:contain}
-@container (max-width:760px){.panel-layout-responsive .publication-panel-element{min-height:min(220px,65cqi)}}
-@container (max-width:480px){.panel-layout-responsive .publication-panel-element{min-height:180px}}
+.panel-layout-responsive:not(.panel-force-canvas) .publication-panel-element{display:flex;flex-direction:column;min-height:min(240px,45cqi)}
+.panel-layout-responsive:not(.panel-force-canvas) .publication-panel-element>*{flex:1 1 auto;min-height:0;min-width:0}
+.panel-layout-responsive:not(.panel-force-canvas) .publication-panel-element :is(.dashboard-card,.panel-dashboard,.publication-data-grid,.dx-widget){min-width:0;max-width:100%}
+.panel-layout-responsive:not(.panel-force-canvas) .publication-panel-element :is(table,.dx-datagrid){width:100%;table-layout:auto}
+.panel-layout-responsive:not(.panel-force-canvas) .publication-panel-element :is(svg,canvas,img,video){max-width:100%;object-fit:contain}
+@container (max-width:760px){.panel-layout-responsive:not(.panel-force-canvas) .publication-panel-element{min-height:min(220px,65cqi)}}
+@container (max-width:480px){.panel-layout-responsive:not(.panel-force-canvas) .publication-panel-element{min-height:180px}}
 .website-publication [data-publication-signal],.website-publication [data-signal-key]{overflow:visible}
 .website-publication [data-tooltip],.website-publication [title]{pointer-events:auto}
 
@@ -5110,3 +5111,22 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
         border-right: 0;
     }
 }
+
+
+/* PublisherStudio 2.4.4: Panel Studio authoring geometry is owned by the same
+   publication-panel viewport as the live renderer. The edited panel keeps a
+   96-DPI design box and is uniformly fit into the workspace, so navigation,
+   live content, hitboxes and the later Mainframe object use one scale. */
+.panel-studio-workspace{display:flex;flex-direction:column;align-items:stretch;min-width:0}
+.panel-studio-canvas-shell{height:100%!important;min-height:420px!important;flex:1 1 auto}
+.panel-studio-canvas{width:100%;height:100%!important;min-height:0!important;aspect-ratio:auto!important;overflow:hidden;--panel-studio-fit-scale:1}
+.panel-studio-canvas>.publication-panel{inset:auto!important;left:50%;top:50%;width:var(--panel-editor-width,604.724px);height:var(--panel-editor-height,340.157px);transform:translate(-50%,-50%) scale(var(--panel-studio-fit-scale,1));transform-origin:center center}
+.publication-panel-viewport[data-panel-authoring-viewport="true"]{isolation:isolate}
+.publication-panel-viewport[data-panel-authoring-viewport="true"]>.panel-studio-hit-layer,
+.publication-panel-viewport[data-panel-authoring-viewport="true"]>.panel-studio-drop-layer{position:absolute;inset:0}
+.publication-panel-viewport[data-panel-authoring-viewport="true"]>.panel-studio-hit-layer{z-index:60;pointer-events:none}
+.publication-panel-viewport[data-panel-authoring-viewport="true"]>.panel-studio-drop-layer{z-index:70;pointer-events:none}
+.publication-panel-viewport[data-panel-authoring-viewport="true"]>.panel-studio-drop-layer.active{pointer-events:auto}
+.panel-studio-canvas-shell.arrange-preview .publication-panel.panel-force-canvas .publication-panel-view,
+.panel-studio-canvas-shell.arrange-preview .publication-panel.panel-force-canvas .publication-panel-element{position:absolute}
+@media(max-width:720px){.panel-studio-canvas-shell{min-height:360px!important}}

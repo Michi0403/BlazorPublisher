@@ -177,54 +177,59 @@
                             </div>
                         </div>
                         <div class="panel-studio-canvas" @ref="_canvasElement" tabindex="0"
+                             style="--panel-editor-width:@PanelDesignWidthCss;--panel-editor-height:@PanelDesignHeightCss"
+                             data-panel-studio-design-width="@PanelDesignWidthPx"
+                             data-panel-studio-design-height="@PanelDesignHeightPx"
                              data-panel-studio-arrange="@((!_interactionPreview).ToString().ToLowerInvariant())"
                              data-panel-studio-binding-id="@_interactionBindingId"
                              aria-label="Panel arrangement canvas"
                              @ondragover:preventDefault
                              @ondrop="DropDraggedElement" @ondrop:preventDefault>
-                            <PanelView @key="(_draft.Id, _selectedViewId, _interactionPreview, _previewRevision)" Document="Document" Item="_draft" CurrentPageId="CurrentPageId" DesignerMode="false" DesignPreviewOnly="false" ForceCanvasLayout="@(!_interactionPreview)" />
-
-                            @if (!_interactionPreview && CurrentView is not null)
-                            {
-                                <div class="panel-studio-hit-layer" aria-label="Panel component arrangement surface">
-                                    @foreach (var element in CurrentView.Elements.Where(element => element.Visible).OrderBy(element => element.ZIndex))
+                            <PanelView @key="(_draft.Id, _selectedViewId, _interactionPreview, _previewRevision)" Document="Document" Item="_draft" CurrentPageId="CurrentPageId" DesignerMode="false" DesignPreviewOnly="false" ForceCanvasLayout="@(!_interactionPreview)">
+                                <AuthoringOverlay>
+                                    @if (!_interactionPreview && CurrentView is not null)
                                     {
-                                        <button @key="element.Id" type="button"
-                                                class="panel-studio-hitbox @(element.Id == _selectedElementId ? "selected" : null)"
-                                                style="@HitStyle(element)"
-                                                data-panel-element-id="@element.Id"
-                                                data-panel-element-x="@NormalizedX(element)"
-                                                data-panel-element-y="@NormalizedY(element)"
-                                                data-panel-element-width="@NormalizedWidth(element)"
-                                                data-panel-element-height="@NormalizedHeight(element)"
-                                                data-panel-element-z="@element.ZIndex"
-                                                title="Move @element.Name. Double-click to interact with its live content."
-                                                @oncontextmenu="args => ShowElementContextMenu(element.Id, args)"
-                                                @oncontextmenu:preventDefault
-                                                @oncontextmenu:stopPropagation>
-                                            <span>@element.Name</span>
-                                            <i data-resize="nw" title="Resize from top left"></i>
-                                            <i data-resize="ne" title="Resize from top right"></i>
-                                            <i data-resize="se" title="Resize from bottom right"></i>
-                                            <i data-resize="sw" title="Resize from bottom left"></i>
-                                        </button>
+                                        <div class="panel-studio-hit-layer" aria-label="Panel component arrangement surface">
+                                            @foreach (var element in CurrentView.Elements.Where(element => element.Visible).OrderBy(element => element.ZIndex))
+                                            {
+                                                <button @key="element.Id" type="button"
+                                                        class="panel-studio-hitbox @(element.Id == _selectedElementId ? "selected" : null)"
+                                                        style="@HitStyle(element)"
+                                                        data-panel-element-id="@element.Id"
+                                                        data-panel-element-x="@NormalizedX(element)"
+                                                        data-panel-element-y="@NormalizedY(element)"
+                                                        data-panel-element-width="@NormalizedWidth(element)"
+                                                        data-panel-element-height="@NormalizedHeight(element)"
+                                                        data-panel-element-z="@element.ZIndex"
+                                                        title="Move @element.Name. Double-click to interact with its live content."
+                                                        @oncontextmenu="args => ShowElementContextMenu(element.Id, args)"
+                                                        @oncontextmenu:preventDefault
+                                                        @oncontextmenu:stopPropagation>
+                                                    <span>@element.Name</span>
+                                                    <i data-resize="nw" title="Resize from top left"></i>
+                                                    <i data-resize="ne" title="Resize from top right"></i>
+                                                    <i data-resize="se" title="Resize from bottom right"></i>
+                                                    <i data-resize="sw" title="Resize from bottom left"></i>
+                                                </button>
+                                            }
+                                        </div>
                                     }
-                                </div>
-                            }
+
+                                    @if (_dragPrototype is not null)
+                                    {
+                                        <div class="panel-studio-drop-layer">
+                                            <div class="panel-studio-drag-ghost" style="@DragGhostStyle">
+                                                <PanelElementPreview Item="_dragPrototype" />
+                                                <span>@_dragPrototype.Name</span>
+                                            </div>
+                                        </div>
+                                    }
+                                </AuthoringOverlay>
+                            </PanelView>
 
                             @if (_interactionPreview)
                             {
                                 <button type="button" class="panel-studio-return-arrange" @onclick="DisableInteractionPreview" title="Return to component arrangement">Return to Arrange</button>
-                            }
-
-                            @if (_dragPrototype is not null)
-                            {
-                                <div class="panel-studio-drop-layer">
-                                    <div class="panel-studio-drag-ghost" style="@DragGhostStyle">
-                                        <PanelElementPreview Item="_dragPrototype" />
-                                        <span>@_dragPrototype.Name</span>
-                                    </div>
-                                </div>
                             }
                         </div>
                     </div>
@@ -869,6 +874,13 @@
         _dragExistingId = null;
         _dragPrototype = null;
     }
+
+    private double PanelDesignWidthPxValue => Math.Max(1, (_draft is { Width: > .1 } ? _draft.Width : _draft?.CanvasWidth ?? 160) * 96d / 25.4d);
+    private double PanelDesignHeightPxValue => Math.Max(1, (_draft is { Height: > .1 } ? _draft.Height : _draft?.CanvasHeight ?? 90) * 96d / 25.4d);
+    private string PanelDesignWidthPx => Inv(PanelDesignWidthPxValue);
+    private string PanelDesignHeightPx => Inv(PanelDesignHeightPxValue);
+    private string PanelDesignWidthCss => $"{PanelDesignWidthPx}px";
+    private string PanelDesignHeightCss => $"{PanelDesignHeightPx}px";
 
     private string DragGhostStyle
     {

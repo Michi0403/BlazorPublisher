@@ -15,6 +15,7 @@
     <IteratorExceptionPolicyScript>$(MSBuildThisFileDirectory)build\Assert-IteratorExceptionPolicy.ps1</IteratorExceptionPolicyScript>
     <SystemVariableInitializationScript>$(MSBuildThisFileDirectory)build\Assert-SystemVariableInitialization.ps1</SystemVariableInitializationScript>
     <PanelStudioInteractionLifecycleScript>$(MSBuildThisFileDirectory)build\Assert-PanelStudioInteractionLifecycle.ps1</PanelStudioInteractionLifecycleScript>
+    <PanelStudioAuthoringGeometryScript>$(MSBuildThisFileDirectory)build\Assert-PanelStudioAuthoringGeometry.ps1</PanelStudioAuthoringGeometryScript>
     <JavaScriptDiagnosticsScript>$(MSBuildThisFileDirectory)build\Assert-JavaScriptDiagnostics.ps1</JavaScriptDiagnosticsScript>
     <PublishConfigurationScript>$(MSBuildThisFileDirectory)build\Assert-PublishConfiguration.ps1</PublishConfigurationScript>
     <InstallerWorkflowScript>$(MSBuildThisFileDirectory)build\Assert-InstallerWorkflow.ps1</InstallerWorkflowScript>
@@ -129,8 +130,15 @@
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(PanelStudioInteractionLifecycleScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <Target Name="AssertPublisherJavaScriptDiagnostics"
+  <Target Name="AssertPublisherPanelStudioAuthoringGeometry"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherPanelStudioInteractionLifecycle"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipPanelStudioAuthoringGeometryGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+    <Error Condition="!Exists('$(PanelStudioAuthoringGeometryScript)')" Text="Panel Studio authoring geometry guard script is missing: $(PanelStudioAuthoringGeometryScript)" />
+    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(PanelStudioAuthoringGeometryScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+  </Target>
+
+  <Target Name="AssertPublisherJavaScriptDiagnostics"
+          BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherPanelStudioAuthoringGeometry"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipJavaScriptDiagnosticsGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(JavaScriptDiagnosticsScript)')" Text="JavaScript diagnostics guard script is missing: $(JavaScriptDiagnosticsScript)" />
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(JavaScriptDiagnosticsScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />

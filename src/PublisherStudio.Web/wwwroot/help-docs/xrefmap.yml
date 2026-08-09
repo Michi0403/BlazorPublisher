@@ -38026,6 +38026,18 @@ references:
   fullName.vb: PublisherStudio.Components.Editor.PanelView.New
   nameWithType: PanelView.PanelView
   nameWithType.vb: PanelView.New
+- uid: PublisherStudio.Components.Editor.PanelView.AuthoringOverlay
+  name: AuthoringOverlay
+  href: api/PublisherStudio.Components.Editor.PanelView.html#PublisherStudio_Components_Editor_PanelView_AuthoringOverlay
+  commentId: P:PublisherStudio.Components.Editor.PanelView.AuthoringOverlay
+  fullName: PublisherStudio.Components.Editor.PanelView.AuthoringOverlay
+  nameWithType: PanelView.AuthoringOverlay
+- uid: PublisherStudio.Components.Editor.PanelView.AuthoringOverlay*
+  name: AuthoringOverlay
+  href: api/PublisherStudio.Components.Editor.PanelView.html#PublisherStudio_Components_Editor_PanelView_AuthoringOverlay_
+  commentId: Overload:PublisherStudio.Components.Editor.PanelView.AuthoringOverlay
+  fullName: PublisherStudio.Components.Editor.PanelView.AuthoringOverlay
+  nameWithType: PanelView.AuthoringOverlay
 - uid: PublisherStudio.Components.Editor.PanelView.BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)
   name: BuildRenderTree(RenderTreeBuilder)
   href: api/PublisherStudio.Components.Editor.PanelView.html#PublisherStudio_Components_Editor_PanelView_BuildRenderTree_Microsoft_AspNetCore_Components_Rendering_RenderTreeBuilder_

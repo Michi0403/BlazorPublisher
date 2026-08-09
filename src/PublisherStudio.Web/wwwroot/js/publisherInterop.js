@@ -6640,16 +6640,34 @@ export function cancelCanvasInteraction(stageId = 'publisher-stage') { try {
     try { state.stage.focus({ preventScroll: true }); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@6635', __caughtJavaScriptError);  }
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cancelCanvasInteraction@6629', __javascriptError); throw __javascriptError; }}
 
+function panelStudioCoordinateSurface(element) { try {
+    if (!(element instanceof HTMLElement)) return null;
+    const viewport = element.querySelector('.publication-panel > .publication-panel-viewport[data-panel-authoring-viewport="true"]');
+    return viewport instanceof HTMLElement ? viewport : element;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:panelStudioCoordinateSurface@6638', __javascriptError); throw __javascriptError; }}
+
+function syncPanelStudioDesignSurface(element) { try {
+    if (!(element instanceof HTMLElement)) return;
+    const width = Math.max(1, Number.parseFloat(element.dataset.panelStudioDesignWidth || '') || 1);
+    const height = Math.max(1, Number.parseFloat(element.dataset.panelStudioDesignHeight || '') || 1);
+    const bounds = element.getBoundingClientRect();
+    const availableWidth = Math.max(1, bounds.width - 16);
+    const availableHeight = Math.max(1, bounds.height - 16);
+    const scale = Math.max(.05, Math.min(availableWidth / width, availableHeight / height));
+    element.style.setProperty('--panel-studio-fit-scale', String(scale));
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:syncPanelStudioDesignSurface@6645', __javascriptError); throw __javascriptError; }}
+
 export function panelStudioPoint(element, clientX, clientY) { try {
     if (!(element instanceof HTMLElement)) return { x: 0.5, y: 0.5 };
-    const bounds = element.getBoundingClientRect();
+    const coordinateSurface = panelStudioCoordinateSurface(element) || element;
+    const bounds = coordinateSurface.getBoundingClientRect();
     const width = Math.max(1, bounds.width);
     const height = Math.max(1, bounds.height);
     return {
         x: clamp((Number(clientX) - bounds.left) / width, 0, 1),
         y: clamp((Number(clientY) - bounds.top) / height, 0, 1)
     };
- } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:panelStudioPoint@6638', __javascriptError); throw __javascriptError; }}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:panelStudioPoint@6645', __javascriptError); throw __javascriptError; }}
 
 const panelStudioDropBindings = new WeakMap();
 
@@ -6765,6 +6783,7 @@ export function unbindPanelStudioDropSurface(element) { try {
     element.dataset.panelStudioBindingState = 'disposed';
     binding.cancelPointer?.();
     binding.controller?.abort?.();
+    try { binding.layoutObserver?.disconnect?.(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@6782', __caughtJavaScriptError); }
     if (binding.gamepad?.frame) cancelAnimationFrame(binding.gamepad.frame);
     panelStudioDropBindings.delete(element);
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:unbindPanelStudioDropSurface@6755', __javascriptError); throw __javascriptError; }}
@@ -6782,15 +6801,23 @@ export function bindPanelStudioDropSurface(element, dotNetReference, bindingId =
     if (existing && !existing.disposed && existing.bindingId === normalizedBindingId) {
         existing.dotNetReference = dotNetReference || existing.dotNetReference;
         element.dataset.panelStudioBindingState = 'active';
+        syncPanelStudioDesignSurface(element);
         return true;
     }
     unbindPanelStudioDropSurface(element);
     const controller = new AbortController();
-    const binding = { element, dotNetReference, bindingId: normalizedBindingId, controller, disposed: false, pointer: null, gamepad: null, reportingError: false, reportingCancellation: false, invokeQueue: Promise.resolve() };
+    const binding = { element, dotNetReference, bindingId: normalizedBindingId, controller, disposed: false, pointer: null, gamepad: null, layoutObserver: null, reportingError: false, reportingCancellation: false, invokeQueue: Promise.resolve() };
     const options = { signal: controller.signal };
     const activeOptions = { signal: controller.signal, passive: false };
     panelStudioDropBindings.set(element, binding);
     element.dataset.panelStudioBindingState = 'active';
+    syncPanelStudioDesignSurface(element);
+    if (typeof ResizeObserver !== 'undefined') {
+        binding.layoutObserver = new ResizeObserver(() => { try {
+            syncPanelStudioDesignSurface(element);
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:ResizeObserver@6811', __javascriptError); throw __javascriptError; }});
+        binding.layoutObserver.observe(element);
+    }
 
     const setActive = active => { try { return (element.querySelector('.panel-studio-drop-layer')?.classList.toggle('active', active)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:setActive@6790', __javascriptError); throw __javascriptError; } };
     const updateGhost = event => { try {

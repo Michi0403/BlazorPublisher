@@ -13,10 +13,17 @@
     private readonly string _instanceId = Guid.NewGuid().ToString("N");
     private string ElementId => $"ps-data-visual-{Item.Id:N}-{_instanceId}";
     private object ClientConfig => DataService.BuildClientVisualConfiguration(Document, Item, CurrentPageId);
+    private string? _lastClientConfigJson;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        try { await JS.InvokeVoidAsync("PublisherStudioLiveDataRuntime.renderVisualById", ElementId, ClientConfig); }
+        var config = ClientConfig;
+        var configJson = System.Text.Json.JsonSerializer.Serialize(config);
+        if (!firstRender && string.Equals(configJson, _lastClientConfigJson, StringComparison.Ordinal))
+            return;
+
+        _lastClientConfigJson = configJson;
+        try { await JS.InvokeVoidAsync("PublisherStudioLiveDataRuntime.renderVisualById", ElementId, config); }
         catch (JSDisconnectedException) { }
         catch (InvalidOperationException) { }
     }

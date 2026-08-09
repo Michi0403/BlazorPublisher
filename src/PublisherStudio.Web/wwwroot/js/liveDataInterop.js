@@ -326,11 +326,13 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
     function disposeWidget(element) { try {
         const state = states.get(element);
         if (state?.timer) clearInterval(state.timer);
+        if (state?.resizeFrame) cancelAnimationFrame(state.resizeFrame);
+        try { state?.resizeObserver?.disconnect?.(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:suppressed-catch@325', __caughtJavaScriptError);  }
         clearVisualInteraction(state);
         try {
             const instance = state?.instance;
             if (instance?.dispose) instance.dispose();
-        } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:suppressed-catch@327', __caughtJavaScriptError);  }
+        } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:suppressed-catch@329', __caughtJavaScriptError);  }
         states.delete(element);
         element.replaceChildren();
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:disposeWidget@320', __javascriptError); throw __javascriptError; }}
@@ -476,8 +478,87 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
 
     function elementSize(config) { try {
         const element = config.__element;
-        return { width: Math.max(1, element?.clientWidth || 1), height: Math.max(1, element?.clientHeight || 1) };
-     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:elementSize@471', __javascriptError); throw __javascriptError; }}
+        if (!(element instanceof HTMLElement)) return { width: 1, height: 1 };
+        const bounds = element.getBoundingClientRect();
+        const width = Math.max(Number(element.clientWidth) || 0, Number(bounds.width) || 0);
+        const height = Math.max(Number(element.clientHeight) || 0, Number(bounds.height) || 0);
+        return { width: Math.max(1, Math.round(width)), height: Math.max(1, Math.round(height)) };
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:elementSize@473', __javascriptError); throw __javascriptError; }}
+
+    function visualSizeUsable(size) { try {
+        return Number(size?.width) >= 4 && Number(size?.height) >= 4;
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:visualSizeUsable@482', __javascriptError); throw __javascriptError; }}
+
+    function resizeVisualInstance(element, state, size) { try {
+        if (!state?.rendered || !visualSizeUsable(size)) return;
+        const width = Number(size.width);
+        const height = Number(size.height);
+        if (Math.abs(width - Number(state.lastWidth || 0)) < 1 && Math.abs(height - Number(state.lastHeight || 0)) < 1) return;
+        state.lastWidth = width;
+        state.lastHeight = height;
+        const instance = state.instance;
+        if (!instance) return;
+        const kind = String(state.config?.kind || '');
+        try {
+            if (kind === 'DataTable') {
+                instance.option?.('width', '100%');
+                instance.option?.('height', '100%');
+                instance.updateDimensions?.();
+                instance.repaint?.();
+            } else {
+                instance.option?.('size', { width, height });
+                instance.render?.({ force: true, animate: false });
+                instance.repaint?.();
+            }
+        } catch (__caughtJavaScriptError) {
+            publisherStudioDiagnostics.report('js/liveDataInterop.js:resizeVisualInstance@492', __caughtJavaScriptError);
+            try { instance.repaint?.(); } catch (__nestedJavaScriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:resizeVisualInstance.repaint@506', __nestedJavaScriptError); }
+        }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:resizeVisualInstance@484', __javascriptError); throw __javascriptError; }}
+
+    function renderStateVisual(element, state, forceRebuild = false) { try {
+        if (!state || states.get(element) !== state || !element.isConnected) return false;
+        state.config.__element = element;
+        const size = elementSize(state.config);
+        if (!visualSizeUsable(size)) return false;
+        if (state.rendered && !forceRebuild) {
+            resizeVisualInstance(element, state, size);
+            return true;
+        }
+        clearVisualInteraction(state);
+        try { state.instance?.dispose?.(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:renderStateVisual.dispose@520', __caughtJavaScriptError); }
+        element.replaceChildren();
+        state.instance = renderWidget(element, state.config, state.rows);
+        state.rendered = true;
+        state.lastWidth = size.width;
+        state.lastHeight = size.height;
+        return true;
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:renderStateVisual@510', __javascriptError); throw __javascriptError; }}
+
+    function queueVisualSizeSync(element, state) { try {
+        if (!state || states.get(element) !== state || state.resizeFrame) return;
+        state.resizeFrame = requestAnimationFrame(() => { try {
+            state.resizeFrame = 0;
+            if (!element.isConnected || states.get(element) !== state) return;
+            state.config.__element = element;
+            const size = elementSize(state.config);
+            if (!state.rendered) renderStateVisual(element, state);
+            else resizeVisualInstance(element, state, size);
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:callback:requestAnimationFrame@538', __javascriptError); throw __javascriptError; }});
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:queueVisualSizeSync@535', __javascriptError); throw __javascriptError; }}
+
+    function observeVisualSize(element, state) { try {
+        if (!state || typeof ResizeObserver === 'undefined') {
+            queueVisualSizeSync(element, state);
+            return;
+        }
+        const observer = new ResizeObserver(() => { try {
+            queueVisualSizeSync(element, state);
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:callback:ResizeObserver@552', __javascriptError); throw __javascriptError; }});
+        state.resizeObserver = observer;
+        observer.observe(element);
+        queueVisualSizeSync(element, state);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:observeVisualSize@546', __javascriptError); throw __javascriptError; }}
 
     function seriesData(config, rows, oneValuePerGroup) { try {
         const argument = config.argumentField;
@@ -628,18 +709,21 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         if (!config) return;
         const prior = states.get(element);
         if (prior?.timer) clearInterval(prior.timer);
+        if (prior?.resizeFrame) cancelAnimationFrame(prior.resizeFrame);
+        try { prior?.resizeObserver?.disconnect?.(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:suppressed-catch@701', __caughtJavaScriptError); }
         clearVisualInteraction(prior);
-        try { prior?.instance?.dispose?.(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:suppressed-catch@626', __caughtJavaScriptError);  }
+        try { prior?.instance?.dispose?.(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:suppressed-catch@703', __caughtJavaScriptError);  }
         element.replaceChildren();
         let rows = Array.isArray(config.rows) ? config.rows : [];
-        let error = "";
+        let error = '';
         if (options?.fetchNow) {
             try { rows = await fetchRows(config) || rows; }
             catch (exception) { error = exception?.message || String(exception); }
         }
-        const instance = renderWidget(element, config, rows);
-        const state = { config, rows, instance, timer: null, error };
+        const state = { config, rows, instance: null, timer: null, error, resizeObserver: null, resizeFrame: 0, rendered: false, lastWidth: 0, lastHeight: 0 };
         states.set(element, state);
+        observeVisualSize(element, state);
+        renderStateVisual(element, state);
         const interval = Number(config.live?.refreshIntervalSeconds || 0);
         if (options?.polling !== false && config.live?.enabled && config.live?.allowExportedHtmlFetch && interval > 0) {
             state.timer = setInterval(async () => { try {
@@ -647,15 +731,13 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
                     const nextRows = await fetchRows(config);
                     if (!nextRows) return;
                     state.rows = nextRows;
-                    try { state.instance?.dispose?.(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:suppressed-catch@644', __caughtJavaScriptError);  }
-                    element.replaceChildren();
-                    state.instance = renderWidget(element, config, nextRows);
+                    renderStateVisual(element, state, true);
                 } catch (exception) {
                     if (!config.live.useSnapshotOnFailure) fallback(element, config, state.rows, exception?.message || String(exception));
                 }
-             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:callback:setInterval@639', __javascriptError); throw __javascriptError; }}, Math.max(1, interval) * 1000);
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:callback:setInterval@725', __javascriptError); throw __javascriptError; }}, Math.max(1, interval) * 1000);
         }
-     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:render@618', __javascriptError); throw __javascriptError; }}
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:render@694', __javascriptError); throw __javascriptError; }}
 
     async function refreshAll(root, options) { try {
         const elements = [...(root || document).querySelectorAll("[data-ps-visual-config]")];

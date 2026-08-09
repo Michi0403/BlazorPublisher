@@ -1,7 +1,7 @@
 @namespace PublisherStudio.Components.Editor
 @inject PublicationMediaAssetStore MediaAssets
 
-<div class="publication-panel panel-nav-@Item.NavigationMode.ToString().ToLowerInvariant() panel-layout-@Item.LayoutMode.ToString().ToLowerInvariant() @(DesignerMode ? "panel-designer-preview" : null)"
+<div class="publication-panel panel-nav-@Item.NavigationMode.ToString().ToLowerInvariant() panel-layout-@Item.LayoutMode.ToString().ToLowerInvariant() @(DesignerMode ? "panel-designer-preview" : null) @(ForceCanvasLayout ? "panel-force-canvas" : null)"
      data-panel-root
      data-panel-id="@Item.Id"
      data-panel-active-view="@ActiveViewId"
@@ -16,7 +16,7 @@
             }
         </nav>
     }
-    <div class="publication-panel-viewport">
+    <div class="publication-panel-viewport" data-panel-authoring-viewport="@(AuthoringOverlay is not null ? "true" : null)">
         @foreach (var view in EnabledViews)
         {
             <section @key="view.Id" class="publication-panel-view @(Item.LayoutMode == PublicationPanelLayoutMode.Responsive && !ForceCanvasLayout ? "responsive-panel-view" : null)" data-panel-view="@view.Id" data-panel-slug="@view.Slug" hidden="@(view.Id != ActiveViewId)" style="background:@view.Background">
@@ -89,6 +89,7 @@
                 }
             </section>
         }
+        @AuthoringOverlay
     </div>
 </div>
 
@@ -100,6 +101,8 @@
     [Parameter] public bool DesignPreviewOnly { get; set; }
     /// <summary>Forces authored canvas coordinates even for responsive panels. Panel Studio uses this in Arrange mode so the live component DOM and selection hitboxes share exactly one geometry.</summary>
     [Parameter] public bool ForceCanvasLayout { get; set; }
+    /// <summary>Optional authoring overlay rendered inside the exact viewport that owns panel element coordinates.</summary>
+    [Parameter] public RenderFragment? AuthoringOverlay { get; set; }
 
     private IReadOnlyList<PublicationPanelView> EnabledViews => Item.Views.Where(view => view.Enabled).ToArray();
     private Guid ActiveViewId => Item.ActiveView?.Id ?? Item.Views.FirstOrDefault()?.Id ?? Guid.Empty;

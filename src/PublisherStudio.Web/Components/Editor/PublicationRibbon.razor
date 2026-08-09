@@ -643,9 +643,9 @@
 
     private void OpenOrganicPlugins() => Navigation.NavigateTo("/organic-plugins");
     private void OpenDocumentation() => Navigation.NavigateTo("/help");
-    private void OpenHtmlDocumentation() => DocumentationViewer.Open(new PublisherDocumentationViewerRequest { Url = "/help-docs/index.html", Title = "PublisherStudio HTML guide" });
+    private void OpenHtmlDocumentation() => DocumentationViewer.Open(new PublisherDocumentationViewerRequest { Url = "/api/documentation/html/index.html", Title = "PublisherStudio HTML guide" });
     private void OpenPdfDocumentation() => DocumentationViewer.Open(new PublisherDocumentationViewerRequest { Url = "/api/documentation/pdf", Title = "PublisherStudio PDF book" });
-    private void OpenApiDocumentation() => DocumentationViewer.Open(new PublisherDocumentationViewerRequest { Url = "/help-docs/api/index.html", Title = "PublisherStudio API reference" });
+    private void OpenApiDocumentation() => DocumentationViewer.Open(new PublisherDocumentationViewerRequest { Url = "/api/documentation/html/api/index.html", Title = "PublisherStudio API reference" });
 
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
     [Parameter] public bool TimelineVisible { get; set; }

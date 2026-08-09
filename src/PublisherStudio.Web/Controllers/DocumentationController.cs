@@ -87,6 +87,11 @@ public sealed class DocumentationController(
             var contentTypes = new FileExtensionContentTypeProvider();
             if (!contentTypes.TryGetContentType(path, out var contentType))
                 contentType = "application/octet-stream";
+
+            // Documentation is shipped beside the executable and may change on an in-place update.
+            // Never let a cached missing/stale response mask the newly installed HTML payload.
+            Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate";
+            Response.Headers["Pragma"] = "no-cache";
             return new PhysicalFileResult(path, contentType) { EnableRangeProcessing = true };
         }
         catch (Exception exception)

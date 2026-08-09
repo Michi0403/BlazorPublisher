@@ -270,11 +270,41 @@ internal static class Program
             {
                 Path.Combine(installedDocumentationRoot, "index.html"),
                 Path.Combine(installedDocumentationRoot, "api", "index.html"),
-                Path.Combine(installedDocumentationRoot, "documentation-status.json")
+                Path.Combine(installedDocumentationRoot, "documentation-status.json"),
+                Path.Combine(installedDocumentationRoot, "public", "docfx.min.css"),
+                Path.Combine(installedDocumentationRoot, "public", "docfx.min.js"),
+                Path.Combine(installedDocumentationRoot, "styles", "publisherstudio-kawaii.css"),
+                Path.Combine(installedDocumentationRoot, "styles", "publisherstudio-kawaii.js")
             };
             var missingInstalledDocumentation = installedDocumentationFiles.Where(path => !File.Exists(path)).ToArray();
             if (missingInstalledDocumentation.Length > 0)
                 throw new InvalidDataException($"PublisherStudio installation is missing required documentation files: {string.Join(", ", missingInstalledDocumentation)}");
+
+            var truncatedInstalledDocumentation = installedDocumentationFiles
+                .Where(path => new FileInfo(path).Length < (Path.GetFileName(path).Equals("documentation-status.json", StringComparison.OrdinalIgnoreCase) ? 64L : 512L))
+                .ToArray();
+            if (truncatedInstalledDocumentation.Length > 0)
+                throw new InvalidDataException($"PublisherStudio installation contains empty or truncated documentation files: {string.Join(", ", truncatedInstalledDocumentation)}");
+
+            var installedStatusPath = Path.Combine(installedDocumentationRoot, "documentation-status.json");
+            using (var installedStatus = JsonDocument.Parse(File.ReadAllText(installedStatusPath)))
+            {
+                var installedDocumentationVersion = installedStatus.RootElement.TryGetProperty("version", out var versionElement)
+                    ? versionElement.GetString()
+                    : null;
+                var installedApplicationAssemblyPath = Path.Combine(targetPath, GetRuntimeFolderName(), "PublisherStudio.Web.dll");
+                if (!File.Exists(installedApplicationAssemblyPath))
+                    throw new InvalidDataException($"PublisherStudio installed application assembly is missing: {installedApplicationAssemblyPath}");
+
+                var installedApplicationVersion = AssemblyName.GetAssemblyName(installedApplicationAssemblyPath).Version?.ToString(3);
+                if (string.IsNullOrWhiteSpace(installedDocumentationVersion) ||
+                    !string.Equals(installedDocumentationVersion, installedApplicationVersion, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidDataException(
+                        $"PublisherStudio installed documentation version '{installedDocumentationVersion ?? "missing"}' does not match installed application version '{installedApplicationVersion ?? "unknown"}'.");
+                }
+            }
+
             logger.LogInformation("Verified installed PublisherStudio HTML and API documentation at {DocumentationRoot}.", installedDocumentationRoot);
 
             logger.LogDebug($"PublisherStudio installed to '{targetPath}'.");
@@ -1196,12 +1226,25 @@ internal static class Program
             {
                 expectedPrefix + "wwwroot/help-docs/index.html",
                 expectedPrefix + "wwwroot/help-docs/api/index.html",
-                expectedPrefix + "wwwroot/help-docs/documentation-status.json"
+                expectedPrefix + "wwwroot/help-docs/documentation-status.json",
+                expectedPrefix + "wwwroot/help-docs/public/docfx.min.css",
+                expectedPrefix + "wwwroot/help-docs/public/docfx.min.js",
+                expectedPrefix + "wwwroot/help-docs/styles/publisherstudio-kawaii.css",
+                expectedPrefix + "wwwroot/help-docs/styles/publisherstudio-kawaii.js"
             };
             foreach (var requiredDocumentationEntry in requiredDocumentationEntries)
             {
                 if (!normalizedNames.Contains(requiredDocumentationEntry))
                     throw new InvalidDataException($"PublisherStudio application archive is missing installed documentation '{requiredDocumentationEntry}'.");
+
+                var documentationEntry = archive.Entries.FirstOrDefault(entry =>
+                    string.Equals(
+                        entry.FullName.Replace('\\', '/').TrimStart('/'),
+                        requiredDocumentationEntry,
+                        StringComparison.OrdinalIgnoreCase));
+                var minimumBytes = requiredDocumentationEntry.EndsWith("documentation-status.json", StringComparison.OrdinalIgnoreCase) ? 64L : 512L;
+                if (documentationEntry is null || documentationEntry.Length < minimumBytes)
+                    throw new InvalidDataException($"PublisherStudio application archive contains empty or truncated documentation '{requiredDocumentationEntry}'.");
             }
         }
 

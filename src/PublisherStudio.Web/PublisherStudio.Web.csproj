@@ -6,7 +6,7 @@
     <InvariantGlobalization>false</InvariantGlobalization>
     <RootNamespace>PublisherStudio</RootNamespace>
     <AssemblyName>PublisherStudio.Web</AssemblyName>
-    <Version>2.4.2</Version>
+    <Version>2.4.3</Version>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
     <ApplicationIcon>..\..\assets\PublisherStudio.ico</ApplicationIcon>
@@ -44,6 +44,7 @@
     <Content Update="Configuration\panel-text-patterns.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Update="Configuration\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <None Update="Configuration\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Update="wwwroot\help-docs\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <!--
@@ -92,6 +93,21 @@
   <ItemGroup>
     <PublisherStudioConfigurationFile Include="appsettings*.json;Configuration\**\*;Localization\**\*.json" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PublisherStudioDocumentationPublishFile Include="wwwroot\help-docs\index.html;wwwroot\help-docs\api\index.html;wwwroot\help-docs\documentation-status.json;wwwroot\help-docs\public\docfx.min.css;wwwroot\help-docs\public\docfx.min.js;wwwroot\help-docs\styles\publisherstudio-kawaii.css;wwwroot\help-docs\styles\publisherstudio-kawaii.js" />
+  </ItemGroup>
+
+  <Target Name="ValidatePublisherStudioDocumentationFilesForPublish"
+          AfterTargets="Publish"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(PublishDir)' != ''">
+    <ItemGroup>
+      <MissingPublisherStudioDocumentationPublishFile Include="@(PublisherStudioDocumentationPublishFile)"
+                                                       Condition="!Exists('$(PublishDir)%(Identity)')" />
+    </ItemGroup>
+    <Error Condition="'@(MissingPublisherStudioDocumentationPublishFile)' != ''"
+           Text="PublisherStudio publish output is missing installed HTML documentation files: @(MissingPublisherStudioDocumentationPublishFile, ', ')" />
+  </Target>
 
   <Target Name="ValidatePublisherConfigurationFilesForPublish"
           AfterTargets="Publish"

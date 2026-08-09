@@ -243,11 +243,20 @@ function Assert-ReleaseArchiveLayout {
             $requiredDocumentation = @(
                 "$RootFolderName/wwwroot/help-docs/index.html",
                 "$RootFolderName/wwwroot/help-docs/api/index.html",
-                "$RootFolderName/wwwroot/help-docs/documentation-status.json"
+                "$RootFolderName/wwwroot/help-docs/documentation-status.json",
+                "$RootFolderName/wwwroot/help-docs/public/docfx.min.css",
+                "$RootFolderName/wwwroot/help-docs/public/docfx.min.js",
+                "$RootFolderName/wwwroot/help-docs/styles/publisherstudio-kawaii.css",
+                "$RootFolderName/wwwroot/help-docs/styles/publisherstudio-kawaii.js"
             )
             foreach ($requiredDocumentationEntry in $requiredDocumentation) {
                 if (-not ($names -contains $requiredDocumentationEntry)) {
                     throw "Release archive is missing required installed documentation entry ${requiredDocumentationEntry}: $ArchivePath"
+                }
+                $documentationEntry = $archive.Entries | Where-Object { $_.FullName.TrimStart('/') -ieq $requiredDocumentationEntry } | Select-Object -First 1
+                $minimumBytes = if ($requiredDocumentationEntry.EndsWith('documentation-status.json', [StringComparison]::OrdinalIgnoreCase)) { 64L } else { 512L }
+                if ($null -eq $documentationEntry -or $documentationEntry.Length -lt $minimumBytes) {
+                    throw "Release archive contains empty or truncated installed documentation entry ${requiredDocumentationEntry}: $ArchivePath"
                 }
             }
             if ([string]::IsNullOrWhiteSpace($Version)) { throw "Version is required when validating release documentation." }

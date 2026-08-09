@@ -100,6 +100,15 @@ public sealed class PublisherDocumentationViewerService(ILogger<PublisherDocumen
             if (normalized.Any(char.IsControl))
                 throw new ArgumentException("Documentation viewer URLs may not contain control characters.", nameof(url));
 
+            // The controller route resolves the installed documentation root from AppContext as well as
+            // IWebHostEnvironment. This deliberately avoids depending on the process working directory or
+            // static-web-root discovery in customer installations. Keep /help-docs as a public compatibility
+            // route, but normalize every in-app viewer request to the canonical controller-backed route.
+            if (string.Equals(normalized, "/help-docs", StringComparison.OrdinalIgnoreCase))
+                normalized = "/api/documentation/html/index.html";
+            else if (normalized.StartsWith("/help-docs/", StringComparison.OrdinalIgnoreCase))
+                normalized = "/api/documentation/html/" + normalized["/help-docs/".Length..];
+
             return normalized;
     
     }

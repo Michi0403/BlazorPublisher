@@ -434,7 +434,7 @@ public sealed class OrganicWorkExecutor(
                     "publisher.text.edit.request" => ReturnReviewedText(envelope, parameters),
                     "publisher.website.content.request" => ReturnApprovedWebContent(envelope, parameters),
                     "publisher.business-context" => businessContext.CreateSnapshot(),
-                    "publisher.documentation.profile" => new { Status = documentation.GetStatus(), HtmlRoute = "/help-docs/index.html", ApiRoute = "/help-docs/api/index.html", PdfRoute = "/api/documentation/pdf", ProfileRoute = "/api/documentation/profile" },
+                    "publisher.documentation.profile" => new { Status = documentation.GetStatus(), HtmlRoute = "/api/documentation/html/index.html", ApiRoute = "/api/documentation/html/api/index.html", PdfRoute = "/api/documentation/pdf", ProfileRoute = "/api/documentation/profile" },
                     "publisher.media.capabilities" => await mediaConversion.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false),
                     _ => throw new KeyNotFoundException($"Unknown organic capability '{envelope.CapabilityKey}'.")
                 };

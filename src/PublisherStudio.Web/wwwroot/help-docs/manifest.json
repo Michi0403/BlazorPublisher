@@ -42,10 +42,10 @@
     },
     {
       "type": "Resource",
-      "source_relative_path": "PublisherStudio-2.4.2.pdf",
+      "source_relative_path": "PublisherStudio-2.4.3.pdf",
       "output": {
         "resource": {
-          "relative_path": "PublisherStudio-2.4.2.pdf"
+          "relative_path": "PublisherStudio-2.4.3.pdf"
         }
       },
       "version": ""

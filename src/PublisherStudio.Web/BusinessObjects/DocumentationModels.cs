@@ -27,7 +27,7 @@ public sealed class PublisherDocumentationStatus
     public int CommentCount { get; set; }
 
     /// <summary>Gets or sets the application-relative URL of the generated HTML documentation.</summary>
-    public string HtmlUrl { get; set; } = "/help-docs/index.html";
+    public string HtmlUrl { get; set; } = "/api/documentation/html/index.html";
 
     /// <summary>Gets or sets the application-relative URL of the versioned PDF book.</summary>
     public string PdfUrl { get; set; } = "/api/documentation/pdf";
@@ -106,10 +106,10 @@ public sealed class PublisherDocumentationProfile
     public string HelpRoute { get; set; } = "/help";
 
     /// <summary>Gets or sets the HTML documentation route.</summary>
-    public string HtmlRoute { get; set; } = "/help-docs/index.html";
+    public string HtmlRoute { get; set; } = "/api/documentation/html/index.html";
 
     /// <summary>Gets or sets the API reference route.</summary>
-    public string ApiRoute { get; set; } = "/help-docs/api/index.html";
+    public string ApiRoute { get; set; } = "/api/documentation/html/api/index.html";
 
     /// <summary>Gets or sets the inline PDF controller route.</summary>
     public string PdfRoute { get; set; } = "/api/documentation/pdf";

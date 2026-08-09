@@ -74,6 +74,8 @@ public sealed class DocumentationController(
     /// <param name="relativePath">Optional path below the generated documentation root.</param>
     [HttpGet("/help-docs")]
     [HttpGet("/help-docs/{**relativePath}")]
+    [HttpGet("html")]
+    [HttpGet("html/{**relativePath}")]
     public IActionResult Html([FromRoute] string? relativePath = null)
     {
         try

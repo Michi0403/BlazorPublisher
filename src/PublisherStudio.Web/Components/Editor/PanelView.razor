@@ -19,7 +19,7 @@
     <div class="publication-panel-viewport">
         @foreach (var view in EnabledViews)
         {
-            <section @key="view.Id" class="publication-panel-view @(Item.LayoutMode == PublicationPanelLayoutMode.Responsive ? "responsive-panel-view" : null)" data-panel-view="@view.Id" data-panel-slug="@view.Slug" hidden="@(view.Id != ActiveViewId)" style="background:@view.Background">
+            <section @key="view.Id" class="publication-panel-view @(Item.LayoutMode == PublicationPanelLayoutMode.Responsive && !ForceCanvasLayout ? "responsive-panel-view" : null)" data-panel-view="@view.Id" data-panel-slug="@view.Slug" hidden="@(view.Id != ActiveViewId)" style="background:@view.Background">
                 @foreach (var element in view.Elements.Where(element => element.Visible).OrderBy(element => element.ZIndex))
                 {
                     <div @key="element.Id" class="publication-panel-element kind-@element.Kind.ToString().ToLowerInvariant() @ResponsiveElementClass(element)"
@@ -98,13 +98,15 @@
     [Parameter] public Guid CurrentPageId { get; set; }
     [Parameter] public bool DesignerMode { get; set; }
     [Parameter] public bool DesignPreviewOnly { get; set; }
+    /// <summary>Forces authored canvas coordinates even for responsive panels. Panel Studio uses this in Arrange mode so the live component DOM and selection hitboxes share exactly one geometry.</summary>
+    [Parameter] public bool ForceCanvasLayout { get; set; }
 
     private IReadOnlyList<PublicationPanelView> EnabledViews => Item.Views.Where(view => view.Enabled).ToArray();
     private Guid ActiveViewId => Item.ActiveView?.Id ?? Item.Views.FirstOrDefault()?.Id ?? Guid.Empty;
     private string PanelStyle => $"background:{Item.Background};border:{Mm(Item.BorderWidthMm)} solid {Item.BorderColor};border-radius:{Mm(Item.CornerRadiusMm)};overflow:{(Item.ClipContent ? "hidden" : "visible")};--panel-canvas-width:{Inv(Item.CanvasWidth)};--panel-canvas-height:{Inv(Item.CanvasHeight)}";
     private string ElementStyle(PublicationElement element)
     {
-        if (Item.LayoutMode == PublicationPanelLayoutMode.Responsive)
+        if (Item.LayoutMode == PublicationPanelLayoutMode.Responsive && !ForceCanvasLayout)
         {
             var order = Math.Max(0, element.ZIndex);
             var minimumHeight = Math.Clamp(element.Height / Math.Max(1, Item.CanvasHeight) * 620, 72, 420);
@@ -116,7 +118,7 @@
         var height = element.Height / Math.Max(1, Item.CanvasHeight) * 100;
         return $"left:{Inv(left)}%;top:{Inv(top)}%;width:{Inv(width)}%;height:{Inv(height)}%;z-index:{element.ZIndex};transform:rotate({Inv(element.Rotation)}deg)";
     }
-    private string ResponsiveElementClass(PublicationElement element) => element switch
+    private string ResponsiveElementClass(PublicationElement element) => ForceCanvasLayout ? string.Empty : element switch
     {
         TextFrameElement => "panel-responsive-title",
         DataVisualElement visual when visual.VisualKind == DataVisualKind.DataTable => "panel-responsive-wide",

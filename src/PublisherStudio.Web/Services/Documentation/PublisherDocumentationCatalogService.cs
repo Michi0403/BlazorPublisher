@@ -35,6 +35,9 @@ public sealed class PublisherDocumentationCatalogService(
                 PdfAvailable = pdfPath is not null,
                 XmlCommentsAvailable = comments.Count > 0,
                 CommentCount = comments.Count,
+                HtmlUrl = "/api/documentation/html/index.html",
+                PdfUrl = "/api/documentation/pdf",
+                CommentsUrl = "/api/documentation/comments",
                 PdfFileName = pdfPath is null ? $"PublisherStudio-{version}.pdf" : Path.GetFileName(pdfPath)
             };
     

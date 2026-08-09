@@ -278,7 +278,9 @@ function New-PublisherStudioReleaseArchive {
     param(
         [Parameter(Mandatory)][string]$SourceDirectory,
         [Parameter(Mandatory)][string]$DestinationPath,
-        [Parameter(Mandatory)][string]$RootFolderName
+        [Parameter(Mandatory)][string]$RootFolderName,
+        [string[]]$UnixExecutableRelativePaths = @(),
+        [switch]$WriteUnixPermissions
     )
 
     $sourceRoot = [IO.Path]::GetFullPath($SourceDirectory).TrimEnd([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar)
@@ -291,6 +293,16 @@ function New-PublisherStudioReleaseArchive {
 
     $files = @(Get-ChildItem -LiteralPath $sourceRoot -File -Recurse | Sort-Object FullName)
     if ($files.Count -eq 0) { throw "Release archive source is empty: $sourceRoot" }
+
+    $unixExecutableSet = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($unixExecutablePath in @($UnixExecutableRelativePaths)) {
+        if ([string]::IsNullOrWhiteSpace($unixExecutablePath)) { continue }
+        $normalizedExecutablePath = $unixExecutablePath.TrimStart([char[]]"\/").Replace('\', '/')
+        if ($normalizedExecutablePath.Split('/') -contains '..') { throw "Unsafe Unix executable path: $unixExecutablePath" }
+        [void]$unixExecutableSet.Add($normalizedExecutablePath)
+    }
+    $unixRegularFileAttributes = [int]-2119958528 # 0100644 << 16
+    $unixExecutableFileAttributes = [int]-2115174400 # 0100755 << 16
 
     $destination = [IO.Path]::GetFullPath($DestinationPath)
     $destinationDirectory = Split-Path -Parent $destination
@@ -317,6 +329,9 @@ function New-PublisherStudioReleaseArchive {
                         try {
                             $entry = $archive.CreateEntry($entryName, [IO.Compression.CompressionLevel]::Optimal)
                             $entry.LastWriteTime = [DateTimeOffset]::new(1980, 1, 1, 0, 0, 0, [TimeSpan]::Zero)
+                            if ($WriteUnixPermissions) {
+                                $entry.ExternalAttributes = if ($unixExecutableSet.Contains($relative)) { $unixExecutableFileAttributes } else { $unixRegularFileAttributes }
+                            }
                             $output = $entry.Open()
                             try { $input.CopyTo($output) }
                             finally { $output.Dispose() }
@@ -344,6 +359,15 @@ function New-PublisherStudioReleaseArchive {
             $entries = @($verification.Entries | Where-Object { -not [string]::IsNullOrWhiteSpace($_.Name) })
             if ($entries.Count -ne $files.Count) {
                 throw "Release archive entry count $($entries.Count) does not match source file count $($files.Count): $temporaryArchive"
+            }
+            if ($WriteUnixPermissions) {
+                foreach ($unixExecutablePath in $unixExecutableSet) {
+                    $expectedEntryName = "$RootFolderName/$unixExecutablePath"
+                    $executableEntry = $entries | Where-Object { $_.FullName -eq $expectedEntryName } | Select-Object -First 1
+                    if ($null -eq $executableEntry) { throw "Unix executable entry is missing from release archive: $expectedEntryName" }
+                    $permissionBits = (($executableEntry.ExternalAttributes -shr 16) -band 511)
+                    if ($permissionBits -ne 493) { throw "Unix executable entry '$expectedEntryName' does not carry mode 0755 (actual permission bits: $permissionBits)." }
+                }
             }
         }
         finally { $verification.Dispose() }
@@ -608,8 +632,8 @@ function Publish-Runtime {
 
     # Final release-boundary check: no later publish step may reintroduce stale help-docs.
     Assert-PublisherStudioDocumentationPayload -DocumentationRoot $publishedDocumentationRoot -Version $appVersion
-    New-PublisherStudioReleaseArchive -SourceDirectory $appFolder -DestinationPath $appZip -RootFolderName $profile.AppFolder
-    New-PublisherStudioReleaseArchive -SourceDirectory $setupFolder -DestinationPath $setupZip -RootFolderName $profile.SetupFolder
+    New-PublisherStudioReleaseArchive -SourceDirectory $appFolder -DestinationPath $appZip -RootFolderName $profile.AppFolder -WriteUnixPermissions:(!$Rid.StartsWith("win-")) -UnixExecutableRelativePaths @($appExecutable)
+    New-PublisherStudioReleaseArchive -SourceDirectory $setupFolder -DestinationPath $setupZip -RootFolderName $profile.SetupFolder -WriteUnixPermissions:(!$Rid.StartsWith("win-")) -UnixExecutableRelativePaths @($setupExecutable)
     Assert-ReleaseArchiveLayout -ArchivePath $appZip -RootFolderName $profile.AppFolder -Executable $appExecutable -Version $appVersion -RequireDocumentation
     Assert-ReleaseArchiveLayout -ArchivePath $setupZip -RootFolderName $profile.SetupFolder -Executable $setupExecutable
     $script:releaseZipPaths.Add($appZip)

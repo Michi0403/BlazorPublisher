@@ -374,6 +374,8 @@ function Complete-ReleaseBundle {
         [Parameter(Mandatory)][string]$WindowsX64SetupExecutablePath,
         [Parameter(Mandatory)][string]$ReadmePath,
         [Parameter(Mandatory)][string]$LicensePath,
+        [Parameter(Mandatory)][string]$WireProtocolPackagePath,
+        [Parameter(Mandatory)][string]$SetupIconPath,
         [Parameter(Mandatory)][bool]$RequireWindowsX64Setup
     )
 
@@ -387,7 +389,7 @@ function Complete-ReleaseBundle {
     foreach ($zipPath in $uniqueZipPaths) {
         if (-not (Test-Path -LiteralPath $zipPath -PathType Leaf)) { throw "Expected release ZIP is missing: $zipPath" }
     }
-    foreach ($requiredFile in @($DocumentationPdfPath, $ReadmePath, $LicensePath)) {
+    foreach ($requiredFile in @($DocumentationPdfPath, $ReadmePath, $LicensePath, $WireProtocolPackagePath, $SetupIconPath)) {
         if (-not (Test-Path -LiteralPath $requiredFile -PathType Leaf)) { throw "Required upload-ready release file is missing: $requiredFile" }
     }
     if ($RequireWindowsX64Setup -and -not (Test-Path -LiteralPath $WindowsX64SetupExecutablePath -PathType Leaf)) {
@@ -403,6 +405,8 @@ function Complete-ReleaseBundle {
         Copy-Item -LiteralPath $DocumentationPdfPath -Destination (Join-Path $stagingDirectory ([IO.Path]::GetFileName($DocumentationPdfPath))) -Force
         Copy-Item -LiteralPath $ReadmePath -Destination (Join-Path $stagingDirectory ([IO.Path]::GetFileName($ReadmePath))) -Force
         Copy-Item -LiteralPath $LicensePath -Destination (Join-Path $stagingDirectory ([IO.Path]::GetFileName($LicensePath))) -Force
+        Copy-Item -LiteralPath $WireProtocolPackagePath -Destination (Join-Path $stagingDirectory ([IO.Path]::GetFileName($WireProtocolPackagePath))) -Force
+        Copy-Item -LiteralPath $SetupIconPath -Destination (Join-Path $stagingDirectory ([IO.Path]::GetFileName($SetupIconPath))) -Force
         if (Test-Path -LiteralPath $WindowsX64SetupExecutablePath -PathType Leaf) {
             Copy-Item -LiteralPath $WindowsX64SetupExecutablePath -Destination (Join-Path $stagingDirectory ([IO.Path]::GetFileName($WindowsX64SetupExecutablePath))) -Force
         }
@@ -646,6 +650,8 @@ try {
         -WindowsX64SetupExecutablePath $winX64SetupExecutable `
         -ReadmePath (Join-Path $root "README.md") `
         -LicensePath $licensePath `
+        -WireProtocolPackagePath $wireProtocolPackage `
+        -SetupIconPath (Join-Path $root "assets\PublisherStudio.ico") `
         -RequireWindowsX64Setup $requireWinX64Setup
 }
 finally {

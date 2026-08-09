@@ -28,6 +28,27 @@ jobs:
       - name: Check out publishing snapshot
         uses: actions/checkout@v6
 
+      - name: Require GitHub Actions as the Pages publishing source
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          pages_json="$(gh api \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2026-03-10" \
+            "repos/${GITHUB_REPOSITORY}/pages")"
+          build_type="$(printf '%s' "$pages_json" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("build_type") or "legacy")')"
+          source_branch="$(printf '%s' "$pages_json" | python3 -c 'import json,sys; d=json.load(sys.stdin).get("source") or {}; print(d.get("branch") or "")')"
+          source_path="$(printf '%s' "$pages_json" | python3 -c 'import json,sys; d=json.load(sys.stdin).get("source") or {}; print(d.get("path") or "")')"
+          echo "PublisherStudio Pages build_type=$build_type source=${source_branch}${source_path}"
+          if [[ "$build_type" != "workflow" ]]; then
+            echo "PublisherStudio Pages is still configured for legacy branch publishing (${source_branch}${source_path})." >&2
+            echo "That GitHub-managed pages-build-deployment Jekyll job can overwrite this DocFX artifact after a successful custom deployment." >&2
+            echo "Change Repository Settings -> Pages -> Build and deployment -> Source to GitHub Actions, then re-run this workflow." >&2
+            exit 1
+          fi
+
       - name: Prepare pinned Kawaii documentation
         shell: bash
         run: |

@@ -34,6 +34,7 @@ $wireProtocolPackageName = "LocalGPT.WireProtocolVersion.$WireProtocolVersion.nu
 $wireProtocolPackage = Join-Path $packageDirectory $wireProtocolPackageName
 $documentationCacheRoot = Join-Path $artifacts ".documentation-cache"
 $documentationPrepared = $false
+$releaseZipPaths = New-Object 'System.Collections.Generic.List[string]'
 
 function Invoke-DotNet {
     param(
@@ -228,7 +229,12 @@ function Assert-ReleaseArchiveLayout {
     Add-Type -AssemblyName System.IO.Compression.FileSystem
     $archive = [IO.Compression.ZipFile]::OpenRead($ArchivePath)
     try {
-        $names = @($archive.Entries | ForEach-Object { $_.FullName.Replace('\', '/').TrimStart('/') })
+        $rawNames = @($archive.Entries | ForEach-Object { $_.FullName })
+        $backslashEntries = @($rawNames | Where-Object { $_.Contains('\') })
+        if ($backslashEntries.Count -gt 0) {
+            throw "Release archive contains Windows-style backslash entry names that flatten on POSIX extractors: $($backslashEntries -join ', ')"
+        }
+        $names = @($rawNames | ForEach-Object { $_.TrimStart('/') })
         $expectedExecutable = "$RootFolderName/$Executable"
         if (-not ($names -contains $expectedExecutable)) {
             throw "Release archive does not contain ${expectedExecutable}: $ArchivePath"
@@ -353,6 +359,75 @@ function New-PublisherStudioReleaseArchive {
 $appVersion = Resolve-ProjectVersion -ProjectPath $webProject
 $setupVersion = Resolve-ProjectVersion -ProjectPath $setupProject
 if ($appVersion -ne $setupVersion) { throw "PublisherStudio application version $appVersion does not match setup version $setupVersion." }
+
+
+function Test-VersionDirectoryName {
+    param([Parameter(Mandatory)][string]$Name)
+    return $Name -match '^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$'
+}
+
+function Complete-ReleaseBundle {
+    param(
+        [Parameter(Mandatory)][string]$Version,
+        [Parameter(Mandatory)][string[]]$ReleaseZipPaths,
+        [Parameter(Mandatory)][string]$DocumentationPdfPath,
+        [Parameter(Mandatory)][string]$WindowsX64SetupExecutablePath,
+        [Parameter(Mandatory)][string]$ReadmePath,
+        [Parameter(Mandatory)][string]$LicensePath,
+        [Parameter(Mandatory)][bool]$RequireWindowsX64Setup
+    )
+
+    $versionDirectory = Join-Path $artifacts $Version
+    if (Test-Path -LiteralPath $versionDirectory) {
+        throw "Release bundle '$versionDirectory' already exists. Existing version directories are never overwritten."
+    }
+
+    $uniqueZipPaths = @($ReleaseZipPaths | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
+    if ($uniqueZipPaths.Count -eq 0) { throw "No release ZIPs were produced for release $Version." }
+    foreach ($zipPath in $uniqueZipPaths) {
+        if (-not (Test-Path -LiteralPath $zipPath -PathType Leaf)) { throw "Expected release ZIP is missing: $zipPath" }
+    }
+    foreach ($requiredFile in @($DocumentationPdfPath, $ReadmePath, $LicensePath)) {
+        if (-not (Test-Path -LiteralPath $requiredFile -PathType Leaf)) { throw "Required upload-ready release file is missing: $requiredFile" }
+    }
+    if ($RequireWindowsX64Setup -and -not (Test-Path -LiteralPath $WindowsX64SetupExecutablePath -PathType Leaf)) {
+        throw "Windows x64 setup executable is required for the full release bundle but is missing: $WindowsX64SetupExecutablePath"
+    }
+
+    $stagingDirectory = Join-Path $artifacts (".release-bundle-" + [Guid]::NewGuid().ToString("N"))
+    New-Item -ItemType Directory -Path $stagingDirectory -Force | Out-Null
+    try {
+        foreach ($zipPath in $uniqueZipPaths) {
+            Copy-Item -LiteralPath $zipPath -Destination (Join-Path $stagingDirectory ([IO.Path]::GetFileName($zipPath))) -Force
+        }
+        Copy-Item -LiteralPath $DocumentationPdfPath -Destination (Join-Path $stagingDirectory ([IO.Path]::GetFileName($DocumentationPdfPath))) -Force
+        Copy-Item -LiteralPath $ReadmePath -Destination (Join-Path $stagingDirectory ([IO.Path]::GetFileName($ReadmePath))) -Force
+        Copy-Item -LiteralPath $LicensePath -Destination (Join-Path $stagingDirectory ([IO.Path]::GetFileName($LicensePath))) -Force
+        if (Test-Path -LiteralPath $WindowsX64SetupExecutablePath -PathType Leaf) {
+            Copy-Item -LiteralPath $WindowsX64SetupExecutablePath -Destination (Join-Path $stagingDirectory ([IO.Path]::GetFileName($WindowsX64SetupExecutablePath))) -Force
+        }
+
+        New-Item -ItemType Directory -Path $versionDirectory -Force | Out-Null
+        foreach ($file in Get-ChildItem -LiteralPath $stagingDirectory -File) {
+            Move-Item -LiteralPath $file.FullName -Destination (Join-Path $versionDirectory $file.Name)
+        }
+
+        foreach ($zipPath in $uniqueZipPaths) {
+            Remove-Item -LiteralPath $zipPath -Force -ErrorAction SilentlyContinue
+        }
+
+        foreach ($directory in Get-ChildItem -LiteralPath $artifacts -Directory -Force) {
+            if ($directory.FullName -eq $versionDirectory) { continue }
+            if (Test-VersionDirectoryName -Name $directory.Name) { continue }
+            Remove-Item -LiteralPath $directory.FullName -Recurse -Force -ErrorAction Stop
+        }
+
+        Write-Host "Upload-ready release bundle: $versionDirectory" -ForegroundColor Green
+    }
+    finally {
+        Remove-Item -LiteralPath $stagingDirectory -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
 
 function Ensure-WireProtocolPackage {
     New-Item -ItemType Directory -Path $packageDirectory -Force | Out-Null
@@ -533,8 +608,10 @@ function Publish-Runtime {
     New-PublisherStudioReleaseArchive -SourceDirectory $setupFolder -DestinationPath $setupZip -RootFolderName $profile.SetupFolder
     Assert-ReleaseArchiveLayout -ArchivePath $appZip -RootFolderName $profile.AppFolder -Executable $appExecutable -Version $appVersion -RequireDocumentation
     Assert-ReleaseArchiveLayout -ArchivePath $setupZip -RootFolderName $profile.SetupFolder -Executable $setupExecutable
-    Write-Host "Created $appZip" -ForegroundColor Green
-    Write-Host "Created $setupZip" -ForegroundColor Green
+    $script:releaseZipPaths.Add($appZip)
+    $script:releaseZipPaths.Add($setupZip)
+    Write-Host "Created portable ZIP $appZip" -ForegroundColor Green
+    Write-Host "Created portable ZIP $setupZip" -ForegroundColor Green
 }
 
 New-Item -ItemType Directory -Path $packageDirectory, $artifacts -Force | Out-Null
@@ -553,10 +630,28 @@ else {
 
 try {
     foreach ($rid in $runtimes) { Publish-Runtime -Rid $rid }
+
+    $documentationPdf = Join-Path $documentationCacheRoot "PublisherStudio-$appVersion.pdf"
+    $winX64Profile = Resolve-ReleaseProfile -Rid "win-x64"
+    $winX64SetupFolder = Resolve-ProfilePublishFolder -ProjectPath $setupProject -ProfileName $winX64Profile.SetupProfile
+    $winX64SetupExecutable = Join-Path $winX64SetupFolder "PublisherStudio.Setup.exe"
+    $requireWinX64Setup = @($runtimes) -contains "win-x64"
+    $licensePath = Join-Path $root "LICENSE.MD"
+    if (-not (Test-Path -LiteralPath $licensePath -PathType Leaf)) { $licensePath = Join-Path $root "LICENSE" }
+
+    Complete-ReleaseBundle `
+        -Version $appVersion `
+        -ReleaseZipPaths @($releaseZipPaths) `
+        -DocumentationPdfPath $documentationPdf `
+        -WindowsX64SetupExecutablePath $winX64SetupExecutable `
+        -ReadmePath (Join-Path $root "README.md") `
+        -LicensePath $licensePath `
+        -RequireWindowsX64Setup $requireWinX64Setup
 }
 finally {
     Remove-Item -LiteralPath $documentationCacheRoot -Recurse -Force -ErrorAction SilentlyContinue
 }
 
-Write-Host "Release output: $artifacts" -ForegroundColor Green
-Write-Host "Protocol package: $(Join-Path $artifacts $wireProtocolPackageName)" -ForegroundColor Green
+$releaseBundle = Join-Path $artifacts $appVersion
+Write-Host "Release output: $releaseBundle" -ForegroundColor Green
+Write-Host "Protocol package cache: $(Join-Path $artifacts $wireProtocolPackageName)" -ForegroundColor Green

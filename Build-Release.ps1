@@ -160,6 +160,10 @@ function Assert-PublisherStudioDocumentationPayload {
 
     $requiredArtifacts = @(
         (Join-Path $DocumentationRoot "index.html"),
+        (Join-Path $DocumentationRoot "api\index.html"),
+        (Join-Path $DocumentationRoot "api\toc.html"),
+        (Join-Path $DocumentationRoot "public\docfx.min.css"),
+        (Join-Path $DocumentationRoot "public\docfx.min.js"),
         (Join-Path $DocumentationRoot "documentation-status.json"),
         (Join-Path $DocumentationRoot "PublisherStudio.Web.xml"),
         (Join-Path $DocumentationRoot "PublisherStudio-$Version.pdf"),
@@ -182,6 +186,10 @@ function Assert-PublisherStudioDocumentationPayload {
     if ([string]$status.pdfMode -eq "html-browser-print" -and [int]$status.apiHtmlCount -gt 0 -and [int]$status.pdfSourcePageCount -lt [int]$status.apiHtmlCount) { throw "The PublisherStudio documentation PDF omitted generated API pages." }
     if (-not ([bool]$status.completeApiReference)) { throw "Published PublisherStudio documentation is missing the complete XML-generated API reference." }
     if ([int]$status.apiYamlCount -le 1 -or [int]$status.apiHtmlCount -le 1) { throw "Published PublisherStudio documentation contains an incomplete API graph." }
+    $physicalApiHtmlCount = @(Get-ChildItem -LiteralPath (Join-Path $DocumentationRoot "api") -Filter "*.html" -File -Recurse -ErrorAction SilentlyContinue).Count
+    if ($physicalApiHtmlCount -le 1) { throw "Published PublisherStudio documentation API directory is physically incomplete ($physicalApiHtmlCount HTML file(s))." }
+    $apiIndexText = Get-Content -LiteralPath (Join-Path $DocumentationRoot "api\index.html") -Raw
+    if ($apiIndexText.IndexOf("PublisherStudio API reference", [StringComparison]::OrdinalIgnoreCase) -lt 0) { throw "Published PublisherStudio api/index.html is not the generated API reference entry point." }
     if ([long]$status.pdfBytes -lt 1048576) { throw "Published PublisherStudio documentation contains an unexpectedly small PDF." }
     if ([int]$status.pdfCandidateCount -lt 1 -or [string]::IsNullOrWhiteSpace([string]$status.pdfGeneratedSourcePath)) { throw "Published PublisherStudio documentation did not record a real documentation PDF source." }
 

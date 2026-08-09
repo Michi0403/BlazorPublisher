@@ -142,6 +142,23 @@ try {
     & $python.Source $validator --archive $temporaryArchive --output $verificationRoot --expected-version $expectedVersion
     if ($LASTEXITCODE -ne 0) { throw "The new PublisherStudio Pages snapshot failed final validation for version $expectedVersion." }
 
+    $sourceApiIndex = Join-Path $DocumentationRoot 'api\index.html'
+    $verifiedApiIndex = Join-Path $verificationRoot 'api\index.html'
+    if (-not (Test-Path -LiteralPath $sourceApiIndex -PathType Leaf) -or -not (Test-Path -LiteralPath $verifiedApiIndex -PathType Leaf)) {
+        throw "PublisherStudio Pages snapshot API entry point disappeared during snapshot preparation."
+    }
+    $sourceApiHash = (Get-FileHash -LiteralPath $sourceApiIndex -Algorithm SHA256).Hash
+    $verifiedApiHash = (Get-FileHash -LiteralPath $verifiedApiIndex -Algorithm SHA256).Hash
+    if (-not [string]::Equals($sourceApiHash, $verifiedApiHash, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "PublisherStudio Pages snapshot api/index.html differs from the generated DocFX source."
+    }
+    $sourceApiCount = @(Get-ChildItem -LiteralPath (Join-Path $DocumentationRoot 'api') -Filter '*.html' -File -Recurse).Count
+    $verifiedApiCount = @(Get-ChildItem -LiteralPath (Join-Path $verificationRoot 'api') -Filter '*.html' -File -Recurse).Count
+    if ($sourceApiCount -ne $verifiedApiCount -or $verifiedApiCount -le 1) {
+        throw "PublisherStudio Pages snapshot API page count changed during preparation: source=$sourceApiCount verified=$verifiedApiCount"
+    }
+    Write-Host "Verified PublisherStudio Pages API tree byte-for-byte at entry point and page-count parity ($verifiedApiCount HTML pages)." -ForegroundColor Green
+
     Remove-Item -LiteralPath $backupArchive -Force -ErrorAction SilentlyContinue
     if (Test-Path -LiteralPath $OutputArchive -PathType Leaf) { [IO.File]::Move($OutputArchive, $backupArchive) }
     try {

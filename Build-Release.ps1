@@ -1,4 +1,4 @@
-param(
+﻿param(
     [ValidateSet("all", "win-x64", "win-x86", "win-arm64", "linux-x64", "linux-arm64", "osx-x64", "osx-arm64")]
     [string]$Runtime = "all",
     [ValidateSet("Release", "Debug")]
@@ -180,6 +180,13 @@ function Assert-PublisherStudioDocumentationPayload {
     }
 
     $status = Get-Content -LiteralPath (Join-Path $DocumentationRoot "documentation-status.json") -Raw | ConvertFrom-Json
+    if (-not [string]::Equals([string]$status.version, $Version, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Published PublisherStudio documentation version '$($status.version)' does not match application version '$Version'."
+    }
+    $versionedPdfs = @(Get-ChildItem -LiteralPath $DocumentationRoot -File -Filter 'PublisherStudio-*.pdf' -ErrorAction SilentlyContinue)
+    if ($versionedPdfs.Count -ne 1 -or -not [string]::Equals($versionedPdfs[0].Name, "PublisherStudio-$Version.pdf", [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Published PublisherStudio documentation must contain exactly one current versioned PDF (PublisherStudio-$Version.pdf). Found: $($versionedPdfs.Name -join ', ')"
+    }
     if ([string]$status.documentationMode -ne "docfx") { throw "Published PublisherStudio documentation did not use the DocFX modern site." }
     if ([string]$status.pdfMode -notin @("html-browser-print", "docfx-pdf-plugin")) { throw "Published PublisherStudio documentation does not contain the complete HTML-backed documentation PDF." }
     if ([string]$status.pdfMode -eq "html-browser-print" -and [int]$status.pdfSourcePageCount -lt 10) { throw "The PublisherStudio documentation PDF did not include the expected HTML page set." }
@@ -214,6 +221,7 @@ function Assert-ReleaseArchiveLayout {
         [Parameter(Mandatory)][string]$ArchivePath,
         [Parameter(Mandatory)][string]$RootFolderName,
         [Parameter(Mandatory)][string]$Executable,
+        [string]$Version = "",
         [switch]$RequireDocumentation
     )
 
@@ -236,9 +244,12 @@ function Assert-ReleaseArchiveLayout {
                     throw "Release archive is missing required installed documentation entry ${requiredDocumentationEntry}: $ArchivePath"
                 }
             }
+            if ([string]::IsNullOrWhiteSpace($Version)) { throw "Version is required when validating release documentation." }
             $pdfPrefix = "$RootFolderName/wwwroot/help-docs/PublisherStudio-"
-            if (-not ($names | Where-Object { $_.StartsWith($pdfPrefix, [StringComparison]::OrdinalIgnoreCase) -and $_.EndsWith('.pdf', [StringComparison]::OrdinalIgnoreCase) } | Select-Object -First 1)) {
-                throw "Release archive does not contain the versioned PublisherStudio documentation PDF below $RootFolderName/wwwroot/help-docs."
+            $versionedPdfs = @($names | Where-Object { $_.StartsWith($pdfPrefix, [StringComparison]::OrdinalIgnoreCase) -and $_.EndsWith('.pdf', [StringComparison]::OrdinalIgnoreCase) })
+            $expectedPdf = "$RootFolderName/wwwroot/help-docs/PublisherStudio-$Version.pdf"
+            if ($versionedPdfs.Count -ne 1 -or -not ($versionedPdfs -contains $expectedPdf)) {
+                throw "Release archive must contain exactly the current PublisherStudio documentation PDF '$expectedPdf'. Found: $($versionedPdfs -join ', ')"
             }
         }
         foreach ($name in $names) {
@@ -516,9 +527,11 @@ function Publish-Runtime {
     $missingSetupFiles = @($requiredSetupFiles | Where-Object { -not (Test-Path -LiteralPath (Join-Path $setupFolder $_) -PathType Leaf) })
     if ($missingSetupFiles.Count -gt 0) { throw "Published setup is incomplete. Missing: $($missingSetupFiles -join ', ')" }
 
+    # Final release-boundary check: no later publish step may reintroduce stale help-docs.
+    Assert-PublisherStudioDocumentationPayload -DocumentationRoot $publishedDocumentationRoot -Version $appVersion
     New-PublisherStudioReleaseArchive -SourceDirectory $appFolder -DestinationPath $appZip -RootFolderName $profile.AppFolder
     New-PublisherStudioReleaseArchive -SourceDirectory $setupFolder -DestinationPath $setupZip -RootFolderName $profile.SetupFolder
-    Assert-ReleaseArchiveLayout -ArchivePath $appZip -RootFolderName $profile.AppFolder -Executable $appExecutable -RequireDocumentation
+    Assert-ReleaseArchiveLayout -ArchivePath $appZip -RootFolderName $profile.AppFolder -Executable $appExecutable -Version $appVersion -RequireDocumentation
     Assert-ReleaseArchiveLayout -ArchivePath $setupZip -RootFolderName $profile.SetupFolder -Executable $setupExecutable
     Write-Host "Created $appZip" -ForegroundColor Green
     Write-Host "Created $setupZip" -ForegroundColor Green

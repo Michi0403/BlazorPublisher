@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html class="publisherstudio-kawaii-docs" lang="en">
+  <head>
+    <meta charset="utf-8">
+      <title>Class PublicationElement | PublisherStudio Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class PublicationElement | PublisherStudio Documentation ">
+      
+      <meta name="description" content="Represents a publication element.">
+      <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=f744350ad7f0" data-publisherstudio-favicon="true" />
+<link rel="alternate icon" href="../favicon.ico?v=c1e7eb37cc8b" />
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  <script data-publisherstudio-theme-bootstrap="true">
+(function () {
+  var cookieName = "publisherstudio-docs-theme";
+  var valid = { light: true, dark: true, auto: true };
+  var preference = null;
+  var prefix = encodeURIComponent(cookieName) + "=";
+  try {
+    document.cookie.split(";").some(function (part) {
+      part = part.trim();
+      if (part.indexOf(prefix) === 0) {
+        try { preference = decodeURIComponent(part.substring(prefix.length)); }
+        catch (_) { preference = null; }
+        return true;
+      }
+      return false;
+    });
+    if (!valid[preference]) preference = localStorage.getItem(cookieName);
+    if (!valid[preference]) preference = localStorage.getItem("theme");
+  } catch (_) { }
+  if (!valid[preference]) preference = "auto";
+  var resolved = preference === "auto"
+    ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+    : preference;
+  document.documentElement.dataset.publisherstudioThemePreference = preference;
+  document.documentElement.setAttribute("data-bs-theme", resolved);
+  try {
+    localStorage.setItem(cookieName, preference);
+    localStorage.setItem("theme", preference);
+  } catch (_) { }
+  var secure = location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = prefix + encodeURIComponent(preference) + "; Max-Age=31536000; Path=/; SameSite=Lax" + secure;
+})();
+</script>
+<link rel="stylesheet" href="../styles/publisherstudio-kawaii.css?v=e41f20c067fb" data-publisherstudio-kawaii-style="true" />
+</head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="PublisherStudio">
+            PublisherStudio
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="PublisherStudio.BusinessObjects.PublicationElement">
+
+
+
+  <h1 id="PublisherStudio_BusinessObjects_PublicationElement" data-uid="PublisherStudio.BusinessObjects.PublicationElement" class="text-break">
+Class PublicationElement  
+  </h1><aside class="publisherstudio-api-neko-note" role="note"><span class="publisherstudio-api-neko-mascot" aria-hidden="true">&#x1F431;&#x2009;&#x1F436;</span><span><strong>Neko & Puppy type guide</strong> Â· Tiny paws, tidy details: constructors, properties, methods, and events stay cuddled up with the type that owns them, nya~ woof!</span></aside>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="PublisherStudio.html">PublisherStudio</a>.<a class="xref" href="PublisherStudio.BusinessObjects.html">BusinessObjects</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>PublisherStudio.Web.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Represents a publication element.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[JsonPolymorphic(TypeDiscriminatorPropertyName = &quot;$type&quot;)]
+[JsonDerivedType(typeof(TextFrameElement), &quot;text&quot;)]
+[JsonDerivedType(typeof(ImageFrameElement), &quot;image&quot;)]
+[JsonDerivedType(typeof(VideoElement), &quot;video&quot;)]
+[JsonDerivedType(typeof(AudioElement), &quot;audio&quot;)]
+[JsonDerivedType(typeof(ShapeElement), &quot;shape&quot;)]
+[JsonDerivedType(typeof(WordArtElement), &quot;wordArt&quot;)]
+[JsonDerivedType(typeof(ConnectorElement), &quot;connector&quot;)]
+[JsonDerivedType(typeof(DataVisualElement), &quot;dataVisual&quot;)]
+[JsonDerivedType(typeof(BarcodeElement), &quot;barcode&quot;)]
+[JsonDerivedType(typeof(SpreadsheetElement), &quot;spreadsheet&quot;)]
+[JsonDerivedType(typeof(DevExtremeComponentElement), &quot;devExtremeComponent&quot;)]
+[JsonDerivedType(typeof(LiveSourceElement), &quot;liveSource&quot;)]
+[JsonDerivedType(typeof(PanelElement), &quot;panel&quot;)]
+[JsonDerivedType(typeof(HtmlEmbedElement), &quot;htmlEmbed&quot;)]
+public abstract class PublicationElement</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">PublicationElement</span></div>
+    </dd>
+  </dl>
+
+
+  <dl class="typelist derived">
+    <dt>Derived</dt>
+    <dd>
+      <div><a class="xref" href="PublisherStudio.BusinessObjects.BarcodeElement.html">BarcodeElement</a></div>
+      <div><a class="xref" href="PublisherStudio.BusinessObjects.ConnectorElement.html">ConnectorElement</a></div>
+      <div><a class="xref" href="PublisherStudio.BusinessObjects.DataVisualElement.html">DataVisualElement</a></div>
+      <div><a class="xref" href="PublisherStudio.BusinessObjects.DevExtremeComponentElement.html">DevExtremeComponentElement</a></div>
+      <div><a class="xref" href="PublisherStudio.BusinessObjects.HtmlEmbedElement.html">HtmlEmbedElement</a></div>
+      <div><a class="xref" href="PublisherStudio.BusinessObjects.ImageFrameElement.html">ImageFrameElement</a></div>
+      <div><a class="xref" href="PublisherStudio.BusinessObjects.LiveSourceElement.html">LiveSourceElement</a></div>
+      <div><a class="xref" href="PublisherStudio.BusinessObjects.PanelElement.html">PanelElement</a></div>
+      <div><a class="xref" href="PublisherStudio.BusinessObjects.PublicationMediaElement.html">PublicationMediaElement</a></div>
+      <div><a class="xref" href="PublisherStudio.BusinessObjects.ShapeElement.html">ShapeElement</a></div>
+      <div><a class="xref" href="PublisherStudio.BusinessObjects.SpreadsheetElement.html">SpreadsheetElement</a></div>
+      <div><a class="xref" href="PublisherStudio.BusinessObjects.TextFrameElement.html">TextFrameElement</a></div>
+      <div><a class="xref" href="PublisherStudio.BusinessObjects.WordArtElement.html">WordArtElement</a></div>
+    </dd>
+  </dl>
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone">object.MemberwiseClone()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <section class="publisherstudio-api-member-panel publisherstudio-api-member-panel--constructors" data-member-kind="Constructors" style="--publisherstudio-api-accent:#a855f7;" role="region" aria-labelledby="constructors"><h2 class="section" id="constructors"><span class="publisherstudio-api-member-icon" aria-hidden="true">&#x2728;</span>Constructors
+<span class="publisherstudio-api-member-count" aria-label="1 item">1</span></h2><div class="publisherstudio-api-member-panel-body">
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationElement__ctor_" data-uid="PublisherStudio.BusinessObjects.PublicationElement.#ctor*"></a>
+
+  <section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationElement__ctor" data-uid="PublisherStudio.BusinessObjects.PublicationElement.#ctor">
+  PublicationElement()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">protected PublicationElement()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </div></section></div></section><section class="publisherstudio-api-member-panel publisherstudio-api-member-panel--properties" data-member-kind="Properties" style="--publisherstudio-api-accent:#06b6d4;" role="region" aria-labelledby="properties"><h2 class="section" id="properties"><span class="publisherstudio-api-member-icon" aria-hidden="true">&#x1F43E;</span>Properties
+<span class="publisherstudio-api-member-count" aria-label="16 items">16</span></h2><div class="publisherstudio-api-member-panel-body">
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationElement_Animations_" data-uid="PublisherStudio.BusinessObjects.PublicationElement.Animations*"></a>
+
+  <section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationElement_Animations" data-uid="PublisherStudio.BusinessObjects.PublicationElement.Animations">
+  Animations
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets animations.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public List&lt;PublicationAnimation&gt; Animations { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1">List</a>&lt;<a class="xref" href="PublisherStudio.BusinessObjects.PublicationAnimation.html">PublicationAnimation</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationElement_ConnectorPorts_" data-uid="PublisherStudio.BusinessObjects.PublicationElement.ConnectorPorts*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationElement_ConnectorPorts" data-uid="PublisherStudio.BusinessObjects.PublicationElement.ConnectorPorts">
+  ConnectorPorts
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets connector ports.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public List&lt;PublicationConnectorPort&gt; ConnectorPorts { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1">List</a>&lt;<a class="xref" href="PublisherStudio.BusinessObjects.PublicationConnectorPort.html">PublicationConnectorPort</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationElement_GroupId_" data-uid="PublisherStudio.BusinessObjects.PublicationElement.GroupId*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationElement_GroupId" data-uid="PublisherStudio.BusinessObjects.PublicationElement.GroupId">
+  GroupId
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets group identifier.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Guid? GroupId { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.guid">Guid</a>?</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationElement_Height_" data-uid="PublisherStudio.BusinessObjects.PublicationElement.Height*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationElement_Height" data-uid="PublisherStudio.BusinessObjects.PublicationElement.Height">
+  Height
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets height.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double Height { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationElement_HiddenAtPresentationStart_" data-uid="PublisherStudio.BusinessObjects.PublicationElement.HiddenAtPresentationStart*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationElement_HiddenAtPresentationStart" data-uid="PublisherStudio.BusinessObjects.PublicationElement.HiddenAtPresentationStart">
+  HiddenAtPresentationStart
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets hidden at presentation start.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool HiddenAtPresentationStart { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationElement_Id_" data-uid="PublisherStudio.BusinessObjects.PublicationElement.Id*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationElement_Id" data-uid="PublisherStudio.BusinessObjects.PublicationElement.Id">
+  Id
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets the stable identifier.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Guid Id { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.guid">Guid</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationElement_Interaction_" data-uid="PublisherStudio.BusinessObjects.PublicationElement.Interaction*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationElement_Interaction" data-uid="PublisherStudio.BusinessObjects.PublicationElement.Interaction">
+  Interaction
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets interaction.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public PublicationInteraction Interaction { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="PublisherStudio.BusinessObjects.PublicationInteraction.html">PublicationInteraction</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationElement_Kind_" data-uid="PublisherStudio.BusinessObjects.PublicationElement.Kind*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationElement_Kind" data-uid="PublisherStudio.BusinessObjects.PublicationElement.Kind">
+  Kind
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets kind.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public abstract PublicationElementKind Kind { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="PublisherStudio.BusinessObjects.PublicationElementKind.html">PublicationElementKind</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationElement_Locked_" data-uid="PublisherStudio.BusinessObjects.PublicationElement.Locked*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationElement_Locked" data-uid="PublisherStudio.BusinessObjects.PublicationElement.Locked">
+  Locked
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets whether the item is locked.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool Locked { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationElement_Name_" data-uid="PublisherStudio.BusinessObjects.PublicationElement.Name*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationElement_Name" data-uid="PublisherStudio.BusinessObjects.PublicationElement.Name">
+  Name
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets the display name.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Name { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationElement_Rotation_" data-uid="PublisherStudio.BusinessObjects.PublicationElement.Rotation*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationElement_Rotation" data-uid="PublisherStudio.BusinessObjects.PublicationElement.Rotation">
+  Rotation
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets rotation.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double Rotation { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationElement_Visible_" data-uid="PublisherStudio.BusinessObjects.PublicationElement.Visible*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationElement_Visible" data-uid="PublisherStudio.BusinessObjects.PublicationElement.Visible">
+  Visible
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets whether the item is visible.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool Visible { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationElement_Width_" data-uid="PublisherStudio.BusinessObjects.PublicationElement.Width*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationElement_Width" data-uid="PublisherStudio.BusinessObjects.PublicationElement.Width">
+  Width
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets width.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double Width { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationElement_X_" data-uid="PublisherStudio.BusinessObjects.PublicationElement.X*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationElement_X" data-uid="PublisherStudio.BusinessObjects.PublicationElement.X">
+  X
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets horizontal position.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double X { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationElement_Y_" data-uid="PublisherStudio.BusinessObjects.PublicationElement.Y*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationElement_Y" data-uid="PublisherStudio.BusinessObjects.PublicationElement.Y">
+  Y
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets vertical position.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double Y { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="PublisherStudio_BusinessObjects_PublicationElement_ZIndex_" data-uid="PublisherStudio.BusinessObjects.PublicationElement.ZIndex*"></a>
+
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_BusinessObjects_PublicationElement_ZIndex" data-uid="PublisherStudio.BusinessObjects.PublicationElement.ZIndex">
+  ZIndex
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Gets or sets zindex.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int ZIndex { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+</div></section>
+</div></section></article>
+
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          PublisherStudio 2.4.2 Â· generated documentation
+        </div>
+      </div>
+    </footer>
+  <script type="module" src="../styles/publisherstudio-kawaii.js?v=704da0f7f0a3" data-publisherstudio-kawaii-script="true"></script>
+</body>
+</html>

@@ -5066,3 +5066,47 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
     opacity: 1 !important;
     text-shadow: none !important;
 }
+
+/* PublisherStudio 2.4.2: preserve the Data Visual workbench while hardening its
+   independent scroll panes and narrow-screen layout. */
+.data-visual-editor-body,
+.visual-type-list,
+.visual-settings,
+.visual-live-preview {
+    min-width: 0;
+    min-height: 0;
+}
+
+.visual-type-list,
+.visual-settings {
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+}
+
+@media (max-width: 760px) {
+    .data-modal-backdrop {
+        padding: 4px !important;
+    }
+
+    .data-visual-editor-dialog {
+        width: calc(100vw - 8px) !important;
+        height: calc(100dvh - 8px) !important;
+        max-width: none !important;
+        max-height: none !important;
+        border-radius: 4px;
+    }
+
+    .data-visual-editor-body {
+        grid-template-columns: minmax(0, 1fr) !important;
+        grid-template-rows: minmax(7.5rem, 28dvh) minmax(0, 1fr) !important;
+    }
+
+    .visual-type-list {
+        border-right: 0;
+        border-bottom: 1px solid #d6dce3;
+    }
+
+    .visual-settings {
+        border-right: 0;
+    }
+}

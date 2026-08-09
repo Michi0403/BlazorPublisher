@@ -6,7 +6,7 @@
     <InvariantGlobalization>false</InvariantGlobalization>
     <RootNamespace>PublisherStudio</RootNamespace>
     <AssemblyName>PublisherStudio.Web</AssemblyName>
-    <Version>2.4.1</Version>
+    <Version>2.4.2</Version>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
     <ApplicationIcon>..\..\assets\PublisherStudio.ico</ApplicationIcon>

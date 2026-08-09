@@ -46,7 +46,7 @@ except Exception as e: failures.append(f"publisher-dx-functions.json invalid: {e
 validator=ROOT/'.github/scripts/prepare-pages-artifact.py'
 archive=ROOT/'.github/pages/publisherstudio-kawaii-docs.zip'
 with tempfile.TemporaryDirectory(prefix='publisher-contract-audit-') as tmp:
- result=subprocess.run([sys.executable,str(validator),'--archive',str(archive),'--output',tmp,'--expected-version','2.2.5'],capture_output=True,text=True)
+ result=subprocess.run([sys.executable,str(validator),'--archive',str(archive),'--output',tmp,'--expected-version','2.3.6'],capture_output=True,text=True)
  if result.returncode: failures.append(result.stderr.strip() or result.stdout.strip())
 if failures:
  print('PublisherStudio documentation/1-Wire contract audit failed:')

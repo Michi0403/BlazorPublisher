@@ -27,6 +27,7 @@ Require $panel 'bindPanelStudioDropSurface", _canvasElement, _self, _interaction
 Require $panel 'refreshPanelStudioDesignSurface", _canvasElement\)\.ConfigureAwait\(true\)' 'Canvas dimension changes must refresh layout without rebinding browser interaction.'
 Require $panel 'TokenCancellationRequested:\{exception\.CancellationToken\.IsCancellationRequested\}' 'Cancellation diagnostics must include token state.'
 Require $panel 'Panel Studio browser interaction ended normally\. Binding:' 'Expected browser shutdown and cancellation must be logged with binding context.'
+Require $panel '_lastInteractionSurfaceNotification' 'Repeated browser interop failures must be notification-deduplicated instead of flooding the user interface.'
 
 $modeBlock = [regex]::Match($panel, '(?s)private void EnableInteractionPreview\(\).*?private Task EditSelectedComponent').Value
 if ([string]::IsNullOrWhiteSpace($modeBlock)) { Fail 'Panel Studio mode methods could not be inspected.' }
@@ -38,6 +39,7 @@ Reject $panel 'case\s+"interact"\s*:' 'Browser command dispatch must not switch 
 
 Require $interop "bindPanelStudioDropSurface\(element, dotNetReference, bindingId = ''\)" 'Browser binding must accept the stable binding id.'
 Require $interop 'export function refreshPanelStudioDesignSurface\(element\)' 'Layout refresh must be independent from interaction binding lifecycle.'
+Require $interop 'refreshPanelStudioDesignSurface\(element\) \{ try \{ return refreshPanelStudioDesignSurface\(element\);' 'The layout refresh function must be exposed through window.publisherStudio for Blazor JS interop.'
 Require $interop 'existing\.bindingId === normalizedBindingId' 'Repeated renders must reuse the existing binding instead of aborting it.'
 Require $interop 'existing\.dotNetReference = dotNetReference \|\| existing\.dotNetReference;' 'An idempotent bind must refresh the .NET reference.'
 Require $interop 'operation=\$\{operation\}; binding=\$\{binding\?\.bindingId' 'Browser cancellation diagnostics must identify the operation and binding.'

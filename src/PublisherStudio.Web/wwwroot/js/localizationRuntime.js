@@ -12,7 +12,9 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
     const devExtremeCultures = new Set(['ar','bg','ca','cs','da','de','el','en','es','fa','fi','fr','hu','it','ja','ko','lt','lv','nb','nl','pl','pt','ro','ru','sk','sl','sv','tr','uk','vi','zh']);
     const excludedSelector = 'script,style,code,pre,textarea,[contenteditable="true"],.print-publication,[data-publication-element],.publication-content-source,.text-frame-content,.spreadsheet-preview-html';
     let dictionary = {};
+    let sourceDictionary = {};
     let sourceMap = new Map();
+    let sourceMapFolded = new Map();
     let phrases = [];
     let words = new Map();
     let observer = null;
@@ -20,11 +22,23 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
 
     function normalize(value) { try { return String(value || '').replace(/\s+/g, ' ').trim();  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/localizationRuntime.js:normalize@15', __javascriptError); throw __javascriptError; }}
     function rebuildSourceMap() { try {
-        sourceMap = new Map(); phrases = []; words = new Map();
+        sourceMap = new Map(); sourceMapFolded = new Map(); phrases = []; words = new Map();
+        for (const [key, rawSource] of Object.entries(sourceDictionary || {})) {
+            if (!(key in (dictionary || {}))) continue;
+            const source = normalize(rawSource);
+            const value = String(dictionary[key] ?? '');
+            if (!source || !value) continue;
+            sourceMap.set(source, value);
+            sourceMapFolded.set(source.toLocaleLowerCase(requestedLanguage), value);
+        }
         for (const [key, value] of Object.entries(dictionary || {})) {
             if (key.startsWith('Text.')) {
-                const source = key.slice(5).replaceAll('␠', ' ');
-                if (source) sourceMap.set(normalize(source), String(value ?? ''));
+                const source = normalize(key.slice(5).replaceAll('␠', ' '));
+                if (source) {
+                    const translatedValue = String(value ?? '');
+                    sourceMap.set(source, translatedValue);
+                    sourceMapFolded.set(source.toLocaleLowerCase(requestedLanguage), translatedValue);
+                }
             } else if (key.startsWith('Phrase.')) {
                 phrases.push([key.slice(7).replaceAll('␠', ' '), String(value ?? '')]);
             } else if (key.startsWith('Word.')) {
@@ -63,7 +77,7 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/localizationRuntime.js:fallbackTranslate@36', __javascriptError); throw __javascriptError; }}
     function translated(value) { try {
         const original = normalize(value);
-        return sourceMap.get(original) || fallbackTranslate(original) || original;
+        return sourceMap.get(original) || sourceMapFolded.get(original.toLocaleLowerCase(requestedLanguage)) || fallbackTranslate(original) || original;
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/localizationRuntime.js:translated@58', __javascriptError); throw __javascriptError; }}
     function isExcluded(node) { try {
         const element = node instanceof Element ? node : node?.parentElement;
@@ -98,22 +112,36 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         }
         for (const node of element.childNodes) if (node instanceof Text) translateTextNode(node);
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/localizationRuntime.js:translateElement@76', __javascriptError); throw __javascriptError; }}
+    function translateTextTree(root) { try {
+        if (root instanceof Text) { translateTextNode(root); return; }
+        if (!(root instanceof Element || root instanceof Document || root instanceof DocumentFragment)) return;
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+        let node = walker.nextNode();
+        while (node) { translateTextNode(node); node = walker.nextNode(); }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/localizationRuntime.js:translateTextTree@95', __javascriptError); throw __javascriptError; }}
     function apply(root = document.body) { try {
         if (!root || applying) return;
         applying = true;
         try {
-            if (root instanceof Text) translateTextNode(root);
-            else if (root instanceof Element || root instanceof Document) {
-                if (root instanceof Element) translateElement(root);
-                root.querySelectorAll?.('button,label,option,summary,h1,h2,h3,h4,p,span,strong,small,input,select,[title],[aria-label],[placeholder],[data-i18n-key]').forEach(translateElement);
-            }
+            translateTextTree(root);
+            if (root instanceof Element) translateElement(root);
+            root.querySelectorAll?.('[title],[aria-label],[placeholder],input[type="button"],input[type="submit"],input[type="reset"],[data-i18n-key]').forEach(translateElement);
         } finally { applying = false; }
-     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/localizationRuntime.js:apply@95', __javascriptError); throw __javascriptError; }}
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/localizationRuntime.js:apply@105', __javascriptError); throw __javascriptError; }}
     async function load(culture = requestedLanguage) { try {
         try {
-            const response = await fetch(`/api/configuration/localization/${encodeURIComponent(culture)}`, { cache: 'no-store' });
-            if (response.ok) dictionary = await response.json();
-        } catch (error) { console.warn('PublisherStudio localization dictionary could not be loaded.', error); }
+            const request = selectedCulture => fetch(`/api/configuration/localization/${encodeURIComponent(selectedCulture)}`, { cache: 'no-store' });
+            const [response, sourceResponse] = await Promise.all([request(culture), request('en-US')]);
+            if (!response.ok) throw new Error(`PublisherStudio localization request failed with HTTP ${response.status}.`);
+            if (!sourceResponse.ok) throw new Error(`PublisherStudio English localization source request failed with HTTP ${sourceResponse.status}.`);
+            const [loaded, loadedSource] = await Promise.all([response.json(), sourceResponse.json()]);
+            dictionary = loaded || {};
+            sourceDictionary = loadedSource || {};
+        } catch (error) {
+            publisherStudioDiagnostics.report('js/localizationRuntime.js:load-catalogs', error);
+            dictionary = {};
+            sourceDictionary = {};
+        }
         rebuildSourceMap();
         document.title = translated(document.title);
         apply(document.body);
@@ -121,11 +149,12 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         observer = new MutationObserver(records => { try {
             if (applying) return;
             for (const record of records) {
-                record.addedNodes.forEach(apply);
-                if (record.type === 'attributes') translateElement(record.target);
+                if (record.type === 'characterData') apply(record.target);
+                else if (record.type === 'attributes') translateElement(record.target);
+                else record.addedNodes.forEach(apply);
             }
-         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/localizationRuntime.js:ArrowFunction@115', __javascriptError); throw __javascriptError; }});
-        observer.observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['title','aria-label','placeholder'] });
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/localizationRuntime.js:ArrowFunction@125', __javascriptError); throw __javascriptError; }});
+        observer.observe(document.documentElement, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['title','aria-label','placeholder','value'] });
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/localizationRuntime.js:load@106', __javascriptError); throw __javascriptError; }}
     function loadDevExtreme() { try {
         const locale = devExtremeCultures.has(neutral) ? neutral : 'en';

@@ -134,7 +134,7 @@
                                 <DevExtremeComponentView Document="Document" Item="component" CurrentPageId="publicationPage.Id" IdPrefix="print" />
                                 break;
                             case LiveSourceElement liveSource:
-                                <LiveSourceView Item="liveSource" DesignerMode="false" />
+                                <LiveSourceView @key="(liveSource.Id, liveSource.SourceKind)" Item="liveSource" DesignerMode="false" />
                                 break;
                             case PanelElement panel:
                                 <PanelView Document="Document" Item="panel" CurrentPageId="publicationPage.Id" DesignerMode="false" />

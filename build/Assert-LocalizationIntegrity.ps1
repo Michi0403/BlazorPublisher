@@ -51,18 +51,33 @@ $english = Read-Catalog $englishPath
 $german = Read-Catalog $germanPath
 $englishKeys = @($english.PSObject.Properties.Name | Sort-Object)
 $germanKeys = @($german.PSObject.Properties.Name | Sort-Object)
-if ($englishKeys.Count -lt 2800) { Fail "English catalog coverage unexpectedly dropped to $($englishKeys.Count) entries." }
+if ($englishKeys.Count -lt 3000) { Fail "English catalog coverage unexpectedly dropped to $($englishKeys.Count) entries." }
 if (($englishKeys -join "`n") -cne ($germanKeys -join "`n")) { Fail 'English and German catalog keys differ.' }
 $requiredTemplates = @(
     'Text.Panel<SP>/<SP>Div<SP>Studio',
     'Text.Save<SP>panel',
     'Text.Arrange<SP>mode',
     'Text.Export<SP>JSON<SP>Canvas',
-    'Text.Panel<SP>changes<SP>applied<SP>to<SP>the<SP>Mainframe<SP>and<SP>export<SP>model.'
+    'Text.Panel<SP>changes<SP>applied<SP>to<SP>the<SP>Mainframe<SP>and<SP>export<SP>model.',
+    'Text.Allow<SP>operator<SP>sending',
+    'Text.Save<SP>as<SP>profile',
+    'Text.Remove<SP>panel',
+    'Text.Request<SP>timeout<SP>(seconds,<SP>0<SP>=<SP>none)',
+    'Text.EBU<SP>loudness<SP>normalization'
 )
 foreach ($template in $requiredTemplates) {
     $key = Expand-SpaceMarkers $template
     $property = $german.PSObject.Properties[$key]
     if ($null -eq $property -or [string]::IsNullOrWhiteSpace([string]$property.Value)) { Fail "Required German UI string is missing: $key" }
 }
+
+$runtimePath = Join-Path $root 'src\PublisherStudio.Web\wwwroot\js\localizationRuntime.js'
+if (-not (Test-Path -LiteralPath $runtimePath -PathType Leaf)) { Fail "Missing $runtimePath" }
+$runtime = Read-StrictUtf8 $runtimePath
+foreach ($requiredRuntimeToken in @('request(''en-US'')', 'document.createTreeWalker', 'characterData: true', 'sourceDictionary')) {
+    if ($runtime.IndexOf($requiredRuntimeToken, [System.StringComparison]::Ordinal) -lt 0) {
+        Fail "PublisherStudio localization runtime is missing required coverage token: $requiredRuntimeToken"
+    }
+}
+
 Write-Host "Localization integrity validation passed for $($englishKeys.Count) PublisherStudio UI strings."

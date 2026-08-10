@@ -42,11 +42,13 @@
     [Parameter] public bool DesignerMode { get; set; }
 
     private bool _active;
+    private readonly string _runtimeInstanceId = Guid.NewGuid().ToString("N");
+    private string RuntimeSourceId => $"{Item.Id:N}-{_runtimeInstanceId}";
     private string ActivateButtonId => $"live-source-activate-{Item.Id:N}";
-    private string VideoId => $"live-source-video-{Item.Id:N}";
-    private string CanvasId => $"live-source-canvas-{Item.Id:N}";
-    private string MeterId => $"live-source-meter-{Item.Id:N}";
-    private string MetadataId => $"live-source-metadata-{Item.Id:N}";
+    private string VideoId => $"live-source-video-{RuntimeSourceId}";
+    private string CanvasId => $"live-source-canvas-{RuntimeSourceId}";
+    private string MeterId => $"live-source-meter-{RuntimeSourceId}";
+    private string MetadataId => $"live-source-metadata-{RuntimeSourceId}";
     private string SourceLabel => Item.SourceKind switch
     {
         PublicationLiveSourceKind.BrowserTab => "browser tab",
@@ -105,7 +107,7 @@
 
             _active = await JS.InvokeAsync<bool>("publisherStreaming.attachSource", new
             {
-                id = Item.Id.ToString("D"),
+                id = RuntimeSourceId,
                 videoId = VideoId,
                 canvasId = CanvasId,
                 meterId = MeterId,
@@ -154,7 +156,7 @@
         {
             await JS.InvokeVoidAsync("publisherStreaming.updateSourceEffects", new
             {
-                id = Item.Id.ToString("D"),
+                id = RuntimeSourceId,
                 videoId = VideoId,
                 canvasId = CanvasId,
                 fitMode = Item.FitMode.ToString().ToLowerInvariant(),
@@ -208,7 +210,7 @@
 
     public async ValueTask DisposeAsync()
     {
-        try { await JS.InvokeVoidAsync("publisherStreaming.detachSource", Item.Id.ToString("D")); }
+        try { await JS.InvokeVoidAsync("publisherStreaming.detachSource", RuntimeSourceId); }
         catch { }
     }
 

@@ -484,6 +484,7 @@
     private bool _dropSurfaceBound;
     private string? _dropSurfaceBindingKey;
     private string? _designSurfaceLayoutKey;
+    private string _lastInteractionSurfaceNotification = string.Empty;
     private readonly string _interactionBindingId = Guid.NewGuid().ToString("N");
     private int _previewRevision;
     private string _advancedElementJson = string.Empty;
@@ -514,6 +515,7 @@
             _dropSurfaceBound = false;
             _dropSurfaceBindingKey = null;
             _designSurfaceLayoutKey = null;
+            _lastInteractionSurfaceNotification = string.Empty;
             _pictureEditorVisible = false;
             _pictureEditorTargetId = null;
             return;
@@ -527,6 +529,7 @@
         _selectedElementId = CurrentView?.Elements.OrderByDescending(element => element.ZIndex).FirstOrDefault()?.Id;
         _loadedId = id;
         _error = string.Empty;
+        _lastInteractionSurfaceNotification = string.Empty;
         _interactionPreview = false;
         RefreshAdvancedJson();
     }
@@ -548,6 +551,7 @@
                 _dropSurfaceBindingKey = _dropSurfaceBound ? bindingKey : null;
                 if (!_dropSurfaceBound)
                     throw new InvalidOperationException("The Panel Studio browser interaction surface rejected its binding.");
+                _lastInteractionSurfaceNotification = string.Empty;
                 Logger.LogInformation($"Panel Studio pointer, keyboard, context-menu, and gamepad interaction binding is active. Binding:{_interactionBindingId} View:{_selectedViewId} Mode:{(_interactionPreview ? "Interact" : "Arrange")} PreviewRevision:{_previewRevision}.");
             }
 
@@ -555,6 +559,7 @@
             {
                 await JS.InvokeVoidAsync("publisherStudio.refreshPanelStudioDesignSurface", _canvasElement).ConfigureAwait(true);
                 _designSurfaceLayoutKey = designSurfaceLayoutKey;
+                _lastInteractionSurfaceNotification = string.Empty;
                 Logger.LogDebug($"Panel Studio authoring layout refreshed without rebinding browser interaction. Binding:{_interactionBindingId} Canvas:{PanelDesignWidthPx}x{PanelDesignHeightPx}.");
             }
         }
@@ -570,7 +575,12 @@
         {
             Logger.LogError(exception, "Panel Studio interaction binding failed.");
             _error = "The Panel Studio interaction surface could not be initialized.";
-            Notifications.Error(_error, "Panel Studio", nameof(PanelStudio));
+            var notificationKey = $"{exception.GetType().FullName}:{exception.Message}";
+            if (!string.Equals(_lastInteractionSurfaceNotification, notificationKey, StringComparison.Ordinal))
+            {
+                _lastInteractionSurfaceNotification = notificationKey;
+                Notifications.Error(_error, "Panel Studio", nameof(PanelStudio));
+            }
         }
     }
 

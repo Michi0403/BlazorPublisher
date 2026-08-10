@@ -298,6 +298,17 @@ function detachRecordingPreview(state) { try {
     state.recordingPreviewElement = null;
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:detachRecordingPreview', __javascriptError); throw __javascriptError; }}
 
+function releaseRecordingCapture(state) { try {
+    detachRecordingPreview(state);
+    const stream = state.stream;
+    if (!stream) return false;
+    for (const track of stream.getTracks?.() || []) {
+        try { if (track.readyState !== 'ended') track.stop(); }
+        catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:suppressed-catch:release-recording-track', __caughtJavaScriptError); }
+    }
+    return true;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:releaseRecordingCapture', __javascriptError); throw __javascriptError; }}
+
 function ensureRecordingPreview(state) { try {
     if (!state.stream) return false;
     const preview = mediaElement(state.id);
@@ -1457,8 +1468,7 @@ export async function startMediaRecording(id, kind, source, dotnet) { try {
     try {
         state.recorder = mimeType ? new MediaRecorder(state.stream, { mimeType }) : new MediaRecorder(state.stream);
     } catch (error) {
-        detachRecordingPreview(state);
-        for (const track of state.stream.getTracks()) track.stop();
+        releaseRecordingCapture(state);
         state.stream = null;
         throw error;
     }
@@ -1475,7 +1485,7 @@ export async function startMediaRecording(id, kind, source, dotnet) { try {
         } catch (error) {
             await state.dotnet?.invokeMethodAsync('MediaRecordingFailed', error?.message || String(error));
         } finally {
-            for (const track of state.stream?.getTracks() || []) track.stop();
+            releaseRecordingCapture(state);
             state.stream = null;
             state.recorder = null;
             state.chunks = [];
@@ -1498,14 +1508,17 @@ export function stopMediaRecording(id) { try {
     const state = stateFor(id);
     state.discardRecording = false;
     if (state.recorder && state.recorder.state !== 'inactive') state.recorder.stop();
+    // MediaRecorder finalization and metadata inspection may continue after Stop. The browser
+    // capture permission must not: release camera/screen/microphone tracks immediately so the
+    // browser privacy indicator reflects actual hardware use rather than post-processing time.
+    releaseRecordingCapture(state);
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:stopMediaRecording@1450', __javascriptError); throw __javascriptError; }}
 
 export function cancelMediaRecording(id) { try {
     const state = stateFor(id);
     state.discardRecording = true;
-    detachRecordingPreview(state);
     try { if (state.recorder && state.recorder.state !== 'inactive') state.recorder.stop(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:suppressed-catch@1464', __caughtJavaScriptError);  }
-    for (const track of state.stream?.getTracks() || []) track.stop();
+    releaseRecordingCapture(state);
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:cancelMediaRecording@1456', __javascriptError); throw __javascriptError; }}
 
 export async function playMediaRange(id, start, end, volume, rate, muted, loop) { try {
@@ -1575,9 +1588,8 @@ export function disposeMediaStudio(id) { try {
     if (!state) return;
     state.discardRecording = true;
     const element = mediaElement(id);
-    detachRecordingPreview(state);
     try { if (state.recorder && state.recorder.state !== 'inactive') state.recorder.stop(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:suppressed-catch@1539', __caughtJavaScriptError);  }
-    for (const track of state.stream?.getTracks() || []) track.stop();
+    releaseRecordingCapture(state);
     if (element) cancelRangePlayback(state, element, true);
     if (state.keyboardHandler) document.removeEventListener("keydown", state.keyboardHandler, true);
     state.keyboardHandler = null;

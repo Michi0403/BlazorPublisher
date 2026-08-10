@@ -5152,7 +5152,7 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 .panel-studio-mode-banner>div:first-child span{overflow-wrap:anywhere}
 
 
-/* PublisherStudio 2.4.7: Panel Studio owns a dedicated design frame. Generic publication-panel
+/* PublisherStudio 2.4.8: Panel Studio owns a dedicated design frame. Generic publication-panel
    sizing no longer competes with the authoring surface. The frame is centered and uniformly
    zoomed to the available workspace while the panel-local coordinate system remains unchanged. */
 .panel-studio-canvas{display:grid!important;place-items:center!important;padding:28px!important;box-sizing:border-box!important;overflow:hidden!important}

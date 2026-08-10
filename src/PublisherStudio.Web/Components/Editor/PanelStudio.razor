@@ -168,8 +168,8 @@
                     <div class="panel-studio-canvas-shell @(_interactionPreview ? "interaction-preview" : "arrange-preview")">
                         <div class="panel-studio-mode-banner">
                             <div>
-                                <b>@(_interactionPreview ? "Interaction mode" : "Arrange mode")</b>
-                                <span>@(_interactionPreview ? "Live content receives mouse, touch and keyboard input." : "Move or resize components. Double-click a component to interact with its real content.")</span>
+                                <b>@(_interactionPreview ? "Interaction mode" : "Arrange mode") · @_draft.Name</b>
+                                <span>@(_interactionPreview ? "Live content receives mouse, touch and keyboard input." : $"Editing this panel's own {Inv(_draft.CanvasWidth)} × {Inv(_draft.CanvasHeight)} canvas. Mainframe placement stays separate; move or resize components here.")</span>
                             </div>
                             <div class="panel-studio-mode-actions" role="group" aria-label="Panel Studio interaction mode">
                                 <button type="button" class="@(!_interactionPreview ? "active" : null)" @onclick="DisableInteractionPreview">Arrange</button>
@@ -180,9 +180,12 @@
                              style="--panel-editor-width:@PanelDesignWidthCss;--panel-editor-height:@PanelDesignHeightCss"
                              data-panel-studio-design-width="@PanelDesignWidthPx"
                              data-panel-studio-design-height="@PanelDesignHeightPx"
+                             data-panel-studio-panel-id="@_draft.Id"
+                             data-panel-studio-canvas-width="@Inv(_draft.CanvasWidth)"
+                             data-panel-studio-canvas-height="@Inv(_draft.CanvasHeight)"
                              data-panel-studio-arrange="@((!_interactionPreview).ToString().ToLowerInvariant())"
                              data-panel-studio-binding-id="@_interactionBindingId"
-                             aria-label="Panel arrangement canvas"
+                             aria-label="Panel arrangement canvas for @_draft.Name"
                              @ondragover:preventDefault
                              @ondrop="DropDraggedElement" @ondrop:preventDefault>
                             <PanelView @key="(_draft.Id, _selectedViewId, _interactionPreview, _previewRevision)" Document="Document" Item="_draft" CurrentPageId="CurrentPageId" DesignerMode="false" DesignPreviewOnly="false" ForceCanvasLayout="@(!_interactionPreview)">
@@ -525,7 +528,10 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var bindingKey = _draft is null ? null : _interactionBindingId;
+        // Canvas dimensions belong to the panel-local coordinate system. Include them in the
+        // browser-layout key so changing CanvasWidth/CanvasHeight immediately recomputes the fit
+        // even though the surrounding workspace itself did not resize.
+        var bindingKey = _draft is null ? null : $"{_interactionBindingId}:{PanelDesignWidthPx}:{PanelDesignHeightPx}";
         if (!Visible || _draft is null || (_dropSurfaceBound && string.Equals(_dropSurfaceBindingKey, bindingKey, StringComparison.Ordinal))) return;
         try
         {
@@ -875,8 +881,10 @@
         _dragPrototype = null;
     }
 
-    private double PanelDesignWidthPxValue => Math.Max(1, (_draft is { Width: > .1 } ? _draft.Width : _draft?.CanvasWidth ?? 160) * 96d / 25.4d);
-    private double PanelDesignHeightPxValue => Math.Max(1, (_draft is { Height: > .1 } ? _draft.Height : _draft?.CanvasHeight ?? 90) * 96d / 25.4d);
+    // Panel Studio edits the panel's local authoring canvas, never the Mainframe frame that contains it.
+    // Width/Height are publication-placement dimensions; CanvasWidth/CanvasHeight own descendant coordinates.
+    private double PanelDesignWidthPxValue => Math.Max(1, (_draft?.CanvasWidth ?? 160) * 96d / 25.4d);
+    private double PanelDesignHeightPxValue => Math.Max(1, (_draft?.CanvasHeight ?? 90) * 96d / 25.4d);
     private string PanelDesignWidthPx => Inv(PanelDesignWidthPxValue);
     private string PanelDesignHeightPx => Inv(PanelDesignHeightPxValue);
     private string PanelDesignWidthCss => $"{PanelDesignWidthPx}px";

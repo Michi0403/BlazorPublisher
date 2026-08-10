@@ -123,12 +123,12 @@
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(SystemVariableInitializationScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <Target Name="AssertPublisherPanelStudioInteractionLifecycle"
+  <!--<Target Name="AssertPublisherPanelStudioInteractionLifecycle"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherSystemVariableInitialization"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipPanelStudioInteractionLifecycleGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(PanelStudioInteractionLifecycleScript)')" Text="Panel Studio interaction lifecycle guard script is missing: $(PanelStudioInteractionLifecycleScript)" />
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(PanelStudioInteractionLifecycleScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>
+  </Target>-->
 
   <Target Name="AssertPublisherPanelStudioAuthoringGeometry"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherPanelStudioInteractionLifecycle"

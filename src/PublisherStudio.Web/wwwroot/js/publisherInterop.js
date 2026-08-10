@@ -6651,10 +6651,14 @@ function syncPanelStudioDesignSurface(element) { try {
     const width = Math.max(1, Number.parseFloat(element.dataset.panelStudioDesignWidth || '') || 1);
     const height = Math.max(1, Number.parseFloat(element.dataset.panelStudioDesignHeight || '') || 1);
     const bounds = element.getBoundingClientRect();
-    const availableWidth = Math.max(1, bounds.width - 16);
-    const availableHeight = Math.max(1, bounds.height - 16);
-    const scale = Math.max(.05, Math.min(availableWidth / width, availableHeight / height));
+    const availableWidth = Math.max(1, bounds.width - 32);
+    const availableHeight = Math.max(1, bounds.height - 32);
+    // The authoring panel may shrink to fit a small viewport, but must never be enlarged to fill
+    // the editor stage. Enlarging made the panel look like the Mainframe/page canvas and hid the
+    // distinction between outer publication placement and the panel's own CanvasWidth/CanvasHeight.
+    const scale = Math.max(.05, Math.min(1, availableWidth / width, availableHeight / height));
     element.style.setProperty('--panel-studio-fit-scale', String(scale));
+    element.dataset.panelStudioFitScale = String(scale);
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:syncPanelStudioDesignSurface@6645', __javascriptError); throw __javascriptError; }}
 
 export function panelStudioPoint(element, clientX, clientY) { try {

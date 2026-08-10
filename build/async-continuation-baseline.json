@@ -61,9 +61,9 @@
       "minConfigureAwaitFalseCount": 0
     },
     "Components/Editor/PanelStudio.razor": {
-      "maxUnconfiguredAwaitCount": 3,
-      "maxConfigureAwaitTrueCount": 20,
-      "minConfigureAwaitFalseCount": 0
+      "maxUnconfiguredAwaitCount": 0,
+      "maxConfigureAwaitTrueCount": 2,
+      "minConfigureAwaitFalseCount": 22
     },
     "Components/Editor/PictureEditor.razor.cs": {
       "maxUnconfiguredAwaitCount": 57,
@@ -357,8 +357,8 @@
     },
     "Components/Shared/DocumentationViewerHost.razor": {
       "maxUnconfiguredAwaitCount": 0,
-      "maxConfigureAwaitTrueCount": 6,
-      "minConfigureAwaitFalseCount": 0
+      "maxConfigureAwaitTrueCount": 0,
+      "minConfigureAwaitFalseCount": 1
     }
   },
   "policy": "Renderer sources stay on the Blazor context; service/controller continuations remain explicitly background-safe. Existing unconfigured awaits are a reviewed ceiling and may only decrease.",

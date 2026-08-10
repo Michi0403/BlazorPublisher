@@ -44,14 +44,23 @@ foreach ($file in $files) {
         $allowedTrue = [int]$baseline[$relative].maxConfigureAwaitTrueCount
         $minimumFalse = [int]$baseline[$relative].minConfigureAwaitFalseCount
     }
-    if ($isRendererSource -and $falseCount -gt 0) {
-        $failures.Add("$relative contains $falseCount ConfigureAwait(false) call(s). Renderer/component continuations must use ConfigureAwait(true) when explicitly configured.")
-    }
-    if (-not $isRendererSource -and $falseCount -lt $minimumFalse) {
+    if ($falseCount -lt $minimumFalse) {
         $failures.Add("$relative has only $falseCount ConfigureAwait(false) call(s); reviewed minimum is $minimumFalse.")
     }
+    if ($isRendererSource -and $trueCount -gt 0) {
+        $allowedRendererMethods = @('OnAfterRenderAsync', 'OnInitializedAsync', 'OnParametersSetAsync', 'SetParametersAsync')
+        $methodPattern = '(?m)^\s*(?:public|private|protected|internal)\s+(?:(?:static|virtual|override|sealed|async|new)\s+)*(?:[A-Za-z0-9_\.<>,?\[\]]+\s+)+(?<name>[A-Za-z_][A-Za-z0-9_]*)\s*\('
+        foreach ($trueMatch in [regex]::Matches($text, '\.ConfigureAwait\s*\(\s*true\s*\)')) {
+            $prefix = $text.Substring(0, $trueMatch.Index)
+            $methods = [regex]::Matches($prefix, $methodPattern)
+            $methodName = if ($methods.Count -gt 0) { [string]$methods[$methods.Count - 1].Groups['name'].Value } else { '' }
+            if ($allowedRendererMethods -notcontains $methodName) {
+                $failures.Add("$relative uses ConfigureAwait(true) in '$methodName'. Renderer-affine true continuations are reserved for component lifecycle/initialization methods; use ConfigureAwait(false) elsewhere.")
+            }
+        }
+    }
     if ($unconfigured -gt $allowedUnconfigured) {
-        $expected = if ($isRendererSource) { 'ConfigureAwait(true)' } else { 'ConfigureAwait(false)' }
+        $expected = 'ConfigureAwait(false)'
         $failures.Add("$relative has $unconfigured unconfigured await(s); reviewed maximum is $allowedUnconfigured. Use $expected or review the baseline deliberately.")
     }
     if ($trueCount -gt $allowedTrue) {

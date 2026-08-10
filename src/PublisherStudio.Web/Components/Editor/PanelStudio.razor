@@ -188,6 +188,7 @@
                              aria-label="Panel arrangement canvas for @_draft.Name"
                              @ondragover:preventDefault
                              @ondrop="DropDraggedElement" @ondrop:preventDefault>
+                            <div class="panel-studio-design-frame" data-panel-studio-design-frame>
                             <PanelView @key="(_draft.Id, _selectedViewId, _interactionPreview, _previewRevision)" Document="Document" Item="_draft" CurrentPageId="CurrentPageId" DesignerMode="false" DesignPreviewOnly="false" ForceCanvasLayout="@(!_interactionPreview)">
                                 <AuthoringOverlay>
                                     @if (!_interactionPreview && CurrentView is not null)
@@ -229,6 +230,7 @@
                                     }
                                 </AuthoringOverlay>
                             </PanelView>
+                            </div>
 
                             @if (_interactionPreview)
                             {
@@ -481,6 +483,7 @@
     private PublicationElement? _dragPrototype;
     private bool _dropSurfaceBound;
     private string? _dropSurfaceBindingKey;
+    private string? _designSurfaceLayoutKey;
     private readonly string _interactionBindingId = Guid.NewGuid().ToString("N");
     private int _previewRevision;
     private string _advancedElementJson = string.Empty;
@@ -509,6 +512,8 @@
         {
             _loadedId = null;
             _dropSurfaceBound = false;
+            _dropSurfaceBindingKey = null;
+            _designSurfaceLayoutKey = null;
             _pictureEditorVisible = false;
             _pictureEditorTargetId = null;
             return;
@@ -528,19 +533,30 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        // Canvas dimensions belong to the panel-local coordinate system. Include them in the
-        // browser-layout key so changing CanvasWidth/CanvasHeight immediately recomputes the fit
-        // even though the surrounding workspace itself did not resize.
-        var bindingKey = _draft is null ? null : $"{_interactionBindingId}:{PanelDesignWidthPx}:{PanelDesignHeightPx}";
-        if (!Visible || _draft is null || (_dropSurfaceBound && string.Equals(_dropSurfaceBindingKey, bindingKey, StringComparison.Ordinal))) return;
+        // Browser interaction has one component-lifetime identity. Layout dimensions are deliberately
+        // tracked separately: changing the panel-local canvas may refresh the fitted authoring surface,
+        // but must never tear down/recreate pointer, keyboard, context-menu, or gamepad handlers.
+        var bindingKey = _draft is null ? null : _interactionBindingId;
+        var designSurfaceLayoutKey = _draft is null ? null : $"{PanelDesignWidthPx}:{PanelDesignHeightPx}";
+        if (!Visible || _draft is null) return;
         try
         {
             _self ??= DotNetObjectReference.Create(this);
-            _dropSurfaceBound = await JS.InvokeAsync<bool>("publisherStudio.bindPanelStudioDropSurface", _canvasElement, _self, _interactionBindingId).ConfigureAwait(true);
-            _dropSurfaceBindingKey = _dropSurfaceBound ? bindingKey : null;
-            if (!_dropSurfaceBound)
-                throw new InvalidOperationException("The Panel Studio browser interaction surface rejected its binding.");
-            Logger.LogInformation($"Panel Studio pointer, keyboard, context-menu, and gamepad interaction binding is active. Binding:{_interactionBindingId} View:{_selectedViewId} Mode:{(_interactionPreview ? "Interact" : "Arrange")} PreviewRevision:{_previewRevision}.");
+            if (!_dropSurfaceBound || !string.Equals(_dropSurfaceBindingKey, bindingKey, StringComparison.Ordinal))
+            {
+                _dropSurfaceBound = await JS.InvokeAsync<bool>("publisherStudio.bindPanelStudioDropSurface", _canvasElement, _self, _interactionBindingId).ConfigureAwait(true);
+                _dropSurfaceBindingKey = _dropSurfaceBound ? bindingKey : null;
+                if (!_dropSurfaceBound)
+                    throw new InvalidOperationException("The Panel Studio browser interaction surface rejected its binding.");
+                Logger.LogInformation($"Panel Studio pointer, keyboard, context-menu, and gamepad interaction binding is active. Binding:{_interactionBindingId} View:{_selectedViewId} Mode:{(_interactionPreview ? "Interact" : "Arrange")} PreviewRevision:{_previewRevision}.");
+            }
+
+            if (_dropSurfaceBound && !string.Equals(_designSurfaceLayoutKey, designSurfaceLayoutKey, StringComparison.Ordinal))
+            {
+                await JS.InvokeVoidAsync("publisherStudio.refreshPanelStudioDesignSurface", _canvasElement).ConfigureAwait(true);
+                _designSurfaceLayoutKey = designSurfaceLayoutKey;
+                Logger.LogDebug($"Panel Studio authoring layout refreshed without rebinding browser interaction. Binding:{_interactionBindingId} Canvas:{PanelDesignWidthPx}x{PanelDesignHeightPx}.");
+            }
         }
         catch (JSDisconnectedException exception)
         {
@@ -679,7 +695,7 @@
 
         try
         {
-            var point = await ResolveCanvasPoint(args).ConfigureAwait(true);
+            var point = await ResolveCanvasPoint(args).ConfigureAwait(false);
             if (_disposed || !ReferenceEquals(_draft, draft) || !draft.Views.Contains(view)) return;
 
             var canvasWidth = Math.Max(1, draft.CanvasWidth);
@@ -795,7 +811,7 @@
         try
         {
             action();
-            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
             Logger.LogDebug("Panel Studio browser operation {Operation} completed.", operation);
         }
         catch (OperationCanceledException exception)
@@ -813,7 +829,7 @@
     {
         try
         {
-            await action().ConfigureAwait(true);
+            await action().ConfigureAwait(false);
             Logger.LogDebug("Panel Studio browser operation {Operation} completed.", operation);
         }
         catch (OperationCanceledException exception)
@@ -849,7 +865,7 @@
     {
         try
         {
-            return await JS.InvokeAsync<PanelCanvasPoint>("publisherStudio.panelStudioPoint", _canvasElement, args.ClientX, args.ClientY).ConfigureAwait(true);
+            return await JS.InvokeAsync<PanelCanvasPoint>("publisherStudio.panelStudioPoint", _canvasElement, args.ClientX, args.ClientY).ConfigureAwait(false);
         }
         catch (OperationCanceledException exception)
         {
@@ -922,7 +938,7 @@
         try
         {
             var fileName = SafeFileName(_draft.Name, "panel") + ".publisher-panel.json";
-            await JS.InvokeVoidAsync("publisherStudio.downloadTextFile", fileName, Files.SerializeElement(_draft), "application/json;charset=utf-8").ConfigureAwait(true);
+            await JS.InvokeVoidAsync("publisherStudio.downloadTextFile", fileName, Files.SerializeElement(_draft), "application/json;charset=utf-8").ConfigureAwait(false);
             Notifications.Success("The complete reusable panel project was exported.", "Panel project exported", nameof(PanelStudio));
         }
         catch (Exception exception)
@@ -974,7 +990,7 @@
                 }
             };
             var json = root.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
-            await JS.InvokeVoidAsync("publisherStudio.downloadTextFile", SafeFileName(CurrentView.Name, "panel-view") + ".canvas", json, "application/json;charset=utf-8").ConfigureAwait(true);
+            await JS.InvokeVoidAsync("publisherStudio.downloadTextFile", SafeFileName(CurrentView.Name, "panel-view") + ".canvas", json, "application/json;charset=utf-8").ConfigureAwait(false);
             Notifications.Success("The active view was exported using the open JSON Canvas format while preserving PublisherStudio element data.", "JSON Canvas exported", nameof(PanelStudio));
         }
         catch (Exception exception)
@@ -990,9 +1006,10 @@
         try
         {
             var file = args.File;
-            await using var source = file.OpenReadStream(long.MaxValue);
+            var source = file.OpenReadStream(long.MaxValue);
+            await using var configuredSource = source.ConfigureAwait(false);
             using var reader = new StreamReader(source, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
-            var json = await reader.ReadToEndAsync().ConfigureAwait(true);
+            var json = await reader.ReadToEndAsync().ConfigureAwait(false);
             using var document = JsonDocument.Parse(json);
             if (document.RootElement.ValueKind != JsonValueKind.Object)
                 throw new InvalidDataException("The selected file does not contain a JSON object.");
@@ -1110,9 +1127,10 @@
         try
         {
             var file = args.File;
-            await using var source = file.OpenReadStream(long.MaxValue);
+            var source = file.OpenReadStream(long.MaxValue);
+            await using var configuredSource = source.ConfigureAwait(false);
             using var reader = new StreamReader(source, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
-            var markup = await reader.ReadToEndAsync().ConfigureAwait(true);
+            var markup = await reader.ReadToEndAsync().ConfigureAwait(false);
             AddElement(new HtmlEmbedElement
             {
                 Name = Path.GetFileNameWithoutExtension(file.Name), Html = markup,
@@ -1135,9 +1153,10 @@
         try
         {
             var file = args.File;
-            await using var source = file.OpenReadStream(long.MaxValue);
+            var source = file.OpenReadStream(long.MaxValue);
+            await using var configuredSource = source.ConfigureAwait(false);
             using var memory = new MemoryStream();
-            await source.CopyToAsync(memory).ConfigureAwait(true);
+            await source.CopyToAsync(memory).ConfigureAwait(false);
             var mime = MediaData.NormalizeMimeType(file.ContentType, "application/octet-stream");
             var dataUrl = $"data:{mime};base64,{Convert.ToBase64String(memory.ToArray())}";
             switch (selected)
@@ -1239,10 +1258,10 @@
 
     private async Task ShowElementContextMenu(Guid id, MouseEventArgs args)
     {
-        await CancelPanelPointerAsync().ConfigureAwait(true);
+        await CancelPanelPointerAsync().ConfigureAwait(false);
         SelectElement(id);
-        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
-        await _elementContextMenu.ShowAsync(args).ConfigureAwait(true);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        await _elementContextMenu.ShowAsync(args).ConfigureAwait(false);
     }
 
     private void EnableInteractionPreview()
@@ -1281,7 +1300,7 @@
 
     private async Task ActivateElementInteraction(Guid id)
     {
-        await CancelPanelPointerAsync().ConfigureAwait(true);
+        await CancelPanelPointerAsync().ConfigureAwait(false);
         SelectElement(id);
         if (SelectedElement is ImageFrameElement)
         {
@@ -1289,18 +1308,18 @@
             _pictureEditorTargetId = id;
             _pictureEditorSessionId = Guid.NewGuid();
             _pictureEditorVisible = true;
-            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
             return;
         }
         EnableInteractionPreview();
-        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
     }
 
     private async Task CancelPanelPointerAsync()
     {
         try
         {
-            await JS.InvokeVoidAsync("publisherStudio.cancelPanelStudioPointer", _canvasElement, true).ConfigureAwait(true);
+            await JS.InvokeVoidAsync("publisherStudio.cancelPanelStudioPointer", _canvasElement, true).ConfigureAwait(false);
         }
         catch (JSDisconnectedException exception)
         {
@@ -1331,7 +1350,7 @@
             SelectElement(image.Id);
         }
         ClosePanelPictureEditor();
-        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
     }
 
     private void ClosePanelPictureEditor()
@@ -1501,7 +1520,7 @@
             // not mutate the object that was just committed to the Mainframe.
             var committed = (PanelElement)Files.CloneElement(_draft);
             Panels.Normalize(Document, committed);
-            await Saved.InvokeAsync(committed).ConfigureAwait(true);
+            await Saved.InvokeAsync(committed).ConfigureAwait(false);
             Notifications.Success("The panel was saved and remains reusable in Mainframe and exports.", "Panel saved", nameof(PanelStudio));
         }
         catch (OperationCanceledException exception)
@@ -1527,7 +1546,7 @@
             ClosePanelPictureEditor();
             try
             {
-                await JS.InvokeVoidAsync("publisherStudio.unbindPanelStudioDropSurface", _canvasElement).ConfigureAwait(true);
+                await JS.InvokeVoidAsync("publisherStudio.unbindPanelStudioDropSurface", _canvasElement).ConfigureAwait(false);
                 Logger.LogDebug($"{nameof(DisposeAsync)} unbound the Panel Studio browser interaction surface.");
             }
             catch (JSDisconnectedException exception)

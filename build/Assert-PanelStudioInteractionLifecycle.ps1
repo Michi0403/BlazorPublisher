@@ -20,8 +20,11 @@ $interop = [System.IO.File]::ReadAllText($interopPath, [System.Text.Encoding]::U
 
 Require $panel 'private readonly string _interactionBindingId\s*=\s*Guid\.NewGuid\(\)\.ToString\("N"\);' 'A stable component-lifetime binding id is required.'
 Require $panel 'data-panel-studio-binding-id="@_interactionBindingId"' 'The canvas must expose the stable binding id.'
-Require $panel 'var bindingKey\s*=\s*_draft is null \? null : _interactionBindingId;' 'The binding key must not depend on interaction mode, view, or preview revision.'
+Require $panel 'var bindingKey\s*=\s*_draft is null \? null : _interactionBindingId;' 'The binding key must not depend on interaction mode, view, preview revision, or authoring dimensions.'
+Reject $panel 'var bindingKey[^\r\n]*(?:PanelDesignWidth|PanelDesignHeight|CanvasWidth|CanvasHeight)' 'Authoring layout dimensions must never become part of the browser interaction binding identity.'
+Require $panel 'var designSurfaceLayoutKey\s*=\s*_draft is null \? null : \$"\{PanelDesignWidthPx\}:\{PanelDesignHeightPx\}";' 'Authoring layout changes require a separate non-lifecycle layout key.'
 Require $panel 'bindPanelStudioDropSurface", _canvasElement, _self, _interactionBindingId\)\.ConfigureAwait\(true\)' 'The stable binding id must be passed to browser interop.'
+Require $panel 'refreshPanelStudioDesignSurface", _canvasElement\)\.ConfigureAwait\(true\)' 'Canvas dimension changes must refresh layout without rebinding browser interaction.'
 Require $panel 'TokenCancellationRequested:\{exception\.CancellationToken\.IsCancellationRequested\}' 'Cancellation diagnostics must include token state.'
 Require $panel 'Panel Studio browser interaction ended normally\. Binding:' 'Expected browser shutdown and cancellation must be logged with binding context.'
 
@@ -34,6 +37,7 @@ Reject $refreshBlock '_dropSurfaceBound\s*=\s*false|_dropSurfaceBindingKey\s*=\s
 Reject $panel 'case\s+"interact"\s*:' 'Browser command dispatch must not switch interaction mode implicitly.'
 
 Require $interop "bindPanelStudioDropSurface\(element, dotNetReference, bindingId = ''\)" 'Browser binding must accept the stable binding id.'
+Require $interop 'export function refreshPanelStudioDesignSurface\(element\)' 'Layout refresh must be independent from interaction binding lifecycle.'
 Require $interop 'existing\.bindingId === normalizedBindingId' 'Repeated renders must reuse the existing binding instead of aborting it.'
 Require $interop 'existing\.dotNetReference = dotNetReference \|\| existing\.dotNetReference;' 'An idempotent bind must refresh the .NET reference.'
 Require $interop 'operation=\$\{operation\}; binding=\$\{binding\?\.bindingId' 'Browser cancellation diagnostics must identify the operation and binding.'

@@ -5150,3 +5150,13 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 }
 .panel-studio-mode-banner>div:first-child{min-width:0;flex:1 1 auto}
 .panel-studio-mode-banner>div:first-child span{overflow-wrap:anywhere}
+
+
+/* PublisherStudio 2.4.7: Panel Studio owns a dedicated design frame. Generic publication-panel
+   sizing no longer competes with the authoring surface. The frame is centered and uniformly
+   zoomed to the available workspace while the panel-local coordinate system remains unchanged. */
+.panel-studio-canvas{display:grid!important;place-items:center!important;padding:28px!important;box-sizing:border-box!important;overflow:hidden!important}
+.panel-studio-design-frame{position:relative;display:block;flex:none;width:var(--panel-editor-width,604.724px);height:var(--panel-editor-height,340.157px);transform:scale(var(--panel-studio-fit-scale,1));transform-origin:center center;isolation:isolate}
+.panel-studio-design-frame>.publication-panel{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;transform:none!important;box-shadow:0 16px 42px #0f172a55,0 0 0 1px #475569}
+.panel-studio-design-frame>.publication-panel>.publication-panel-viewport{min-width:0;min-height:0}
+@media(max-width:720px){.panel-studio-canvas{padding:16px!important}}

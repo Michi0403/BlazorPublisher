@@ -246,9 +246,18 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
                     using var stream = File.OpenRead(path);
                     var data = JsonSerializer.Deserialize<Dictionary<string, string>>(stream)
                         ?? new Dictionary<string, string>();
-                    return data.Where(pair => !string.IsNullOrWhiteSpace(pair.Key))
-                        .ToDictionary(pair => pair.Key, pair => pair.Value ?? string.Empty, StringComparer.OrdinalIgnoreCase);
-    
+                    var normalized = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                    foreach (var pair in data.Where(pair => !string.IsNullOrWhiteSpace(pair.Key)))
+                    {
+                        if (normalized.ContainsKey(pair.Key))
+                            logger.LogWarning(
+                                "Localization catalog {CatalogPath} contains a case-insensitive duplicate key {LocalizationKey}; the later value is used defensively. Source-controlled catalogs must still pass the localization integrity guard.",
+                                path,
+                                pair.Key);
+                        normalized[pair.Key] = pair.Value ?? string.Empty;
+                    }
+                    return normalized;
+
         }
         catch (Exception exception)
         {

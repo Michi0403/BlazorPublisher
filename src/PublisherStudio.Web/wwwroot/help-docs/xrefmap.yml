@@ -38026,18 +38026,6 @@ references:
   fullName.vb: PublisherStudio.Components.Editor.PanelView.New
   nameWithType: PanelView.PanelView
   nameWithType.vb: PanelView.New
-- uid: PublisherStudio.Components.Editor.PanelView.AuthoringOverlay
-  name: AuthoringOverlay
-  href: api/PublisherStudio.Components.Editor.PanelView.html#PublisherStudio_Components_Editor_PanelView_AuthoringOverlay
-  commentId: P:PublisherStudio.Components.Editor.PanelView.AuthoringOverlay
-  fullName: PublisherStudio.Components.Editor.PanelView.AuthoringOverlay
-  nameWithType: PanelView.AuthoringOverlay
-- uid: PublisherStudio.Components.Editor.PanelView.AuthoringOverlay*
-  name: AuthoringOverlay
-  href: api/PublisherStudio.Components.Editor.PanelView.html#PublisherStudio_Components_Editor_PanelView_AuthoringOverlay_
-  commentId: Overload:PublisherStudio.Components.Editor.PanelView.AuthoringOverlay
-  fullName: PublisherStudio.Components.Editor.PanelView.AuthoringOverlay
-  nameWithType: PanelView.AuthoringOverlay
 - uid: PublisherStudio.Components.Editor.PanelView.BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)
   name: BuildRenderTree(RenderTreeBuilder)
   href: api/PublisherStudio.Components.Editor.PanelView.html#PublisherStudio_Components_Editor_PanelView_BuildRenderTree_Microsoft_AspNetCore_Components_Rendering_RenderTreeBuilder_
@@ -38098,18 +38086,6 @@ references:
   commentId: Overload:PublisherStudio.Components.Editor.PanelView.Document
   fullName: PublisherStudio.Components.Editor.PanelView.Document
   nameWithType: PanelView.Document
-- uid: PublisherStudio.Components.Editor.PanelView.ForceCanvasLayout
-  name: ForceCanvasLayout
-  href: api/PublisherStudio.Components.Editor.PanelView.html#PublisherStudio_Components_Editor_PanelView_ForceCanvasLayout
-  commentId: P:PublisherStudio.Components.Editor.PanelView.ForceCanvasLayout
-  fullName: PublisherStudio.Components.Editor.PanelView.ForceCanvasLayout
-  nameWithType: PanelView.ForceCanvasLayout
-- uid: PublisherStudio.Components.Editor.PanelView.ForceCanvasLayout*
-  name: ForceCanvasLayout
-  href: api/PublisherStudio.Components.Editor.PanelView.html#PublisherStudio_Components_Editor_PanelView_ForceCanvasLayout_
-  commentId: Overload:PublisherStudio.Components.Editor.PanelView.ForceCanvasLayout
-  fullName: PublisherStudio.Components.Editor.PanelView.ForceCanvasLayout
-  nameWithType: PanelView.ForceCanvasLayout
 - uid: PublisherStudio.Components.Editor.PanelView.Item
   name: Item
   href: api/PublisherStudio.Components.Editor.PanelView.html#PublisherStudio_Components_Editor_PanelView_Item

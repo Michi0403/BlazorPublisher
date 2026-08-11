@@ -1381,7 +1381,6 @@
 
     private async Task SaveSelectedAsTemplate()
     {
-        await FlushPanelStudioInteractionsAsync().ConfigureAwait(true);
         if (SelectedElement is null) return;
         var name = string.IsNullOrWhiteSpace(_templateName) ? SelectedElement.Name : _templateName.Trim();
         var template = _selectedTemplateId is { } selectedId
@@ -1389,12 +1388,16 @@
             : null;
         template ??= new PublicationElementTemplate();
         var isNew = !Document.ComponentTemplates.Contains(template);
+
+        // Pointer-up commits are serialized by browser interop. Flush immediately before
+        // cloning so the reusable prototype contains the exact last arranged bounds.
+        await FlushPanelStudioInteractionsAsync().ConfigureAwait(true);
+        template.Prototype = Files.CloneElement(SelectedElement);
+        template.Prototype.Id = Guid.NewGuid();
         template.Name = name;
         template.Description = _templateDescription.Trim();
         template.Category = string.IsNullOrWhiteSpace(_templateCategory) ? "My modules" : _templateCategory.Trim();
         template.IconCssClass = IconFor(SelectedElement);
-        template.Prototype = Files.CloneElement(SelectedElement);
-        template.Prototype.Id = Guid.NewGuid();
         template.ModifiedUtc = DateTimeOffset.UtcNow;
         Panels.NormalizeTemplate(Document, template);
         if (isNew) Document.ComponentTemplates.Add(template);

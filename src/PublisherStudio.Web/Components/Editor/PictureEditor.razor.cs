@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
@@ -178,6 +178,9 @@ public partial class PictureEditor
         LocalGptConnection.Changed += LocalGptConnectionChanged;
     }
 
+    /// <summary>
+    /// Runs the local gpt connection changed operation.
+    /// </summary>
     private void LocalGptConnectionChanged() => _ = InvokeAsync(StateHasChanged);
 
     /// <summary>
@@ -270,12 +273,18 @@ public partial class PictureEditor
         }
     }
 
+    /// <summary>
+    /// Runs the state changed operation.
+    /// </summary>
     private void StateChanged()
     {
         _renderRequested = true;
         _ = InvokeAsync(StateHasChanged);
     }
 
+    /// <summary>
+    /// Runs the render canvas async operation.
+    /// </summary>
     private async Task RenderCanvasAsync()
     {
         if (_module is null || !Visible) return;
@@ -437,6 +446,9 @@ public partial class PictureEditor
         _ = InvokeAsync(StateHasChanged);
     }
 
+    /// <summary>
+    /// Runs the show canvas context menu operation.
+    /// </summary>
     private async Task ShowCanvasContextMenu(MouseEventArgs args)
     {
         if (_module is not null && args.Button == 2)
@@ -448,6 +460,9 @@ public partial class PictureEditor
         await _pictureContextMenu.ShowAsync(args);
     }
 
+    /// <summary>
+    /// Runs the show layer context menu operation.
+    /// </summary>
     private async Task ShowLayerContextMenu(PictureLayer layer, MouseEventArgs args)
     {
         State.SelectLayer(layer.Id);
@@ -455,6 +470,9 @@ public partial class PictureEditor
         await _pictureContextMenu.ShowAsync(args);
     }
 
+    /// <summary>
+    /// Runs the show layer list context menu operation.
+    /// </summary>
     private async Task ShowLayerListContextMenu(MouseEventArgs args)
     {
         State.SelectLayer(null);
@@ -462,18 +480,27 @@ public partial class PictureEditor
         await _pictureContextMenu.ShowAsync(args);
     }
 
+    /// <summary>
+    /// Runs the request image operation.
+    /// </summary>
     private async Task RequestImage()
     {
         _replaceRasterLayerId = null;
         await JS.InvokeVoidAsync("publisherStudio.clickElement", RuntimePolicy.PictureStudio.ImageInputId);
     }
 
+    /// <summary>
+    /// Runs the request layered import operation.
+    /// </summary>
     private async Task RequestLayeredImport()
     {
         _replaceRasterLayerId = null;
         await JS.InvokeVoidAsync("publisherStudio.clickElement", RuntimePolicy.PictureStudio.LayeredInputId);
     }
 
+    /// <summary>
+    /// Runs the request raster replacement operation.
+    /// </summary>
     private async Task RequestRasterReplacement()
     {
         if (State.SelectedLayer is not RasterPictureLayer { Locked: false } raster) return;
@@ -481,10 +508,19 @@ public partial class PictureEditor
         await JS.InvokeVoidAsync("publisherStudio.clickElement", RuntimePolicy.PictureStudio.ImageInputId);
     }
 
+    /// <summary>
+    /// Imports image.
+    /// </summary>
     private Task ImportImage(InputFileChangeEventArgs args) => ImportImageCore(args, forceAdd: false);
 
+    /// <summary>
+    /// Imports dropped image.
+    /// </summary>
     private Task ImportDroppedImage(InputFileChangeEventArgs args) => ImportImageCore(args, forceAdd: true);
 
+    /// <summary>
+    /// Imports image core.
+    /// </summary>
     private async Task ImportImageCore(InputFileChangeEventArgs args, bool forceAdd)
     {
         try
@@ -518,10 +554,19 @@ public partial class PictureEditor
         }
     }
 
+    /// <summary>
+    /// Imports layered document.
+    /// </summary>
     private Task ImportLayeredDocument(InputFileChangeEventArgs args) => ImportLayeredDocumentCore(args, append: false);
 
+    /// <summary>
+    /// Imports dropped layered document.
+    /// </summary>
     private Task ImportDroppedLayeredDocument(InputFileChangeEventArgs args) => ImportLayeredDocumentCore(args, append: true);
 
+    /// <summary>
+    /// Imports layered document core.
+    /// </summary>
     private async Task ImportLayeredDocumentCore(InputFileChangeEventArgs args, bool append)
     {
         _error = null;
@@ -594,6 +639,9 @@ public partial class PictureEditor
         _pendingDropY = y is double py && double.IsFinite(py) ? Math.Clamp(py, 0, State.Document.HeightPx) : null;
     }
 
+    /// <summary>
+    /// Runs the clear pending drop position operation.
+    /// </summary>
     private void ClearPendingDropPosition()
     {
         _pendingDropX = null;
@@ -613,29 +661,98 @@ public partial class PictureEditor
         _ = InvokeAsync(StateHasChanged);
     }
 
+    /// <summary>
+    /// Adds text layer.
+    /// </summary>
     private void AddTextLayer() => State.AddText();
+    /// <summary>
+    /// Adds rectangle.
+    /// </summary>
     private void AddRectangle() => State.AddShape(PictureShapeKind.Rectangle);
+    /// <summary>
+    /// Adds ellipse.
+    /// </summary>
     private void AddEllipse() => State.AddShape(PictureShapeKind.Ellipse);
+    /// <summary>
+    /// Adds arrow shape.
+    /// </summary>
     private void AddArrowShape() => State.AddShape(PictureShapeKind.Arrow);
+    /// <summary>
+    /// Adds line shape.
+    /// </summary>
     private void AddLineShape() => State.AddShape(PictureShapeKind.Line);
+    /// <summary>
+    /// Adds gradient.
+    /// </summary>
     private void AddGradient() => State.AddFill(PictureFillKind.LinearGradient);
+    /// <summary>
+    /// Adds solid fill.
+    /// </summary>
     private void AddSolidFill() => State.AddFill(PictureFillKind.Solid);
+    /// <summary>
+    /// Adds clouds.
+    /// </summary>
     private void AddClouds() => State.AddRender(PictureRenderKind.Clouds);
+    /// <summary>
+    /// Adds noise.
+    /// </summary>
     private void AddNoise() => State.AddRender(PictureRenderKind.Noise);
+    /// <summary>
+    /// Adds stripes.
+    /// </summary>
     private void AddStripes() => State.AddRender(PictureRenderKind.Stripes);
+    /// <summary>
+    /// Adds vignette.
+    /// </summary>
     private void AddVignette() => State.AddRender(PictureRenderKind.Vignette);
+    /// <summary>
+    /// Adds bloom.
+    /// </summary>
     private void AddBloom() => State.AddRender(PictureRenderKind.Bloom);
+    /// <summary>
+    /// Adds neon.
+    /// </summary>
     private void AddNeon() => State.AddRender(PictureRenderKind.Neon);
+    /// <summary>
+    /// Adds lens flare.
+    /// </summary>
     private void AddLensFlare() => State.AddRender(PictureRenderKind.LensFlare);
+    /// <summary>
+    /// Adds grain noise.
+    /// </summary>
     private void AddGrainNoise() => State.AddRender(PictureRenderKind.GrainNoise);
+    /// <summary>
+    /// Adds motion blur.
+    /// </summary>
     private void AddMotionBlur() => State.AddRender(PictureRenderKind.MotionBlur);
+    /// <summary>
+    /// Adds wind.
+    /// </summary>
     private void AddWind() => State.AddRender(PictureRenderKind.Wind);
+    /// <summary>
+    /// Adds ocean waves.
+    /// </summary>
     private void AddOceanWaves() => State.AddRender(PictureRenderKind.OceanWaves);
+    /// <summary>
+    /// Adds paint layer.
+    /// </summary>
     private void AddPaintLayer() => State.AddPaint();
+    /// <summary>
+    /// Runs the move up operation.
+    /// </summary>
     private void MoveUp() => State.MoveSelectedLayer(1);
+    /// <summary>
+    /// Runs the move down operation.
+    /// </summary>
     private void MoveDown() => State.MoveSelectedLayer(-1);
+    /// <summary>
+    /// Runs the zoom100 operation.
+    /// </summary>
     private void Zoom100() => State.SetZoom(1);
 
+    /// <summary>
+    /// Runs the fit canvas operation.
+    /// </summary>
     private async Task FitCanvas()
     {
         if (_module is null) return;
@@ -643,6 +760,9 @@ public partial class PictureEditor
         State.SetZoom(zoom);
     }
 
+    /// <summary>
+    /// Runs the apply operation.
+    /// </summary>
     private async Task Apply()
     {
         if (_module is null || _self is null || _pictureExportId is not null) return;
@@ -773,10 +893,16 @@ public partial class PictureEditor
         _ = InvokeAsync(StateHasChanged);
     }
 
+    /// <summary>
+    /// Determines whether current picture export.
+    /// </summary>
     private bool IsCurrentPictureExport(string exportId) =>
         _pictureExportId is not null &&
         string.Equals(_pictureExportId, exportId, StringComparison.Ordinal);
 
+    /// <summary>
+    /// Runs the reset picture export operation.
+    /// </summary>
     private void ResetPictureExport()
     {
         _pictureExportBuffer = null;
@@ -789,6 +915,9 @@ public partial class PictureEditor
         _pictureExportExpectedLength = 0;
     }
 
+    /// <summary>
+    /// Starts local gpt ocr async.
+    /// </summary>
     private async Task StartLocalGptOcrAsync()
     {
         if (!CanUseLocalGptOcr || _module is null || _self is null || _pictureExportId is not null || _ocrBusy) return;
@@ -815,6 +944,9 @@ public partial class PictureEditor
         }
     }
 
+    /// <summary>
+    /// Runs the request local gpt ocr async operation.
+    /// </summary>
     private async Task RequestLocalGptOcrAsync(string dataUrl)
     {
         _ocrBusy = true;
@@ -891,6 +1023,9 @@ public partial class PictureEditor
         }
     }
 
+    /// <summary>
+    /// Runs the insert ocr text layer operation.
+    /// </summary>
     private void InsertOcrTextLayer()
     {
         if (string.IsNullOrWhiteSpace(_ocrText)) return;
@@ -901,20 +1036,35 @@ public partial class PictureEditor
         Notifications.Success(_notice, "Picture Studio OCR", nameof(PictureEditor));
     }
 
+    /// <summary>
+    /// Runs the clear ocr text operation.
+    /// </summary>
     private void ClearOcrText()
     {
         _ocrText = string.Empty;
         _ocrStatus = string.Empty;
     }
 
+    /// <summary>
+    /// Reads wire string.
+    /// </summary>
     private string ReadWireString(OrganicWireEnvelope envelope, string key)
     {
         if (envelope.Properties is null || !envelope.Properties.TryGetValue(key, out var value)) return string.Empty;
         return value.ValueKind == JsonValueKind.String ? value.GetString() ?? string.Empty : value.GetRawText();
     }
 
+    /// <summary>
+    /// Runs the download png operation.
+    /// </summary>
     private async Task DownloadPng() => await Download("image/png", "png", 1d);
+    /// <summary>
+    /// Runs the download jpeg operation.
+    /// </summary>
     private async Task DownloadJpeg() => await Download("image/jpeg", "jpg", .92d);
+    /// <summary>
+    /// Runs the download SVG operation.
+    /// </summary>
     private async Task DownloadSvg()
     {
         if (_module is null) return;
@@ -922,6 +1072,9 @@ public partial class PictureEditor
         await _module.InvokeVoidAsync("downloadPictureStudioSvg", State.Document, fileName);
     }
 
+    /// <summary>
+    /// Runs the download operation.
+    /// </summary>
     private async Task Download(string mimeType, string extension, double quality)
     {
         if (_module is null) return;
@@ -936,6 +1089,9 @@ public partial class PictureEditor
         }
     }
 
+    /// <summary>
+    /// Determines whether cel.
+    /// </summary>
     private async Task Cancel()
     {
         await CancelPictureInteractionAsync();
@@ -943,32 +1099,98 @@ public partial class PictureEditor
         await Cancelled.InvokeAsync();
     }
 
+    /// <summary>
+    /// Runs the select tool operation.
+    /// </summary>
     private void SelectTool() => SetDrawTool(PictureDrawTool.Select);
+    /// <summary>
+    /// Runs the brush tool operation.
+    /// </summary>
     private void BrushTool() => SetDrawTool(PictureDrawTool.Brush);
+    /// <summary>
+    /// Runs the pencil tool operation.
+    /// </summary>
     private void PencilTool() => SetDrawTool(PictureDrawTool.Pencil);
+    /// <summary>
+    /// Runs the spray tool operation.
+    /// </summary>
     private void SprayTool() => SetDrawTool(PictureDrawTool.Spray);
+    /// <summary>
+    /// Runs the toothbrush tool operation.
+    /// </summary>
     private void ToothbrushTool() => SetDrawTool(PictureDrawTool.Toothbrush);
+    /// <summary>
+    /// Runs the square tool operation.
+    /// </summary>
     private void SquareTool() => SetDrawTool(PictureDrawTool.Square);
+    /// <summary>
+    /// Runs the rectangle tool operation.
+    /// </summary>
     private void RectangleTool() => SetDrawTool(PictureDrawTool.Rectangle);
+    /// <summary>
+    /// Runs the ellipse tool operation.
+    /// </summary>
     private void EllipseTool() => SetDrawTool(PictureDrawTool.Ellipse);
+    /// <summary>
+    /// Runs the arrow tool operation.
+    /// </summary>
     private void ArrowTool() => SetDrawTool(PictureDrawTool.Arrow);
+    /// <summary>
+    /// Runs the line tool operation.
+    /// </summary>
     private void LineTool() => SetDrawTool(PictureDrawTool.Line);
+    /// <summary>
+    /// Runs the path tool operation.
+    /// </summary>
     private void PathTool() => SetDrawTool(PictureDrawTool.Path);
+    /// <summary>
+    /// Runs the eraser tool operation.
+    /// </summary>
     private void EraserTool() => SetDrawTool(PictureDrawTool.Eraser);
+    /// <summary>
+    /// Runs the eyedropper tool operation.
+    /// </summary>
     private void EyedropperTool() => SetDrawTool(PictureDrawTool.Eyedropper);
+    /// <summary>
+    /// Runs the rectangle select tool operation.
+    /// </summary>
     private void RectangleSelectTool() => SetDrawTool(PictureDrawTool.RectangleSelect);
+    /// <summary>
+    /// Runs the ellipse select tool operation.
+    /// </summary>
     private void EllipseSelectTool() => SetDrawTool(PictureDrawTool.EllipseSelect);
+    /// <summary>
+    /// Runs the free select tool operation.
+    /// </summary>
     private void FreeSelectTool() => SetDrawTool(PictureDrawTool.FreeSelect);
+    /// <summary>
+    /// Runs the magnetic select tool operation.
+    /// </summary>
     private void MagneticSelectTool() => SetDrawTool(PictureDrawTool.MagneticSelect);
+    /// <summary>
+    /// Runs the polygon select tool operation.
+    /// </summary>
     private void PolygonSelectTool() => SetDrawTool(PictureDrawTool.PolygonSelect);
+    /// <summary>
+    /// Runs the fill solid tool operation.
+    /// </summary>
     private void FillSolidTool() => SetDrawTool(PictureDrawTool.FillSolid);
+    /// <summary>
+    /// Runs the fill gradient tool operation.
+    /// </summary>
     private void FillGradientTool() => SetDrawTool(PictureDrawTool.FillGradient);
+    /// <summary>
+    /// Runs the clear area selection operation.
+    /// </summary>
     private async Task ClearAreaSelection()
     {
         if (_module is not null) await _module.InvokeVoidAsync("clearPictureStudioAreaSelection", RuntimePolicy.PictureStudio.CanvasId);
         _renderRequested = true;
     }
 
+    /// <summary>
+    /// Reads area selection async.
+    /// </summary>
     private async Task<PictureAreaSelection?> ReadAreaSelectionAsync()
     {
         if (_module is null || State.SelectedLayer is null) return null;
@@ -981,6 +1203,9 @@ public partial class PictureEditor
         catch (JSException) { return null; }
     }
 
+    /// <summary>
+    /// Runs the selection polygon operation.
+    /// </summary>
     private List<PicturePoint> SelectionPolygon(PictureAreaSelection selection)
     {
         var points = selection.Points
@@ -1031,6 +1256,9 @@ public partial class PictureEditor
         return points.Count >= 3 ? points : [];
     }
 
+    /// <summary>
+    /// Applies area clip async.
+    /// </summary>
     private async Task<bool> ApplyAreaClipAsync(bool inverted, bool quietWhenMissing = false)
     {
         var selection = await ReadAreaSelectionAsync();
@@ -1051,9 +1279,18 @@ public partial class PictureEditor
         return true;
     }
 
+    /// <summary>
+    /// Runs the keep selected area operation.
+    /// </summary>
     private Task KeepSelectedArea() => ApplyAreaClipAsync(inverted: false);
+    /// <summary>
+    /// Runs the cut selected area operation.
+    /// </summary>
     private Task CutSelectedArea() => ApplyAreaClipAsync(inverted: true);
 
+    /// <summary>
+    /// Runs the copy area selection to clipboard async operation.
+    /// </summary>
     private async Task<bool> CopyAreaSelectionToClipboardAsync()
     {
         var selection = await ReadAreaSelectionAsync();
@@ -1063,12 +1300,18 @@ public partial class PictureEditor
         return true;
     }
 
+    /// <summary>
+    /// Runs the copy selected area operation.
+    /// </summary>
     private async Task CopySelectedArea()
     {
         if (!await CopyAreaSelectionToClipboardAsync())
             _notice = "Create an area selection on a layer before copying a region.";
     }
 
+    /// <summary>
+    /// Runs the copy selected area as layer operation.
+    /// </summary>
     private async Task CopySelectedAreaAsLayer()
     {
         if (!await CopyAreaSelectionToClipboardAsync())
@@ -1082,17 +1325,26 @@ public partial class PictureEditor
         _notice = "The selected region was inserted as a new clipped layer.";
     }
 
+    /// <summary>
+    /// Runs the clear layer cut operation.
+    /// </summary>
     private void ClearLayerCut()
     {
         if (State.ClearSelectedClip()) _notice = "The layer cut was cleared.";
     }
 
+    /// <summary>
+    /// Runs the distance operation.
+    /// </summary>
     private double Distance(PicturePoint first, PicturePoint second)
     {
         var x = first.X - second.X;
         var y = first.Y - second.Y;
         return Math.Sqrt(x * x + y * y);
     }
+    /// <summary>
+    /// Sets draw tool.
+    /// </summary>
     private void SetDrawTool(PictureDrawTool tool)
     {
         _ = CancelPictureInteractionAsync();
@@ -1101,6 +1353,9 @@ public partial class PictureEditor
         StateHasChanged();
     }
 
+    /// <summary>
+    /// Determines whether cel picture interaction async.
+    /// </summary>
     private async Task CancelPictureInteractionAsync()
     {
         if (_module is null) return;
@@ -1113,6 +1368,9 @@ public partial class PictureEditor
         catch (JSException) { }
     }
 
+    /// <summary>
+    /// Runs the dispose picture runtime async operation.
+    /// </summary>
     private async Task DisposePictureRuntimeAsync()
     {
         if (_module is null || !_initialized) return;
@@ -1128,22 +1386,49 @@ public partial class PictureEditor
             _initialized = false;
         }
     }
+    /// <summary>
+    /// Runs the tool text operation.
+    /// </summary>
     private string ToolText(PictureDrawTool tool, string text) => _drawTool == tool ? $"✓ {text}" : text;
+    /// <summary>
+    /// Determines whether draw width.
+    /// </summary>
     private bool IsDrawWidth(double value) => Math.Abs(_drawWidth - value) < .001;
+    /// <summary>
+    /// Runs the draw width text operation.
+    /// </summary>
     private string DrawWidthText(double value) => IsDrawWidth(value) ? $"✓ {value:0.##} px" : $"{value:0.##} px";
+    /// <summary>
+    /// Runs the draw width button class operation.
+    /// </summary>
     private string DrawWidthButtonClass(double value) => IsDrawWidth(value) ? "selected" : string.Empty;
+    /// <summary>
+    /// Runs the change draw color operation.
+    /// </summary>
     private void ChangeDrawColor(string value) { if (!string.IsNullOrWhiteSpace(value)) _drawColor = value; _renderRequested = true; }
+    /// <summary>
+    /// Runs the change draw secondary color operation.
+    /// </summary>
     private void ChangeDrawSecondaryColor(string value) { if (!string.IsNullOrWhiteSpace(value)) _drawSecondaryColor = value; _renderRequested = true; }
+    /// <summary>
+    /// Sets draw width.
+    /// </summary>
     private void SetDrawWidth(double value)
     {
         _drawWidth = Math.Clamp(value, RuntimePolicy.PictureStudio.MinimumDrawWidth, RuntimePolicy.PictureStudio.MaximumDrawWidth);
         _renderRequested = true;
     }
+    /// <summary>
+    /// Runs the width to slider operation.
+    /// </summary>
     private double WidthToSlider(double width)
     {
         var clamped = Math.Clamp(width, RuntimePolicy.PictureStudio.MinimumDrawWidth, RuntimePolicy.PictureStudio.MaximumDrawWidth);
         return Math.Log(clamped / RuntimePolicy.PictureStudio.MinimumDrawWidth) / Math.Log(RuntimePolicy.PictureStudio.MaximumDrawWidth / RuntimePolicy.PictureStudio.MinimumDrawWidth) * 100;
     }
+    /// <summary>
+    /// Runs the slider to width operation.
+    /// </summary>
     private double SliderToWidth(double slider)
     {
         var normalized = Math.Clamp(slider, 0, 100) / 100;
@@ -1158,47 +1443,167 @@ public partial class PictureEditor
         };
         return Math.Round(width / step) * step;
     }
+    /// <summary>
+    /// Runs the draw width1 operation.
+    /// </summary>
     private void DrawWidth1() => SetDrawWidth(1);
+    /// <summary>
+    /// Runs the draw width3 operation.
+    /// </summary>
     private void DrawWidth3() => SetDrawWidth(3);
+    /// <summary>
+    /// Runs the draw width8 operation.
+    /// </summary>
     private void DrawWidth8() => SetDrawWidth(8);
+    /// <summary>
+    /// Runs the draw width16 operation.
+    /// </summary>
     private void DrawWidth16() => SetDrawWidth(16);
+    /// <summary>
+    /// Runs the draw width32 operation.
+    /// </summary>
     private void DrawWidth32() => SetDrawWidth(32);
+    /// <summary>
+    /// Runs the toggle grid ribbon operation.
+    /// </summary>
     private void ToggleGridRibbon() => State.SetGrid(!State.Document.GridVisible);
+    /// <summary>
+    /// Runs the toggle snap ribbon operation.
+    /// </summary>
     private void ToggleSnapRibbon() => State.SetSnap(!State.Document.SnapToGrid);
     private string GridText => State.Document.GridVisible ? "✓ Grid" : "Grid";
     private string SnapText => State.Document.SnapToGrid ? "✓ Snap" : "Snap";
+    /// <summary>
+    /// Runs the make render clouds operation.
+    /// </summary>
     private void MakeRenderClouds() => WithRender(layer => layer.RenderKind = PictureRenderKind.Clouds);
+    /// <summary>
+    /// Runs the make render noise operation.
+    /// </summary>
     private void MakeRenderNoise() => WithRender(layer => layer.RenderKind = PictureRenderKind.Noise);
+    /// <summary>
+    /// Runs the make render stripes operation.
+    /// </summary>
     private void MakeRenderStripes() => WithRender(layer => layer.RenderKind = PictureRenderKind.Stripes);
+    /// <summary>
+    /// Runs the make render vignette operation.
+    /// </summary>
     private void MakeRenderVignette() => WithRender(layer => layer.RenderKind = PictureRenderKind.Vignette);
+    /// <summary>
+    /// Runs the make render bloom operation.
+    /// </summary>
     private void MakeRenderBloom() => WithRender(layer => layer.RenderKind = PictureRenderKind.Bloom);
+    /// <summary>
+    /// Runs the make render neon operation.
+    /// </summary>
     private void MakeRenderNeon() => WithRender(layer => layer.RenderKind = PictureRenderKind.Neon);
+    /// <summary>
+    /// Runs the make render lens flare operation.
+    /// </summary>
     private void MakeRenderLensFlare() => WithRender(layer => layer.RenderKind = PictureRenderKind.LensFlare);
+    /// <summary>
+    /// Runs the make render grain noise operation.
+    /// </summary>
     private void MakeRenderGrainNoise() => WithRender(layer => layer.RenderKind = PictureRenderKind.GrainNoise);
+    /// <summary>
+    /// Runs the make render motion blur operation.
+    /// </summary>
     private void MakeRenderMotionBlur() => WithRender(layer => layer.RenderKind = PictureRenderKind.MotionBlur);
+    /// <summary>
+    /// Runs the make render wind operation.
+    /// </summary>
     private void MakeRenderWind() => WithRender(layer => layer.RenderKind = PictureRenderKind.Wind);
+    /// <summary>
+    /// Runs the make render ocean waves operation.
+    /// </summary>
     private void MakeRenderOceanWaves() => WithRender(layer => layer.RenderKind = PictureRenderKind.OceanWaves);
+    /// <summary>
+    /// Runs the raster contain operation.
+    /// </summary>
     private void RasterContain() => WithRaster(layer => layer.FitMode = PictureRasterFitMode.Contain);
+    /// <summary>
+    /// Runs the raster cover operation.
+    /// </summary>
     private void RasterCover() => WithRaster(layer => layer.FitMode = PictureRasterFitMode.Cover);
+    /// <summary>
+    /// Runs the raster stretch operation.
+    /// </summary>
     private void RasterStretch() => WithRaster(layer => layer.FitMode = PictureRasterFitMode.Stretch);
+    /// <summary>
+    /// Runs the raster flip horizontal operation.
+    /// </summary>
     private void RasterFlipHorizontal() => WithRaster(layer => layer.FlipHorizontal = !layer.FlipHorizontal);
+    /// <summary>
+    /// Runs the raster flip vertical operation.
+    /// </summary>
     private void RasterFlipVertical() => WithRaster(layer => layer.FlipVertical = !layer.FlipVertical);
+    /// <summary>
+    /// Runs the raster rotate left operation.
+    /// </summary>
     private void RasterRotateLeft() => WithRaster(layer => layer.Rotation = (layer.Rotation - 90 + 360) % 360);
+    /// <summary>
+    /// Runs the raster rotate right operation.
+    /// </summary>
     private void RasterRotateRight() => WithRaster(layer => layer.Rotation = (layer.Rotation + 90) % 360);
+    /// <summary>
+    /// Runs the raster reset rotation operation.
+    /// </summary>
     private void RasterResetRotation() => WithRaster(layer => layer.Rotation = 0);
+    /// <summary>
+    /// Runs the raster no tint operation.
+    /// </summary>
     private void RasterNoTint() => WithRaster(layer => layer.TintOpacity = 0);
+    /// <summary>
+    /// Runs the raster blue tint operation.
+    /// </summary>
     private void RasterBlueTint() => WithRaster(layer => { layer.TintColor = "#2563eb"; layer.TintOpacity = .28; });
+    /// <summary>
+    /// Runs the raster warm tint operation.
+    /// </summary>
     private void RasterWarmTint() => WithRaster(layer => { layer.TintColor = "#f97316"; layer.TintOpacity = .24; });
+    /// <summary>
+    /// Runs the soften light operation.
+    /// </summary>
     private void SoftenLight() => State.UpdateSelected(layer => layer.Blur = 2);
+    /// <summary>
+    /// Runs the soften medium operation.
+    /// </summary>
     private void SoftenMedium() => State.UpdateSelected(layer => layer.Blur = 6);
+    /// <summary>
+    /// Removes softening.
+    /// </summary>
     private void RemoveSoftening() => State.UpdateSelected(layer => layer.Blur = 0);
+    /// <summary>
+    /// Runs the brighten operation.
+    /// </summary>
     private void Brighten() => State.UpdateSelected(layer => layer.Brightness = Math.Clamp(layer.Brightness + .1, 0, 3));
+    /// <summary>
+    /// Runs the darken operation.
+    /// </summary>
     private void Darken() => State.UpdateSelected(layer => layer.Brightness = Math.Clamp(layer.Brightness - .1, 0, 3));
+    /// <summary>
+    /// Runs the more contrast operation.
+    /// </summary>
     private void MoreContrast() => State.UpdateSelected(layer => layer.Contrast = Math.Clamp(layer.Contrast + .1, 0, 3));
+    /// <summary>
+    /// Runs the more saturation operation.
+    /// </summary>
     private void MoreSaturation() => State.UpdateSelected(layer => layer.Saturation = Math.Clamp(layer.Saturation + .1, 0, 3));
+    /// <summary>
+    /// Runs the toggle grayscale preset operation.
+    /// </summary>
     private void ToggleGrayscalePreset() => State.UpdateSelected(layer => layer.Grayscale = layer.Grayscale > .5 ? 0 : 1);
+    /// <summary>
+    /// Runs the toggle sepia preset operation.
+    /// </summary>
     private void ToggleSepiaPreset() => State.UpdateSelected(layer => layer.Sepia = layer.Sepia > .5 ? 0 : 1);
+    /// <summary>
+    /// Runs the toggle invert preset operation.
+    /// </summary>
     private void ToggleInvertPreset() => State.UpdateSelected(layer => layer.Invert = layer.Invert > .5 ? 0 : 1);
+    /// <summary>
+    /// Applies bloom effect.
+    /// </summary>
     private void ApplyBloomEffect() => State.UpdateSelected(layer =>
     {
         layer.Brightness = Math.Clamp(layer.Brightness + .18, 0, 3);
@@ -1208,6 +1613,9 @@ public partial class PictureEditor
         layer.Opacity = Math.Clamp(layer.Opacity, .82, 1);
         layer.BlendMode = PictureBlendMode.Screen;
     });
+    /// <summary>
+    /// Applies neon effect.
+    /// </summary>
     private void ApplyNeonEffect() => State.UpdateSelected(layer =>
     {
         layer.Brightness = Math.Clamp(layer.Brightness + .22, 0, 3);
@@ -1216,6 +1624,9 @@ public partial class PictureEditor
         layer.Blur = Math.Clamp(Math.Max(layer.Blur, 1.5), 0, 50);
         layer.BlendMode = PictureBlendMode.Screen;
     });
+    /// <summary>
+    /// Applies lens flare effect.
+    /// </summary>
     private void ApplyLensFlareEffect() => State.UpdateSelected(layer =>
     {
         layer.Brightness = Math.Clamp(layer.Brightness + .28, 0, 3);
@@ -1226,158 +1637,515 @@ public partial class PictureEditor
         layer.BlendMode = PictureBlendMode.Screen;
     });
 
+    /// <summary>
+    /// Runs the shape rectangle operation.
+    /// </summary>
     private void ShapeRectangle() => WithShape(layer => layer.Shape = PictureShapeKind.Rectangle);
+    /// <summary>
+    /// Runs the shape rounded rectangle operation.
+    /// </summary>
     private void ShapeRoundedRectangle() => WithShape(layer => layer.Shape = PictureShapeKind.RoundedRectangle);
+    /// <summary>
+    /// Runs the shape ellipse operation.
+    /// </summary>
     private void ShapeEllipse() => WithShape(layer => layer.Shape = PictureShapeKind.Ellipse);
+    /// <summary>
+    /// Runs the shape arrow operation.
+    /// </summary>
     private void ShapeArrow() => WithShape(layer => layer.Shape = PictureShapeKind.Arrow);
+    /// <summary>
+    /// Runs the shape line operation.
+    /// </summary>
     private void ShapeLine() => WithShape(layer => layer.Shape = PictureShapeKind.Line);
+    /// <summary>
+    /// Runs the shape path operation.
+    /// </summary>
     private void ShapePath() => WithShape(layer => layer.Shape = PictureShapeKind.Path);
+    /// <summary>
+    /// Runs the fill solid operation.
+    /// </summary>
     private void FillSolid() => WithFill(layer => layer.FillKind = PictureFillKind.Solid);
+    /// <summary>
+    /// Runs the fill linear gradient operation.
+    /// </summary>
     private void FillLinearGradient() => WithFill(layer => layer.FillKind = PictureFillKind.LinearGradient);
+    /// <summary>
+    /// Runs the fill radial gradient operation.
+    /// </summary>
     private void FillRadialGradient() => WithFill(layer => layer.FillKind = PictureFillKind.RadialGradient);
+    /// <summary>
+    /// Sets picture text font.
+    /// </summary>
     private void SetPictureTextFont(string font) => WithText(layer => layer.FontFamily = font);
+    /// <summary>
+    /// Sets picture text size.
+    /// </summary>
     private void SetPictureTextSize(double value) => WithText(layer => layer.FontSizePx = value);
+    /// <summary>
+    /// Runs the text size24 operation.
+    /// </summary>
     private void TextSize24() => SetPictureTextSize(24);
+    /// <summary>
+    /// Runs the text size48 operation.
+    /// </summary>
     private void TextSize48() => SetPictureTextSize(48);
+    /// <summary>
+    /// Runs the text size72 operation.
+    /// </summary>
     private void TextSize72() => SetPictureTextSize(72);
+    /// <summary>
+    /// Runs the text size120 operation.
+    /// </summary>
     private void TextSize120() => SetPictureTextSize(120);
+    /// <summary>
+    /// Runs the text size180 operation.
+    /// </summary>
     private void TextSize180() => SetPictureTextSize(180);
+    /// <summary>
+    /// Runs the toggle picture text bold operation.
+    /// </summary>
     private void TogglePictureTextBold() => WithText(layer => layer.Bold = !layer.Bold);
+    /// <summary>
+    /// Runs the toggle picture text italic operation.
+    /// </summary>
     private void TogglePictureTextItalic() => WithText(layer => layer.Italic = !layer.Italic);
+    /// <summary>
+    /// Runs the toggle picture text shadow operation.
+    /// </summary>
     private void TogglePictureTextShadow() => WithText(layer => layer.ShadowEnabled = !layer.ShadowEnabled);
+    /// <summary>
+    /// Runs the text align left operation.
+    /// </summary>
     private void TextAlignLeft() => WithText(layer => layer.Alignment = PictureTextAlignment.Left);
+    /// <summary>
+    /// Runs the text align center operation.
+    /// </summary>
     private void TextAlignCenter() => WithText(layer => layer.Alignment = PictureTextAlignment.Center);
+    /// <summary>
+    /// Runs the text align right operation.
+    /// </summary>
     private void TextAlignRight() => WithText(layer => layer.Alignment = PictureTextAlignment.Right);
+    /// <summary>
+    /// Runs the text color blue operation.
+    /// </summary>
     private void TextColorBlue() => WithText(layer => layer.FillColor = "#17365d");
+    /// <summary>
+    /// Runs the text color black operation.
+    /// </summary>
     private void TextColorBlack() => WithText(layer => layer.FillColor = "#000000");
+    /// <summary>
+    /// Runs the text color white operation.
+    /// </summary>
     private void TextColorWhite() => WithText(layer => layer.FillColor = "#ffffff");
+    /// <summary>
+    /// Runs the text color red operation.
+    /// </summary>
     private void TextColorRed() => WithText(layer => layer.FillColor = "#dc2626");
+    /// <summary>
+    /// Runs the text outline none operation.
+    /// </summary>
     private void TextOutlineNone() => WithText(layer => { layer.OutlineColor = "transparent"; layer.OutlineWidthPx = 0; });
+    /// <summary>
+    /// Runs the text outline thin operation.
+    /// </summary>
     private void TextOutlineThin() => WithText(layer => { layer.OutlineColor = "#111827"; layer.OutlineWidthPx = 1; });
+    /// <summary>
+    /// Runs the text outline thick operation.
+    /// </summary>
     private void TextOutlineThick() => WithText(layer => { layer.OutlineColor = "#ffffff"; layer.OutlineWidthPx = 4; });
+    /// <summary>
+    /// Runs the shape fill solid operation.
+    /// </summary>
     private void ShapeFillSolid() => WithShape(layer => layer.FillKind = PictureFillKind.Solid);
+    /// <summary>
+    /// Runs the shape fill linear operation.
+    /// </summary>
     private void ShapeFillLinear() => WithShape(layer => layer.FillKind = PictureFillKind.LinearGradient);
+    /// <summary>
+    /// Runs the shape fill radial operation.
+    /// </summary>
     private void ShapeFillRadial() => WithShape(layer => layer.FillKind = PictureFillKind.RadialGradient);
+    /// <summary>
+    /// Sets shape colors.
+    /// </summary>
     private void SetShapeColors(string first, string second, string stroke) => WithShape(layer => { layer.FillColor = first; layer.SecondaryFillColor = second; layer.StrokeColor = stroke; });
+    /// <summary>
+    /// Runs the shape colors blue operation.
+    /// </summary>
     private void ShapeColorsBlue() => SetShapeColors("#60a5fa", "#dbeafe", "#1d4ed8");
+    /// <summary>
+    /// Runs the shape colors green operation.
+    /// </summary>
     private void ShapeColorsGreen() => SetShapeColors("#4ade80", "#dcfce7", "#15803d");
+    /// <summary>
+    /// Runs the shape colors orange operation.
+    /// </summary>
     private void ShapeColorsOrange() => SetShapeColors("#fb923c", "#ffedd5", "#c2410c");
+    /// <summary>
+    /// Runs the shape colors mono operation.
+    /// </summary>
     private void ShapeColorsMono() => SetShapeColors("#111827", "#ffffff", "#000000");
+    /// <summary>
+    /// Sets shape stroke.
+    /// </summary>
     private void SetShapeStroke(double width) => WithShape(layer => layer.StrokeWidthPx = width);
+    /// <summary>
+    /// Runs the shape stroke0 operation.
+    /// </summary>
     private void ShapeStroke0() => SetShapeStroke(0);
+    /// <summary>
+    /// Runs the shape stroke1 operation.
+    /// </summary>
     private void ShapeStroke1() => SetShapeStroke(1);
+    /// <summary>
+    /// Runs the shape stroke3 operation.
+    /// </summary>
     private void ShapeStroke3() => SetShapeStroke(3);
+    /// <summary>
+    /// Runs the shape stroke8 operation.
+    /// </summary>
     private void ShapeStroke8() => SetShapeStroke(8);
+    /// <summary>
+    /// Sets fill colors.
+    /// </summary>
     private void SetFillColors(string first, string second) => WithFill(layer => { layer.PrimaryColor = first; layer.SecondaryColor = second; });
+    /// <summary>
+    /// Runs the fill colors blue operation.
+    /// </summary>
     private void FillColorsBlue() => SetFillColors("#dbeafe", "#6366f1");
+    /// <summary>
+    /// Runs the fill colors green operation.
+    /// </summary>
     private void FillColorsGreen() => SetFillColors("#dcfce7", "#16a34a");
+    /// <summary>
+    /// Runs the fill colors sunset operation.
+    /// </summary>
     private void FillColorsSunset() => SetFillColors("#fde68a", "#f97316");
+    /// <summary>
+    /// Runs the fill colors mono operation.
+    /// </summary>
     private void FillColorsMono() => SetFillColors("#ffffff", "#111827");
+    /// <summary>
+    /// Sets fill angle.
+    /// </summary>
     private void SetFillAngle(double value) => WithFill(layer => layer.AngleDegrees = value);
+    /// <summary>
+    /// Runs the fill angle0 operation.
+    /// </summary>
     private void FillAngle0() => SetFillAngle(0);
+    /// <summary>
+    /// Runs the fill angle45 operation.
+    /// </summary>
     private void FillAngle45() => SetFillAngle(45);
+    /// <summary>
+    /// Runs the fill angle90 operation.
+    /// </summary>
     private void FillAngle90() => SetFillAngle(90);
+    /// <summary>
+    /// Runs the fill angle180 operation.
+    /// </summary>
     private void FillAngle180() => SetFillAngle(180);
+    /// <summary>
+    /// Runs the fill angle270 operation.
+    /// </summary>
     private void FillAngle270() => SetFillAngle(270);
+    /// <summary>
+    /// Sets layer opacity.
+    /// </summary>
     private void SetLayerOpacity(double value) => State.UpdateSelected(layer => layer.Opacity = value);
+    /// <summary>
+    /// Runs the layer opacity100 operation.
+    /// </summary>
     private void LayerOpacity100() => SetLayerOpacity(1);
+    /// <summary>
+    /// Runs the layer opacity75 operation.
+    /// </summary>
     private void LayerOpacity75() => SetLayerOpacity(.75);
+    /// <summary>
+    /// Runs the layer opacity50 operation.
+    /// </summary>
     private void LayerOpacity50() => SetLayerOpacity(.5);
+    /// <summary>
+    /// Runs the layer opacity25 operation.
+    /// </summary>
     private void LayerOpacity25() => SetLayerOpacity(.25);
+    /// <summary>
+    /// Runs the toggle selected lock menu operation.
+    /// </summary>
     private void ToggleSelectedLockMenu()
     {
         if (State.SelectedLayer is PictureLayer layer) State.ToggleLock(layer.Id);
     }
+    /// <summary>
+    /// Runs the toggle selected visibility menu operation.
+    /// </summary>
     private void ToggleSelectedVisibilityMenu()
     {
         if (State.SelectedLayer is PictureLayer layer) State.ToggleVisibility(layer.Id);
     }
+    /// <summary>
+    /// Runs the checked text operation.
+    /// </summary>
     private string CheckedText(bool selected, string text) => selected ? $"✓ {text}" : text;
 
+    /// <summary>
+    /// Runs the change document name operation.
+    /// </summary>
     private void ChangeDocumentName(ChangeEventArgs args) => State.SetDocumentName(Text(args));
+    /// <summary>
+    /// Runs the change canvas width operation.
+    /// </summary>
     private void ChangeCanvasWidth(ChangeEventArgs args) => State.SetDocumentSize(Int(args, State.Document.WidthPx), State.Document.HeightPx);
+    /// <summary>
+    /// Runs the change canvas height operation.
+    /// </summary>
     private void ChangeCanvasHeight(ChangeEventArgs args) => State.SetDocumentSize(State.Document.WidthPx, Int(args, State.Document.HeightPx));
+    /// <summary>
+    /// Runs the change background preset operation.
+    /// </summary>
     private void ChangeBackgroundPreset(ChangeEventArgs args) => State.SetBackground(Text(args));
+    /// <summary>
+    /// Runs the change canvas color operation.
+    /// </summary>
     private void ChangeCanvasColor(ChangeEventArgs args) => State.SetBackground(Text(args));
+    /// <summary>
+    /// Runs the change grid spacing operation.
+    /// </summary>
     private void ChangeGridSpacing(ChangeEventArgs args) => State.SetGridSpacing(Int(args, State.Document.GridSpacingPx));
+    /// <summary>
+    /// Runs the toggle grid operation.
+    /// </summary>
     private void ToggleGrid(ChangeEventArgs args) => State.SetGrid(Bool(args));
+    /// <summary>
+    /// Runs the toggle snap operation.
+    /// </summary>
     private void ToggleSnap(ChangeEventArgs args) => State.SetSnap(Bool(args));
+    /// <summary>
+    /// Runs the change zoom operation.
+    /// </summary>
     private void ChangeZoom(ChangeEventArgs args) => State.SetZoom(Number(args, State.Document.Zoom));
+    /// <summary>
+    /// Runs the change draw tool operation.
+    /// </summary>
     private void ChangeDrawTool(ChangeEventArgs args)
     {
         if (Enum.TryParse<PictureDrawTool>(Text(args), true, out var tool)) SetDrawTool(tool);
     }
+    /// <summary>
+    /// Runs the change draw color input operation.
+    /// </summary>
     private void ChangeDrawColorInput(ChangeEventArgs args) => ChangeDrawColor(Text(args));
+    /// <summary>
+    /// Runs the change draw secondary color input operation.
+    /// </summary>
     private void ChangeDrawSecondaryColorInput(ChangeEventArgs args) => ChangeDrawSecondaryColor(Text(args));
+    /// <summary>
+    /// Runs the change draw width operation.
+    /// </summary>
     private void ChangeDrawWidth(ChangeEventArgs args) => SetDrawWidth(Number(args, _drawWidth));
+    /// <summary>
+    /// Runs the change draw width slider operation.
+    /// </summary>
     private void ChangeDrawWidthSlider(ChangeEventArgs args) => SetDrawWidth(SliderToWidth(Number(args, BrushWidthSliderValue)));
+    /// <summary>
+    /// Runs the change draw opacity operation.
+    /// </summary>
     private void ChangeDrawOpacity(ChangeEventArgs args) { _drawOpacity = Math.Clamp(Number(args, _drawOpacity), 0, 1); _renderRequested = true; }
+    /// <summary>
+    /// Runs the change draw hardness operation.
+    /// </summary>
     private void ChangeDrawHardness(ChangeEventArgs args) { _drawHardness = Math.Clamp(Number(args, _drawHardness), 0, 1); _renderRequested = true; }
 
+    /// <summary>
+    /// Runs the preset square operation.
+    /// </summary>
     private void PresetSquare() => State.SetDocumentSize(1200, 1200);
+    /// <summary>
+    /// Runs the preset landscape operation.
+    /// </summary>
     private void PresetLandscape() => State.SetDocumentSize(1600, 1000);
+    /// <summary>
+    /// Runs the preset full hd operation.
+    /// </summary>
     private void PresetFullHd() => State.SetDocumentSize(1920, 1080);
+    /// <summary>
+    /// Runs the preset a4 operation.
+    /// </summary>
     private void PresetA4() => State.SetDocumentSize(2480, 3508);
 
+    /// <summary>
+    /// Runs the change layer name operation.
+    /// </summary>
     private void ChangeLayerName(ChangeEventArgs args) => State.UpdateSelected(layer => layer.Name = Text(args));
+    /// <summary>
+    /// Runs the change layer x operation.
+    /// </summary>
     private void ChangeLayerX(ChangeEventArgs args) => State.UpdateSelected(layer => layer.X = Number(args, layer.X));
+    /// <summary>
+    /// Runs the change layer y operation.
+    /// </summary>
     private void ChangeLayerY(ChangeEventArgs args) => State.UpdateSelected(layer => layer.Y = Number(args, layer.Y));
+    /// <summary>
+    /// Runs the change layer width operation.
+    /// </summary>
     private void ChangeLayerWidth(ChangeEventArgs args) => State.UpdateSelected(layer => layer.Width = Number(args, layer.Width));
+    /// <summary>
+    /// Runs the change layer height operation.
+    /// </summary>
     private void ChangeLayerHeight(ChangeEventArgs args) => State.UpdateSelected(layer => layer.Height = Number(args, layer.Height));
+    /// <summary>
+    /// Runs the change layer rotation operation.
+    /// </summary>
     private void ChangeLayerRotation(ChangeEventArgs args) => State.UpdateSelectedLive("layer-rotation", layer => layer.Rotation = Number(args, layer.Rotation));
+    /// <summary>
+    /// Runs the change layer opacity operation.
+    /// </summary>
     private void ChangeLayerOpacity(ChangeEventArgs args) => State.UpdateSelectedLive("layer-opacity", layer => layer.Opacity = Number(args, layer.Opacity));
+    /// <summary>
+    /// Runs the change blend mode operation.
+    /// </summary>
     private void ChangeBlendMode(ChangeEventArgs args)
     {
         if (Enum.TryParse<PictureBlendMode>(Text(args), true, out var value))
             State.UpdateSelected(layer => layer.BlendMode = value);
     }
+    /// <summary>
+    /// Runs the toggle selected visibility operation.
+    /// </summary>
     private void ToggleSelectedVisibility(ChangeEventArgs args) => State.UpdateSelected(layer => layer.Visible = Bool(args), allowLocked: true);
+    /// <summary>
+    /// Runs the toggle selected lock operation.
+    /// </summary>
     private void ToggleSelectedLock(ChangeEventArgs args) => State.UpdateSelected(layer => layer.Locked = Bool(args), allowLocked: true);
+    /// <summary>
+    /// Runs the end live edit operation.
+    /// </summary>
     private void EndLiveEdit(ChangeEventArgs _) => State.EndLiveEdit();
 
+    /// <summary>
+    /// Runs the change raster fit operation.
+    /// </summary>
     private void ChangeRasterFit(ChangeEventArgs args)
     {
         if (Enum.TryParse<PictureRasterFitMode>(Text(args), true, out var value))
             WithRaster(layer => layer.FitMode = value);
     }
+    /// <summary>
+    /// Runs the toggle raster flip horizontal operation.
+    /// </summary>
     private void ToggleRasterFlipHorizontal(ChangeEventArgs args) => WithRaster(layer => layer.FlipHorizontal = Bool(args));
+    /// <summary>
+    /// Runs the toggle raster flip vertical operation.
+    /// </summary>
     private void ToggleRasterFlipVertical(ChangeEventArgs args) => WithRaster(layer => layer.FlipVertical = Bool(args));
+    /// <summary>
+    /// Runs the change raster tint color operation.
+    /// </summary>
     private void ChangeRasterTintColor(ChangeEventArgs args) => WithRaster(layer => layer.TintColor = Text(args));
+    /// <summary>
+    /// Runs the change raster tint opacity operation.
+    /// </summary>
     private void ChangeRasterTintOpacity(ChangeEventArgs args) => WithRasterLive("raster-tint", layer => layer.TintOpacity = Number(args, layer.TintOpacity));
 
+    /// <summary>
+    /// Runs the change text content operation.
+    /// </summary>
     private void ChangeTextContent(ChangeEventArgs args) => WithText(layer => layer.Text = Text(args));
+    /// <summary>
+    /// Runs the change text font operation.
+    /// </summary>
     private void ChangeTextFont(ChangeEventArgs args) => WithText(layer => layer.FontFamily = Text(args));
+    /// <summary>
+    /// Runs the change text size operation.
+    /// </summary>
     private void ChangeTextSize(ChangeEventArgs args) => WithText(layer => layer.FontSizePx = Number(args, layer.FontSizePx));
+    /// <summary>
+    /// Runs the change text alignment operation.
+    /// </summary>
     private void ChangeTextAlignment(ChangeEventArgs args)
     {
         if (Enum.TryParse<PictureTextAlignment>(Text(args), true, out var value))
             WithText(layer => layer.Alignment = value);
     }
+    /// <summary>
+    /// Runs the toggle text bold operation.
+    /// </summary>
     private void ToggleTextBold(ChangeEventArgs args) => WithText(layer => layer.Bold = Bool(args));
+    /// <summary>
+    /// Runs the toggle text italic operation.
+    /// </summary>
     private void ToggleTextItalic(ChangeEventArgs args) => WithText(layer => layer.Italic = Bool(args));
+    /// <summary>
+    /// Runs the toggle text shadow operation.
+    /// </summary>
     private void ToggleTextShadow(ChangeEventArgs args) => WithText(layer => layer.ShadowEnabled = Bool(args));
+    /// <summary>
+    /// Runs the change text fill operation.
+    /// </summary>
     private void ChangeTextFill(ChangeEventArgs args) => WithText(layer => layer.FillColor = Text(args));
+    /// <summary>
+    /// Runs the change text outline operation.
+    /// </summary>
     private void ChangeTextOutline(ChangeEventArgs args) => WithText(layer => layer.OutlineColor = Text(args));
+    /// <summary>
+    /// Runs the change text outline width operation.
+    /// </summary>
     private void ChangeTextOutlineWidth(ChangeEventArgs args) => WithText(layer => layer.OutlineWidthPx = Number(args, layer.OutlineWidthPx));
+    /// <summary>
+    /// Runs the change text shadow blur operation.
+    /// </summary>
     private void ChangeTextShadowBlur(ChangeEventArgs args) => WithText(layer => layer.ShadowBlurPx = Number(args, layer.ShadowBlurPx));
 
+    /// <summary>
+    /// Runs the change shape kind operation.
+    /// </summary>
     private void ChangeShapeKind(ChangeEventArgs args)
     {
         if (Enum.TryParse<PictureShapeKind>(Text(args), true, out var value))
             WithShape(layer => layer.Shape = value);
     }
+    /// <summary>
+    /// Runs the change shape fill kind operation.
+    /// </summary>
     private void ChangeShapeFillKind(ChangeEventArgs args)
     {
         if (Enum.TryParse<PictureFillKind>(Text(args), true, out var value)) WithShape(layer => layer.FillKind = value);
     }
+    /// <summary>
+    /// Runs the change shape fill operation.
+    /// </summary>
     private void ChangeShapeFill(ChangeEventArgs args) => WithShape(layer => layer.FillColor = Text(args));
+    /// <summary>
+    /// Runs the change shape secondary fill operation.
+    /// </summary>
     private void ChangeShapeSecondaryFill(ChangeEventArgs args) => WithShape(layer => layer.SecondaryFillColor = Text(args));
+    /// <summary>
+    /// Runs the change shape fill angle operation.
+    /// </summary>
     private void ChangeShapeFillAngle(ChangeEventArgs args) => State.UpdateSelectedLive("shape-fill-angle", layer => { if (layer is ShapePictureLayer shape) shape.FillAngleDegrees = Number(args, shape.FillAngleDegrees); });
+    /// <summary>
+    /// Runs the change shape stroke operation.
+    /// </summary>
     private void ChangeShapeStroke(ChangeEventArgs args) => WithShape(layer => layer.StrokeColor = Text(args));
+    /// <summary>
+    /// Runs the change shape stroke width operation.
+    /// </summary>
     private void ChangeShapeStrokeWidth(ChangeEventArgs args) => WithShape(layer => layer.StrokeWidthPx = Number(args, layer.StrokeWidthPx));
+    /// <summary>
+    /// Runs the change shape radius operation.
+    /// </summary>
     private void ChangeShapeRadius(ChangeEventArgs args) => WithShape(layer => layer.CornerRadiusPx = Number(args, layer.CornerRadiusPx));
+    /// <summary>
+    /// Runs the toggle shape path closed operation.
+    /// </summary>
     private void ToggleShapePathClosed(ChangeEventArgs args) => WithShape(layer => layer.PathClosed = Bool(args));
+    /// <summary>
+    /// Runs the toggle shape path smooth operation.
+    /// </summary>
     private void ToggleShapePathSmooth(ChangeEventArgs args) => WithShape(layer => layer.PathSmooth = Bool(args));
+    /// <summary>
+    /// Adds shape path point.
+    /// </summary>
     private void AddShapePathPoint() => WithShape(layer =>
     {
         layer.PathPoints ??= [];
@@ -1388,14 +2156,29 @@ public partial class PictureEditor
             Y = Math.Clamp(previous?.Y ?? layer.Height / 2, 0, Math.Max(1, layer.Height))
         });
     });
+    /// <summary>
+    /// Removes shape path point.
+    /// </summary>
     private void RemoveShapePathPoint(int index) => WithShape(layer =>
     {
         if (layer.PathPoints is { Count: > 2 } && index >= 0 && index < layer.PathPoints.Count)
             layer.PathPoints.RemoveAt(index);
     });
+    /// <summary>
+    /// Runs the reverse shape path operation.
+    /// </summary>
     private void ReverseShapePath() => WithShape(layer => { layer.PathPoints?.Reverse(); });
+    /// <summary>
+    /// Runs the change shape path point x operation.
+    /// </summary>
     private void ChangeShapePathPointX(int index, ChangeEventArgs args) => ChangeShapePathPoint(index, args, true);
+    /// <summary>
+    /// Runs the change shape path point y operation.
+    /// </summary>
     private void ChangeShapePathPointY(int index, ChangeEventArgs args) => ChangeShapePathPoint(index, args, false);
+    /// <summary>
+    /// Runs the change shape path point operation.
+    /// </summary>
     private void ChangeShapePathPoint(int index, ChangeEventArgs args, bool horizontal) => WithShape(layer =>
     {
         if (layer.PathPoints is null || index < 0 || index >= layer.PathPoints.Count) return;
@@ -1404,72 +2187,246 @@ public partial class PictureEditor
         else point.Y = Math.Clamp(Number(args, point.Y), -16384, 32768);
     });
 
+    /// <summary>
+    /// Runs the change fill kind operation.
+    /// </summary>
     private void ChangeFillKind(ChangeEventArgs args)
     {
         if (Enum.TryParse<PictureFillKind>(Text(args), true, out var value))
             WithFill(layer => layer.FillKind = value);
     }
+    /// <summary>
+    /// Runs the change fill primary operation.
+    /// </summary>
     private void ChangeFillPrimary(ChangeEventArgs args) => WithFill(layer => layer.PrimaryColor = Text(args));
+    /// <summary>
+    /// Runs the change fill secondary operation.
+    /// </summary>
     private void ChangeFillSecondary(ChangeEventArgs args) => WithFill(layer => layer.SecondaryColor = Text(args));
+    /// <summary>
+    /// Runs the change fill angle operation.
+    /// </summary>
     private void ChangeFillAngle(ChangeEventArgs args) => WithFillLive("fill-angle", layer => layer.AngleDegrees = Number(args, layer.AngleDegrees));
 
+    /// <summary>
+    /// Runs the change render kind operation.
+    /// </summary>
     private void ChangeRenderKind(ChangeEventArgs args)
     {
         if (Enum.TryParse<PictureRenderKind>(Text(args), true, out var value))
             WithRender(layer => layer.RenderKind = value);
     }
+    /// <summary>
+    /// Runs the change render primary operation.
+    /// </summary>
     private void ChangeRenderPrimary(ChangeEventArgs args) => WithRender(layer => layer.PrimaryColor = Text(args));
+    /// <summary>
+    /// Runs the change render secondary operation.
+    /// </summary>
     private void ChangeRenderSecondary(ChangeEventArgs args) => WithRender(layer => layer.SecondaryColor = Text(args));
+    /// <summary>
+    /// Runs the change render seed operation.
+    /// </summary>
     private void ChangeRenderSeed(ChangeEventArgs args) => WithRender(layer => layer.Seed = Int(args, layer.Seed));
+    /// <summary>
+    /// Runs the change render scale operation.
+    /// </summary>
     private void ChangeRenderScale(ChangeEventArgs args) => WithRender(layer => layer.Scale = Number(args, layer.Scale));
+    /// <summary>
+    /// Runs the change render detail operation.
+    /// </summary>
     private void ChangeRenderDetail(ChangeEventArgs args) => WithRender(layer => layer.Detail = Int(args, layer.Detail));
+    /// <summary>
+    /// Runs the change render softness operation.
+    /// </summary>
     private void ChangeRenderSoftness(ChangeEventArgs args) => WithRender(layer => layer.Softness = Number(args, layer.Softness));
+    /// <summary>
+    /// Runs the change render contrast operation.
+    /// </summary>
     private void ChangeRenderContrast(ChangeEventArgs args) => WithRender(layer => layer.RenderContrast = Number(args, layer.RenderContrast));
+    /// <summary>
+    /// Runs the change render stripe width operation.
+    /// </summary>
     private void ChangeRenderStripeWidth(ChangeEventArgs args) => WithRender(layer => layer.StripeWidthPx = Number(args, layer.StripeWidthPx));
+    /// <summary>
+    /// Runs the change render angle operation.
+    /// </summary>
     private void ChangeRenderAngle(ChangeEventArgs args) => WithRenderLive("render-angle", layer => layer.AngleDegrees = Number(args, layer.AngleDegrees));
+    /// <summary>
+    /// Runs the randomize render operation.
+    /// </summary>
     private void RandomizeRender() => WithRender(layer => layer.Seed = Random.Shared.Next(1, int.MaxValue));
+    /// <summary>
+    /// Runs the focus render properties operation.
+    /// </summary>
     private Task FocusRenderProperties() => JS.InvokeVoidAsync("publisherStudio.focusElement", "picture-render-properties").AsTask();
+    /// <summary>
+    /// Runs the render primary white operation.
+    /// </summary>
     private void RenderPrimaryWhite() => WithRender(layer => layer.PrimaryColor = "#ffffff");
+    /// <summary>
+    /// Runs the render primary black operation.
+    /// </summary>
     private void RenderPrimaryBlack() => WithRender(layer => layer.PrimaryColor = "#000000");
+    /// <summary>
+    /// Runs the render primary blue operation.
+    /// </summary>
     private void RenderPrimaryBlue() => WithRender(layer => layer.PrimaryColor = "#2563eb");
+    /// <summary>
+    /// Runs the render secondary white operation.
+    /// </summary>
     private void RenderSecondaryWhite() => WithRender(layer => layer.SecondaryColor = "#ffffff");
+    /// <summary>
+    /// Runs the render secondary black operation.
+    /// </summary>
     private void RenderSecondaryBlack() => WithRender(layer => layer.SecondaryColor = "#000000");
+    /// <summary>
+    /// Runs the render secondary blue operation.
+    /// </summary>
     private void RenderSecondaryBlue() => WithRender(layer => layer.SecondaryColor = "#60a5fa");
+    /// <summary>
+    /// Sets render scale.
+    /// </summary>
     private void SetRenderScale(double value) => WithRender(layer => layer.Scale = value);
+    /// <summary>
+    /// Runs the render scale24 operation.
+    /// </summary>
     private void RenderScale24() => SetRenderScale(24);
+    /// <summary>
+    /// Runs the render scale64 operation.
+    /// </summary>
     private void RenderScale64() => SetRenderScale(64);
+    /// <summary>
+    /// Runs the render scale128 operation.
+    /// </summary>
     private void RenderScale128() => SetRenderScale(128);
+    /// <summary>
+    /// Runs the render scale256 operation.
+    /// </summary>
     private void RenderScale256() => SetRenderScale(256);
+    /// <summary>
+    /// Sets render detail.
+    /// </summary>
     private void SetRenderDetail(int value) => WithRender(layer => layer.Detail = value);
+    /// <summary>
+    /// Runs the render detail1 operation.
+    /// </summary>
     private void RenderDetail1() => SetRenderDetail(1);
+    /// <summary>
+    /// Runs the render detail2 operation.
+    /// </summary>
     private void RenderDetail2() => SetRenderDetail(2);
+    /// <summary>
+    /// Runs the render detail4 operation.
+    /// </summary>
     private void RenderDetail4() => SetRenderDetail(4);
+    /// <summary>
+    /// Runs the render detail6 operation.
+    /// </summary>
     private void RenderDetail6() => SetRenderDetail(6);
+    /// <summary>
+    /// Runs the render detail8 operation.
+    /// </summary>
     private void RenderDetail8() => SetRenderDetail(8);
+    /// <summary>
+    /// Sets render softness.
+    /// </summary>
     private void SetRenderSoftness(double value) => WithRender(layer => layer.Softness = value);
+    /// <summary>
+    /// Runs the render softness0 operation.
+    /// </summary>
     private void RenderSoftness0() => SetRenderSoftness(0);
+    /// <summary>
+    /// Runs the render softness25 operation.
+    /// </summary>
     private void RenderSoftness25() => SetRenderSoftness(.25);
+    /// <summary>
+    /// Runs the render softness50 operation.
+    /// </summary>
     private void RenderSoftness50() => SetRenderSoftness(.5);
+    /// <summary>
+    /// Runs the render softness75 operation.
+    /// </summary>
     private void RenderSoftness75() => SetRenderSoftness(.75);
+    /// <summary>
+    /// Runs the render softness100 operation.
+    /// </summary>
     private void RenderSoftness100() => SetRenderSoftness(1);
+    /// <summary>
+    /// Sets render contrast.
+    /// </summary>
     private void SetRenderContrast(double value) => WithRender(layer => layer.RenderContrast = value);
+    /// <summary>
+    /// Runs the render contrast05 operation.
+    /// </summary>
     private void RenderContrast05() => SetRenderContrast(.5);
+    /// <summary>
+    /// Runs the render contrast10 operation.
+    /// </summary>
     private void RenderContrast10() => SetRenderContrast(1);
+    /// <summary>
+    /// Runs the render contrast15 operation.
+    /// </summary>
     private void RenderContrast15() => SetRenderContrast(1.5);
+    /// <summary>
+    /// Runs the render contrast20 operation.
+    /// </summary>
     private void RenderContrast20() => SetRenderContrast(2);
+    /// <summary>
+    /// Runs the render contrast30 operation.
+    /// </summary>
     private void RenderContrast30() => SetRenderContrast(3);
+    /// <summary>
+    /// Sets render angle.
+    /// </summary>
     private void SetRenderAngle(double value) => WithRender(layer => layer.AngleDegrees = value);
+    /// <summary>
+    /// Runs the render angle0 operation.
+    /// </summary>
     private void RenderAngle0() => SetRenderAngle(0);
+    /// <summary>
+    /// Runs the render angle45 operation.
+    /// </summary>
     private void RenderAngle45() => SetRenderAngle(45);
+    /// <summary>
+    /// Runs the render angle90 operation.
+    /// </summary>
     private void RenderAngle90() => SetRenderAngle(90);
+    /// <summary>
+    /// Runs the render angle180 operation.
+    /// </summary>
     private void RenderAngle180() => SetRenderAngle(180);
+    /// <summary>
+    /// Runs the render angle270 operation.
+    /// </summary>
     private void RenderAngle270() => SetRenderAngle(270);
+    /// <summary>
+    /// Sets render stripe width.
+    /// </summary>
     private void SetRenderStripeWidth(double value) => WithRender(layer => layer.StripeWidthPx = value);
+    /// <summary>
+    /// Runs the render stripe8 operation.
+    /// </summary>
     private void RenderStripe8() => SetRenderStripeWidth(8);
+    /// <summary>
+    /// Runs the render stripe16 operation.
+    /// </summary>
     private void RenderStripe16() => SetRenderStripeWidth(16);
+    /// <summary>
+    /// Runs the render stripe32 operation.
+    /// </summary>
     private void RenderStripe32() => SetRenderStripeWidth(32);
+    /// <summary>
+    /// Runs the render stripe64 operation.
+    /// </summary>
     private void RenderStripe64() => SetRenderStripeWidth(64);
+    /// <summary>
+    /// Runs the render stripe128 operation.
+    /// </summary>
     private void RenderStripe128() => SetRenderStripeWidth(128);
+    /// <summary>
+    /// Runs the reset render settings operation.
+    /// </summary>
     private void ResetRenderSettings() => WithRender(layer =>
     {
         layer.Scale = 90;
@@ -1480,15 +2437,42 @@ public partial class PictureEditor
         layer.StripeWidthPx = 32;
     });
 
+    /// <summary>
+    /// Runs the change brightness operation.
+    /// </summary>
     private void ChangeBrightness(ChangeEventArgs args) => State.UpdateSelectedLive("adjust-brightness", layer => layer.Brightness = Number(args, layer.Brightness));
+    /// <summary>
+    /// Runs the change contrast operation.
+    /// </summary>
     private void ChangeContrast(ChangeEventArgs args) => State.UpdateSelectedLive("adjust-contrast", layer => layer.Contrast = Number(args, layer.Contrast));
+    /// <summary>
+    /// Runs the change saturation operation.
+    /// </summary>
     private void ChangeSaturation(ChangeEventArgs args) => State.UpdateSelectedLive("adjust-saturation", layer => layer.Saturation = Number(args, layer.Saturation));
+    /// <summary>
+    /// Runs the change hue operation.
+    /// </summary>
     private void ChangeHue(ChangeEventArgs args) => State.UpdateSelectedLive("adjust-hue", layer => layer.HueRotation = Number(args, layer.HueRotation));
+    /// <summary>
+    /// Runs the change blur operation.
+    /// </summary>
     private void ChangeBlur(ChangeEventArgs args) => State.UpdateSelectedLive("adjust-blur", layer => layer.Blur = Number(args, layer.Blur));
+    /// <summary>
+    /// Runs the change grayscale operation.
+    /// </summary>
     private void ChangeGrayscale(ChangeEventArgs args) => State.UpdateSelectedLive("adjust-grayscale", layer => layer.Grayscale = Number(args, layer.Grayscale));
+    /// <summary>
+    /// Runs the change sepia operation.
+    /// </summary>
     private void ChangeSepia(ChangeEventArgs args) => State.UpdateSelectedLive("adjust-sepia", layer => layer.Sepia = Number(args, layer.Sepia));
+    /// <summary>
+    /// Runs the change invert operation.
+    /// </summary>
     private void ChangeInvert(ChangeEventArgs args) => State.UpdateSelectedLive("adjust-invert", layer => layer.Invert = Number(args, layer.Invert));
 
+    /// <summary>
+    /// Runs the reset adjustments operation.
+    /// </summary>
     private void ResetAdjustments()
     {
         State.UpdateSelected(layer =>
@@ -1504,46 +2488,76 @@ public partial class PictureEditor
         });
     }
 
+    /// <summary>
+    /// Runs the with raster operation.
+    /// </summary>
     private void WithRaster(Action<RasterPictureLayer> update)
     {
         if (State.SelectedLayer is RasterPictureLayer layer) State.UpdateSelected(_ => update(layer));
     }
+    /// <summary>
+    /// Runs the with raster live operation.
+    /// </summary>
     private void WithRasterLive(string key, Action<RasterPictureLayer> update)
     {
         if (State.SelectedLayer is RasterPictureLayer layer) State.UpdateSelectedLive(key, _ => update(layer));
     }
+    /// <summary>
+    /// Runs the toggle SVG preserve aspect ratio operation.
+    /// </summary>
     private void ToggleSvgPreserveAspectRatio(ChangeEventArgs args)
     {
         if (State.SelectedLayer is SvgPictureLayer svg)
             State.UpdateSelected(_ => svg.PreserveAspectRatio = Bool(args));
     }
 
+    /// <summary>
+    /// Runs the with text operation.
+    /// </summary>
     private void WithText(Action<TextPictureLayer> update)
     {
         if (State.SelectedLayer is TextPictureLayer layer) State.UpdateSelected(_ => update(layer));
     }
+    /// <summary>
+    /// Runs the with shape operation.
+    /// </summary>
     private void WithShape(Action<ShapePictureLayer> update)
     {
         if (State.SelectedLayer is ShapePictureLayer layer) State.UpdateSelected(_ => update(layer));
     }
+    /// <summary>
+    /// Runs the with fill operation.
+    /// </summary>
     private void WithFill(Action<FillPictureLayer> update)
     {
         if (State.SelectedLayer is FillPictureLayer layer) State.UpdateSelected(_ => update(layer));
     }
+    /// <summary>
+    /// Runs the with fill live operation.
+    /// </summary>
     private void WithFillLive(string key, Action<FillPictureLayer> update)
     {
         if (State.SelectedLayer is FillPictureLayer layer) State.UpdateSelectedLive(key, _ => update(layer));
     }
+    /// <summary>
+    /// Runs the with render operation.
+    /// </summary>
     private void WithRender(Action<RenderPictureLayer> update)
     {
         if (State.SelectedLayer is RenderPictureLayer layer) State.UpdateSelected(_ => update(layer));
     }
+    /// <summary>
+    /// Runs the with render live operation.
+    /// </summary>
     private void WithRenderLive(string key, Action<RenderPictureLayer> update)
     {
         if (State.SelectedLayer is RenderPictureLayer layer) State.UpdateSelectedLive(key, _ => update(layer));
     }
 
 
+    /// <summary>
+    /// Reads SVG text async.
+    /// </summary>
     private async Task<string> ReadSvgTextAsync(Stream input)
     {
         using var buffer = new MemoryStream();
@@ -1551,9 +2565,15 @@ public partial class PictureEditor
         return new UTF8Encoding(false, true).GetString(buffer.ToArray());
     }
 
+    /// <summary>
+    /// Determines whether supported image data URL.
+    /// </summary>
     private bool IsSupportedImageDataUrl(string value) =>
         value.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase) && value.Contains(",", StringComparison.Ordinal);
 
+    /// <summary>
+    /// Runs the fit raster canvas size operation.
+    /// </summary>
     private PictureImageSize FitRasterCanvasSize(int width, int height)
     {
         if (width <= 0 || height <= 0) return new PictureImageSize { Width = 1200, Height = 800 };
@@ -1565,6 +2585,9 @@ public partial class PictureEditor
         };
     }
 
+    /// <summary>
+    /// Runs the layer icon operation.
+    /// </summary>
     private string LayerIcon(PictureLayer layer) => layer.Kind switch
     {
         PictureLayerKind.Raster => "▧",
@@ -1577,27 +2600,51 @@ public partial class PictureEditor
         _ => "•"
     };
 
+    /// <summary>
+    /// Runs the picture text font size menu text operation.
+    /// </summary>
     private string PictureTextFontSizeMenuText(TextPictureLayer text) =>
         $"Font size · {Math.Round(text.FontSizePx).ToString(CultureInfo.InvariantCulture)} px";
 
+    /// <summary>
+    /// Runs the render scale menu text operation.
+    /// </summary>
     private string RenderScaleMenuText(RenderPictureLayer render) =>
         $"Scale · {Math.Round(render.Scale).ToString(CultureInfo.InvariantCulture)} px";
 
+    /// <summary>
+    /// Runs the render detail menu text operation.
+    /// </summary>
     private string RenderDetailMenuText(RenderPictureLayer render) =>
         $"Detail · {render.Detail.ToString(CultureInfo.InvariantCulture)}";
 
+    /// <summary>
+    /// Runs the render softness menu text operation.
+    /// </summary>
     private string RenderSoftnessMenuText(RenderPictureLayer render) =>
         $"Softness · {Math.Round(render.Softness * 100).ToString(CultureInfo.InvariantCulture)}%";
 
+    /// <summary>
+    /// Runs the render contrast menu text operation.
+    /// </summary>
     private string RenderContrastMenuText(RenderPictureLayer render) =>
         $"Contrast · {render.RenderContrast.ToString("0.0", CultureInfo.InvariantCulture)}×";
 
+    /// <summary>
+    /// Runs the render angle menu text operation.
+    /// </summary>
     private string RenderAngleMenuText(RenderPictureLayer render) =>
         $"Angle · {Math.Round(render.AngleDegrees).ToString(CultureInfo.InvariantCulture)}°";
 
+    /// <summary>
+    /// Runs the render stripe width menu text operation.
+    /// </summary>
     private string RenderStripeWidthMenuText(RenderPictureLayer render) =>
         $"Stripe width · {Math.Round(render.StripeWidthPx).ToString(CultureInfo.InvariantCulture)} px";
 
+    /// <summary>
+    /// Runs the layer description operation.
+    /// </summary>
     private string LayerDescription(PictureLayer layer) => layer switch
     {
         RasterPictureLayer raster => raster.FitMode.ToString(),
@@ -1610,15 +2657,36 @@ public partial class PictureEditor
         _ => layer.Kind.ToString()
     };
 
+    /// <summary>
+    /// Runs the truncate operation.
+    /// </summary>
     private string Truncate(string value, int length) => string.IsNullOrWhiteSpace(value)
         ? "Empty"
         : value.Length <= length ? value : value[..length] + "…";
 
+    /// <summary>
+    /// Runs the text operation.
+    /// </summary>
     private string Text(ChangeEventArgs args) => Convert.ToString(args.Value, CultureInfo.InvariantCulture)?.Trim() ?? string.Empty;
+    /// <summary>
+    /// Runs the bool operation.
+    /// </summary>
     private bool Bool(ChangeEventArgs args) => args.Value is bool value && value;
+    /// <summary>
+    /// Runs the number operation.
+    /// </summary>
     private double Number(ChangeEventArgs args, double fallback) => double.TryParse(Text(args), NumberStyles.Float, CultureInfo.InvariantCulture, out var value) ? value : fallback;
+    /// <summary>
+    /// Runs the int operation.
+    /// </summary>
     private int Int(ChangeEventArgs args, int fallback) => int.TryParse(Text(args), NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) ? value : fallback;
+    /// <summary>
+    /// Runs the inv operation.
+    /// </summary>
     private string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+    /// <summary>
+    /// Runs the safe color operation.
+    /// </summary>
     private string SafeColor(string value) => value.StartsWith('#') && value.Length is 4 or 7 ? value : "#000000";
 
     /// <summary>
@@ -1647,6 +2715,9 @@ public partial class PictureEditor
         catch (TaskCanceledException) { }
     }
 
+    /// <summary>
+    /// Represents a picture area selection.
+    /// </summary>
     private sealed class PictureAreaSelection
     {
         /// <summary>
@@ -1659,6 +2730,9 @@ public partial class PictureEditor
         public List<PicturePoint> Points { get; set; } = [];
     }
 
+    /// <summary>
+    /// Represents a picture ocr result.
+    /// </summary>
     private sealed class PictureOcrResult
     {
         /// <summary>
@@ -1683,6 +2757,9 @@ public partial class PictureEditor
         public bool NeedsHumanReview { get; set; } = true;
     }
 
+    /// <summary>
+    /// Represents a picture image size.
+    /// </summary>
     private sealed class PictureImageSize
     {
         /// <summary>

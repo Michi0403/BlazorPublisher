@@ -9,6 +9,9 @@ namespace PublisherStudio.Services;
 /// </summary>
 public sealed class SpreadsheetSessionStore
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<Guid, SpreadsheetEditorSession> _sessions = new();
     private readonly SpreadsheetDocumentService _documents;
     private readonly IPublisherRuntimePolicyDataService runtimePolicy;
@@ -154,6 +157,9 @@ public sealed class SpreadsheetSessionStore
     }
 }
 
+    /// <summary>
+    /// Runs the cleanup expired operation.
+    /// </summary>
     private void CleanupExpired()
     {
     try

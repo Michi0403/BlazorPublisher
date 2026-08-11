@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using PublisherStudio.BusinessObjects;
 
@@ -14,8 +14,14 @@ public sealed class PublicationMediaAssetStore(
     PublicationElementTraversal elementTraversal,
     ILogger<PublicationMediaAssetStore> logger)
 {
+    /// <summary>
+    /// Represents a media asset.
+    /// </summary>
     private sealed record MediaAsset(byte[] Bytes, string MimeType, string Version, string SourceKey, DateTimeOffset LastAccessUtc);
 
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<Guid, MediaAsset> _assets = new();
 
     /// <summary>
@@ -102,6 +108,9 @@ public sealed class PublicationMediaAssetStore(
             }
         }
 
+    /// <summary>
+    /// Registers bytes.
+    /// </summary>
     private string RegisterBytes(Guid id, byte[] bytes, string? mimeType, string? sourceKey)
     {
         try
@@ -211,6 +220,9 @@ public sealed class PublicationMediaAssetStore(
         }
     }
 
+    /// <summary>
+    /// Builds URL.
+    /// </summary>
     private string BuildUrl(Guid id, string version)
         {
             try
@@ -225,6 +237,9 @@ public sealed class PublicationMediaAssetStore(
             }
         }
 
+    /// <summary>
+    /// Creates source key.
+    /// </summary>
     private string CreateSourceKey(string source, string? mimeType)
     {
         try
@@ -245,6 +260,9 @@ public sealed class PublicationMediaAssetStore(
         }
     }
 
+    /// <summary>
+    /// Creates version.
+    /// </summary>
     private string CreateVersion(byte[] bytes, string mimeType)
     {
         try
@@ -265,6 +283,9 @@ public sealed class PublicationMediaAssetStore(
         }
     }
 
+    /// <summary>
+    /// Attempts to decode data URL.
+    /// </summary>
     private bool TryDecodeDataUrl(string source, string? declaredMimeType, out byte[] bytes, out string mimeType)
     {
         try

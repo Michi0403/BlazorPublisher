@@ -16,12 +16,27 @@ namespace PublisherStudio.Services.Streaming.Chat;
 /// </summary>
 public sealed class PlatformChatService : IAsyncDisposable
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private readonly MediaSession _session;
     private readonly ILogger<PlatformChatService> _logger;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<Guid, IPlatformChatAdapter> _adapters = new();
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<Guid, ConcurrentQueue<PlatformChatMessage>> _history = new();
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<Guid, ConcurrentDictionary<Guid, Channel<PlatformChatMessage>>> _subscribers = new();
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly CancellationTokenSource _lifetime = new();
 
     /// <summary>
@@ -132,6 +147,9 @@ public sealed class PlatformChatService : IAsyncDisposable
         }
     }
 
+    /// <summary>
+    /// Determines whether chat configuration.
+    /// </summary>
     private bool HasChatConfiguration(MediaOutputDefinition output) {
     try
     {
@@ -149,6 +167,9 @@ public sealed class PlatformChatService : IAsyncDisposable
     }
 }
 
+    /// <summary>
+    /// Runs the publish operation.
+    /// </summary>
     private void Publish(PlatformChatMessage message)
     {
     try
@@ -187,18 +208,33 @@ public sealed class PlatformChatService : IAsyncDisposable
     }
 }
 
+/// <summary>
+/// Defines the platform chat adapter contract.
+/// </summary>
 internal interface IPlatformChatAdapter : IAsyncDisposable
 {
     string Status { get; }
+    /// <summary>
+    /// Runs the start operation.
+    /// </summary>
     void Start();
+    /// <summary>
+    /// Runs the send async operation.
+    /// </summary>
     Task SendAsync(string message, CancellationToken cancellationToken);
 }
 
+/// <summary>
+/// Represents a twitch irc chat adapter.
+/// </summary>
 internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
 {
     private readonly MediaOutputDefinition _output;
     private readonly Action<PlatformChatMessage> _publish;
     private readonly CancellationTokenSource _lifetime;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly SemaphoreSlim _sendGate = new(1, 1);
     private Task? _runTask;
     private StreamWriter? _writer;
@@ -252,6 +288,9 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
     }
 }
 
+    /// <summary>
+    /// Runs the run async operation.
+    /// </summary>
     private async Task RunAsync()
     {
     try
@@ -314,6 +353,9 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
     }
 }
 
+    /// <summary>
+    /// Attempts to parse priv msg.
+    /// </summary>
     private bool TryParsePrivMsg(string line, out PlatformChatMessage message)
     {
     try
@@ -365,6 +407,9 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
     }
 }
 
+    /// <summary>
+    /// Normalizes account.
+    /// </summary>
     private string NormalizeAccount(string value) {
     try
     {
@@ -376,6 +421,9 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
         throw;
     }
 }
+    /// <summary>
+    /// Normalizes channel.
+    /// </summary>
     private string NormalizeChannel(string value) {
     try
     {
@@ -387,6 +435,9 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
         throw;
     }
 }
+    /// <summary>
+    /// Runs the sanitize message operation.
+    /// </summary>
     private string SanitizeMessage(string value) {
     try
     {
@@ -398,6 +449,9 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
         throw;
     }
 }
+    /// <summary>
+    /// Runs the decode tag operation.
+    /// </summary>
     private string DecodeTag(string value) {
     try
     {
@@ -431,15 +485,27 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
 }
 }
 
+/// <summary>
+/// Represents a you tube live chat adapter.
+/// </summary>
 internal sealed class YouTubeLiveChatAdapter : IPlatformChatAdapter
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private readonly MediaOutputDefinition _output;
     private readonly Action<PlatformChatMessage> _publish;
     private readonly CancellationTokenSource _lifetime;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(30) };
     private Task? _runTask;
     private string _pageToken = string.Empty;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly HashSet<string> _seen = new(StringComparer.Ordinal);
 
     /// <summary>
@@ -504,6 +570,9 @@ internal sealed class YouTubeLiveChatAdapter : IPlatformChatAdapter
     }
 }
 
+    /// <summary>
+    /// Runs the run async operation.
+    /// </summary>
     private async Task RunAsync()
     {
     try
@@ -550,6 +619,9 @@ internal sealed class YouTubeLiveChatAdapter : IPlatformChatAdapter
     }
 }
 
+    /// <summary>
+    /// Publishes item.
+    /// </summary>
     private void PublishItem(JsonElement item)
     {
     try

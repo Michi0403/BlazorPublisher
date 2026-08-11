@@ -11,6 +11,9 @@ namespace PublisherStudio.Services.OrganicPlugins;
 /// </summary>
 public sealed class OrganicPluginProtocolCodec : IOrganicPluginProtocolCodec
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly JsonSerializerOptions jsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
@@ -114,6 +117,9 @@ public sealed class OrganicPluginProtocolCodec : IOrganicPluginProtocolCodec
     }
 }
 
+    /// <summary>
+    /// Validates payload shape.
+    /// </summary>
     private void ValidatePayloadShape(OrganicWireEnvelope envelope)
     {
     try
@@ -131,6 +137,9 @@ public sealed class OrganicPluginProtocolCodec : IOrganicPluginProtocolCodec
     }
 }
 
+    /// <summary>
+    /// Builds integrity bytes.
+    /// </summary>
     private byte[] BuildIntegrityBytes(OrganicWireEnvelope envelope)
     {
     try
@@ -161,6 +170,9 @@ public sealed class OrganicPluginProtocolCodec : IOrganicPluginProtocolCodec
     }
 }
 
+    /// <summary>
+    /// Computes crc32.
+    /// </summary>
     private uint ComputeCrc32(ReadOnlySpan<byte> data)
     {
     try

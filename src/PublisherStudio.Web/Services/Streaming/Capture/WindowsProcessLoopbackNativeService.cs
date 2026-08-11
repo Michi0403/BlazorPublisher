@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 
 namespace PublisherStudio.Services.Streaming.Capture;
 
@@ -8,8 +8,17 @@ namespace PublisherStudio.Services.Streaming.Capture;
 public interface IWindowsProcessLoopbackNativeService
 {
     bool IsAvailable { get; }
+    /// <summary>
+    /// Runs the initialize multithreaded apartment operation.
+    /// </summary>
     int InitializeMultithreadedApartment();
+    /// <summary>
+    /// Runs the uninitialize apartment operation.
+    /// </summary>
     void UninitializeApartment();
+    /// <summary>
+    /// Runs the activate audio interface operation.
+    /// </summary>
     int ActivateAudioInterface(
         string deviceInterfacePath,
         ref Guid interfaceId,
@@ -117,24 +126,39 @@ public sealed class WindowsProcessLoopbackNativeService : IWindowsProcessLoopbac
         try
         {
             if (!IsAvailable || activateAudioInterface is null)
+               /// <summary>
+               /// Runs the platform not supported exception operation.
+               /// </summary>
                 throw new PlatformNotSupportedException("Windows process-loopback native bindings are unavailable.");
+            /// <summary>
+            /// Runs the activate audio interface operation.
+            /// </summary>
             var result = activateAudioInterface(
                 deviceInterfacePath,
                 ref interfaceId,
                 activationParameters,
                 completionHandler,
                 out activationOperation);
+            /// <summary>
+            /// Runs the log trace operation.
+            /// </summary>
             logger.LogTrace($"Requested Windows process-loopback audio activation with result {result}.");
             return result;
         }
         catch (Exception exception)
         {
             activationOperation = null!;
+            /// <summary>
+            /// Runs the log error operation.
+            /// </summary>
             logger.LogError(exception, $"Could not activate the Windows process-loopback audio interface: {exception.Message}");
             throw;
         }
     }
 
+    /// <summary>
+    /// Loads delegate.
+    /// </summary>
     private TDelegate LoadDelegate<TDelegate>(IntPtr library, string exportName)
         where TDelegate : Delegate
     {
@@ -175,6 +199,9 @@ public sealed class WindowsProcessLoopbackNativeService : IWindowsProcessLoopbac
         }
     }
 
+    /// <summary>
+    /// Runs the release libraries operation.
+    /// </summary>
     private void ReleaseLibraries()
     {
         try
@@ -196,6 +223,9 @@ public sealed class WindowsProcessLoopbackNativeService : IWindowsProcessLoopbac
         }
     }
 
+    /// <summary>
+    /// Represents the int callback.
+    /// </summary>
     [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode)]
     private delegate int ActivateAudioInterfaceDelegate(
         [MarshalAs(UnmanagedType.LPWStr)] string deviceInterfacePath,
@@ -204,9 +234,15 @@ public sealed class WindowsProcessLoopbackNativeService : IWindowsProcessLoopbac
         [MarshalAs(UnmanagedType.Interface)] object completionHandler,
         [MarshalAs(UnmanagedType.Interface)] out object activationOperation);
 
+    /// <summary>
+    /// Represents the int callback.
+    /// </summary>
     [UnmanagedFunctionPointer(CallingConvention.Winapi)]
     private delegate int CoInitializeExDelegate(IntPtr reserved, uint concurrencyModel);
 
+    /// <summary>
+    /// Represents the void callback.
+    /// </summary>
     [UnmanagedFunctionPointer(CallingConvention.Winapi)]
     private delegate void CoUninitializeDelegate();
 }

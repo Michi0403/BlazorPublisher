@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using PublisherStudio.BusinessObjects;
 
@@ -15,6 +15,9 @@ public sealed class PublicationComponentService
 
     private readonly PublicationDataService _data;
     private readonly IPublicationMarkupService _markup;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly JsonSerializerOptions _json = new(JsonSerializerDefaults.Web)
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
@@ -550,6 +553,9 @@ public sealed class PublicationComponentService
     }
 
 
+    /// <summary>
+    /// Builds menu items.
+    /// </summary>
     private object[] BuildMenuItems(DevExtremeComponentElement item)
         {
             try
@@ -577,6 +583,9 @@ public sealed class PublicationComponentService
             }
         }
 
+    /// <summary>
+    /// Builds fields.
+    /// </summary>
     private object[] BuildFields(PublicationDocument document, IEnumerable<PublicationComponentField> fields, Guid currentPageId)
     {
         try
@@ -634,6 +643,9 @@ public sealed class PublicationComponentService
         }
     }
 
+    /// <summary>
+    /// Builds actions.
+    /// </summary>
     private object[] BuildActions(PublicationDocument document, DevExtremeComponentElement item, Guid currentPageId)
     {
         try
@@ -678,6 +690,9 @@ public sealed class PublicationComponentService
         }
     }
 
+    /// <summary>
+    /// Builds panel configuration.
+    /// </summary>
     private object BuildPanelConfiguration(PublicationDocument document, PublicationComponentPanel panel, Guid currentPageId)
     {
         try
@@ -723,6 +738,9 @@ public sealed class PublicationComponentService
         }
     }
 
+    /// <summary>
+    /// Builds connection.
+    /// </summary>
     private object BuildConnection(PublicationComponentConnection connection, object? dataObjectLive) {
         try
         {
@@ -761,6 +779,9 @@ public sealed class PublicationComponentService
         }
     }
 
+    /// <summary>
+    /// Builds live data.
+    /// </summary>
     private object? BuildLiveData(PublicationDocument document, PublicationDataObject? data)
     {
         try
@@ -797,6 +818,9 @@ public sealed class PublicationComponentService
         }
     }
 
+    /// <summary>
+    /// Ensures data object.
+    /// </summary>
     private PublicationDataObject EnsureDataObject(PublicationDocument document)
     {
         try
@@ -820,6 +844,9 @@ public sealed class PublicationComponentService
         }
     }
 
+    /// <summary>
+    /// Ensures publication media object.
+    /// </summary>
     private PublicationDataObject EnsurePublicationMediaObject(PublicationDocument document)
     {
         try
@@ -836,6 +863,9 @@ public sealed class PublicationComponentService
         }
     }
 
+    /// <summary>
+    /// Ensures chat preview object.
+    /// </summary>
     private PublicationDataObject EnsureChatPreviewObject(PublicationDocument document)
     {
         try
@@ -862,6 +892,9 @@ public sealed class PublicationComponentService
         }
     }
 
+    /// <summary>
+    /// Converts value.
+    /// </summary>
     private object? ConvertValue(string value, PublicationDataValueKind? kind)
     {
         try
@@ -880,6 +913,9 @@ public sealed class PublicationComponentService
         }
     }
 
+    /// <summary>
+    /// Applies mappings from fields.
+    /// </summary>
     private void ApplyMappingsFromFields(DevExtremeComponentElement item)
     {
         try
@@ -928,6 +964,9 @@ public sealed class PublicationComponentService
         }
     }
 
+    /// <summary>
+    /// Runs the find operation.
+    /// </summary>
     private string? Find(IEnumerable<PublicationComponentField> fields, params string[] names)
     {
         try
@@ -948,6 +987,9 @@ public sealed class PublicationComponentService
         }
     }
 
+    /// <summary>
+    /// Applies kind defaults.
+    /// </summary>
     private void ApplyKindDefaults(PublicationDocument document, DevExtremeComponentElement item, bool onlyMissing = false)
     {
         try
@@ -1016,6 +1058,9 @@ public sealed class PublicationComponentService
         }
     }
 
+    /// <summary>
+    /// Runs the editor for operation.
+    /// </summary>
     private PublicationComponentEditorKind EditorFor(PublicationDataValueKind kind) {
         try
         {
@@ -1035,6 +1080,9 @@ public sealed class PublicationComponentService
         }
     }
 
+    /// <summary>
+    /// Runs the default size operation.
+    /// </summary>
     private (double Width, double Height) DefaultSize(PublicationComponentKind kind) => kind switch
     {
         PublicationComponentKind.Button => (42, 14),
@@ -1108,6 +1156,9 @@ public sealed class PublicationComponentService
         }
     }
 
+    /// <summary>
+    /// Runs the sanitize CSS class operation.
+    /// </summary>
     private string SanitizeCssClass(string? value) {
         try
         {
@@ -1124,6 +1175,9 @@ public sealed class PublicationComponentService
         }
     }
 
+    /// <summary>
+    /// Runs the sanitize inline CSS operation.
+    /// </summary>
     private string SanitizeInlineCss(string? value)
     {
         try
@@ -1144,6 +1198,9 @@ public sealed class PublicationComponentService
         }
     }
 
+    /// <summary>
+    /// Normalizes JSON object.
+    /// </summary>
     private string NormalizeJsonObject(string? json)
     {
         try
@@ -1168,6 +1225,9 @@ public sealed class PublicationComponentService
         }
     }
 
+    /// <summary>
+    /// Normalizes odata key type.
+    /// </summary>
     private string NormalizeODataKeyType(string? value)
     {
         try

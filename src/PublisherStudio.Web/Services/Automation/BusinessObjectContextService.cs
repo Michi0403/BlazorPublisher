@@ -10,6 +10,9 @@ public sealed class BusinessObjectContextService(
     IServiceArchitectureRegistry architecture,
     IApiSurfaceCatalogService apiSurfaceCatalog) : IBusinessObjectContextService
 {
+    /// <summary>
+    /// Runs the typeof operation.
+    /// </summary>
     private readonly Assembly _assembly = typeof(BusinessObjectContextService).Assembly;
 
     /// <summary>
@@ -82,6 +85,9 @@ public sealed class BusinessObjectContextService(
     }
 }
 
+    /// <summary>
+    /// Runs the friendly name operation.
+    /// </summary>
     private string FriendlyName(Type type)
     {
     try
@@ -98,6 +104,9 @@ public sealed class BusinessObjectContextService(
     }
 }
 
+    /// <summary>
+    /// Runs the unwrap types operation.
+    /// </summary>
     private IEnumerable<Type> UnwrapTypes(Type type)
     {
         if (type == typeof(void)) yield break;

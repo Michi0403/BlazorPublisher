@@ -7,7 +7,13 @@ namespace PublisherStudio.Services.OpenScad;
 /// </summary>
 public interface IOpenScadCatalogService
 {
+    /// <summary>
+    /// Gets definitions.
+    /// </summary>
     IReadOnlyList<OpenScadNodeDefinition> GetDefinitions();
+    /// <summary>
+    /// Runs the find operation.
+    /// </summary>
     OpenScadNodeDefinition? Find(string kind);
 }
 
@@ -17,6 +23,9 @@ public interface IOpenScadCatalogService
 /// </summary>
 public interface IOpenScadNodeFactoryService
 {
+    /// <summary>
+    /// Runs the create operation.
+    /// </summary>
     OpenScadNode Create(string kind);
 }
 
@@ -25,8 +34,17 @@ public interface IOpenScadNodeFactoryService
 /// </summary>
 public interface IOpenScadValueFormatter
 {
+    /// <summary>
+    /// Runs the format operation.
+    /// </summary>
     string Format(OpenScadValue? value, string fallbackExpression = "undef");
+    /// <summary>
+    /// Runs the quote operation.
+    /// </summary>
     string Quote(string value);
+    /// <summary>
+    /// Runs the identifier operation.
+    /// </summary>
     string Identifier(string value, string fallback = "part");
 }
 
@@ -35,7 +53,13 @@ public interface IOpenScadValueFormatter
 /// </summary>
 public interface IOpenScadNodeRenderer
 {
+    /// <summary>
+    /// Determines whether render.
+    /// </summary>
     bool CanRender(OpenScadNode node);
+    /// <summary>
+    /// Runs the render operation.
+    /// </summary>
     string Render(OpenScadNode node, OpenScadRenderContext context);
 }
 
@@ -44,8 +68,17 @@ public interface IOpenScadNodeRenderer
 /// </summary>
 public interface IOpenScadDocumentService
 {
+    /// <summary>
+    /// Runs the validate operation.
+    /// </summary>
     OpenScadValidationResult Validate(OpenScadDocument document);
+    /// <summary>
+    /// Runs the generate operation.
+    /// </summary>
     OpenScadGenerationResult Generate(OpenScadDocument document);
+    /// <summary>
+    /// Creates example document.
+    /// </summary>
     OpenScadDocument CreateExampleDocument();
 }
 
@@ -54,6 +87,9 @@ public interface IOpenScadDocumentService
 /// </summary>
 public interface IOpenScadVideoLayerAdapter
 {
+    /// <summary>
+    /// Creates script.
+    /// </summary>
     string CreateScript(VideoEffectLayer layer);
 }
 

@@ -18,7 +18,7 @@
         <section class="data-visual-editor-dialog panel-studio-dialog" role="dialog" aria-modal="true" aria-label="Panel Studio">
             <header>
                 <div>
-                    <strong>Panel / Div Studio</strong>
+                    <strong>Panel Studio</strong>
                     <span>Build reusable live modules from the same components, data connections and web runtimes used by the Mainframe and exports.</span>
                 </div>
                 <button type="button" class="window-close" @onclick="Cancel">×</button>
@@ -1062,7 +1062,7 @@
             // different root id and must not be replaced by OnParametersSet on rerender.
             _loadedId = InitialPanel?.Id;
             RefreshAdvancedJson();
-            Notifications.Success("The complete Panel/Div Studio project was imported.", "Panel project imported", nameof(PanelStudio));
+            Notifications.Success("The complete Panel Studio project was imported.", "Panel project imported", nameof(PanelStudio));
         }
         catch (Exception exception)
         {
@@ -1379,8 +1379,9 @@
         _templateDescription = template.Description;
     }
 
-    private void SaveSelectedAsTemplate()
+    private async Task SaveSelectedAsTemplate()
     {
+        await FlushPanelStudioInteractionsAsync().ConfigureAwait(true);
         if (SelectedElement is null) return;
         var name = string.IsNullOrWhiteSpace(_templateName) ? SelectedElement.Name : _templateName.Trim();
         var template = _selectedTemplateId is { } selectedId
@@ -1400,10 +1401,10 @@
         SelectTemplate(template.Id);
     }
 
-    private void SaveSelectedAsNewTemplate()
+    private async Task SaveSelectedAsNewTemplate()
     {
         _selectedTemplateId = null;
-        SaveSelectedAsTemplate();
+        await SaveSelectedAsTemplate().ConfigureAwait(true);
     }
 
     private void DeleteSelectedTemplate()
@@ -1514,6 +1515,17 @@
     private void ToggleViewEnabled(ChangeEventArgs args) { if (CurrentView is not null) CurrentView.Enabled = AsBool(args); }
 
     private bool AsBool(ChangeEventArgs args) => PanelText.AsBool(args, Logger);
+
+    /// <summary>
+    /// Waits for queued pointer/keyboard layout commits to reach the Blazor circuit before
+    /// a reusable module or the complete panel graph is cloned.
+    /// </summary>
+    private async Task FlushPanelStudioInteractionsAsync()
+    {
+        if (!_dropSurfaceBound) return;
+        _ = await JS.InvokeAsync<bool>("publisherStudio.flushPanelStudioInteractions", _canvasElement).ConfigureAwait(true);
+    }
+
     private string Text(ChangeEventArgs args) => PanelText.Text(args, Logger);
     private string Inv(double value) => PanelText.Invariant(value, Logger);
     private void ChangeNumber(ChangeEventArgs args, Action<double> update) => PanelText.ChangeNumber(args, update, Logger);
@@ -1525,6 +1537,7 @@
         _error = string.Empty;
         try
         {
+            await FlushPanelStudioInteractionsAsync().ConfigureAwait(true);
             Panels.Normalize(Document, _draft);
             // Pass an isolated graph to the parent. Closing or rerendering the dialog must
             // not mutate the object that was just committed to the Mainframe.

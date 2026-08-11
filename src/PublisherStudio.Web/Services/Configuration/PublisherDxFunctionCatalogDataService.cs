@@ -1,4 +1,4 @@
-﻿using PublisherStudio.Services.OrganicPlugins;
+using PublisherStudio.Services.OrganicPlugins;
 using System.Text.Json;
 
 namespace PublisherStudio.Services.Configuration;
@@ -8,6 +8,9 @@ namespace PublisherStudio.Services.Configuration;
 /// </summary>
 public interface IPublisherDxFunctionCatalogDataService
 {
+    /// <summary>
+    /// Gets functions async.
+    /// </summary>
     Task<IReadOnlyList<OrganicCapabilityDescriptor>> GetFunctionsAsync(CancellationToken cancellationToken = default);
 }
 
@@ -34,6 +37,9 @@ public sealed class PublisherDxFunctionCatalogDataService(
     IWebHostEnvironment environment,
     ILogger<PublisherDxFunctionCatalogDataService> logger) : IPublisherDxFunctionCatalogDataService
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
         PropertyNameCaseInsensitive = true,
@@ -97,6 +103,9 @@ public sealed class PublisherDxFunctionCatalogDataService(
         }
     }
 
+    /// <summary>
+    /// Reads required document async.
+    /// </summary>
     private async Task<PublisherDxFunctionCatalogDocument> ReadRequiredDocumentAsync(
         string path,
         string source,
@@ -122,6 +131,9 @@ public sealed class PublisherDxFunctionCatalogDataService(
         }
     }
 
+    /// <summary>
+    /// Reads optional document async.
+    /// </summary>
     private async Task<PublisherDxFunctionCatalogDocument?> ReadOptionalDocumentAsync(
         string path,
         CancellationToken cancellationToken)
@@ -144,6 +156,9 @@ public sealed class PublisherDxFunctionCatalogDataService(
         }
     }
 
+    /// <summary>
+    /// Validates document.
+    /// </summary>
     private void ValidateDocument(PublisherDxFunctionCatalogDocument document, string source)
     {
         try
@@ -162,6 +177,9 @@ public sealed class PublisherDxFunctionCatalogDataService(
         }
     }
 
+    /// <summary>
+    /// Validates functions.
+    /// </summary>
     private void ValidateFunctions(IEnumerable<OrganicCapabilityDescriptor> functions, string source)
     {
         try
@@ -189,6 +207,9 @@ public sealed class PublisherDxFunctionCatalogDataService(
         }
     }
 
+    /// <summary>
+    /// Gets storage key.
+    /// </summary>
     private string GetStorageKey(OrganicCapabilityDescriptor item)
     {
         try
@@ -206,6 +227,9 @@ public sealed class PublisherDxFunctionCatalogDataService(
         }
     }
 
+    /// <summary>
+    /// Gets user catalog path.
+    /// </summary>
     private string GetUserCatalogPath()
     {
         try
@@ -225,6 +249,9 @@ public sealed class PublisherDxFunctionCatalogDataService(
         }
     }
 
+    /// <summary>
+    /// Writes initial user catalog async.
+    /// </summary>
     private async Task WriteInitialUserCatalogAsync(
         string userPath,
         PublisherDxFunctionCatalogDocument seed,

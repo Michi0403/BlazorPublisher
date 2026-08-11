@@ -82,6 +82,9 @@ public sealed class PublisherDocumentationViewerService(ILogger<PublisherDocumen
         }
     }
 
+    /// <summary>
+    /// Normalizes URL.
+    /// </summary>
     private string NormalizeUrl(string url)
     {
     try

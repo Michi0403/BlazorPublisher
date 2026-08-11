@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
@@ -16,6 +16,9 @@ namespace PublisherStudio.Services.MediaConversion;
 /// </summary>
 public sealed class MediaConversionService : IMediaConversionService, IDisposable
 {
+    /// <summary>
+    /// Represents a job state.
+    /// </summary>
     private sealed class JobState
     {
         /// <summary>
@@ -84,7 +87,13 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         public object Sync { get; } = new();
     }
 
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web) { WriteIndented = true };
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<Guid, JobState> _jobs = new();
     private readonly ILogger<MediaConversionService> logger;
     private readonly FfmpegLocator _ffmpegLocator;
@@ -93,7 +102,13 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     private readonly PublisherStudioConfigurationNode _publisherConfiguration;
     private readonly string _root;
     private readonly string _profilesPath;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly object _profilesSync = new();
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly SemaphoreSlim _capabilityLock = new(1, 1);
     private MediaConversionCapabilities? _capabilities;
     private List<MediaConversionProfile>? _userProfiles;
@@ -444,6 +459,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Runs the execute async operation.
+    /// </summary>
     private async Task ExecuteAsync(JobState job, string executable)
     {
         double durationSeconds = job.Options.DurationSeconds.GetValueOrDefault();
@@ -551,6 +569,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Builds arguments.
+    /// </summary>
     internal IReadOnlyList<string> BuildArguments(MediaConversionPreset preset, MediaConversionOptions options, string inputPath, string outputPath)
     {
         try
@@ -579,6 +600,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Runs the preset arguments operation.
+    /// </summary>
     private IReadOnlyList<string> PresetArguments(string presetId) {
         try
         {
@@ -609,6 +633,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Applies stream overrides.
+    /// </summary>
     private void ApplyStreamOverrides(List<string> arguments, MediaConversionOptions options)
     {
         try
@@ -647,6 +674,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Applies filters.
+    /// </summary>
     private void ApplyFilters(List<string> arguments, MediaConversionOptions options)
     {
         try
@@ -672,6 +702,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Runs the scale filter operation.
+    /// </summary>
     private string ScaleFilter(MediaConversionOptions options)
     {
         try
@@ -699,6 +732,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Applies metadata.
+    /// </summary>
     private void ApplyMetadata(List<string> arguments, MediaConversionOptions options)
     {
         try
@@ -720,6 +756,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Adds override.
+    /// </summary>
     private void AddOverride(List<string> arguments, string key, string? value)
     {
         try
@@ -744,6 +783,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Parses advanced arguments.
+    /// </summary>
     internal IReadOnlyList<string> ParseAdvancedArguments(string? source)
     {
         try
@@ -816,6 +858,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Normalizes options.
+    /// </summary>
     private MediaConversionOptions NormalizeOptions(MediaConversionOptions source)
     {
         try
@@ -856,6 +901,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Validates requested encoders.
+    /// </summary>
     private void ValidateRequestedEncoders(MediaConversionCapabilities capabilities, MediaConversionOptions options)
     {
         try
@@ -873,6 +921,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Runs the built in profiles operation.
+    /// </summary>
     private IReadOnlyList<MediaConversionProfile> BuiltInProfiles() {
         try
         {
@@ -893,6 +944,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Runs the profile operation.
+    /// </summary>
     private MediaConversionProfile Profile(string name, string description, string presetId, MediaConversionOptions options) {
         try
         {
@@ -915,6 +969,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Runs the stable profile identifier operation.
+    /// </summary>
     private Guid StableProfileId(string value)
     {
         try
@@ -931,6 +988,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Loads user profiles.
+    /// </summary>
     private List<MediaConversionProfile> LoadUserProfiles()
     {
         if (_userProfiles is not null) return _userProfiles;
@@ -953,6 +1013,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         return _userProfiles;
     }
 
+    /// <summary>
+    /// Runs the persist profiles operation.
+    /// </summary>
     private void PersistProfiles(List<MediaConversionProfile> profiles)
     {
         try
@@ -972,6 +1035,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Runs the clone profile operation.
+    /// </summary>
     private MediaConversionProfile CloneProfile(MediaConversionProfile profile) {
         try
         {
@@ -994,6 +1060,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Reads encoders async.
+    /// </summary>
     private async Task<IReadOnlyList<string>> ReadEncodersAsync(string executable, CancellationToken cancellationToken)
     {
         try
@@ -1030,6 +1099,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Runs the snapshot operation.
+    /// </summary>
     private MediaConversionJobInfo Snapshot(JobState job)
     {
         try
@@ -1062,6 +1134,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Runs the safe file name operation.
+    /// </summary>
     private string SafeFileName(string? fileName, string fallback)
     {
         try
@@ -1080,6 +1155,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Normalizes extension.
+    /// </summary>
     private string NormalizeExtension(string? requested, string fallback)
     {
         try
@@ -1098,6 +1176,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Runs the clean option value operation.
+    /// </summary>
     private string CleanOptionValue(string? value)
     {
         try
@@ -1114,6 +1195,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Runs the positive operation.
+    /// </summary>
     private int? Positive(int? value) {
         try
         {
@@ -1126,6 +1210,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
             throw;
         }
     }
+    /// <summary>
+    /// Runs the finite positive operation.
+    /// </summary>
     private double? FinitePositive(double? value) {
         try
         {
@@ -1138,6 +1225,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
             throw;
         }
     }
+    /// <summary>
+    /// Runs the finite positive or zero operation.
+    /// </summary>
     private double? FinitePositiveOrZero(double? value) {
         try
         {
@@ -1150,6 +1240,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
             throw;
         }
     }
+    /// <summary>
+    /// Runs the number operation.
+    /// </summary>
     private string Number(double value) {
         try
         {
@@ -1163,6 +1256,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Runs the cleanup old directories operation.
+    /// </summary>
     private void CleanupOldDirectories()
     {
         try
@@ -1189,6 +1285,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Attempts to delete.
+    /// </summary>
     private void TryDelete(string path) {
         try
         {
@@ -1202,6 +1301,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
 
+    /// <summary>
+    /// Determines whether cel state.
+    /// </summary>
     private void CancelState(JobState job)
     {
         try

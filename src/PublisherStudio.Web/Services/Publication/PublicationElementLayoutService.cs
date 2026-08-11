@@ -7,12 +7,33 @@ namespace PublisherStudio.Services.Publication;
 /// </summary>
 public interface IPublicationElementLayoutService
 {
+    /// <summary>
+    /// Runs the constrain operation.
+    /// </summary>
     PublicationCanvasBounds Constrain(PublicationCanvasBounds bounds, double canvasWidth, double canvasHeight);
+    /// <summary>
+    /// Applies bounds.
+    /// </summary>
     void ApplyBounds(PublicationElement element, PublicationCanvasBounds bounds, double canvasWidth, double canvasHeight);
+    /// <summary>
+    /// Runs the nudge operation.
+    /// </summary>
     void Nudge(PublicationElement element, double deltaX, double deltaY, double canvasWidth, double canvasHeight);
+    /// <summary>
+    /// Runs the next z operation.
+    /// </summary>
     int NextZ(IEnumerable<PublicationElement> elements);
+    /// <summary>
+    /// Normalizes zorder.
+    /// </summary>
     void NormalizeZOrder(IList<PublicationElement> elements);
+    /// <summary>
+    /// Runs the move layer operation.
+    /// </summary>
     bool MoveLayer(IList<PublicationElement> elements, Guid elementId, PublicationLayerMove move);
+    /// <summary>
+    /// Runs the reorder operation.
+    /// </summary>
     IReadOnlyList<PublicationLayerItem> Reorder(IReadOnlyList<PublicationLayerItem> elements, Guid elementId, PublicationLayerMove move);
 }
 
@@ -253,6 +274,9 @@ public sealed class PublicationElementLayoutService(ILogger<PublicationElementLa
     }
 }
 
+    /// <summary>
+    /// Runs the safe operation.
+    /// </summary>
     private double Safe(double value, double fallback = 0) {
     try
     {

@@ -1,4 +1,4 @@
-﻿using PublisherStudio.BusinessObjects;
+using PublisherStudio.BusinessObjects;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Options;
@@ -78,6 +78,9 @@ public sealed class PanelStudioTextPatternDataService : IPanelStudioTextPatternD
     /// </summary>
     public Regex UnsafeFileNamePattern => RequirePattern(nameof(UnsafeFileNamePattern));
 
+    /// <summary>
+    /// Runs the require pattern operation.
+    /// </summary>
     private Regex RequirePattern(string name)
     {
         try
@@ -100,6 +103,9 @@ public sealed class PanelStudioTextPatternDataService : IPanelStudioTextPatternD
         }
     }
 
+    /// <summary>
+    /// Reads store.
+    /// </summary>
     private Dictionary<string, PatternDefinition> ReadStore(string path)
     {
         try
@@ -127,6 +133,9 @@ public sealed class PanelStudioTextPatternDataService : IPanelStudioTextPatternD
         }
     }
 
+    /// <summary>
+    /// Runs the compile operation.
+    /// </summary>
     private Regex Compile(string name, PatternDefinition definition)
     {
         try
@@ -162,6 +171,9 @@ public sealed class PanelStudioTextPatternDataService : IPanelStudioTextPatternD
         }
     }
 
+    /// <summary>
+    /// Validates options.
+    /// </summary>
     private void ValidateOptions(PanelTextPatternStoreOptions options)
     {
         try
@@ -182,6 +194,9 @@ public sealed class PanelStudioTextPatternDataService : IPanelStudioTextPatternD
 
 }
 
+/// <summary>
+/// Represents a pattern store document.
+/// </summary>
 internal sealed class PatternStoreDocument
 {
     /// <summary>
@@ -198,6 +213,9 @@ internal sealed class PatternStoreDocument
     public Dictionary<string, PatternDefinition> Patterns { get; set; } = new(StringComparer.Ordinal);
 }
 
+/// <summary>
+/// Represents a pattern definition.
+/// </summary>
 internal sealed class PatternDefinition
 {
     /// <summary>

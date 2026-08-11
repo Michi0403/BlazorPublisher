@@ -1,4 +1,4 @@
-﻿using PublisherStudio.BusinessObjects;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Services.Streaming.Metadata;
@@ -48,6 +48,9 @@ public sealed class NowPlayingReader(
         }
     }
 
+    /// <summary>
+    /// Reads mp3.
+    /// </summary>
     private AudioTags ReadMp3(string path)
     {
         try
@@ -91,6 +94,9 @@ public sealed class NowPlayingReader(
         }
     }
 
+    /// <summary>
+    /// Reads id3 v2.
+    /// </summary>
     private void ReadId3V2(Stream stream, int tagSize, byte version, AudioTags tags)
     {
         try
@@ -135,6 +141,9 @@ public sealed class NowPlayingReader(
         }
     }
 
+    /// <summary>
+    /// Runs the decode text frame operation.
+    /// </summary>
     private string DecodeTextFrame(byte[] payload)
     {
         try
@@ -151,6 +160,9 @@ public sealed class NowPlayingReader(
         }
     }
 
+    /// <summary>
+    /// Runs the decode picture frame operation.
+    /// </summary>
     private string DecodePictureFrame(byte[] payload, byte version)
     {
         try
@@ -187,6 +199,9 @@ public sealed class NowPlayingReader(
         }
     }
 
+    /// <summary>
+    /// Runs the skip terminated text operation.
+    /// </summary>
     private int SkipTerminatedText(byte[] bytes, int index, byte encoding)
     {
         try
@@ -209,6 +224,9 @@ public sealed class NowPlayingReader(
         }
     }
 
+    /// <summary>
+    /// Runs the decode encoded text operation.
+    /// </summary>
     private string DecodeEncodedText(byte encoding, ReadOnlySpan<byte> bytes)
     {
         try
@@ -230,6 +248,9 @@ public sealed class NowPlayingReader(
         }
     }
 
+    /// <summary>
+    /// Runs the decode latin1 operation.
+    /// </summary>
     private string DecodeLatin1(ReadOnlySpan<byte> bytes) {
         try
         {
@@ -243,6 +264,9 @@ public sealed class NowPlayingReader(
         }
     }
 
+    /// <summary>
+    /// Runs the synchsafe operation.
+    /// </summary>
     private int Synchsafe(byte a, byte b, byte c, byte d) {
         try
         {
@@ -255,6 +279,9 @@ public sealed class NowPlayingReader(
             throw;
         }
     }
+    /// <summary>
+    /// Reads big endian int.
+    /// </summary>
     private int ReadBigEndianInt(ReadOnlySpan<byte> bytes) {
         try
         {
@@ -267,6 +294,9 @@ public sealed class NowPlayingReader(
             throw;
         }
     }
+    /// <summary>
+    /// Runs the first operation.
+    /// </summary>
     private string First(string current, string fallback) {
         try
         {
@@ -280,6 +310,9 @@ public sealed class NowPlayingReader(
         }
     }
 
+    /// <summary>
+    /// Represents an audio tags.
+    /// </summary>
     private sealed class AudioTags
     {
         /// <summary>

@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 
 namespace PublisherStudio.Services.Streaming.Hotkeys;
 
@@ -8,10 +8,25 @@ namespace PublisherStudio.Services.Streaming.Hotkeys;
 public interface IWindowsHotkeyNativeService
 {
     bool IsAvailable { get; }
+    /// <summary>
+    /// Attempts to initialize message queue.
+    /// </summary>
     bool TryInitializeMessageQueue(out uint threadId);
+    /// <summary>
+    /// Attempts to register hot key.
+    /// </summary>
     bool TryRegisterHotKey(IntPtr windowHandle, int id, uint modifiers, uint virtualKey);
+    /// <summary>
+    /// Attempts to unregister hot key.
+    /// </summary>
     bool TryUnregisterHotKey(IntPtr windowHandle, int id);
+    /// <summary>
+    /// Reads message.
+    /// </summary>
     int ReadMessage(out WindowsHotkeyNativeMessage message);
+    /// <summary>
+    /// Attempts to post thread message.
+    /// </summary>
     bool TryPostThreadMessage(uint threadId, uint message, UIntPtr wordParameter, IntPtr longParameter);
 }
 
@@ -232,6 +247,9 @@ public sealed class WindowsHotkeyNativeService : IWindowsHotkeyNativeService, ID
         }
     }
 
+    /// <summary>
+    /// Loads delegate.
+    /// </summary>
     private TDelegate LoadDelegate<TDelegate>(IntPtr library, string exportName)
         where TDelegate : Delegate
     {
@@ -275,6 +293,9 @@ public sealed class WindowsHotkeyNativeService : IWindowsHotkeyNativeService, ID
         }
     }
 
+    /// <summary>
+    /// Runs the release libraries operation.
+    /// </summary>
     private void ReleaseLibraries()
     {
         try
@@ -296,25 +317,43 @@ public sealed class WindowsHotkeyNativeService : IWindowsHotkeyNativeService, ID
         }
     }
 
+    /// <summary>
+    /// Represents the bool callback.
+    /// </summary>
     [UnmanagedFunctionPointer(CallingConvention.Winapi, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private delegate bool RegisterHotKeyDelegate(IntPtr windowHandle, int id, uint modifiers, uint virtualKey);
 
+    /// <summary>
+    /// Represents the bool callback.
+    /// </summary>
     [UnmanagedFunctionPointer(CallingConvention.Winapi, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private delegate bool UnregisterHotKeyDelegate(IntPtr windowHandle, int id);
 
+    /// <summary>
+    /// Represents the int callback.
+    /// </summary>
     [UnmanagedFunctionPointer(CallingConvention.Winapi, SetLastError = true)]
     private delegate int GetMessageDelegate(out WindowsHotkeyNativeMessage message, IntPtr windowHandle, uint minimumFilter, uint maximumFilter);
 
+    /// <summary>
+    /// Represents the bool callback.
+    /// </summary>
     [UnmanagedFunctionPointer(CallingConvention.Winapi, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private delegate bool PeekMessageDelegate(out WindowsHotkeyNativeMessage message, IntPtr windowHandle, uint minimumFilter, uint maximumFilter, uint removeMessage);
 
+    /// <summary>
+    /// Represents the bool callback.
+    /// </summary>
     [UnmanagedFunctionPointer(CallingConvention.Winapi, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private delegate bool PostThreadMessageDelegate(uint threadId, uint message, UIntPtr wordParameter, IntPtr longParameter);
 
+    /// <summary>
+    /// Represents the uint callback.
+    /// </summary>
     [UnmanagedFunctionPointer(CallingConvention.Winapi)]
     private delegate uint GetCurrentThreadIdDelegate();
 }

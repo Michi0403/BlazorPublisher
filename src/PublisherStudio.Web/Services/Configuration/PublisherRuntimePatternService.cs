@@ -1,4 +1,4 @@
-﻿using System.Collections.Frozen;
+using System.Collections.Frozen;
 using System.Text.RegularExpressions;
 using PublisherStudio.BusinessObjects;
 
@@ -54,6 +54,9 @@ public sealed class PublisherRuntimePatternService : IPublisherRuntimePatternSer
         }
     }
 
+    /// <summary>
+    /// Runs the compile operation.
+    /// </summary>
     private Regex Compile(PublisherRuntimePattern key, PublisherRegexPolicy policy)
     {
         try
@@ -73,6 +76,9 @@ public sealed class PublisherRuntimePatternService : IPublisherRuntimePatternSer
         }
     }
 
+    /// <summary>
+    /// Parses options.
+    /// </summary>
     private RegexOptions ParseOptions(string value)
     {
         try

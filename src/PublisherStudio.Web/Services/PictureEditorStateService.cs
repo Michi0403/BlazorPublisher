@@ -9,7 +9,13 @@ public sealed class PictureEditorStateService
 {
     private readonly PictureDocumentService _documents;
     private readonly IPublisherDocumentFactory _documentFactory;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly Stack<string> _undo = new();
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly Stack<string> _redo = new();
     private string? _liveEditKey;
     private PictureLayer? _clipboard;
@@ -1170,6 +1176,9 @@ public sealed class PictureEditorStateService
     }
 }
 
+    /// <summary>
+    /// Runs the restore operation.
+    /// </summary>
     private void Restore(string json)
     {
     try
@@ -1187,6 +1196,9 @@ public sealed class PictureEditorStateService
     }
 }
 
+    /// <summary>
+    /// Runs the reset history operation.
+    /// </summary>
     private void ResetHistory()
     {
     try
@@ -1203,6 +1215,9 @@ public sealed class PictureEditorStateService
     }
 }
 
+    /// <summary>
+    /// Runs the capture operation.
+    /// </summary>
     private void Capture()
     {
     try
@@ -1225,6 +1240,9 @@ public sealed class PictureEditorStateService
     }
 }
 
+    /// <summary>
+    /// Creates paint layer.
+    /// </summary>
     private PaintPictureLayer CreatePaintLayer(string name)
     {
     try
@@ -1249,6 +1267,9 @@ public sealed class PictureEditorStateService
     }
 }
 
+    /// <summary>
+    /// Runs the clone layer operation.
+    /// </summary>
     private PictureLayer CloneLayer(PictureLayer layer)
     {
     try
@@ -1265,6 +1286,9 @@ public sealed class PictureEditorStateService
     }
 }
 
+    /// <summary>
+    /// Runs the next name operation.
+    /// </summary>
     private string NextName(string basis)
     {
     try
@@ -1284,6 +1308,9 @@ public sealed class PictureEditorStateService
     }
 }
 
+    /// <summary>
+    /// Runs the fit size operation.
+    /// </summary>
     private (double Width, double Height) FitSize(double width, double height, double maxWidth, double maxHeight)
     {
         width = Math.Max(1, width);
@@ -1293,6 +1320,9 @@ public sealed class PictureEditorStateService
         return (Math.Max(1, width * scale), Math.Max(1, height * scale));
     }
 
+    /// <summary>
+    /// Normalizes layer.
+    /// </summary>
     private void NormalizeLayer(PictureLayer layer)
     {
     try
@@ -1349,6 +1379,9 @@ public sealed class PictureEditorStateService
     }
 }
 
+    /// <summary>
+    /// Normalizes clip polygon.
+    /// </summary>
     private List<PicturePoint> NormalizeClipPolygon(IEnumerable<PicturePoint>? points)
     {
     try
@@ -1375,6 +1408,9 @@ public sealed class PictureEditorStateService
     }
 }
 
+    /// <summary>
+    /// Runs the nearly equal operation.
+    /// </summary>
     private bool NearlyEqual(double first, double second) {
     try
     {
@@ -1386,6 +1422,9 @@ public sealed class PictureEditorStateService
         throw;
     }
 }
+    /// <summary>
+    /// Normalizes angle.
+    /// </summary>
     private double NormalizeAngle(double value) {
     try
     {
@@ -1397,6 +1436,9 @@ public sealed class PictureEditorStateService
         throw;
     }
 }
+    /// <summary>
+    /// Runs the notify operation.
+    /// </summary>
     private void Notify(bool markChanged = true) {
     try
     {

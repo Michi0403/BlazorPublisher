@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -10,8 +10,14 @@ using Microsoft.Extensions.Logging;
 
 
 namespace PublisherStudio.InstallerConsole;
+/// <summary>
+/// Represents a FFmpeg provisioner.
+/// </summary>
 internal static class FfmpegProvisioner
 {
+    /// <summary>
+    /// Runs the from seconds operation.
+    /// </summary>
     private static readonly TimeSpan ProgressHeartbeat = TimeSpan.FromSeconds(30);
 
     /// <summary>
@@ -33,6 +39,9 @@ internal static class FfmpegProvisioner
         return null;
     }
 
+    /// <summary>
+    /// Runs the known install locations operation.
+    /// </summary>
     private static IEnumerable<string> KnownInstallLocations()
     {
         if (OperatingSystem.IsWindows())
@@ -60,6 +69,9 @@ internal static class FfmpegProvisioner
         yield return "/snap/bin/ffmpeg";
     }
 
+    /// <summary>
+    /// Finds win get package executables.
+    /// </summary>
     private static IEnumerable<string> FindWinGetPackageExecutables(string localAppData)
     {
         var packagesRoot = Path.Combine(localAppData, "Microsoft", "WinGet", "Packages");
@@ -184,6 +196,9 @@ ProvisioningFinished:
         return true;
     }
 
+    /// <summary>
+    /// Runs the installation commands operation.
+    /// </summary>
     private static IEnumerable<InstallCommand> InstallationCommands()
     {
         if (OperatingSystem.IsWindows())
@@ -211,12 +226,33 @@ ProvisioningFinished:
         var elevated = !string.Equals(Environment.UserName, "root", StringComparison.OrdinalIgnoreCase) && CommandExists("sudo");
         foreach (var command in new[]
         {
+            /// <summary>
+            /// Runs the install command operation.
+            /// </summary>
             new InstallCommand("apt-get", ["update"], "APT update", TimeSpan.FromMinutes(10), 1),
+            /// <summary>
+            /// Runs the install command operation.
+            /// </summary>
             new InstallCommand("apt-get", ["install", "-y", "ffmpeg"], "APT", TimeSpan.FromMinutes(20), 1),
+            /// <summary>
+            /// Runs the install command operation.
+            /// </summary>
             new InstallCommand("dnf", ["install", "-y", "ffmpeg"], "DNF", TimeSpan.FromMinutes(20), 1),
+            /// <summary>
+            /// Runs the install command operation.
+            /// </summary>
             new InstallCommand("yum", ["install", "-y", "ffmpeg"], "YUM", TimeSpan.FromMinutes(20), 1),
+            /// <summary>
+            /// Runs the install command operation.
+            /// </summary>
             new InstallCommand("zypper", ["--non-interactive", "install", "ffmpeg"], "Zypper", TimeSpan.FromMinutes(20), 1),
+            /// <summary>
+            /// Runs the install command operation.
+            /// </summary>
             new InstallCommand("pacman", ["--noconfirm", "-S", "ffmpeg"], "Pacman", TimeSpan.FromMinutes(20), 1),
+            /// <summary>
+            /// Runs the install command operation.
+            /// </summary>
             new InstallCommand("apk", ["add", "ffmpeg"], "APK", TimeSpan.FromMinutes(20), 1)
         })
         {
@@ -225,6 +261,9 @@ ProvisioningFinished:
         }
     }
 
+    /// <summary>
+    /// Runs the command exists operation.
+    /// </summary>
     private static bool CommandExists(string command)
     {
         if (Path.IsPathRooted(command)) return File.Exists(command);
@@ -238,6 +277,9 @@ ProvisioningFinished:
         return false;
     }
 
+    /// <summary>
+    /// Determines whether runnable async.
+    /// </summary>
     private static async Task<bool> IsRunnableAsync(string executable, CancellationToken cancellationToken)
     {
         try
@@ -267,6 +309,9 @@ ProvisioningFinished:
         }
     }
 
+    /// <summary>
+    /// Runs the run async operation.
+    /// </summary>
     private static async Task<ProcessRunResult> RunAsync(InstallCommand command, ILogger logger, CancellationToken cancellationToken)
     {
         try
@@ -344,6 +389,9 @@ ProvisioningFinished:
         }
     }
 
+    /// <summary>
+    /// Runs the pump output async operation.
+    /// </summary>
     private static async Task PumpOutputAsync(
         StreamReader reader,
         Action<string> writeLine,
@@ -381,6 +429,9 @@ ProvisioningFinished:
         }
     }
 
+    /// <summary>
+    /// Runs the flush pending operation.
+    /// </summary>
     private static void FlushPending(StringBuilder pending, Action<string> writeLine)
     {
         if (pending.Length == 0) return;
@@ -389,6 +440,9 @@ ProvisioningFinished:
         if (!string.IsNullOrWhiteSpace(line)) writeLine(line);
     }
 
+    /// <summary>
+    /// Represents an install command.
+    /// </summary>
     private sealed record InstallCommand(
         string FileName,
         string[] Arguments,
@@ -396,5 +450,8 @@ ProvisioningFinished:
         TimeSpan Timeout,
         int MaxAttempts);
 
+    /// <summary>
+    /// Represents a process run result.
+    /// </summary>
     private sealed record ProcessRunResult(int ExitCode, bool TimedOut);
 }

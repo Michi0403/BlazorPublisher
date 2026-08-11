@@ -14,8 +14,14 @@ public sealed class RtspLanServer : IAsyncDisposable
 {
     private readonly TcpListener _listener;
     private readonly UdpClient _rtpInput;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly CancellationTokenSource _cancellation = new();
     private readonly Dictionary<Guid, RtspClient> _clients = [];
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly object _sync = new();
     private Task? _acceptTask;
     private Task? _relayTask;
@@ -66,6 +72,9 @@ public sealed class RtspLanServer : IAsyncDisposable
     }
 }
 
+    /// <summary>
+    /// Runs the accept loop async operation.
+    /// </summary>
     private async Task AcceptLoopAsync(CancellationToken cancellationToken)
     {
     try
@@ -89,6 +98,9 @@ public sealed class RtspLanServer : IAsyncDisposable
     }
 }
 
+    /// <summary>
+    /// Runs the relay loop async operation.
+    /// </summary>
     private async Task RelayLoopAsync(CancellationToken cancellationToken)
     {
     try
@@ -114,6 +126,9 @@ public sealed class RtspLanServer : IAsyncDisposable
     }
 }
 
+    /// <summary>
+    /// Handles client async.
+    /// </summary>
     private async Task HandleClientAsync(TcpClient tcpClient, CancellationToken serverCancellation)
     {
     try
@@ -219,6 +234,9 @@ public sealed class RtspLanServer : IAsyncDisposable
     }
 }
 
+    /// <summary>
+    /// Runs the request base operation.
+    /// </summary>
     private string RequestBase(string requestUri)
     {
     try
@@ -234,6 +252,9 @@ public sealed class RtspLanServer : IAsyncDisposable
     }
 }
 
+    /// <summary>
+    /// Runs the authorize operation.
+    /// </summary>
     private bool Authorize(string requestUri)
     {
     try
@@ -256,6 +277,9 @@ public sealed class RtspLanServer : IAsyncDisposable
     }
 }
 
+    /// <summary>
+    /// Parses interleaved channel.
+    /// </summary>
     private int ParseInterleavedChannel(string transport)
     {
     try
@@ -274,6 +298,9 @@ public sealed class RtspLanServer : IAsyncDisposable
     }
 }
 
+    /// <summary>
+    /// Reads request async.
+    /// </summary>
     private async Task<RtspRequest?> ReadRequestAsync(NetworkStream stream, CancellationToken cancellationToken)
     {
     try
@@ -309,6 +336,9 @@ public sealed class RtspLanServer : IAsyncDisposable
     }
 }
 
+    /// <summary>
+    /// Runs the response operation.
+    /// </summary>
     private byte[] Response(int status, string cseq, IReadOnlyList<string>? headers = null, string body = "")
     {
     try
@@ -353,18 +383,33 @@ public sealed class RtspLanServer : IAsyncDisposable
     }
 }
 
+    /// <summary>
+    /// Represents a rtsp request.
+    /// </summary>
     private sealed record RtspRequest(string Method, string Uri, Dictionary<string, string> Headers);
 
+    /// <summary>
+    /// Represents a rtsp client.
+    /// </summary>
     private sealed class RtspClient : IAsyncDisposable
     {
         private readonly TcpClient _client;
+        /// <summary>
+        /// Runs the new operation.
+        /// </summary>
         private readonly SemaphoreSlim _controlSend = new(1, 1);
+        /// <summary>
+        /// Creates bounded.
+        /// </summary>
         private readonly Channel<byte[]> _rtp = Channel.CreateBounded<byte[]>(new BoundedChannelOptions(180)
         {
             SingleReader = true,
             SingleWriter = false,
             FullMode = BoundedChannelFullMode.DropOldest
         });
+        /// <summary>
+        /// Runs the new operation.
+        /// </summary>
         private readonly CancellationTokenSource _disconnected = new();
         private Task? _sender;
         private int _disposed;

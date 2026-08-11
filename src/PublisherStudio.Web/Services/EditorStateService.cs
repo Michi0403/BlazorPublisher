@@ -1,4 +1,4 @@
-﻿using PublisherStudio.BusinessObjects;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Panels;
 using PublisherStudio.Services.Configuration;
 
@@ -24,7 +24,13 @@ public sealed class EditorStateService : IDisposable
     private readonly ILogger<EditorStateService> logger;
     private readonly RichTextDocumentFactory _richTextFactory;
     private readonly IPublisherDocumentFactory _documentFactory;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly Stack<string> _undo = new();
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly Stack<string> _redo = new();
     private readonly List<PublicationElement> _clipboard = [];
     private readonly HashSet<Guid> _selectedElementIds = [];
@@ -804,8 +810,9 @@ public sealed class EditorStateService : IDisposable
 
     /// <summary>
     /// Promotes a standalone HTML/DIV object to a full reusable panel when Panel Studio
-    /// contains additional authored objects. The outer Mainframe bounds and interaction
-    /// metadata stay stable while the complete panel graph replaces the original object.
+    /// contains additional authored objects or meaningful panel-local geometry. The outer
+    /// Mainframe bounds and interaction metadata stay stable while the complete panel graph
+    /// replaces the original object.
     /// </summary>
     public bool PromoteSelectedHtmlEmbedToPanel(PanelElement draft)
     {
@@ -1502,6 +1509,9 @@ public sealed class EditorStateService : IDisposable
             }
         }
 
+    /// <summary>
+    /// Runs the refresh web data objects async operation.
+    /// </summary>
     private async Task RefreshWebDataObjectsAsync(IReadOnlyList<PublicationDataObject> candidates, CancellationToken cancellationToken)
     {
         try
@@ -1523,6 +1533,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the data visual name operation.
+    /// </summary>
     private string DataVisualName(DataVisualKind kind) {
         try
         {
@@ -1711,6 +1724,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Attempts to prepare endpoint.
+    /// </summary>
     private bool TryPrepareEndpoint(ConnectorEndpoint endpoint, PublicationConnectorPort? pendingPort, out PublicationElement? owner)
     {
         try
@@ -1749,6 +1765,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the attach pending port operation.
+    /// </summary>
     private void AttachPendingPort(ConnectorEndpoint endpoint, PublicationElement? owner, PublicationConnectorPort? pendingPort)
     {
         try
@@ -3679,6 +3698,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the restore operation.
+    /// </summary>
     private void Restore(string json)
     {
         try
@@ -3705,6 +3727,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Finds animation.
+    /// </summary>
     private PublicationAnimation? FindAnimation(Guid id) {
         try
         {
@@ -3718,6 +3743,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the next animation order operation.
+    /// </summary>
     private int NextAnimationOrder() {
         try
         {
@@ -3731,6 +3759,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the reindex animations operation.
+    /// </summary>
     private void ReindexAnimations()
     {
         try
@@ -3747,6 +3778,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the renew animation identifiers operation.
+    /// </summary>
     private void RenewAnimationIds(PublicationElement element, bool preserveOrder)
     {
         try
@@ -3768,6 +3802,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Ensures timeline duration.
+    /// </summary>
     private void EnsureTimelineDuration()
     {
         try
@@ -3783,6 +3820,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the animation span operation.
+    /// </summary>
     private double AnimationSpan(PublicationAnimation animation) {
         try
         {
@@ -3796,6 +3836,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Normalizes media.
+    /// </summary>
     private void NormalizeMedia(PublicationMediaElement media)
     {
         try
@@ -3848,6 +3891,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Normalizes animation.
+    /// </summary>
     private void NormalizeAnimation(PublicationAnimation animation)
     {
         try
@@ -3871,6 +3917,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the clone transition operation.
+    /// </summary>
     private PublicationPageTransition CloneTransition(PublicationPageTransition source) {
         try
         {
@@ -3893,6 +3942,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the reorder selected operation.
+    /// </summary>
     private void ReorderSelected(int movement)
     {
         try
@@ -3927,6 +3979,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the clipboard selection operation.
+    /// </summary>
     private List<PublicationElement> ClipboardSelection()
     {
         try
@@ -3956,6 +4011,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the clone selection operation.
+    /// </summary>
     private void CloneSelection(IReadOnlyList<PublicationElement> sources, bool useInsertionPoint)
     {
         try
@@ -4073,6 +4131,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the layer selection block operation.
+    /// </summary>
     private List<PublicationElement> LayerSelectionBlock()
     {
         try
@@ -4093,6 +4154,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the transform selection block operation.
+    /// </summary>
     private List<PublicationElement> TransformSelectionBlock()
     {
         try
@@ -4110,6 +4174,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the minimum element size operation.
+    /// </summary>
     private (double Width, double Height) MinimumElementSize(PublicationElement element) => element switch
     {
         DataVisualElement { VisualKind: DataVisualKind.Sparkline } => (55, 18),
@@ -4126,6 +4193,9 @@ public sealed class EditorStateService : IDisposable
         _ => (5, 5)
     };
 
+    /// <summary>
+    /// Runs the ordered elements operation.
+    /// </summary>
     private List<PublicationElement> OrderedElements() {
         try
         {
@@ -4144,6 +4214,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Determines whether normalized zorder.
+    /// </summary>
     private bool HasNormalizedZOrder(IReadOnlyList<PublicationElement> ordered)
     {
         try
@@ -4161,6 +4234,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Applies normalized zorder.
+    /// </summary>
     private void ApplyNormalizedZOrder(IReadOnlyList<PublicationElement> ordered)
     {
         try
@@ -4176,6 +4252,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the nearly equal operation.
+    /// </summary>
     private bool NearlyEqual(double first, double second) {
         try
         {
@@ -4189,6 +4268,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the next z operation.
+    /// </summary>
     private int NextZ() {
         try
         {
@@ -4201,6 +4283,9 @@ public sealed class EditorStateService : IDisposable
             throw;
         }
     }
+    /// <summary>
+    /// Runs the next name operation.
+    /// </summary>
     private string NextName(string basis) {
         try
         {
@@ -4214,6 +4299,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the selection unit operation.
+    /// </summary>
     private IEnumerable<PublicationElement> SelectionUnit(PublicationElement element)
     {
         try
@@ -4230,6 +4318,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the movable selection for operation.
+    /// </summary>
     private IEnumerable<PublicationElement> MovableSelectionFor(PublicationElement element)
     {
         try
@@ -4247,6 +4338,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Sets selection core.
+    /// </summary>
     private void SetSelectionCore(IEnumerable<Guid> ids, Guid? primary)
     {
         try
@@ -4268,6 +4362,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the clear selection core operation.
+    /// </summary>
     private void ClearSelectionCore()
     {
         try
@@ -4284,6 +4381,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the place at operation.
+    /// </summary>
     private void PlaceAt(PublicationElement element, double? centerX, double? centerY)
     {
         try
@@ -4303,6 +4403,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Removes media assets.
+    /// </summary>
     private void RemoveMediaAssets(PublicationDocument document)
     {
         try
@@ -4322,6 +4425,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the capture operation.
+    /// </summary>
     private void Capture()
     {
         try
@@ -4345,6 +4451,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the synchronize document component operation.
+    /// </summary>
     private void SynchronizeDocumentComponent(DevExtremeComponentElement source)
     {
         try
@@ -4377,6 +4486,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the clone element operation.
+    /// </summary>
     private PublicationElement CloneElement(PublicationElement element) {
         try
         {
@@ -4390,6 +4502,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the clone page operation.
+    /// </summary>
     private PublicationPage ClonePage(PublicationPage publicationPage) {
         try
         {
@@ -4403,6 +4518,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the notify operation.
+    /// </summary>
     private void Notify(bool markModified = true)
     {
         try
@@ -4425,6 +4543,9 @@ public sealed class EditorStateService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the persist streaming settings operation.
+    /// </summary>
     private void PersistStreamingSettings()
     {
         try

@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using PublisherStudio.BusinessObjects;
@@ -9,6 +9,9 @@ namespace PublisherStudio.Controllers;
 /// <summary>MVC adapter for describing the public HTTP surface without leaking MVC into reusable services.</summary>
 public sealed class ApiSurfaceCatalogService(ILogger<ApiSurfaceCatalogService> logger) : IApiSurfaceCatalogService
 {
+    /// <summary>
+    /// Runs the typeof operation.
+    /// </summary>
     private readonly Assembly assembly = typeof(ApiSurfaceCatalogService).Assembly;
 
     /// <summary>
@@ -34,6 +37,9 @@ public sealed class ApiSurfaceCatalogService(ILogger<ApiSurfaceCatalogService> l
         }
     }
 
+    /// <summary>
+    /// Creates descriptor.
+    /// </summary>
     private ApiSurfaceDescriptor CreateDescriptor(Type controller)
     {
         try
@@ -86,6 +92,9 @@ public sealed class ApiSurfaceCatalogService(ILogger<ApiSurfaceCatalogService> l
         }
     }
 
+    /// <summary>
+    /// Runs the combine route operation.
+    /// </summary>
     private string CombineRoute(string root, string controllerName, string action)
     {
         var routeName = controllerName.EndsWith("Controller", StringComparison.Ordinal)

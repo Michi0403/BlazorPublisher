@@ -10,7 +10,13 @@ namespace PublisherStudio.Services.Streaming.Lan;
 /// </summary>
 public sealed class WebRtcSignalingService
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<Guid, ViewerConnection> _viewers = new();
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly SemaphoreSlim _publisherSend = new(1, 1);
     private WebSocket? _publisher;
 
@@ -132,6 +138,9 @@ public sealed class WebRtcSignalingService
     }
 }
 
+    /// <summary>
+    /// Runs the send publisher async operation.
+    /// </summary>
     private async Task SendPublisherAsync(object message, CancellationToken cancellationToken) {
     try
     {
@@ -144,6 +153,9 @@ public sealed class WebRtcSignalingService
     }
 }
 
+    /// <summary>
+    /// Runs the send publisher bytes async operation.
+    /// </summary>
     private async Task SendPublisherBytesAsync(byte[] payload, CancellationToken cancellationToken)
     {
     try
@@ -167,6 +179,9 @@ public sealed class WebRtcSignalingService
     }
 }
 
+    /// <summary>
+    /// Runs the receive JSON async operation.
+    /// </summary>
     private async Task ReceiveJsonAsync(WebSocket socket, Func<JsonDocument, Task> onMessage, CancellationToken cancellationToken)
     {
     try
@@ -203,6 +218,9 @@ public sealed class WebRtcSignalingService
     }
 }
 
+    /// <summary>
+    /// Runs the copy with viewer operation.
+    /// </summary>
     private byte[] CopyWithViewer(JsonElement root, string type, Guid viewerId)
     {
     try
@@ -230,6 +248,9 @@ public sealed class WebRtcSignalingService
     }
 }
 
+    /// <summary>
+    /// Runs the copy with type operation.
+    /// </summary>
     private byte[] CopyWithType(JsonElement root, string type, bool includeViewerId)
     {
     try
@@ -256,6 +277,9 @@ public sealed class WebRtcSignalingService
     }
 }
 
+    /// <summary>
+    /// Reads string.
+    /// </summary>
     private string ReadString(JsonElement root, string property) {
     try
     {
@@ -268,6 +292,9 @@ public sealed class WebRtcSignalingService
     }
 }
 
+    /// <summary>
+    /// Attempts to read viewer identifier.
+    /// </summary>
     private bool TryReadViewerId(JsonElement root, out Guid viewerId)
     {
     try
@@ -285,6 +312,9 @@ public sealed class WebRtcSignalingService
     }
 }
 
+    /// <summary>
+    /// Closes quietly async.
+    /// </summary>
     private async Task CloseQuietlyAsync(WebSocket socket, string reason)
     {
     try
@@ -305,9 +335,15 @@ public sealed class WebRtcSignalingService
     }
 }
 
+    /// <summary>
+    /// Represents a viewer connection.
+    /// </summary>
     private sealed class ViewerConnection(WebSocket socket) : IAsyncDisposable
     {
         private readonly WebSocket _socket = socket;
+        /// <summary>
+        /// Runs the new operation.
+        /// </summary>
         private readonly SemaphoreSlim _send = new(1, 1);
 
         /// <summary>

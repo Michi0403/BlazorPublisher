@@ -1,4 +1,4 @@
-﻿using PublisherStudio.BusinessObjects;
+using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Configuration;
 
@@ -33,6 +33,12 @@ public interface IPublisherRuntimePolicyDataService
     PublisherDocumentDefaultsPolicy DocumentDefaults { get; }
     PublisherMediaSessionDefaultsPolicy MediaSessionDefaults { get; }
     IReadOnlyList<MediaConversionPreset> MediaConversionPresets { get; }
+    /// <summary>
+    /// Gets collection.
+    /// </summary>
     IReadOnlyList<string> GetCollection(PublisherRuntimeCollection collection);
+    /// <summary>
+    /// Gets snapshot.
+    /// </summary>
     PublisherRuntimePolicySnapshot GetSnapshot();
 }

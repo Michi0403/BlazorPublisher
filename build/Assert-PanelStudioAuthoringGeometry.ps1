@@ -11,16 +11,18 @@ function Reject([string]$Text, [string]$Pattern, [string]$Message) {
 
 $root = Split-Path -Parent $PSScriptRoot
 $panelStudioPath = Join-Path $root 'src\PublisherStudio.Web\Components\Editor\PanelStudio.razor'
+$editorPath = Join-Path $root 'src\PublisherStudio.Web\Components\Pages\Editor.razor'
 $panelViewPath = Join-Path $root 'src\PublisherStudio.Web\Components\Editor\PanelView.razor'
 $dataVisualHostPath = Join-Path $root 'src\PublisherStudio.Web\Components\Editor\DataVisualClientHost.razor'
 $sitePath = Join-Path $root 'src\PublisherStudio.Web\wwwroot\css\site.css'
 $interopPath = Join-Path $root 'src\PublisherStudio.Web\wwwroot\js\publisherInterop.js'
 $liveDataPath = Join-Path $root 'src\PublisherStudio.Web\wwwroot\js\liveDataInterop.js'
-foreach ($path in @($panelStudioPath, $panelViewPath, $dataVisualHostPath, $sitePath, $interopPath, $liveDataPath)) {
+foreach ($path in @($panelStudioPath, $editorPath, $panelViewPath, $dataVisualHostPath, $sitePath, $interopPath, $liveDataPath)) {
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { Fail "Required source is missing: $path" }
 }
 
 $panelStudio = [IO.File]::ReadAllText($panelStudioPath)
+$editor = [IO.File]::ReadAllText($editorPath)
 $panelView = [IO.File]::ReadAllText($panelViewPath)
 $dataVisualHost = [IO.File]::ReadAllText($dataVisualHostPath)
 $site = [IO.File]::ReadAllText($sitePath)
@@ -52,5 +54,9 @@ Require $liveData 'new ResizeObserver' 'Data visuals must observe their actual r
 Require $liveData 'visualSizeUsable' 'Data visual rendering must reject degenerate one-pixel layout measurements.'
 Require $liveData 'resizeObserver\?\.disconnect' 'Data visual resize observers must be disposed with their widgets.'
 Require $dataVisualHost '_lastClientConfigJson' 'Blazor re-renders must not recreate unchanged DevExtreme visual instances.'
+Require $editor 'var fillsLocalCanvas = html is not null' 'Standalone HTML must explicitly test whether Panel Studio local geometry is still canvas-equivalent.'
+Require $editor 'Math\.Abs\(html\.Width - draft\.CanvasWidth\)' 'Standalone HTML width must be compared with the panel-local canvas before lightweight apply.'
+Require $editor 'Math\.Abs\(html\.Height - draft\.CanvasHeight\)' 'Standalone HTML height must be compared with the panel-local canvas before lightweight apply.'
+Require $editor 'State\.PromoteSelectedHtmlEmbedToPanel\(draft\)' 'Authored local HTML geometry must promote to a panel instead of being discarded.'
 
 Write-Host 'Panel Studio authoring geometry validation passed. The selected panel owns a centered fitted design frame; live content, hitboxes and drop coordinates share one viewport; responsive authoring is isolated; DataVisuals resize from their actual host.'

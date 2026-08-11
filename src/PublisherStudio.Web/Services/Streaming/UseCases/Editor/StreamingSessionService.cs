@@ -8,7 +8,13 @@ namespace PublisherStudio.Services.Streaming.UseCases.Editor;
 public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
 {
     private readonly StreamingMediaHostClient _mediaHost = mediaHost;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly SemaphoreSlim _gate = new(1, 1);
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private StreamingSessionSnapshot _snapshot = new();
     private CancellationTokenSource? _eventPollCancellation;
 
@@ -231,6 +237,9 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
     }
 }
 
+    /// <summary>
+    /// Sets recording core async.
+    /// </summary>
     private async Task<bool> SetRecordingCoreAsync(bool enabled, CancellationToken cancellationToken)
     {
     try
@@ -271,6 +280,9 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
     }
 }
 
+    /// <summary>
+    /// Runs the describe active state operation.
+    /// </summary>
     private string DescribeActiveState()
     {
     try
@@ -296,6 +308,9 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
     }
 }
 
+    /// <summary>
+    /// Stops event polling.
+    /// </summary>
     private void StopEventPolling()
     {
     try
@@ -312,6 +327,9 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
     }
 }
 
+    /// <summary>
+    /// Starts event polling.
+    /// </summary>
     private void StartEventPolling(Guid sessionId)
     {
     try
@@ -346,6 +364,9 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
     }
 }
 
+    /// <summary>
+    /// Resolves program page.
+    /// </summary>
     private Guid? ResolveProgramPage(PublicationDocument document) {
     try
     {

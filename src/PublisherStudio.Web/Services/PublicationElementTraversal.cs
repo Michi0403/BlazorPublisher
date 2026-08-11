@@ -45,6 +45,9 @@ public sealed class PublicationElementTraversal(ILogger<PublicationElementTraver
         }
     }
 
+    /// <summary>
+    /// Runs the collect descendants operation.
+    /// </summary>
     private void CollectDescendants(
         IEnumerable<PublicationElement> elements,
         ICollection<PublicationElement> descendants)

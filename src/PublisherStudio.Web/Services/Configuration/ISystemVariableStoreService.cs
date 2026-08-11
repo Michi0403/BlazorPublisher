@@ -1,4 +1,4 @@
-﻿namespace PublisherStudio.Services.Configuration;
+namespace PublisherStudio.Services.Configuration;
 
 /// <summary>
 /// Defines the system variable store service contract.
@@ -18,10 +18,28 @@ public interface ISystemVariableStoreService
     string RuntimeDirectoryName { get; }
     string RuntimeEndpointFileName { get; }
     string DefaultDocumentName { get; }
+    /// <summary>
+    /// Gets string.
+    /// </summary>
     string GetString(string name, string fallback);
+    /// <summary>
+    /// Gets int.
+    /// </summary>
     int GetInt(string name, int fallback);
+    /// <summary>
+    /// Gets time span.
+    /// </summary>
     TimeSpan GetTimeSpan(string name, TimeSpan fallback);
+    /// <summary>
+    /// Runs the set operation.
+    /// </summary>
     void Set<T>(string name, T value);
+    /// <summary>
+    /// Runs the snapshot operation.
+    /// </summary>
     IReadOnlyDictionary<string, string> Snapshot();
+    /// <summary>
+    /// Runs the attach logger operation.
+    /// </summary>
     void AttachLogger(ILogger<SystemVariableStoreService> logger);
 }

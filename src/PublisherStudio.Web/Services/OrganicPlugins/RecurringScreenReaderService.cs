@@ -17,7 +17,13 @@ public sealed class RecurringScreenReaderService(
     IOptions<OrganicPluginOptions> options,
     ILogger<RecurringScreenReaderService> logger) : IRecurringScreenReaderService, IAsyncDisposable
 {
+    /// <summary>
+    /// Represents a runtime.
+    /// </summary>
     private sealed record Runtime(RecurringScreenReaderSession Session, CancellationTokenSource Cancellation, Task Loop);
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<Guid, Runtime> runtimes = new();
     /// <summary>
     /// Occurs when changed.
@@ -117,6 +123,9 @@ public sealed class RecurringScreenReaderService(
         return true;
     }
 
+    /// <summary>
+    /// Runs the run async operation.
+    /// </summary>
     private async Task RunAsync(RecurringScreenReaderSession session, CancellationToken cancellationToken)
     {
         try
@@ -156,6 +165,9 @@ public sealed class RecurringScreenReaderService(
         }
     }
 
+    /// <summary>
+    /// Runs the execute single flight async operation.
+    /// </summary>
     private async Task ExecuteSingleFlightAsync(RecurringScreenReaderSession session, CancellationToken cancellationToken)
     {
     try
@@ -246,6 +258,9 @@ public sealed class RecurringScreenReaderService(
     }
 }
 
+    /// <summary>
+    /// Runs the wait for screenshot async operation.
+    /// </summary>
     private async Task<BrowserScreenshotRequest> WaitForScreenshotAsync(Guid requestId, TimeSpan timeout, CancellationToken cancellationToken)
     {
     try

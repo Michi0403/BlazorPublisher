@@ -299,6 +299,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Runs the render open XML operation.
+    /// </summary>
     private string RenderOpenXml(byte[] content, out string activeSheetName)
     {
     try
@@ -424,6 +427,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Runs the render delimited text operation.
+    /// </summary>
     private string RenderDelimitedText(byte[] content, char delimiter, string sheetName, out string activeSheetName)
     {
     try
@@ -460,6 +466,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Runs the detect delimiter operation.
+    /// </summary>
     private char DetectDelimiter(byte[] content, char fallback)
     {
     try
@@ -480,6 +489,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Runs the count delimiter operation.
+    /// </summary>
     private int CountDelimiter(string line, char delimiter)
     {
     try
@@ -505,6 +517,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Parses delimited.
+    /// </summary>
     private List<List<string>> ParseDelimited(string text, char delimiter)
     {
     try
@@ -542,6 +557,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Reads cell value.
+    /// </summary>
     private string ReadCellValue(XElement cell, IReadOnlyList<string> sharedStrings, CellStyle? style)
     {
     try
@@ -570,6 +588,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Reads shared strings.
+    /// </summary>
     private IReadOnlyList<string> ReadSharedStrings(ZipArchive archive)
     {
     try
@@ -590,6 +611,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Reads styles.
+    /// </summary>
     private IReadOnlyList<CellStyle> ReadStyles(ZipArchive archive)
     {
     try
@@ -631,6 +655,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Reads font.
+    /// </summary>
     private FontStyle ReadFont(XElement font)
     {
     try
@@ -651,6 +678,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Reads fill.
+    /// </summary>
     private string ReadFill(XElement fill)
     {
     try
@@ -667,6 +697,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Reads border.
+    /// </summary>
     private string ReadBorder(XElement border)
     {
     try
@@ -689,6 +722,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Reads color.
+    /// </summary>
     private string ReadColor(XElement? color)
     {
     try
@@ -710,6 +746,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Determines whether date format.
+    /// </summary>
     private bool IsDateFormat(int numberFormatId, string? custom)
     {
     try
@@ -728,6 +767,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Reads merged ranges.
+    /// </summary>
     private IReadOnlyList<MergedRange> ReadMergedRanges(XDocument worksheet)
     {
     try
@@ -746,6 +788,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Reads column widths.
+    /// </summary>
     private Dictionary<int, double> ReadColumnWidths(XDocument worksheet)
     {
     try
@@ -768,6 +813,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Parses range.
+    /// </summary>
     private MergedRange? ParseRange(string? value)
     {
     try
@@ -786,6 +834,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Runs the column name operation.
+    /// </summary>
     private string ColumnName(int column)
     {
     try
@@ -808,6 +859,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Parses cell reference.
+    /// </summary>
     private (int Row, int Column) ParseCellReference(string? reference, int fallbackRow)
     {
         if (string.IsNullOrWhiteSpace(reference)) return (fallbackRow, 1);
@@ -822,6 +876,9 @@ public sealed class SpreadsheetDocumentService
         return (Math.Max(1, row), Math.Max(1, column));
     }
 
+    /// <summary>
+    /// Loads entry.
+    /// </summary>
     private XDocument LoadEntry(ZipArchive archive, string path)
     {
     try
@@ -838,6 +895,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Normalizes archive path.
+    /// </summary>
     private string NormalizeArchivePath(string baseFolder, string target)
     {
     try
@@ -860,6 +920,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Runs the decode text operation.
+    /// </summary>
     private string DecodeText(byte[] content)
     {
     try
@@ -878,6 +941,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Runs the empty preview operation.
+    /// </summary>
     private string EmptyPreview(string sheetName, string message) {
     try
     {
@@ -890,6 +956,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Writes entry.
+    /// </summary>
     private void WriteEntry(ZipArchive archive, string path, string content)
     {
     try
@@ -906,6 +975,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Normalizes font family.
+    /// </summary>
     private string NormalizeFontFamily(string? value)
     {
     try
@@ -925,6 +997,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Normalizes sheet name.
+    /// </summary>
     private string NormalizeSheetName(string value)
     {
     try
@@ -941,6 +1016,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Runs the security element escape operation.
+    /// </summary>
     private string SecurityElementEscape(string value) {
     try
     {
@@ -952,6 +1030,9 @@ public sealed class SpreadsheetDocumentService
         throw;
     }
 }
+    /// <summary>
+    /// Parses int.
+    /// </summary>
     private int ParseInt(string? value, int fallback) {
     try
     {
@@ -963,6 +1044,9 @@ public sealed class SpreadsheetDocumentService
         throw;
     }
 }
+    /// <summary>
+    /// Parses double.
+    /// </summary>
     private double ParseDouble(string? value, double fallback) {
     try
     {
@@ -974,6 +1058,9 @@ public sealed class SpreadsheetDocumentService
         throw;
     }
 }
+    /// <summary>
+    /// Parses bool.
+    /// </summary>
     private bool ParseBool(string? value) {
     try
     {
@@ -986,6 +1073,9 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Runs the CSS text operation.
+    /// </summary>
     private string CssText(string value) {
     try
     {
@@ -998,9 +1088,21 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>
+    /// Represents a cell preview.
+    /// </summary>
     private sealed record CellPreview(string Value, int StyleIndex);
+    /// <summary>
+    /// Represents a merged range.
+    /// </summary>
     private sealed record MergedRange(int StartRow, int StartColumn, int EndRow, int EndColumn);
+    /// <summary>
+    /// Represents a font style.
+    /// </summary>
     private sealed record FontStyle(string Family, double SizePt, bool Bold, bool Italic, bool Underline, string Color);
+    /// <summary>
+    /// Represents a cell style.
+    /// </summary>
     private sealed record CellStyle(FontStyle Font, string Fill, string Border, string? Horizontal, string? Vertical, bool Wrap, bool IsDate)
     {
         /// <summary>

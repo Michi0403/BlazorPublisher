@@ -13,6 +13,9 @@ public sealed class LanStreamingServer : IAsyncDisposable
     private readonly MediaSession _session;
     private readonly ILogger<LanStreamingServer> _logger;
     private readonly SemaphoreSlim _viewerGate;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly CancellationTokenSource _cancellation = new();
     private WebApplication? _app;
     private Task? _runTask;
@@ -117,6 +120,9 @@ public sealed class LanStreamingServer : IAsyncDisposable
     }
 }
 
+    /// <summary>
+    /// Starts core async.
+    /// </summary>
     private async Task StartCoreAsync()
     {
         try
@@ -258,6 +264,9 @@ public sealed class LanStreamingServer : IAsyncDisposable
         }
     }
 
+    /// <summary>
+    /// Builds watch page.
+    /// </summary>
     private string BuildWatchPage()
     {
     try
@@ -352,6 +361,9 @@ public sealed class LanStreamingServer : IAsyncDisposable
     }
 }
 
+    /// <summary>
+    /// Runs the authorize operation.
+    /// </summary>
     private bool Authorize(HttpContext context)
     {
     try
@@ -378,6 +390,9 @@ public sealed class LanStreamingServer : IAsyncDisposable
     }
 }
 
+    /// <summary>
+    /// Runs the append token operation.
+    /// </summary>
     private string AppendToken(string uri)
     {
     try
@@ -396,6 +411,9 @@ public sealed class LanStreamingServer : IAsyncDisposable
     }
 }
 
+    /// <summary>
+    /// Resolves address.
+    /// </summary>
     private IPAddress ResolveAddress(string value)
     {
     try
@@ -415,6 +433,9 @@ public sealed class LanStreamingServer : IAsyncDisposable
     }
 }
 
+    /// <summary>
+    /// Runs the safe asset path operation.
+    /// </summary>
     private string? SafeAssetPath(string rootDirectory, string? asset)
     {
     try

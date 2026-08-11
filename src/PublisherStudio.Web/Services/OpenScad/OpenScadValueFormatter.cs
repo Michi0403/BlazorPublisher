@@ -81,6 +81,9 @@ public sealed class OpenScadValueFormatter : IOpenScadValueFormatter
     }
 }
 
+    /// <summary>
+    /// Runs the vector operation.
+    /// </summary>
     private string Vector(IEnumerable<double> values) {
     try
     {
@@ -92,6 +95,9 @@ public sealed class OpenScadValueFormatter : IOpenScadValueFormatter
         throw;
     }
 }
+    /// <summary>
+    /// Runs the matrix operation.
+    /// </summary>
     private string Matrix(IEnumerable<IEnumerable<double>> rows) {
     try
     {
@@ -104,6 +110,9 @@ public sealed class OpenScadValueFormatter : IOpenScadValueFormatter
     }
 }
 
+    /// <summary>
+    /// Runs the faces operation.
+    /// </summary>
     private string Faces(IEnumerable<IEnumerable<int>> rows)
     {
     try
@@ -118,6 +127,9 @@ public sealed class OpenScadValueFormatter : IOpenScadValueFormatter
         throw;
     }
 }
+    /// <summary>
+    /// Runs the number operation.
+    /// </summary>
     private string Number(double value) {
     try
     {

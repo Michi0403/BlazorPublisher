@@ -10,8 +10,17 @@ namespace PublisherStudio.Services;
 /// </summary>
 public sealed class PublicationLiveDataRegistry
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<Guid, LivePublicationSnapshot> _documents = new();
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<(Guid DocumentId, Guid DataId), string> _exportTokens = new();
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<Guid, HashSet<Guid>> _documentWebhookBindings = new();
     private readonly PublicationWebhookStore _webhooks;
 
@@ -102,6 +111,9 @@ public sealed class PublicationLiveDataRegistry
 }
 
 
+    /// <summary>
+    /// Determines whether reuse data snapshot.
+    /// </summary>
     private bool CanReuseDataSnapshot(LivePublicationSnapshot? previous, PublicationDataObject item)
         {
     try
@@ -144,6 +156,9 @@ public sealed class PublicationLiveDataRegistry
     }
 }
 
+    /// <summary>
+    /// Unregisters webhook when unused.
+    /// </summary>
     private void UnregisterWebhookWhenUnused(Guid bindingId)
     {
     try

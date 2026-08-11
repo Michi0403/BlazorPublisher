@@ -1,4 +1,4 @@
-﻿using System.IO.Compression;
+using System.IO.Compression;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Nodes;
@@ -31,6 +31,9 @@ public sealed partial class PublicationFileService
     private readonly IPublicationMarkupService _markup;
     private readonly IStoryPageLayoutService _storyPageLayouts;
     private readonly ILogger<PublicationFileService> logger;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly JsonSerializerOptions _options = new(JsonSerializerDefaults.Web)
     {
         WriteIndented = true,
@@ -611,6 +614,9 @@ public sealed partial class PublicationFileService
         }
     }
 
+    /// <summary>
+    /// Runs the looks like HTML operation.
+    /// </summary>
     private bool LooksLikeHtml(byte[] content)
     {
         try
@@ -782,6 +788,9 @@ public sealed partial class PublicationFileService
         }
     }
 
+    /// <summary>
+    /// Reads open XML twips.
+    /// </summary>
     private double ReadOpenXmlTwips(XElement? element, XName attributeName, double fallbackMillimeters)
     {
         try
@@ -949,6 +958,9 @@ public sealed partial class PublicationFileService
         }
     }
 
+    /// <summary>
+    /// Runs the render open XML table operation.
+    /// </summary>
     private string RenderOpenXmlTable(XElement table, XNamespace word)
     {
         try
@@ -978,6 +990,9 @@ public sealed partial class PublicationFileService
         }
     }
 
+    /// <summary>
+    /// Runs the render open XML paragraph operation.
+    /// </summary>
     private string RenderOpenXmlParagraph(XElement paragraph, XNamespace word)
     {
         try
@@ -1022,6 +1037,9 @@ public sealed partial class PublicationFileService
         }
     }
 
+    /// <summary>
+    /// Runs the render open XML run operation.
+    /// </summary>
     private string RenderOpenXmlRun(XElement run, XNamespace word)
     {
         try
@@ -1080,6 +1098,9 @@ public sealed partial class PublicationFileService
         }
     }
 
+    /// <summary>
+    /// Normalizes open XML color.
+    /// </summary>
     private string? NormalizeOpenXmlColor(string? value)
     {
         try
@@ -1097,6 +1118,9 @@ public sealed partial class PublicationFileService
         }
     }
 
+    /// <summary>
+    /// Opens XML highlight color.
+    /// </summary>
     private string? OpenXmlHighlightColor(string? value) {
         try
         {
@@ -1117,6 +1141,9 @@ public sealed partial class PublicationFileService
         }
     }
 
+    /// <summary>
+    /// Determines whether visible CSS background.
+    /// </summary>
     private bool IsVisibleCssBackground(string? value) {
         try
         {
@@ -1166,6 +1193,9 @@ public sealed partial class PublicationFileService
         }
     }
 
+    /// <summary>
+    /// Normalizes streaming.
+    /// </summary>
     private void NormalizeStreaming(PublicationDocument document)
     {
         try

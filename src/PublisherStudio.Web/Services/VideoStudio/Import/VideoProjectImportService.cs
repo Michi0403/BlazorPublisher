@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
@@ -64,6 +64,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Imports otio bundle async.
+    /// </summary>
     private async Task<VideoProjectImportResult> ImportOtioBundleAsync(
         Stream source,
         string fileName,
@@ -129,6 +132,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Imports otio.
+    /// </summary>
     private VideoProjectImportResult ImportOtio(
         byte[] bytes,
         string fileName,
@@ -210,6 +216,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Imports otio nested stack.
+    /// </summary>
     private void ImportOtioNestedStack(
         JsonElement stack,
         VideoProjectDocument project,
@@ -248,6 +257,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Imports otio track children.
+    /// </summary>
     private void ImportOtioTrackChildren(
         JsonElement trackNode,
         MediaTimelineTrack track,
@@ -390,6 +402,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the otio linear speed operation.
+    /// </summary>
     private double OtioLinearSpeed(JsonElement clip, List<InterchangeIssue> issues)
     {
         try
@@ -423,6 +438,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Imports otio markers.
+    /// </summary>
     private void ImportOtioMarkers(
         JsonElement owner,
         List<MediaProjectMarker> markers,
@@ -455,6 +473,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Imports mlt.
+    /// </summary>
     private VideoProjectImportResult ImportMlt(byte[] bytes, string fileName)
     {
         try
@@ -555,6 +576,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Imports mlt playlist.
+    /// </summary>
     private void ImportMltPlaylist(
         XElement playlist,
         MediaTimelineTrack track,
@@ -649,6 +673,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Imports mlt transitions.
+    /// </summary>
     private void ImportMltTransitions(
         XElement tractor,
         VideoProjectDocument project,
@@ -691,6 +718,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Imports xges.
+    /// </summary>
     private VideoProjectImportResult ImportXges(byte[] bytes, string fileName)
     {
         try
@@ -785,6 +815,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the xges segment operation.
+    /// </summary>
     private PublicationMediaSegment XgesSegment(
         string name,
         string assetId,
@@ -838,6 +871,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Imports open shot.
+    /// </summary>
     private VideoProjectImportResult ImportOpenShot(byte[] bytes, string fileName)
     {
         try
@@ -970,6 +1006,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Imports edl.
+    /// </summary>
     private VideoProjectImportResult ImportEdl(byte[] bytes, string fileName)
     {
         try
@@ -1086,6 +1125,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the finalize result operation.
+    /// </summary>
     private VideoProjectImportResult FinalizeResult(VideoProjectImportResult result, string fileName)
     {
         try
@@ -1160,6 +1202,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Parses safe XML.
+    /// </summary>
     private XDocument ParseSafeXml(byte[] bytes)
     {
         try
@@ -1184,6 +1229,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Reads all async.
+    /// </summary>
     private async Task<byte[]> ReadAllAsync(Stream source, CancellationToken cancellationToken)
     {
         try
@@ -1201,6 +1249,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Reads all.
+    /// </summary>
     private byte[] ReadAll(Stream source)
     {
         try
@@ -1218,6 +1269,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Normalizes archive path.
+    /// </summary>
     private string NormalizeArchivePath(string path)
     {
         try
@@ -1237,6 +1291,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Normalizes otio target.
+    /// </summary>
     private string NormalizeOtioTarget(string targetUrl)
     {
         try
@@ -1254,6 +1311,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the JSON array operation.
+    /// </summary>
     private IEnumerable<JsonElement> JsonArray(JsonElement owner, string property)
     {
         try
@@ -1273,6 +1333,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the JSON string operation.
+    /// </summary>
     private string JsonString(JsonElement owner, string property, string fallback = "")
     {
         try
@@ -1296,6 +1359,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the JSON double operation.
+    /// </summary>
     private double JsonDouble(JsonElement owner, string property, double fallback = 0)
     {
         try
@@ -1315,6 +1381,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the JSON bool operation.
+    /// </summary>
     private bool JsonBool(JsonElement owner, string property, bool fallback)
     {
         try
@@ -1333,6 +1402,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the schema name operation.
+    /// </summary>
     private string SchemaName(string schema)
     {
         try
@@ -1349,6 +1421,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the schema version operation.
+    /// </summary>
     private string SchemaVersion(string schema)
     {
         try
@@ -1365,6 +1440,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Finds otio rate.
+    /// </summary>
     private double FindOtioRate(JsonElement root, double fallback)
     {
         try
@@ -1398,6 +1476,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the otio time range start operation.
+    /// </summary>
     private double OtioTimeRangeStart(JsonElement owner, double fallbackRate)
     {
         try
@@ -1415,6 +1496,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the otio time range duration operation.
+    /// </summary>
     private double OtioTimeRangeDuration(JsonElement owner, double fallbackRate)
     {
         try
@@ -1432,6 +1516,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the otio rational seconds operation.
+    /// </summary>
     private double OtioRationalSeconds(JsonElement owner, string property, double fallbackRate)
     {
         try
@@ -1450,6 +1537,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the otio source rate operation.
+    /// </summary>
     private double OtioSourceRate(JsonElement owner, double fallbackRate)
     {
         try
@@ -1469,6 +1559,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the otio marker color operation.
+    /// </summary>
     private string OtioMarkerColor(string color) {
         try
         {
@@ -1494,6 +1587,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the attribute operation.
+    /// </summary>
     private string Attribute(XElement? element, string name, string fallback = "")
         {
             try
@@ -1508,6 +1604,9 @@ public sealed class VideoProjectImportService(
             }
         }
 
+    /// <summary>
+    /// Runs the attribute double operation.
+    /// </summary>
     private double AttributeDouble(XElement? element, string name, double fallback)
         {
             try
@@ -1522,6 +1621,9 @@ public sealed class VideoProjectImportService(
             }
         }
 
+    /// <summary>
+    /// Runs the property operation.
+    /// </summary>
     private string Property(XElement? element, string name, string fallback = "")
     {
         try
@@ -1539,6 +1641,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the property double operation.
+    /// </summary>
     private double PropertyDouble(XElement? element, string name, double fallback)
         {
             try
@@ -1553,6 +1658,9 @@ public sealed class VideoProjectImportService(
             }
         }
 
+    /// <summary>
+    /// Runs the ratio operation.
+    /// </summary>
     private double Ratio(double numerator, double denominator, double fallback)
         {
             try
@@ -1567,6 +1675,9 @@ public sealed class VideoProjectImportService(
             }
         }
 
+    /// <summary>
+    /// Runs the mlt position operation.
+    /// </summary>
     private double MltPosition(string value, double frameRate)
     {
         try
@@ -1584,6 +1695,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the mlt duration operation.
+    /// </summary>
     private double MltDuration(string value, double frameRate)
     {
         try
@@ -1601,6 +1715,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Parses mlt speed.
+    /// </summary>
     private double ParseMltSpeed(string resource, XElement? producer)
     {
         try
@@ -1625,6 +1742,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Parses caps frame rate.
+    /// </summary>
     private double ParseCapsFrameRate(string serialized, double fallback)
     {
         try
@@ -1642,6 +1762,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the property from serialized operation.
+    /// </summary>
     private string PropertyFromSerialized(string serialized, string property, string fallback)
     {
         try
@@ -1659,6 +1782,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the nanoseconds operation.
+    /// </summary>
     private double Nanoseconds(double value) {
         try
         {
@@ -1672,6 +1798,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Opens shot frame rate.
+    /// </summary>
     private double OpenShotFrameRate(JsonElement root)
     {
         try
@@ -1698,6 +1827,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Opens shot profile int.
+    /// </summary>
     private int OpenShotProfileInt(JsonElement root, string property, int fallback)
     {
         try
@@ -1715,6 +1847,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Parses edl rate.
+    /// </summary>
     private double ParseEdlRate(string text, double fallback)
     {
         try
@@ -1731,6 +1866,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the edl title operation.
+    /// </summary>
     private string EdlTitle(string text, string fallback)
     {
         try
@@ -1747,6 +1885,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Parses timecode.
+    /// </summary>
     private double ParseTimecode(string value, double frameRate)
     {
         try
@@ -1768,6 +1909,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Parses clock.
+    /// </summary>
     private double ParseClock(string value, double frameRate)
     {
         try
@@ -1785,6 +1929,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Parses double.
+    /// </summary>
     private double ParseDouble(string? value, double fallback)
         {
             try
@@ -1801,6 +1948,9 @@ public sealed class VideoProjectImportService(
             }
         }
 
+    /// <summary>
+    /// Runs the finite operation.
+    /// </summary>
     private double Finite(double value, double fallback = 0) {
         try
         {
@@ -1814,6 +1964,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the URI path operation.
+    /// </summary>
     private string UriPath(string? uri)
     {
         try
@@ -1833,6 +1986,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the mime from path operation.
+    /// </summary>
     private string MimeFromPath(string? path, string fallback)
     {
         try
@@ -1867,6 +2023,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the data URL operation.
+    /// </summary>
     private string DataUrl(string mimeType, byte[] bytes)
         {
             try
@@ -1881,6 +2040,9 @@ public sealed class VideoProjectImportService(
             }
         }
 
+    /// <summary>
+    /// Runs the default video layer operation.
+    /// </summary>
     private VideoEffectLayer DefaultVideoLayer(string name, double start, double end) {
         try
         {
@@ -1901,6 +2063,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the decode text operation.
+    /// </summary>
     private string DecodeText(byte[] bytes)
     {
         try
@@ -1918,6 +2083,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the format bytes operation.
+    /// </summary>
     private string FormatBytes(long bytes)
     {
         try
@@ -1935,6 +2103,9 @@ public sealed class VideoProjectImportService(
         }
     }
 
+    /// <summary>
+    /// Represents an embedded media.
+    /// </summary>
     private sealed record EmbeddedMedia(string Path, string MimeType, byte[] Bytes);
 
 

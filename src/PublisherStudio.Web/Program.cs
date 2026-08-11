@@ -166,6 +166,9 @@ public static class Program
                 },
                 // Keep the shell in one language. Browser Accept-Language no longer partially
                 // translates an otherwise English UI; users choose a reviewed culture explicitly.
+                /// <summary>
+                /// Runs the cookie request culture provider operation.
+                /// </summary>
                 new CookieRequestCultureProvider()
             ]
         });

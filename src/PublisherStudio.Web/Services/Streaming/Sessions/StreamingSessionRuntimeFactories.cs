@@ -1,10 +1,13 @@
-﻿namespace PublisherStudio.Services.Streaming.Sessions;
+namespace PublisherStudio.Services.Streaming.Sessions;
 
 /// <summary>
 /// Defines the platform chat service factory contract.
 /// </summary>
 public interface IPlatformChatServiceFactory
 {
+    /// <summary>
+    /// Runs the create operation.
+    /// </summary>
     PlatformChatService Create(MediaSession session);
 }
 
@@ -38,6 +41,9 @@ public sealed class PlatformChatServiceFactory(
 /// </summary>
 public interface ILanStreamingServerFactory
 {
+    /// <summary>
+    /// Runs the create operation.
+    /// </summary>
     LanStreamingServer Create(MediaSession session);
 }
 

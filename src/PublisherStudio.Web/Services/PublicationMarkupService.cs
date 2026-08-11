@@ -1,4 +1,4 @@
-﻿using PublisherStudio.BusinessObjects;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Services;
@@ -8,8 +8,17 @@ namespace PublisherStudio.Services;
 /// </summary>
 public interface IPublicationMarkupService
 {
+    /// <summary>
+    /// Runs the safe file name operation.
+    /// </summary>
     string SafeFileName(string value);
+    /// <summary>
+    /// Normalizes CSS background.
+    /// </summary>
     string NormalizeCssBackground(string? value);
+    /// <summary>
+    /// Runs the sanitize preview HTML operation.
+    /// </summary>
     string SanitizePreviewHtml(string html);
 }
 

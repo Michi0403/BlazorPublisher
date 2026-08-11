@@ -5,6 +5,9 @@ namespace PublisherStudio.Services.VideoStudio.Export;
 /// </summary>
 public interface IBrowserRuntimeTemplateService
 {
+    /// <summary>
+    /// Creates blob runtime.
+    /// </summary>
     string CreateBlobRuntime(string payload);
 }
 

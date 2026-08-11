@@ -8,7 +8,13 @@ namespace PublisherStudio.Services;
 /// </summary>
 public interface IPagePresetCatalog
 {
+    /// <summary>
+    /// Gets all.
+    /// </summary>
     IReadOnlyList<PagePreset> GetAll();
+    /// <summary>
+    /// Runs the find operation.
+    /// </summary>
     PagePreset? Find(string? key);
 }
 
@@ -60,7 +66,13 @@ public sealed class PagePresetCatalog(
 /// </summary>
 public interface IStoryPageLayoutService
 {
+    /// <summary>
+    /// Gets default.
+    /// </summary>
     StoryPageLayout GetDefault();
+    /// <summary>
+    /// Runs the normalize operation.
+    /// </summary>
     StoryPageLayout Normalize(
         double pageWidthMm,
         double pageHeightMm,
@@ -131,6 +143,9 @@ public sealed class StoryPageLayoutService(
         }
     }
 
+    /// <summary>
+    /// Normalizes margin.
+    /// </summary>
     private double NormalizeMargin(double value, double pageSize) {
     try
     {
@@ -146,6 +161,9 @@ public sealed class StoryPageLayoutService(
     }
 }
 
+    /// <summary>
+    /// Normalizes pair.
+    /// </summary>
     private void NormalizePair(ref double first, ref double second, double pageSize)
     {
     try

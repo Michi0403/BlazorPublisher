@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
 using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.OrganicPlugins;
 using System.Net;
@@ -18,6 +18,9 @@ public sealed class LocalGptDiscoveryHostedService(
     ILogger<LocalGptDiscoveryHostedService> logger) : BackgroundService
 {
     private int autoConnectInProgress;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly HashSet<string> automaticallyAttemptedPeers = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>

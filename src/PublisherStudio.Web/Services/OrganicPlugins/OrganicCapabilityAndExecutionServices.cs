@@ -147,6 +147,9 @@ public sealed class OrganicCapabilityCatalog(
     }
 }
 
+    /// <summary>
+    /// Runs the capability operation.
+    /// </summary>
     private OrganicCapabilityDescriptor Capability(string key, string name, string description, string organ, bool readOnly, bool confirmation, bool scheduling) {
     try
     {
@@ -187,6 +190,9 @@ public sealed class OrganicCapabilityCatalog(
     }
 }
 
+    /// <summary>
+    /// Runs the UI activation keys operation.
+    /// </summary>
     private List<string> UiActivationKeys(string key) {
     try
     {
@@ -210,6 +216,9 @@ public sealed class OrganicCapabilityCatalog(
     }
 }
 
+    /// <summary>
+    /// Runs the skills operation.
+    /// </summary>
     private List<string> Skills(string key) {
     try
     {
@@ -241,6 +250,9 @@ public sealed class OrganicCapabilityCatalog(
     }
 }
 
+    /// <summary>
+    /// Runs the schema operation.
+    /// </summary>
     private string Schema(string key) {
     try
     {
@@ -271,6 +283,9 @@ public sealed class OrganicCapabilityCatalog(
     }
 }
 
+    /// <summary>
+    /// Runs the input contract operation.
+    /// </summary>
     private string InputContract(string key) {
     try
     {
@@ -293,6 +308,9 @@ public sealed class OrganicCapabilityCatalog(
     }
 }
 
+    /// <summary>
+    /// Runs the output contract operation.
+    /// </summary>
     private string OutputContract(string key) {
     try
     {
@@ -315,6 +333,9 @@ public sealed class OrganicCapabilityCatalog(
     }
 }
 
+    /// <summary>
+    /// Runs the security contract operation.
+    /// </summary>
     private string SecurityContract(string key) {
     try
     {
@@ -335,6 +356,9 @@ public sealed class OrganicCapabilityCatalog(
     }
 }
 
+    /// <summary>
+    /// Runs the organic use case operation.
+    /// </summary>
     private string OrganicUseCase(string key) {
     try
     {
@@ -356,6 +380,9 @@ public sealed class OrganicCapabilityCatalog(
     }
 }
 
+    /// <summary>
+    /// Runs the suggested council roles operation.
+    /// </summary>
     private List<string> SuggestedCouncilRoles(string key) {
     try
     {
@@ -453,6 +480,9 @@ public sealed class OrganicWorkExecutor(
     }
 }
 
+    /// <summary>
+    /// Runs the queue screenshot operation.
+    /// </summary>
     private object QueueScreenshot(JsonElement parameters)
     {
     try
@@ -488,6 +518,9 @@ public sealed class OrganicWorkExecutor(
     }
 }
 
+    /// <summary>
+    /// Reads secure capture.
+    /// </summary>
     private object ReadSecureCapture(OrganicWireEnvelope envelope, string expectedKind)
     {
     try
@@ -523,6 +556,9 @@ public sealed class OrganicWorkExecutor(
     }
 }
 
+    /// <summary>
+    /// Runs the return reviewed text operation.
+    /// </summary>
     private object ReturnReviewedText(OrganicWireEnvelope envelope, JsonElement parameters)
     {
     try
@@ -552,6 +588,9 @@ public sealed class OrganicWorkExecutor(
     }
 }
 
+    /// <summary>
+    /// Runs the return approved web content operation.
+    /// </summary>
     private object ReturnApprovedWebContent(OrganicWireEnvelope envelope, JsonElement parameters)
     {
     try
@@ -582,6 +621,9 @@ public sealed class OrganicWorkExecutor(
     }
 }
 
+    /// <summary>
+    /// Runs the queue input operation.
+    /// </summary>
     private object QueueInput(JsonElement parameters)
     {
     try
@@ -612,6 +654,9 @@ public sealed class OrganicWorkExecutor(
     }
 }
 
+    /// <summary>
+    /// Reads screenshot result.
+    /// </summary>
     private object ReadScreenshotResult(JsonElement parameters)
     {
     try
@@ -643,6 +688,9 @@ public sealed class OrganicWorkExecutor(
     }
 }
 
+    /// <summary>
+    /// Reads input result.
+    /// </summary>
     private object ReadInputResult(JsonElement parameters)
     {
     try
@@ -668,6 +716,9 @@ public sealed class OrganicWorkExecutor(
     }
 }
 
+    /// <summary>
+    /// Runs the generate open scad operation.
+    /// </summary>
     private object GenerateOpenScad(JsonElement parameters)
     {
     try
@@ -687,6 +738,9 @@ public sealed class OrganicWorkExecutor(
     }
 }
 
+    /// <summary>
+    /// Runs the inspect spreadsheet operation.
+    /// </summary>
     private object InspectSpreadsheet(JsonElement parameters)
     {
     try
@@ -713,6 +767,9 @@ public sealed class OrganicWorkExecutor(
     }
 }
 
+    /// <summary>
+    /// Runs the propose text operation.
+    /// </summary>
     private object ProposeText(JsonElement parameters)
     {
     try
@@ -738,6 +795,9 @@ public sealed class OrganicWorkExecutor(
     }
 }
 
+    /// <summary>
+    /// Reads parameters.
+    /// </summary>
     private JsonElement ReadParameters(OrganicWireEnvelope envelope)
     {
     try
@@ -755,6 +815,9 @@ public sealed class OrganicWorkExecutor(
         throw;
     }
 }
+    /// <summary>
+    /// Gets string.
+    /// </summary>
     private string GetString(JsonElement root, string name, string fallback) {
     try
     {
@@ -769,6 +832,9 @@ public sealed class OrganicWorkExecutor(
         throw;
     }
 }
+    /// <summary>
+    /// Gets double.
+    /// </summary>
     private double GetDouble(JsonElement root, string name, double fallback) {
     try
     {
@@ -783,6 +849,9 @@ public sealed class OrganicWorkExecutor(
         throw;
     }
 }
+    /// <summary>
+    /// Gets int.
+    /// </summary>
     private int GetInt(JsonElement root, string name, int fallback) {
     try
     {
@@ -797,6 +866,9 @@ public sealed class OrganicWorkExecutor(
         throw;
     }
 }
+    /// <summary>
+    /// Gets boolean.
+    /// </summary>
     private bool GetBoolean(JsonElement root, string name, bool fallback) {
     try
     {
@@ -823,7 +895,13 @@ public sealed class OrganicWorkCoordinator(
     IOrganicWorkExecutor executor,
     ILogger<OrganicWorkCoordinator> logger) : IOrganicWorkCoordinator
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<Guid, OrganicPluginWorkItem> work = new();
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<string, SemaphoreSlim> workflowGates = new(StringComparer.Ordinal);
     /// <summary>
     /// Occurs when changed.
@@ -993,6 +1071,9 @@ public sealed class OrganicWorkCoordinator(
     }
 }
 
+    /// <summary>
+    /// Reads interaction editor.
+    /// </summary>
     private OrganicInteractionEditor ReadInteractionEditor(OrganicWireEnvelope envelope)
     {
     try
@@ -1042,6 +1123,9 @@ public sealed class OrganicWorkCoordinator(
     }
 }
 
+    /// <summary>
+    /// Runs the execute async operation.
+    /// </summary>
     private async Task ExecuteAsync(OrganicPluginWorkItem item, CancellationToken cancellationToken)
     {
         var key = string.IsNullOrWhiteSpace(item.Request.WorkOrderKey) ? item.Id.ToString("N") : item.Request.WorkOrderKey;

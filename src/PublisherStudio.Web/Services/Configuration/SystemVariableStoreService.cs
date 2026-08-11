@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Text.Json;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -9,7 +9,13 @@ namespace PublisherStudio.Services.Configuration;
 /// </summary>
 public sealed class SystemVariableStoreService : ISystemVariableStoreService
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly object _sync = new();
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly Dictionary<string, string> _values = new(StringComparer.OrdinalIgnoreCase);
     private readonly string _storagePath;
     private ILogger<SystemVariableStoreService> logger = NullLogger<SystemVariableStoreService>.Instance;
@@ -236,6 +242,9 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
         }
     }
 
+    /// <summary>
+    /// Loads configuration.
+    /// </summary>
     private void LoadConfiguration(IConfiguration configuration)
     {
         try
@@ -254,6 +263,9 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
         }
     }
 
+    /// <summary>
+    /// Loads persisted.
+    /// </summary>
     private void LoadPersisted()
     {
         try
@@ -274,6 +286,9 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
         }
     }
 
+    /// <summary>
+    /// Runs the persist operation.
+    /// </summary>
     private void Persist()
     {
         try

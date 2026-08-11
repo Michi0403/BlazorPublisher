@@ -1,4 +1,4 @@
-﻿using PublisherStudio.Hubs.Streaming.Lan;
+using PublisherStudio.Hubs.Streaming.Lan;
 using System.Net.WebSockets;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +12,9 @@ namespace PublisherStudio.Controllers.Streaming.UseCases;
 [Route("api/mediahost/sessions/{sessionId:guid}")]
 public sealed class StreamingIngestController(StreamingIngestUseCases useCases, WebRtcSignalingHub webRtcHub) : ControllerBase
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly JsonSerializerOptions IngestJson = new() { PropertyNameCaseInsensitive = true };
     private readonly StreamingIngestUseCases _useCases = useCases;
     private readonly WebRtcSignalingHub _webRtcHub = webRtcHub;

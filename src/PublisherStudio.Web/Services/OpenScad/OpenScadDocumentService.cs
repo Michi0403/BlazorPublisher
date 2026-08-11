@@ -11,6 +11,9 @@ public sealed class OpenScadDocumentService(
     IOpenScadValueFormatter values,
     IEnumerable<IOpenScadNodeRenderer> renderers) : IOpenScadDocumentService
 {
+    /// <summary>
+    /// Runs the to list operation.
+    /// </summary>
     private readonly IReadOnlyList<IOpenScadNodeRenderer> _renderers = renderers.ToList().AsReadOnly();
 
     /// <summary>
@@ -198,6 +201,9 @@ public sealed class OpenScadDocumentService(
     }
 }
 
+    /// <summary>
+    /// Runs the render node operation.
+    /// </summary>
     private string RenderNode(OpenScadDocument document, OpenScadNode node, int depth)
     {
     try
@@ -245,6 +251,9 @@ public sealed class OpenScadDocumentService(
     }
 }
 
+    /// <summary>
+    /// Validates parameter.
+    /// </summary>
     private void ValidateParameter(OpenScadValidationResult result, Guid nodeId, OpenScadNodeDefinition definition, OpenScadParameterDefinition parameter, OpenScadValue value)
     {
     try
@@ -280,6 +289,9 @@ public sealed class OpenScadDocumentService(
     }
 }
 
+    /// <summary>
+    /// Runs the track expression operation.
+    /// </summary>
     private string TrackExpression(OpenScadAnimationTrack track)
     {
     try
@@ -303,6 +315,9 @@ public sealed class OpenScadDocumentService(
     }
 }
 
+    /// <summary>
+    /// Runs the indent block operation.
+    /// </summary>
     private string IndentBlock(string source, int levels)
     {
     try
@@ -318,6 +333,9 @@ public sealed class OpenScadDocumentService(
     }
 }
 
+    /// <summary>
+    /// Runs the number operation.
+    /// </summary>
     private string Number(double value) {
     try
     {
@@ -330,6 +348,9 @@ public sealed class OpenScadDocumentService(
     }
 }
 
+    /// <summary>
+    /// Runs the enumerate operation.
+    /// </summary>
     private IEnumerable<OpenScadNode> Enumerate(IEnumerable<OpenScadNode> nodes)
     {
         foreach (var node in nodes)

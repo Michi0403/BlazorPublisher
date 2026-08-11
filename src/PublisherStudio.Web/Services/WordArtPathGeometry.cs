@@ -199,6 +199,9 @@ public sealed class WordArtPathGeometry(
     }
 }
 
+    /// <summary>
+    /// Runs the points operation.
+    /// </summary>
     private List<WordArtPathPoint> Points(params (double X, double Y)[] values) {
     try
     {
@@ -214,6 +217,9 @@ public sealed class WordArtPathGeometry(
     }
 }
 
+    /// <summary>
+    /// Runs the inv operation.
+    /// </summary>
     private string Inv(double value) {
     try
     {

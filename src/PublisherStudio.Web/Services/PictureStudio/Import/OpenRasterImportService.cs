@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.IO.Compression;
 using System.Text;
 using System.Xml;
@@ -88,6 +88,9 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
         }
     }
 
+    /// <summary>
+    /// Reads stack async.
+    /// </summary>
     private async Task ReadStackAsync(
         ZipArchive archive,
         XElement stack,
@@ -224,6 +227,9 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
         }
     }
 
+    /// <summary>
+    /// Reads image size.
+    /// </summary>
     private (int Width, int Height) ReadImageSize(byte[] bytes, string extension)
     {
         if (extension == ".png" && bytes.Length >= 24 && bytes.AsSpan(0, 8).SequenceEqual(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 }))
@@ -234,6 +240,9 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
     }
 
 
+    /// <summary>
+    /// Reads int.
+    /// </summary>
     private int ReadInt(string? value, int fallback) {
         try
         {
@@ -247,6 +256,9 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
         }
     }
 
+    /// <summary>
+    /// Reads double.
+    /// </summary>
     private double ReadDouble(string? value, double fallback) {
         try
         {
@@ -262,6 +274,9 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
         }
     }
 
+    /// <summary>
+    /// Runs the map blend mode operation.
+    /// </summary>
     private PictureBlendMode MapBlendMode(string? value)
     {
         try
@@ -289,6 +304,9 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
         }
     }
 
+    /// <summary>
+    /// Runs the decode SVG operation.
+    /// </summary>
     private string DecodeSvg(byte[] bytes)
     {
         try
@@ -306,6 +324,9 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
         }
     }
 
+    /// <summary>
+    /// Runs the decompress SVG operation.
+    /// </summary>
     private string DecompressSvg(byte[] bytes)
     {
         try
@@ -336,6 +357,9 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
         }
     }
 
+    /// <summary>
+    /// Reads big endian int.
+    /// </summary>
     private int ReadBigEndianInt(byte[] bytes, int offset)
     {
         try
@@ -357,6 +381,9 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
     }
 
 
+    /// <summary>
+    /// Runs the clean name operation.
+    /// </summary>
     private string CleanName(string? value, string fallback) {
         try
         {
@@ -369,6 +396,9 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
             throw;
         }
     }
+    /// <summary>
+    /// Determines whether true.
+    /// </summary>
     private bool IsTrue(string? value) {
         try
         {
@@ -381,6 +411,9 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
             throw;
         }
     }
+    /// <summary>
+    /// Runs the nearly operation.
+    /// </summary>
     private bool Nearly(double left, double right) {
         try
         {

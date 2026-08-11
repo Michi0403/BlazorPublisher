@@ -1,4 +1,4 @@
-﻿using PublisherStudio.BusinessObjects;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.OrganicPlugins;
 
 namespace PublisherStudio.Services.Configuration;
@@ -9,6 +9,9 @@ namespace PublisherStudio.Services.Configuration;
 public sealed class OrganicConnectionRuntimeStateService(
     ILogger<OrganicConnectionRuntimeStateService> logger) : IOrganicConnectionRuntimeState
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly object gate = new();
     private Guid connectionId;
     private string peerId = string.Empty;

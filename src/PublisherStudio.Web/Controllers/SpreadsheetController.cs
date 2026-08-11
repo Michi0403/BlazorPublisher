@@ -1,4 +1,4 @@
-﻿using DevExpress.AspNetCore.Spreadsheet;
+using DevExpress.AspNetCore.Spreadsheet;
 using DevExpress.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using PublisherStudio.BusinessObjects;
@@ -172,6 +172,9 @@ public sealed class SpreadsheetController : Controller
         return File(session.Content, ContentType(session.SourceFormat), session.FileName);
     }
 
+    /// <summary>
+    /// Runs the content type operation.
+    /// </summary>
     private string ContentType(SpreadsheetStorageFormat format) => format switch
     {
         SpreadsheetStorageFormat.Xlsm => "application/vnd.ms-excel.sheet.macroEnabled.12",
@@ -181,6 +184,9 @@ public sealed class SpreadsheetController : Controller
         _ => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     };
 
+    /// <summary>
+    /// Runs the to dev express format operation.
+    /// </summary>
     private DocumentFormat ToDevExpressFormat(SpreadsheetStorageFormat format) => format switch
     {
         SpreadsheetStorageFormat.Xlsm => DocumentFormat.Xlsm,

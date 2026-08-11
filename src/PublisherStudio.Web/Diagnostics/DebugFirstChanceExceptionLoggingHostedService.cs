@@ -15,6 +15,9 @@ public sealed class DebugFirstChanceExceptionLoggingHostedService(
     IOptions<DebugExceptionDiagnosticsOptions> configuredOptions,
     ILogger<DebugFirstChanceExceptionLoggingHostedService> logger) : IHostedService, IDisposable
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<string, ExceptionOccurrence> occurrences = new(StringComparer.Ordinal);
     private readonly DebugExceptionDiagnosticsOptions options = configuredOptions.Value;
     private int handlingException;
@@ -59,6 +62,9 @@ public sealed class DebugFirstChanceExceptionLoggingHostedService(
         Unsubscribe();
     }
 
+    /// <summary>
+    /// Handles first chance exception.
+    /// </summary>
     private void HandleFirstChanceException(object? _, FirstChanceExceptionEventArgs eventArgs)
     {
         if (Interlocked.CompareExchange(ref handlingException, 1, 0) != 0)
@@ -109,6 +115,9 @@ public sealed class DebugFirstChanceExceptionLoggingHostedService(
         }
     }
 
+    /// <summary>
+    /// Resolves log level.
+    /// </summary>
     private LogLevel? ResolveLogLevel(Exception exception, bool applicationOwned)
     {
         if (applicationOwned)
@@ -128,6 +137,9 @@ public sealed class DebugFirstChanceExceptionLoggingHostedService(
         return null;
     }
 
+    /// <summary>
+    /// Resolves call site.
+    /// </summary>
     private string ResolveCallSite(string stackTrace)
     {
         if (string.IsNullOrWhiteSpace(stackTrace))
@@ -139,6 +151,9 @@ public sealed class DebugFirstChanceExceptionLoggingHostedService(
             ?? "stack unavailable";
     }
 
+    /// <summary>
+    /// Validates options.
+    /// </summary>
     private void ValidateOptions()
     {
         if (options.DetailedOccurrencesPerCallSite < 1)
@@ -147,6 +162,9 @@ public sealed class DebugFirstChanceExceptionLoggingHostedService(
             throw new InvalidDataException("PublisherStudio debug exception diagnostics require a repetition summary interval of at least two.");
     }
 
+    /// <summary>
+    /// Runs the log final summaries operation.
+    /// </summary>
     private void LogFinalSummaries()
     {
         foreach (var occurrence in occurrences.Values.Where(value => value.Count > options.DetailedOccurrencesPerCallSite))
@@ -159,6 +177,9 @@ public sealed class DebugFirstChanceExceptionLoggingHostedService(
         }
     }
 
+    /// <summary>
+    /// Runs the unsubscribe operation.
+    /// </summary>
     private void Unsubscribe()
     {
         if (!subscribed)
@@ -168,6 +189,9 @@ public sealed class DebugFirstChanceExceptionLoggingHostedService(
         subscribed = false;
     }
 
+    /// <summary>
+    /// Represents an exception occurrence.
+    /// </summary>
     private sealed class ExceptionOccurrence(string exceptionType, string callSite)
     {
         internal string ExceptionType { get; } = exceptionType;

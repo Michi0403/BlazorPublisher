@@ -1,4 +1,4 @@
-﻿using PublisherStudio.BusinessObjects;
+using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.MediaStudio.UseCases;
 
@@ -568,6 +568,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Runs the segment timeline length operation.
+    /// </summary>
     private double SegmentTimelineLength(PublicationMediaSegment segment, double playbackRate)
     {
         try
@@ -586,6 +589,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Runs the clone source reference operation.
+    /// </summary>
     private MediaSourceReference CloneSourceReference(MediaSourceReference? source) {
         try
         {
@@ -780,6 +786,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Runs the upsert live filter operation.
+    /// </summary>
     private void UpsertLiveFilter(VideoEffectLayer layer, VideoEffectFilterKind kind, double value, double neutral)
     {
         try
@@ -806,6 +815,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Runs the clone temporal sections operation.
+    /// </summary>
     private List<MediaTemporalSection> CloneTemporalSections(IEnumerable<MediaTemporalSection>? sections) {
         try
         {
@@ -830,6 +842,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Runs the clone video layers operation.
+    /// </summary>
     private List<VideoEffectLayer> CloneVideoLayers(IEnumerable<VideoEffectLayer>? layers) {
         try
         {
@@ -847,6 +862,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Runs the clone video region operation.
+    /// </summary>
     private VideoFrameRegion CloneVideoRegion(VideoFrameRegion? region) {
         try
         {
@@ -870,6 +888,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Runs the clone video filters operation.
+    /// </summary>
     private List<VideoEffectFilter> CloneVideoFilters(IEnumerable<VideoEffectFilter>? filters) {
         try
         {
@@ -900,6 +921,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Normalizes video layer.
+    /// </summary>
     private VideoEffectLayer NormalizeVideoLayer(VideoEffectLayer layer, double minimum, double maximum, int index)
     {
         try
@@ -977,6 +1001,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Normalizes filter.
+    /// </summary>
     private void NormalizeFilter(VideoEffectFilter filter)
     {
         try
@@ -1030,6 +1057,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Normalizes color.
+    /// </summary>
     private string NormalizeColor(string? value, string fallback)
     {
         try
@@ -1047,6 +1077,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Runs the suffix operation.
+    /// </summary>
     private string Suffix(string name, string suffix)
     {
         try
@@ -1063,6 +1096,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Normalizes temporal selection.
+    /// </summary>
     private void NormalizeTemporalSelection(PublicationMediaSegment segment)
     {
         try
@@ -1115,6 +1151,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Normalizes cut sections.
+    /// </summary>
     private void NormalizeCutSections(PublicationMediaSegment segment)
     {
         try
@@ -1145,6 +1184,9 @@ public sealed class MediaTimelineEditService(
         }
     }
 
+    /// <summary>
+    /// Runs the merge name operation.
+    /// </summary>
     private string MergeName(string left, string right)
     {
         try

@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Configuration;
@@ -8,5 +8,8 @@ namespace PublisherStudio.Services.Configuration;
 /// </summary>
 public interface IPublisherRuntimePatternService
 {
+    /// <summary>
+    /// Gets regex.
+    /// </summary>
     Regex GetRegex(PublisherRuntimePattern pattern);
 }

@@ -1,4 +1,4 @@
-﻿using PublisherStudio.BusinessObjects;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.OrganicPlugins;
 
 namespace PublisherStudio.Services.Configuration;
@@ -9,6 +9,9 @@ namespace PublisherStudio.Services.Configuration;
 public sealed class OrganicReplayPolicyDataService(
     ILogger<OrganicReplayPolicyDataService> logger) : IOrganicReplayPolicyDataService
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly OrganicReplayPolicySnapshot snapshot = new()
     {
         Retention = TimeSpan.FromMinutes(15),

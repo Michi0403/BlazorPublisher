@@ -27,10 +27,25 @@ public sealed class LocalGptConnectionService(
     IRuntimeEndpointState runtimeEndpointState,
     ILogger<LocalGptConnectionService> logger) : ILocalGptConnectionService
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly SemaphoreSlim lifecycleGate = new(1, 1);
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly SemaphoreSlim writeGate = new(1, 1);
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<Guid, Task> activeInvocations = new();
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<Guid, TaskCompletionSource<OrganicWireEnvelope>> responseWaiters = new();
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<Guid, OrganicWireEnvelope> recentResponses = new();
     private TcpClient? client;
     private StreamReader? reader;
@@ -279,6 +294,9 @@ public sealed class LocalGptConnectionService(
         }
     }
 
+    /// <summary>
+    /// Reads loop async.
+    /// </summary>
     private async Task ReadLoopAsync(Guid connectedId, string connectedPeerId, StreamReader connectedReader, StreamWriter connectedWriter, bool isLoopback, CancellationToken cancellationToken)
     {
         try
@@ -320,6 +338,9 @@ public sealed class LocalGptConnectionService(
         }
     }
 
+    /// <summary>
+    /// Handles incoming async.
+    /// </summary>
     private async Task HandleIncomingAsync(OrganicWireEnvelope envelope, Guid connectedId, string connectedPeerId, StreamWriter connectedWriter, bool isLoopback, CancellationToken cancellationToken)
     {
         try
@@ -411,6 +432,9 @@ public sealed class LocalGptConnectionService(
         }
     }
 
+    /// <summary>
+    /// Starts invoke.
+    /// </summary>
     private void StartInvoke(OrganicWireEnvelope envelope, Guid connectedId, StreamWriter connectedWriter, bool isLoopback, CancellationToken cancellationToken)
     {
         try
@@ -429,6 +453,9 @@ public sealed class LocalGptConnectionService(
         }
     }
 
+    /// <summary>
+    /// Runs the process invoke async operation.
+    /// </summary>
     private async Task ProcessInvokeAsync(OrganicWireEnvelope envelope, Guid connectedId, StreamWriter connectedWriter, bool isLoopback, CancellationToken cancellationToken)
     {
         try
@@ -448,6 +475,9 @@ public sealed class LocalGptConnectionService(
         }
     }
 
+    /// <summary>
+    /// Runs the send envelope core async operation.
+    /// </summary>
     private async Task<Guid> SendEnvelopeCoreAsync(OrganicWireEnvelope envelope, StreamWriter connectedWriter, string targetPeerId, bool isLoopback, CancellationToken cancellationToken)
     {
         try
@@ -477,6 +507,9 @@ public sealed class LocalGptConnectionService(
     }
 
 
+    /// <summary>
+    /// Runs the disconnect core async operation.
+    /// </summary>
     private async Task DisconnectCoreAsync()
     {
         var oldPeerId = peerId;
@@ -514,6 +547,9 @@ public sealed class LocalGptConnectionService(
         Changed?.Invoke();
     }
 
+    /// <summary>
+    /// Attempts to read.
+    /// </summary>
     private bool TryRead<T>(OrganicWireEnvelope envelope, string key, out T? value)
     {
         value = default;
@@ -522,6 +558,9 @@ public sealed class LocalGptConnectionService(
         catch (JsonException) { return false; }
     }
 
+    /// <summary>
+    /// Applies permission policy.
+    /// </summary>
     private OrganicCapabilityDescriptor ApplyPermissionPolicy(string requestedPeerId, OrganicCapabilityDescriptor capability)
     {
         try
@@ -547,6 +586,9 @@ public sealed class LocalGptConnectionService(
         }
     }
 
+    /// <summary>
+    /// Normalizes address.
+    /// </summary>
     private string NormalizeAddress(string address, string hostName)
     {
         try

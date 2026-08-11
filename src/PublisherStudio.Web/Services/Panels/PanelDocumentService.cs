@@ -138,6 +138,9 @@ public sealed class PanelDocumentService(
         }
     }
 
+    /// <summary>
+    /// Creates visual.
+    /// </summary>
     private DataVisualElement CreateVisual(PublicationDocument document, DataVisualKind kind, string name, double width, double height)
     {
     try
@@ -166,6 +169,9 @@ public sealed class PanelDocumentService(
     }
 }
 
+    /// <summary>
+    /// Creates component.
+    /// </summary>
     private DevExtremeComponentElement CreateComponent(PublicationDocument document, PublicationComponentKind kind, string name, double width, double height)
     {
     try
@@ -286,6 +292,9 @@ public sealed class PanelDocumentService(
         }
     }
 
+    /// <summary>
+    /// Normalizes panel.
+    /// </summary>
     private void NormalizePanel(PublicationDocument document, PanelElement panel, int depth, HashSet<Guid> usedElementIds, bool panelIdRegistered)
     {
     try
@@ -336,6 +345,9 @@ public sealed class PanelDocumentService(
     }
 }
 
+    /// <summary>
+    /// Normalizes elements.
+    /// </summary>
     private void NormalizeElements(PublicationDocument document, PanelElement owner, List<PublicationElement> elements, int depth, HashSet<Guid> usedElementIds)
     {
     try
@@ -394,6 +406,9 @@ public sealed class PanelDocumentService(
     }
 }
 
+    /// <summary>
+    /// Ensures unique identifier.
+    /// </summary>
     private Guid EnsureUniqueId(Guid candidate, HashSet<Guid> usedIds)
     {
     try
@@ -414,6 +429,9 @@ public sealed class PanelDocumentService(
     }
 }
 
+    /// <summary>
+    /// Creates kpi dashboard.
+    /// </summary>
     private PanelElement CreateKpiDashboard(PublicationDocument document)
     {
     try
@@ -455,6 +473,9 @@ public sealed class PanelDocumentService(
     }
 }
 
+    /// <summary>
+    /// Creates operations board.
+    /// </summary>
     private PanelElement CreateOperationsBoard(PublicationDocument document)
     {
     try
@@ -494,6 +515,9 @@ public sealed class PanelDocumentService(
     }
 }
 
+    /// <summary>
+    /// Creates creator hub.
+    /// </summary>
     private PanelElement CreateCreatorHub(PublicationDocument document)
     {
     try
@@ -545,6 +569,9 @@ public sealed class PanelDocumentService(
     }
 }
 
+    /// <summary>
+    /// Creates web experience.
+    /// </summary>
     private PanelElement CreateWebExperience()
     {
     try
@@ -568,6 +595,9 @@ public sealed class PanelDocumentService(
     }
 }
 
+    /// <summary>
+    /// Runs the web view operation.
+    /// </summary>
     private PublicationPanelView WebView(string name, string slug, string background, string heading, string copy)
     {
     try
@@ -594,6 +624,9 @@ public sealed class PanelDocumentService(
     }
 }
 
+    /// <summary>
+    /// Ensures data.
+    /// </summary>
     private PublicationDataObject EnsureData(PublicationDocument document)
     {
     try
@@ -614,6 +647,9 @@ public sealed class PanelDocumentService(
     }
 }
 
+    /// <summary>
+    /// Runs the visual operation.
+    /// </summary>
     private DataVisualElement Visual(Guid dataObjectId, DataVisualKind kind, string title, string argument, string value, string target, double x, double y, double width, double height) {
     try
     {
@@ -645,6 +681,9 @@ public sealed class PanelDocumentService(
     }
 }
 
+    /// <summary>
+    /// Runs the slug operation.
+    /// </summary>
     private string Slug(string? value, string fallback)
     {
     try

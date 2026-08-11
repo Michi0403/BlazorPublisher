@@ -131,6 +131,9 @@ public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> log
     }
 }
 
+    /// <summary>
+    /// Creates open XML package.
+    /// </summary>
     private byte[] CreateOpenXmlPackage(IEnumerable<string> bodyElements)
     {
     try
@@ -197,6 +200,9 @@ public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> log
     }
 }
 
+    /// <summary>
+    /// Builds paragraph.
+    /// </summary>
     private string BuildParagraph(string runs, string? paragraphProperties = null) {
     try
     {
@@ -214,6 +220,9 @@ public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> log
     }
 }
 
+    /// <summary>
+    /// Builds markdown runs.
+    /// </summary>
     private string BuildMarkdownRuns(string value, string? baseProperties = null)
     {
     try
@@ -280,6 +289,9 @@ public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> log
     }
 }
 
+    /// <summary>
+    /// Builds run.
+    /// </summary>
     private string BuildRun(string value, string? runProperties = null)
     {
     try
@@ -301,6 +313,9 @@ public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> log
     }
 }
 
+    /// <summary>
+    /// Normalizes lines.
+    /// </summary>
     private string NormalizeLines(string? value) {
     try
     {
@@ -316,6 +331,9 @@ public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> log
     }
 }
 
+    /// <summary>
+    /// Runs the write operation.
+    /// </summary>
     private void Write(ZipArchive archive, string name, string content)
     {
     try

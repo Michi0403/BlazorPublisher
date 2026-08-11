@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Configuration;
 
@@ -108,6 +108,9 @@ public sealed class FfmpegLocator(
         }
     }
 
+    /// <summary>
+    /// Runs the known install locations operation.
+    /// </summary>
     private IEnumerable<string> KnownInstallLocations()
     {
         logger.LogTrace($"Enumerating known FFmpeg installation locations.");
@@ -140,6 +143,9 @@ public sealed class FfmpegLocator(
         }
     }
 
+    /// <summary>
+    /// Finds win get package executables.
+    /// </summary>
     private IEnumerable<string> FindWinGetPackageExecutables(string localAppData)
     {
         try
@@ -189,6 +195,9 @@ public sealed class FfmpegLocator(
         }
     }
 
+    /// <summary>
+    /// Attempts to resolve command.
+    /// </summary>
     private bool TryResolveCommand(string command, out string path)
     {
         try

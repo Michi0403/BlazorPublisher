@@ -1,4 +1,4 @@
-﻿using PublisherStudio.BusinessObjects;
+using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Automation;
 
@@ -7,10 +7,25 @@ namespace PublisherStudio.Services.Automation;
 /// </summary>
 public interface IUserInputAutomationService
 {
+    /// <summary>
+    /// Runs the enqueue operation.
+    /// </summary>
     BrowserAutomationCommand Enqueue(BrowserAutomationCommand command);
+    /// <summary>
+    /// Gets all.
+    /// </summary>
     IReadOnlyList<BrowserAutomationCommand> GetAll();
+    /// <summary>
+    /// Runs the claim pending operation.
+    /// </summary>
     IReadOnlyList<BrowserAutomationCommand> ClaimPending(int maximum = 25);
+    /// <summary>
+    /// Runs the complete operation.
+    /// </summary>
     bool Complete(Guid id, AutomationCompletion completion);
+    /// <summary>
+    /// Determines whether cel.
+    /// </summary>
     bool Cancel(Guid id);
 }
 
@@ -19,11 +34,29 @@ public interface IUserInputAutomationService
 /// </summary>
 public interface IScreenshotCaptureService
 {
+    /// <summary>
+    /// Runs the enqueue operation.
+    /// </summary>
     BrowserScreenshotRequest Enqueue(BrowserScreenshotRequest request);
+    /// <summary>
+    /// Gets all.
+    /// </summary>
     IReadOnlyList<BrowserScreenshotRequest> GetAll();
+    /// <summary>
+    /// Runs the claim pending operation.
+    /// </summary>
     IReadOnlyList<BrowserScreenshotRequest> ClaimPending(int maximum = 5);
+    /// <summary>
+    /// Runs the complete operation.
+    /// </summary>
     bool Complete(Guid id, ScreenshotCompletion completion);
+    /// <summary>
+    /// Attempts to get.
+    /// </summary>
     bool TryGet(Guid id, out BrowserScreenshotRequest request);
+    /// <summary>
+    /// Determines whether cel.
+    /// </summary>
     bool Cancel(Guid id);
 }
 
@@ -32,6 +65,9 @@ public interface IScreenshotCaptureService
 /// </summary>
 public interface IBusinessObjectContextService
 {
+    /// <summary>
+    /// Creates snapshot.
+    /// </summary>
     BusinessObjectContextSnapshot CreateSnapshot();
 }
 
@@ -40,5 +76,8 @@ public interface IBusinessObjectContextService
 /// </summary>
 public interface IApiSurfaceCatalogService
 {
+    /// <summary>
+    /// Gets surfaces.
+    /// </summary>
     IReadOnlyList<ApiSurfaceDescriptor> GetSurfaces();
 }

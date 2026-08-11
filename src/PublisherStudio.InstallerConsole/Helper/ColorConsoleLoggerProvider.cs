@@ -33,6 +33,9 @@ namespace PublisherStudio.InstallerConsole.Helper
         public ILogger CreateLogger(string categoryName) =>
             loggers.GetOrAdd(categoryName, name => new ColorConsoleLogger(name, GetCurrentConfig));
 
+        /// <summary>
+        /// Gets current config.
+        /// </summary>
         private ColorConsoleLoggerConfiguration GetCurrentConfig() => _currentConfig;
 
         /// <summary>

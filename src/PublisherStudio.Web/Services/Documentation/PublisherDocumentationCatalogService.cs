@@ -12,6 +12,9 @@ public sealed class PublisherDocumentationCatalogService(
     IWebHostEnvironment environment,
     ILogger<PublisherDocumentationCatalogService> logger) : IPublisherDocumentationCatalogService
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly object synchronization = new();
     private IReadOnlyList<PublisherDocumentationComment>? commentCache;
     private string? commentCachePath;
@@ -135,6 +138,9 @@ public sealed class PublisherDocumentationCatalogService(
     }
 }
 
+    /// <summary>
+    /// Loads comments.
+    /// </summary>
     private IReadOnlyList<PublisherDocumentationComment> LoadComments(string? documentationRoot)
     {
         var path = ResolveXmlDocumentationPath(documentationRoot);
@@ -169,6 +175,9 @@ public sealed class PublisherDocumentationCatalogService(
         }
     }
 
+    /// <summary>
+    /// Creates comment.
+    /// </summary>
     private PublisherDocumentationComment? CreateComment(XElement member)
     {
     try
@@ -197,6 +206,9 @@ public sealed class PublisherDocumentationCatalogService(
     }
 }
 
+    /// <summary>
+    /// Runs the comment matches operation.
+    /// </summary>
     private bool CommentMatches(PublisherDocumentationComment comment, string query) {
     try
     {
@@ -215,6 +227,9 @@ public sealed class PublisherDocumentationCatalogService(
     }
 }
 
+    /// <summary>
+    /// Resolves documentation root.
+    /// </summary>
     private string? ResolveDocumentationRoot()
     {
     try
@@ -242,6 +257,9 @@ public sealed class PublisherDocumentationCatalogService(
     }
 }
 
+    /// <summary>
+    /// Resolves XML documentation path.
+    /// </summary>
     private string? ResolveXmlDocumentationPath(string? documentationRoot)
     {
     try
@@ -265,6 +283,9 @@ public sealed class PublisherDocumentationCatalogService(
     }
 }
 
+    /// <summary>
+    /// Reads manifest.
+    /// </summary>
     private PublisherDocumentationManifest? ReadManifest(string? documentationRoot)
     {
         if (documentationRoot is null) return null;
@@ -282,6 +303,9 @@ public sealed class PublisherDocumentationCatalogService(
         }
     }
 
+    /// <summary>
+    /// Builds display name.
+    /// </summary>
     private string BuildDisplayName(string memberId)
     {
     try
@@ -302,6 +326,9 @@ public sealed class PublisherDocumentationCatalogService(
     }
 }
 
+    /// <summary>
+    /// Normalizes comment.
+    /// </summary>
     private string NormalizeComment(string? value)
     {
     try

@@ -1,4 +1,4 @@
-﻿using PublisherStudio.BusinessObjects;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Configuration;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -71,13 +71,37 @@ public sealed class EncoderSessionService : IDisposable
     private readonly FfmpegLocator _ffmpegLocator;
     private readonly FfmpegEncoderResolver _encoderResolver;
     private readonly PublisherMediaSessionDefaultsPolicy _defaults;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<string, Process> _processes = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<string, PipelineInputWriter> _inputWriters = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<string, string[]> _processArguments = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<string, string> _processInputs = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<string, byte[]> _initializationChunks = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<string, int> _restartAttempts = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly HashSet<string> _manualStops = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly object _sync = new();
     private readonly FfmpegEncoderSet _videoEncoders;
     private readonly List<string> _recordingPatterns = [];
@@ -257,6 +281,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Starts validation.
+    /// </summary>
     private void StartValidation(Guid? inputId)
     {
         try
@@ -278,6 +305,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Starts output.
+    /// </summary>
     private void StartOutput(MediaOutputDefinition output)
     {
         try
@@ -296,6 +326,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Starts recording for input.
+    /// </summary>
     private void StartRecordingForInput(Guid? inputId)
     {
         try
@@ -312,6 +345,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Starts recording variant.
+    /// </summary>
     private void StartRecordingVariant(RecordingVariant variant)
     {
         try
@@ -341,6 +377,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Resolves recording variants.
+    /// </summary>
     private IReadOnlyList<RecordingVariant> ResolveRecordingVariants()
     {
         try
@@ -349,6 +388,9 @@ public sealed class EncoderSessionService : IDisposable
                     if (_session.RecordingDefinition.Variant == 0)
                         return
                         [
+                            /// <summary>
+                            /// Runs the recording variant operation.
+                            /// </summary>
                             new RecordingVariant(
                                 "clean-master",
                                 "Clean Master",
@@ -384,6 +426,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Starts LAN hls.
+    /// </summary>
     private void StartLanHls()
     {
         try
@@ -410,6 +455,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Starts LAN rtsp.
+    /// </summary>
     private void StartLanRtsp()
     {
         try
@@ -431,6 +479,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Builds validation arguments.
+    /// </summary>
     private List<string> BuildValidationArguments(Guid? inputId, int width, int height, int frameRate, int bitrateKbps)
     {
         try
@@ -450,6 +501,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Builds output arguments.
+    /// </summary>
     private List<string> BuildOutputArguments(MediaOutputDefinition output, string destination)
     {
         try
@@ -474,6 +528,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Builds recording arguments.
+    /// </summary>
     private List<string> BuildRecordingArguments(RecordingVariant variant, string path)
     {
         try
@@ -505,6 +562,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the base input arguments operation.
+    /// </summary>
     private List<string> BaseInputArguments(Guid? inputId)
     {
         try
@@ -526,6 +586,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds video encoding.
+    /// </summary>
     private void AddVideoEncoding(List<string> args, int width, int height, int frameRate, int bitrateKbps, int keyframeSeconds, int codec)
     {
         try
@@ -554,6 +617,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds webm video encoding.
+    /// </summary>
     private void AddWebmVideoEncoding(List<string> args, int width, int height, int frameRate, int bitrateKbps, int keyframeSeconds)
     {
         try
@@ -581,6 +647,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the recommended recording bitrate kbps operation.
+    /// </summary>
     private int RecommendedRecordingBitrateKbps(int width, int height, int frameRate)
     {
         try
@@ -597,6 +666,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Adds audio encoding.
+    /// </summary>
     private void AddAudioEncoding(List<string> args, int bitrateKbps, int codec) {
         try
         {
@@ -610,6 +682,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Builds destination.
+    /// </summary>
     private string BuildDestination(MediaOutputDefinition output)
     {
         try
@@ -638,6 +713,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Starts process.
+    /// </summary>
     private void StartProcess(string key, Guid? inputId, IReadOnlyList<string> arguments, bool restart = false)
     {
         try
@@ -686,6 +764,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Handles process exit.
+    /// </summary>
     private void HandleProcessExit(string key, Guid? inputId, Process process, string[] arguments)
     {
         try
@@ -720,6 +801,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the schedule restart operation.
+    /// </summary>
     private void ScheduleRestart(string key, Guid? inputId, string[] arguments)
     {
         try
@@ -748,6 +832,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the should run operation.
+    /// </summary>
     private bool ShouldRun(string key, Guid? inputId)
     {
         try
@@ -770,6 +857,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Stops processes with prefix.
+    /// </summary>
     private void StopProcessesWithPrefix(string prefix)
     {
         try
@@ -785,6 +875,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Stops process.
+    /// </summary>
     private void StopProcess(string key)
     {
         try
@@ -816,6 +909,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the schedule recording remux operation.
+    /// </summary>
     private void ScheduleRecordingRemux()
     {
         try
@@ -903,6 +999,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Resolves recording files.
+    /// </summary>
     private IEnumerable<string> ResolveRecordingFiles(string pattern)
     {
         try
@@ -948,6 +1047,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Determines whether piped input.
+    /// </summary>
     private bool IsPipedInput(Guid? inputId) {
         try
         {
@@ -961,6 +1063,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the input key operation.
+    /// </summary>
     private string InputKey(Guid? id) {
         try
         {
@@ -973,6 +1078,9 @@ public sealed class EncoderSessionService : IDisposable
             throw;
         }
     }
+    /// <summary>
+    /// Runs the output key operation.
+    /// </summary>
     private string OutputKey(Guid id) {
         try
         {
@@ -985,6 +1093,9 @@ public sealed class EncoderSessionService : IDisposable
             throw;
         }
     }
+    /// <summary>
+    /// Normalizes container.
+    /// </summary>
     private string NormalizeContainer(string value) {
         try
         {
@@ -997,6 +1108,9 @@ public sealed class EncoderSessionService : IDisposable
             throw;
         }
     }
+    /// <summary>
+    /// Runs the safe file name operation.
+    /// </summary>
     private string SafeFileName(string value)
     {
         try
@@ -1014,12 +1128,18 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Provides pipeline input writer operations.
+    /// </summary>
     private sealed class PipelineInputWriter : IDisposable
     {
         private readonly Process process;
         private readonly string key;
         private readonly Action<string> reportError;
         private readonly Channel<byte[]> queue;
+        /// <summary>
+        /// Runs the new operation.
+        /// </summary>
         private readonly CancellationTokenSource cancellation = new();
         private readonly Task pump;
         private readonly PublisherMediaSessionDefaultsPolicy defaults;
@@ -1151,6 +1271,9 @@ public sealed class EncoderSessionService : IDisposable
             }
         }
 
+        /// <summary>
+        /// Runs the pump async operation.
+        /// </summary>
         private async Task PumpAsync()
         {
             try
@@ -1219,6 +1342,9 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Represents a recording variant.
+    /// </summary>
     private sealed record RecordingVariant(
         string Id,
         string Name,
@@ -1280,7 +1406,13 @@ public sealed class FfmpegEncoderResolver(
     FfmpegLocator ffmpegLocator,
     ILogger<FfmpegEncoderResolver> logger)
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<string, HashSet<string>> Cache = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<string, bool> HardwareProbeCache = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
@@ -1312,6 +1444,9 @@ public sealed class FfmpegEncoderResolver(
         }
     }
 
+    /// <summary>
+    /// Runs the choose operation.
+    /// </summary>
     private FfmpegVideoEncoder Choose(int codec, int preference, HashSet<string> available, string executable)
     {
         try
@@ -1344,6 +1479,9 @@ public sealed class FfmpegEncoderResolver(
         }
     }
 
+    /// <summary>
+    /// Determines whether didate.
+    /// </summary>
     private FfmpegVideoEncoder? Candidate(int codec, string family, HashSet<string> available, string executable)
     {
         try
@@ -1377,6 +1515,9 @@ public sealed class FfmpegEncoderResolver(
         }
     }
 
+    /// <summary>
+    /// Runs the software fallback operation.
+    /// </summary>
     private FfmpegVideoEncoder SoftwareFallback(int codec, HashSet<string> available)
     {
         try
@@ -1399,6 +1540,9 @@ public sealed class FfmpegEncoderResolver(
         }
     }
 
+    /// <summary>
+    /// Determines whether initialize hardware encoder.
+    /// </summary>
     private bool CanInitializeHardwareEncoder(string executable, string encoder)
     {
         try
@@ -1451,6 +1595,9 @@ public sealed class FfmpegEncoderResolver(
         }
     }
 
+    /// <summary>
+    /// Runs the options for operation.
+    /// </summary>
     private IReadOnlyList<string> OptionsFor(string encoder) {
         try
         {
@@ -1473,6 +1620,9 @@ public sealed class FfmpegEncoderResolver(
         }
     }
 
+    /// <summary>
+    /// Runs the probe operation.
+    /// </summary>
     private HashSet<string> Probe(string executable)
     {
         try

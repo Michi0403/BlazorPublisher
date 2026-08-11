@@ -10,8 +10,14 @@ namespace PublisherStudio.Services.Streaming.Profiles;
 public sealed class StreamingProfileStore
 {
     private readonly IDataProtector _protector;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly SemaphoreSlim _gate = new(1, 1);
     private readonly string _filePath;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly JsonSerializerOptions _json = new() { WriteIndented = true, PropertyNameCaseInsensitive = true };
 
     /// <summary>
@@ -227,6 +233,9 @@ public sealed class StreamingProfileStore
     }
 }
 
+    /// <summary>
+    /// Reads OAuth credentials async.
+    /// </summary>
     internal async Task<StreamingOAuthCredentials?> ReadOAuthCredentialsAsync(Guid profileId, CancellationToken cancellationToken = default)
     {
     try
@@ -273,6 +282,9 @@ public sealed class StreamingProfileStore
     }
 }
 
+    /// <summary>
+    /// Saves twitch OAuth connection async.
+    /// </summary>
     internal async Task<StreamingProviderProfile> SaveTwitchOAuthConnectionAsync(
         TwitchOAuthCredentialUpdate update,
         CancellationToken cancellationToken = default)
@@ -320,6 +332,9 @@ public sealed class StreamingProfileStore
     }
 }
 
+    /// <summary>
+    /// Saves OAuth tokens async.
+    /// </summary>
     internal async Task SaveOAuthTokensAsync(
         Guid profileId,
         string accessToken,
@@ -357,6 +372,9 @@ public sealed class StreamingProfileStore
     }
 }
 
+    /// <summary>
+    /// Runs the mark OAuth validated async operation.
+    /// </summary>
     internal async Task MarkOAuthValidatedAsync(
         Guid profileId,
         DateTimeOffset accessTokenExpiresUtc,
@@ -390,6 +408,9 @@ public sealed class StreamingProfileStore
     }
 }
 
+    /// <summary>
+    /// Updates twitch ingest async.
+    /// </summary>
     internal async Task UpdateTwitchIngestAsync(
         Guid profileId,
         TwitchIngestCandidate candidate,
@@ -424,6 +445,9 @@ public sealed class StreamingProfileStore
     }
 }
 
+    /// <summary>
+    /// Runs the clear OAuth session async operation.
+    /// </summary>
     internal async Task ClearOAuthSessionAsync(Guid profileId, CancellationToken cancellationToken = default)
     {
     try
@@ -455,6 +479,9 @@ public sealed class StreamingProfileStore
     }
 }
 
+    /// <summary>
+    /// Resolves protected value async.
+    /// </summary>
     private async Task<string?> ResolveProtectedValueAsync(
         Guid profileId,
         ProtectedValueKind kind,
@@ -489,6 +516,9 @@ public sealed class StreamingProfileStore
     }
 }
 
+    /// <summary>
+    /// Loads core async.
+    /// </summary>
     private async Task<StreamingMachineSettings> LoadCoreAsync(CancellationToken cancellationToken)
     {
     try
@@ -512,6 +542,9 @@ public sealed class StreamingProfileStore
     }
 }
 
+    /// <summary>
+    /// Runs the to public operation.
+    /// </summary>
     private StreamingProviderProfile ToPublic(StoredProviderProfile profile) {
     try
     {
@@ -548,6 +581,9 @@ public sealed class StreamingProfileStore
     }
 }
 
+    /// <summary>
+    /// Loads stored async.
+    /// </summary>
     private async Task<StoredStreamingMachineSettings> LoadStoredAsync(CancellationToken cancellationToken)
     {
     try
@@ -574,6 +610,9 @@ public sealed class StreamingProfileStore
     }
 }
 
+    /// <summary>
+    /// Saves stored async.
+    /// </summary>
     private async Task SaveStoredAsync(StoredStreamingMachineSettings settings, CancellationToken cancellationToken)
     {
     try
@@ -591,12 +630,18 @@ public sealed class StreamingProfileStore
     }
 }
 
+    /// <summary>
+    /// Lists supported protected value kind values.
+    /// </summary>
     private enum ProtectedValueKind
     {
         StreamSecret,
         ChatSecret
     }
 
+    /// <summary>
+    /// Represents a stored streaming machine settings.
+    /// </summary>
     private sealed class StoredStreamingMachineSettings
     {
         /// <summary>
@@ -625,6 +670,9 @@ public sealed class StreamingProfileStore
         public StreamingHardwareEncoderPreference HardwareEncoder { get; set; } = StreamingHardwareEncoderPreference.Auto;
     }
 
+    /// <summary>
+    /// Represents a stored provider profile.
+    /// </summary>
     private sealed class StoredProviderProfile
     {
         /// <summary>
@@ -718,6 +766,9 @@ public sealed class StreamingProfileStore
     }
 }
 
+/// <summary>
+/// Represents a streaming OAuth credentials.
+/// </summary>
 internal sealed class StreamingOAuthCredentials
 {
     /// <summary>
@@ -758,6 +809,9 @@ internal sealed class StreamingOAuthCredentials
     public string ChannelId { get; set; } = string.Empty;
 }
 
+/// <summary>
+/// Represents a twitch OAuth credential update.
+/// </summary>
 internal sealed class TwitchOAuthCredentialUpdate
 {
     /// <summary>

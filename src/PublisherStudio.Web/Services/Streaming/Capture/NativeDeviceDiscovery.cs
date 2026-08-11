@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Configuration;
 using PublisherStudio.Services.Streaming.Encoding;
@@ -65,6 +65,9 @@ public sealed class NativeDeviceDiscovery(
         }
     }
 
+    /// <summary>
+    /// Runs the discover direct show async operation.
+    /// </summary>
     private async Task<IReadOnlyList<DiscoveredNativeMediaDeviceInfo>> DiscoverDirectShowAsync(
         string? ffmpegPath,
         CancellationToken cancellationToken)
@@ -107,6 +110,9 @@ public sealed class NativeDeviceDiscovery(
         }
     }
 
+    /// <summary>
+    /// Runs the discover av foundation async operation.
+    /// </summary>
     private async Task<IReadOnlyList<DiscoveredNativeMediaDeviceInfo>> DiscoverAvFoundationAsync(
         string? ffmpegPath,
         CancellationToken cancellationToken)
@@ -151,6 +157,9 @@ public sealed class NativeDeviceDiscovery(
         }
     }
 
+    /// <summary>
+    /// Runs the discover windows processes operation.
+    /// </summary>
     private IReadOnlyList<DiscoveredNativeMediaDeviceInfo> DiscoverWindowsProcesses()
     {
         try
@@ -191,6 +200,9 @@ public sealed class NativeDeviceDiscovery(
         }
     }
 
+    /// <summary>
+    /// Runs the run FFmpeg async operation.
+    /// </summary>
     private async Task<string> RunFfmpegAsync(
         string? ffmpegPath,
         IReadOnlyList<string> arguments,

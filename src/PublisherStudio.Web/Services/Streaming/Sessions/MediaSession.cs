@@ -1,4 +1,4 @@
-﻿using PublisherStudio.BusinessObjects;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Configuration;
 using System.Collections.Concurrent;
 using System.Text.Json;
@@ -11,6 +11,9 @@ namespace PublisherStudio.Services.Streaming.Sessions;
 /// </summary>
 public interface IMediaSessionFactory
 {
+    /// <summary>
+    /// Runs the create operation.
+    /// </summary>
     MediaSession Create(JsonElement request);
 }
 
@@ -53,6 +56,9 @@ public sealed class MediaSession
 {
     private readonly PublisherMediaSessionDefaultsPolicy defaults;
     private readonly ILogger<MediaSession> logger;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly object ingestSubscriberSync = new();
     private readonly Dictionary<Guid, Channel<byte[]>> ingestSubscribers = [];
     private byte[]? webmInitializationChunk;
@@ -460,6 +466,9 @@ public sealed class MediaSession
         }
     }
 
+    /// <summary>
+    /// Applies outputs.
+    /// </summary>
     private void ApplyOutputs(JsonElement request)
     {
         try
@@ -509,6 +518,9 @@ public sealed class MediaSession
         }
     }
 
+    /// <summary>
+    /// Applies recording.
+    /// </summary>
     private void ApplyRecording(JsonElement request)
     {
         try
@@ -543,6 +555,9 @@ public sealed class MediaSession
         }
     }
 
+    /// <summary>
+    /// Applies LAN.
+    /// </summary>
     private void ApplyLan(JsonElement request)
     {
         try
@@ -582,6 +597,9 @@ public sealed class MediaSession
         }
     }
 
+    /// <summary>
+    /// Applies hotkeys.
+    /// </summary>
     private void ApplyHotkeys(JsonElement request)
     {
         try
@@ -611,6 +629,9 @@ public sealed class MediaSession
         }
     }
 
+    /// <summary>
+    /// Reads string.
+    /// </summary>
     private string? ReadString(JsonElement element, string name)
     {
         try
@@ -628,6 +649,9 @@ public sealed class MediaSession
         }
     }
 
+    /// <summary>
+    /// Reads bool.
+    /// </summary>
     private bool ReadBool(JsonElement element, string name)
     {
         try
@@ -645,6 +669,9 @@ public sealed class MediaSession
         }
     }
 
+    /// <summary>
+    /// Reads int.
+    /// </summary>
     private int ReadInt(JsonElement element, string name, int fallback)
     {
         try

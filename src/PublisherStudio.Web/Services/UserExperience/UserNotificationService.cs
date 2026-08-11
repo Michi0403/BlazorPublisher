@@ -178,6 +178,9 @@ public sealed class UserNotificationService(ILogger<UserNotificationService> log
     }
 }
 
+    /// <summary>
+    /// Runs the create operation.
+    /// </summary>
     private UserNotificationMessage Create(UserNotificationSeverity severity, string title, string message, string source) {
     try
     {
@@ -199,6 +202,9 @@ public sealed class UserNotificationService(ILogger<UserNotificationService> log
     }
 }
 
+    /// <summary>
+    /// Runs the log operation.
+    /// </summary>
     private void Log(UserNotificationMessage message)
     {
     try

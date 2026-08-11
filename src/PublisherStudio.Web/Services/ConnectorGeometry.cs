@@ -192,6 +192,9 @@ public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
         return (ControlPoint(source, connector.Source.Anchor, distance), ControlPoint(target, connector.Target.Anchor, distance));
     }
 
+    /// <summary>
+    /// Runs the elbow path operation.
+    /// </summary>
     private string ElbowPath(PublicationPoint source, PublicationPoint target)
     {
     try
@@ -218,6 +221,9 @@ public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
     }
 }
 
+    /// <summary>
+    /// Runs the curved path operation.
+    /// </summary>
     private string CurvedPath(ConnectorElement connector, PublicationPoint source, PublicationPoint target)
     {
     try
@@ -236,6 +242,9 @@ public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
     }
 }
 
+    /// <summary>
+    /// Runs the control point operation.
+    /// </summary>
     private PublicationPoint ControlPoint(PublicationPoint point, ConnectorAnchor anchor, double distance) {
     try
     {
@@ -281,6 +290,9 @@ public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
     }
 }
 
+    /// <summary>
+    /// Runs the inv operation.
+    /// </summary>
     private string Inv(double value) {
     try
     {

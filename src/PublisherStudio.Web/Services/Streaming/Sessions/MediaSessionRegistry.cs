@@ -1,4 +1,4 @@
-﻿using PublisherStudio.Services.Configuration;
+using PublisherStudio.Services.Configuration;
 using System.Collections.Concurrent;
 using System.Text.Json;
 
@@ -15,6 +15,9 @@ public sealed class MediaSessionRegistry(
     ILanStreamingServerFactory lanServerFactory,
     ILogger<MediaSessionRegistry> logger) : IDisposable
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<Guid, MediaSession> _sessions = new();
     private readonly GlobalHotkeyService _hotkeys = hotkeys;
     private readonly EncoderOrchestrator _encoder = encoder;

@@ -8,6 +8,9 @@ namespace PublisherStudio.Services.Automation;
 /// </summary>
 public sealed class UserInputAutomationService(ILogger<UserInputAutomationService> logger) : IUserInputAutomationService
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<Guid, BrowserAutomationCommand> _commands = new();
 
     /// <summary>
@@ -136,6 +139,9 @@ public sealed class UserInputAutomationService(ILogger<UserInputAutomationServic
     }
 }
 
+    /// <summary>
+    /// Runs the trim completed operation.
+    /// </summary>
     private void TrimCompleted()
     {
     try
@@ -165,6 +171,9 @@ public sealed class UserInputAutomationService(ILogger<UserInputAutomationServic
 /// </summary>
 public sealed class ScreenshotCaptureService(ILogger<ScreenshotCaptureService> logger) : IScreenshotCaptureService
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<Guid, BrowserScreenshotRequest> _requests = new();
 
     /// <summary>

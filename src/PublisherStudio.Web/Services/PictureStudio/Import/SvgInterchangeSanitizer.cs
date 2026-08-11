@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -9,6 +9,9 @@ namespace PublisherStudio.Services.PictureStudio.Import;
 /// </summary>
 public sealed class SvgInterchangeSanitizer(ILogger<SvgInterchangeSanitizer> logger)
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly HashSet<string> RemovedElements = new(StringComparer.OrdinalIgnoreCase)
     {
         "script", "foreignObject", "iframe", "object", "embed", "audio", "video", "canvas"
@@ -141,6 +144,9 @@ public sealed class SvgInterchangeSanitizer(ILogger<SvgInterchangeSanitizer> log
         }
     }
 
+    /// <summary>
+    /// Runs the contains external CSS reference operation.
+    /// </summary>
     private bool ContainsExternalCssReference(string value)
     {
         try
@@ -170,6 +176,9 @@ public sealed class SvgInterchangeSanitizer(ILogger<SvgInterchangeSanitizer> log
         }
     }
 
+    /// <summary>
+    /// Determines whether external reference.
+    /// </summary>
     private bool IsExternalReference(string localName, string value)
     {
         try
@@ -189,6 +198,9 @@ public sealed class SvgInterchangeSanitizer(ILogger<SvgInterchangeSanitizer> log
         }
     }
 
+    /// <summary>
+    /// Determines whether safe embedded raster.
+    /// </summary>
     private bool IsSafeEmbeddedRaster(string value)
     {
         try
@@ -210,6 +222,9 @@ public sealed class SvgInterchangeSanitizer(ILogger<SvgInterchangeSanitizer> log
         }
     }
 
+    /// <summary>
+    /// Parses numbers.
+    /// </summary>
     private double[] ParseNumbers(string? value, int maximum)
     {
         try

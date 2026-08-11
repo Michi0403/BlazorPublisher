@@ -73,6 +73,9 @@ public sealed class CodeLanguageService : ICodeLanguageService
     }
 }
 
+    /// <summary>
+    /// Builds profiles.
+    /// </summary>
     private IReadOnlyList<CodeLanguageProfile> BuildProfiles() {
     try
     {
@@ -109,6 +112,9 @@ public sealed class CodeLanguageService : ICodeLanguageService
     }
 }
 
+    /// <summary>
+    /// Runs the profile operation.
+    /// </summary>
     private CodeLanguageProfile Profile(string id, string name, List<string> extensions, string line, string blockStart, string blockEnd, List<string> keywords, bool braces, bool indentation) {
     try
     {

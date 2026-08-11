@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using PublisherStudio.Services;
 
@@ -11,6 +11,9 @@ namespace PublisherStudio.Controllers;
 [Route("api/assets")]
 public sealed class AssetController(PublicationMediaAssetStore mediaAssets) : ControllerBase
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly HashSet<string> AllowedTypes = new(StringComparer.OrdinalIgnoreCase)
     {
         "image/png", "image/jpeg", "image/gif", "image/webp", "image/svg+xml"

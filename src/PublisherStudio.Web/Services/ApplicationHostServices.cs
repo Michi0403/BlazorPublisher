@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -11,6 +11,9 @@ namespace PublisherStudio.Services;
 /// </summary>
 public interface IApplicationPortResolver
 {
+    /// <summary>
+    /// Runs the resolve operation.
+    /// </summary>
     int Resolve(IReadOnlyList<string> args);
 }
 
@@ -65,7 +68,13 @@ public sealed class ApplicationPortResolver(
 public interface IRuntimeEndpointState
 {
     string BaseUrl { get; }
+    /// <summary>
+    /// Sets base URL.
+    /// </summary>
     void SetBaseUrl(string baseUrl);
+    /// <summary>
+    /// Runs the clear operation.
+    /// </summary>
     void Clear();
 }
 
@@ -74,6 +83,9 @@ public interface IRuntimeEndpointState
 /// </summary>
 public sealed class RuntimeEndpointState(ILogger<RuntimeEndpointState> logger) : IRuntimeEndpointState
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly System.Threading.Lock sync = new();
     private string baseUrl = string.Empty;
 
@@ -138,7 +150,13 @@ public sealed class RuntimeEndpointState(ILogger<RuntimeEndpointState> logger) :
 /// </summary>
 public interface IRuntimeEndpointWriter
 {
+    /// <summary>
+    /// Runs the write operation.
+    /// </summary>
     void Write(WebApplication app);
+    /// <summary>
+    /// Deletes owned endpoint.
+    /// </summary>
     void DeleteOwnedEndpoint();
 }
 
@@ -148,6 +166,9 @@ public interface IRuntimeEndpointWriter
 public sealed class RuntimeEndpointWriter : IRuntimeEndpointWriter
 {
     private readonly ILogger<RuntimeEndpointWriter> logger;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly System.Text.Json.JsonSerializerOptions _jsonOptions = new() { WriteIndented = true };
     private readonly string _runtimeDirectory;
     private readonly string _runtimeFilePath;

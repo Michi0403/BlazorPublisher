@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Text.RegularExpressions;
 using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Configuration;
@@ -103,6 +103,9 @@ public sealed class CodeFormattingService(
         }
     }
 
+    /// <summary>
+    /// Runs the tokenize operation.
+    /// </summary>
     private IReadOnlyList<CodeTokenSpan> Tokenize(CodeLanguageProfile profile, string text)
     {
         try
@@ -130,6 +133,9 @@ public sealed class CodeFormattingService(
         }
     }
 
+    /// <summary>
+    /// Normalizes lines.
+    /// </summary>
     private string NormalizeLines(string? text) {
         try
         {
@@ -142,6 +148,9 @@ public sealed class CodeFormattingService(
             throw;
         }
     }
+    /// <summary>
+    /// Starts s with closing token.
+    /// </summary>
     private bool StartsWithClosingToken(string line) {
         try
         {
@@ -154,6 +163,9 @@ public sealed class CodeFormattingService(
             throw;
         }
     }
+    /// <summary>
+    /// Runs the brace delta operation.
+    /// </summary>
     private int BraceDelta(string line) {
         try
         {
@@ -166,6 +178,9 @@ public sealed class CodeFormattingService(
             throw;
         }
     }
+    /// <summary>
+    /// Adds line comment.
+    /// </summary>
     private string AddLineComment(string line, string token) {
         try
         {
@@ -178,6 +193,9 @@ public sealed class CodeFormattingService(
             throw;
         }
     }
+    /// <summary>
+    /// Removes line comment.
+    /// </summary>
     private string RemoveLineComment(string line, string token)
     {
         try

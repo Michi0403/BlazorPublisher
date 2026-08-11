@@ -18,9 +18,18 @@ public sealed class GlobalHotkeyService(
     private const uint ModWin = 0x0008;
     private const uint ModNoRepeat = 0x4000;
 
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentQueue<Action> _commands = new();
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<Guid, ConcurrentQueue<MediaHostHotkeyEvent>> _events = new();
     private readonly Dictionary<int, RegisteredHotkey> _registered = [];
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ManualResetEventSlim _started = new(false);
     private Thread? _thread;
     private uint _threadId;
@@ -150,6 +159,9 @@ public sealed class GlobalHotkeyService(
     }
 }
 
+    /// <summary>
+    /// Runs the enqueue operation.
+    /// </summary>
     private void Enqueue(Action command)
     {
     try
@@ -168,6 +180,9 @@ public sealed class GlobalHotkeyService(
     }
 }
 
+    /// <summary>
+    /// Runs the message loop operation.
+    /// </summary>
     private void MessageLoop()
     {
     try
@@ -206,6 +221,9 @@ public sealed class GlobalHotkeyService(
     }
 }
 
+    /// <summary>
+    /// Removes core.
+    /// </summary>
     private void RemoveCore(Guid sessionId)
     {
     try
@@ -227,6 +245,9 @@ public sealed class GlobalHotkeyService(
     }
 }
 
+    /// <summary>
+    /// Attempts to parse gesture.
+    /// </summary>
     private bool TryParseGesture(string gesture, out uint modifiers, out uint virtualKey)
     {
     try
@@ -303,6 +324,9 @@ public sealed class GlobalHotkeyService(
     }
 }
 
+    /// <summary>
+    /// Represents a registered hotkey.
+    /// </summary>
     private sealed record RegisteredHotkey(Guid SessionId, string Command, Guid? TargetId);
 
 }

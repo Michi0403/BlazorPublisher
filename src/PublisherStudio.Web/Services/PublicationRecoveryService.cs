@@ -18,8 +18,14 @@ public sealed record PublicationRecoverySnapshot(
 /// </summary>
 public sealed class PublicationRecoveryService
 {
+    /// <summary>
+    /// Represents a recovery manifest.
+    /// </summary>
     private sealed record RecoveryManifest(Guid DocumentId, string DocumentName, DateTimeOffset ModifiedUtc, DateTimeOffset SavedUtc, string FileName);
 
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly SemaphoreSlim _gate = new(1, 1);
     private readonly string _root;
     private readonly string _manifestPath;

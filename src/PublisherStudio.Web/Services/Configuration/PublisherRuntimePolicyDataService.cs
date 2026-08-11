@@ -1,4 +1,4 @@
-﻿using System.Collections.Frozen;
+using System.Collections.Frozen;
 using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Configuration;
@@ -152,12 +152,21 @@ public sealed class PublisherRuntimePolicyDataService : IPublisherRuntimePolicyD
         try
         {
             if (!collections.TryGetValue(collection, out var values))
+               /// <summary>
+               /// Runs the key not found exception operation.
+               /// </summary>
                 throw new KeyNotFoundException($"The runtime collection '{collection}' is not configured.");
+            /// <summary>
+            /// Runs the log trace operation.
+            /// </summary>
             logger.LogTrace($"Resolved PublisherStudio runtime collection '{collection}' with {values.Length} values.");
             return values;
         }
         catch (Exception exception)
         {
+            /// <summary>
+            /// Runs the log error operation.
+            /// </summary>
             logger.LogError(exception, $"Could not resolve PublisherStudio runtime collection '{collection}'.");
             throw;
         }
@@ -203,6 +212,9 @@ public sealed class PublisherRuntimePolicyDataService : IPublisherRuntimePolicyD
         }
     }
 
+    /// <summary>
+    /// Runs the validate operation.
+    /// </summary>
     private void Validate()
     {
         try

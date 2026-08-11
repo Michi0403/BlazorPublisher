@@ -8,12 +8,33 @@ namespace PublisherStudio.Services.VideoStudio.Export;
 /// </summary>
 public interface IPolygonGeometryService
 {
+    /// <summary>
+    /// Runs the normalize operation.
+    /// </summary>
     List<MediaFramePoint> Normalize(IEnumerable<MediaFramePoint>? points);
+    /// <summary>
+    /// Runs the full frame operation.
+    /// </summary>
     List<MediaFramePoint> FullFrame();
+    /// <summary>
+    /// Runs the resample operation.
+    /// </summary>
     List<MediaFramePoint> Resample(IReadOnlyList<MediaFramePoint> points, int count);
+    /// <summary>
+    /// Runs the clone operation.
+    /// </summary>
     MediaFramePoint Clone(MediaFramePoint point);
+    /// <summary>
+    /// Runs the distance operation.
+    /// </summary>
     double Distance(double deltaX, double deltaY);
+    /// <summary>
+    /// Runs the to open scad points operation.
+    /// </summary>
     string ToOpenScadPoints(IEnumerable<MediaFramePoint> points);
+    /// <summary>
+    /// Runs the number operation.
+    /// </summary>
     string Number(double value);
 }
 

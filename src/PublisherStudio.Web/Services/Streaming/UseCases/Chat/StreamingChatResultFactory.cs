@@ -8,9 +8,21 @@ namespace PublisherStudio.Services.Streaming.UseCases.Chat;
 /// </summary>
 public interface IStreamingChatResultFactory
 {
+    /// <summary>
+    /// Creates not found.
+    /// </summary>
     StreamingChatSendResult CreateNotFound();
+    /// <summary>
+    /// Creates accepted.
+    /// </summary>
     StreamingChatSendResult CreateAccepted();
+    /// <summary>
+    /// Creates not configured.
+    /// </summary>
     StreamingChatSendResult CreateNotConfigured();
+    /// <summary>
+    /// Creates failure.
+    /// </summary>
     StreamingChatSendResult CreateFailure(string error);
 }
 

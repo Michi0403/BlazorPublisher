@@ -6806,6 +6806,14 @@ export function cancelPanelStudioPointer(element, restore = true) { try {
     binding?.cancelPointer?.(restore !== false);
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cancelPanelStudioPointer@6767', __javascriptError); throw __javascriptError; }}
 
+export async function flushPanelStudioInteractions(element) { try {
+    if (!(element instanceof HTMLElement)) return false;
+    const binding = panelStudioDropBindings.get(element);
+    if (!binding || binding.disposed) return false;
+    await (binding.invokeQueue || Promise.resolve());
+    return !binding.disposed;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:flushPanelStudioInteractions', __javascriptError); throw __javascriptError; }}
+
 export function bindPanelStudioDropSurface(element, dotNetReference, bindingId = '') { try {
     if (!(element instanceof HTMLElement)) return false;
     const normalizedBindingId = String(bindingId || element.dataset.panelStudioBindingId || '').trim();
@@ -7932,6 +7940,7 @@ window.publisherStudio = {
     refreshPanelStudioDesignSurface(element) { try { return refreshPanelStudioDesignSurface(element);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:refreshPanelStudioDesignSurface@7888', __javascriptError); throw __javascriptError; }},
     panelStudioPoint(element, clientX, clientY) { try { return panelStudioPoint(element, clientX, clientY);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:panelStudioPoint@7889', __javascriptError); throw __javascriptError; }},
     bindPanelStudioDropSurface(element, dotNetReference, bindingId = '') { try { return bindPanelStudioDropSurface(element, dotNetReference, bindingId);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:bindPanelStudioDropSurface@7890', __javascriptError); throw __javascriptError; }},
+    flushPanelStudioInteractions(element) { try { return flushPanelStudioInteractions(element);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:flushPanelStudioInteractions', __javascriptError); throw __javascriptError; }},
     cancelPanelStudioPointer(element, restore = true) { try { cancelPanelStudioPointer(element, restore);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cancelPanelStudioPointer@7890', __javascriptError); throw __javascriptError; }},
     unbindPanelStudioDropSurface(element) { try { unbindPanelStudioDropSurface(element);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:unbindPanelStudioDropSurface@7891', __javascriptError); throw __javascriptError; }},
     clickElement(id) { try { clickElementById(id);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:clickElement@7892', __javascriptError); throw __javascriptError; }},

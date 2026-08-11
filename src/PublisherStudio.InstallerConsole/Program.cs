@@ -18,12 +18,21 @@ using System.Threading.Tasks;
 
 
 namespace PublisherStudio.InstallerConsole;
+/// <summary>
+/// Represents a program.
+/// </summary>
 internal static class Program
 {
     private const string PublisherStudioRepo = "Michi0403/BlazorPublisher";
+    /// <summary>
+    /// Creates HTTP client.
+    /// </summary>
     private static readonly HttpClient Http = CreateHttpClient();
     private const string DetachedSetupEnvironmentVariable = "PUBLISHERSTUDIO_SETUP_DETACHED";
 
+    /// <summary>
+    /// Attempts to start detached setup.
+    /// </summary>
     private static bool TryStartDetachedSetup(string[] args)
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -103,6 +112,9 @@ internal static class Program
         }
         
     }
+    /// <summary>
+    /// Runs the run async operation.
+    /// </summary>
     private static async Task<int> RunAsync(string[] args, CliOptions options)
     {
         try
@@ -201,6 +213,9 @@ internal static class Program
         }
     }
 
+    /// <summary>
+    /// Runs the install publisher studio async operation.
+    /// </summary>
     private static async Task InstallPublisherStudioAsync(CliOptions options, ILogger logger)
     {
         try
@@ -317,6 +332,9 @@ internal static class Program
         }
     }
 
+    /// <summary>
+    /// Runs the uninstall publisher studio windows operation.
+    /// </summary>
     private static void UninstallPublisherStudioWindows(CliOptions options, ILogger logger)
     {
         try
@@ -354,6 +372,9 @@ internal static class Program
             logger.LogError(ex, $"Error in UninstallPublisherStudioWindows. options {options.ToString()}");
         }
     }
+    /// <summary>
+    /// Gets publisher studio uninstall targets.
+    /// </summary>
     private static List<string> GetPublisherStudioUninstallTargets(CliOptions options, ILogger logger)
     {
         try
@@ -387,6 +408,9 @@ internal static class Program
         }
     }
 
+    /// <summary>
+    /// Runs the provision windows shortcuts operation.
+    /// </summary>
     private static void ProvisionWindowsShortcuts(CliOptions options, ILogger logger)
     {
         try
@@ -433,6 +457,9 @@ internal static class Program
             throw;
         }
     }
+    /// <summary>
+    /// Gets shortcut targets.
+    /// </summary>
     private static List<ShortcutDefinition> GetShortcutTargets(string publisherStudioRoot, ILogger logger)
     {
         try
@@ -474,6 +501,9 @@ internal static class Program
             return new List<ShortcutDefinition>();
         }
     }
+    /// <summary>
+    /// Creates shortcut set.
+    /// </summary>
     private static void CreateShortcutSet(
     List<ShortcutDefinition> shortcuts,
     string targetDirectory,
@@ -507,6 +537,9 @@ internal static class Program
             throw;
         }
     }
+    /// <summary>
+    /// Creates windows URL shortcut.
+    /// </summary>
     private static void CreateWindowsUrlShortcut(
     string shortcutPath,
     string targetPath,
@@ -559,6 +592,9 @@ internal static class Program
             throw;
         }
     }
+    /// <summary>
+    /// Runs the enumerate files safe operation.
+    /// </summary>
     private static IEnumerable<string> EnumerateFilesSafe(
     string root,
     string searchPattern,
@@ -585,6 +621,9 @@ internal static class Program
             return Enumerable.Empty<string>();
         }
     }
+    /// <summary>
+    /// Finds publisher studio icon.
+    /// </summary>
     private static string? FindPublisherStudioIcon(ILogger logger)
     {
         try
@@ -650,6 +689,9 @@ internal static class Program
             return null;
         }
     }
+    /// <summary>
+    /// Finds publisher studio file.
+    /// </summary>
     private static string? FindPublisherStudioFile(
     string publisherStudioRoot,
     string fileName,
@@ -697,6 +739,9 @@ internal static class Program
             return null;
         }
     }
+    /// <summary>
+    /// Finds publisher studio executable.
+    /// </summary>
     private static string? FindPublisherStudioExecutable(CliOptions options, ILogger logger)
     {
         try
@@ -764,6 +809,9 @@ internal static class Program
             return null;
         }
     }
+    /// <summary>
+    /// Gets relative path depth.
+    /// </summary>
     private static int GetRelativePathDepth(string root, string path)
     {
         try
@@ -776,6 +824,9 @@ internal static class Program
             return int.MaxValue;
         }
     }
+    /// <summary>
+    /// Adds cmd shortcut if exists.
+    /// </summary>
     private static void AddCmdShortcutIfExists(
     List<ShortcutDefinition> shortcuts,
     string publisherStudioRoot,
@@ -811,6 +862,9 @@ internal static class Program
             logger.LogError(ex, $"Error in AddCmdShortcutIfExists. cmdFileName {cmdFileName}");
         }
     }
+    /// <summary>
+    /// Ensures windows only.
+    /// </summary>
     private static void EnsureWindowsOnly(string featureName, ILogger logger)
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
@@ -819,6 +873,9 @@ internal static class Program
         throw exception;
     }
 
+    /// <summary>
+    /// Gets publisher studio install root.
+    /// </summary>
     private static string GetPublisherStudioInstallRoot(ILogger logger)
     {
         try
@@ -837,6 +894,9 @@ internal static class Program
         }
     }
 
+    /// <summary>
+    /// Gets start menu folder.
+    /// </summary>
     private static string GetStartMenuFolder(CliOptions options, ILogger logger)
     {
         try
@@ -859,6 +919,9 @@ internal static class Program
             return string.Empty;
         }
     }
+    /// <summary>
+    /// Runs the sanitize shortcut group name operation.
+    /// </summary>
     private static string SanitizeShortcutGroupName(string value, ILogger logger)
     {
         try
@@ -879,6 +942,9 @@ internal static class Program
             return "PublisherStudio by Michi0403";
         }
     }
+    /// <summary>
+    /// Gets desktop folder.
+    /// </summary>
     private static string GetDesktopFolder(ILogger logger)
     {
         try
@@ -897,6 +963,9 @@ internal static class Program
         }
     }
 
+    /// <summary>
+    /// Starts publisher studio.
+    /// </summary>
     private static void StartPublisherStudio(CliOptions options, ILogger logger)
     {
         try
@@ -955,6 +1024,9 @@ internal static class Program
             throw;
         }
     }
+    /// <summary>
+    /// Attempts to get running endpoint.
+    /// </summary>
     private static bool TryGetRunningEndpoint(
         string productName,
         string runtimeProductDirectory,
@@ -1020,6 +1092,9 @@ internal static class Program
         }
     }
 
+    /// <summary>
+    /// Runs the wait for runtime endpoint operation.
+    /// </summary>
     private static string WaitForRuntimeEndpoint(
         string productName,
         string runtimeProductDirectory,
@@ -1102,6 +1177,9 @@ internal static class Program
             $"{productName} did not become ready within 45 seconds. Requested URL: {fallbackUrl}");
     }
 
+    /// <summary>
+    /// Opens default browser.
+    /// </summary>
     private static void OpenDefaultBrowser(string url, ILogger logger)
     {
         try
@@ -1120,6 +1198,9 @@ internal static class Program
     }
 
 
+    /// <summary>
+    /// Ensures release asset async.
+    /// </summary>
     private static async Task EnsureReleaseAssetAsync(
         string repo,
         string expectedAssetName,
@@ -1169,6 +1250,9 @@ internal static class Program
             runtimeIdentifier).ConfigureAwait(false);
     }
 
+    /// <summary>
+    /// Validates release archive.
+    /// </summary>
     private static void ValidateReleaseArchive(
         string archivePath,
         string expectedRootDirectory,
@@ -1255,6 +1339,9 @@ internal static class Program
             expectedExecutable);
     }
 
+    /// <summary>
+    /// Runs the download latest release asset async operation.
+    /// </summary>
     private static async Task DownloadLatestReleaseAssetAsync(
         string repo,
         string outFile,
@@ -1323,6 +1410,9 @@ internal static class Program
         }
     }
 
+    /// <summary>
+    /// Gets JSON with retry async.
+    /// </summary>
     private static async Task<JsonDocument> GetJsonWithRetryAsync(string url, ILogger logger)
     {
         const int maxAttempts = 4;
@@ -1353,6 +1443,9 @@ internal static class Program
         throw new HttpRequestException($"Could not retrieve release information from {url} after {maxAttempts} attempts.", lastError);
     }
 
+    /// <summary>
+    /// Runs the download file async operation.
+    /// </summary>
     private static async Task DownloadFileAsync(
         string url,
         string outFile,
@@ -1528,6 +1621,9 @@ internal static class Program
         throw new IOException($"Download failed after {maxAttempts} attempts: {url}", lastError);
     }
 
+    /// <summary>
+    /// Reads with stall timeout async.
+    /// </summary>
     private static async Task<int> ReadWithStallTimeoutAsync(Stream input, byte[] buffer, CancellationToken totalCancellationToken)
     {
         using var stallTimeout = CancellationTokenSource.CreateLinkedTokenSource(totalCancellationToken);
@@ -1542,6 +1638,9 @@ internal static class Program
         }
     }
 
+    /// <summary>
+    /// Runs the move file with retry async operation.
+    /// </summary>
     private static async Task MoveFileWithRetryAsync(string source, string destination, ILogger logger, CliOptions options)
     {
         try
@@ -1577,6 +1676,9 @@ internal static class Program
             throw;
         }
     }
+    /// <summary>
+    /// Runs the format bytes operation.
+    /// </summary>
     private static string FormatBytes(long bytes, ILogger logger)
     {
         try
@@ -1601,6 +1703,9 @@ internal static class Program
       
     }
 
+    /// <summary>
+    /// Deletes if exists.
+    /// </summary>
     private static void DeleteIfExists(string path, ILogger logger)
     {
         try
@@ -1621,6 +1726,9 @@ internal static class Program
             logger.LogError(ex, $"Error in DeleteIfExists. path {path.ToString()}");
         }
     }
+    /// <summary>
+    /// Runs the extract zip with fallback operation.
+    /// </summary>
     private static void ExtractZipWithFallback(string zipPath, string targetPath, ILogger logger)
     {
         try
@@ -1649,6 +1757,9 @@ internal static class Program
         }
     }
 
+    /// <summary>
+    /// Runs the run process async operation.
+    /// </summary>
     private static async Task RunProcessAsync(string fileName, string arguments, ILogger logger)
     {
         try
@@ -1685,6 +1796,9 @@ internal static class Program
 
     }
 
+    /// <summary>
+    /// Gets expected release asset name.
+    /// </summary>
     private static string GetExpectedReleaseAssetName(string runtimeIdentifier, bool setupAsset)
     {
         var runtimeFolder = runtimeIdentifier.Trim().ToLowerInvariant() switch
@@ -1703,6 +1817,9 @@ internal static class Program
         return $"{(setupAsset ? "setup" : string.Empty)}{runtimeFolder}.zip";
     }
 
+    /// <summary>
+    /// Gets expected published executable.
+    /// </summary>
     private static string GetExpectedPublishedExecutable(string runtimeIdentifier, bool setupAsset)
     {
         var isWindows = runtimeIdentifier.StartsWith("win-", StringComparison.OrdinalIgnoreCase);
@@ -1710,6 +1827,9 @@ internal static class Program
         return isWindows ? fileName + ".exe" : fileName;
     }
 
+    /// <summary>
+    /// Gets platform token.
+    /// </summary>
     private static string GetPlatformToken()
     {
 
@@ -1719,6 +1839,9 @@ internal static class Program
         return "";
     }
 
+    /// <summary>
+    /// Gets architecture token.
+    /// </summary>
     private static string GetArchitectureToken() => RuntimeInformation.OSArchitecture switch
     {
         Architecture.X64 => "x64",
@@ -1728,6 +1851,9 @@ internal static class Program
         _ => ""
     };
 
+    /// <summary>
+    /// Gets runtime identifier.
+    /// </summary>
     private static string GetRuntimeIdentifier()
     {
         var platform = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
@@ -1747,6 +1873,9 @@ internal static class Program
         return $"{platform}-{architecture}";
     }
 
+    /// <summary>
+    /// Gets runtime folder name.
+    /// </summary>
     private static string GetRuntimeFolderName()
     {
         var platform = GetPlatformToken();
@@ -1754,6 +1883,9 @@ internal static class Program
         return $"{platform}{architecture}";
     }
 
+    /// <summary>
+    /// Validates repo.
+    /// </summary>
     private static void ValidateRepo(string repo, ILogger logger)
     {
         try
@@ -1769,6 +1901,9 @@ internal static class Program
 
     }
 
+    /// <summary>
+    /// Creates HTTP client.
+    /// </summary>
     private static HttpClient CreateHttpClient()
     {
         try
@@ -1786,6 +1921,9 @@ internal static class Program
     }
 }
 
+/// <summary>
+/// Represents a shortcut definition.
+/// </summary>
 internal sealed record ShortcutDefinition(
     string ShortcutName,
     string TargetPath,
@@ -1793,6 +1931,9 @@ internal sealed record ShortcutDefinition(
     string WorkingDirectory
 );
 
+/// <summary>
+/// Represents a cli options.
+/// </summary>
 internal sealed class CliOptions
 {
     /// <summary>
@@ -2070,6 +2211,9 @@ Compatibility aliases using the former --*-blazorpublisher names remain accepted
 """);
     }
 
+    /// <summary>
+    /// Runs the next value operation.
+    /// </summary>
     private static string NextValue(List<string> args, ref int index, string optionName)
     {
         if (index + 1 >= args.Count)

@@ -10,6 +10,9 @@ namespace PublisherStudio.Services;
 /// </summary>
 public sealed class PublicationAnimationData(ILogger<PublicationAnimationData> logger)
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly JsonSerializerOptions Options = new(JsonSerializerDefaults.Web)
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,

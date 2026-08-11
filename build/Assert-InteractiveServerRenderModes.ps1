@@ -6,6 +6,7 @@ $appRoot = Join-Path $root 'src\PublisherStudio.Web'
 $expected = [ordered]@{
     'Components/Layout/JavaScriptDiagnosticsBridge.razor' = '@rendermode @(new InteractiveServerRenderMode(prerender: false))'
     'Components/Pages/Editor.razor' = '@rendermode @(new InteractiveServerRenderMode(prerender: true))'
+    'Components/Pages/Help.razor' = '@rendermode InteractiveServer'
     'Components/Pages/Localization.razor' = '@rendermode InteractiveServer'
     'Components/Pages/OrganicPlugins.razor' = '@rendermode InteractiveServer'
 }

@@ -9,7 +9,13 @@ namespace PublisherStudio.Services;
 /// </summary>
 public sealed class PublicationWebhookStore
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<Guid, string> _tokens = new();
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<Guid, WebhookPayload> _payloads = new();
 
     /// <summary>

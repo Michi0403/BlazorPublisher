@@ -15,7 +15,13 @@ public sealed class OrganicRuntimeSecurityService(
 {
     private const int SchemaVersion = 1;
     private const int TotpPeriodSeconds = 30;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly SemaphoreSlim gate = new(1, 1);
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly JsonSerializerOptions jsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
@@ -376,6 +382,9 @@ public sealed class OrganicRuntimeSecurityService(
         finally { gate.Release(); }
     }
 
+    /// <summary>
+    /// Loads core async.
+    /// </summary>
     private async Task<RuntimeSecretFile?> LoadCoreAsync(bool createWhenMissing, CancellationToken cancellationToken)
     {
     try
@@ -409,6 +418,9 @@ public sealed class OrganicRuntimeSecurityService(
     }
 }
 
+    /// <summary>
+    /// Runs the persist core async operation.
+    /// </summary>
     private async Task PersistCoreAsync(RuntimeSecretFile file, CancellationToken cancellationToken)
     {
     try
@@ -433,6 +445,9 @@ public sealed class OrganicRuntimeSecurityService(
     }
 }
 
+    /// <summary>
+    /// Attempts to restrict secret permissions.
+    /// </summary>
     private void TryRestrictSecretPermissions(string path)
     {
     try
@@ -459,6 +474,9 @@ public sealed class OrganicRuntimeSecurityService(
     }
 }
 
+    /// <summary>
+    /// Resolves secret path.
+    /// </summary>
     private string ResolveSecretPath()
     {
     try
@@ -482,6 +500,9 @@ public sealed class OrganicRuntimeSecurityService(
     }
 }
 
+    /// <summary>
+    /// Determines whether write directory.
+    /// </summary>
     private bool CanWriteDirectory(string directory)
     {
     try
@@ -507,6 +528,9 @@ public sealed class OrganicRuntimeSecurityService(
     }
 }
 
+    /// <summary>
+    /// Creates secret.
+    /// </summary>
     private RuntimeSecretFile CreateSecret(DateTimeOffset createdUtc, DateTimeOffset? rotatedUtc)
     {
     try
@@ -543,6 +567,9 @@ public sealed class OrganicRuntimeSecurityService(
     }
 }
 
+    /// <summary>
+    /// Validates secret.
+    /// </summary>
     private void ValidateSecret(RuntimeSecretFile file)
     {
     try
@@ -563,6 +590,9 @@ public sealed class OrganicRuntimeSecurityService(
     }
 }
 
+    /// <summary>
+    /// Creates status.
+    /// </summary>
     private OneWireRuntimeSecurityStatus CreateStatus(RuntimeSecretFile file) {
     try
     {
@@ -588,6 +618,9 @@ public sealed class OrganicRuntimeSecurityService(
     }
 }
 
+    /// <summary>
+    /// Creates public descriptor.
+    /// </summary>
     private OneWireSecurityDescriptor CreatePublicDescriptor(RuntimeSecretFile file) {
     try
     {
@@ -610,6 +643,9 @@ public sealed class OrganicRuntimeSecurityService(
     }
 }
 
+    /// <summary>
+    /// Validates pairing ticket.
+    /// </summary>
     private void ValidatePairingTicket(OneWirePairingTicket ticket)
     {
     try
@@ -640,6 +676,9 @@ public sealed class OrganicRuntimeSecurityService(
     }
 }
 
+    /// <summary>
+    /// Builds ticket bytes.
+    /// </summary>
     private byte[] BuildTicketBytes(OneWirePairingTicket ticket) {
     try
     {
@@ -659,6 +698,9 @@ public sealed class OrganicRuntimeSecurityService(
     }
 }
 
+    /// <summary>
+    /// Builds signature bytes.
+    /// </summary>
     private byte[] BuildSignatureBytes(OrganicWireEnvelope envelope) {
     try
     {
@@ -684,6 +726,9 @@ public sealed class OrganicRuntimeSecurityService(
     }
 }
 
+    /// <summary>
+    /// Builds associated data.
+    /// </summary>
     private byte[] BuildAssociatedData(OrganicWireEnvelope envelope) {
     try
     {
@@ -700,6 +745,9 @@ public sealed class OrganicRuntimeSecurityService(
     }
 }
 
+    /// <summary>
+    /// Runs the derive peer key operation.
+    /// </summary>
     private byte[] DerivePeerKey(RuntimeSecretFile file, OneWireTrustedPeerDescriptor peer, string sourcePeerId, string targetPeerId)
     {
     try
@@ -730,6 +778,9 @@ public sealed class OrganicRuntimeSecurityService(
     }
 }
 
+    /// <summary>
+    /// Runs the hkdf sha256 operation.
+    /// </summary>
     private byte[] HkdfSha256(ReadOnlySpan<byte> inputKeyMaterial, ReadOnlySpan<byte> salt, ReadOnlySpan<byte> info, int outputLength)
     {
     try
@@ -770,6 +821,9 @@ public sealed class OrganicRuntimeSecurityService(
     }
 }
 
+    /// <summary>
+    /// Runs the verify totp operation.
+    /// </summary>
     private bool VerifyTotp(string seedBase64, string code)
     {
     try
@@ -802,6 +856,9 @@ public sealed class OrganicRuntimeSecurityService(
     }
 }
 
+    /// <summary>
+    /// Runs the base32 encode operation.
+    /// </summary>
     private string Base32Encode(ReadOnlySpan<byte> data)
     {
     try
@@ -834,6 +891,9 @@ public sealed class OrganicRuntimeSecurityService(
     }
 }
 
+    /// <summary>
+    /// Determines whether current trust.
+    /// </summary>
     private bool IsCurrentTrust(OneWireTrustedPeerDescriptor peer, string peerId) {
     try
     {
@@ -852,6 +912,9 @@ public sealed class OrganicRuntimeSecurityService(
     }
 }
 
+    /// <summary>
+    /// Determines whether security bootstrap.
+    /// </summary>
     private bool IsSecurityBootstrap(OrganicWireMessageType type) {
     try
     {
@@ -870,6 +933,9 @@ public sealed class OrganicRuntimeSecurityService(
     }
 }
 
+    /// <summary>
+    /// Runs the clamp operation.
+    /// </summary>
     private TimeSpan Clamp(TimeSpan value, TimeSpan minimum, TimeSpan maximum) {
     try
     {
@@ -885,6 +951,9 @@ public sealed class OrganicRuntimeSecurityService(
     }
 }
 
+    /// <summary>
+    /// Runs the clone trusted peer operation.
+    /// </summary>
     private OneWireTrustedPeerDescriptor CloneTrustedPeer(OneWireTrustedPeerDescriptor peer) {
     try
     {
@@ -906,6 +975,9 @@ public sealed class OrganicRuntimeSecurityService(
     }
 }
 
+    /// <summary>
+    /// Represents a runtime secret file.
+    /// </summary>
     private sealed class RuntimeSecretFile
     {
         /// <summary>

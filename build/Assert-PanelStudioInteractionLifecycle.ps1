@@ -28,6 +28,8 @@ Require $panel 'refreshPanelStudioDesignSurface", _canvasElement\)\.ConfigureAwa
 Require $panel 'TokenCancellationRequested:\{exception\.CancellationToken\.IsCancellationRequested\}' 'Cancellation diagnostics must include token state.'
 Require $panel 'Panel Studio browser interaction ended normally\. Binding:' 'Expected browser shutdown and cancellation must be logged with binding context.'
 Require $panel '_lastInteractionSurfaceNotification' 'Repeated browser interop failures must be notification-deduplicated instead of flooding the user interface.'
+Require $panel 'await FlushPanelStudioInteractionsAsync\(\)\.ConfigureAwait\(true\);[\s\S]{0,260}template\.Prototype = Files\.CloneElement\(SelectedElement\);' 'Saving/updating a reusable module must flush queued pointer bounds before cloning it.'
+Require $panel 'private async Task Save\(\)[\s\S]{0,260}await FlushPanelStudioInteractionsAsync\(\)\.ConfigureAwait\(true\);' 'Applying a panel must flush queued pointer bounds before cloning the complete graph.'
 
 $modeBlock = [regex]::Match($panel, '(?s)private void EnableInteractionPreview\(\).*?private Task EditSelectedComponent').Value
 if ([string]::IsNullOrWhiteSpace($modeBlock)) { Fail 'Panel Studio mode methods could not be inspected.' }
@@ -39,6 +41,9 @@ Reject $panel 'case\s+"interact"\s*:' 'Browser command dispatch must not switch 
 
 Require $interop "bindPanelStudioDropSurface\(element, dotNetReference, bindingId = ''\)" 'Browser binding must accept the stable binding id.'
 Require $interop 'export function refreshPanelStudioDesignSurface\(element\)' 'Layout refresh must be independent from interaction binding lifecycle.'
+Require $interop 'export async function flushPanelStudioInteractions\(element\)' 'Panel Studio must expose a browser-side queue flush before save snapshots.'
+Require $interop 'await \(binding\.invokeQueue \|\| Promise\.resolve\(\)\);' 'The queue flush must wait for all previously queued .NET layout commits.'
+Require $interop 'flushPanelStudioInteractions\(element\) \{ try \{ return flushPanelStudioInteractions\(element\);' 'The queue flush must be exposed through window.publisherStudio for Blazor JS interop.'
 Require $interop 'refreshPanelStudioDesignSurface\(element\) \{ try \{ return refreshPanelStudioDesignSurface\(element\);' 'The layout refresh function must be exposed through window.publisherStudio for Blazor JS interop.'
 Require $interop 'existing\.bindingId === normalizedBindingId' 'Repeated renders must reuse the existing binding instead of aborting it.'
 Require $interop 'existing\.dotNetReference = dotNetReference \|\| existing\.dotNetReference;' 'An idempotent bind must refresh the .NET reference.'

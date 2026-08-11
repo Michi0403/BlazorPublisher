@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Xml.Linq;
@@ -235,6 +235,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Ensures built in.
+    /// </summary>
     private void EnsureBuiltIn(PublicationDocument document, PublicationDataSourceKind kind, string name)
     {
         try
@@ -592,6 +595,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Parses web snapshot.
+    /// </summary>
     private void ParseWebSnapshot(PublicationDataObject data)
     {
         try
@@ -644,6 +650,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Runs the detect web response format operation.
+    /// </summary>
     private PublicationWebResponseFormat DetectWebResponseFormat(PublicationDataObject data)
     {
         try
@@ -682,6 +691,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Runs the select JSON path operation.
+    /// </summary>
     private string SelectJsonPath(string source, string path)
     {
         try
@@ -723,6 +735,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Parses JSON.
+    /// </summary>
     private void ParseJson(PublicationDataObject data)
     {
         try
@@ -785,6 +800,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Runs the select JSON rows operation.
+    /// </summary>
     private JsonElement[] SelectJsonRows(JsonElement root)
     {
         try
@@ -803,6 +821,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Attempts to find JSON row array.
+    /// </summary>
     private bool TryFindJsonRowArray(JsonElement root, int depth, out JsonElement[] rows)
     {
         try
@@ -842,6 +863,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Runs the flatten JSON object operation.
+    /// </summary>
     private void FlattenJsonObject(JsonElement source, string prefix, Dictionary<string, string> values, List<string> names)
     {
         try
@@ -868,6 +892,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Runs the JSON text operation.
+    /// </summary>
     private string JsonText(JsonElement value) {
         try
         {
@@ -889,6 +916,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Parses XML.
+    /// </summary>
     private void ParseXml(PublicationDataObject data)
     {
         try
@@ -960,6 +990,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Adds XML value.
+    /// </summary>
     private void AddXmlValue(Dictionary<string, string> values, List<string> names, string name, string value, bool attribute)
     {
         try
@@ -981,6 +1014,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Parses delimited.
+    /// </summary>
     private void ParseDelimited(PublicationDataObject data)
     {
         try
@@ -1018,6 +1054,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Parses delimited rows.
+    /// </summary>
     private List<List<string>> ParseDelimitedRows(string source, char delimiter)
     {
         try
@@ -1056,6 +1095,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Runs the make unique operation.
+    /// </summary>
     private List<string> MakeUnique(List<string> names)
     {
         try
@@ -1080,6 +1122,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Runs the infer kind operation.
+    /// </summary>
     private PublicationDataValueKind InferKind(IEnumerable<string> values)
     {
         try
@@ -1100,6 +1145,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Runs the document object columns operation.
+    /// </summary>
     private List<PublicationDataColumn> DocumentObjectColumns() {
         try
         {
@@ -1132,6 +1180,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Runs the publication page columns operation.
+    /// </summary>
     private List<PublicationDataColumn> PublicationPageColumns() {
         try
         {
@@ -1157,6 +1208,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Runs the publication document columns operation.
+    /// </summary>
     private List<PublicationDataColumn> PublicationDocumentColumns() {
         try
         {
@@ -1182,6 +1236,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Runs the publication media columns operation.
+    /// </summary>
     private List<PublicationDataColumn> PublicationMediaColumns() {
         try
         {
@@ -1212,6 +1269,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Runs the mime from data URL operation.
+    /// </summary>
     private string MimeFromDataUrl(string dataUrl, string fallback)
     {
         try
@@ -1232,6 +1292,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Builds publication media rows.
+    /// </summary>
     private IReadOnlyList<PublicationDataRow> BuildPublicationMediaRows(PublicationDocument document, DocumentObjectDataScope scope, Guid currentPageId)
     {
         try
@@ -1309,6 +1372,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Builds document rows.
+    /// </summary>
     private IReadOnlyList<PublicationDataRow> BuildDocumentRows(PublicationDocument document, DocumentObjectDataScope scope, Guid currentPageId)
     {
         try
@@ -1348,6 +1414,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Builds publication page rows.
+    /// </summary>
     private IReadOnlyList<PublicationDataRow> BuildPublicationPageRows(PublicationDocument document)
         {
             try
@@ -1378,6 +1447,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
             }
         }
 
+    /// <summary>
+    /// Builds publication document rows.
+    /// </summary>
     private IReadOnlyList<PublicationDataRow> BuildPublicationDocumentRows(PublicationDocument document, Guid currentPageId)
     {
         try
@@ -1414,6 +1486,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>
+    /// Runs the slug operation.
+    /// </summary>
     private string Slug(string value, int fallback)
     {
         try

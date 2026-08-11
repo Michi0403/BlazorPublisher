@@ -31,6 +31,9 @@ public sealed class OpenScadNodeFactoryService(IOpenScadCatalogService catalog) 
     }
 }
 
+    /// <summary>
+    /// Parses default.
+    /// </summary>
     private OpenScadValue? ParseDefault(OpenScadParameterDefinition parameter)
     {
     try
@@ -58,6 +61,9 @@ public sealed class OpenScadNodeFactoryService(IOpenScadCatalogService catalog) 
     }
 }
 
+    /// <summary>
+    /// Runs the unquote operation.
+    /// </summary>
     private string Unquote(string expression)
     {
     try
@@ -77,6 +83,9 @@ public sealed class OpenScadNodeFactoryService(IOpenScadCatalogService catalog) 
     }
 }
 
+    /// <summary>
+    /// Parses double rows.
+    /// </summary>
     private List<List<double>> ParseDoubleRows(string expression)
     {
     try
@@ -96,6 +105,9 @@ public sealed class OpenScadNodeFactoryService(IOpenScadCatalogService catalog) 
     }
 }
 
+    /// <summary>
+    /// Parses integer rows.
+    /// </summary>
     private List<List<int>> ParseIntegerRows(string expression)
     {
     try

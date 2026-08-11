@@ -1,4 +1,4 @@
-﻿using System.Buffers.Binary;
+using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Text;
 
@@ -16,6 +16,9 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
         "Arial", "Calibri", "Cambria", "Courier New", "Georgia", "Segoe UI", "Tahoma", "Times New Roman", "Verdana"
     ];
 
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly object _sync = new();
     private IReadOnlyList<string>? _fontFamilies;
 
@@ -47,6 +50,9 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
         }
     }
 
+    /// <summary>
+    /// Runs the discover font families operation.
+    /// </summary>
     internal IReadOnlyList<string> DiscoverFontFamilies()
     {
         try
@@ -76,6 +82,9 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
         }
     }
 
+    /// <summary>
+    /// Runs the enumerate font directories operation.
+    /// </summary>
     private IEnumerable<string> EnumerateFontDirectories()
     {
         try
@@ -125,6 +134,9 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
         }
     }
 
+    /// <summary>
+    /// Reads font config families.
+    /// </summary>
     private void ReadFontConfigFamilies(ISet<string> families)
     {
         try
@@ -173,6 +185,9 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
         }
     }
 
+    /// <summary>
+    /// Reads font directory.
+    /// </summary>
     private void ReadFontDirectory(string directory, ISet<string> families)
     {
         try
@@ -208,6 +223,9 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
         }
     }
 
+    /// <summary>
+    /// Reads open type families.
+    /// </summary>
     private void ReadOpenTypeFamilies(string path, ISet<string> families)
     {
         try
@@ -246,6 +264,9 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
         }
     }
 
+    /// <summary>
+    /// Reads open type face.
+    /// </summary>
     private void ReadOpenTypeFace(BinaryReader reader, long faceOffset, ISet<string> families)
     {
         try
@@ -318,6 +339,9 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
         }
     }
 
+    /// <summary>
+    /// Runs the score name record operation.
+    /// </summary>
     private int ScoreNameRecord(NameRecord record)
     {
         try
@@ -339,6 +363,9 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
         }
     }
 
+    /// <summary>
+    /// Runs the decode name operation.
+    /// </summary>
     private string DecodeName(ushort platformId, ushort encodingId, byte[] bytes)
     {
         try
@@ -368,6 +395,9 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
         }
     }
 
+    /// <summary>
+    /// Adds family.
+    /// </summary>
     private void AddFamily(ISet<string> families, string? value)
     {
         try
@@ -384,6 +414,9 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
         }
     }
 
+    /// <summary>
+    /// Determines whether usable family name.
+    /// </summary>
     private bool IsUsableFamilyName(string? value)
     {
         try
@@ -400,6 +433,9 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
         }
     }
 
+    /// <summary>
+    /// Reads uint16 big endian.
+    /// </summary>
     private ushort ReadUInt16BigEndian(BinaryReader reader)
     {
         try
@@ -417,6 +453,9 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
         }
     }
 
+    /// <summary>
+    /// Reads uint32 big endian.
+    /// </summary>
     private uint ReadUInt32BigEndian(BinaryReader reader)
     {
         try
@@ -434,6 +473,9 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
         }
     }
 
+    /// <summary>
+    /// Represents a name record.
+    /// </summary>
     private sealed record NameRecord(
         ushort PlatformId,
         ushort EncodingId,

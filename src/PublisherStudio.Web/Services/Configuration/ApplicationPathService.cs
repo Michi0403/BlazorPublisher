@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
 using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Configuration;
@@ -105,6 +105,9 @@ public sealed class ApplicationPathService(IOptions<PublisherStudioPathOptions> 
         }
     }
 
+    /// <summary>
+    /// Runs the choose operation.
+    /// </summary>
     private string Choose(params string?[] candidates)
     {
         try

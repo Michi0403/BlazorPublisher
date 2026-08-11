@@ -1,4 +1,4 @@
-﻿using PublisherStudio.BusinessObjects;
+using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Configuration;
 
@@ -7,9 +7,21 @@ namespace PublisherStudio.Services.Configuration;
 /// </summary>
 public interface IApplicationPathService
 {
+    /// <summary>
+    /// Gets defaults.
+    /// </summary>
     PublisherStudioPathOptions GetDefaults();
+    /// <summary>
+    /// Runs the resolve operation.
+    /// </summary>
     PublisherStudioPathOptions Resolve(PublisherStudioPathOptions? projectOverrides = null);
+    /// <summary>
+    /// Resolves media path.
+    /// </summary>
     string ResolveMediaPath(string mediaKind, PublisherStudioPathOptions? projectOverrides = null);
+    /// <summary>
+    /// Ensures directories.
+    /// </summary>
     void EnsureDirectories(PublisherStudioPathOptions? projectOverrides = null);
 }
 
@@ -51,6 +63,12 @@ public interface IFileLocalizationService
 /// </summary>
 public interface IRenderExportCatalogService
 {
+    /// <summary>
+    /// Gets capabilities.
+    /// </summary>
     IReadOnlyList<RenderExportCapability> GetCapabilities();
+    /// <summary>
+    /// Runs the find operation.
+    /// </summary>
     RenderExportCapability? Find(string format);
 }

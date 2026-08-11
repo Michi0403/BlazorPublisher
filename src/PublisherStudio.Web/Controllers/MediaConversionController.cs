@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.MediaConversion;
@@ -12,6 +12,9 @@ namespace PublisherStudio.Controllers;
 [Route("api/media-conversion")]
 public sealed class MediaConversionController(IMediaConversionService conversions) : ControllerBase
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private readonly IMediaConversionService _conversions = conversions;
 

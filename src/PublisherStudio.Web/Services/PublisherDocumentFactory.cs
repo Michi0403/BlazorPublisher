@@ -1,4 +1,4 @@
-﻿using PublisherStudio.BusinessObjects;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Services;
@@ -8,9 +8,21 @@ namespace PublisherStudio.Services;
 /// </summary>
 public interface IPublisherDocumentFactory
 {
+    /// <summary>
+    /// Creates publication.
+    /// </summary>
     PublicationDocument CreatePublication();
+    /// <summary>
+    /// Creates page.
+    /// </summary>
     PublicationPage CreatePage(string? name = null);
+    /// <summary>
+    /// Creates picture.
+    /// </summary>
     PictureDocument CreatePicture(int? widthPixels = null, int? heightPixels = null, bool transparent = true);
+    /// <summary>
+    /// Creates picture from raster.
+    /// </summary>
     PictureDocument CreatePictureFromRaster(string dataUrl, string name, int? widthPixels = null, int? heightPixels = null);
 }
 
@@ -159,6 +171,9 @@ public sealed class PublisherDocumentFactory(
 /// </summary>
 public interface IPublicationGridRowFactory
 {
+    /// <summary>
+    /// Runs the create operation.
+    /// </summary>
     PublicationGridRow Create(PublicationDataRow row, IReadOnlyList<string> columns);
 }
 

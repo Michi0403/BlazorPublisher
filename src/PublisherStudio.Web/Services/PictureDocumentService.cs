@@ -9,6 +9,9 @@ namespace PublisherStudio.Services;
 /// </summary>
 public sealed class PictureDocumentService
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly JsonSerializerOptions _options = new(JsonSerializerDefaults.Web)
     {
         WriteIndented = false,
@@ -212,6 +215,9 @@ public sealed class PictureDocumentService
     }
 }
 
+    /// <summary>
+    /// Normalizes SVG markup.
+    /// </summary>
     private string NormalizeSvgMarkup(string? markup)
     {
     try
@@ -233,6 +239,9 @@ public sealed class PictureDocumentService
     }
 }
 
+    /// <summary>
+    /// Runs the fit size operation.
+    /// </summary>
     private (double Width, double Height) FitSize(double width, double height, double maxWidth, double maxHeight)
     {
         width = Math.Max(1, width);
@@ -242,6 +251,9 @@ public sealed class PictureDocumentService
         return (Math.Max(1, width * scale), Math.Max(1, height * scale));
     }
 
+    /// <summary>
+    /// Runs the next layer name operation.
+    /// </summary>
     private string NextLayerName(PictureDocument document, string requested)
     {
     try
@@ -265,6 +277,9 @@ public sealed class PictureDocumentService
     }
 }
 
+    /// <summary>
+    /// Normalizes angle.
+    /// </summary>
     private double NormalizeAngle(double value) {
     try
     {

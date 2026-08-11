@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.IO.Compression;
 using System.Net;
 using System.Security;
@@ -55,6 +55,9 @@ public sealed partial class OpenDocumentImportService(
         }
     }
 
+    /// <summary>
+    /// Imports package async.
+    /// </summary>
     private async Task<PublicationImportResult> ImportPackageAsync(Stream source, string fileName, CancellationToken cancellationToken)
     {
         try
@@ -87,6 +90,9 @@ public sealed partial class OpenDocumentImportService(
         }
     }
 
+    /// <summary>
+    /// Imports flat async.
+    /// </summary>
     private async Task<PublicationImportResult> ImportFlatAsync(Stream source, string fileName, CancellationToken cancellationToken)
     {
         try
@@ -103,6 +109,9 @@ public sealed partial class OpenDocumentImportService(
         }
     }
 
+    /// <summary>
+    /// Imports documents.
+    /// </summary>
     private PublicationImportResult ImportDocuments(
         XDocument content,
         XDocument? styles,
@@ -160,6 +169,9 @@ public sealed partial class OpenDocumentImportService(
         }
     }
 
+    /// <summary>
+    /// Imports element.
+    /// </summary>
     private void ImportElement(
         XElement element,
         PublicationPage page,
@@ -363,6 +375,9 @@ public sealed partial class OpenDocumentImportService(
         }
     }
 
+    /// <summary>
+    /// Adds text frame.
+    /// </summary>
     private void AddTextFrame(
         XElement textBox,
         PublicationPage page,
@@ -404,6 +419,9 @@ public sealed partial class OpenDocumentImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the extract text lines operation.
+    /// </summary>
     private List<string> ExtractTextLines(XElement textBox)
     {
         try
@@ -426,6 +444,9 @@ public sealed partial class OpenDocumentImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the append text operation.
+    /// </summary>
     private void AppendText(XNode node, StringBuilder builder)
     {
         try
@@ -451,6 +472,9 @@ public sealed partial class OpenDocumentImportService(
         }
     }
 
+    /// <summary>
+    /// Builds shape SVG.
+    /// </summary>
     private string BuildShapeSvg(XElement element, Bounds bounds, ResolvedStyle style)
     {
         try
@@ -487,6 +511,9 @@ public sealed partial class OpenDocumentImportService(
         }
     }
 
+    /// <summary>
+    /// Builds style catalog.
+    /// </summary>
     private StyleCatalog BuildStyleCatalog(XDocument content, XDocument? stylesDocument)
     {
         try
@@ -513,6 +540,9 @@ public sealed partial class OpenDocumentImportService(
         }
     }
 
+    /// <summary>
+    /// Resolves page size.
+    /// </summary>
     private (double Width, double Height) ResolvePageSize(XElement page, StyleCatalog styles)
     {
         var masterName = (string?)page.Attribute(Draw + "master-page-name");
@@ -528,6 +558,9 @@ public sealed partial class OpenDocumentImportService(
         return (Math.Clamp(width, 10, 5000), Math.Clamp(height, 10, 5000));
     }
 
+    /// <summary>
+    /// Resolves page background.
+    /// </summary>
     private string ResolvePageBackground(XElement page, StyleCatalog styles)
     {
         try
@@ -544,6 +577,9 @@ public sealed partial class OpenDocumentImportService(
         }
     }
 
+    /// <summary>
+    /// Reads bounds.
+    /// </summary>
     private Bounds ReadBounds(XElement element, PublicationPage page)
     {
         try
@@ -578,6 +614,9 @@ public sealed partial class OpenDocumentImportService(
         }
     }
 
+    /// <summary>
+    /// Reads rotation.
+    /// </summary>
     private double ReadRotation(XElement element)
     {
         try
@@ -597,6 +636,9 @@ public sealed partial class OpenDocumentImportService(
         }
     }
 
+    /// <summary>
+    /// Reads length mm.
+    /// </summary>
     private double ReadLengthMm(string? value, double fallback)
     {
         try
@@ -624,6 +666,9 @@ public sealed partial class OpenDocumentImportService(
         }
     }
 
+    /// <summary>
+    /// Reads archive entry.
+    /// </summary>
     private byte[]? ReadArchiveEntry(ZipArchive archive, string path)
     {
         try
@@ -647,6 +692,9 @@ public sealed partial class OpenDocumentImportService(
     }
 
 
+    /// <summary>
+    /// Normalizes package path.
+    /// </summary>
     private string NormalizePackagePath(string? path)
     {
         try
@@ -668,6 +716,9 @@ public sealed partial class OpenDocumentImportService(
         }
     }
 
+    /// <summary>
+    /// Resolves image mime.
+    /// </summary>
     private string ResolveImageMime(string? declared, string path, byte[] bytes)
     {
         try
@@ -702,6 +753,9 @@ public sealed partial class OpenDocumentImportService(
         }
     }
 
+    /// <summary>
+    /// Loads XML async.
+    /// </summary>
     private async Task<XDocument> LoadXmlAsync(Stream source, CancellationToken cancellationToken)
     {
         try
@@ -726,6 +780,9 @@ public sealed partial class OpenDocumentImportService(
         }
     }
 
+    /// <summary>
+    /// Runs the decorate group name operation.
+    /// </summary>
     private string DecorateGroupName(string name, string groupPath) {
         try
         {
@@ -738,6 +795,9 @@ public sealed partial class OpenDocumentImportService(
             throw;
         }
     }
+    /// <summary>
+    /// Runs the clean name operation.
+    /// </summary>
     private string CleanName(string? value, string fallback) {
         try
         {
@@ -750,6 +810,9 @@ public sealed partial class OpenDocumentImportService(
             throw;
         }
     }
+    /// <summary>
+    /// Runs the fo operation.
+    /// </summary>
     private XName Fo(string localName) {
         try
         {
@@ -763,6 +826,9 @@ public sealed partial class OpenDocumentImportService(
         }
     }
 
+    /// <summary>
+    /// Provides style catalog operations.
+    /// </summary>
     private sealed class StyleCatalog
     {
         private readonly OpenDocumentImportService owner;
@@ -846,6 +912,9 @@ public sealed partial class OpenDocumentImportService(
         }
     }
 
+    /// <summary>
+    /// Normalizes color.
+    /// </summary>
     private string NormalizeColor(string? value, string fallback)
     {
         try
@@ -863,7 +932,13 @@ public sealed partial class OpenDocumentImportService(
         }
     }
 
+    /// <summary>
+    /// Represents a bounds.
+    /// </summary>
     private readonly record struct Bounds(double X, double Y, double Width, double Height);
+    /// <summary>
+    /// Represents a resolved style.
+    /// </summary>
     private readonly record struct ResolvedStyle(string Fill, string Stroke, double StrokeWidth);
 
 }

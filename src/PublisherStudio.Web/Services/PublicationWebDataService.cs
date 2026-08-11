@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Net.Http.Headers;
 using System.Text;
 using PublisherStudio.BusinessObjects;
@@ -17,6 +17,9 @@ public sealed class PublicationWebDataService
     private readonly PublicationDataService _data;
     private readonly IRuntimeEndpointState _runtimeEndpointState;
     private readonly ILogger<PublicationWebDataService> logger;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<Guid, SemaphoreSlim> _bindingLocks = new();
 
     /// <summary>
@@ -151,6 +154,9 @@ public sealed class PublicationWebDataService
         }
     }
 
+    /// <summary>
+    /// Resolves URI.
+    /// </summary>
     private Uri ResolveUri(string value, PublicationWebTransportKind transport)
     {
         try
@@ -171,6 +177,9 @@ public sealed class PublicationWebDataService
         }
     }
 
+    /// <summary>
+    /// Runs the to HTTP method operation.
+    /// </summary>
     private HttpMethod ToHttpMethod(PublicationWebHttpMethod method) {
         try
         {
@@ -191,6 +200,9 @@ public sealed class PublicationWebDataService
         }
     }
 
+    /// <summary>
+    /// Runs the trim for error operation.
+    /// </summary>
     private string TrimForError(string value)
     {
         try

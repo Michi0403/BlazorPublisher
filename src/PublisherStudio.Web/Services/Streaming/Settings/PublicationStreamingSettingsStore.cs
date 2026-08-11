@@ -13,9 +13,15 @@ namespace PublisherStudio.Services.Streaming.Settings;
 /// </summary>
 public sealed class PublicationStreamingSettingsStore
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly object _gate = new();
     private readonly IDataProtector _protector;
     private readonly string _filePath;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly JsonSerializerOptions _json = new(JsonSerializerDefaults.Web)
     {
         WriteIndented = true,
@@ -106,6 +112,9 @@ public sealed class PublicationStreamingSettingsStore
     }
 }
 
+    /// <summary>
+    /// Loads core.
+    /// </summary>
     private Dictionary<Guid, PublicationStreamingSettings> LoadCore()
     {
     try
@@ -134,6 +143,9 @@ public sealed class PublicationStreamingSettingsStore
     }
 }
 
+    /// <summary>
+    /// Saves core.
+    /// </summary>
     private void SaveCore(Dictionary<Guid, PublicationStreamingSettings> values)
     {
     try
@@ -152,6 +164,9 @@ public sealed class PublicationStreamingSettingsStore
     }
 }
 
+    /// <summary>
+    /// Runs the clone operation.
+    /// </summary>
     private PublicationStreamingSettings Clone(PublicationStreamingSettings settings) {
     try
     {

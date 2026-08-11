@@ -517,10 +517,21 @@
         {
             var authored = draft.Views.SelectMany(view => view.Elements).Where(element => element.Visible).ToArray();
             var html = ElementTraversal.Descendants(authored).OfType<HtmlEmbedElement>().FirstOrDefault();
+            // A single HTML object can stay a lightweight Mainframe HTML element only while it
+            // still represents the complete local Panel Studio canvas. Once the author moves,
+            // resizes or rotates it, that geometry is meaningful panel-local state and must be
+            // preserved by promoting the Mainframe object to a PanelElement.
+            var fillsLocalCanvas = html is not null
+                && Math.Abs(html.X) < 0.0001
+                && Math.Abs(html.Y) < 0.0001
+                && Math.Abs(html.Width - draft.CanvasWidth) < 0.0001
+                && Math.Abs(html.Height - draft.CanvasHeight) < 0.0001
+                && Math.Abs(html.Rotation) < 0.0001;
             var remainsStandaloneHtml = draft.Views.Count == 1
                 && authored.Length == 1
                 && authored[0] is HtmlEmbedElement
-                && draft.NavigationMode == PublicationPanelNavigationMode.Hidden;
+                && draft.NavigationMode == PublicationPanelNavigationMode.Hidden
+                && fillsLocalCanvas;
             applied = remainsStandaloneHtml && html is not null
                 ? State.ApplySelectedHtmlEmbed(html)
                 : State.PromoteSelectedHtmlEmbedToPanel(draft);

@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
 using System.Net.WebSockets;
@@ -13,6 +13,9 @@ namespace PublisherStudio.Services.Streaming.Capture;
 /// </summary>
 public interface INativeCaptureSessionFactory
 {
+    /// <summary>
+    /// Runs the create operation.
+    /// </summary>
     NativeCaptureSession Create(NativeCaptureRequest request);
 }
 
@@ -56,6 +59,9 @@ public sealed class NativeCaptureRegistry(
     INativeCaptureSessionFactory sessionFactory,
     ILogger<NativeCaptureRegistry> logger) : IDisposable
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<Guid, NativeCaptureSession> _captures = new();
 
     /// <summary>
@@ -152,8 +158,14 @@ public sealed class NativeCaptureSession : IDisposable
     private readonly FfmpegLocator _ffmpegLocator;
     private readonly IWindowsProcessLoopbackCaptureFactory _processLoopbackFactory;
     private readonly ILogger<NativeCaptureSession> logger;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly object _sync = new();
     private readonly Dictionary<Guid, Channel<byte[]>> _subscribers = [];
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly CancellationTokenSource _cancellation = new();
     private Process? _process;
     private IWindowsProcessLoopbackCapture? _processLoopback;
@@ -298,6 +310,9 @@ public sealed class NativeCaptureSession : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the pump async operation.
+    /// </summary>
     private async Task PumpAsync(Stream stdout, CancellationToken cancellationToken)
     {
         try
@@ -340,6 +355,9 @@ public sealed class NativeCaptureSession : IDisposable
         }
     }
 
+    /// <summary>
+    /// Builds arguments.
+    /// </summary>
     private IReadOnlyList<string> BuildArguments()
     {
         try
@@ -416,6 +434,9 @@ public sealed class NativeCaptureSession : IDisposable
         }
     }
 
+    /// <summary>
+    /// Resolves backend.
+    /// </summary>
     private string ResolveBackend(string kind)
     {
         try
@@ -436,6 +457,9 @@ public sealed class NativeCaptureSession : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the clamp even operation.
+    /// </summary>
     private int ClampEven(int value)
     {
         try
@@ -452,6 +476,9 @@ public sealed class NativeCaptureSession : IDisposable
         }
     }
 
+    /// <summary>
+    /// Runs the complete subscribers operation.
+    /// </summary>
     private void CompleteSubscribers()
     {
         try

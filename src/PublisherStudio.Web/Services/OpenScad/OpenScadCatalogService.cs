@@ -48,6 +48,9 @@ public sealed class OpenScadCatalogService : IOpenScadCatalogService
     }
 }
 
+    /// <summary>
+    /// Builds definitions.
+    /// </summary>
     private IReadOnlyList<OpenScadNodeDefinition> BuildDefinitions()
     {
     try
@@ -156,6 +159,9 @@ public sealed class OpenScadCatalogService : IOpenScadCatalogService
     }
 }
 
+    /// <summary>
+    /// Runs the primitive operation.
+    /// </summary>
     private OpenScadNodeDefinition Primitive(string kind, string displayName, OpenScadNodeCategory category, params OpenScadParameterDefinition[] parameters) {
     try
     {
@@ -168,6 +174,9 @@ public sealed class OpenScadCatalogService : IOpenScadCatalogService
     }
 }
 
+    /// <summary>
+    /// Runs the wrapper operation.
+    /// </summary>
     private OpenScadNodeDefinition Wrapper(string kind, string displayName, OpenScadNodeCategory category, params OpenScadParameterDefinition[] parameters) {
     try
     {
@@ -180,6 +189,9 @@ public sealed class OpenScadCatalogService : IOpenScadCatalogService
     }
 }
 
+    /// <summary>
+    /// Runs the wrapper operation.
+    /// </summary>
     private OpenScadNodeDefinition Wrapper(string kind, string displayName, OpenScadNodeCategory category, int minimumChildren, params OpenScadParameterDefinition[] parameters) {
     try
     {
@@ -192,6 +204,9 @@ public sealed class OpenScadCatalogService : IOpenScadCatalogService
     }
 }
 
+    /// <summary>
+    /// Runs the wrapper operation.
+    /// </summary>
     private OpenScadNodeDefinition Wrapper(string kind, string displayName, OpenScadNodeCategory category, int minimumChildren, string exportNote) {
     try
     {
@@ -204,6 +219,9 @@ public sealed class OpenScadCatalogService : IOpenScadCatalogService
     }
 }
 
+    /// <summary>
+    /// Runs the wrapper operation.
+    /// </summary>
     private OpenScadNodeDefinition Wrapper(string kind, string displayName, OpenScadNodeCategory category, int minimumChildren, int? maximumChildren, string exportNote, params OpenScadParameterDefinition[] parameters) {
     try
     {
@@ -220,6 +238,9 @@ public sealed class OpenScadCatalogService : IOpenScadCatalogService
     }
 }
 
+    /// <summary>
+    /// Runs the parameter operation.
+    /// </summary>
     private OpenScadParameterDefinition Parameter(string name, string displayName, OpenScadParameterType type, string defaultExpression, bool required = false, double? minimum = null, double? maximum = null) {
     try
     {

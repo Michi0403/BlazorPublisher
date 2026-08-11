@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.AspNetCore.WebUtilities;
 using System.Collections.Concurrent;
 using System.Globalization;
 using System.Text.Json;
@@ -10,7 +10,13 @@ namespace PublisherStudio.Services.Configuration;
 /// </summary>
 public sealed class FileLocalizationService(IWebHostEnvironment environment, ILogger<FileLocalizationService> logger) : IFileLocalizationService
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<string, IReadOnlyDictionary<string, string>> _cache = new(StringComparer.OrdinalIgnoreCase);
     private string LocalizationPath => Path.Combine(environment.ContentRootPath, "Localization");
     private string OverridePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PublisherStudio", "LocalizationOverrides");
@@ -216,6 +222,9 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
         }
     }
 
+    /// <summary>
+    /// Runs the load operation.
+    /// </summary>
     private IReadOnlyDictionary<string, string> Load(string culture)
     {
         try
@@ -237,6 +246,9 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
     }
 
 
+    /// <summary>
+    /// Loads file.
+    /// </summary>
     private Dictionary<string, string> LoadFile(string path)
     {
         try
@@ -266,6 +278,9 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
         }
     }
 
+    /// <summary>
+    /// Runs the merge file operation.
+    /// </summary>
     private void MergeFile(string path, IDictionary<string, string> result)
     {
         try
@@ -285,6 +300,9 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
         }
     }
 
+    /// <summary>
+    /// Adds cultures.
+    /// </summary>
     private void AddCultures(string path, ISet<string> values)
     {
         try
@@ -343,6 +361,9 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
         }
     }
 
+    /// <summary>
+    /// Normalizes culture.
+    /// </summary>
     private string NormalizeCulture(string? culture)
     {
         try

@@ -9,6 +9,9 @@ namespace PublisherStudio.Services.OrganicPlugins;
 /// </summary>
 public sealed class LocalGptDiscoveryRegistry(ILogger<LocalGptDiscoveryRegistry> logger) : ILocalGptDiscoveryRegistry
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<string, OrganicPeerAdvertisement> peers = new(StringComparer.OrdinalIgnoreCase);
     /// <summary>
     /// Occurs when changed.
@@ -130,6 +133,9 @@ public sealed class LocalGptDiscoveryRegistry(ILogger<LocalGptDiscoveryRegistry>
     }
 }
 
+    /// <summary>
+    /// Runs the clone operation.
+    /// </summary>
     private OrganicPeerAdvertisement Clone(OrganicPeerAdvertisement peer) {
     try
     {
@@ -174,6 +180,9 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
 {
     private readonly ILogger<OrganicPermissionStore> logger;
     private readonly IOrganicPluginProtocolCodec codec;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly object gate = new();
     private readonly string filePath;
     private List<OrganicPermissionRule>? rules;
@@ -390,6 +399,9 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
     }
 }
 
+    /// <summary>
+    /// Runs the matching rules operation.
+    /// </summary>
     private List<OrganicPermissionRule> MatchingRules(OrganicWireEnvelope envelope) {
     try
     {
@@ -407,6 +419,9 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
     }
 }
 
+    /// <summary>
+    /// Resolves rule.
+    /// </summary>
     private OrganicPermissionRule? ResolveRule(IReadOnlyList<OrganicPermissionRule> candidates, string organ) {
     try
     {
@@ -423,6 +438,9 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
     }
 }
 
+    /// <summary>
+    /// Runs the load operation.
+    /// </summary>
     private List<OrganicPermissionRule> Load()
     {
         try
@@ -437,6 +455,9 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
         }
     }
 
+    /// <summary>
+    /// Runs the persist operation.
+    /// </summary>
     private void Persist()
     {
     try
@@ -458,6 +479,9 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
     }
 }
 
+    /// <summary>
+    /// Runs the same key operation.
+    /// </summary>
     private bool SameKey(OrganicPermissionRule left, OrganicPermissionRule right) {
     try
     {
@@ -475,6 +499,9 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
     }
 }
 
+    /// <summary>
+    /// Runs the clone operation.
+    /// </summary>
     private OrganicPermissionRule Clone(OrganicPermissionRule rule) {
     try
     {
@@ -512,6 +539,9 @@ public sealed class OrganicReplayGuard(
     IOrganicReplayPolicyDataService policyData,
     ILogger<OrganicReplayGuard> logger) : IOrganicReplayGuard
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<string, DateTimeOffset> accepted = new(StringComparer.OrdinalIgnoreCase);
     private int cleanupCounter;
 
@@ -562,7 +592,13 @@ public sealed class OrganicReplayGuard(
 /// </summary>
 public sealed class OrganicResultStore(IOrganicPluginProtocolCodec codec) : IOrganicResultStore
 {
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentQueue<OrganicPluginWorkItem> results = new();
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ConcurrentDictionary<Guid, OrganicTextInsertionProposal> textProposals = new();
 
     /// <summary>
@@ -656,6 +692,9 @@ public sealed class OrganicResultStore(IOrganicPluginProtocolCodec codec) : IOrg
     }
 }
 
+    /// <summary>
+    /// Resolves status.
+    /// </summary>
     private OrganicWorkStatus ResolveStatus(OrganicWireEnvelope envelope)
     {
     try

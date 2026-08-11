@@ -9,6 +9,9 @@ namespace PublisherStudio.Services.Streaming.Capture;
 /// </summary>
 public interface IWindowsProcessLoopbackCapture : IDisposable
 {
+    /// <summary>
+    /// Runs the start operation.
+    /// </summary>
     void Start();
 }
 
@@ -17,6 +20,9 @@ public interface IWindowsProcessLoopbackCapture : IDisposable
 /// </summary>
 public interface IWindowsProcessLoopbackCaptureFactory
 {
+    /// <summary>
+    /// Runs the create operation.
+    /// </summary>
     IWindowsProcessLoopbackCapture Create(uint processId, Stream destination, CancellationToken cancellationToken);
 }
 
@@ -80,6 +86,9 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
     private readonly uint _processId;
     private readonly Stream _destination;
     private readonly CancellationTokenSource _cancellation;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly ManualResetEventSlim _started = new(false);
     private readonly Thread _thread;
     private Exception? _startupError;
@@ -136,6 +145,9 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
     }
 }
 
+    /// <summary>
+    /// Runs the capture thread operation.
+    /// </summary>
     private void CaptureThread()
     {
         IAudioClient? audioClient = null;
@@ -227,6 +239,9 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
         }
     }
 
+    /// <summary>
+    /// Runs the activate audio client operation.
+    /// </summary>
     private IAudioClient ActivateAudioClient(uint processId)
     {
     try
@@ -283,6 +298,9 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
     }
 }
 
+    /// <summary>
+    /// Runs the throw if failed operation.
+    /// </summary>
     private void ThrowIfFailed(int hresult)
     {
     try
@@ -300,6 +318,9 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
     }
 }
 
+    /// <summary>
+    /// Runs the release com object operation.
+    /// </summary>
     private void ReleaseComObject(object? value)
     {
     try
@@ -343,9 +364,15 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
     }
 }
 
+    /// <summary>
+    /// Represents an audio activation completion handler.
+    /// </summary>
     private sealed class AudioActivationCompletionHandler(WindowsProcessLoopbackCapture owner)
         : IActivateAudioInterfaceCompletionHandler
     {
+        /// <summary>
+        /// Runs the new operation.
+        /// </summary>
         private readonly TaskCompletionSource<IAudioClient> _completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         /// <summary>
@@ -391,6 +418,9 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
 }
     }
 
+    /// <summary>
+    /// Represents an audio client activation params.
+    /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     private struct AudioClientActivationParams
     {
@@ -404,6 +434,9 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
         public AudioClientProcessLoopbackParams ProcessLoopbackParams;
     }
 
+    /// <summary>
+    /// Represents an audio client process loopback params.
+    /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     private struct AudioClientProcessLoopbackParams
     {
@@ -417,6 +450,9 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
         public int ProcessLoopbackMode;
     }
 
+    /// <summary>
+    /// Represents a prop variant.
+    /// </summary>
     [StructLayout(LayoutKind.Explicit)]
     private struct PropVariant
     {
@@ -430,6 +466,9 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
         [FieldOffset(8)] public Blob Blob;
     }
 
+    /// <summary>
+    /// Represents a blob.
+    /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     private struct Blob
     {
@@ -443,6 +482,9 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
         public IntPtr Data;
     }
 
+    /// <summary>
+    /// Represents a wave format ex.
+    /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 2)]
     private struct WaveFormatEx
     {
@@ -476,42 +518,105 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
         public ushort Size;
     }
 
+    /// <summary>
+    /// Defines the activate audio interface completion handler contract.
+    /// </summary>
     [ComImport, Guid("41D949AB-9862-444A-80F6-C261334DA5EB"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     private interface IActivateAudioInterfaceCompletionHandler
     {
+        /// <summary>
+        /// Runs the activate completed operation.
+        /// </summary>
         [PreserveSig]
         int ActivateCompleted([MarshalAs(UnmanagedType.Interface)] IActivateAudioInterfaceAsyncOperation operation);
     }
 
+    /// <summary>
+    /// Defines the activate audio interface async operation contract.
+    /// </summary>
     [ComImport, Guid("72A22D78-CDE4-431D-B8CC-843A71199B6D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     private interface IActivateAudioInterfaceAsyncOperation
     {
+        /// <summary>
+        /// Gets activate result.
+        /// </summary>
         [PreserveSig]
         int GetActivateResult(out int activateResult, [MarshalAs(UnmanagedType.IUnknown)] out object activatedInterface);
     }
 
+    /// <summary>
+    /// Defines the audio client contract.
+    /// </summary>
     [ComImport, Guid("1CB9AD4C-DBFA-4c32-B178-C2F568A703B2"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     private interface IAudioClient
     {
+       /// <summary>
+       /// Runs the initialize operation.
+       /// </summary>
         [PreserveSig] int Initialize(int shareMode, uint streamFlags, long bufferDuration, long periodicity, IntPtr format, IntPtr audioSessionGuid);
+       /// <summary>
+       /// Gets buffer size.
+       /// </summary>
         [PreserveSig] int GetBufferSize(out uint bufferFrames);
+       /// <summary>
+       /// Gets stream latency.
+       /// </summary>
         [PreserveSig] int GetStreamLatency(out long latency);
+       /// <summary>
+       /// Gets current padding.
+       /// </summary>
         [PreserveSig] int GetCurrentPadding(out uint currentPadding);
+       /// <summary>
+       /// Determines whether format supported.
+       /// </summary>
         [PreserveSig] int IsFormatSupported(int shareMode, IntPtr format, out IntPtr closestMatch);
+       /// <summary>
+       /// Gets mix format.
+       /// </summary>
         [PreserveSig] int GetMixFormat(out IntPtr deviceFormat);
+       /// <summary>
+       /// Gets device period.
+       /// </summary>
         [PreserveSig] int GetDevicePeriod(out long defaultDevicePeriod, out long minimumDevicePeriod);
+       /// <summary>
+       /// Runs the start operation.
+       /// </summary>
         [PreserveSig] int Start();
+       /// <summary>
+       /// Runs the stop operation.
+       /// </summary>
         [PreserveSig] int Stop();
+       /// <summary>
+       /// Runs the reset operation.
+       /// </summary>
         [PreserveSig] int Reset();
+       /// <summary>
+       /// Sets event handle.
+       /// </summary>
         [PreserveSig] int SetEventHandle(IntPtr eventHandle);
+       /// <summary>
+       /// Gets service.
+       /// </summary>
         [PreserveSig] int GetService(ref Guid riid, [MarshalAs(UnmanagedType.IUnknown)] out object service);
     }
 
+    /// <summary>
+    /// Defines the audio capture client contract.
+    /// </summary>
     [ComImport, Guid("C8ADBD64-E71E-48A0-A4DE-185C395CD317"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     private interface IAudioCaptureClient
     {
+       /// <summary>
+       /// Gets buffer.
+       /// </summary>
         [PreserveSig] int GetBuffer(out IntPtr data, out uint frames, out uint flags, out ulong devicePosition, out ulong qpcPosition);
+       /// <summary>
+       /// Runs the release buffer operation.
+       /// </summary>
         [PreserveSig] int ReleaseBuffer(uint frames);
+       /// <summary>
+       /// Gets next packet size.
+       /// </summary>
         [PreserveSig] int GetNextPacketSize(out uint packetFrames);
     }
 }

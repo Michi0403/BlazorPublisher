@@ -21,12 +21,18 @@ public sealed class TwitchOAuthService
     private const string StreamKeyUrl = "https://api.twitch.tv/helix/streams/key";
     private const string IngestUrl = "https://ingest.twitch.tv/ingests";
     private const string GlobalEndpoint = "rtmp://ingest.global-contribute.live-video.net/app/{streamKey}";
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     private readonly IPublisherRuntimePolicyDataService _runtimePolicy;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly StreamingProfileStore _profiles;
     private readonly IConfiguration _configuration;
+    /// <summary>
+    /// Runs the new operation.
+    /// </summary>
     private readonly SemaphoreSlim _tokenGate = new(1, 1);
 
     /// <summary>
@@ -336,6 +342,9 @@ public sealed class TwitchOAuthService
     }
 }
 
+    /// <summary>
+    /// Ensures valid access token core async.
+    /// </summary>
     private async Task<string?> EnsureValidAccessTokenCoreAsync(
         Guid profileId,
         bool forceValidation,
@@ -399,6 +408,9 @@ public sealed class TwitchOAuthService
     }
 }
 
+    /// <summary>
+    /// Runs the poll for token async operation.
+    /// </summary>
     private async Task<TwitchTokenResponse> PollForTokenAsync(
         TwitchDeviceAuthorization authorization,
         CancellationToken cancellationToken)
@@ -442,6 +454,9 @@ public sealed class TwitchOAuthService
     }
 }
 
+    /// <summary>
+    /// Runs the refresh token async operation.
+    /// </summary>
     private async Task<TwitchTokenResponse> RefreshTokenAsync(
         StreamingOAuthCredentials credentials,
         CancellationToken cancellationToken)
@@ -473,6 +488,9 @@ public sealed class TwitchOAuthService
     }
 }
 
+    /// <summary>
+    /// Validates token async.
+    /// </summary>
     private async Task<TwitchValidationResponse?> ValidateTokenAsync(string accessToken, CancellationToken cancellationToken)
     {
     try
@@ -493,6 +511,9 @@ public sealed class TwitchOAuthService
     }
 }
 
+    /// <summary>
+    /// Gets stream key async.
+    /// </summary>
     private async Task<string> GetStreamKeyAsync(
         string clientId,
         string accessToken,
@@ -519,6 +540,9 @@ public sealed class TwitchOAuthService
     }
 }
 
+    /// <summary>
+    /// Gets ingest candidates async.
+    /// </summary>
     private async Task<List<TwitchIngestCandidate>> GetIngestCandidatesAsync(CancellationToken cancellationToken)
     {
     try
@@ -573,6 +597,9 @@ public sealed class TwitchOAuthService
     }
 }
 
+    /// <summary>
+    /// Runs the measure TCP latency async operation.
+    /// </summary>
     private async Task<double?> MeasureTcpLatencyAsync(string host, int port, CancellationToken cancellationToken)
     {
     try
@@ -605,6 +632,9 @@ public sealed class TwitchOAuthService
     }
 }
 
+    /// <summary>
+    /// Runs the send async operation.
+    /// </summary>
     private async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
     try
@@ -620,6 +650,9 @@ public sealed class TwitchOAuthService
     }
 }
 
+    /// <summary>
+    /// Reads JSON async.
+    /// </summary>
     private async Task<T?> ReadJsonAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken)
     {
         try
@@ -633,6 +666,9 @@ public sealed class TwitchOAuthService
         }
     }
 
+    /// <summary>
+    /// Reads twitch error async.
+    /// </summary>
     private async Task<string> ReadTwitchErrorAsync(
         HttpResponseMessage response,
         string? parsedMessage,
@@ -653,6 +689,9 @@ public sealed class TwitchOAuthService
     }
 }
 
+    /// <summary>
+    /// Reads response text async.
+    /// </summary>
     private async Task<string> ReadResponseTextAsync(HttpResponseMessage response, CancellationToken cancellationToken)
     {
     try
@@ -668,6 +707,9 @@ public sealed class TwitchOAuthService
     }
 }
 
+    /// <summary>
+    /// Normalizes twitch error.
+    /// </summary>
     private string NormalizeTwitchError(string message)
     {
     try
@@ -692,6 +734,9 @@ public sealed class TwitchOAuthService
     }
 }
 
+    /// <summary>
+    /// Builds scopes.
+    /// </summary>
     private string BuildScopes(bool includeChat) {
     try
     {
@@ -706,6 +751,9 @@ public sealed class TwitchOAuthService
     }
 }
 
+    /// <summary>
+    /// Creates global candidate.
+    /// </summary>
     private TwitchIngestCandidate CreateGlobalCandidate() {
     try
     {
@@ -724,6 +772,9 @@ public sealed class TwitchOAuthService
     }
 }
 
+    /// <summary>
+    /// Normalizes endpoint.
+    /// </summary>
     private string NormalizeEndpoint(string? endpoint)
     {
     try
@@ -743,6 +794,9 @@ public sealed class TwitchOAuthService
     }
 }
 
+    /// <summary>
+    /// Attempts to read host.
+    /// </summary>
     private string TryReadHost(string? endpoint)
     {
     try
@@ -758,6 +812,9 @@ public sealed class TwitchOAuthService
     }
 }
 
+    /// <summary>
+    /// Represents a twitch device authorization response.
+    /// </summary>
     private sealed class TwitchDeviceAuthorizationResponse
     {
         /// <summary>
@@ -786,6 +843,9 @@ public sealed class TwitchOAuthService
         [JsonPropertyName("message")] public string Message { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// Represents a twitch token response.
+    /// </summary>
     private sealed class TwitchTokenResponse
     {
         /// <summary>
@@ -814,6 +874,9 @@ public sealed class TwitchOAuthService
         [JsonPropertyName("message")] public string Message { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// Represents a twitch validation response.
+    /// </summary>
     private sealed class TwitchValidationResponse
     {
         /// <summary>
@@ -838,6 +901,9 @@ public sealed class TwitchOAuthService
         [JsonPropertyName("expires_in")] public int ExpiresIn { get; set; }
     }
 
+    /// <summary>
+    /// Represents a twitch stream key response.
+    /// </summary>
     private sealed class TwitchStreamKeyResponse
     {
         /// <summary>
@@ -850,6 +916,9 @@ public sealed class TwitchOAuthService
         [JsonPropertyName("message")] public string Message { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// Represents a twitch stream key item.
+    /// </summary>
     private sealed class TwitchStreamKeyItem
     {
         /// <summary>
@@ -858,6 +927,9 @@ public sealed class TwitchOAuthService
         [JsonPropertyName("stream_key")] public string StreamKey { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// Represents a twitch ingest response.
+    /// </summary>
     private sealed class TwitchIngestResponse
     {
         /// <summary>
@@ -866,6 +938,9 @@ public sealed class TwitchOAuthService
         [JsonPropertyName("ingests")] public List<TwitchIngestItem> Ingests { get; set; } = [];
     }
 
+    /// <summary>
+    /// Represents a twitch ingest item.
+    /// </summary>
     private sealed class TwitchIngestItem
     {
         /// <summary>

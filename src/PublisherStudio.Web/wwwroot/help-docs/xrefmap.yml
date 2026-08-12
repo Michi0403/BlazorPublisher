@@ -38026,6 +38026,18 @@ references:
   fullName.vb: PublisherStudio.Components.Editor.PanelView.New
   nameWithType: PanelView.PanelView
   nameWithType.vb: PanelView.New
+- uid: PublisherStudio.Components.Editor.PanelView.AuthoringOverlay
+  name: AuthoringOverlay
+  href: api/PublisherStudio.Components.Editor.PanelView.html#PublisherStudio_Components_Editor_PanelView_AuthoringOverlay
+  commentId: P:PublisherStudio.Components.Editor.PanelView.AuthoringOverlay
+  fullName: PublisherStudio.Components.Editor.PanelView.AuthoringOverlay
+  nameWithType: PanelView.AuthoringOverlay
+- uid: PublisherStudio.Components.Editor.PanelView.AuthoringOverlay*
+  name: AuthoringOverlay
+  href: api/PublisherStudio.Components.Editor.PanelView.html#PublisherStudio_Components_Editor_PanelView_AuthoringOverlay_
+  commentId: Overload:PublisherStudio.Components.Editor.PanelView.AuthoringOverlay
+  fullName: PublisherStudio.Components.Editor.PanelView.AuthoringOverlay
+  nameWithType: PanelView.AuthoringOverlay
 - uid: PublisherStudio.Components.Editor.PanelView.BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)
   name: BuildRenderTree(RenderTreeBuilder)
   href: api/PublisherStudio.Components.Editor.PanelView.html#PublisherStudio_Components_Editor_PanelView_BuildRenderTree_Microsoft_AspNetCore_Components_Rendering_RenderTreeBuilder_
@@ -38086,6 +38098,18 @@ references:
   commentId: Overload:PublisherStudio.Components.Editor.PanelView.Document
   fullName: PublisherStudio.Components.Editor.PanelView.Document
   nameWithType: PanelView.Document
+- uid: PublisherStudio.Components.Editor.PanelView.ForceCanvasLayout
+  name: ForceCanvasLayout
+  href: api/PublisherStudio.Components.Editor.PanelView.html#PublisherStudio_Components_Editor_PanelView_ForceCanvasLayout
+  commentId: P:PublisherStudio.Components.Editor.PanelView.ForceCanvasLayout
+  fullName: PublisherStudio.Components.Editor.PanelView.ForceCanvasLayout
+  nameWithType: PanelView.ForceCanvasLayout
+- uid: PublisherStudio.Components.Editor.PanelView.ForceCanvasLayout*
+  name: ForceCanvasLayout
+  href: api/PublisherStudio.Components.Editor.PanelView.html#PublisherStudio_Components_Editor_PanelView_ForceCanvasLayout_
+  commentId: Overload:PublisherStudio.Components.Editor.PanelView.ForceCanvasLayout
+  fullName: PublisherStudio.Components.Editor.PanelView.ForceCanvasLayout
+  nameWithType: PanelView.ForceCanvasLayout
 - uid: PublisherStudio.Components.Editor.PanelView.Item
   name: Item
   href: api/PublisherStudio.Components.Editor.PanelView.html#PublisherStudio_Components_Editor_PanelView_Item
@@ -46159,6 +46183,12 @@ references:
   commentId: T:PublisherStudio.Services.Configuration.IPublisherDxFunctionCatalogDataService
   fullName: PublisherStudio.Services.Configuration.IPublisherDxFunctionCatalogDataService
   nameWithType: IPublisherDxFunctionCatalogDataService
+- uid: PublisherStudio.Services.Configuration.IPublisherDxFunctionCatalogDataService.Changed
+  name: Changed
+  href: api/PublisherStudio.Services.Configuration.IPublisherDxFunctionCatalogDataService.html#PublisherStudio_Services_Configuration_IPublisherDxFunctionCatalogDataService_Changed
+  commentId: E:PublisherStudio.Services.Configuration.IPublisherDxFunctionCatalogDataService.Changed
+  fullName: PublisherStudio.Services.Configuration.IPublisherDxFunctionCatalogDataService.Changed
+  nameWithType: IPublisherDxFunctionCatalogDataService.Changed
 - uid: PublisherStudio.Services.Configuration.IPublisherDxFunctionCatalogDataService.GetFunctionsAsync(System.Threading.CancellationToken)
   name: GetFunctionsAsync(CancellationToken)
   href: api/PublisherStudio.Services.Configuration.IPublisherDxFunctionCatalogDataService.html#PublisherStudio_Services_Configuration_IPublisherDxFunctionCatalogDataService_GetFunctionsAsync_System_Threading_CancellationToken_
@@ -47008,6 +47038,24 @@ references:
   fullName.vb: PublisherStudio.Services.Configuration.PublisherDxFunctionCatalogDataService.New
   nameWithType: PublisherDxFunctionCatalogDataService.PublisherDxFunctionCatalogDataService
   nameWithType.vb: PublisherDxFunctionCatalogDataService.New
+- uid: PublisherStudio.Services.Configuration.PublisherDxFunctionCatalogDataService.Changed
+  name: Changed
+  href: api/PublisherStudio.Services.Configuration.PublisherDxFunctionCatalogDataService.html#PublisherStudio_Services_Configuration_PublisherDxFunctionCatalogDataService_Changed
+  commentId: E:PublisherStudio.Services.Configuration.PublisherDxFunctionCatalogDataService.Changed
+  fullName: PublisherStudio.Services.Configuration.PublisherDxFunctionCatalogDataService.Changed
+  nameWithType: PublisherDxFunctionCatalogDataService.Changed
+- uid: PublisherStudio.Services.Configuration.PublisherDxFunctionCatalogDataService.Dispose
+  name: Dispose()
+  href: api/PublisherStudio.Services.Configuration.PublisherDxFunctionCatalogDataService.html#PublisherStudio_Services_Configuration_PublisherDxFunctionCatalogDataService_Dispose
+  commentId: M:PublisherStudio.Services.Configuration.PublisherDxFunctionCatalogDataService.Dispose
+  fullName: PublisherStudio.Services.Configuration.PublisherDxFunctionCatalogDataService.Dispose()
+  nameWithType: PublisherDxFunctionCatalogDataService.Dispose()
+- uid: PublisherStudio.Services.Configuration.PublisherDxFunctionCatalogDataService.Dispose*
+  name: Dispose
+  href: api/PublisherStudio.Services.Configuration.PublisherDxFunctionCatalogDataService.html#PublisherStudio_Services_Configuration_PublisherDxFunctionCatalogDataService_Dispose_
+  commentId: Overload:PublisherStudio.Services.Configuration.PublisherDxFunctionCatalogDataService.Dispose
+  fullName: PublisherStudio.Services.Configuration.PublisherDxFunctionCatalogDataService.Dispose
+  nameWithType: PublisherDxFunctionCatalogDataService.Dispose
 - uid: PublisherStudio.Services.Configuration.PublisherDxFunctionCatalogDataService.GetFunctionsAsync(System.Threading.CancellationToken)
   name: GetFunctionsAsync(CancellationToken)
   href: api/PublisherStudio.Services.Configuration.PublisherDxFunctionCatalogDataService.html#PublisherStudio_Services_Configuration_PublisherDxFunctionCatalogDataService_GetFunctionsAsync_System_Threading_CancellationToken_
@@ -53026,6 +53074,12 @@ references:
   commentId: T:PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog
   fullName: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog
   nameWithType: IOrganicCapabilityCatalog
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.Changed
+  name: Changed
+  href: api/PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.html#PublisherStudio_Services_OrganicPlugins_IOrganicCapabilityCatalog_Changed
+  commentId: E:PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.Changed
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.Changed
+  nameWithType: IOrganicCapabilityCatalog.Changed
 - uid: PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.GetCapabilitiesAsync(System.Threading.CancellationToken)
   name: GetCapabilitiesAsync(CancellationToken)
   href: api/PublisherStudio.Services.OrganicPlugins.IOrganicCapabilityCatalog.html#PublisherStudio_Services_OrganicPlugins_IOrganicCapabilityCatalog_GetCapabilitiesAsync_System_Threading_CancellationToken_
@@ -53125,6 +53179,12 @@ references:
   commentId: T:PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore
   fullName: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore
   nameWithType: IOrganicPermissionStore
+- uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.Changed
+  name: Changed
+  href: api/PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicPermissionStore_Changed
+  commentId: E:PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.Changed
+  fullName: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.Changed
+  nameWithType: IOrganicPermissionStore.Changed
 - uid: PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.Delete(System.String,System.String,System.String)
   name: Delete(string, string, string)
   href: api/PublisherStudio.Services.OrganicPlugins.IOrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_IOrganicPermissionStore_Delete_System_String_System_String_System_String_
@@ -54004,6 +54064,12 @@ references:
   fullName.vb: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.New
   nameWithType: ObjectStoreOrganicCapabilityCatalog.ObjectStoreOrganicCapabilityCatalog
   nameWithType.vb: ObjectStoreOrganicCapabilityCatalog.New
+- uid: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.Changed
+  name: Changed
+  href: api/PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.html#PublisherStudio_Services_OrganicPlugins_ObjectStoreOrganicCapabilityCatalog_Changed
+  commentId: E:PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.Changed
+  fullName: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.Changed
+  nameWithType: ObjectStoreOrganicCapabilityCatalog.Changed
 - uid: PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.GetCapabilitiesAsync(System.Threading.CancellationToken)
   name: GetCapabilitiesAsync(CancellationToken)
   href: api/PublisherStudio.Services.OrganicPlugins.ObjectStoreOrganicCapabilityCatalog.html#PublisherStudio_Services_OrganicPlugins_ObjectStoreOrganicCapabilityCatalog_GetCapabilitiesAsync_System_Threading_CancellationToken_
@@ -54076,6 +54142,12 @@ references:
   fullName.vb: PublisherStudio.Services.OrganicPlugins.OrganicCapabilityCatalog.New
   nameWithType: OrganicCapabilityCatalog.OrganicCapabilityCatalog
   nameWithType.vb: OrganicCapabilityCatalog.New
+- uid: PublisherStudio.Services.OrganicPlugins.OrganicCapabilityCatalog.Changed
+  name: Changed
+  href: api/PublisherStudio.Services.OrganicPlugins.OrganicCapabilityCatalog.html#PublisherStudio_Services_OrganicPlugins_OrganicCapabilityCatalog_Changed
+  commentId: E:PublisherStudio.Services.OrganicPlugins.OrganicCapabilityCatalog.Changed
+  fullName: PublisherStudio.Services.OrganicPlugins.OrganicCapabilityCatalog.Changed
+  nameWithType: OrganicCapabilityCatalog.Changed
 - uid: PublisherStudio.Services.OrganicPlugins.OrganicCapabilityCatalog.GetCapabilitiesAsync(System.Threading.CancellationToken)
   name: GetCapabilitiesAsync(CancellationToken)
   href: api/PublisherStudio.Services.OrganicPlugins.OrganicCapabilityCatalog.html#PublisherStudio_Services_OrganicPlugins_OrganicCapabilityCatalog_GetCapabilitiesAsync_System_Threading_CancellationToken_
@@ -54148,6 +54220,12 @@ references:
   fullName.vb: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.New
   nameWithType: OrganicPermissionStore.OrganicPermissionStore
   nameWithType.vb: OrganicPermissionStore.New
+- uid: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Changed
+  name: Changed
+  href: api/PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_OrganicPermissionStore_Changed
+  commentId: E:PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Changed
+  fullName: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Changed
+  nameWithType: OrganicPermissionStore.Changed
 - uid: PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.Delete(System.String,System.String,System.String)
   name: Delete(string, string, string)
   href: api/PublisherStudio.Services.OrganicPlugins.OrganicPermissionStore.html#PublisherStudio_Services_OrganicPlugins_OrganicPermissionStore_Delete_System_String_System_String_System_String_

@@ -1,0 +1,973 @@
+@rendermode InteractiveServer
+@page "/test-lab"
+@using System.Net.Http.Json
+@using System.Text
+@using System.Text.Json
+@using System.Text.RegularExpressions
+@inject CouncilTextService CouncilText
+@inject LocalGptCatalogService Catalog
+@inject NavigationManager NavigationManager
+@inject ILogger<TestLab> Logger
+@inject INotificationService Notifier
+@inject IComponentActivityService ComponentActivity
+@inject ISupervisedTaskRunner TaskRunner
+@inject IRemoteKnowledgeImportService RemoteKnowledgeImporter
+@inject ILearnBaseKnowledgeImporterService LearnBaseImporter
+@inject ICouncilTeamConfigurationService CouncilTeams
+@inject LocalGPT.Services.Localization.ILocalGptLocalizationService Localization
+
+<PageTitle>Test Lab</PageTitle>
+<main class="test-lab-page">
+    <WorkbenchHeader Eyebrow='@Localization.Get("TestLab.Workbench.Eyebrow", fallback: "Diagnostics studio")'
+                     Title='@Localization.Get("TestLab.Workbench.Title", fallback: "Test Lab")'
+                     Subtitle='@Localization.Get("TestLab.Workbench.Subtitle", fallback: "Run local diagnostics, inspect generated artifacts and manage bounded knowledge imports from one responsive workbench.")' />
+    <ToastWrapper Name="@toastName" />
+    <div class="test-lab-workbench-layout">
+        <ConfigurationWorkbenchNav Items="@TestLabSections"
+                                   ActiveKey="@ActiveTestLabSection"
+                                   ActiveKeyChanged="OnTestLabSectionChanged"
+                                   AriaLabel="Test Lab sections" />
+        <div class="test-lab-workbench-stage">
+    <section class="test-lab-grid">
+        <ConfigurationWorkbenchPanel SectionKey="frontend" ActiveKey="@ActiveTestLabSection" AriaLabel="Frontend API smoke tests">
+        <article id="frontend-smoke" class="help-panel test-lab-panel frontend-api-smoke-panel">
+            <h2>Frontend API Smoke</h2>
+            <p>These checks stay on the local loopback server and are useful before loading a heavy model.</p>
+            <div class="test-lab-actions">
+                @foreach (var route in Catalog.Routes)
+                {
+                    <DxButton Text="@route.Label"
+                              RenderStyle="@route.Style"
+                              RenderStyleMode="ButtonRenderStyleMode.Contained"
+                              Enabled="@(!isBusy)"
+                              Click="@(() => RunRouteAsync(route.Path))" />
+                }
+            </div>
+        </article>
+        </ConfigurationWorkbenchPanel>
+
+        <ConfigurationWorkbenchPanel SectionKey="learnbase" ActiveKey="@ActiveTestLabSection" AriaLabel="Learn-Base import">
+        <article id="learnbase-import" class="help-panel test-lab-panel learnbase-panel">
+            <h2>Learn-Base Import</h2>
+            <p>Import compact, bounded source maps into the Council knowledge database. Presets are starting points; the actual file endings and regex policy remain editable for every run.</p>
+            <div class="learnbase-primary-grid">
+                <label class="test-lab-field">
+                    <span>Knowledge source preset</span>
+                    <DxComboBox Data="@Catalog.LearnBasePresets"
+                                Value="@selectedLearnBasePreset"
+                                TextFieldName="@nameof(LearnBasePreset.Label)"
+                                ValueChanged="@((LearnBasePreset preset) => SelectLearnBasePreset(preset))" />
+                </label>
+                <label class="test-lab-field">
+                    <span>Scan scope</span>
+                    <DxComboBox Data="@Catalog.LearnBaseScanProfiles"
+                                Value="@selectedScanProfile"
+                                TextFieldName="@nameof(LearnBaseScanProfile.Label)"
+                                ValueChanged="@((LearnBaseScanProfile profile) => SelectLearnBaseScanProfile(profile))" />
+                </label>
+                <div class="test-lab-field learnbase-root-field">
+                    <span>Knowledge root</span>
+                    <div class="path-picker-row">
+                        <DxTextBox @bind-Text="learnBaseRoot" />
+                        <DxButton Text="Browse…"
+                                  RenderStyle="ButtonRenderStyle.Secondary"
+                                  RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                  Click="@(() => learnBasePathExplorerVisible = true)" />
+                    </div>
+                    <small>Choose a folder on this LocalGPT host or keep typing a path manually. Selection does not grant write/execute permission.</small>
+                </div>
+                <label class="test-lab-field">
+                    <span>Project limit</span>
+                    <DxSpinEdit @bind-Value="maxProjects" MinValue="1" MaxValue="120" Increment="5" />
+                </label>
+                <label class="test-lab-field">
+                    <span>Maximum bytes per selected file</span>
+                    <input type="number" min="1024" max="16777216" step="65536" @bind="learnBaseMaximumFileBytes" />
+                </label>
+            </div>
+            <div class="learnbase-workbench">
+                <div class="learnbase-source-column">
+                    <div class="test-lab-import-summary">
+                        <strong>Source & import behavior · @selectedLearnBasePreset.Label</strong>
+                        <p>@selectedLearnBasePreset.Description</p>
+                        <p>@selectedScanProfile.Description</p>
+                        <p>@Catalog.LearnBaseDuplicatePolicySummary</p>
+                    </div>
+                    <div class="learnbase-mode-grid">
+                        <label><input type="checkbox" @bind="learnBaseImportManifests" /> Import installer learning-source manifests</label>
+                        <label><input type="checkbox" @bind="learnBaseImportDocumentation" /> Detect known documentation corpora</label>
+                        <label><input type="checkbox" @bind="learnBaseImportProjects" /> Build project architecture summaries</label>
+                        <label><input type="checkbox" @bind="saveToKnowledge" /> Save or update SQLite Council knowledge</label>
+                    </div>
+                </div>
+
+                <details class="learnbase-policy-editor" open>
+                    <summary>File selection & dynamic regex policy (@selectedLearnBaseExtensions.Count endings)</summary>
+                    <p class="human-inbox-note">The rules are runtime data. Council regex tools can list, test and refine database-backed patterns without recompiling LocalGPT.</p>
+                    <div class="learnbase-extension-toolbar">
+                        <button type="button" @onclick="SelectAllLearnBaseExtensions">Select all known</button>
+                        <button type="button" @onclick="ClearLearnBaseExtensions">Clear selection</button>
+                    </div>
+                    <div class="learnbase-extension-grid" aria-label="LearnBase file ending selection">
+                        @foreach (var extension in Catalog.LearnBaseKnownExtensions.OrderBy(item => item, StringComparer.OrdinalIgnoreCase))
+                        {
+                            <label>
+                                <input type="checkbox"
+                                       checked="@selectedLearnBaseExtensions.Contains(extension)"
+                                       @onchange="@((ChangeEventArgs args) => ToggleLearnBaseExtension(extension, args))" />
+                                <code>@extension</code>
+                            </label>
+                        }
+                    </div>
+                    <div class="learnbase-policy-grid">
+                        <label class="test-lab-field">
+                            <span>Additional file endings</span>
+                            <input @bind="learnBaseAdditionalExtensions" placeholder=".fzz; .kicad_sch; .custom" />
+                        </label>
+                        <label class="test-lab-field">
+                            <span>Include regex (empty means all selected endings)</span>
+                            <textarea rows="3" @bind="learnBaseIncludeRegex"></textarea>
+                        </label>
+                        <label class="test-lab-field">
+                            <span>Exclude regex</span>
+                            <textarea rows="3" @bind="learnBaseExcludeRegex"></textarea>
+                        </label>
+                    </div>
+                </details>
+            </div>
+            <DxButton Text="Import Learn-Base"
+                      RenderStyle="ButtonRenderStyle.Primary"
+                      RenderStyleMode="ButtonRenderStyleMode.Contained"
+                      Enabled="@(!isBusy && !string.IsNullOrWhiteSpace(learnBaseRoot) && (selectedLearnBaseExtensions.Count > 0 || !string.IsNullOrWhiteSpace(learnBaseAdditionalExtensions)))"
+                      Click="RunLearnBaseImportAsync" />
+        </article>
+        </ConfigurationWorkbenchPanel>
+
+        <ConfigurationWorkbenchPanel SectionKey="remote" ActiveKey="@ActiveTestLabSection" AriaLabel="Remote knowledge import">
+        <article id="remote-knowledge" class="help-panel test-lab-panel remote-knowledge-panel">
+            <h2>GitHub / Website Knowledge</h2>
+            <p>Download a public repository or webpage into LocalGPT's bounded source cache, inspect the returned files, apply a regex/file-ending policy, and optionally pass the result into the existing learn-base database importer.</p>
+            <div class="test-lab-actions remote-source-presets" aria-label="Remote source presets">
+                <button type="button" @onclick='@(() => SelectRemoteSourcePreset("doom"))'>DOOM source</button>
+                <button type="button" @onclick='@(() => SelectRemoteSourcePreset("lotgd"))'>Green Dragon source</button>
+                <button type="button" @onclick='@(() => SelectRemoteSourcePreset("php"))'>PHP manual</button>
+                <button type="button" @onclick='@(() => SelectRemoteSourcePreset("llvm"))'>LLVM source</button>
+            </div>
+            <label class="test-lab-field">
+                <span>GitHub repository or webpage URL</span>
+                <input @bind="remoteSourceUrl" @bind:after="ResetRemoteApproval" placeholder="https://github.com/owner/repository or https://example.org/docs" />
+            </label>
+            <div class="test-lab-custom remote-knowledge-fields remote-source-fields">
+                <label class="test-lab-field compact-field"><span>Source kind</span><select @bind="remoteSourceKind"><option>Auto</option><option>GitHub</option><option>Web</option></select></label>
+                <label class="test-lab-field compact-field"><span>Branch</span><input @bind="remoteBranch" /></label>
+                <label class="test-lab-field compact-field"><span>Max files</span><input type="number" min="1" max="20000" @bind="remoteMaxFiles" /></label>
+            </div>
+            <label class="test-lab-field">
+                <span>File include regex</span>
+                <input @bind="remoteFileRegex" />
+            </label>
+            <div class="test-lab-custom remote-knowledge-fields remote-role-fields">
+                <label class="test-lab-field compact-field">
+                    <span>Existing Council role</span>
+                    <select @bind="remoteSelectedRoleKey">
+                        <option value="">No preset role</option>
+                        @foreach (var role in availableRemoteRoleKeys)
+                        {
+                            <option value="@role">@role</option>
+                        }
+                    </select>
+                </label>
+                <label class="test-lab-field">
+                    <span>Additional/new role keys (semicolon separated)</span>
+                    <input @bind="remoteRoleKeys" placeholder="Map Architect; ASCII Frame Renderer" />
+                </label>
+            </div>
+            <label class="test-lab-field"><span>Topics (semicolon separated)</span><input @bind="remoteTopics" placeholder="DOOM source architecture; C rendering" /></label>
+            <div class="remote-import-options" role="group" aria-label="Remote knowledge import selections">
+                <label class="remote-import-option">
+                    <DxCheckBox @bind-Checked="remoteSaveToKnowledge" />
+                    <span><strong>Save to Council knowledge</strong><small>Enable this to write compact source maps into the SQLite knowledge database.</small></span>
+                </label>
+                @if (remoteImportResult is not null)
+                {
+                    <label class="remote-import-option remote-import-approval">
+                        <DxCheckBox @bind-Checked="remoteImportApproved" />
+                        <span><strong>Approve reviewed import</strong><small>Click this after checking the returned-file list. Import remains disabled until approval is selected.</small></span>
+                    </label>
+                }
+            </div>
+            <p class="test-lab-selection-hint">Select the options above deliberately. Database import requires the review approval checkbox after a preview.</p>
+            <div class="test-lab-actions">
+                <DxButton Text="Inspect returned files" RenderStyle="ButtonRenderStyle.Secondary" RenderStyleMode="ButtonRenderStyleMode.Outline" Enabled="@(!isBusy)" Click="PreviewRemoteKnowledgeAsync" />
+                <DxButton Text="Import reviewed source" RenderStyle="ButtonRenderStyle.Primary" RenderStyleMode="ButtonRenderStyleMode.Contained" Enabled="@(!isBusy && remoteImportResult is not null && remoteImportApproved)" Click="ImportRemoteKnowledgeAsync" />
+            </div>
+            @if (remoteImportResult is not null)
+            {
+                <p class="test-lab-muted">@remoteImportResult.DownloadedFileCount downloaded · @remoteImportResult.MatchedFileCount matched · @remoteImportResult.ImportedKnowledgeCount knowledge entries</p>
+                <details class="remote-file-preview">
+                    <summary>Returned files (@remoteImportResult.Files.Count)</summary>
+                    <div>
+                        @foreach (var file in remoteImportResult.Files.Take(200))
+                        {
+                            <span class="@(file.MatchesFilePolicy ? "matched" : "excluded")"><strong>@file.RelativePath</strong><small>@file.Length bytes · @file.Status</small></span>
+                        }
+                    </div>
+                </details>
+            }
+        </article>
+        </ConfigurationWorkbenchPanel>
+    </section>
+
+    <ConfigurationWorkbenchPanel SectionKey="route" ActiveKey="@ActiveTestLabSection" AriaLabel="Custom local route">
+    <section id="custom-route" class="help-panel help-wide test-lab-panel">
+        <h2>Custom Local Route</h2>
+        <p>Allowed routes are constrained to local diagnostics and artifact paths.</p>
+        <div class="test-lab-custom">
+            <input @bind="customRoute" />
+            <DxButton Text="Run"
+                      RenderStyle="ButtonRenderStyle.Secondary"
+                      RenderStyleMode="ButtonRenderStyleMode.Contained"
+                      Enabled="@(!isBusy)"
+                      Click="RunCustomRouteAsync" />
+        </div>
+    </section>
+    </ConfigurationWorkbenchPanel>
+
+    <ConfigurationWorkbenchPanel SectionKey="workspace" ActiveKey="@ActiveTestLabSection" AriaLabel="Generated workspace">
+    <section id="generated-workspace" class="help-panel help-wide test-lab-panel">
+        <h2>Generated Workspace</h2>
+        <p>Inspect and edit generated source before refreshing the zip. Starting programs or scripts stays a user-approved action.</p>
+        <div class="test-lab-custom">
+            <DxButton Text="Refresh Workspaces"
+                      RenderStyle="ButtonRenderStyle.Secondary"
+                      RenderStyleMode="ButtonRenderStyleMode.Contained"
+                      Enabled="@(!isBusy)"
+                      Click="LoadArtifactWorkspacesAsync" />
+            @if (artifactWorkspaces.Count > 0)
+            {
+                <DxComboBox Data="@artifactWorkspaces"
+                            Value="@selectedArtifactWorkspace"
+                            TextFieldName="@nameof(ArtifactWorkspaceSummary.WorkspaceName)"
+                            ValueChanged="@((ArtifactWorkspaceSummary workspace) => SelectArtifactWorkspaceAsync(workspace))" />
+            }
+            <DxButton Text="Refresh ZIP"
+                      RenderStyle="ButtonRenderStyle.Primary"
+                      RenderStyleMode="ButtonRenderStyleMode.Outline"
+                      Enabled="@(!isBusy && selectedArtifactWorkspace is not null)"
+                      Click="RefreshWorkspaceZipAsync" />
+        </div>
+        @if (selectedArtifactWorkspace is not null)
+        {
+            <dl class="workspace-facts">
+                <dt>Host</dt>
+                <dd>@artifactBaseUrl</dd>
+                <dt>Workspace</dt>
+                <dd>@selectedArtifactWorkspace.RootPath</dd>
+                <dt>Editable files</dt>
+                <dd>@artifactWorkspaceFiles.Count source/doc file(s)</dd>
+            </dl>
+        }
+        @if (artifactWorkspaceFiles.Count > 0)
+        {
+            <div class="workspace-file-list">
+                @foreach (var file in artifactWorkspaceFiles.Take(80))
+                {
+                    <button type="button" @onclick="@(() => OpenWorkspaceFileAsync(file))">
+                        <span>@file.RelativePath</span>
+                        <small>@file.Length bytes</small>
+                    </button>
+                }
+            </div>
+        }
+    </section>
+    </ConfigurationWorkbenchPanel>
+
+    <ConfigurationWorkbenchPanel SectionKey="result" ActiveKey="@ActiveTestLabSection" AriaLabel="Test result">
+    <section id="test-result" class="help-panel help-wide test-lab-panel test-result-panel">
+        <h2>Result</h2>
+        @if (!string.IsNullOrWhiteSpace(statusText))
+        {
+            <p class="memory-status">@statusText</p>
+        }
+        @if (downloadLinks.Count > 0)
+        {
+            <div class="test-lab-downloads">
+                <strong>Downloads</strong>
+                @foreach (var link in downloadLinks)
+                {
+                    <a href="@link.AbsoluteUrl" target="_blank">@link.Label</a>
+                }
+            </div>
+        }
+        <textarea class="test-lab-output" readonly>@resultText</textarea>
+    </section>
+    </ConfigurationWorkbenchPanel>
+        </div>
+    </div>
+
+    <LocalPathExplorer @bind-Visible="learnBasePathExplorerVisible"
+                       @bind-SelectedPath="learnBaseRoot"
+                       SelectionMode="Directory"
+                       IncludeFiles="true"
+                       Title="Choose Learn-Base source folder" />
+
+    <DxPopup @bind-Visible="@sourcePopupVisible"
+             HeaderText="@SourcePopupTitle"
+             Width="min(1180px, 96vw)"
+             MaxHeight="92vh"
+             CloseOnOutsideClick="false">
+        <BodyContentTemplate>
+            <div class="source-popup">
+                <div class="source-popup-toolbar">
+                    <DxButton Text="Save Source"
+                              RenderStyle="ButtonRenderStyle.Primary"
+                              RenderStyleMode="ButtonRenderStyleMode.Contained"
+                              Enabled="@(!isBusy && !string.IsNullOrWhiteSpace(openSourceRelativePath))"
+                              Click="SaveWorkspaceFileAsync" />
+                    <DxButton Text="Refresh ZIP"
+                              RenderStyle="ButtonRenderStyle.Secondary"
+                              RenderStyleMode="ButtonRenderStyleMode.Outline"
+                              Enabled="@(!isBusy && selectedArtifactWorkspace is not null)"
+                              Click="RefreshWorkspaceZipAsync" />
+                    <span>@openSourceRelativePath</span>
+                </div>
+                <p class="execution-boundary">
+                    LocalGPT may save, compile, validate, and zip sandbox files here. Launching generated programs,
+                    scripts, installers, or solutions needs a separate user-approved action with an impact summary.
+                </p>
+                <div class="source-editor-grid">
+                    <label>
+                        Raw source
+                        <textarea class="source-editor" @bind="openSourceContent"></textarea>
+                    </label>
+                    <div>
+                        <span class="source-preview-title">DevExpress HTML preview</span>
+                        <DxHtmlEditor Markup="@openSourcePreviewMarkup"
+                                      Height="520px"
+                                      ReadOnly="true" />
+                    </div>
+                </div>
+            </div>
+        </BodyContentTemplate>
+    </DxPopup>
+</main>
+
+@code {
+    private string ActiveTestLabSection { get; set; } = "frontend";
+    private IReadOnlyList<WorkbenchNavItem> TestLabSections =>
+    [
+        new("frontend", Localization.Get("TestLab.Workbench.Nav.Frontend", fallback: "Frontend smoke"), "Local API health and diagnostics"),
+        new("learnbase", Localization.Get("TestLab.Workbench.Nav.LearnBase", fallback: "Learn-Base"), "Bounded local source import"),
+        new("remote", Localization.Get("TestLab.Workbench.Nav.Remote", fallback: "Remote knowledge"), "Preview then approve remote knowledge"),
+        new("route", Localization.Get("TestLab.Workbench.Nav.Route", fallback: "Custom route"), "Allowed local diagnostic routes"),
+        new("workspace", Localization.Get("TestLab.Workbench.Nav.Workspace", fallback: "Workspace"), "Inspect generated source and ZIPs"),
+        new("result", Localization.Get("TestLab.Workbench.Nav.Result", fallback: "Result"), "Current operation output")
+    ];
+
+    private Task OnTestLabSectionChanged(string key)
+    {
+        ActiveTestLabSection = key;
+        return Task.CompletedTask;
+    }
+
+
+    string toastName = "TestLabToasts";
+    private bool isBusy;
+    private string statusText = "Ready.";
+    private string resultText = "Run a local diagnostic route to see JSON here.";
+    private string customRoute = "/__diag/benchmark/engineering?taskSet=replacement&validateBuildableArtifacts=true&maxBuildArtifacts=4";
+    private string learnBaseRoot = string.Empty;
+    private int maxProjects = 1;
+    private bool saveToKnowledge = true;
+    private readonly HashSet<string> selectedLearnBaseExtensions = new(StringComparer.OrdinalIgnoreCase);
+    private string learnBaseAdditionalExtensions = string.Empty;
+    private string learnBaseIncludeRegex = string.Empty;
+    private string learnBaseExcludeRegex = string.Empty;
+    private int learnBaseMaximumFileBytes = 1_048_576;
+    private bool learnBaseImportManifests = true;
+    private bool learnBaseImportDocumentation = true;
+    private bool learnBaseImportProjects = true;
+    private string remoteSourceUrl = "https://github.com/id-Software/DOOM";
+    private string remoteSourceKind = "Auto";
+    private string remoteBranch = "main";
+    private string remoteFileRegex = @"(?i)\.(cs|razor|csproj|sln|json|xml|md|txt|ps1|cmd|sh|py|js|ts|tsx|css|html|php|c|h|cpp|hpp|java|kt|go|rs|sql|yml|yaml)$";
+    private int remoteMaxFiles = 5000;
+    private bool remoteSaveToKnowledge = true;
+    private bool remoteImportApproved;
+    private string remoteRoleKeys = "Map Architect; ASCII Frame Renderer";
+    private string remoteSelectedRoleKey = string.Empty;
+    private List<string> availableRemoteRoleKeys = [];
+    private string remoteTopics = "open-source game architecture; runtime classes";
+    private RemoteKnowledgeImportResult? remoteImportResult;
+    private LearnBasePreset selectedLearnBasePreset = default!;
+    private LearnBaseScanProfile selectedScanProfile = default!;
+    private List<TestLabDownloadLink> downloadLinks = [];
+    private List<ArtifactWorkspaceSummary> artifactWorkspaces = [];
+    private List<ArtifactWorkspaceFileSummary> artifactWorkspaceFiles = [];
+    private ArtifactWorkspaceSummary? selectedArtifactWorkspace;
+    private string artifactBaseUrl = string.Empty;
+    private bool learnBasePathExplorerVisible;
+    private bool sourcePopupVisible;
+    private string openSourceRelativePath = string.Empty;
+    private string openSourceContent = string.Empty;
+    private string openSourcePreviewMarkup = string.Empty;
+    private string SourcePopupTitle => string.IsNullOrWhiteSpace(openSourceRelativePath)
+        ? "Generated Source"
+        : $"Generated Source - {openSourceRelativePath}";
+
+    private bool initialRoleCatalogLoadStarted;
+
+    protected override Task OnInitializedAsync()
+    {
+        ApplyRequestedTestLabSection();
+        selectedLearnBasePreset = Catalog.LearnBasePresets.First();
+        selectedScanProfile = Catalog.LearnBaseScanProfiles.Skip(1).FirstOrDefault() ?? Catalog.LearnBaseScanProfiles.First();
+        learnBaseRoot = Directory.Exists(selectedLearnBasePreset.RootPath)
+            ? selectedLearnBasePreset.RootPath
+            : string.Empty;
+        maxProjects = selectedLearnBasePreset.RecommendedMaxProjects;
+        SelectAllLearnBaseExtensions();
+        return Task.CompletedTask;
+    }
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !initialRoleCatalogLoadStarted)
+        {
+            initialRoleCatalogLoadStarted = true;
+            TaskRunner.Run(nameof(TestLab), "PreloadRemoteRoleCatalog", PreloadRemoteRoleCatalogAsync);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private async Task PreloadRemoteRoleCatalogAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var roleKeys = (await CouncilTeams.GetTeamsAsync().ConfigureAwait(false))
+                .SelectMany(team => team.Roles)
+                .Select(role => role.Role)
+                .Where(role => !string.IsNullOrWhiteSpace(role))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(role => role, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            cancellationToken.ThrowIfCancellationRequested();
+            await InvokeAsync(() =>
+            {
+                availableRemoteRoleKeys = roleKeys;
+                StateHasChanged();
+            }).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            Logger.LogDebug("Test Lab role catalog preload was cancelled.");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Could not preload Council role choices for remote knowledge import; free-text role entry remains available.");
+        }
+    }
+
+
+    private void ApplyRequestedTestLabSection()
+    {
+        try
+        {
+            var fragment = new Uri(NavigationManager.Uri).Fragment.TrimStart('#');
+            ActiveTestLabSection = fragment switch
+            {
+                "frontend-smoke" => "frontend",
+                "learnbase-import" => "learnbase",
+                "remote-knowledge" => "remote",
+                "custom-route" => "route",
+                "generated-workspace" => "workspace",
+                "test-result" => "result",
+                _ => ActiveTestLabSection
+            };
+        }
+        catch (Exception ex)
+        {
+            Logger.LogDebug(ex, "Could not map the Test Lab URL fragment to a workbench section.");
+        }
+    }
+
+    private Task RunCustomRouteAsync()
+    {
+        try
+        {
+            var route = string.IsNullOrWhiteSpace(customRoute) ? "/__diag" : customRoute.Trim();
+            if (!route.StartsWith('/'))
+            {
+                route = "/" + route;
+            }
+
+            return CouncilText.IsAllowedLocalRoute(route, Logger)
+                ? RunRouteAsync(route)
+                : ShowBlockedRouteAsync(route);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Exception in RunCustomRouteAsync {Message}",  ex.Message);
+            statusText = "The operation failed. See local application logs for technical details.";
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+            return Task.CompletedTask;
+        }
+
+    }
+
+    private Task PreviewRemoteKnowledgeAsync()
+    {
+        remoteImportApproved = false;
+        return RunRemoteKnowledgeAsync(previewOnly: true);
+    }
+
+    private Task ImportRemoteKnowledgeAsync()
+    {
+        if (!remoteImportApproved || remoteImportResult is null)
+        {
+            statusText = "Inspect the source and approve its returned-file list before importing.";
+            return Task.CompletedTask;
+        }
+        return RunRemoteKnowledgeAsync(previewOnly: false);
+    }
+
+    private async Task RunRemoteKnowledgeAsync(bool previewOnly) => await RunUiActionAsync(async () =>
+    {
+        statusText = previewOnly ? "Inspecting remote source and returned files..." : "Importing reviewed remote source...";
+        remoteImportResult = await RemoteKnowledgeImporter.ImportAsync(new RemoteKnowledgeImportRequest
+        {
+            SourceUrl = remoteSourceUrl,
+            SourceKind = remoteSourceKind,
+            Branch = remoteBranch,
+            FileIncludeRegex = remoteFileRegex,
+            MaxFiles = Math.Clamp(remoteMaxFiles, 1, 20000),
+            MaxLinkedPages = 20,
+            SaveToKnowledge = !previewOnly && remoteSaveToKnowledge,
+            PreviewOnly = previewOnly,
+            RoleKeys = RemoteKnowledgeImporter.ParseLabels(remoteSelectedRoleKey, remoteRoleKeys),
+            Topics = RemoteKnowledgeImporter.ParseLabels(remoteTopics),
+            UserConfirmed = !previewOnly && remoteImportApproved
+        }).ConfigureAwait(false);
+        resultText = JsonSerializer.Serialize(remoteImportResult, new JsonSerializerOptions(JsonSerializerDefaults.Web) { WriteIndented = true });
+        statusText = previewOnly
+            ? $"Inspected {remoteImportResult.DownloadedFileCount} file(s); {remoteImportResult.MatchedFileCount} match the file policy."
+            : $"Imported {remoteImportResult.ImportedKnowledgeCount} knowledge entry/entries from {remoteImportResult.MatchedFileCount} matched file(s).";
+    }, previewOnly ? "PreviewRemoteKnowledge" : "ImportRemoteKnowledge").ConfigureAwait(false);
+
+
+    private void ResetRemoteApproval()
+    {
+        remoteImportApproved = false;
+        remoteImportResult = null;
+    }
+
+    private void SelectRemoteSourcePreset(string key)
+    {
+        (remoteSourceUrl, remoteSourceKind, remoteBranch, remoteRoleKeys, remoteTopics) = key switch
+        {
+            "lotgd" => ("https://github.com/lotgd/lotgd", "GitHub", "master", "Story Director; World Actor; NPC", "open-source text RPG architecture; runtime story events; houses and NPCs"),
+            "php" => ("https://github.com/php/doc-en", "GitHub", "master", "Knowledge Curator", "PHP language manual; documentation architecture"),
+            "llvm" => ("https://github.com/llvm/llvm-project", "GitHub", "main", "Code Analyst", "compiler architecture; C and C++ source"),
+            _ => ("https://github.com/id-Software/DOOM", "GitHub", "master", "Map Architect; ASCII Frame Renderer", "open-source DOOM source architecture; 2.5D rendering; room graph")
+        };
+        ResetRemoteApproval();
+    }
+
+    private async Task RunLearnBaseImportAsync() => await RunUiActionAsync(async () =>
+    {
+        statusText = "Importing the selected LearnBase source profile...";
+        var result = await LearnBaseImporter.ImportAsync(new LearnBaseImportRequest
+        {
+            RootPath = learnBaseRoot.Trim(),
+            MaxProjects = Math.Clamp(maxProjects, 1, 120),
+            SaveToKnowledge = saveToKnowledge,
+            FileExtensions = selectedLearnBaseExtensions.OrderBy(extension => extension, StringComparer.OrdinalIgnoreCase).ToList(),
+            AdditionalFileExtensions = learnBaseAdditionalExtensions,
+            FileIncludeRegex = learnBaseIncludeRegex,
+            FileExcludeRegex = learnBaseExcludeRegex,
+            MaximumFileBytes = Math.Clamp(learnBaseMaximumFileBytes, 1024, 16 * 1024 * 1024),
+            ImportLearningSourceManifests = learnBaseImportManifests,
+            ImportKnownDocumentationCorpora = learnBaseImportDocumentation,
+            ImportProjectArchitecture = learnBaseImportProjects
+        }).ConfigureAwait(false);
+        resultText = JsonSerializer.Serialize(result, new JsonSerializerOptions(JsonSerializerDefaults.Web) { WriteIndented = true });
+        statusText = $"Imported {result.ProjectCount} compact project/corpus summaries; {result.SavedKnowledgeCount} knowledge entries saved.";
+    }, "RunLearnBaseImportAsync").ConfigureAwait(false);
+
+    private void SelectAllLearnBaseExtensions()
+    {
+        selectedLearnBaseExtensions.Clear();
+        foreach (var extension in Catalog.LearnBaseKnownExtensions)
+            selectedLearnBaseExtensions.Add(extension);
+    }
+
+    private void ClearLearnBaseExtensions() => selectedLearnBaseExtensions.Clear();
+
+    private void ToggleLearnBaseExtension(string extension, ChangeEventArgs args)
+    {
+        if (args.Value is true || (bool.TryParse(args.Value?.ToString(), out var selected) && selected))
+            selectedLearnBaseExtensions.Add(extension);
+        else
+            selectedLearnBaseExtensions.Remove(extension);
+    }
+
+    private void SelectLearnBasePreset(LearnBasePreset preset)
+    {
+        try
+        {
+            selectedLearnBasePreset = preset;
+            if (!string.IsNullOrWhiteSpace(preset.RootPath) && Directory.Exists(preset.RootPath))
+                learnBaseRoot = preset.RootPath;
+            maxProjects = preset.RecommendedMaxProjects;
+            selectedScanProfile = Catalog.LearnBaseScanProfiles
+                .FirstOrDefault(profile => profile.MaxProjects == preset.RecommendedMaxProjects) ??
+                Catalog.LearnBaseScanProfiles[^1];
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            statusText = "The operation failed. See local application logs for technical details.";
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+    }
+
+    private void SelectLearnBaseScanProfile(LearnBaseScanProfile profile)
+    {
+        try
+        {
+            selectedScanProfile = profile;
+            maxProjects = profile.MaxProjects;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            statusText = "The operation failed. See local application logs for technical details.";
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+
+    }
+
+    private async Task RunRouteAsync(string route)
+    {
+        try
+        {
+            if (!CouncilText.IsAllowedLocalRoute(route, Logger))
+            {
+                await ShowBlockedRouteAsync(route).ConfigureAwait(false);
+                return;
+            }
+
+            isBusy = true;
+            statusText = $"Running GET {route} ...";
+            resultText = string.Empty;
+            downloadLinks = [];
+
+            try
+            {
+                using var http = new HttpClient { Timeout = TimeSpan.FromMinutes(5) };
+                var url = NavigationManager.ToAbsoluteUri(route);
+                var response = await http.GetAsync(url).ConfigureAwait(false);
+                var text = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                statusText = $"GET {route} -> {(int)response.StatusCode} {response.ReasonPhrase}";
+                resultText = CouncilText.PrettyPrintJson(text, Logger);
+                downloadLinks = ExtractDownloadLinks(text);
+                await TryRefreshArtifactWorkspacesAfterRouteAsync(text).ConfigureAwait(false);
+            }
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or InvalidOperationException)
+            {
+                Logger.LogWarning(ex, "Test Lab route {Route} failed.", route);
+                statusText = "The route request failed. See local application logs for technical details.";
+                resultText = "The operation failed. See local application logs for technical details.";
+            }
+            finally
+            {
+                isBusy = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            statusText = "The operation failed. See local application logs for technical details.";
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+
+    }
+
+    private async Task LoadArtifactWorkspacesAsync()
+    {
+        try
+        {
+            await RunUiActionAsync(async () =>
+        {
+            using var http = new HttpClient { Timeout = TimeSpan.FromMinutes(5) };
+            var response = await http.GetFromJsonAsync<ArtifactWorkspaceListResponse>(
+                NavigationManager.ToAbsoluteUri("/__diag/artifact-workspaces?take=30")).ConfigureAwait(false);
+
+            artifactBaseUrl = response?.BaseUrl ?? NavigationManager.BaseUri.TrimEnd('/');
+            artifactWorkspaces = response?.Workspaces ?? [];
+            selectedArtifactWorkspace = response?.LatestWorkspace ?? artifactWorkspaces.FirstOrDefault();
+            await LoadSelectedWorkspaceFilesAsync().ConfigureAwait(false);
+            statusText = selectedArtifactWorkspace is null
+                ? "No generated artifact workspaces found yet."
+                : $"Loaded workspace {selectedArtifactWorkspace.WorkspaceName}.";
+        }, "LoadArtifactWorkspacesAsync").ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            statusText = "The operation failed. See local application logs for technical details.";
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+
+    }
+
+    private async Task SelectArtifactWorkspaceAsync(ArtifactWorkspaceSummary workspace)
+    {
+        try
+        {
+            selectedArtifactWorkspace = workspace;
+            await LoadSelectedWorkspaceFilesAsync().ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            statusText = "The operation failed. See local application logs for technical details.";
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+
+    }
+
+    private async Task LoadSelectedWorkspaceFilesAsync()
+    {
+        try
+        {
+            artifactWorkspaceFiles = [];
+            if (selectedArtifactWorkspace is null)
+                return;
+
+            using var http = new HttpClient { Timeout = TimeSpan.FromMinutes(5) };
+            var route = $"/__diag/artifact-workspace/{Uri.EscapeDataString(selectedArtifactWorkspace.WorkspaceName)}/files?take=500";
+            var response = await http.GetFromJsonAsync<ArtifactWorkspaceFilesResponse>(NavigationManager.ToAbsoluteUri(route)).ConfigureAwait(false);
+            artifactWorkspaceFiles = response?.Files ?? [];
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            statusText = "The operation failed. See local application logs for technical details.";
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+
+    }
+
+    private async Task OpenWorkspaceFileAsync(ArtifactWorkspaceFileSummary file)
+    {
+        try
+        {
+            await RunUiActionAsync(async () =>
+       {
+           if (selectedArtifactWorkspace is null)
+               return;
+
+           using var http = new HttpClient { Timeout = TimeSpan.FromMinutes(5) };
+           var route = $"/__diag/artifact-workspace/{Uri.EscapeDataString(selectedArtifactWorkspace.WorkspaceName)}/file?path={Uri.EscapeDataString(file.RelativePath)}";
+           var response = await http.GetFromJsonAsync<ArtifactWorkspaceFileResponse>(NavigationManager.ToAbsoluteUri(route)).ConfigureAwait(false);
+           openSourceRelativePath = response?.RelativePath ?? file.RelativePath;
+           openSourceContent = response?.Content ?? string.Empty;
+           openSourcePreviewMarkup = CouncilText.BuildSourcePreviewMarkup(openSourceRelativePath, openSourceContent, Logger);
+           sourcePopupVisible = true;
+           statusText = $"Opened {openSourceRelativePath}.";
+       }, "OpenWorkspaceFileAsync").ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            statusText = "The operation failed. See local application logs for technical details.";
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+
+    }
+
+    private async Task SaveWorkspaceFileAsync()
+    {
+        try
+        {
+            await RunUiActionAsync(async () =>
+    {
+        if (selectedArtifactWorkspace is null || string.IsNullOrWhiteSpace(openSourceRelativePath))
+            return;
+
+        using var http = new HttpClient { Timeout = TimeSpan.FromMinutes(5) };
+        var route = $"/__diag/artifact-workspace/{Uri.EscapeDataString(selectedArtifactWorkspace.WorkspaceName)}/file";
+        var response = await http.PostAsJsonAsync(
+            NavigationManager.ToAbsoluteUri(route),
+            new ArtifactWorkspaceFileSaveRequest(openSourceRelativePath, openSourceContent)).ConfigureAwait(false);
+        var text = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        statusText = response.IsSuccessStatusCode
+            ? $"Saved {openSourceRelativePath}. Refresh the zip when the source is ready."
+            : $"Save failed: {(int)response.StatusCode} {response.ReasonPhrase}";
+        resultText = CouncilText.PrettyPrintJson(text, Logger);
+        openSourcePreviewMarkup = CouncilText.BuildSourcePreviewMarkup(openSourceRelativePath, openSourceContent, Logger);
+        await LoadSelectedWorkspaceFilesAsync().ConfigureAwait(false);
+    }, "SaveWorkspaceFileAsync").ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            statusText = "The operation failed. See local application logs for technical details.";
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+
+    }
+
+    private async Task RefreshWorkspaceZipAsync()
+    {
+        try
+        {
+            await RunUiActionAsync(async () =>
+      {
+          if (selectedArtifactWorkspace is null)
+              return;
+
+          var route = $"/__diag/artifact-workspace/{Uri.EscapeDataString(selectedArtifactWorkspace.WorkspaceName)}/zip";
+          using var http = new HttpClient { Timeout = TimeSpan.FromMinutes(5) };
+          var response = await http.GetAsync(NavigationManager.ToAbsoluteUri(route)).ConfigureAwait(false);
+          var text = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+          statusText = response.IsSuccessStatusCode
+              ? $"Workspace zip refreshed for {selectedArtifactWorkspace.WorkspaceName}."
+              : $"Zip refresh failed: {(int)response.StatusCode} {response.ReasonPhrase}";
+          resultText = CouncilText.PrettyPrintJson(text, Logger);
+          downloadLinks = ExtractDownloadLinks(text);
+          await LoadArtifactWorkspacesAsync().ConfigureAwait(false);
+      }, "RefreshWorkspaceZipAsync").ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            statusText = "The operation failed. See local application logs for technical details.";
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+
+    }
+
+    private async Task TryRefreshArtifactWorkspacesAfterRouteAsync(string responseText)
+    {
+        try
+        {
+            if (responseText.Contains("ArtifactRoot", StringComparison.OrdinalIgnoreCase) ||
+           responseText.Contains("\"artifacts\"", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    await LoadArtifactWorkspacesAsync().ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogWarning(ex, "Could not refresh generated artifact workspaces after route run.");
+                    ComponentActivity.RecordFailure(nameof(TestLab), "RefreshArtifactWorkspaces", ex);
+                    Notifier.ShowWarning(toastName, "The route completed, but the generated artifact list could not refresh.", "Artifact refresh warning");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not refresh artifact workspaces; response content was omitted from logs.");
+            statusText = "The operation failed. See local application logs for technical details.";
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+
+    }
+
+    private Task ShowBlockedRouteAsync(string route)
+    {
+        try
+        {
+            statusText = "Route blocked by Test Lab local safety policy.";
+            resultText = $"Blocked route: {route}{Environment.NewLine}Allowed prefixes: /__diag, /__artifacts, /health.";
+            downloadLinks = [];
+            return Task.CompletedTask;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not display the blocked route; route content was omitted from logs.");
+            statusText = "The operation failed. See local application logs for technical details.";
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+            return Task.CompletedTask;
+        }
+
+    }
+
+
+
+    private List<TestLabDownloadLink> ExtractDownloadLinks(string text)
+    {
+        try
+        {
+            var links = new List<TestLabDownloadLink>();
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return links;
+            }
+
+            foreach (Match match in Catalog.DownloadUrlPattern.Matches(text))
+            {
+                var relativeUrl = match.Groups["url"].Value.Replace("\\/", "/", StringComparison.Ordinal);
+                if (!relativeUrl.StartsWith("/__artifacts", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var absoluteUrl = NavigationManager.ToAbsoluteUri(relativeUrl).ToString();
+                var label = relativeUrl.Split('/', StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? relativeUrl;
+                links.Add(new TestLabDownloadLink(label, absoluteUrl));
+            }
+
+            return links
+                .DistinctBy(link => link.AbsoluteUrl)
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            statusText = "The operation failed. See local application logs for technical details.";
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+            return new();
+        }
+     
+    }
+
+
+    private async Task RunUiActionAsync(Func<Task> action, string operation)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+        isBusy = true;
+        ComponentActivity.RecordInformation(nameof(TestLab), operation, "The Test Lab UI operation started.");
+        try
+        {
+            await action().ConfigureAwait(false);
+            ComponentActivity.RecordInformation(nameof(TestLab), operation, "The Test Lab UI operation completed.");
+        }
+        catch (OperationCanceledException)
+        {
+            Logger.LogInformation("Test Lab UI operation {Operation} was cancelled.", operation);
+            statusText = "The requested operation was cancelled.";
+            resultText = statusText;
+            ComponentActivity.RecordWarning(nameof(TestLab), operation, "The Test Lab UI operation was cancelled.");
+            Notifier.ShowWarning(toastName, statusText, "Operation cancelled");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Test Lab UI operation {Operation} failed; operation delegates and user content were omitted from logs.", operation);
+            statusText = "The requested operation failed. See local application logs for technical details.";
+            resultText = "The operation failed. See local application logs for technical details.";
+            ComponentActivity.RecordFailure(nameof(TestLab), operation, ex);
+            Notifier.ShowError(toastName, statusText, "Operation failed");
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+ 
+}

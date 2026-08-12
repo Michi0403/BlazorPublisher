@@ -1,0 +1,2136 @@
+@rendermode InteractiveServer
+@page "/install"
+@using LocalGPT.BusinessObjects.Enums
+@inject CouncilTextService CouncilText
+@inject IOptionsMonitor<LocalGPT.BusinessObjects.ConfigurationRoot> Opts
+@inject IConfigurationWriter Writer
+@inject IAiProviderConfigurationRegistryService ProviderConfigurationRegistry
+@inject INetworkCertificateService NetworkCertificates
+@inject IAiConnectivityProbe Probe
+@inject IOllamaProcessService OllamaProcesses
+@inject NavigationManager Nav
+@inject ILogger<Install> Logger
+@inject INotificationService Notifier
+@inject IComponentActivityService ComponentActivity
+@inject ISupervisedTaskRunner TaskRunner
+@inject IFirstRunOnboardingService Onboarding
+@inject IProjectMaintenanceService ProjectMaintenance
+@inject IFeaturePersistenceService FeaturePersistence
+@inject LocalGPT.Services.Localization.ILocalGptLocalizationService Localization
+
+<PageTitle>AI Setup</PageTitle>
+
+<span id="install-scroll-top" class="install-scroll-anchor" aria-hidden="true"></span>
+<div class="main-container install-page-scroll-owner">
+    <ToastWrapper Name="@toastName" />
+
+    <div class="install-workbench">
+        <WorkbenchHeader Eyebrow='@T("Install.Workbench.Eyebrow", "Configuration studio")'
+                         Title='@T("Install.Workbench.Title", "LocalGPT setup")'
+                         Subtitle='@T("Install.Workbench.Subtitle", "Configure AI providers, remote access, certificates, toolchains and language catalogs without leaving the application.")'>
+            <Actions>
+                <DxButton Text="@(IsSaving ? "Saving and refreshing..." : "Save setup settings")"
+                          CssClass="provider-save-button"
+                          Enabled="@(!IsSaving)"
+                          RenderStyle="ButtonRenderStyle.Primary"
+                          RenderStyleMode="ButtonRenderStyleMode.Contained"
+                          IconCssClass="save"
+                          Click="Save" />
+                <DxButton Text="Back to Chat"
+                          RenderStyle="ButtonRenderStyle.Primary"
+                          RenderStyleMode="ButtonRenderStyleMode.Outline"
+                          IconCssClass="chevron-left"
+                          Click="GoChat" />
+            </Actions>
+        </WorkbenchHeader>
+
+        <div class="install-workbench-layout">
+            <ConfigurationWorkbenchNav Items="@InstallSections"
+                                       ActiveKey="@ActiveInstallSection"
+                                       ActiveKeyChanged="OnInstallSectionChanged"
+                                       AriaLabel="Setup sections" />
+            <div class="install-workbench-stage">
+        <ConfigurationWorkbenchPanel SectionKey="providers" ActiveKey="@ActiveInstallSection" AriaLabel="AI providers">
+        <section id="provider-studio" class="install-workbench-region install-provider-studio" aria-labelledby="provider-studio-heading">
+            <header class="install-region-heading">
+                <div>
+                    <span class="install-region-kicker">@T("Install.Workbench.ProviderKicker", "Provider workbench")</span>
+                    <h2 id="provider-studio-heading">@T("Install.Workbench.ProvidersTitle", "AI providers")</h2>
+                    <p>@T("Install.Workbench.ProvidersHelp", "Discover reachable hosts, select the provider family, edit every existing option and verify connectivity before saving.")</p>
+                </div>
+            </header>
+
+        <div class="@ConnectivityAlertCss" role="status">
+            <div class="d-flex flex-wrap align-items-center gap-2 justify-content-between">
+                <div>
+                    <strong>AI Provider Connectivity</strong>
+                    <div>@ConnectivityStatus</div>
+                    @if (LastConnectivityCheck is not null)
+                    {
+                        <small>@LastCheckedLabel</small>
+                    }
+                </div>
+                <DxButton Text="Refresh Connectivity"
+                          CssClass="provider-action-button"
+                          RenderStyle="ButtonRenderStyle.Secondary"
+                          RenderStyleMode="ButtonRenderStyleMode.Contained"
+                          Enabled="@(!IsConnectivityChecking)"
+                          Click="RefreshConnectivityStatusFromButton" />
+            </div>
+            <div class="ollama-process-panel" data-testid="ollama-process-controls">
+                <div class="ollama-process-status">
+                    <strong>Ollama process</strong>
+                    <span>@OllamaProcessStatus.Message</span>
+                    @if (OllamaProcessStatus.Processes.Count > 0)
+                    {
+                        <small>@OllamaProcessStatus.ProcessSummary</small>
+                    }
+                </div>
+                <div class="ollama-process-actions">
+                    <DxButton Text="Start Ollama"
+                              CssClass="provider-action-button"
+                              RenderStyle="ButtonRenderStyle.Success"
+                              RenderStyleMode="ButtonRenderStyleMode.Contained"
+                              Enabled="@(!IsOllamaProcessBusy && OllamaProcessStatus.IsInstalled && !OllamaProcessStatus.IsRunning)"
+                              Click="StartOllamaAsync" />
+                    <DxButton Text="Stop Ollama"
+                              CssClass="provider-action-button"
+                              RenderStyle="ButtonRenderStyle.Danger"
+                              RenderStyleMode="ButtonRenderStyleMode.Outline"
+                              Enabled="@(!IsOllamaProcessBusy && OllamaProcessStatus.IsRunning)"
+                              Click="StopOllamaAsync" />
+                    <DxButton Text="Restart Ollama"
+                              CssClass="provider-action-button"
+                              RenderStyle="ButtonRenderStyle.Warning"
+                              RenderStyleMode="ButtonRenderStyleMode.Contained"
+                              Enabled="@(!IsOllamaProcessBusy && OllamaProcessStatus.IsInstalled)"
+                              Click="RestartOllamaAsync" />
+                    <DxButton Text="Refresh process status"
+                              CssClass="provider-action-button"
+                              RenderStyle="ButtonRenderStyle.Secondary"
+                              RenderStyleMode="ButtonRenderStyleMode.Outline"
+                              Enabled="@(!IsOllamaProcessBusy)"
+                              Click="RefreshOllamaProcessStatusAsync" />
+                </div>
+            </div>
+        </div>
+
+        <div class="top-container">
+            <DxButton Text="Find configured / local AI hosts"
+                      RenderStyle="ButtonRenderStyle.Secondary"
+                      RenderStyleMode="ButtonRenderStyleMode.Contained"
+                      Enabled="@(!IsDiscovering)"
+                      Click="DiscoverLocalAiHosts" />
+            <DxButton Text="Use Ollama gpt-oss:20b"
+                      RenderStyle="ButtonRenderStyle.Primary"
+                      RenderStyleMode="ButtonRenderStyleMode.Outline"
+                      Click="UseOllamaGptOss20b" />
+        </div>
+
+        <section class="configured-provider-catalog" aria-label="Configured AI providers" data-testid="configured-provider-catalog">
+            <header>
+                <div>
+                    <strong>Configured AI hosts</strong>
+                    <small>@ConfiguredProviderSummary</small>
+                </div>
+                <span class="configured-provider-count">@ConfiguredProviderHosts.Count</span>
+            </header>
+            @if (ConfiguredProviderHosts.Count == 0)
+            {
+                <p class="field-help">No provider host is stored yet. Discover a local host or add Ollama / LM Studio / another OpenAI-compatible endpoint below.</p>
+            }
+            else
+            {
+                <div class="configured-provider-grid">
+                    @foreach (var configured in ConfiguredProviderHosts)
+                    {
+                        <article class="configured-provider-card" @key="configured.Key">
+                            <div class="configured-provider-card-heading">
+                                <div>
+                                    <strong>@configured.Provider</strong>
+                                    <small>@configured.Origin</small>
+                                </div>
+                                <span class="configured-host-badge">saved</span>
+                            </div>
+                            <code>@configured.Endpoint</code>
+                            <span>@(string.IsNullOrWhiteSpace(configured.ModelName) ? "No preferred model selected" : configured.ModelName)</span>
+                            <div class="configured-provider-actions">
+                                @if (configured.OpenAiHost is not null)
+                                {
+                                    <DxButton Text="Test" Click="@(() => TestOpenAiCompatibleHostAsync(configured.OpenAiHost))" />
+                                }
+                                else if (configured.OllamaHost is not null)
+                                {
+                                    <DxButton Text="Test" Click="@(() => TestOllamaHostAsync(configured.OllamaHost))" />
+                                }
+                                @if (!configured.IsPrimary && (configured.OpenAiHost is not null || configured.OllamaHost is not null))
+                                {
+                                    <DxButton Text="Make primary"
+                                              Enabled="@(!IsSaving)"
+                                              RenderStyle="ButtonRenderStyle.Secondary"
+                                              RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                              Click="@(() => MakeConfiguredProviderPrimaryAsync(configured))" />
+                                }
+                                <DxButton Text="Delete"
+                                          Enabled="@(!IsSaving)"
+                                          RenderStyle="ButtonRenderStyle.Danger"
+                                          RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                          Click="@(() => RemoveConfiguredProviderHostAsync(configured))" />
+                            </div>
+                        </article>
+                    }
+                </div>
+            }
+        </section>
+
+        @if (DiscoveredHosts.Count > 0)
+        {
+            <DxFormLayout>
+                <DxFormLayoutGroup Caption="Reachable AI hosts (discovery; configuration is saved separately)" ColSpanMd="12">
+                    @foreach (var host in DiscoveredHosts)
+                    {
+                        <DxFormLayoutItem Caption="@($"{host.Provider} - {host.Endpoint}")" ColSpanMd="12">
+                            <div class="discovered-ai-host">
+                                <div class="discovered-host-status-row">
+                                    <div>
+                                        <strong>@(host.IsReachable ? "Reachable" : "Unavailable")</strong>: @host.Status
+                                        @if (IsConfiguredHost(host))
+                                        {
+                                            <span class="configured-host-badge">configured</span>
+                                        }
+                                    </div>
+                                    @if (IsConfiguredHost(host))
+                                    {
+                                        <DxButton Text="Remove saved host"
+                                                  RenderStyle="ButtonRenderStyle.Danger"
+                                                  RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                                  Click="@(() => RemoveConfiguredHostAsync(host))" />
+                                    }
+                                </div>
+                                <p class="field-help">Discovery only verifies reachability. Use a model below to load it into setup, then press Save provider settings. Existing provider values stay editable in the provider tabs.</p>
+                                @if (host.Models.Count > 0)
+                                {
+                                    <div class="install-provider-model-grid">
+                                        @foreach (var model in host.Models)
+                                        {
+                                            <ProviderModelPanel @key="model" Model="ToProviderModel(host, model)"
+                                                                ShowSelection="false"
+                                                                ShowUseAction="true"
+                                                                UseActionText="Use in setup"
+                                                                Activated="@(_ => ApplyDiscoveredModel(host, model))"
+                                                                CouncilModels="DiscoveredProviderModels"
+                                                                BenchmarkApplied="OnInstallBenchmarkAppliedAsync" />
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </DxFormLayoutItem>
+                    }
+                </DxFormLayoutGroup>
+            </DxFormLayout>
+        }
+
+        <DxFormLayout>
+            <DxFormLayoutTabPages>
+
+                <DxFormLayoutTabPage Caption="LM Studio / local OpenAI-compatible">
+                    <p class="field-help">Local OpenAI-compatible servers are detected automatically. Ollama normally uses http://localhost:11434/v1; LM Studio normally uses http://localhost:1234/v1. Test Connection verifies the selected endpoint and discovers the active model id.</p>
+                    <DxFormLayoutItem Caption="Endpoint (OpenAI-compatible base URL, usually /v1)">
+                        <DxTextBox @bind-Text="Model.ChatGPTLocalCore.Endpoint" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="API Key">
+                        <DxTextBox @bind-Text="Model.ChatGPTLocalCore.ApiKey" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Model Name">
+                        <DxTextBox @bind-Text="Model.ChatGPTLocalCore.ModelName" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem>
+                        <DxCheckBox @bind-Checked="Model.ChatGPTLocalCore.AutoStartServer"
+                                    Text="Auto start server if not running" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Working Directory">
+                        <DxTextBox @bind-Text="Model.ChatGPTLocalCore.WorkingDir" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Start Command (bat/exe)">
+                        <DxTextBox @bind-Text="Model.ChatGPTLocalCore.StartCommand" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Health Timeout (s)">
+                        <DxSpinEdit @bind-Value="Model.ChatGPTLocalCore.HealthTimeoutSeconds" Min="5" Max="300" />
+                    </DxFormLayoutItem>
+
+                    <div class="top-container">
+                  @*       <DxButton Text="Check Python" Click="CheckPython" />
+                        <DxButton Text="Install Dependencies" Click="InstallDependencies" />
+                        <DxButton Text="Download Model" Click="DownloadModel" /> *@
+                        <DxButton Text="Start Local Server" Click="StartLocal" />
+                        <DxButton Text="Test Connection" Click="TestLocal" />
+                        <DxButton Text="Save provider settings"
+                                  RenderStyle="ButtonRenderStyle.Primary"
+                                  RenderStyleMode="ButtonRenderStyleMode.Contained"
+                                  Click="Save" />
+                    </div>
+
+                    <DxFormLayoutItem Caption="Additional OpenAI-compatible hosts">
+                        <DxButton Text="Add Host"
+                                  RenderStyle="ButtonRenderStyle.Secondary"
+                                  RenderStyleMode="ButtonRenderStyleMode.Contained"
+                                  Click="AddOpenAiCompatibleHost" />
+                    </DxFormLayoutItem>
+                    @foreach (var host in AdditionalOpenAiCompatibleHosts)
+                    {
+                        <DxFormLayoutItem Caption="Endpoint">
+                            <DxTextBox @bind-Text="host.Endpoint" />
+                        </DxFormLayoutItem>
+                        <DxFormLayoutItem Caption="API Key">
+                            <DxTextBox @bind-Text="host.ApiKey" />
+                        </DxFormLayoutItem>
+                        <DxFormLayoutItem Caption="Preferred model">
+                            <DxTextBox @bind-Text="host.ModelName" />
+                        </DxFormLayoutItem>
+                        <DxFormLayoutItem>
+                            <div class="configured-provider-actions">
+                                <DxButton Text="Test connection" Click="@(() => TestOpenAiCompatibleHostAsync(host))" />
+                                <DxButton Text="Save provider settings"
+                                          RenderStyle="ButtonRenderStyle.Primary"
+                                          RenderStyleMode="ButtonRenderStyleMode.Contained"
+                                          Click="Save" />
+                                <DxButton Text="Remove"
+                                          RenderStyle="ButtonRenderStyle.Danger"
+                                          RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                          Click="@(() => RemoveOpenAiCompatibleHostAsync(host))" />
+                            </div>
+                        </DxFormLayoutItem>
+                    }
+                </DxFormLayoutTabPage>
+
+                <DxFormLayoutTabPage Caption="Ollama">
+                    <p class="field-help">@T("Install.Ollama.AdditiveHostHelp", "The fields below describe the current primary Ollama host. Adding or selecting another endpoint is additive; an existing host is removed only by an explicit Remove action. Use Make primary in the configured host catalog to change the default host.")</p>
+                    <DxFormLayoutItem Caption="URI">
+                        <DxTextBox @bind-Text="Model.OllamaCore.Uri" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Model">
+                        <DxTextBox @bind-Text="Model.OllamaCore.ModelName" />
+                    </DxFormLayoutItem>
+                    <div class="configured-provider-actions">
+                        <DxButton Text="Test Connection" Click="TestOllama" />
+                        <DxButton Text="Save provider settings"
+                                  RenderStyle="ButtonRenderStyle.Primary"
+                                  RenderStyleMode="ButtonRenderStyleMode.Contained"
+                                  Click="Save" />
+                    </div>
+
+                    <DxFormLayoutItem Caption="Additional Ollama hosts / preferred models">
+                        <DxButton Text="Add Ollama host"
+                                  RenderStyle="ButtonRenderStyle.Secondary"
+                                  RenderStyleMode="ButtonRenderStyleMode.Contained"
+                                  Click="AddOllamaModel" />
+                    </DxFormLayoutItem>
+
+                    @foreach (var ollama in AdditionalOllamaModels)
+                    {
+                        <DxFormLayoutItem Caption="URI">
+                            <DxTextBox @bind-Text="ollama.Uri" />
+                        </DxFormLayoutItem>
+                        <DxFormLayoutItem Caption="Model">
+                            <DxTextBox @bind-Text="ollama.ModelName" />
+                        </DxFormLayoutItem>
+                        <DxFormLayoutItem>
+                            <div class="configured-provider-actions">
+                                <DxButton Text="Test connection" Click="@(() => TestOllamaHostAsync(ollama))" />
+                                <DxButton Text="Save provider settings"
+                                          RenderStyle="ButtonRenderStyle.Primary"
+                                          RenderStyleMode="ButtonRenderStyleMode.Contained"
+                                          Click="Save" />
+                                <DxButton Text="Remove"
+                                          RenderStyle="ButtonRenderStyle.Danger"
+                                          RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                          Click="@(() => RemoveOllamaModelAsync(ollama))" />
+                            </div>
+                        </DxFormLayoutItem>
+                    }
+                </DxFormLayoutTabPage>
+
+                <DxFormLayoutTabPage Caption="OpenAI (Cloud)">
+                    <DxFormLayoutItem Caption="API Key">
+                        <DxTextBox @bind-Text="Model.OpenAICore.ApiKey" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Model">
+                        <DxTextBox @bind-Text="Model.OpenAICore.ModelName" />
+                    </DxFormLayoutItem>
+                    <DxButton Text="Test Connection" Click="TestOpenAI" />
+                </DxFormLayoutTabPage>
+
+                <DxFormLayoutTabPage Caption="Azure OpenAI">
+                    <DxFormLayoutItem Caption="Endpoint">
+                        <DxTextBox @bind-Text="Model.OpenAIServiceCore.Endpoint" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Key">
+                        <DxTextBox @bind-Text="Model.OpenAIServiceCore.Key" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Deployment Name">
+                        <DxTextBox @bind-Text="Model.OpenAIServiceCore.DeploymentName" />
+                    </DxFormLayoutItem>
+                    <DxButton Text="Test Connection" Click="TestAzure" />
+                </DxFormLayoutTabPage>
+
+                <DxFormLayoutTabPage Caption="App Logging">
+                    <DxFormLayoutItem Caption="Global Log Level">
+                        <DxComboBox Data="@LogLevels"
+                                    @bind-Value="LoggingModel.CoreLogLevel" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="SQLite Log Level">
+                        <DxComboBox Data="@LogLevels"
+                                    @bind-Value="DatabaseLoggerModel.CoreLogLevel" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Queue Length">
+                        <DxSpinEdit @bind-Value="DatabaseLoggerModel.MaxQueueLength" Min="100" Max="50000" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Batch Size">
+                        <DxSpinEdit @bind-Value="DatabaseLoggerModel.BatchSize" Min="1" Max="500" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Flush Interval (s)">
+                        <DxSpinEdit @bind-Value="DatabaseLoggerModel.FlushIntervalSeconds" Min="1" Max="30" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Retention (days)">
+                        <DxSpinEdit @bind-Value="DatabaseLoggerModel.RetentionDays" Min="1" Max="3660" />
+                    </DxFormLayoutItem>
+                </DxFormLayoutTabPage>
+
+            </DxFormLayoutTabPages>
+        </DxFormLayout>
+        </section>
+        </ConfigurationWorkbenchPanel>
+
+        <ConfigurationWorkbenchPanel SectionKey="remote" ActiveKey="@ActiveInstallSection" AriaLabel="Remote endpoint">
+        <section id="network-endpoint" class="installer-workbench-card install-workbench-region" aria-labelledby="network-endpoint-heading">
+            <div class="installer-card-heading">
+                <div>
+                    <h3 id="network-endpoint-heading">Remote web endpoint (LAN / VPN / smartphone)</h3>
+                    <p class="field-help">This is an optional second Kestrel listener. The existing http://127.0.0.1 LocalGPT endpoint remains unchanged. Saving these settings requires a LocalGPT restart before the listener is rebound.</p>
+                </div>
+            </div>
+            <DxFormLayout>
+                <DxFormLayoutItem Caption="Enable remote endpoint">
+                    <DxCheckBox @bind-Checked="NetworkModel.Enabled" Text="Listen on a second network endpoint" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem Caption="Bind address">
+                    <DxTextBox @bind-Text="NetworkModel.Address" />
+                    <p class="field-help">Use 0.0.0.0 for all IPv4 interfaces, :: for all IPv6 interfaces, or one concrete local interface IP.</p>
+                </DxFormLayoutItem>
+                <DxFormLayoutItem Caption="Port">
+                    <DxSpinEdit @bind-Value="NetworkModel.Port" Min="0" Max="65535" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem Caption="PFX certificate path">
+                    <DxTextBox @bind-Text="NetworkModel.CertificatePath" />
+                    <p class="field-help">Leave empty for HTTP. Select or create a PFX below for HTTPS.</p>
+                </DxFormLayoutItem>
+                <DxFormLayoutItem Caption="PFX password">
+                    <DxTextBox @bind-Text="NetworkModel.CertificatePassword" />
+                    <p class="field-help">For reusable deployments prefer LOCALGPT_NETWORK_CERTIFICATE_PASSWORD instead of persisting a production password.</p>
+                </DxFormLayoutItem>
+                <DxFormLayoutItem Caption="Effective after restart">
+                    <div class="installer-status-line"><code>@NetworkEndpointPreview</code></div>
+                </DxFormLayoutItem>
+            </DxFormLayout>
+        </section>
+        </ConfigurationWorkbenchPanel>
+
+        <ConfigurationWorkbenchPanel SectionKey="tls" ActiveKey="@ActiveInstallSection" AriaLabel="TLS certificate">
+        <section id="tls-certificate" class="installer-workbench-card install-workbench-region" aria-labelledby="certificate-heading">
+            <div class="installer-card-heading">
+                <div>
+                    <h3 id="certificate-heading">Create TLS certificate</h3>
+                    <p class="field-help">Creates a user-requested self-signed server certificate with Server Authentication EKU and SAN entries. A self-signed certificate is encrypted traffic, but browsers still require the certificate or issuing authority to be trusted.</p>
+                </div>
+            </div>
+            <DxFormLayout>
+                <DxFormLayoutItem Caption="Common name">
+                    <DxTextBox @bind-Text="CertificateRequest.CommonName" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem Caption="Subject alternative names">
+                    <DxMemo Rows="3" @bind-Text="CertificateRequest.SubjectAlternativeNames" />
+                    <p class="field-help">Separate DNS names and IP addresses with semicolons. The current machine name and detected local addresses are prefilled.</p>
+                </DxFormLayoutItem>
+                <DxFormLayoutItem Caption="RSA key size">
+                    <DxComboBox Data="@CertificateKeySizes" @bind-Value="CertificateRequest.KeySize" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem Caption="Hash algorithm">
+                    <DxComboBox Data="@CertificateHashes" @bind-Value="CertificateRequest.Hash" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem Caption="Validity (days)">
+                    <DxSpinEdit @bind-Value="CertificateRequest.ValidityDays" Min="1" Max="3650" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem Caption="Save PFX to">
+                    <DxTextBox @bind-Text="CertificateRequest.OutputPath" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem Caption="PFX password">
+                    <DxTextBox @bind-Text="CertificateRequest.Password" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem Caption="Certificate store">
+                    <DxCheckBox @bind-Checked="CertificateRequest.InstallToStore" Text="Install the generated certificate into a Windows/.NET certificate store" />
+                </DxFormLayoutItem>
+                @if (CertificateRequest.InstallToStore)
+                {
+                    <DxFormLayoutItem Caption="Store location">
+                        <DxComboBox Data="@CertificateStoreLocations" @bind-Value="CertificateRequest.StoreLocation" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Store name">
+                        <DxComboBox Data="@CertificateStoreNames" @bind-Value="CertificateRequest.StoreName" />
+                    </DxFormLayoutItem>
+                }
+                <DxFormLayoutItem>
+                    <DxCheckBox @bind-Checked="UseCreatedCertificateForRemoteEndpoint" Text="Use the generated PFX for the remote Kestrel endpoint" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem>
+                    <DxButton Text="@(IsCertificateBusy ? "Creating certificate..." : "Create certificate")"
+                              Enabled="@(!IsCertificateBusy)"
+                              RenderStyle="ButtonRenderStyle.Primary"
+                              RenderStyleMode="ButtonRenderStyleMode.Contained"
+                              Click="CreateNetworkCertificateAsync" />
+                </DxFormLayoutItem>
+                @if (!string.IsNullOrWhiteSpace(CertificateStatus))
+                {
+                    <DxFormLayoutItem Caption="Certificate status">
+                        <div class="installer-status-line">@CertificateStatus</div>
+                    </DxFormLayoutItem>
+                }
+            </DxFormLayout>
+        </section>
+        </ConfigurationWorkbenchPanel>
+
+        <ConfigurationWorkbenchPanel SectionKey="guide" ActiveKey="@ActiveInstallSection" AriaLabel="Setup guide">
+        <section id="setup-guide" class="installer-workbench-card install-workbench-region" aria-labelledby="onboarding-heading">
+            <div class="installer-card-heading">
+                <div>
+                    <h3 id="onboarding-heading">@T("Install.Onboarding.Title", "Setup guide, benchmark council and quick starts")</h3>
+                    <p>@T("Install.Onboarding.PersistentHelp", "The guide remains available here after it has been reviewed. It does not disappear when completion is recorded.")</p>
+                </div>
+                <div class="top-container">
+                    <DxButton Text='@T("Install.Onboarding.OpenDocumentation", "Open documentation")' Click="OpenDocumentation" />
+                    <DxButton Text='@T("Install.Onboarding.EditTeams", "Edit Council teams")' Click="OpenCouncilTeams" />
+                    <DxButton Text='@T("Install.Onboarding.Refresh", "Refresh setup guide")' Enabled="@(!IsOnboardingLoading)" Click="RefreshOnboardingAsync" />
+                </div>
+            </div>
+            @if (OnboardingStatus is null)
+            {
+                <p>@T("Install.Onboarding.Loading", "Loading installer profiles and Council quick starts...")</p>
+            }
+            else
+            {
+                <div class="installer-status-line">
+                    <strong>@T("Install.Onboarding.ReviewStatus", "Review status:")</strong> @(OnboardingStatus.IsCompleted ? T("Install.Onboarding.Reviewed", "Reviewed — available for reopening") : T("Install.Onboarding.NotReviewed", "Not reviewed"))
+                    <span>@T("Install.Onboarding.DetectedModels", "Detected models:") @OnboardingStatus.InstalledModels.Count</span>
+                    <span>@T("Install.Onboarding.CouncilTeams", "Council teams:") @OnboardingStatus.CouncilTeamKeys.Count</span>
+                </div>
+                <div class="installer-quickstart-grid">
+                    @foreach (var quickStart in OnboardingStatus.QuickStarts)
+                    {
+                        <article class="installer-quickstart-card">
+                            <h4>@quickStart.DisplayName</h4>
+                            <p>@quickStart.Description</p>
+                            <small>Team: @quickStart.CouncilTeamKey<br />Preset: @quickStart.ModelPresetName</small>
+                            <span class="installer-direct-starter-hint">@T("Install.Onboarding.DirectStarterHint", "Direct Council starter: opens a fresh AI Council chat and submits the maintained starter prompt automatically.")</span>
+                            <DxButton Text='@T("Install.Onboarding.OpenInChat", "Open in Chat")' RenderStyle="ButtonRenderStyle.Primary" Click="@(() => OpenQuickStartInChat(quickStart))" />
+                        </article>
+                    }
+                </div>
+                <details class="installer-profile-details" open="@(!OnboardingStatus.IsCompleted)">
+                    <summary>@T("Install.Onboarding.InstallerProfiles", "Installer profiles and recommended models/repositories")</summary>
+                    <div class="installer-quickstart-grid">
+                        @foreach (var profile in OnboardingStatus.InstallerProfiles)
+                        {
+                            <article class="installer-quickstart-card">
+                                <h4>@profile.DisplayName</h4>
+                                <p>@profile.Purpose</p>
+                                <code>@profile.Command</code>
+                                <small>@T("Install.Onboarding.Models", "Models:") @(string.IsNullOrWhiteSpace(profile.ModelSummary) ? T("Install.Onboarding.None", "none") : profile.ModelSummary)</small>
+                                <small>@T("Install.Onboarding.Repositories", "Repositories:") @profile.RepositorySummary</small>
+                            </article>
+                        }
+                    </div>
+                </details>
+                @if (!OnboardingStatus.IsCompleted)
+                {
+                    <DxButton Text='@T("Install.Onboarding.MarkReviewed", "I reviewed this setup guide")' RenderStyle="ButtonRenderStyle.Success" Enabled="@(!IsOnboardingLoading)" Click="CompleteOnboardingAsync" />
+                }
+            }
+        </section>
+        </ConfigurationWorkbenchPanel>
+
+        <ConfigurationWorkbenchPanel SectionKey="toolchains" ActiveKey="@ActiveInstallSection" AriaLabel="Toolchains">
+        <section id="toolchains" class="installer-workbench-card install-workbench-region" aria-labelledby="toolchain-heading">
+            <div class="installer-card-heading">
+                <div>
+                    <h3 id="toolchain-heading">@T("Install.Toolchains.Title", "Compilers and runtime toolchains")</h3>
+                    <p>@T("Install.Toolchains.Description", "Discover MSBuild, .NET, Java, Python, PowerShell and embedded toolchains from PATH and common installation folders. Saved defaults are reused by project workspaces and build verification.")</p>
+                </div>
+                <div class="top-container">
+                    <DxButton Text='@T("Install.Toolchains.Discover", "Discover and save toolchains")' RenderStyle="ButtonRenderStyle.Primary" Enabled="@(!IsToolchainBusy)" Click="DiscoverToolchainsAsync" />
+                    <DxButton Text='@T("Install.Toolchains.Refresh", "Refresh stored toolchains")' Enabled="@(!IsToolchainBusy)" Click="RefreshCompilerInstallationsAsync" />
+                </div>
+            </div>
+            <label class="toolchain-search-roots">
+                @T("Install.Toolchains.CustomRoots", "Additional search roots (one path per line)")
+                <textarea rows="3" @bind="ToolchainSearchRoots" placeholder="C:\Program Files\Microsoft Visual Studio&#10;C:\Python313"></textarea>
+            </label>
+            @if (!string.IsNullOrWhiteSpace(ToolchainStatus))
+            {
+                <div class="installer-status-line"><span>@ToolchainStatus</span></div>
+            }
+            @if (CompilerInstallations.Count == 0)
+            {
+                <p class="field-help">@T("Install.Toolchains.None", "No stored toolchains yet. Discovery is explicit and only saves detected executable paths after you press the button.")</p>
+            }
+            else
+            {
+                <div class="toolchain-grid">
+                    @foreach (var compiler in CompilerInstallations)
+                    {
+                        <article class="toolchain-card">
+                            <header>
+                                <div>
+                                    <h4>@compiler.Name</h4>
+                                    <small>@compiler.Language · @(string.IsNullOrWhiteSpace(compiler.Version) ? T("Install.Toolchains.VersionUnknown", "version not validated") : compiler.Version)</small>
+                                </div>
+                                @if (compiler.IsDefaultForLanguage)
+                                {
+                                    <strong class="toolchain-default-badge">@T("Install.Toolchains.Default", "Default")</strong>
+                                }
+                            </header>
+                            <code>@compiler.ExecutablePath</code>
+                            <small>@compiler.DiscoverySource · @(compiler.LastValidationSucceeded ? T("Install.Toolchains.Valid", "validated") : T("Install.Toolchains.Unvalidated", "not validated"))</small>
+                            @if (!string.IsNullOrWhiteSpace(compiler.LastValidationMessage))
+                            {
+                                <p class="toolchain-validation-message">@compiler.LastValidationMessage</p>
+                            }
+                            <div class="toolchain-actions">
+                                <DxButton Text='@T("Install.Toolchains.Validate", "Validate")' Enabled="@(!IsToolchainBusy)" Click="@(() => ValidateCompilerAsync(compiler.Id))" />
+                                <DxButton Text='@T("Install.Toolchains.MakeDefault", "Use as language default")' Enabled="@(!IsToolchainBusy && !compiler.IsDefaultForLanguage)" Click="@(() => MakeCompilerDefaultAsync(compiler))" />
+                                <DxButton Text='@T("Install.Toolchains.Remove", "Remove")' RenderStyle="ButtonRenderStyle.Danger" RenderStyleMode="ButtonRenderStyleMode.Outline" Enabled="@(!IsToolchainBusy)" Click="@(() => DeleteCompilerAsync(compiler.Id))" />
+                            </div>
+                        </article>
+                    }
+                </div>
+            }
+        </section>
+        </ConfigurationWorkbenchPanel>
+
+        <ConfigurationWorkbenchPanel SectionKey="languages" ActiveKey="@ActiveInstallSection" AriaLabel="Languages">
+        <section id="localization" class="installer-workbench-card install-workbench-region" aria-labelledby="localization-heading">
+            <div class="installer-card-heading">
+                <div>
+                    <h3 id="localization-heading">@T("Install.Localization.Title", "Languages and localization catalogs")</h3>
+                    <p>@T("Install.Localization.Description", "English and German are shipped defaults. Any valid .NET culture can be added as a persistent JSON catalog; missing keys fall back to English.")</p>
+                </div>
+            </div>
+            <div class="localization-catalog-list">
+                @foreach (var catalog in LocalizationCatalogs)
+                {
+                    <span class="localization-catalog-pill">
+                        @catalog.DisplayName (@catalog.Culture) · @catalog.StringCount strings
+                        @if (catalog.HasUserOverride)
+                        {
+                            <strong>@T("Install.Localization.UserOverride", "user override")</strong>
+                        }
+                    </span>
+                }
+            </div>
+            <div class="localization-import-grid">
+                <label>
+                    @T("Install.Localization.CultureName", "Culture name")
+                    <input @bind="LocalizationCulture" placeholder="fr-FR" autocomplete="off" />
+                </label>
+                <label class="localization-file-input">
+                    @T("Install.Localization.JsonFile", "Language JSON file")
+                    <InputFile OnChange="ImportLocalizationFileAsync" accept=".json,application/json" disabled="@IsLocalizationImporting" />
+                </label>
+                <label class="localization-overwrite">
+                    <input type="checkbox" @bind="OverwriteLocalizationCatalog" />
+                    @T("Install.Localization.Overwrite", "Replace an existing user catalog for this culture")
+                </label>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(LocalizationImportStatus))
+            {
+                <div class="installer-status-line">
+                    <span>@LocalizationImportStatus</span>
+                    <DxButton Text='@T("Install.Localization.Activate", "Activate selected language")' Click="ActivateSelectedCulture" />
+                </div>
+            }
+            <p class="field-help">@T("Install.Localization.FormatHelp", "Catalog format: a flat JSON object. User catalogs are stored under the current user's LocalGPT application-data directory and survive rebuilds.") <code>{ "Nav.Home": "Accueil", "Nav.Chat": "Discussion IA" }</code></p>
+        </section>
+        </ConfigurationWorkbenchPanel>
+
+        <ConfigurationWorkbenchPanel SectionKey="log" ActiveKey="@ActiveInstallSection" AriaLabel="Setup activity">
+        <section id="setup-log" class="installer-workbench-card install-workbench-region setup-log-card" aria-labelledby="setup-log-heading">
+            <div class="installer-card-heading">
+                <div>
+                    <h3 id="setup-log-heading">@T("Install.Workbench.LogTitle", "Setup activity")</h3>
+                    <p class="field-help">@T("Install.Workbench.LogHelp", "Operational setup messages stay visible here while technical details continue to use the application logging pipeline.")</p>
+                </div>
+            </div>
+            <DxMemo Rows="8" ReadOnly="true" @bind-Text="_log" CssClass="w-full setup-log-editor" />
+        </section>
+        </ConfigurationWorkbenchPanel>
+            </div>
+        </div>
+    </div>
+    <span id="install-scroll-bottom" class="install-scroll-anchor" aria-hidden="true"></span>
+</div>
+
+@code {
+    private string ActiveInstallSection { get; set; } = "providers";
+    private IReadOnlyList<WorkbenchNavItem> InstallSections =>
+    [
+        new("providers", T("Install.Workbench.Nav.Providers", "AI providers"), T("Install.Workbench.Nav.ProvidersHelp", "Hosts, models and provider connection settings"), ConfiguredProviderHosts.Count.ToString(CultureInfo.InvariantCulture)),
+        new("remote", T("Install.Workbench.Nav.RemoteEndpoint", "Remote endpoint"), T("Install.Workbench.Nav.RemoteEndpointHelp", "LAN / VPN / smartphone listener")),
+        new("tls", T("Install.Workbench.Nav.Certificate", "TLS certificate"), T("Install.Workbench.Nav.CertificateHelp", "Create and select the HTTPS certificate")),
+        new("guide", T("Install.Workbench.Nav.Guide", "Setup guide"), T("Install.Workbench.Nav.GuideHelp", "First-run status and quick starts")),
+        new("toolchains", T("Install.Workbench.Nav.Toolchains", "Toolchains"), T("Install.Workbench.Nav.ToolchainsHelp", "Compilers and runtime discovery")),
+        new("languages", T("Install.Workbench.Nav.Languages", "Languages"), T("Install.Workbench.Nav.LanguagesHelp", "Runtime language catalogs")),
+        new("log", T("Install.Workbench.Nav.Log", "Setup log"), T("Install.Workbench.Nav.LogHelpShort", "Operational setup messages"))
+    ];
+
+    private Task OnInstallSectionChanged(string key)
+    {
+        ActiveInstallSection = key;
+        return Task.CompletedTask;
+    }
+
+    private AICoreOptions Model = new();
+    private readonly HashSet<string> RemovedOllamaEndpoints = new(StringComparer.OrdinalIgnoreCase);
+    private string? ExplicitOllamaPrimaryEndpoint;
+    private LoggingCoreOptions LoggingModel = new();
+    private DatabaseLoggerCoreOptions DatabaseLoggerModel = new();
+    private IReadOnlyList<CoreLogLevel> LogLevels { get; } = Enum.GetValues<CoreLogLevel>();
+    private RemoteWebEndpointOptions NetworkModel = new();
+    private NetworkCertificateCreateRequest CertificateRequest = new();
+    private IReadOnlyList<NetworkCertificateKeySize> CertificateKeySizes { get; } = Enum.GetValues<NetworkCertificateKeySize>();
+    private IReadOnlyList<NetworkCertificateHash> CertificateHashes { get; } = Enum.GetValues<NetworkCertificateHash>();
+    private IReadOnlyList<System.Security.Cryptography.X509Certificates.StoreLocation> CertificateStoreLocations { get; } = Enum.GetValues<System.Security.Cryptography.X509Certificates.StoreLocation>();
+    private IReadOnlyList<System.Security.Cryptography.X509Certificates.StoreName> CertificateStoreNames { get; } = Enum.GetValues<System.Security.Cryptography.X509Certificates.StoreName>();
+    private bool UseCreatedCertificateForRemoteEndpoint = true;
+    private bool IsCertificateBusy;
+    private string CertificateStatus = string.Empty;
+    private string NetworkEndpointPreview => !NetworkModel.Enabled || NetworkModel.Port <= 0
+        ? "disabled (loopback-only LocalGPT remains active)"
+        : $"{(string.IsNullOrWhiteSpace(NetworkModel.CertificatePath) ? "http" : "https")}://{(string.IsNullOrWhiteSpace(NetworkModel.Address) ? "0.0.0.0" : NetworkModel.Address)}:{NetworkModel.Port}";
+    private string _log = "";
+    private string toastName = "InstallToasts";
+    private bool IsDiscovering;
+    private bool IsConnectivityChecking;
+    private bool IsSaving;
+    private bool IsOllamaProcessBusy;
+    private bool IsOnboardingLoading;
+    private bool IsLocalizationImporting;
+    private bool IsToolchainBusy;
+    private bool OverwriteLocalizationCatalog;
+    private string LocalizationCulture = "fr-FR";
+    private string LocalizationImportStatus = string.Empty;
+    private string ToolchainSearchRoots = string.Empty;
+    private string ToolchainStatus = string.Empty;
+    private FirstRunOnboardingStatus? OnboardingStatus;
+    private IReadOnlyList<LocalizationCatalogDescriptor> LocalizationCatalogs = Array.Empty<LocalizationCatalogDescriptor>();
+    private IReadOnlyList<ProjectCompilerInstallation> CompilerInstallations = Array.Empty<ProjectCompilerInstallation>();
+    private OllamaProcessStatus OllamaProcessStatus = new(false, false, null, Array.Empty<OllamaProcessInfo>(), string.Empty, "Ollama process status not checked yet.");
+    private string ConnectivityStatus = "Connectivity not checked yet. Refresh to verify configured and local Ollama / OpenAI-compatible hosts.";
+    private DateTimeOffset? LastConnectivityCheck;
+    private IReadOnlyList<LocalAiHostDiscoveryResult> DiscoveredHosts = Array.Empty<LocalAiHostDiscoveryResult>();
+    private IReadOnlyList<ProviderModelReference> DiscoveredProviderModels => DiscoveredHosts
+        .Where(host => host.IsReachable)
+        .SelectMany(host => host.Models.Select(model => ToProviderModel(host, model)))
+        .ToList();
+    private List<OllamaCoreOptions> AdditionalOllamaModels => Model.OllamaCores;
+    private List<ChatGPTLocalCoreOptions> AdditionalOpenAiCompatibleHosts => Model.ChatGPTLocalCores;
+    private IReadOnlyList<ConfiguredProviderHostView> ConfiguredProviderHosts => BuildConfiguredProviderHosts();
+    private bool HasReachableAiHost => DiscoveredHosts.Any(host => host.IsReachable);
+    private string ConnectivityAlertCss => HasReachableAiHost ? "alert alert-success" : "alert alert-warning";
+    /// <summary>Resolves one installer UI string with a maintained fallback.</summary>
+    private string T(string key, string fallback) => Localization.Get(key, fallback: fallback);
+
+    private string LastCheckedLabel => LastConnectivityCheck is null
+        ? string.Empty
+        : string.Format(
+            CultureInfo.CurrentUICulture,
+            T("Install.Connectivity.LastChecked", "Last checked {0}."),
+            LastConnectivityCheck.Value.ToLocalTime().ToString("HH:mm:ss", CultureInfo.CurrentUICulture));
+
+    private string ConfiguredProviderSummary => string.Format(
+        CultureInfo.CurrentUICulture,
+        ConfiguredProviderHosts.Count == 1
+            ? T("Install.ConfiguredProviders.SummaryOne", "{0} host/model binding available to Chat and AI Council.")
+            : T("Install.ConfiguredProviders.SummaryMany", "{0} host/model bindings available to Chat and AI Council."),
+        ConfiguredProviderHosts.Count);
+
+    protected override void OnInitialized()
+    {
+        ApplyRequestedInstallSection();
+        try
+        {
+            var current = Opts.CurrentValue.AICore ?? new AICoreOptions();
+            // Provider settings are edited transactionally. Never alias IOptionsMonitor.CurrentValue into the UI;
+            // otherwise typing a new endpoint mutates the live registry before Save and can replace another host.
+            Model = ProviderConfigurationRegistry.CreateDetachedDraft(current);
+
+            LoggingModel = Opts.CurrentValue.LoggingCore ?? new LoggingCoreOptions
+            {
+                CoreLogLevel = CoreLogLevel.Information,
+                FileCore = new FileLoggerCoreOptions { CoreLogLevel = CoreLogLevel.Error, FilePath = string.Empty },
+                EmailCore = new EmailLoggerCoreOptions { CoreLogLevel = CoreLogLevel.None },
+                DatabaseCore = new DatabaseLoggerCoreOptions { CoreLogLevel = CoreLogLevel.Warning }
+            };
+            LoggingModel.FileCore ??= new FileLoggerCoreOptions { CoreLogLevel = CoreLogLevel.Error, FilePath = string.Empty };
+            LoggingModel.EmailCore ??= new EmailLoggerCoreOptions { CoreLogLevel = CoreLogLevel.None };
+            DatabaseLoggerModel = LoggingModel.DatabaseCore ?? new DatabaseLoggerCoreOptions { CoreLogLevel = CoreLogLevel.Warning };
+            LoggingModel.DatabaseCore = DatabaseLoggerModel;
+            NetworkModel = Opts.CurrentValue.LocalGPT?.RemoteEndpoint ?? new RemoteWebEndpointOptions();
+            CertificateRequest = NetworkCertificates.CreateDefaultRequest();
+            if (!string.IsNullOrWhiteSpace(NetworkModel.CertificatePath))
+            {
+                CertificateRequest.OutputPath = NetworkModel.CertificatePath;
+                CertificateRequest.Password = NetworkModel.CertificatePassword;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Install.OnInitialized failed: {Message}", ex.Message);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+            _ = Append("(Init) " + ex.Message);
+        }
+    }
+
+
+    private void ApplyRequestedInstallSection()
+    {
+        try
+        {
+            var fragment = new Uri(Nav.Uri).Fragment.TrimStart('#');
+            ActiveInstallSection = fragment switch
+            {
+                "provider-studio" => "providers",
+                "network-endpoint" => "remote",
+                "tls-certificate" => "tls",
+                "setup-guide" => "guide",
+                "toolchains" => "toolchains",
+                "localization" => "languages",
+                "setup-log" => "log",
+                _ => ActiveInstallSection
+            };
+        }
+        catch (Exception ex)
+        {
+            Logger.LogDebug(ex, "Could not map the Install URL fragment to a workbench section.");
+        }
+    }
+
+    private IReadOnlyList<ConfiguredProviderHostView> BuildConfiguredProviderHosts()
+    {
+        var result = new List<ConfiguredProviderHostView>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        void AddOpenAiCompatible(ChatGPTLocalCoreOptions? option, bool primary, string origin)
+        {
+            if (option is null || (string.IsNullOrWhiteSpace(option.Endpoint) && string.IsNullOrWhiteSpace(option.ModelName)))
+                return;
+            var endpoint = NormalizeProviderEndpoint(option.Endpoint);
+            var key = $"openai-compatible|{endpoint}|{option.ModelName}";
+            if (!seen.Add(key)) return;
+            result.Add(new ConfiguredProviderHostView(key, "OpenAI-compatible / LM Studio", endpoint, option.ModelName ?? string.Empty, origin, primary, option, null));
+        }
+
+        void AddOllama(OllamaCoreOptions? option, bool primary, string origin)
+        {
+            if (option is null || (string.IsNullOrWhiteSpace(option.Uri) && string.IsNullOrWhiteSpace(option.ModelName)))
+                return;
+            var endpoint = NormalizeProviderEndpoint(option.Uri);
+            var key = $"ollama|{endpoint}|{option.ModelName}";
+            if (!seen.Add(key)) return;
+            result.Add(new ConfiguredProviderHostView(key, "Ollama", endpoint, option.ModelName ?? string.Empty, origin, primary, null, option));
+        }
+
+        AddOpenAiCompatible(Model.ChatGPTLocalCore, true, "Primary local OpenAI-compatible host");
+        foreach (var option in Model.ChatGPTLocalCores)
+            AddOpenAiCompatible(option, false, "Additional local OpenAI-compatible host");
+        AddOllama(Model.OllamaCore, true, "Primary Ollama host");
+        foreach (var option in Model.OllamaCores)
+            AddOllama(option, false, "Additional Ollama host");
+
+        if (Model.OpenAICore is { } openAi && (!string.IsNullOrWhiteSpace(openAi.ApiKey) || !string.IsNullOrWhiteSpace(openAi.ModelName)))
+            result.Add(new ConfiguredProviderHostView("openai-cloud", "OpenAI Cloud", "OpenAI API", openAi.ModelName ?? string.Empty, "Cloud provider", true, null, null));
+        if (Model.OpenAIServiceCore is { } azure && (!string.IsNullOrWhiteSpace(azure.Endpoint) || !string.IsNullOrWhiteSpace(azure.DeploymentName)))
+            result.Add(new ConfiguredProviderHostView("azure-openai", "Azure OpenAI", azure.Endpoint ?? string.Empty, azure.DeploymentName ?? string.Empty, "Cloud provider", true, null, null));
+
+        return result;
+    }
+
+    private sealed record ConfiguredProviderHostView(
+        string Key,
+        string Provider,
+        string Endpoint,
+        string ModelName,
+        string Origin,
+        bool IsPrimary,
+        ChatGPTLocalCoreOptions? OpenAiHost,
+        OllamaCoreOptions? OllamaHost);
+
+    private void NormalizeLocalEndpoint()
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(Model.ChatGPTLocalCore?.Endpoint)) return;
+
+            var ep = Model.ChatGPTLocalCore.Endpoint.Trim().TrimEnd('/');
+            if (Uri.TryCreate(ep, UriKind.Absolute, out var uri) && (string.IsNullOrWhiteSpace(uri.AbsolutePath) || uri.AbsolutePath == "/"))
+                ep += "/v1";
+            Model.ChatGPTLocalCore.Endpoint = ep;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to normalize local endpoint: {Message}", ex.Message);
+            _ = Append("Normalization warning: " + ex.Message);
+        }
+    }
+
+    private async Task Append(string text)
+    {
+        try
+        {
+            _log = $"[{DateTime.Now:T}] {text}\n" + _log;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            // Logging must never recurse into the UI log path when the interactive circuit is unavailable.
+            Logger.LogWarning(ex, "Install activity log UI refresh failed: {Message}", ex.Message);
+        }
+    }
+
+    private async Task TestLocal()
+    {
+        try
+        {
+            NormalizeLocalEndpoint();
+            var (ok, msg) = await Probe.TestLocalOpenAICompatAsync(Model.ChatGPTLocalCore!, default).ConfigureAwait(false);
+            await Append((ok ? "OK" : "FAIL") + " Local: " + msg).ConfigureAwait(false);
+            if (ok) Notifier.ShowSuccess(toastName, "Local endpoint is reachable.", "Local Test OK");
+            else    Notifier.ShowWarning(toastName, msg, "Local Test Failed");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "TestLocal failed: {Message}", ex.Message);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+            await Append("(Local Test) " + ex.Message).ConfigureAwait(false);
+        }
+    }
+
+    private async Task StartLocal()
+    {
+        try
+        {
+            NormalizeLocalEndpoint();
+            var (ok, msg) = await Probe.TryStartLocalAsync(Model.ChatGPTLocalCore!, default).ConfigureAwait(false);
+            await Append((ok ? "Started" : "Failed") + ": " + msg).ConfigureAwait(false);
+            if (ok) Notifier.ShowSuccess(toastName, "Local server started.", "Start OK");
+            else    Notifier.ShowWarning(toastName, msg, "Start Failed");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "StartLocal failed: {Message}", ex.Message);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+            await Append("(Start Local) " + ex.Message).ConfigureAwait(false);
+        }
+    }
+
+    private async Task TestOllama()
+    {
+        try
+        {
+            var (ok, msg) = await Probe.TestOllamaAsync(Model.OllamaCore!, default).ConfigureAwait(false);
+            LastConnectivityCheck = DateTimeOffset.Now;
+            ConnectivityStatus = ok
+                ? $"Ollama reachable at {Model.OllamaCore?.Uri}. Selected model: {Model.OllamaCore?.ModelName}."
+                : $"Ollama not reachable at {Model.OllamaCore?.Uri}: {msg}";
+            await Append((ok ? "OK" : "FAIL") + " Ollama: " + msg).ConfigureAwait(false);
+            if (ok) Notifier.ShowSuccess(toastName, "Ollama reachable.", "Ollama Test OK");
+            else    Notifier.ShowWarning(toastName, msg, "Ollama Test Failed");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "TestOllama failed: {Message}", ex.Message);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+            await Append("(Ollama Test) " + ex.Message).ConfigureAwait(false);
+        }
+    }
+
+    private bool initialSetupRefreshStarted;
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !initialSetupRefreshStarted)
+        {
+            initialSetupRefreshStarted = true;
+            TaskRunner.Run(
+                nameof(Install),
+                "InitialSetupRefresh",
+                InitializeSetupAfterRenderAsync);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private async Task InitializeSetupAfterRenderAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            LocalizationCatalogs = Localization.GetCatalogs();
+            cancellationToken.ThrowIfCancellationRequested();
+            await RefreshOnboardingAsync().ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+            await RefreshCompilerInstallationsAsync().ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+            await RefreshOllamaProcessStatusAsync().ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+            await RefreshConnectivityStatusAsync(showToast: false).ConfigureAwait(false);
+            ComponentActivity.RecordInformation(nameof(Install), nameof(InitializeSetupAfterRenderAsync), "Install background initialization completed without holding the interactive renderer.");
+        }
+        catch (OperationCanceledException)
+        {
+            Logger.LogDebug("Install background initialization was cancelled.");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Install background initialization failed: {Message}", ex.Message);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+            await Append("(InitializeSetupAfterRenderAsync) " + ex.Message).ConfigureAwait(false);
+        }
+    }
+
+
+
+    /// <summary>Refreshes the persistent installer guide and Council quick-start catalog.</summary>
+    private async Task RefreshOnboardingAsync()
+    {
+        try
+        {
+            IsOnboardingLoading = true;
+            OnboardingStatus = await Onboarding.GetStatusAsync(refreshConnectivity: false).ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Could not load the persistent installer onboarding surface.");
+            Notifier.ShowError(toastName, "The setup guide could not be loaded. Review LocalGPT logs.", "Setup guide");
+        }
+        finally
+        {
+            IsOnboardingLoading = false;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>Records that the guide was reviewed without hiding it from Install.</summary>
+    private async Task CompleteOnboardingAsync()
+    {
+        try
+        {
+            IsOnboardingLoading = true;
+            await Onboarding.CompleteAsync(userConfirmed: true).ConfigureAwait(false);
+            OnboardingStatus = await Onboarding.GetStatusAsync(refreshConnectivity: false).ConfigureAwait(false);
+            Notifier.ShowSuccess(toastName, "The setup guide was marked reviewed and remains available on Install.", "Setup reviewed");
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Could not record the onboarding review state.");
+            Notifier.ShowError(toastName, "The setup review state could not be saved.", "Setup guide");
+        }
+        finally
+        {
+            IsOnboardingLoading = false;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>Loads compiler and runtime toolchains stored in the LocalGPT database.</summary>
+    /// <returns>A task that completes after the installer list is refreshed.</returns>
+    private async Task RefreshCompilerInstallationsAsync()
+    {
+        try
+        {
+            IsToolchainBusy = true;
+            CompilerInstallations = await ProjectMaintenance.GetCompilerInstallationsAsync().ConfigureAwait(false) /* renderer-affine toolchain list */;
+            ToolchainStatus = $"{CompilerInstallations.Count} stored toolchain profile(s).";
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Could not load stored compiler installations; executable paths were omitted from logs.");
+            ToolchainStatus = T("Install.Toolchains.LoadFailed", "Stored toolchains could not be loaded. Review LocalGPT logs.");
+            Notifier.ShowError(toastName, ToolchainStatus, T("Install.Toolchains.Title", "Compilers and runtime toolchains"));
+        }
+        finally
+        {
+            IsToolchainBusy = false;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>Discovers compiler executables from PATH, common locations and optional user roots.</summary>
+    /// <returns>A task that completes after detected profiles are saved and displayed.</returns>
+    private async Task DiscoverToolchainsAsync()
+    {
+        try
+        {
+            IsToolchainBusy = true;
+            ToolchainStatus = T("Install.Toolchains.Discovering", "Discovering toolchains...");
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            var discovered = await ProjectMaintenance.DiscoverCompilerInstallationsAsync(new DiscoverProjectCompilersRequest
+            {
+                CustomSearchRootsText = ToolchainSearchRoots,
+                SaveDiscovered = true,
+                UserConfirmed = true
+            }).ConfigureAwait(false);
+            CompilerInstallations = await ProjectMaintenance.GetCompilerInstallationsAsync().ConfigureAwait(false) /* renderer-affine discovery refresh */;
+            ToolchainStatus = $"Discovered {discovered.Count} candidate(s); {CompilerInstallations.Count} profile(s) are stored.";
+            Notifier.ShowSuccess(toastName, ToolchainStatus, T("Install.Toolchains.Title", "Compilers and runtime toolchains"));
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Compiler discovery failed; search roots and executable paths were omitted from logs.");
+            ToolchainStatus = T("Install.Toolchains.DiscoveryFailed", "Toolchain discovery failed. Review LocalGPT logs.");
+            Notifier.ShowError(toastName, ToolchainStatus, T("Install.Toolchains.Title", "Compilers and runtime toolchains"));
+        }
+        finally
+        {
+            IsToolchainBusy = false;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>Runs the bounded version probe for one stored compiler installation.</summary>
+    /// <param name="compilerId">Stored compiler identifier.</param>
+    /// <returns>A task that completes after validation and list refresh.</returns>
+    private async Task ValidateCompilerAsync(Guid compilerId)
+    {
+        try
+        {
+            IsToolchainBusy = true;
+            var compiler = await ProjectMaintenance.ValidateCompilerInstallationAsync(compilerId, userConfirmed: true).ConfigureAwait(false) /* renderer-affine validation result */;
+            ToolchainStatus = compiler.LastValidationSucceeded
+                ? $"Validated {compiler.Name}: {compiler.Version}."
+                : $"Validation failed for {compiler.Name}.";
+            CompilerInstallations = await ProjectMaintenance.GetCompilerInstallationsAsync().ConfigureAwait(false) /* renderer-affine validation refresh */;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Compiler validation failed for {CompilerId}; executable path was omitted from logs.", compilerId);
+            ToolchainStatus = T("Install.Toolchains.ValidationFailed", "Compiler validation failed. Review LocalGPT logs.");
+            Notifier.ShowError(toastName, ToolchainStatus, T("Install.Toolchains.Title", "Compilers and runtime toolchains"));
+        }
+        finally
+        {
+            IsToolchainBusy = false;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>Marks one stored compiler as the default for its language.</summary>
+    /// <param name="compiler">Compiler profile selected by the user.</param>
+    /// <returns>A task that completes after the default profile is saved.</returns>
+    private async Task MakeCompilerDefaultAsync(ProjectCompilerInstallation compiler)
+    {
+        ArgumentNullException.ThrowIfNull(compiler);
+        try
+        {
+            IsToolchainBusy = true;
+            await ProjectMaintenance.SaveCompilerInstallationAsync(new SaveProjectCompilerInstallationRequest
+            {
+                Id = compiler.Id,
+                Name = compiler.Name,
+                Language = compiler.Language,
+                ExecutablePath = compiler.ExecutablePath,
+                CompilerHomePath = compiler.CompilerHomePath,
+                Version = compiler.Version,
+                Architecture = compiler.Architecture,
+                DiscoverySource = compiler.DiscoverySource,
+                ValidationArguments = compiler.ValidationArguments,
+                EnvironmentVariablesJson = compiler.EnvironmentVariablesJson,
+                IsEnabled = compiler.IsEnabled,
+                IsDefaultForLanguage = true,
+                UserConfirmed = true
+            }).ConfigureAwait(false);
+            CompilerInstallations = await ProjectMaintenance.GetCompilerInstallationsAsync().ConfigureAwait(false) /* renderer-affine default refresh */;
+            ToolchainStatus = $"{compiler.Name} is now the default {compiler.Language} toolchain.";
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Setting compiler {CompilerId} as language default failed.", compiler.Id);
+            ToolchainStatus = T("Install.Toolchains.DefaultFailed", "The default toolchain could not be saved.");
+        }
+        finally
+        {
+            IsToolchainBusy = false;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>Deletes one unreferenced stored compiler profile.</summary>
+    /// <param name="compilerId">Stored compiler identifier.</param>
+    /// <returns>A task that completes after the delete attempt.</returns>
+    private async Task DeleteCompilerAsync(Guid compilerId)
+    {
+        try
+        {
+            IsToolchainBusy = true;
+            await ProjectMaintenance.DeleteCompilerInstallationAsync(compilerId, userConfirmed: true).ConfigureAwait(false) /* renderer-affine delete result */;
+            CompilerInstallations = await ProjectMaintenance.GetCompilerInstallationsAsync().ConfigureAwait(false) /* renderer-affine delete refresh */;
+            ToolchainStatus = T("Install.Toolchains.Removed", "The compiler profile was removed.");
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Deleting compiler {CompilerId} failed.", compilerId);
+            ToolchainStatus = exception.Message;
+            Notifier.ShowError(toastName, ToolchainStatus, T("Install.Toolchains.Title", "Compilers and runtime toolchains"));
+        }
+        finally
+        {
+            IsToolchainBusy = false;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>Validates and imports one user-selected localization JSON file.</summary>
+    /// <param name="args">Selected browser file.</param>
+    private async Task ImportLocalizationFileAsync(InputFileChangeEventArgs args)
+    {
+        try
+        {
+            IsLocalizationImporting = true;
+            LocalizationImportStatus = string.Empty;
+            var file = args.File;
+            if (string.IsNullOrWhiteSpace(LocalizationCulture))
+                LocalizationCulture = Path.GetFileNameWithoutExtension(file.Name);
+            await using var stream = file.OpenReadStream(4 * 1024 * 1024);
+            using var reader = new StreamReader(stream);
+            var json = await reader.ReadToEndAsync().ConfigureAwait(false);
+            var validation = Localization.ValidateCatalog(LocalizationCulture, json);
+            if (!validation.IsValid)
+            {
+                LocalizationImportStatus = Localization.FormatValidationErrors(validation);
+                Notifier.ShowWarning(toastName, LocalizationImportStatus, "Language catalog rejected");
+                return;
+            }
+
+            var imported = await Localization.ImportCatalogAsync(
+                validation.Culture,
+                json,
+                OverwriteLocalizationCatalog).ConfigureAwait(false);
+            LocalizationCatalogs = Localization.GetCatalogs();
+            var catalogDescriptor = LocalizationCatalogs.FirstOrDefault(item => string.Equals(item.Culture, imported.Culture, StringComparison.OrdinalIgnoreCase));
+            await FeaturePersistence.SaveLocalizationCatalogAsync(new SaveFeatureRecordRequest<LocalizationCatalogRegistration>
+            {
+                UserConfirmed = true,
+                Record = new LocalizationCatalogRegistration
+                {
+                    CultureName = imported.Culture,
+                    DisplayName = catalogDescriptor?.DisplayName ?? imported.Culture,
+                    CatalogPath = $"user-localization://{imported.Culture}",
+                    StringCount = imported.StringCount,
+                    MissingBaselineKeyCount = imported.MissingBaselineKeyCount,
+                    IsUserOverride = true,
+                    IsEnabled = true
+                }
+            }).ConfigureAwait(false);
+            LocalizationCulture = imported.Culture;
+            LocalizationImportStatus = $"Imported {imported.StringCount} strings for {imported.Culture}. {imported.MissingBaselineKeyCount} missing baseline keys use English fallback.";
+            Notifier.ShowSuccess(toastName, LocalizationImportStatus, "Language catalog imported");
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Localization catalog import failed; submitted text was omitted from logs.");
+            LocalizationImportStatus = exception.Message;
+            Notifier.ShowError(toastName, "The language catalog could not be imported. " + exception.Message, "Language catalog");
+        }
+        finally
+        {
+            IsLocalizationImporting = false;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>Activates the selected imported culture and reloads Install through the localization controller.</summary>
+    private void ActivateSelectedCulture()
+    {
+        var route = $"/api/localization/select?culture={Uri.EscapeDataString(LocalizationCulture)}&returnUrl={Uri.EscapeDataString("/install")}";
+        Nav.NavigateTo(route, forceLoad: true);
+    }
+
+    /// <summary>Opens the generated documentation route.</summary>
+    private void OpenDocumentation() => NavigateToRoute("/help");
+
+    /// <summary>Opens the editable Council-team catalog.</summary>
+    private void OpenCouncilTeams() => NavigateToRoute("/council-teams");
+
+    /// <summary>Opens one direct Council starter through a fresh full Chat navigation.</summary>
+    /// <param name="quickStart">Selected maintained quick-start descriptor.</param>
+    private void OpenQuickStartInChat(CouncilQuickStart quickStart)
+    {
+        ArgumentNullException.ThrowIfNull(quickStart);
+        try
+        {
+            Nav.NavigateTo(quickStart.Route, forceLoad: true);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Installer direct Council starter navigation failed for {StarterKey}.", quickStart.Key);
+            Notifier.ShowError(toastName, "The selected Council starter could not be opened.", "Council starter");
+        }
+    }
+
+    /// <summary>Navigates to one application-relative installer destination.</summary>
+    /// <param name="route">Application-relative route.</param>
+    private void NavigateToRoute(string route)
+    {
+        try
+        {
+            Nav.NavigateTo(route, forceLoad: false);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Installer navigation failed for route {Route}.", route);
+            Notifier.ShowError(toastName, "The requested LocalGPT page could not be opened.", "Navigation");
+        }
+    }
+
+    private async Task RefreshOllamaProcessStatusAsync()
+    {
+        try
+        {
+            IsOllamaProcessBusy = true;
+            OllamaProcessStatus = await OllamaProcesses.GetStatusAsync().ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not refresh Ollama process status; executable paths were omitted from logs.");
+            OllamaProcessStatus = OllamaProcessStatus with { Message = $"Ollama process status failed: {ex.Message}" };
+        }
+        finally
+        {
+            IsOllamaProcessBusy = false;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    private Task StartOllamaAsync() => RunOllamaProcessActionAsync(
+        cancellationToken => OllamaProcesses.StartAsync(cancellationToken),
+        "Start Ollama");
+
+    private Task StopOllamaAsync() => RunOllamaProcessActionAsync(
+        cancellationToken => OllamaProcesses.StopAsync(cancellationToken),
+        "Stop Ollama");
+
+    private Task RestartOllamaAsync() => RunOllamaProcessActionAsync(
+        cancellationToken => OllamaProcesses.RestartAsync(cancellationToken),
+        "Restart Ollama");
+
+    private async Task RunOllamaProcessActionAsync(
+        Func<CancellationToken, Task<OllamaProcessStatus>> action,
+        string operation)
+    {
+        try
+        {
+            IsOllamaProcessBusy = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            OllamaProcessStatus = await action(default).ConfigureAwait(false);
+            await Append($"{operation}: {OllamaProcessStatus.Message}").ConfigureAwait(false);
+
+            if (OllamaProcessStatus.IsRunning)
+                Notifier.ShowSuccess(toastName, OllamaProcessStatus.Message, operation);
+            else if (operation.StartsWith("Stop", StringComparison.OrdinalIgnoreCase))
+                Notifier.ShowSuccess(toastName, OllamaProcessStatus.Message, operation);
+            else
+                Notifier.ShowWarning(toastName, OllamaProcessStatus.Message, operation);
+
+            await RefreshConnectivityStatusAsync(showToast: false).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Ollama process operation {Operation} failed; executable paths were omitted from logs.", operation);
+            Notifier.ShowError(toastName, "The Ollama process operation failed. Review LocalGPT logs.", operation);
+        }
+        finally
+        {
+            IsOllamaProcessBusy = false;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    private async Task DiscoverLocalAiHosts()
+    {
+        try
+        {
+            IsDiscovering = true;
+            await Append("Scanning configured providers plus standard localhost discovery endpoints...").ConfigureAwait(false);
+
+            DiscoveredHosts = await Probe.DiscoverLocalHostsAsync(default).ConfigureAwait(false);
+
+            var reachable = DiscoveredHosts.Count(h => h.IsReachable);
+            var models = DiscoveredHosts.Sum(h => h.Models.Count);
+
+            await Append($"Discovery found {reachable} reachable host(s) and {models} model(s).").ConfigureAwait(false);
+            LastConnectivityCheck = DateTimeOffset.Now;
+            ConnectivityStatus = BuildConnectivityStatus(reachable, models);
+
+            if (reachable > 0)
+                Notifier.ShowSuccess(toastName, $"Found {reachable} reachable AI host(s).", "Discovery Complete");
+            else
+                Notifier.ShowWarning(toastName, "No configured or standard local AI hosts responded.", "Discovery Complete");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "DiscoverLocalAiHosts failed: {Message}", ex.Message);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+            await Append("(Discovery) " + ex.Message).ConfigureAwait(false);
+        }
+        finally
+        {
+            IsDiscovering = false;
+        }
+    }
+
+    private Task RefreshConnectivityStatusFromButton()
+    {
+        try
+        {
+            return RefreshConnectivityStatusAsync(showToast: true);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "DiscoverLocalAiHosts failed: {Message}", ex.Message);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+            return Task.CompletedTask;
+        }
+    }
+
+    private async Task RefreshConnectivityStatusAsync(bool showToast)
+    {
+        try
+        {
+            IsConnectivityChecking = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            DiscoveredHosts = await Probe.DiscoverLocalHostsAsync(default).ConfigureAwait(false);
+
+            var reachable = DiscoveredHosts.Count(host => host.IsReachable);
+            var models = DiscoveredHosts.Sum(host => host.Models.Count);
+            LastConnectivityCheck = DateTimeOffset.Now;
+            ConnectivityStatus = BuildConnectivityStatus(reachable, models);
+            await Append($"Connectivity refresh: {ConnectivityStatus}").ConfigureAwait(false);
+
+            if (!showToast)
+                return;
+
+            if (reachable > 0)
+                Notifier.ShowSuccess(toastName, ConnectivityStatus, "Connectivity OK");
+            else
+                Notifier.ShowWarning(toastName, ConnectivityStatus, "Connectivity Warning");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "RefreshConnectivityStatusAsync failed: {Message}", ex.Message);
+            LastConnectivityCheck = DateTimeOffset.Now;
+            ConnectivityStatus = "Connectivity check failed: " + ex.Message;
+            if (showToast)
+                Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+            await Append("(Connectivity) " + ex.Message).ConfigureAwait(false);
+        }
+        finally
+        {
+            IsConnectivityChecking = false;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    private string BuildConnectivityStatus(int reachable, int models)
+    {
+        try
+        {
+            if (reachable <= 0)
+                return "No configured or standard local Ollama / OpenAI-compatible host is reachable. Verify the endpoint, provider bind address and firewall, then refresh.";
+
+            var hostSummaries = DiscoveredHosts
+                .Where(host => host.IsReachable)
+                .Select(host => $"{host.Provider} at {host.Endpoint} ({host.Models.Count} model(s))");
+            return $"Reachable: {string.Join("; ", hostSummaries)}. Total detected models: {models}.";
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+            return string.Empty;
+        }
+    }
+
+    private ProviderModelReference ToProviderModel(LocalAiHostDiscoveryResult host, LocalAiModelInfo model)
+    {
+        var isOllama = host.Provider.Equals("Ollama", StringComparison.OrdinalIgnoreCase);
+        var identity = new ProviderModelIdentity();
+        var endpoint = isOllama
+            ? identity.NormalizeEndpoint(host.Endpoint)
+            : identity.NormalizeOpenAiCompatibleEndpoint(host.Endpoint);
+        return new ProviderModelReference
+        {
+            ProviderKind = isOllama ? ProviderModelKinds.Ollama : ProviderModelKinds.OpenAICompatible,
+            ProviderName = host.Provider,
+            Endpoint = endpoint,
+            ModelName = model.Name,
+            IsLocal = Uri.TryCreate(endpoint, UriKind.Absolute, out var endpointUri) &&
+                (endpointUri.IsLoopback || endpointUri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase)),
+            IsReachable = host.IsReachable,
+            IsConfigured = isOllama
+                ? IsOllamaModelConfigured(endpoint, model.Name)
+                : IsOpenAiCompatibleModelConfigured(endpoint, model.Name),
+            IsLoaded = model.IsLoaded,
+            SupportsBenchmark = host.IsReachable,
+            Details = host.Status
+        };
+    }
+
+    private Task OnInstallBenchmarkAppliedAsync(ProviderModelBenchmarkAppliedEvent applied)
+    {
+        ConnectivityStatus = $"Benchmark recommendation applied for {applied.Model.SelectionKey} as preset {applied.Preset.Name}. Save provider settings separately only when you changed the active setup model.";
+        Notifier.ShowSuccess(toastName, ConnectivityStatus, "Benchmark settings applied");
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ApplyDiscoveredModel(LocalAiHostDiscoveryResult host, LocalAiModelInfo model)
+    {
+        try
+        {
+            if (string.Equals(host.Provider, "Ollama", StringComparison.OrdinalIgnoreCase))
+            {
+                var binding = UpsertOllamaHostBinding(host.Endpoint, model.Name);
+                await Append($"Selected Ollama model {model.Name} at {host.Endpoint} as {(binding.IsPrimary ? "the primary" : "an additional")} endpoint-qualified host binding.").ConfigureAwait(false);
+            }
+            else
+            {
+                var binding = UpsertOpenAiCompatibleHostBinding(host.Provider, host.Endpoint, model.Name);
+                await Append($"Selected {host.Provider} model {model.Name} at {host.Endpoint} as {(binding.IsPrimary ? "the primary" : "an additional")} endpoint-qualified host binding.").ConfigureAwait(false);
+            }
+
+            Notifier.ShowSuccess(toastName, $"{host.Provider}: {model.Name}", "Model Selected");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "ApplyDiscoveredModel failed: {Message}", ex.Message);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+            await Append("(Selection) " + ex.Message).ConfigureAwait(false);
+        }
+    }
+
+    private async Task UseOllamaGptOss20b()
+    {
+        try
+        {
+            var binding = UpsertOllamaHostBinding("http://localhost:11434", "gpt-oss:20b");
+            await Append($"Selected Ollama gpt-oss:20b at http://localhost:11434 as {(binding.IsPrimary ? "the primary" : "an additional")} endpoint-qualified host binding.").ConfigureAwait(false);
+            Notifier.ShowSuccess(toastName, "Ollama gpt-oss:20b selected.", "Model Selected");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UseOllamaGptOss20b failed: {Message}", ex.Message);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+    }
+
+    private void AddOpenAiCompatibleHost()
+    {
+        Model.ChatGPTLocalCores ??= new List<ChatGPTLocalCoreOptions>();
+        Model.ChatGPTLocalCores.Add(new ChatGPTLocalCoreOptions
+        {
+            Endpoint = "http://127.0.0.1:1234/v1",
+            ApiKey = "local-no-key",
+            ModelName = string.Empty,
+            AutoStartServer = false
+        });
+    }
+
+    private (bool IsPrimary, OllamaCoreOptions Binding) UpsertOllamaHostBinding(string endpoint, string modelName)
+    {
+        try
+        {
+            var identity = new ProviderModelIdentity();
+            var normalizedEndpoint = identity.NormalizeEndpoint(endpoint);
+            RemovedOllamaEndpoints.Remove(normalizedEndpoint);
+            Model.OllamaCores ??= new List<OllamaCoreOptions>();
+
+            if (string.IsNullOrWhiteSpace(Model.OllamaCore?.Uri)
+                || identity.NormalizeEndpoint(Model.OllamaCore.Uri).Equals(normalizedEndpoint, StringComparison.OrdinalIgnoreCase))
+            {
+                Model.OllamaCore ??= new OllamaCoreOptions();
+                Model.OllamaCore.Uri = normalizedEndpoint;
+                Model.OllamaCore.ModelName = modelName.Trim();
+                return (true, Model.OllamaCore);
+            }
+
+            var existing = Model.OllamaCores.FirstOrDefault(item =>
+                !string.IsNullOrWhiteSpace(item.Uri)
+                && identity.NormalizeEndpoint(item.Uri).Equals(normalizedEndpoint, StringComparison.OrdinalIgnoreCase));
+            if (existing is null)
+            {
+                existing = new OllamaCoreOptions
+                {
+                    Uri = normalizedEndpoint,
+                    ModelName = modelName.Trim(),
+                    ResponseProtocol = ChatResponseProtocol.Auto
+                };
+                Model.OllamaCores.Add(existing);
+            }
+            else
+            {
+                existing.Uri = normalizedEndpoint;
+                existing.ModelName = modelName.Trim();
+            }
+
+            return (false, existing);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not upsert the endpoint-qualified Ollama host binding for {EndpointHost}.", GetEndpointHostLabel(endpoint));
+            throw;
+        }
+    }
+
+    private (bool IsPrimary, ChatGPTLocalCoreOptions Binding) UpsertOpenAiCompatibleHostBinding(string providerName, string endpoint, string modelName)
+    {
+        try
+        {
+            var identity = new ProviderModelIdentity();
+            var normalizedEndpoint = identity.NormalizeOpenAiCompatibleEndpoint(endpoint);
+            Model.ChatGPTLocalCores ??= new List<ChatGPTLocalCoreOptions>();
+
+            if (string.IsNullOrWhiteSpace(Model.ChatGPTLocalCore?.Endpoint)
+                || identity.NormalizeOpenAiCompatibleEndpoint(Model.ChatGPTLocalCore.Endpoint).Equals(normalizedEndpoint, StringComparison.OrdinalIgnoreCase))
+            {
+                Model.ChatGPTLocalCore ??= new ChatGPTLocalCoreOptions();
+                Model.ChatGPTLocalCore.Endpoint = normalizedEndpoint;
+                Model.ChatGPTLocalCore.ApiKey = string.IsNullOrWhiteSpace(Model.ChatGPTLocalCore.ApiKey)
+                    ? (string.Equals(providerName, "LM Studio", StringComparison.OrdinalIgnoreCase) ? "lm-studio" : "local-key")
+                    : Model.ChatGPTLocalCore.ApiKey;
+                Model.ChatGPTLocalCore.ModelName = modelName.Trim();
+                return (true, Model.ChatGPTLocalCore);
+            }
+
+            var existing = Model.ChatGPTLocalCores.FirstOrDefault(item =>
+                !string.IsNullOrWhiteSpace(item.Endpoint)
+                && identity.NormalizeOpenAiCompatibleEndpoint(item.Endpoint).Equals(normalizedEndpoint, StringComparison.OrdinalIgnoreCase));
+            if (existing is null)
+            {
+                existing = new ChatGPTLocalCoreOptions
+                {
+                    Endpoint = normalizedEndpoint,
+                    ApiKey = string.Equals(providerName, "LM Studio", StringComparison.OrdinalIgnoreCase) ? "lm-studio" : "local-key",
+                    ModelName = modelName.Trim(),
+                    AutoStartServer = false
+                };
+                Model.ChatGPTLocalCores.Add(existing);
+            }
+            else
+            {
+                existing.Endpoint = normalizedEndpoint;
+                existing.ApiKey = string.IsNullOrWhiteSpace(existing.ApiKey)
+                    ? (string.Equals(providerName, "LM Studio", StringComparison.OrdinalIgnoreCase) ? "lm-studio" : "local-key")
+                    : existing.ApiKey;
+                existing.ModelName = modelName.Trim();
+            }
+
+            return (false, existing);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not upsert the endpoint-qualified OpenAI-compatible host binding for {EndpointHost}.", GetEndpointHostLabel(endpoint));
+            throw;
+        }
+    }
+
+    private bool IsOllamaModelConfigured(string normalizedEndpoint, string modelName)
+    {
+        try
+        {
+            var identity = new ProviderModelIdentity();
+            bool Matches(OllamaCoreOptions? option) => option is not null
+                && !string.IsNullOrWhiteSpace(option.Uri)
+                && !string.IsNullOrWhiteSpace(option.ModelName)
+                && identity.NormalizeEndpoint(option.Uri).Equals(normalizedEndpoint, StringComparison.OrdinalIgnoreCase)
+                && option.ModelName.Equals(modelName, StringComparison.OrdinalIgnoreCase);
+            return Matches(Model.OllamaCore) || (Model.OllamaCores?.Any(Matches) ?? false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not evaluate the configured Ollama model identity.");
+            return false;
+        }
+    }
+
+    private bool IsOpenAiCompatibleModelConfigured(string normalizedEndpoint, string modelName)
+    {
+        try
+        {
+            var identity = new ProviderModelIdentity();
+            bool Matches(ChatGPTLocalCoreOptions? option) => option is not null
+                && !string.IsNullOrWhiteSpace(option.Endpoint)
+                && !string.IsNullOrWhiteSpace(option.ModelName)
+                && identity.NormalizeOpenAiCompatibleEndpoint(option.Endpoint).Equals(normalizedEndpoint, StringComparison.OrdinalIgnoreCase)
+                && option.ModelName.Equals(modelName, StringComparison.OrdinalIgnoreCase);
+            return Matches(Model.ChatGPTLocalCore) || (Model.ChatGPTLocalCores?.Any(Matches) ?? false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not evaluate the configured OpenAI-compatible model identity.");
+            return false;
+        }
+    }
+
+    private async Task MakeConfiguredProviderPrimaryAsync(ConfiguredProviderHostView configured)
+    {
+        try
+        {
+            ArgumentNullException.ThrowIfNull(configured);
+            if (configured.IsPrimary)
+                return;
+
+            if (configured.OllamaHost is not null)
+            {
+                var selected = configured.OllamaHost;
+                ExplicitOllamaPrimaryEndpoint = new ProviderModelIdentity().NormalizeEndpoint(selected.Uri);
+                if (!string.IsNullOrWhiteSpace(ExplicitOllamaPrimaryEndpoint))
+                    RemovedOllamaEndpoints.Remove(ExplicitOllamaPrimaryEndpoint);
+                var previousPrimary = Model.OllamaCore;
+                Model.OllamaCores.Remove(selected);
+                Model.OllamaCore = selected;
+                if (previousPrimary is not null && !string.IsNullOrWhiteSpace(previousPrimary.Uri))
+                    AddDistinctOllamaAdditionalBinding(previousPrimary);
+            }
+            else if (configured.OpenAiHost is not null)
+            {
+                var selected = configured.OpenAiHost;
+                var previousPrimary = Model.ChatGPTLocalCore;
+                Model.ChatGPTLocalCores.Remove(selected);
+                Model.ChatGPTLocalCore = selected;
+                if (previousPrimary is not null && !string.IsNullOrWhiteSpace(previousPrimary.Endpoint))
+                    AddDistinctOpenAiAdditionalBinding(previousPrimary);
+            }
+            else
+            {
+                throw new InvalidOperationException("Only local Ollama and OpenAI-compatible host bindings can be promoted to primary.");
+            }
+
+            await Save().ConfigureAwait(false);
+            Notifier.ShowSuccess(toastName, configured.Endpoint, "Primary provider updated");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not promote configured provider {ProviderKey} to primary.", configured.Key);
+            Notifier.ShowError(toastName, "The provider could not be promoted. See local application logs for details.", "Primary provider failed");
+        }
+    }
+
+    private void AddDistinctOllamaAdditionalBinding(OllamaCoreOptions option)
+    {
+        try
+        {
+            var identity = new ProviderModelIdentity();
+            var endpoint = identity.NormalizeEndpoint(option.Uri);
+            Model.OllamaCores ??= new List<OllamaCoreOptions>();
+            if (Model.OllamaCores.Any(item =>
+                identity.NormalizeEndpoint(item.Uri).Equals(endpoint, StringComparison.OrdinalIgnoreCase)
+                && item.ModelName.Equals(option.ModelName, StringComparison.OrdinalIgnoreCase)))
+                return;
+            Model.OllamaCores.Add(option);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not preserve the previous primary Ollama binding as an additional endpoint-qualified host.");
+            throw;
+        }
+    }
+
+    private void AddDistinctOpenAiAdditionalBinding(ChatGPTLocalCoreOptions option)
+    {
+        try
+        {
+            var identity = new ProviderModelIdentity();
+            var endpoint = identity.NormalizeOpenAiCompatibleEndpoint(option.Endpoint);
+            Model.ChatGPTLocalCores ??= new List<ChatGPTLocalCoreOptions>();
+            if (Model.ChatGPTLocalCores.Any(item =>
+                identity.NormalizeOpenAiCompatibleEndpoint(item.Endpoint).Equals(endpoint, StringComparison.OrdinalIgnoreCase)
+                && item.ModelName.Equals(option.ModelName, StringComparison.OrdinalIgnoreCase)))
+                return;
+            Model.ChatGPTLocalCores.Add(option);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not preserve the previous primary OpenAI-compatible binding as an additional endpoint-qualified host.");
+            throw;
+        }
+    }
+
+    private static string GetEndpointHostLabel(string? endpoint)
+    {
+        if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var uri))
+            return string.IsNullOrWhiteSpace(endpoint) ? "unknown" : "invalid-endpoint";
+        return $"{uri.Host}:{uri.Port}";
+    }
+
+    private async Task RemoveConfiguredProviderHostAsync(ConfiguredProviderHostView configured)
+    {
+        try
+        {
+            ArgumentNullException.ThrowIfNull(configured);
+
+            if (string.Equals(configured.Key, "openai-cloud", StringComparison.OrdinalIgnoreCase))
+            {
+                Model.OpenAICore = new OpenAICompatOptions
+                {
+                    Endpoint = string.Empty,
+                    ApiKey = string.Empty,
+                    ModelName = string.Empty
+                };
+            }
+            else if (string.Equals(configured.Key, "azure-openai", StringComparison.OrdinalIgnoreCase))
+            {
+                Model.OpenAIServiceCore = new OpenAIServiceCoreOptions
+                {
+                    Endpoint = string.Empty,
+                    Key = string.Empty,
+                    DeploymentName = string.Empty
+                };
+            }
+            else if (configured.OpenAiHost is not null)
+            {
+                if (configured.IsPrimary)
+                {
+                    Model.ChatGPTLocalCore = new ChatGPTLocalCoreOptions
+                    {
+                        Endpoint = string.Empty,
+                        ApiKey = string.Empty,
+                        ModelName = string.Empty,
+                        AutoStartServer = false
+                    };
+                }
+                else
+                {
+                    Model.ChatGPTLocalCores.Remove(configured.OpenAiHost);
+                }
+            }
+            else if (configured.OllamaHost is not null)
+            {
+                var removedEndpoint = new ProviderModelIdentity().NormalizeEndpoint(configured.OllamaHost.Uri);
+                if (!string.IsNullOrWhiteSpace(removedEndpoint))
+                    RemovedOllamaEndpoints.Add(removedEndpoint);
+                if (string.Equals(ExplicitOllamaPrimaryEndpoint, removedEndpoint, StringComparison.OrdinalIgnoreCase))
+                    ExplicitOllamaPrimaryEndpoint = null;
+
+                if (configured.IsPrimary)
+                {
+                    Model.OllamaCore = new OllamaCoreOptions
+                    {
+                        Uri = string.Empty,
+                        ModelName = string.Empty
+                    };
+                }
+                else
+                {
+                    Model.OllamaCores.Remove(configured.OllamaHost);
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("The selected configured provider has no removable configuration binding.");
+            }
+
+            await Save().ConfigureAwait(false);
+            Notifier.ShowSuccess(toastName, configured.Provider, "Saved provider removed");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "RemoveConfiguredProviderHostAsync failed for configured provider {ProviderKey}.", configured.Key);
+            Notifier.ShowError(toastName, "The provider could not be removed. See local application logs for details.", "Remove provider failed");
+        }
+    }
+
+    private async Task RemoveOpenAiCompatibleHostAsync(ChatGPTLocalCoreOptions host)
+    {
+        Model.ChatGPTLocalCores?.Remove(host);
+        await Save().ConfigureAwait(false);
+    }
+
+    private void AddOllamaModel()
+    {
+        try
+        {
+            Model.OllamaCores.Add(new OllamaCoreOptions
+            {
+                Uri = string.Empty,
+                ModelName = string.Empty
+            });
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "AddOllamaModel failed: {Message}", ex.Message);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+    }
+
+    private async Task RemoveOllamaModelAsync(OllamaCoreOptions ollama)
+    {
+        try
+        {
+            var identity = new ProviderModelIdentity();
+            var removedEndpoint = identity.NormalizeEndpoint(ollama.Uri);
+            var primaryEndpoint = identity.NormalizeEndpoint(Model.OllamaCore?.Uri);
+            if (!string.IsNullOrWhiteSpace(removedEndpoint)
+                && !removedEndpoint.Equals(primaryEndpoint, StringComparison.OrdinalIgnoreCase))
+                RemovedOllamaEndpoints.Add(removedEndpoint);
+            Model.OllamaCores.Remove(ollama);
+            await Save().ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "RemoveOllamaModelAsync failed: {Message}", ex.Message);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+    }
+
+    private async Task TestOpenAiCompatibleHostAsync(ChatGPTLocalCoreOptions host)
+    {
+        try
+        {
+            var (ok, msg) = await Probe.TestLocalOpenAICompatAsync(host, default).ConfigureAwait(false);
+            await Append((ok ? "OK" : "FAIL") + $" OpenAI-compatible {host.Endpoint}: " + msg).ConfigureAwait(false);
+            if (ok) Notifier.ShowSuccess(toastName, host.Endpoint, "Provider reachable");
+            else Notifier.ShowWarning(toastName, msg, "Provider test failed");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "TestOpenAiCompatibleHostAsync failed for provider endpoint host.");
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+    }
+
+    private async Task TestOllamaHostAsync(OllamaCoreOptions host)
+    {
+        try
+        {
+            var (ok, msg) = await Probe.TestOllamaAsync(host, default).ConfigureAwait(false);
+            await Append((ok ? "OK" : "FAIL") + $" Ollama {host.Uri}: " + msg).ConfigureAwait(false);
+            if (ok) Notifier.ShowSuccess(toastName, host.Uri, "Provider reachable");
+            else Notifier.ShowWarning(toastName, msg, "Provider test failed");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "TestOllamaHostAsync failed for provider endpoint host.");
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+    }
+
+    private bool IsConfiguredHost(LocalAiHostDiscoveryResult host)
+    {
+        try
+        {
+            var identity = new ProviderModelIdentity();
+            if (string.Equals(host.Provider, "Ollama", StringComparison.OrdinalIgnoreCase))
+            {
+                var endpoint = identity.NormalizeEndpoint(host.Endpoint);
+                return string.Equals(identity.NormalizeEndpoint(Model.OllamaCore?.Uri), endpoint, StringComparison.OrdinalIgnoreCase)
+                    || Model.OllamaCores.Any(item => string.Equals(identity.NormalizeEndpoint(item.Uri), endpoint, StringComparison.OrdinalIgnoreCase));
+            }
+
+            var openAiEndpoint = identity.NormalizeOpenAiCompatibleEndpoint(host.Endpoint);
+            return string.Equals(identity.NormalizeOpenAiCompatibleEndpoint(Model.ChatGPTLocalCore?.Endpoint), openAiEndpoint, StringComparison.OrdinalIgnoreCase)
+                || Model.ChatGPTLocalCores.Any(item => string.Equals(identity.NormalizeOpenAiCompatibleEndpoint(item.Endpoint), openAiEndpoint, StringComparison.OrdinalIgnoreCase));
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not compare discovered provider host {EndpointHost} with the configured endpoint registry.", GetEndpointHostLabel(host.Endpoint));
+            return false;
+        }
+    }
+
+    private async Task RemoveConfiguredHostAsync(LocalAiHostDiscoveryResult host)
+    {
+        try
+        {
+            var identity = new ProviderModelIdentity();
+            if (string.Equals(host.Provider, "Ollama", StringComparison.OrdinalIgnoreCase))
+            {
+                var endpoint = identity.NormalizeEndpoint(host.Endpoint);
+                if (!string.IsNullOrWhiteSpace(endpoint))
+                    RemovedOllamaEndpoints.Add(endpoint);
+                if (string.Equals(ExplicitOllamaPrimaryEndpoint, endpoint, StringComparison.OrdinalIgnoreCase))
+                    ExplicitOllamaPrimaryEndpoint = null;
+                if (string.Equals(identity.NormalizeEndpoint(Model.OllamaCore?.Uri), endpoint, StringComparison.OrdinalIgnoreCase))
+                    Model.OllamaCore = new OllamaCoreOptions { Uri = string.Empty, ModelName = string.Empty };
+                Model.OllamaCores.RemoveAll(item => string.Equals(identity.NormalizeEndpoint(item.Uri), endpoint, StringComparison.OrdinalIgnoreCase));
+            }
+            else
+            {
+                var endpoint = identity.NormalizeOpenAiCompatibleEndpoint(host.Endpoint);
+                if (string.Equals(identity.NormalizeOpenAiCompatibleEndpoint(Model.ChatGPTLocalCore?.Endpoint), endpoint, StringComparison.OrdinalIgnoreCase))
+                    Model.ChatGPTLocalCore = new ChatGPTLocalCoreOptions { Endpoint = string.Empty, ApiKey = string.Empty, ModelName = string.Empty, AutoStartServer = false };
+                Model.ChatGPTLocalCores.RemoveAll(item => string.Equals(identity.NormalizeOpenAiCompatibleEndpoint(item.Endpoint), endpoint, StringComparison.OrdinalIgnoreCase));
+            }
+
+            await Save().ConfigureAwait(false);
+            Notifier.ShowSuccess(toastName, host.Endpoint, "Saved provider removed");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "RemoveConfiguredHostAsync failed for provider endpoint host.");
+            Notifier.ShowError(toastName, "The provider could not be removed. See local application logs for details.", "Remove provider failed");
+        }
+    }
+
+    private static string NormalizeProviderEndpoint(string? endpoint)
+        => string.IsNullOrWhiteSpace(endpoint)
+            ? string.Empty
+            : new ProviderModelIdentity().NormalizeEndpoint(endpoint);
+
+    private async Task TestOpenAI()
+    {
+        try
+        {
+            var (ok, msg) = await Probe.TestOpenAIAsync(Model.OpenAICore!, default).ConfigureAwait(false);
+            await Append((ok ? "OK" : "FAIL") + " OpenAI: " + msg).ConfigureAwait(false);
+            if (ok) Notifier.ShowSuccess(toastName, "OpenAI reachable.", "OpenAI Test OK");
+            else    Notifier.ShowWarning(toastName, msg, "OpenAI Test Failed");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "TestOpenAI failed: {Message}", ex.Message);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+            await Append("(OpenAI Test) " + ex.Message).ConfigureAwait(false);
+        }
+    }
+
+    private async Task TestAzure()
+    {
+        try
+        {
+            var (ok, msg) = await Probe.TestAzureAsync(Model.OpenAIServiceCore!, default).ConfigureAwait(false);
+            await Append((ok ? "OK" : "FAIL") + " Azure: " + msg).ConfigureAwait(false);
+            if (ok) Notifier.ShowSuccess(toastName, "Azure endpoint reachable.", "Azure Test OK");
+            else    Notifier.ShowWarning(toastName, msg, "Azure Test Failed");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "TestAzure failed: {Message}", ex.Message);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+            await Append("(Azure Test) " + ex.Message).ConfigureAwait(false);
+        }
+    }
+
+    private async Task Save()
+    {
+        var persistedSuccessfully = false;
+        try
+        {
+            IsSaving = true;
+            NormalizeLocalEndpoint();
+
+            var root = Opts.CurrentValue;
+            ApplyModelsToConfiguration(root);
+            await Writer.SaveAsync(root).ConfigureAwait(false);
+
+            // Refresh connectivity for status only. Discovery must never rewrite provider
+            // configuration; selecting a discovered model remains an explicit user action.
+            await RefreshConnectivityStatusAsync(showToast: false).ConfigureAwait(false);
+            NormalizeLocalEndpoint();
+            ApplyModelsToConfiguration(root);
+            await Writer.SaveAsync(root).ConfigureAwait(false);
+            persistedSuccessfully = true;
+
+            await Append("Saved durable provider and network endpoint settings. A changed network listener becomes active after restart.").ConfigureAwait(false);
+            Notifier.ShowSuccess(toastName, "Provider/network settings saved. Restart LocalGPT to apply listener changes.", "Saved");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Save failed: {Message}", ex.Message);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+            await Append("(Save) " + ex.Message).ConfigureAwait(false);
+        }
+        finally
+        {
+            if (persistedSuccessfully)
+            {
+                RemovedOllamaEndpoints.Clear();
+                ExplicitOllamaPrimaryEndpoint = null;
+            }
+            IsSaving = false;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    private void ApplyModelsToConfiguration(LocalGPT.BusinessObjects.ConfigurationRoot root)
+    {
+        root.AICore ??= new AICoreOptions();
+        ProviderConfigurationRegistry.ApplyDetachedDraft(
+            root.AICore,
+            Model,
+            RemovedOllamaEndpoints,
+            ExplicitOllamaPrimaryEndpoint);
+        Model = ProviderConfigurationRegistry.CreateDetachedDraft(root.AICore);
+        root.LoggingCore = LoggingModel;
+        root.LoggingCore.DatabaseCore = DatabaseLoggerModel;
+        root.LocalGPT ??= new LocalGptHostOptions();
+        root.LocalGPT.RemoteEndpoint = new RemoteWebEndpointOptions
+        {
+            Enabled = NetworkModel.Enabled,
+            Address = string.IsNullOrWhiteSpace(NetworkModel.Address) ? "0.0.0.0" : NetworkModel.Address.Trim(),
+            Port = NetworkModel.Port,
+            CertificatePath = NetworkModel.CertificatePath?.Trim() ?? string.Empty,
+            CertificatePassword = NetworkModel.CertificatePassword ?? string.Empty
+        };
+    }
+
+    private async Task CreateNetworkCertificateAsync()
+    {
+        try
+        {
+            IsCertificateBusy = true;
+            CertificateStatus = "Creating certificate...";
+            var result = await NetworkCertificates.CreateAsync(CertificateRequest).ConfigureAwait(false);
+            CertificateStatus = $"Created {result.Thumbprint} at {result.PfxPath}; {result.StoreDescription}; valid until {result.NotAfter:O}.";
+            if (UseCreatedCertificateForRemoteEndpoint)
+            {
+                NetworkModel.CertificatePath = result.PfxPath;
+                NetworkModel.CertificatePassword = CertificateRequest.Password ?? string.Empty;
+                if (NetworkModel.Port <= 0) NetworkModel.Port = 5443;
+                NetworkModel.Enabled = true;
+            }
+            await Append(CertificateStatus).ConfigureAwait(false);
+            Notifier.ShowSuccess(toastName, "Certificate created. Save setup settings and restart LocalGPT to activate HTTPS.", "TLS certificate ready");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Certificate creation failed: {Message}", ex.Message);
+            CertificateStatus = ex.Message;
+            Notifier.ShowError(toastName, "Certificate creation failed. See local application logs for details.", "TLS certificate failed");
+            await Append("(Certificate) " + ex.Message).ConfigureAwait(false);
+        }
+        finally
+        {
+            IsCertificateBusy = false;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    private void GoChat()
+    {
+        try
+        {
+            Nav.NavigateTo("/Chat", forceLoad: false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Navigation to /Chat failed: {Message}", ex.Message);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+            _ = Append("(Nav) " + ex.Message);
+        }
+    }
+}

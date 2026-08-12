@@ -1,0 +1,16 @@
+LocalGPT project-owned source is licensed under Apache License 2.0.
+
+Included or referenced third-party software remains under its own terms, including:
+
+- Bootstrap (MIT)
+- Open Iconic icons (MIT) and fonts (SIL Open Font License)
+- Markdig (BSD-2-Clause)
+- MessagePack for C# (MIT)
+- OllamaSharp (MIT)
+- Microsoft .NET/ASP.NET Core/Entity Framework Core/Microsoft.Extensions.AI packages
+- SQLite/SQLitePCLRaw components under their applicable upstream terms
+- proprietary DevExpress packages and assets requiring a valid DevExpress license
+
+No DevExpress license, private package-feed credential, generated customer-linked runtime-license key, or proprietary DevExpress binary is granted by this repository.
+
+See the repository-root `THIRD-PARTY-NOTICES.md` and `docs/architecture/frontend-and-themes.md`.

@@ -1,4 +1,4 @@
-# PublisherStudio current documentation delivery contract
+# LocalGPT current documentation delivery contract
 
 Release and GitHub Pages packaging must use the documentation generated for the exact application version being built.
 

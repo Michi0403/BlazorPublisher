@@ -5,7 +5,7 @@ powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "%~dp0Build-
 set "EXITCODE=%ERRORLEVEL%"
 if not "%EXITCODE%"=="0" (
   echo.
-  echo PublisherStudio development build failed with exit code %EXITCODE%.
+  echo LocalGPT development build failed with exit code %EXITCODE%.
   echo Review the errors above. This window will remain open.
   pause
 )

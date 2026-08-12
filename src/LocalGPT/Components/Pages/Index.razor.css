@@ -1,0 +1,152 @@
+::deep .welcome-gridlayout {
+    margin: auto;
+    width: auto;
+    height: auto;
+}
+
+::deep .welcome-gridlayout .dxbl-gridlayout-root {
+    align-content: center;
+    justify-content: center;
+}
+
+::deep .title {
+    text-align: center;
+}
+
+::deep .welcome-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+}
+
+::deep .welcome-card {
+    width: 26.25rem;
+    height: 15rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0px 4px 6px -1px rgba(var(--localgpt-body-color-rgb, 33, 37, 41), 0.1), 0px 2px 4px -2px rgba(var(--localgpt-body-color-rgb, 33, 37, 41), 0.1);
+    transition: box-shadow 0.2s;
+    border-radius: 1rem;
+    color: var(--bs-link-color, var(--dxds-primary-90));
+    gap: 1.5rem;
+    text-decoration: none;
+    position: relative;
+}
+
+::deep .welcome-card:hover {
+    box-shadow: 0px 20px 25px -5px rgba(var(--localgpt-body-color-rgb, 33, 37, 41), 0.1), 0px 8px 10px -6px rgba(var(--localgpt-body-color-rgb, 33, 37, 41), 0.1);
+}
+
+::deep .welcome-card .welcome-card-img {
+    width: 6.5rem;
+    height: 6.5rem;
+}
+
+::deep .welcome-card .welcome-card-text {
+    font-size: 1.75rem;
+    font-weight: 600;
+    letter-spacing: 0em;
+    text-align: center;
+    text-decoration: unset;
+}
+
+::deep .welcome-card .welcome-card-back {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bs-body-color, var(--dxds-color-content-neutral-default-rest));
+    opacity: 0.05;
+    border-radius: 1rem;
+    z-index: -2;
+}
+.first-run-onboarding {
+    margin: 1.25rem;
+    padding: clamp(1rem, 2vw, 2rem);
+    border: 1px solid color-mix(in srgb, var(--localgpt-accent, #b020f0) 45%, transparent);
+    border-radius: 1rem;
+    background: color-mix(in srgb, var(--localgpt-panel, #303030) 92%, transparent);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, .2);
+}
+
+.first-run-onboarding > header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.first-run-kicker {
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    opacity: .75;
+}
+
+.first-run-onboarding h1 { margin: .25rem 0 .5rem; }
+.first-run-onboarding h2 { font-size: 1.05rem; margin: 0 0 .75rem; }
+
+.first-run-status-grid,
+.first-run-section-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.first-run-status-card,
+.first-run-profile,
+.first-run-quickstart {
+    border: 1px solid rgba(255,255,255,.13);
+    border-radius: .75rem;
+    background: rgba(0,0,0,.16);
+}
+
+.first-run-status-card {
+    display: grid;
+    gap: .35rem;
+    padding: 1rem;
+}
+
+.first-run-status-card.approved { border-left: .35rem solid #4ecb71; }
+.first-run-status-card.warning { border-left: .35rem solid #f0b441; }
+.first-run-status-card a,
+.first-run-quickstart { color: var(--localgpt-link, #dc7cff); }
+
+.first-run-warnings { display: grid; gap: .25rem; margin-top: .75rem; color: #f0c36a; }
+.first-run-profile { padding: .75rem 1rem; margin-bottom: .65rem; }
+.first-run-profile summary { cursor: pointer; font-weight: 700; }
+.first-run-profile code,
+.first-run-profile small { display: block; margin-top: .5rem; overflow-wrap: anywhere; }
+
+.first-run-quickstarts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: .75rem; }
+.first-run-quickstart { display: grid; gap: .35rem; padding: .9rem; text-decoration: none; }
+.first-run-quickstart span, .first-run-quickstart small { color: var(--bs-body-color, #eee); }
+.first-run-loading { margin: 1.25rem; padding: 1rem; }
+
+@media (max-width: 720px) {
+    .first-run-onboarding { margin: .75rem; }
+}
+
+
+/* v2.4.2: first-run guidance follows the active shell theme instead of forcing a dark island. */
+.first-run-onboarding {
+    color: var(--bs-body-color);
+    background: var(--bs-body-bg);
+    border-color: color-mix(in srgb, var(--bs-primary) 35%, var(--bs-border-color));
+    box-shadow: 0 .65rem 2rem color-mix(in srgb, var(--bs-body-color) 12%, transparent);
+}
+.first-run-status-card,
+.first-run-profile,
+.first-run-quickstart {
+    color: var(--bs-body-color);
+    background: var(--bs-tertiary-bg);
+    border-color: var(--bs-border-color);
+}
+.first-run-quickstart span, .first-run-quickstart small { color: var(--bs-secondary-color, var(--bs-body-color)); }
+.first-run-warnings { color: var(--bs-warning-text-emphasis, #997404); }

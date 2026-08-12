@@ -1,0 +1,144 @@
+@inherits LayoutComponentBase
+@implements IDisposable
+@using LocalGPT.Services;
+@inject NavigationUrlService NavigationUrls
+@inject NavigationManager NavigationManager
+@namespace LocalGPT.Components.Layout
+@inject ILogger<MainLayout> Logger
+@inject INotificationService Notifier
+@inject IComponentActivityService ComponentActivity
+@inject LocalGPT.Services.Localization.ILocalGptLocalizationService Localization
+
+<div class="page" data-testid="main-layout">
+    <Drawer DrawerHeader="drawerHeader"
+            DrawerFooter="drawerFooter"
+            CssClass="@(IsChatPage ? "navigation-drawer chat-navigation-drawer" : "navigation-drawer")">
+        <DrawerBody>
+            <div class="w-100">
+                <MenuIsland></MenuIsland>
+                <NavMenu>
+                </NavMenu>
+            </div>
+        </DrawerBody>
+        <DrawerTarget>
+    
+            <article id="current-main-window" class="p-4 full-height @(IsChatPage ? "chat-main-window" : string.Empty)" data-testid="main-content">
+                <div class="nav-buttons-container drawer-target">
+
+                    <NavLink data-enhance-nav="false" href="@NavigationUrls.GetUrl(new Uri(NavigationManager.Uri).LocalPath, !ToggledSidebar)">
+                        <DxButton RenderStyle="@ButtonRenderStyle.Dark" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="menu-button" IconCssClass="icon icon-menu"></DxButton>
+                    </NavLink>
+                    @if (new Uri(NavigationManager.Uri).LocalPath != "/")
+                    {
+                        <NavLink data-enhance-nav="false" href="@NavigationUrls.GetUrl("/", ToggledSidebar)" class="button-link hidden">
+                            <DxButton RenderStyle="@ButtonRenderStyle.Dark" Text="Back to Home" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="menu-button-nav" IconCssClass="icon icon-back"></DxButton>
+                        </NavLink>
+                    }
+                    <div class="language-switcher" aria-label="@LanguageLabel">
+                        <label for="localgpt-language-select" class="visually-hidden">@LanguageLabel</label>
+                        <select id="localgpt-language-select"
+                                name="culture"
+                                aria-label="@LanguageLabel"
+                                data-enhance-nav="false"
+                                onchange="window.location.assign(this.selectedOptions[0].dataset.selectionUrl)">
+                            @foreach (var culture in Localization.GetAvailableCultures())
+                            {
+                                var selectionUrl = Localization.BuildCultureSelectionUrl(NavigationManager.Uri, culture);
+                                if (string.Equals(culture, CurrentCulture, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <option value="@culture" data-selection-url="@selectionUrl" selected>@CultureLabel(culture)</option>
+                                }
+                                else
+                                {
+                                    <option value="@culture" data-selection-url="@selectionUrl">@CultureLabel(culture)</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+                <SafeErrorBoundary @key="NavigationManager.Uri" Area="MainLayout" ToastName="ComponentSafetyToasts">
+                    @Body
+                </SafeErrorBoundary>
+            </article>
+        </DrawerTarget>
+    </Drawer>
+
+    <aside class="localgpt-assistant-rail" aria-label="LocalGPT approvals and Council tools">
+        <HumanCollaborationInbox />
+        <CouncilSpoolerPanel />
+        @if (IsInstallPage)
+        {
+            <nav class="localgpt-page-scroll-assist" aria-label="@(Localization.Get("Navigation.ScrollAssist", fallback: "Page scrolling"))">
+                <a href="#install-scroll-top" data-enhance-nav="false" aria-label="@(Localization.Get("Navigation.ScrollUp", fallback: "Scroll to top"))">▲</a>
+                <a href="#install-scroll-bottom" data-enhance-nav="false" aria-label="@(Localization.Get("Navigation.ScrollDown", fallback: "Scroll to bottom"))">▼</a>
+            </nav>
+        }
+    </aside>
+</div>
+
+@code {
+    [SupplyParameterFromQuery(Name = NavigationUrlService.ToggleSidebarName)]
+    public bool ToggledSidebar { get; set; }
+
+    private bool IsChatPage =>
+        string.Equals(new Uri(NavigationManager.Uri).AbsolutePath, "/Chat", StringComparison.OrdinalIgnoreCase);
+
+    private bool IsInstallPage =>
+        string.Equals(new Uri(NavigationManager.Uri).AbsolutePath, "/install", StringComparison.OrdinalIgnoreCase);
+
+    protected override void OnInitialized()
+    {
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs args) =>
+        _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose() => NavigationManager.LocationChanged -= OnLocationChanged;
+
+    protected override void OnParametersSet()
+    {
+        try
+        {
+            Logger.LogDebug("Applying MainLayout parameters for {Path}.", new Uri(NavigationManager.Uri).LocalPath);
+            ComponentActivity.RecordInformation(nameof(MainLayout), "LayoutState", ToggledSidebar ? "Navigation drawer is open." : "Navigation drawer is closed.", NavigationManager.Uri);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "MainLayout parameter handling failed.");
+            ComponentActivity.RecordFailure(nameof(MainLayout), nameof(OnParametersSet), ex);
+            Notifier.ShowError("ComponentSafetyToasts", "The layout could not apply its navigation state. See local logs for details.", "Layout error");
+        }
+    }
+
+    private string CurrentCulture => Localization.ResolveAvailableCulture(System.Globalization.CultureInfo.CurrentUICulture.Name);
+    private string LanguageLabel => Localization.GetText("Language");
+
+    /// <summary>Creates a native-language label for one culture option.</summary>
+    private string CultureLabel(string culture)
+    {
+        try
+        {
+            var info = System.Globalization.CultureInfo.GetCultureInfo(culture);
+            return $"{info.NativeName} ({info.Name})";
+        }
+        catch (System.Globalization.CultureNotFoundException)
+        {
+            return culture;
+        }
+    }
+
+    private RenderFragment drawerHeader => @<div class="navigation-drawer-header">
+        <img class="logo" src="images/TacosLogos.svg" alt="LocalGPT logo" />
+        <NavLink data-enhance-nav="false" href="@NavigationUrls.GetUrl(new Uri(NavigationManager.Uri).LocalPath, !ToggledSidebar)">
+            <DxButton RenderStyle="@ButtonRenderStyle.Light" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="menu-button-nav" IconCssClass="@(ToggledSidebar ? "icon icon-close" : "icon icon-menu")"></DxButton>
+        </NavLink>
+    </div>;
+
+    private RenderFragment drawerFooter => @<div>
+    <NavLink href="https://github.com/Michi0403/LocalGPT" class="button-link">
+            <DxButton Text="Github" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="footer-button" RenderStyle="@ButtonRenderStyle.Light" IconCssClass="icon docs-icon"></DxButton>
+        </NavLink>
+    </div>
+    ;
+}

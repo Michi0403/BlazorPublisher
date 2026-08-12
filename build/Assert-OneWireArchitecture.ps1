@@ -16,47 +16,45 @@ function Read-OptionalText([string]$RelativePath) {
     return [IO.File]::ReadAllText($path)
 }
 
-$webProject = Read-OptionalText 'src\PublisherStudio.Web\PublisherStudio.Web.csproj'
-$globalUsing = Read-OptionalText 'src\PublisherStudio.Web\GlobalUsings.OneWire.cs'
-$interfaces = Read-OptionalText 'src\PublisherStudio.Web\Services\OrganicPlugins\IOrganicPluginServices.cs'
-$connection = Read-OptionalText 'src\PublisherStudio.Web\Services\OrganicPlugins\LocalGptConnectionService.cs'
-$state = Read-OptionalText 'src\PublisherStudio.Web\Services\OrganicPlugins\OrganicPluginStateServices.cs'
-$discovery = Read-OptionalText 'src\PublisherStudio.Web\HostedServices\OrganicPlugins\LocalGptDiscoveryHostedService.cs'
-$applicationHost = Read-OptionalText 'src\PublisherStudio.Web\Services\ApplicationHostServices.cs'
-$systemVariableStore = Read-OptionalText 'src\PublisherStudio.Web\Services\Configuration\SystemVariableStoreService.cs'
-$settingsPath = Join-Path $root 'src\PublisherStudio.Web\appsettings.json'
+$protocolProject = Read-OptionalText 'src\LocalGPT.WireProtocolVersion\LocalGPT.WireProtocolVersion.csproj'
+$appProject = Read-OptionalText 'src\LocalGPT\LocalGPT.csproj'
+$globalUsing = Read-OptionalText 'src\LocalGPT\GlobalUsings.OneWire.cs'
+$interfaces = Read-OptionalText 'src\LocalGPT\Interfaces\IOneWireServices.cs'
+$dispatcher = Read-OptionalText 'src\LocalGPT\Services\OneWire\OneWireExecutionServices.cs'
+$state = Read-OptionalText 'src\LocalGPT\Services\OneWire\OneWireStateServices.cs'
+$transport = Read-OptionalText 'src\LocalGPT\Services\OneWire\OneWireTransportHostedServices.cs'
+$settingsPath = Join-Path $root 'src\LocalGPT\appsettings.json'
 
-if ($webProject -and $webProject -notmatch 'PackageReference Include="LocalGPT\.WireProtocolVersion"') { Add-Finding 'PublisherStudio no longer consumes the authoritative protocol package.' }
-if ($webProject -match 'ProjectReference[^\r\n]*LocalGPT\.WireProtocolVersion') { Add-Finding 'PublisherStudio contains a protocol source-project reference instead of the package.' }
-if (Test-Path -LiteralPath (Join-Path $root 'src\LocalGPT.WireProtocolVersion')) { Add-Finding 'PublisherStudio contains a duplicate protocol source project.' }
+if ($protocolProject -and $protocolProject -notmatch '<Platforms>AnyCPU</Platforms>') { Add-Finding 'The protocol package project is not explicitly AnyCPU.' }
+if ($protocolProject -match '<RuntimeIdentifiers?>') { Add-Finding 'The protocol package project declares a runtime identifier and is no longer RID-neutral.' }
+if ($appProject -and $appProject -notmatch 'UseLocalWireProtocolProject') { Add-Finding 'LocalGPT no longer exposes explicit source/package protocol modes.' }
 if ($globalUsing -and $globalUsing -notmatch 'global using LocalGPT\.WireProtocol;') { Add-Finding 'The application-wide protocol namespace import is missing.' }
-if ($interfaces -and $interfaces -notmatch 'IOrganicReplayGuard') { Add-Finding 'The replay-guard contract is missing.' }
-if ($state -and $state -notmatch 'class OrganicReplayGuard') { Add-Finding 'The replay-guard implementation is missing.' }
-if ($connection -and $connection -notmatch 'IOrganicConnectionRuntimeState') { Add-Finding 'Connection transport locality is no longer owned by the runtime-state service.' }
-if ($connection -and $connection -notmatch 'SourcePeerId does not match the peer identity owned by this connection') { Add-Finding 'The TCP connection no longer pins SourcePeerId to its discovered peer.' }
-if ($discovery -and $discovery -notmatch 'automaticallyAttemptedPeers\.Remove') { Add-Finding 'Failed automatic connections will not become retryable.' }
-if ($applicationHost -and $applicationHost -notmatch 'systemVariables\.DefaultPort') { Add-Finding 'PublisherStudio port resolution no longer uses systemVariables.DefaultPort.' }
-if ($systemVariableStore -and $systemVariableStore -notmatch 'Application\.DefaultPort') { Add-Finding 'SystemVariableStoreService.cs no longer owns Application.DefaultPort.' }
-if ($connection -and ($connection -notmatch 'SynchronizeLocalCapabilityDirectoryAsync' -or $connection -notmatch 'capabilities\.Changed \+= SignalCapabilitySynchronization')) { Add-Finding 'PublisherStudio no longer performs event-driven post-link capability synchronization.' }
-if ($connection -and $connection -notmatch 'OrganicWireMessageType\.CapabilityRequest') { Add-Finding 'PublisherStudio no longer answers linked-peer capability refresh requests.' }
-if ($connection -and $connection -notmatch 'OrganicWireMessageType\.CapabilityResponse') { Add-Finding 'PublisherStudio no longer broadcasts refreshed capability directories.' }
+if ($interfaces -and $interfaces -notmatch 'RegisterOwned') { Add-Finding 'Connection-generation ownership is missing from the 1-Wire registry contract.' }
+if ($interfaces -and $interfaces -notmatch 'IOneWireReplayGuard') { Add-Finding 'The replay-guard contract is missing.' }
+if ($dispatcher -and $dispatcher -notmatch 'OneWireDispatchContext') { Add-Finding 'The dispatcher no longer receives transport-owned peer context.' }
+if ($dispatcher -and $dispatcher -notmatch 'case OneWireMessageType\.CapabilityResponse') { Add-Finding 'LocalGPT no longer accepts live capability directory refreshes from linked peers.' }
+if ($dispatcher -and $dispatcher -notmatch 'Refreshed live 1-Wire directory for peer') { Add-Finding 'LocalGPT live peer-directory refresh diagnostics are missing.' }
+if ($dispatcher -match 'SourcePeerId\s*,\s*"localgpt"[\s\S]{0,180}IsConnected') { Add-Finding 'Review dispatcher identity handling; source envelope data may be participating in internal-call authorization.' }
+if ($state -and $state -notmatch 'class OneWireReplayGuard') { Add-Finding 'The replay guard implementation is missing.' }
+if ($transport -and ($transport -notmatch 'EnableLanTransport' -or $transport -notmatch 'IPAddress\.Loopback')) { Add-Finding 'The TCP listener no longer defaults to loopback with explicit LAN opt-in.' }
 
 if (-not (Test-Path -LiteralPath $settingsPath -PathType Leaf)) {
-    Add-Finding 'Missing PublisherStudio appsettings.json.'
+    Add-Finding 'Missing LocalGPT appsettings.json.'
 }
 else {
     try { $settings = Get-Content -Raw -LiteralPath $settingsPath | ConvertFrom-Json }
     catch { Add-Finding "appsettings.json is invalid JSON: $($_.Exception.Message)"; $settings = $null }
     if ($settings) {
-        if ([int]$settings.PublisherStudio.Port -ne 58071) { Add-Finding 'PublisherStudio default port is not 58071.' }
-        if ([int]$settings.OrganicPlugins.ServicePort -ne 51140 -or [int]$settings.OrganicPlugins.DiscoveryPort -ne 51141) { Add-Finding 'Organic 1-Wire ports no longer match LocalGPT.' }
+        if ([int]$settings.OneWire.ServicePort -ne 51140 -or [int]$settings.OneWire.DiscoveryPort -ne 51141) { Add-Finding '1-Wire ports no longer match TCP 51140 / UDP 51141.' }
+        if ([bool]$settings.OneWire.EnableLanTransport) { Add-Finding 'LAN transport is enabled by default; reviewed default is loopback-only.' }
+        if ([string]$settings.OneWire.ListenAddress -ne '127.0.0.1') { Add-Finding 'The reviewed default listen address is not 127.0.0.1.' }
     }
 }
 
 if ($findings.Count -eq 0) {
-    Write-Host 'PublisherStudio 1-Wire static audit completed with no findings.' -ForegroundColor Green
+    Write-Host 'LocalGPT 1-Wire static audit completed with no findings.' -ForegroundColor Green
 }
 else {
     foreach ($finding in $findings) { Write-Warning $finding }
-    Write-Host "PublisherStudio 1-Wire static audit completed with $($findings.Count) finding(s). This audit reports only and does not block the build." -ForegroundColor Yellow
+    Write-Host "LocalGPT 1-Wire static audit completed with $($findings.Count) finding(s). This audit reports only and does not block the build." -ForegroundColor Yellow
 }

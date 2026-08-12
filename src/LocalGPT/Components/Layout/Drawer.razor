@@ -1,0 +1,84 @@
+@inherits LayoutComponentBase
+@inject NavigationUrlService NavigationUrls
+@inject NavigationManager NavigationManager
+@namespace LocalGPT.Components.Layout
+@inject IJSRuntime JS
+@inject ILogger<Drawer> Logger
+@inject INotificationService Notifier
+@inject IComponentActivityService ComponentActivity
+
+<div id="main-window-drawer">
+@*       <DxDrawer SizeMode="SizeMode.Large"
+                PanelWidth="@Width"
+              CssClass="@(CssClass + " mobile")"
+              Mode="@DrawerMode.Overlap"
+              IsOpen="@drawerOpen"
+              HeaderTemplate="@DrawerHeader"
+              FooterTemplate="@DrawerFooter"
+              ApplyBackgroundShading="false"
+              ClosedCssClass="panel-closed"> *@
+    <DxDrawer SizeMode="SizeMode.Large"
+                PanelWidth="@Width"
+              CssClass="@(CssClass)"
+              Mode="@DrawerMode.Overlap"
+              IsOpen="@drawerOpen"
+              HeaderTemplate="@DrawerHeader"
+              FooterTemplate="@DrawerFooter"
+              ApplyBackgroundShading="@false"
+              ClosedCssClass="panel-closed"
+              OpenCssClass="panel-open">
+        <BodyTemplate>
+            @DrawerBody
+        </BodyTemplate>
+        <TargetContent >
+            @DrawerTarget
+        </TargetContent>
+    </DxDrawer>
+</div>
+
+@code {
+    string toastName { get; set; } = "DrawerToasts";
+    [Parameter]
+    public string Width { get; set; } = "max-content";
+    [Parameter]
+    public string CssClass { get; set; } = "navigation-drawer";
+
+    [SupplyParameterFromQuery(Name = NavigationUrlService.ToggleSidebarName)]
+    public bool ToggledSidebar { get; set; }
+    [Parameter] public RenderFragment? DrawerTarget { get; set; }
+    [Parameter] public RenderFragment? DrawerBody { get; set; }
+    [Parameter] public RenderFragment? DrawerHeader { get; set; }
+    [Parameter] public RenderFragment? DrawerFooter { get; set; }
+    private bool drawerOpen;
+
+    protected override void OnParametersSet()
+    {
+        drawerOpen = ToggledSidebar;
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            if (firstRender)
+            {
+                var width = await JS.InvokeAsync<int>("getScreenWidth").ConfigureAwait(true) /* renderer-affine lifecycle continuation */;
+
+                if (width < 768)
+                    Width = "50%";
+                else if (width < 1024)
+                    Width = "30%";
+                else
+                    Width = "20%";
+
+                ComponentActivity.RecordInformation(nameof(Drawer), "ResponsiveWidth", $"Navigation drawer width selected as {Width}.", NavigationManager.Uri);
+                Logger.LogInformation("Navigation drawer responsive width selected as {Width}.", Width);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            ComponentActivity.RecordFailure(nameof(Drawer), "ResponsiveWidth", ex, NavigationManager.Uri);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+    }
+}

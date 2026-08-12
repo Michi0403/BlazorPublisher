@@ -3,7 +3,9 @@
     {
       "src": [
         {
-          "files": ["PublisherStudio.Web.dll"],
+          "files": [
+            "LocalGPT.dll"
+          ],
           "src": "input"
         }
       ],
@@ -20,32 +22,57 @@
         "files": [
           "index.md",
           "toc.yml",
-          "articles/**/*.md",
-          "guide/toc.yml",
+          "guide/**/*.md",
+          "guide/**/toc.yml",
+          "architecture/**/*.md",
+          "architecture/**/toc.yml",
+          "engineering/**/*.md",
+          "engineering/**/toc.yml",
+          "reference/**/*.md",
+          "reference/**/toc.yml",
           "api/**/*.yml",
           "api/**/*.md",
           "pdf/toc.yml"
         ],
-        "exclude": ["_site/**", "input/**", ".tools/**", ".print-book/**"]
+        "exclude": [
+          "_site/**",
+          "input/**",
+          ".tools/**",
+          "internal-notes/**"
+        ]
       }
     ],
     "resource": [
       {
-        "files": ["media/**", "styles/**", "pdf-cover.html", "PublisherStudio-*.pdf"]
+        "files": [
+          "media/**",
+          "styles/**",
+          "pdf-cover.html",
+          "LocalGPT-*.pdf"
+        ]
       }
     ],
     "output": "_site",
-    "template": ["default", "modern", "templates/publisherstudio"],
+    "template": [
+      "default",
+      "modern",
+      "templates/localgpt"
+    ],
     "globalMetadata": {
-      "_appName": "PublisherStudio",
-      "_appTitle": "PublisherStudio Documentation",
-      "_appFooter": "PublisherStudio 2.5.4 Â· generated documentation",
+      "_appName": "LocalGPT",
+      "_appTitle": "LocalGPT Documentation",
+      "_appFooter": "LocalGPT 2.3.7 · generated documentation",
       "_enableSearch": true,
       "_disableContribution": true,
       "_disableTocFilter": false,
       "_disableNextArticle": false,
       "_lang": "en",
-      "publisherstudioVersion": "2.5.4"
+      "localgptVersion": "2.3.7"
     }
   }
 }
+
+
+
+
+

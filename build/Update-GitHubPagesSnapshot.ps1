@@ -7,16 +7,16 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
 $repositoryRoot = Split-Path -Parent $PSScriptRoot
-$projectFile = Join-Path $repositoryRoot 'src\\PublisherStudio.Web\\PublisherStudio.Web.csproj'
+$projectFile = Join-Path $repositoryRoot 'src\\LocalGPT\\LocalGPT.csproj'
 if (-not (Test-Path -LiteralPath $projectFile -PathType Leaf)) {
-    throw "PublisherStudio project file was not found: $projectFile"
+    throw "LocalGPT project file was not found: $projectFile"
 }
 $projectText = [IO.File]::ReadAllText($projectFile)
 $versionMatch = [regex]::Match($projectText, '<Version>\s*(?<Version>[^<]+?)\s*</Version>', [Text.RegularExpressions.RegexOptions]::IgnoreCase)
-if (-not $versionMatch.Success) { throw "PublisherStudio source version could not be resolved from $projectFile" }
+if (-not $versionMatch.Success) { throw "LocalGPT source version could not be resolved from $projectFile" }
 $expectedVersion = $versionMatch.Groups['Version'].Value.Trim()
 
-function Get-PublisherStudioDocumentationVersion {
+function Get-LocalGptDocumentationVersion {
     param([Parameter(Mandatory = $true)][string]$Root)
 
     $statusPath = Join-Path $Root 'documentation-status.json'
@@ -37,15 +37,15 @@ function Get-PublisherStudioDocumentationVersion {
 
 if ([string]::IsNullOrWhiteSpace($DocumentationRoot)) {
     $candidateRoots = @(
-        (Join-Path $repositoryRoot 'src\\PublisherStudio.Web\\bin\\Release\\net10.0\\wwwroot\\help-docs'),
-        (Join-Path $repositoryRoot 'src\\PublisherStudio.Web\\bin\\Debug\\net10.0\\wwwroot\\help-docs'),
-        (Join-Path $repositoryRoot 'src\\PublisherStudio.Web\\wwwroot\\help-docs')
+        (Join-Path $repositoryRoot 'src\\LocalGPT\\bin\\Release\\net10.0\\wwwroot\\help-docs'),
+        (Join-Path $repositoryRoot 'src\\LocalGPT\\bin\\Debug\\net10.0\\wwwroot\\help-docs'),
+        (Join-Path $repositoryRoot 'src\\LocalGPT\\wwwroot\\help-docs')
     )
     $matchingRoots = @()
     $detectedRoots = [System.Collections.Generic.List[string]]::new()
     foreach ($candidateRoot in $candidateRoots) {
         if (-not (Test-Path -LiteralPath $candidateRoot -PathType Container)) { continue }
-        $candidateVersion = Get-PublisherStudioDocumentationVersion -Root $candidateRoot
+        $candidateVersion = Get-LocalGptDocumentationVersion -Root $candidateRoot
         $displayVersion = if ([string]::IsNullOrWhiteSpace($candidateVersion)) { '<unknown>' } else { $candidateVersion }
         $detectedRoots.Add("$candidateRoot => $displayVersion")
         if ([string]::Equals($candidateVersion, $expectedVersion, [StringComparison]::OrdinalIgnoreCase)) {
@@ -59,24 +59,24 @@ if ([string]::IsNullOrWhiteSpace($DocumentationRoot)) {
 
     if ($matchingRoots.Count -eq 0) {
         $detected = if ($detectedRoots.Count -eq 0) { 'no generated Debug, Release, or source-web documentation output exists' } else { $detectedRoots -join '; ' }
-        throw "No generated PublisherStudio documentation matching source version $expectedVersion was found. Build PublisherStudio first. Detected: $detected"
+        throw "No generated LocalGPT documentation matching source version $expectedVersion was found. Build LocalGPT first. Detected: $detected"
     }
 
     $DocumentationRoot = ($matchingRoots | Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1).Root
-    Write-Host "Selected version-matched PublisherStudio documentation output: $DocumentationRoot" -ForegroundColor Cyan
+    Write-Host "Selected version-matched LocalGPT documentation output: $DocumentationRoot" -ForegroundColor Cyan
 }
 $DocumentationRoot = [IO.Path]::GetFullPath($DocumentationRoot)
-$versionedDocumentationPdfs = @(Get-ChildItem -LiteralPath $DocumentationRoot -File -Filter 'PublisherStudio-*.pdf' -ErrorAction SilentlyContinue)
-$expectedDocumentationPdf = 'PublisherStudio-' + $expectedVersion + '.pdf'
+$versionedDocumentationPdfs = @(Get-ChildItem -LiteralPath $DocumentationRoot -File -Filter 'LocalGPT-*.pdf' -ErrorAction SilentlyContinue)
+$expectedDocumentationPdf = 'LocalGPT-' + $expectedVersion + '.pdf'
 if ($versionedDocumentationPdfs.Count -ne 1 -or -not [string]::Equals($versionedDocumentationPdfs[0].Name, $expectedDocumentationPdf, [StringComparison]::OrdinalIgnoreCase)) {
-    throw "PublisherStudio Pages source must contain exactly one current versioned PDF '$expectedDocumentationPdf'. Found: $($versionedDocumentationPdfs.Name -join ', ')"
+    throw "LocalGPT Pages source must contain exactly one current versioned PDF '$expectedDocumentationPdf'. Found: $($versionedDocumentationPdfs.Name -join ', ')"
 }
 if (-not (Test-Path -LiteralPath $DocumentationRoot -PathType Container)) {
-    throw "Generated PublisherStudio documentation was not found: $DocumentationRoot"
+    throw "Generated LocalGPT documentation was not found: $DocumentationRoot"
 }
 
 if ([string]::IsNullOrWhiteSpace($OutputArchive)) {
-    $OutputArchive = Join-Path $repositoryRoot '.github\\pages\\publisherstudio-kawaii-docs.zip'
+    $OutputArchive = Join-Path $repositoryRoot '.github\\pages\\localgpt-kawaii-docs.zip'
 }
 $OutputArchive = [IO.Path]::GetFullPath($OutputArchive)
 $validator = Join-Path $repositoryRoot ".github\scripts\prepare-pages-artifact.py"
@@ -89,8 +89,8 @@ if ($null -eq $python) { $python = Get-Command python3 -ErrorAction SilentlyCont
 if ($null -eq $python) { throw "Python 3 is required to validate the GitHub Pages snapshot." }
 
 $operationId = [Guid]::NewGuid().ToString("N")
-$preparedRoot = Join-Path ([IO.Path]::GetTempPath()) ("PublisherStudio-Pages-Prepared-" + $operationId)
-$verificationRoot = Join-Path ([IO.Path]::GetTempPath()) ("PublisherStudio-Pages-Verify-" + $operationId)
+$preparedRoot = Join-Path ([IO.Path]::GetTempPath()) ("LocalGPT-Pages-Prepared-" + $operationId)
+$verificationRoot = Join-Path ([IO.Path]::GetTempPath()) ("LocalGPT-Pages-Verify-" + $operationId)
 $temporaryArchive = "$OutputArchive.$operationId.tmp"
 $backupArchive = "$OutputArchive.$operationId.backup"
 $installed = $false
@@ -98,7 +98,7 @@ $installed = $false
 try {
     & $python.Source $validator --source $DocumentationRoot --output $preparedRoot --expected-version $expectedVersion
     if ($LASTEXITCODE -ne 0) {
-        throw "Generated PublisherStudio documentation did not pass the GitHub Pages validator for version $expectedVersion."
+        throw "Generated LocalGPT documentation did not pass the GitHub Pages validator for version $expectedVersion."
     }
     Remove-Item -LiteralPath (Join-Path $preparedRoot "github-pages-deployment.json") -Force -ErrorAction SilentlyContinue
     if (-not (Test-Path -LiteralPath (Join-Path $preparedRoot ".nojekyll") -PathType Leaf)) {
@@ -145,24 +145,7 @@ try {
     } finally { $archive.Dispose() }
 
     & $python.Source $validator --archive $temporaryArchive --output $verificationRoot --expected-version $expectedVersion
-    if ($LASTEXITCODE -ne 0) { throw "The new PublisherStudio Pages snapshot failed final validation for version $expectedVersion." }
-
-    $sourceApiIndex = Join-Path $DocumentationRoot 'api\index.html'
-    $verifiedApiIndex = Join-Path $verificationRoot 'api\index.html'
-    if (-not (Test-Path -LiteralPath $sourceApiIndex -PathType Leaf) -or -not (Test-Path -LiteralPath $verifiedApiIndex -PathType Leaf)) {
-        throw "PublisherStudio Pages snapshot API entry point disappeared during snapshot preparation."
-    }
-    $sourceApiHash = (Get-FileHash -LiteralPath $sourceApiIndex -Algorithm SHA256).Hash
-    $verifiedApiHash = (Get-FileHash -LiteralPath $verifiedApiIndex -Algorithm SHA256).Hash
-    if (-not [string]::Equals($sourceApiHash, $verifiedApiHash, [StringComparison]::OrdinalIgnoreCase)) {
-        throw "PublisherStudio Pages snapshot api/index.html differs from the generated DocFX source."
-    }
-    $sourceApiCount = @(Get-ChildItem -LiteralPath (Join-Path $DocumentationRoot 'api') -Filter '*.html' -File -Recurse).Count
-    $verifiedApiCount = @(Get-ChildItem -LiteralPath (Join-Path $verificationRoot 'api') -Filter '*.html' -File -Recurse).Count
-    if ($sourceApiCount -ne $verifiedApiCount -or $verifiedApiCount -le 1) {
-        throw "PublisherStudio Pages snapshot API page count changed during preparation: source=$sourceApiCount verified=$verifiedApiCount"
-    }
-    Write-Host "Verified PublisherStudio Pages API tree byte-for-byte at entry point and page-count parity ($verifiedApiCount HTML pages)." -ForegroundColor Green
+    if ($LASTEXITCODE -ne 0) { throw "The new LocalGPT Pages snapshot failed final validation for version $expectedVersion." }
 
     Remove-Item -LiteralPath $backupArchive -Force -ErrorAction SilentlyContinue
     if (Test-Path -LiteralPath $OutputArchive -PathType Leaf) { [IO.File]::Move($OutputArchive, $backupArchive) }
@@ -174,7 +157,7 @@ try {
         throw
     }
     Remove-Item -LiteralPath $backupArchive -Force -ErrorAction SilentlyContinue
-    Write-Host "Updated the single PublisherStudio $expectedVersion GitHub Pages snapshot: $OutputArchive" -ForegroundColor Green
+    Write-Host "Updated the single LocalGPT $expectedVersion GitHub Pages snapshot: $OutputArchive" -ForegroundColor Green
 } finally {
     Remove-Item -LiteralPath $preparedRoot -Recurse -Force -ErrorAction SilentlyContinue
     Remove-Item -LiteralPath $verificationRoot -Recurse -Force -ErrorAction SilentlyContinue

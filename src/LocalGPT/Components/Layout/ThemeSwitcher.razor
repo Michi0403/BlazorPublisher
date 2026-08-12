@@ -1,0 +1,93 @@
+@implements IDisposable
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@inject ThemeService Themes
+@inject ILogger<ThemeSwitcher> Logger
+@inject INotificationService Notifier
+@inject IComponentActivityService ComponentActivity
+
+<ThemeJsChangeDispatcher InitialShellThemeName="@ShellThemeName"
+                         InitialComponentThemeName="@ComponentThemeName" />
+<ToastWrapper Name="@toastName" />
+<div class="@HeaderCss">
+    <div class="btn-container d-flex">
+        <DxButton Click="@Toggle"
+                  CssClass="@ButtonCss"
+                  SizeMode="SizeMode.Large"
+                  RenderStyle="ButtonRenderStyle.Secondary"
+                  RenderStyleMode="ButtonRenderStyleMode.Outline"
+                  IconCssClass="theme-icon"
+                  aria-label="Themes"
+                  aria-haspopup="true"
+                  aria-expanded="@_open" />
+    </div>
+
+    <ThemeSwitcherContainer @bind-Shown="_open"
+                            @bind-ShellThemeName="ShellThemeName"
+                            @bind-ComponentThemeName="ComponentThemeName" />
+</div>
+
+@code
+{
+    string toastName { get; set; } = "ThemeSwitcherRazorToasts";
+    string ShellThemeName { get; set; } = ThemeService.DEFAULT_THEME_NAME;
+    string ComponentThemeName { get; set; } = ThemeService.DEFAULT_THEME_NAME;
+    bool _open;
+    bool _disposed;
+
+    protected override void OnInitialized()
+    {
+        try
+        {
+            if (!Themes.IsInitialized)
+            {
+                var legacyCookie = HttpContextAccessor.HttpContext?.Request.Cookies[ThemeService.LegacyThemeCookieName];
+                var shellCookie = HttpContextAccessor.HttpContext?.Request.Cookies[ThemeService.ShellThemeCookieName];
+                var componentCookie = HttpContextAccessor.HttpContext?.Request.Cookies[ThemeService.ComponentThemeCookieName];
+                Themes.InitializeThemes(shellCookie ?? legacyCookie, componentCookie ?? legacyCookie);
+            }
+
+            ShellThemeName = Themes.ActiveShellTheme.Name;
+            ComponentThemeName = Themes.ActiveComponentTheme.Name;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Theme initialization failed; local state details were omitted from logs.");
+            ComponentActivity.RecordFailure(nameof(ThemeSwitcher), nameof(OnInitialized), ex);
+            Notifier.ShowError(toastName, "The theme could not be initialized. See local application logs for details.", "Theme initialization failed");
+        }
+    }
+
+    void Toggle()
+    {
+        try
+        {
+            _open = !_open;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Theme panel toggle failed.");
+            ComponentActivity.RecordFailure(nameof(ThemeSwitcher), nameof(Toggle), ex);
+            Notifier.ShowError(toastName, "The theme panel could not be opened. See local logs for details.", "Theme panel failed");
+        }
+    }
+
+    string ButtonCss => "themeswitcher-button theme-settings " + _open;
+    string HeaderCss => Themes.GetThemeLayerCssClass(ShellThemeName, ComponentThemeName);
+
+    public void Dispose()
+    {
+        try
+        {
+            if (_disposed)
+                return;
+
+            _disposed = true;
+            GC.SuppressFinalize(this);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Theme switcher disposal failed.");
+            ComponentActivity.RecordFailure(nameof(ThemeSwitcher), nameof(Dispose), ex);
+        }
+    }
+}

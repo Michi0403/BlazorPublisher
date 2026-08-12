@@ -1,0 +1,607 @@
+@rendermode InteractiveServer
+@page "/minecraft-mod-builder"
+@inject CouncilTextService CouncilText
+@inject LocalGptCatalogService Catalog
+@inject IMinecraftModWorkspaceService WorkspaceService
+@inject INativeCommandRunner CommandRunner
+@inject IChatClient? ChatClient
+@inject IMultiModelCouncilService CouncilService
+@inject NavigationManager Navigation
+@inject ILogger<MinecraftModBuilder> Logger
+@inject INotificationService Notifier
+@inject IComponentActivityService ComponentActivity
+
+<PageTitle>Minecraft Mod Builder</PageTitle>
+
+<div class="minecraft-builder-page-scroll-owner">
+    <div class="mod-builder">
+        <ToastWrapper Name="@toastName" />
+
+        <WorkbenchHeader Eyebrow="Build studio"
+                         Title="Minecraft Mod Builder"
+                         Subtitle="Configure a Minecraft workspace, generate a grounded implementation plan with one model or an AI Council, and run only scoped build commands from the generated project.">
+            <Actions>
+                <DxButton Text="Create Workspace"
+                          RenderStyle="ButtonRenderStyle.Primary"
+                          RenderStyleMode="ButtonRenderStyleMode.Contained"
+                          Click="CreateWorkspaceAsync"
+                          Enabled="@(!isBusy)" />
+                <DxButton Text="Create Datapack ZIP"
+                          RenderStyle="ButtonRenderStyle.Secondary"
+                          RenderStyleMode="ButtonRenderStyleMode.Outline"
+                          Click="CreateDatapackZipAsync"
+                          Enabled="@(!isBusy && IsDatapack)" />
+            </Actions>
+        </WorkbenchHeader>
+
+        <section class="builder-panel builder-request-panel" aria-labelledby="minecraft-build-request-heading">
+            <header class="builder-section-heading">
+                <div>
+                    <span class="builder-section-kicker">Project definition</span>
+                    <h2 id="minecraft-build-request-heading">Workspace and target</h2>
+                    <p>Keep the project identity, Minecraft target, toolchain and Council inputs together before creating files.</p>
+                </div>
+                @if (isBusy)
+                {
+                    <span class="builder-status-badge">Working…</span>
+                }
+            </header>
+
+            <div class="form-grid">
+                <label>
+                    <span>Project name</span>
+                    <input @bind="request.ProjectName" />
+                </label>
+                <label>
+                    <span>Mod id</span>
+                    <input @bind="request.ModId" />
+                </label>
+                <label>
+                    <span>Package</span>
+                    <input @bind="request.PackageName" />
+                </label>
+                <label>
+                    <span>Minecraft version</span>
+                    <input @bind="request.MinecraftVersion" />
+                </label>
+                <label>
+                    <span>Loader</span>
+                    <select @bind="request.Loader">
+                        <option>Fabric Mod</option>
+                        <option>NeoForge Mod</option>
+                        <option>Paper Plugin</option>
+                        <option>Datapack</option>
+                        <option>Bedrock Add-on</option>
+                    </select>
+                </label>
+                <label>
+                    <span>Java</span>
+                    <input @bind="request.JavaVersion" />
+                </label>
+                <label>
+                    <span>Gradle</span>
+                    <input @bind="request.GradleVersion" />
+                </label>
+                <label>
+                    <span>IDE</span>
+                    <select @bind="request.Ide">
+                        <option>Eclipse</option>
+                        <option>IntelliJ IDEA</option>
+                        <option>Visual Studio Code</option>
+                    </select>
+                </label>
+                <label class="checkbox-label" title="Adds a small item, command, and design brief for the Living Cities 0.1 sample.">
+                    <input type="checkbox" @bind="request.IncludeLivingCitiesStarter" />
+                    <span>Living Cities starter</span>
+                </label>
+            </div>
+
+            <div class="builder-ai-grid">
+                <label class="wide-field">
+                    <span>What should the mod do?</span>
+                    <textarea @bind="request.Description" rows="8" placeholder="Example: Create a magic ore, a wand item, custom crafting recipes, and server-side commands to grant spell XP."></textarea>
+                </label>
+
+                <div class="builder-council-card">
+                    <label class="wide-field">
+                        <span>Council Models</span>
+                        <input @bind="councilModels" placeholder="gpt-oss:20b, qwen3-coder:30b" />
+                    </label>
+                    <label class="checkbox-label" title="When enabled, LocalGPT sends num_gpu=0 to Ollama for safer low-resource council tests. Turn it off only when you intentionally want a GPU-backed model run.">
+                        <input type="checkbox" @bind="useCpuOnlyCouncil" />
+                        <span>CPU-only council</span>
+                    </label>
+                    <p>Use a single configured model for a fast plan or the Council for a multi-model implementation review.</p>
+                </div>
+            </div>
+
+            <div class="button-row builder-ai-actions">
+                <DxButton Text="Ask AI For Plan"
+                          RenderStyle="ButtonRenderStyle.Secondary"
+                          RenderStyleMode="ButtonRenderStyleMode.Contained"
+                          Click="GeneratePlanAsync"
+                          Enabled="@(!isBusy && ChatClient is not null)" />
+                <DxButton Text="Ask AI Council"
+                          RenderStyle="ButtonRenderStyle.Secondary"
+                          RenderStyleMode="ButtonRenderStyleMode.Contained"
+                          Click="GenerateCouncilPlanAsync"
+                          Enabled="@(!isBusy)" />
+                <DxButton Text="Living Cities Prompt"
+                          RenderStyle="ButtonRenderStyle.Secondary"
+                          RenderStyleMode="ButtonRenderStyleMode.Outline"
+                          Click="LoadLivingCitiesPrompt"
+                          Enabled="@(!isBusy)" />
+            </div>
+        </section>
+
+    @if (workspace is not null)
+    {
+        <section class="builder-panel">
+            <h2>Workspace</h2>
+            <dl class="workspace-details">
+                <dt>Root</dt>
+                <dd>@workspace.RootPath</dd>
+                <dt>Main class</dt>
+                <dd>@workspace.MainClassPath</dd>
+                <dt>Metadata</dt>
+                <dd>@workspace.MetadataPath</dd>
+                <dt>Build file</dt>
+                <dd>@workspace.BuildFilePath</dd>
+                <dt>Brief</dt>
+                <dd>@workspace.ReadmePath</dd>
+                <dt>Build command</dt>
+                <dd>@workspace.BuildCommand</dd>
+                <dt>IDE import</dt>
+                <dd>@workspace.EclipseImportHint</dd>
+            </dl>
+
+            <div class="command-grid">
+                <label>
+                    Command
+                    <input @bind="commandFileName" />
+                </label>
+                <label>
+                    Arguments
+                    <input @bind="commandArguments" />
+                </label>
+                <DxButton Text="Run Command"
+                          RenderStyle="ButtonRenderStyle.Primary"
+                          RenderStyleMode="ButtonRenderStyleMode.Contained"
+                          Click="RunCommandAsync"
+                          Enabled="@(!isBusy)" />
+            </div>
+        </section>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(aiPlan))
+    {
+        <section class="builder-panel">
+            <h2>AI Plan</h2>
+            <div class="markdown-output">@((MarkupString)Markdig.Markdown.ToHtml(aiPlan).Trim())</div>
+        </section>
+    }
+
+    @if (lastCouncilResult is not null)
+    {
+        <section class="builder-panel">
+            <h2>AI Council Log</h2>
+            <dl class="workspace-details">
+                <dt>Models</dt>
+                <dd>@string.Join(" + ", lastCouncilResult.ModelNames)</dd>
+                <dt>Log</dt>
+                <dd>@lastCouncilResult.LogPath</dd>
+                <dt>Memory</dt>
+                <dd>@lastCouncilResult.MemoryConversationId</dd>
+            </dl>
+        </section>
+    }
+
+    @if (lastCommandResult is not null)
+    {
+        <section class="builder-panel">
+            <h2>Command Result</h2>
+            <div class="result-summary">
+                Exit code @lastCommandResult.ExitCode in @lastCommandResult.Duration.TotalSeconds.ToString("0.0")s
+            </div>
+            <pre>@lastCommandResult.StandardOutput</pre>
+            @if (!string.IsNullOrWhiteSpace(artifactDownloadUrl))
+            {
+                <div class="download-row">
+                    <a class="download-link" href="@artifactDownloadUrl" target="_blank" rel="noopener" download="@artifactFileName">Download Datapack ZIP</a>
+                    <span>@artifactFileName</span>
+                </div>
+                <dl class="artifact-details">
+                    <dt>HTTP GET</dt>
+                    <dd><a href="@artifactDownloadUrl" target="_blank" rel="noopener">@artifactDownloadUrl</a></dd>
+                    <dt>Local file</dt>
+                    <dd>@artifactPath</dd>
+                </dl>
+                <div class="hint">
+                    The download route is served by ASP.NET Core and constrained to the generated Minecraft workspace folder.
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(lastCommandResult.StandardError))
+            {
+                <pre class="error-output">@lastCommandResult.StandardError</pre>
+            }
+        </section>
+    }
+    </div>
+</div>
+
+@code {
+    string toastName = "MinecraftModBuilderToasts";
+    MinecraftModBuildRequest request = new()
+    {
+        ProjectName = "LivingCities",
+        ModId = "living_cities",
+        PackageName = "com.localgpt.livingcities",
+        Loader = "Datapack",
+        IncludeLivingCitiesStarter = true,
+        Description = string.Empty
+    };
+
+    MinecraftModWorkspace? workspace;
+    CommandExecutionResult? lastCommandResult;
+    MultiModelCouncilResult? lastCouncilResult;
+    string aiPlan = string.Empty;
+    string commandFileName = "powershell.exe";
+    string commandArguments = "-NoProfile -ExecutionPolicy Bypass -File .\\build-local.ps1";
+    string councilModels = "gpt-oss:20b";
+    bool useCpuOnlyCouncil = true;
+    string? artifactDownloadUrl;
+    string? artifactDownloadRoute;
+    string? artifactFileName;
+    string? artifactPath;
+    bool isBusy;
+    bool IsDatapack => string.Equals(request.Loader, "Datapack", StringComparison.OrdinalIgnoreCase);
+
+    protected override Task OnInitializedAsync()
+    {
+        request.Description = Catalog.LivingCitiesPrompt;
+        return Task.CompletedTask;
+    }
+
+
+
+    async Task CreateWorkspaceAsync()
+    {
+        try
+        {
+            await RunUiActionAsync(async () =>
+       {
+           await CreateWorkspaceCoreAsync().ConfigureAwait(false);
+           if (workspace is not null)
+               Notifier.ShowSuccess(toastName, workspace.RootPath, "Workspace created");
+       }, "CreateWorkspaceAsync").ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "CreateWorkspaceAsync failed: {Message}", ex.Message);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+    }
+
+    async Task CreateDatapackZipAsync()
+    {
+        try
+        {
+            await RunUiActionAsync(async () =>
+       {
+           await CreateWorkspaceCoreAsync().ConfigureAwait(false);
+           await RunCommandCoreAsync().ConfigureAwait(false);
+           if (lastCommandResult?.Succeeded == true && !string.IsNullOrWhiteSpace(artifactDownloadUrl))
+               Notifier.ShowSuccess(toastName, artifactFileName ?? "Datapack ZIP", "Datapack ZIP ready");
+       }, "CreateDatapackZipAsync").ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "CreateDatapackZipAsync failed: {Message}", ex.Message);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+
+        }
+
+    }
+
+    async Task CreateWorkspaceCoreAsync()
+    {
+        try
+        {
+            workspace = await WorkspaceService.CreateWorkspaceAsync(request).ConfigureAwait(false);
+            ClearDownloadArtifact();
+            lastCommandResult = null;
+            commandFileName = "powershell.exe";
+            commandArguments = "-NoProfile -ExecutionPolicy Bypass -File .\\build-local.ps1";
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "CreateWorkspaceCoreAsync failed; request details were omitted from logs.");
+            ComponentActivity.RecordFailure(nameof(MinecraftModBuilder), "CreateWorkspaceCoreAsync", ex);
+            throw;
+        }
+    }
+
+    async Task GeneratePlanAsync()
+    {
+        try
+        {
+            if (ChatClient is null)
+            {
+                Notifier.ShowError(toastName, "No AI chat client is configured.", "AI unavailable");
+                return;
+            }
+
+            await RunUiActionAsync(async () =>
+            {
+                var messages = new[]
+                {
+                new ChatMessage(ChatRole.System, CouncilText.CreateMinecraftSystemPrompt("single model",Logger)),
+                new ChatMessage(ChatRole.User, CreatePlanningPrompt())
+                };
+
+                var response = await ChatClient.GetResponseAsync(messages).ConfigureAwait(false);
+                aiPlan = response.Text;
+            }, "GeneratePlanAsync").ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "GeneratePlanAsync failed: {Message}", ex.Message);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+
+        }
+    }
+
+    async Task GenerateCouncilPlanAsync()
+    {
+        try
+        {
+            await RunUiActionAsync(async () =>
+       {
+           var result = await CouncilService.RunAsync(new MultiModelCouncilRequest
+           {
+               ModelNames = ParseCouncilModels().ToList(),
+               Prompt = CreatePlanningPrompt(),
+               MaxRounds = 0,
+               MaxOutputTokens = 1024,
+               MaxParallelModels = 1,
+               MaxContextTokens = 2048,
+               ModelTimeoutSeconds = 300,
+               OllamaKeepAlive = "0s",
+               OllamaNumGpu = useCpuOnlyCouncil ? 0 : null,
+               IncludeMemory = true,
+               SaveToMemory = true
+           }).ConfigureAwait(false);
+
+           lastCouncilResult = result;
+           aiPlan = result.FinalAnswer;
+           Notifier.ShowSuccess(toastName, "Council plan saved to log and memory.", "AI Council complete");
+       }, "GenerateCouncilPlanAsync").ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "GenerateCouncilPlanAsync failed: {Message}", ex.Message);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+
+        }
+    }
+
+    async Task RunCommandAsync()
+    {
+        try
+        {
+            if (workspace is null)
+            {
+                Notifier.ShowError(toastName, "Create a workspace first.", "No workspace");
+                return;
+            }
+
+            await RunUiActionAsync(async () =>
+            {
+                await RunCommandCoreAsync().ConfigureAwait(false);
+                if (lastCommandResult?.Succeeded == true)
+                    Notifier.ShowSuccess(toastName, "Command finished successfully.", "Command complete");
+                else
+                    Notifier.ShowError(toastName, $"Exit code {lastCommandResult?.ExitCode.ToString() ?? "unknown"}", "Command failed");
+            }, "RunCommandAsync").ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "RunCommandAsync failed: {Message}", ex.Message);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+
+        }
+
+    }
+
+    async Task RunCommandCoreAsync()
+    {
+        try
+        {
+            if (workspace is null)
+                throw new InvalidOperationException("Create a workspace first.");
+
+            lastCommandResult = await CommandRunner.RunAsync(
+                commandFileName,
+                commandArguments,
+                workspace.RootPath,
+                userConfirmed: true).ConfigureAwait(false);
+            ArgumentNullException.ThrowIfNull(lastCommandResult);
+            if (lastCommandResult.Succeeded)
+            {
+                SetDownloadArtifact(workspace.RootPath);
+            }
+            else
+            {
+                ClearDownloadArtifact();
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "RunCommandCoreAsync failed; command arguments were omitted from logs.");
+            ComponentActivity.RecordFailure(nameof(MinecraftModBuilder), "RunCommandCoreAsync", ex);
+            throw;
+        }
+
+    }
+
+    void ClearDownloadArtifact()
+    {
+        try
+        {
+            artifactDownloadUrl = null;
+            artifactDownloadRoute = null;
+            artifactFileName = null;
+            artifactPath = null;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "ClearDownloadArtifact failed: {Message}", ex.Message);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+
+        }
+
+    }
+
+    void SetDownloadArtifact(string workspaceRoot)
+    {
+        try
+        {
+            if (workspace is null)
+                return;
+
+            var buildDirectory = Path.Combine(workspaceRoot, "build");
+            if (!Directory.Exists(buildDirectory))
+            {
+                ClearDownloadArtifact();
+                return;
+            }
+
+            var zip = Directory.GetFiles(buildDirectory, "*.zip", SearchOption.TopDirectoryOnly)
+                .OrderByDescending(File.GetLastWriteTimeUtc)
+                .FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(zip))
+            {
+                ClearDownloadArtifact();
+                return;
+            }
+
+            artifactPath = zip;
+            artifactFileName = Path.GetFileName(zip);
+            var workspaceDirectory = Path.GetFileName(Path.TrimEndingDirectorySeparator(workspaceRoot));
+            if (string.IsNullOrWhiteSpace(workspaceDirectory))
+            {
+                ClearDownloadArtifact();
+                return;
+            }
+
+            artifactDownloadRoute = $"/__artifacts/minecraft/{Uri.EscapeDataString(workspaceDirectory)}/{Uri.EscapeDataString(artifactFileName)}";
+            artifactDownloadUrl = Navigation.ToAbsoluteUri(artifactDownloadRoute).ToString();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "SetDownloadArtifact failed: {Message} workspaceRoot {workspaceRoot}", ex.Message, workspaceRoot);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+
+        }
+
+    }
+
+    string CreatePlanningPrompt()
+    {
+        try
+        {
+            return string.Join(Environment.NewLine, new[]
+                {
+
+                    "Build target:",
+                    $"- Loader: {request.Loader}",
+                    $"- Minecraft: {request.MinecraftVersion}",
+                    $"- Java: {request.JavaVersion}",
+                    $"- Gradle: {request.GradleVersion}",
+                    $"- IDE: {request.Ide}",
+                    $"- Project: {request.ProjectName}",
+                    $"- Mod id: {request.ModId}",
+                    $"- Package: {request.PackageName}",
+                    $"- Workspace root: {workspace?.RootPath ?? "not created yet"}",
+                    "",
+                    "User request:",
+                    request.Description,
+                    "",
+                    "Return:",
+                    "1. Architecture and classes.",
+                    "2. Files to create or edit.",
+                    "3. Java code strategy, or explain why this target is command/datapack-only.",
+                    "4. Assets/data files needed.",
+                    "5. Build and test commands.",
+                    "6. User setup steps for JDK, Gradle, Eclipse/Minecraft launcher, Ollama, and LocalGPT AI Council.",
+                    "7. Risks or missing details to ask the user.",
+                    "8. Missing feature report for LocalGPT if the builder lacks a needed capability.",
+                    "",
+                    "Council rules:",
+                    "- Work kindly with the other models and correct each other directly.",
+                    "- Do not claim the mod was compiled or run unless the transcript contains command output.",
+                    "- If setup is incomplete, make a short user decision poll instead of guessing.",
+                    "- Mark version-sensitive dependency claims as Needs verification unless proven by a build."
+                });
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "CreatePlanningPrompt failed: {Message} ", ex.Message);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+            return string.Empty;
+        }
+    }
+
+    IEnumerable<string> ParseCouncilModels() =>
+        councilModels.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(model => !string.IsNullOrWhiteSpace(model));
+
+    void LoadLivingCitiesPrompt()
+    {
+        try
+        {
+            request.ProjectName = "LivingCities";
+            request.ModId = "living_cities";
+            request.PackageName = "com.localgpt.livingcities";
+            request.MinecraftVersion = "26.1";
+            request.JavaVersion = "25";
+            request.Loader = "Datapack";
+            request.IncludeLivingCitiesStarter = true;
+            request.Description = Catalog.LivingCitiesPrompt;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "LoadLivingCitiesPrompt failed: {Message} ", ex.Message);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+
+    }
+
+    async Task RunUiActionAsync(Func<Task> action, string operation)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+        isBusy = true;
+        ComponentActivity.RecordInformation(nameof(MinecraftModBuilder), operation, "The Minecraft workspace UI operation started.");
+        try
+        {
+            await action().ConfigureAwait(false);
+            ComponentActivity.RecordInformation(nameof(MinecraftModBuilder), operation, "The Minecraft workspace UI operation completed.");
+        }
+        catch (OperationCanceledException)
+        {
+            Logger.LogInformation("Minecraft UI operation {Operation} was cancelled.", operation);
+            ComponentActivity.RecordWarning(nameof(MinecraftModBuilder), operation, "The Minecraft workspace UI operation was cancelled.");
+            Notifier.ShowWarning(toastName, "The operation was cancelled.", "Operation cancelled");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Minecraft UI operation {Operation} failed; user input and generated content were omitted from logs.", operation);
+            ComponentActivity.RecordFailure(nameof(MinecraftModBuilder), operation, ex);
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+}

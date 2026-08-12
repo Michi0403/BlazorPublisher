@@ -1,0 +1,783 @@
+using DevExpress.Blazor;
+using LocalGPT.BusinessObjects;
+using LocalGPT.Interfaces;
+using DxThemes = DevExpress.Blazor.Themes;
+
+namespace LocalGPT.Services;
+
+/// <summary>
+/// Owns LocalGPT's selectable theme catalog and the two independently selectable theme layers
+/// for one Blazor circuit. The shell theme controls LocalGPT page surfaces and Bootstrap metadata;
+/// the component theme is applied through DevExpress' supported <see cref="IThemeChangeService"/>.
+/// </summary>
+public sealed class ThemeService
+{
+    /// <summary>
+    /// Stores default theme name.
+    /// </summary>
+    public const string DEFAULT_THEME_NAME = "office-white";
+    /// <summary>
+    /// Stores legacy theme cookie name.
+    /// </summary>
+    public const string LegacyThemeCookieName = "ActiveTheme";
+    /// <summary>
+    /// Stores shell theme cookie name.
+    /// </summary>
+    public const string ShellThemeCookieName = "ActiveShellTheme";
+    /// <summary>
+    /// Stores component theme cookie name.
+    /// </summary>
+    public const string ComponentThemeCookieName = "ActiveComponentTheme";
+    /// <summary>
+    /// Stores local theme contract path.
+    /// </summary>
+    public const string LocalThemeContractPath = "css/localgpt-theme-contract.css";
+    /// <summary>
+    /// Stores max fusion route steps.
+    /// </summary>
+    public const int MaxFusionRouteSteps = 256;
+
+    private readonly ILogger<ThemeService> logger;
+    private readonly IServiceActivityService serviceActivity;
+    private readonly IReadOnlyDictionary<string, string> highlightJsThemeNames;
+    private readonly Dictionary<string, Theme> themesByName;
+    private readonly Theme defaultTheme;
+    private readonly List<ThemeFusionStep> fusionRoute = [];
+    private Theme activeShellTheme;
+    private Theme activeComponentTheme;
+    private int nextFusionRouteSequence = 1;
+
+    /// <summary>
+    /// Runs the theme service operation.
+    /// </summary>
+    public ThemeService(
+        ILogger<ThemeService> logger,
+        IServiceActivityService serviceActivity)
+    {
+        this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        this.serviceActivity = serviceActivity ?? throw new ArgumentNullException(nameof(serviceActivity));
+        highlightJsThemeNames = CreateHighlightJsThemeNames();
+        ThemeSets = CreateSets();
+        themesByName = ThemeSets
+            .SelectMany(set => set.Themes)
+            .ToDictionary(theme => theme.Name, StringComparer.OrdinalIgnoreCase);
+        defaultTheme = FindThemeByName(DEFAULT_THEME_NAME)
+            ?? throw new InvalidOperationException($"The required default theme '{DEFAULT_THEME_NAME}' is not configured.");
+        activeShellTheme = defaultTheme;
+        activeComponentTheme = defaultTheme;
+    }
+
+    /// <summary>
+    /// Gets or sets active shell theme.
+    /// </summary>
+    public Theme ActiveShellTheme => activeShellTheme;
+    /// <summary>
+    /// Gets or sets active component theme.
+    /// </summary>
+    public Theme ActiveComponentTheme => activeComponentTheme;
+
+    /// <summary>
+    /// Compatibility alias for older diagnostics and components. The former single theme now maps
+    /// to the DevExpress component theme; new code should select the shell and component layers explicitly.
+    /// </summary>
+    public Theme ActiveTheme => ActiveComponentTheme;
+
+    /// <summary>
+    /// Gets or sets is initialized.
+    /// </summary>
+    public bool IsInitialized { get; private set; }
+    /// <summary>
+    /// Gets or sets theme sets.
+    /// </summary>
+    public List<ThemeSet> ThemeSets { get; }
+    /// <summary>
+    /// Gets or sets fusion route.
+    /// </summary>
+    public IReadOnlyList<ThemeFusionStep> FusionRoute => fusionRoute;
+    /// <summary>
+    /// Gets or sets theme change request dispatcher.
+    /// </summary>
+    public IThemeChangeRequestDispatcher? ThemeChangeRequestDispatcher { get; set; }
+    /// <summary>
+    /// Gets or sets theme load notifier.
+    /// </summary>
+    public IThemeLoadNotifier? ThemeLoadNotifier { get; set; }
+    /// <summary>
+    /// Occurs when active shell theme changed.
+    /// </summary>
+    public event Action<Theme>? ActiveShellThemeChanged;
+    /// <summary>
+    /// Occurs when active component theme changed.
+    /// </summary>
+    public event Action<Theme>? ActiveComponentThemeChanged;
+    /// <summary>
+    /// Occurs when active theme changed.
+    /// </summary>
+    public event Action<Theme>? ActiveThemeChanged;
+
+    /// <summary>
+    /// Gets theme or default.
+    /// </summary>
+    public Theme GetThemeOrDefault(string? themeName) {
+    try
+    {
+        return FindThemeByName(themeName) ?? defaultTheme;
+    }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(GetThemeOrDefault)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(GetThemeOrDefault)} failed.");
+        throw;
+    }
+}
+
+    /// <summary>
+    /// Gets theme title.
+    /// </summary>
+    public string GetThemeTitle(string? themeName) {
+    try
+    {
+        return FindThemeByName(themeName)?.Title
+        ?? (string.IsNullOrWhiteSpace(themeName) ? "Unknown theme" : themeName.Trim());
+    }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(GetThemeTitle)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(GetThemeTitle)} failed.");
+        throw;
+    }
+}
+
+    /// <summary>
+    /// Runs the replace fusion route operation.
+    /// </summary>
+    public void ReplaceFusionRoute(IEnumerable<ThemeFusionStep>? steps)
+    {
+        try
+        {
+            fusionRoute.Clear();
+            nextFusionRouteSequence = 1;
+
+            if (steps is not null)
+            {
+                foreach (var step in steps.TakeLast(MaxFusionRouteSteps))
+                {
+                    if (FindThemeByName(step.ThemeName) is null
+                        || !Enum.IsDefined(step.Target))
+                    {
+                        continue;
+                    }
+
+                    fusionRoute.Add(new ThemeFusionStep(
+                        nextFusionRouteSequence++,
+                        step.Target,
+                        step.ThemeName));
+                }
+            }
+
+            logger.LogInformation(
+                "Theme Fusion route restored with {StepCount} selection steps.",
+                fusionRoute.Count);
+        }
+        catch (Exception ex)
+        {
+            fusionRoute.Clear();
+            nextFusionRouteSequence = 1;
+            logger.LogError(ex, "Theme Fusion route restoration failed; the route was cleared.");
+            serviceActivity.RecordFailure(nameof(ThemeService), nameof(ReplaceFusionRoute), ex);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Ensures fusion route seeded.
+    /// </summary>
+    public void EnsureFusionRouteSeeded()
+    {
+        try
+        {
+            if (fusionRoute.Count > 0)
+                return;
+
+            RecordFusionStep(ThemeApplicationTarget.Shell, activeShellTheme);
+            RecordFusionStep(ThemeApplicationTarget.Components, activeComponentTheme);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Theme Fusion route seeding failed.");
+            serviceActivity.RecordFailure(nameof(ThemeService), nameof(EnsureFusionRouteSeeded), ex);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Runs the record fusion step operation.
+    /// </summary>
+    public ThemeFusionStep RecordFusionStep(ThemeApplicationTarget target, Theme theme)
+    {
+        ArgumentNullException.ThrowIfNull(theme);
+
+        try
+        {
+            if (!Enum.IsDefined(target))
+                throw new ArgumentOutOfRangeException(nameof(target));
+
+            if (FindThemeByName(theme.Name) is null)
+                throw new InvalidOperationException("Only catalog themes can be added to the Theme Fusion route.");
+
+            if (fusionRoute.Count >= MaxFusionRouteSteps)
+                fusionRoute.RemoveAt(0);
+
+            var step = new ThemeFusionStep(nextFusionRouteSequence++, target, theme.Name);
+            fusionRoute.Add(step);
+
+            logger.LogInformation(
+                "Theme Fusion route step {RouteStep}: {ThemeTarget} selected {ThemeName}.",
+                step.Sequence,
+                target,
+                theme.Name);
+            serviceActivity.RecordInformation(
+                nameof(ThemeService),
+                nameof(RecordFusionStep),
+                $"Theme Fusion route step {step.Sequence}: {target} selected {theme.Name}.");
+            return step;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Theme Fusion route recording failed; selected theme details were omitted from the error message.");
+            serviceActivity.RecordFailure(nameof(ThemeService), nameof(RecordFusionStep), ex);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Runs the reset fusion route to current selection operation.
+    /// </summary>
+    public void ResetFusionRouteToCurrentSelection()
+    {
+        try
+        {
+            fusionRoute.Clear();
+            nextFusionRouteSequence = 1;
+            RecordFusionStep(ThemeApplicationTarget.Shell, activeShellTheme);
+            RecordFusionStep(ThemeApplicationTarget.Components, activeComponentTheme);
+            logger.LogInformation(
+                "Theme Fusion route reset to current Base Theme {ShellTheme} and Style Layer {ComponentTheme}.",
+                activeShellTheme.Name,
+                activeComponentTheme.Name);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Theme Fusion route reset failed.");
+            serviceActivity.RecordFailure(nameof(ThemeService), nameof(ResetFusionRouteToCurrentSelection), ex);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Gets theme layer CSS class.
+    /// </summary>
+    public string GetThemeLayerCssClass(string? shellThemeName, string? componentThemeName)
+    {
+        try
+        {
+            var shellToken = GetThemeCssToken(shellThemeName);
+            var componentToken = GetThemeCssToken(componentThemeName);
+            return $"theme-{shellToken} component-theme-{componentToken}";
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Theme layer CSS class generation failed; theme names were omitted from logs.");
+            serviceActivity.RecordFailure(nameof(ThemeService), nameof(GetThemeLayerCssClass), ex);
+            return $"theme-{DEFAULT_THEME_NAME} component-theme-{DEFAULT_THEME_NAME}";
+        }
+    }
+
+    /// <summary>
+    /// Gets theme CSS token.
+    /// </summary>
+    private string GetThemeCssToken(string? themeName)
+    {
+        try
+        {
+            var validatedTheme = GetThemeOrDefault(themeName);
+            return validatedTheme.Name.Replace(" ", "-", StringComparison.Ordinal).ToLowerInvariant();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Theme CSS token generation failed; theme details were omitted from logs.");
+            serviceActivity.RecordFailure(nameof(ThemeService), nameof(GetThemeCssToken), ex);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Finds theme by name.
+    /// </summary>
+    public Theme? FindThemeByName(string? themeName)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(themeName))
+                return null;
+
+            return themesByName.GetValueOrDefault(themeName.Trim());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Theme lookup failed; the requested theme name was omitted from logs.");
+            serviceActivity.RecordFailure(nameof(ThemeService), nameof(FindThemeByName), ex);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Runs the initialize themes operation.
+    /// </summary>
+    public void InitializeThemes(string? shellThemeName, string? componentThemeName)
+    {
+        try
+        {
+            if (IsInitialized)
+                return;
+
+            activeShellTheme = GetThemeOrDefault(shellThemeName);
+            activeComponentTheme = GetThemeOrDefault(componentThemeName);
+            IsInitialized = true;
+            logger.LogInformation(
+                "Theme state initialized with shell {ShellTheme} and DevExpress components {ComponentTheme}.",
+                activeShellTheme.Name,
+                activeComponentTheme.Name);
+            serviceActivity.RecordInformation(
+                nameof(ThemeService),
+                nameof(InitializeThemes),
+                $"Theme Fusion initialized with base {activeShellTheme.Name} and style layer {activeComponentTheme.Name}.");
+        }
+        catch (Exception ex)
+        {
+            activeShellTheme = defaultTheme;
+            activeComponentTheme = defaultTheme;
+            IsInitialized = true;
+            logger.LogError(ex, "Theme Fusion initialization failed; LocalGPT restored the Base Theme and Style Layer to the default.");
+            serviceActivity.RecordFailure(nameof(ThemeService), nameof(InitializeThemes), ex);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Sets active shell theme by name.
+    /// </summary>
+    public void SetActiveShellThemeByName(string? themeName) {
+    try
+    {
+        SetActiveShellTheme(GetThemeOrDefault(themeName));
+    }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(SetActiveShellThemeByName)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(SetActiveShellThemeByName)} failed.");
+        throw;
+    }
+}
+    /// <summary>
+    /// Sets active component theme by name.
+    /// </summary>
+    public void SetActiveComponentThemeByName(string? themeName) {
+    try
+    {
+        SetActiveComponentTheme(GetThemeOrDefault(themeName));
+    }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(SetActiveComponentThemeByName)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(SetActiveComponentThemeByName)} failed.");
+        throw;
+    }
+}
+
+    /// <summary>
+    /// Sets active shell theme.
+    /// </summary>
+    public void SetActiveShellTheme(Theme theme) {
+    try
+    {
+        SetActiveThemeCore(
+            theme,
+            ThemeApplicationTarget.Shell,
+            ref activeShellTheme,
+            changedTheme => ActiveShellThemeChanged?.Invoke(changedTheme));
+    }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(SetActiveShellTheme)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(SetActiveShellTheme)} failed.");
+        throw;
+    }
+}
+
+    /// <summary>
+    /// Sets active component theme.
+    /// </summary>
+    public void SetActiveComponentTheme(Theme theme) {
+    try
+    {
+        SetActiveThemeCore(
+            theme,
+            ThemeApplicationTarget.Components,
+            ref activeComponentTheme,
+            changedTheme => ActiveComponentThemeChanged?.Invoke(changedTheme));
+    }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(SetActiveComponentTheme)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(SetActiveComponentTheme)} failed.");
+        throw;
+    }
+}
+
+    /// <summary>
+    /// Backward-compatible single-theme setter. It intentionally updates both layers.
+    /// </summary>
+    public void SetActiveThemeByName(string? themeName) {
+    try
+    {
+        SetActiveTheme(GetThemeOrDefault(themeName));
+    }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(SetActiveThemeByName)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(SetActiveThemeByName)} failed.");
+        throw;
+    }
+}
+
+    /// <summary>
+    /// Sets active theme.
+    /// </summary>
+    public void SetActiveTheme(Theme theme)
+    {
+        ArgumentNullException.ThrowIfNull(theme);
+        var previousShell = activeShellTheme;
+        var previousComponent = activeComponentTheme;
+        try
+        {
+            SetActiveShellTheme(theme);
+            SetActiveComponentTheme(theme);
+            ActiveThemeChanged?.Invoke(theme);
+        }
+        catch (Exception ex)
+        {
+            activeShellTheme = previousShell;
+            activeComponentTheme = previousComponent;
+            logger.LogError(ex, "The compatibility theme change failed; both prior theme layers were restored.");
+            serviceActivity.RecordFailure(nameof(ThemeService), nameof(SetActiveTheme), ex);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Sets active theme core.
+    /// </summary>
+    private void SetActiveThemeCore(
+        Theme theme,
+        ThemeApplicationTarget target,
+        ref Theme activeTheme,
+        Action<Theme>? changed)
+    {
+        ArgumentNullException.ThrowIfNull(theme);
+
+        if (ReferenceEquals(activeTheme, theme)
+            || activeTheme.Name.Equals(theme.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            activeTheme = theme;
+            IsInitialized = true;
+            return;
+        }
+
+        var previousTheme = activeTheme;
+        activeTheme = theme;
+        IsInitialized = true;
+        try
+        {
+            logger.LogInformation(
+                "{ThemeTarget} theme changed from {PreviousTheme} to {ThemeName}.",
+                target,
+                previousTheme.Name,
+                theme.Name);
+            changed?.Invoke(theme);
+            serviceActivity.RecordInformation(
+                nameof(ThemeService),
+                target == ThemeApplicationTarget.Shell ? nameof(SetActiveShellTheme) : nameof(SetActiveComponentTheme),
+                $"The {target} theme changed from {previousTheme.Name} to {theme.Name}.");
+        }
+        catch (Exception ex)
+        {
+            activeTheme = previousTheme;
+            logger.LogError(
+                ex,
+                "The {ThemeTarget} theme notification for {ThemeName} failed; the previous theme was restored.",
+                target,
+                theme.Name);
+            serviceActivity.RecordFailure(
+                nameof(ThemeService),
+                target == ThemeApplicationTarget.Shell ? nameof(SetActiveShellTheme) : nameof(SetActiveComponentTheme),
+                ex);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Compatibility helper for diagnostics and older code. Runtime component switching uses
+    /// IThemeChangeService and the theme's ITheme instance instead of replacing this link manually.
+    /// </summary>
+    public string GetThemeCssUrl(Theme theme)
+    {
+    try
+    {
+            ArgumentNullException.ThrowIfNull(theme);
+            return theme.IsBootstrapNative
+                ? "_content/DevExpress.Blazor.Themes/bootstrap-external.bs5.min.css"
+                : theme.Name switch
+                {
+                    "blazing-berry" => "_content/DevExpress.Blazor.Themes/blazing-berry.bs5.min.css",
+                    "blazing-dark" => "_content/DevExpress.Blazor.Themes/blazing-dark.bs5.min.css",
+                    "purple" => "_content/DevExpress.Blazor.Themes/purple.bs5.min.css",
+                    "office-white" => "_content/DevExpress.Blazor.Themes/office-white.bs5.min.css",
+                    _ => string.Empty
+                };
+    
+    }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(GetThemeCssUrl)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(GetThemeCssUrl)} failed.");
+        throw;
+    }
+}
+
+    /// <summary>
+    /// Compatibility helper for diagnostics. Bootstrap theme files are registered on the
+    /// corresponding DevExpress BootstrapExternal ITheme via AddFilePaths.
+    /// </summary>
+    public string GetBootstrapThemeCssUrl(Theme theme)
+    {
+    try
+    {
+            ArgumentNullException.ThrowIfNull(theme);
+            return theme.IsBootstrapNative
+                ? $"switcher-resources/css/themes/{theme.ThemePath}/bootstrap.min.css"
+                : string.Empty;
+    
+    }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(GetBootstrapThemeCssUrl)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(GetBootstrapThemeCssUrl)} failed.");
+        throw;
+    }
+}
+
+    /// <summary>
+    /// Gets highlight jstheme CSS URL.
+    /// </summary>
+    public string GetHighlightJSThemeCssUrl(Theme theme)
+    {
+    try
+    {
+            ArgumentNullException.ThrowIfNull(theme);
+            var highlightThemeName = highlightJsThemeNames.GetValueOrDefault(theme.Name, "default");
+            return $"css/highlight/{highlightThemeName}.css";
+    
+    }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(GetHighlightJSThemeCssUrl)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(GetHighlightJSThemeCssUrl)} failed.");
+        throw;
+    }
+}
+
+    /// <summary>
+    /// Creates highlight JavaScript theme names.
+    /// </summary>
+    private IReadOnlyDictionary<string, string> CreateHighlightJsThemeNames() {
+    try
+    {
+        return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            [DEFAULT_THEME_NAME] = "default",
+            ["blazing-berry"] = "default",
+            ["blazing-dark"] = "androidstudio",
+            ["fluent-light"] = "default",
+            ["fluent-dark"] = "androidstudio",
+            ["cyborg"] = "androidstudio",
+            ["default-dark"] = "androidstudio",
+            ["solar"] = "androidstudio",
+            ["superhero"] = "androidstudio"
+        };
+    }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(CreateHighlightJsThemeNames)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(CreateHighlightJsThemeNames)} failed.");
+        throw;
+    }
+}
+
+    /// <summary>
+    /// Creates sets.
+    /// </summary>
+    private List<ThemeSet> CreateSets()
+    {
+    try
+    {
+            var classicThemes = new ThemeSet(
+                "DevExpress Classic Themes",
+                CreateClassic("blazing-berry", "Blazing Berry", DxThemes.BlazingBerry),
+                CreateClassic("blazing-dark", "Blazing Dark", DxThemes.BlazingDark, "dark"),
+                CreateClassic("purple", "Purple", DxThemes.Purple),
+                CreateClassic(DEFAULT_THEME_NAME, "Office White", DxThemes.OfficeWhite));
+
+            var fluentThemes = new ThemeSet(
+                "DevExpress Fluent Themes",
+                CreateFluent("fluent-light", "Fluent Light", ThemeMode.Light),
+                CreateFluent("fluent-dark", "Fluent Dark", ThemeMode.Dark));
+
+            var bootstrapThemes = new ThemeSet(
+                "Bootstrap Themes",
+                CreateBootstrap("default", "Bootstrap Default", "default", "light"),
+                CreateBootstrap("default-dark", "Bootstrap Default Dark", "default", "dark"),
+                CreateBootstrap("cerulean"),
+                CreateBootstrap("cyborg", bootstrapMode: "dark"),
+                CreateBootstrap("flatly"),
+                CreateBootstrap("journal"),
+                CreateBootstrap("litera"),
+                CreateBootstrap("lumen"),
+                CreateBootstrap("lux"),
+                CreateBootstrap("pulse"),
+                CreateBootstrap("simplex"),
+                CreateBootstrap("solar", bootstrapMode: "dark"),
+                CreateBootstrap("superhero", bootstrapMode: "dark"),
+                CreateBootstrap("united"),
+                CreateBootstrap("yeti"));
+
+            return [classicThemes, fluentThemes, bootstrapThemes];
+    
+    }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(CreateSets)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(CreateSets)} failed.");
+        throw;
+    }
+}
+
+    /// <summary>
+    /// Creates classic.
+    /// </summary>
+    private Theme CreateClassic(string name, string title, DxTheme sourceTheme, string bootstrapMode = "light")
+    {
+    try
+    {
+            var devExpressTheme = sourceTheme.Clone(properties =>
+            {
+                properties.Name = $"LocalGPT-{name}";
+                properties.AddFilePaths(LocalThemeContractPath);
+            });
+            return new Theme(name, devExpressTheme, false, title, bootstrapMode);
+    
+    }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(CreateClassic)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(CreateClassic)} failed.");
+        throw;
+    }
+}
+
+    /// <summary>
+    /// Creates fluent.
+    /// </summary>
+    private Theme CreateFluent(string name, string title, ThemeMode mode)
+    {
+    try
+    {
+            var devExpressTheme = DxThemes.Fluent.Clone(properties =>
+            {
+                properties.Name = $"LocalGPT-{name}";
+                properties.Mode = mode;
+                properties.ApplyToPageElements = false;
+                properties.UseBootstrapStyles = true;
+                properties.AddFilePaths(LocalThemeContractPath);
+            });
+            return new Theme(name, devExpressTheme, false, title, mode == ThemeMode.Dark ? "dark" : "light");
+    
+    }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(CreateFluent)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(CreateFluent)} failed.");
+        throw;
+    }
+}
+
+    /// <summary>
+    /// Creates bootstrap.
+    /// </summary>
+    private Theme CreateBootstrap(
+        string name,
+        string? title = null,
+        string? themePath = null,
+        string bootstrapMode = "light")
+    {
+    try
+    {
+            var resolvedThemePath = string.IsNullOrWhiteSpace(themePath) ? name : themePath;
+            var bootstrapPath = $"switcher-resources/css/themes/{resolvedThemePath}/bootstrap.min.css";
+            var devExpressTheme = DxThemes.BootstrapExternal.Clone(properties =>
+            {
+                properties.Name = $"LocalGPT-bootstrap-{name}";
+                properties.AddFilePaths(bootstrapPath);
+                properties.AddFilePaths(LocalThemeContractPath);
+            });
+            return new Theme(name, devExpressTheme, true, title, bootstrapMode, resolvedThemePath);
+    
+    }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(CreateBootstrap)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(ThemeService)}.{nameof(CreateBootstrap)} failed.");
+        throw;
+    }
+}
+}

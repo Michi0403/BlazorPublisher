@@ -1,0 +1,959 @@
+@rendermode InteractiveServer
+@page "/database"
+@inject CouncilRuntimeService CouncilRuntime
+@inject CouncilTextService CouncilText
+@inject LocalGptCatalogService Catalog
+@inject SqliteGridPresentationService GridPresentation
+@inject IChatMemoryService ChatMemory
+@inject IApplicationLogReaderService ApplicationLogs
+@inject ICouncilKnowledgeService CouncilKnowledge
+@inject ISqliteTableEditorService TableEditor
+@inject ISqliteEditorPreferenceService EditorPreferences
+@inject IKnowledgeRatingService KnowledgeRatings
+@inject ILogger<Database> Logger
+@inject INotificationService Notifier
+@inject IComponentActivityService ComponentActivity
+
+<PageTitle>SQLite Database</PageTitle>
+
+<main class="database-page">
+    <ToastWrapper Name="@toastName" />
+
+    <section class="database-header">
+        <div>
+            <h1>SQLite Database</h1>
+            <p>Inspect and edit LocalGPT memory, council knowledge, application logs, and other local tables.</p>
+        </div>
+        <DxButton Text="Refresh"
+                  RenderStyle="ButtonRenderStyle.Secondary"
+                  RenderStyleMode="ButtonRenderStyleMode.Outline"
+                  Enabled="@(!isBusy)"
+                  Click="RefreshAllAsync" />
+    </section>
+
+    <section class="knowledge-panel">
+        <div class="panel-heading">
+            <div>
+                <h2>Council Knowledge</h2>
+                <p>Shared notes the council can reuse in future prompts. Edit this like a grounded project notebook.</p>
+                <p class="hint">@KnowledgeReviewSummary</p>
+            </div>
+            <DxButton Text="New Knowledge"
+                      RenderStyle="ButtonRenderStyle.Primary"
+                      RenderStyleMode="ButtonRenderStyleMode.Outline"
+                      Enabled="@(!isBusy)"
+                      Click="NewKnowledgeEntry" />
+        </div>
+
+        <div class="knowledge-layout">
+            <div>
+                <DxGrid Data="@KnowledgeEntries"
+                        PageSize="8"
+                        ShowSearchBox="true"
+                        TextWrapEnabled="true"
+                        CssClass="database-grid">
+                    <Columns>
+                        <DxGridDataColumn FieldName="@nameof(CouncilKnowledgeEntry.Topic)" Caption="Topic" />
+                        <DxGridDataColumn FieldName="@nameof(CouncilKnowledgeEntry.Scope)" Caption="Scope" />
+                        <DxGridDataColumn FieldName="@nameof(CouncilKnowledgeEntry.Tags)" Caption="Tags" />
+                        <DxGridDataColumn FieldName="@nameof(CouncilKnowledgeEntry.Confidence)" Caption="Confidence" />
+                        <DxGridDataColumn FieldName="@nameof(CouncilKnowledgeEntry.VerificationStatus)" Caption="Status" />
+                        <DxGridDataColumn FieldName="@nameof(CouncilKnowledgeEntry.ReviewStatus)" Caption="Review" />
+                        <DxGridDataColumn FieldName="@nameof(CouncilKnowledgeEntry.ExpiresAtUtc)" Caption="Expires UTC" />
+                        <DxGridDataColumn FieldName="@nameof(CouncilKnowledgeEntry.LastVerifiedAtUtc)" Caption="Verified UTC" />
+                        <DxGridDataColumn FieldName="@nameof(CouncilKnowledgeEntry.LastUsedAtUtc)" Caption="Used UTC" />
+                        <DxGridDataColumn FieldName="@nameof(CouncilKnowledgeEntry.UpdatedAtUtc)" Caption="Updated UTC" />
+                        <DxGridDataColumn FieldName="@nameof(CouncilKnowledgeEntry.IsUserApproved)" Caption="User Approved" />
+                        <DxGridDataColumn FieldName="@nameof(CouncilKnowledgeEntry.IsPinned)" Caption="Pinned" />
+                    </Columns>
+                </DxGrid>
+                <div class="selector-row">
+                    <span title="Choose a knowledge entry to edit in the form.">
+                        <DxComboBox Data="@KnowledgeEntries"
+                                    Value="@SelectedKnowledgeEntry"
+                                    TextFieldName="@nameof(CouncilKnowledgeEntry.Topic)"
+                                    CssClass="knowledge-selector"
+                                    ValueChanged="@((CouncilKnowledgeEntry entry) => SelectKnowledgeEntry(entry))" />
+                    </span>
+                </div>
+            </div>
+
+            <div class="editor-panel">
+                <label title="Short name used by the council briefing.">
+                    Topic
+                    <DxTextBox @bind-Text="KnowledgeEdit.Topic" />
+                </label>
+                <label title="Use a scope such as AI Council, Minecraft Builder, DevExpress, setup, or diagnostics.">
+                    Scope
+                    <DxTextBox @bind-Text="KnowledgeEdit.Scope" />
+                </label>
+                <label title="The actual reusable note. Keep facts grounded and correct stale notes later.">
+                    Content
+                    <DxMemo @bind-Text="KnowledgeEdit.Content" Rows="7" />
+                </label>
+                <label title="Docs, official references, sample repositories, or URLs the council wants next time.">
+                    Helpful Sources
+                    <DxMemo @bind-Text="KnowledgeEdit.HelpfulSources" Rows="3" />
+                </label>
+                <label title="Semicolon-separated tags help the council and humans filter notes.">
+                    Tags
+                    <DxTextBox @bind-Text="KnowledgeEdit.Tags" />
+                </label>
+                <label title="Trust bucket used by the council. Suggested values: SourceBacked, UserVerified, ModelSuggested, NeedsVerification, Archived.">
+                    Verification Status
+                    <DxTextBox @bind-Text="KnowledgeEdit.VerificationStatus" />
+                </label>
+                <label title="Lifecycle bucket shown to humans and used by the council briefing filter.">
+                    Review Status
+                    <DxComboBox Data="@ReviewStatusOptions"
+                                @bind-Value="KnowledgeEdit.ReviewStatus" />
+                </label>
+                <label title="Optional UTC date after which this note should stop influencing the council. Use ISO format such as 2026-06-30T12:00:00Z.">
+                    Expires At UTC
+                    <DxTextBox Text="@CouncilText.FormatNullableUtc(KnowledgeEdit.ExpiresAtUtc, Logger)"
+                               TextChanged="@((string value) => KnowledgeEdit.ExpiresAtUtc = CouncilText.ParseNullableUtc(value,Logger))" />
+                </label>
+                <label title="UTC date when a human or source-backed import last verified this note.">
+                    Last Verified UTC
+                    <DxTextBox Text="@CouncilText.FormatNullableUtc(KnowledgeEdit.LastVerifiedAtUtc, Logger)"
+                               TextChanged="@((string value) => KnowledgeEdit.LastVerifiedAtUtc = CouncilText.ParseNullableUtc(value,Logger))" />
+                </label>
+                <label title="Optional knowledge id that replaces this entry when Review Status is Superseded.">
+                    Superseded By Knowledge Id
+                    <DxTextBox Text="@CouncilText.FormatNullableGuid(KnowledgeEdit.SupersededByKnowledgeId, Logger)"
+                               TextChanged="@((string value) => KnowledgeEdit.SupersededByKnowledgeId = CouncilText.ParseNullableGuid(value,Logger))" />
+                </label>
+                <label title="Why this note needs refresh, diagnostics, expiry, or replacement.">
+                    Staleness Reason
+                    <DxMemo @bind-Text="KnowledgeEdit.StalenessReason" Rows="2" />
+                </label>
+                <label title="Who or what detected the stale state. Examples: user, LocalGPT importer, DXAiChat parser, diagnostic route.">
+                    Staleness Detected By
+                    <DxTextBox @bind-Text="KnowledgeEdit.StalenessDetectedBy" />
+                </label>
+                <label title="Source fingerprint. Source-backed imports fill this automatically; humans can paste a source hash when needed.">
+                    Source Hash
+                    <DxTextBox @bind-Text="KnowledgeEdit.SourceHash" />
+                </label>
+                <label title="Optional UTC date of the source material this knowledge summarizes.">
+                    Source Date UTC
+                    <DxTextBox Text="@CouncilText.FormatNullableUtc(KnowledgeEdit.SourceDateUtc, Logger)"
+                               TextChanged="@((string value) => KnowledgeEdit.SourceDateUtc = CouncilText.ParseNullableUtc(value,Logger))" />
+                </label>
+                <div class="form-row">
+                    <label title="How reliable the note currently is.">
+                        Confidence
+                        <DxSpinEdit @bind-Value="KnowledgeEdit.Confidence" MinValue="0" MaxValue="100" />
+                    </label>
+                    <DxCheckBox @bind-Checked="KnowledgeEdit.IsUserApproved" Text="User approved" />
+                    <DxCheckBox @bind-Checked="KnowledgeEdit.IsPinned" Text="Pinned" />
+                    <DxCheckBox @bind-Checked="KnowledgeEdit.IsArchived" Text="Archived" />
+                </div>
+                <fieldset class="knowledge-rating-panel">
+                    <legend>Human knowledge rating</legend>
+                    <p class="hint">Rate and explicitly approve collected knowledge before the council treats it as grounded input.</p>
+                    <div class="form-row">
+                        <label>Accuracy
+                            <DxComboBox Data="@KnowledgeAccuracyOptions" @bind-Value="KnowledgeRatingEdit.AccuracyStatus" />
+                        </label>
+                        <label>Rating
+                            <DxSpinEdit @bind-Value="KnowledgeRatingEdit.Rating" MinValue="0" MaxValue="100" />
+                        </label>
+                        <DxCheckBox @bind-Checked="KnowledgeRatingEdit.ApprovedForCouncilUse" Text="Approve for council use" />
+                    </div>
+                    <label>Rating notes
+                        <DxMemo @bind-Text="KnowledgeRatingEdit.Notes" Rows="2" />
+                    </label>
+                    <DxButton Text="Save human rating"
+                              RenderStyle="ButtonRenderStyle.Success"
+                              RenderStyleMode="ButtonRenderStyleMode.Outline"
+                              Enabled="@(!isBusy && SelectedKnowledgeEntry is not null)"
+                              Click="SaveKnowledgeRatingAsync" />
+                </fieldset>
+                <div class="run-row">
+                    <DxButton Text="Mark Current"
+                              RenderStyle="ButtonRenderStyle.Success"
+                              RenderStyleMode="ButtonRenderStyleMode.Outline"
+                              Enabled="@(!isBusy)"
+                              Click="MarkKnowledgeCurrent" />
+                    <DxButton Text="Needs Review"
+                              RenderStyle="ButtonRenderStyle.Warning"
+                              RenderStyleMode="ButtonRenderStyleMode.Outline"
+                              Enabled="@(!isBusy)"
+                              Click="MarkKnowledgeNeedsUserReview" />
+                    <DxButton Text="Source Refresh"
+                              RenderStyle="ButtonRenderStyle.Secondary"
+                              RenderStyleMode="ButtonRenderStyleMode.Outline"
+                              Enabled="@(!isBusy)"
+                              Click="MarkKnowledgeNeedsSourceRefresh" />
+                    <DxButton Text="Expired"
+                              RenderStyle="ButtonRenderStyle.Danger"
+                              RenderStyleMode="ButtonRenderStyleMode.Outline"
+                              Enabled="@(!isBusy)"
+                              Click="MarkKnowledgeExpired" />
+                </div>
+                <div class="run-row">
+                    <DxButton Text="Save Knowledge"
+                              RenderStyle="ButtonRenderStyle.Primary"
+                              RenderStyleMode="ButtonRenderStyleMode.Contained"
+                              Enabled="@(!isBusy)"
+                              Click="SaveKnowledgeAsync" />
+                    <DxButton Text="Delete Knowledge"
+                              RenderStyle="ButtonRenderStyle.Danger"
+                              RenderStyleMode="ButtonRenderStyleMode.Outline"
+                              Enabled="@(!isBusy && SelectedKnowledgeEntry is not null)"
+                              Click="DeleteKnowledgeAsync" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="table-panel">
+        <div class="panel-heading">
+            <div>
+                <h2>Live SQLite Tables</h2>
+                <p>@TableEditor.DatabasePath</p>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(statusText))
+            {
+                <span class="status-text">@statusText</span>
+            }
+        </div>
+
+        <div class="table-toolbar">
+            <span title="Select any LocalGPT SQLite table except internal sqlite_* tables.">
+                <DxComboBox Data="@Tables"
+                            Value="@SelectedTable"
+                            TextFieldName="@nameof(SqliteTableSummary.Name)"
+                            CssClass="table-selector"
+                            ValueChanged="@((SqliteTableSummary table) => SelectTableAsync(table))" />
+            </span>
+            <span title="Limit the preview size so large logs and chat history stay responsive.">
+                <DxSpinEdit @bind-Value="RowLimit" MinValue="10" MaxValue="500" Increment="10" />
+            </span>
+            <DxButton Text="Load Table"
+                      RenderStyle="ButtonRenderStyle.Secondary"
+                      RenderStyleMode="ButtonRenderStyleMode.Contained"
+                      Enabled="@(!isBusy && SelectedTable is not null)"
+                      Click="LoadSelectedTableAsync" />
+            <DxButton Text="New Row"
+                      RenderStyle="ButtonRenderStyle.Primary"
+                      RenderStyleMode="ButtonRenderStyleMode.Outline"
+                      Enabled="@(!isBusy && CurrentTable is not null)"
+                      Click="NewSqliteRow" />
+        </div>
+
+        @if (Tables.Count > 0)
+        {
+            <DxGrid Data="@Tables"
+                    PageSize="8"
+                    TextWrapEnabled="true"
+                    CssClass="database-grid table-list">
+                <Columns>
+                    <DxGridDataColumn FieldName="@nameof(SqliteTableSummary.Name)" Caption="Table" />
+                    <DxGridDataColumn FieldName="@nameof(SqliteTableSummary.RowCount)" Caption="Rows" />
+                    <DxGridDataColumn FieldName="@nameof(SqliteTableSummary.ColumnCount)" Caption="Columns" />
+                    <DxGridDataColumn FieldName="@nameof(SqliteTableSummary.HasPrimaryKey)" Caption="Primary Key" />
+                </Columns>
+            </DxGrid>
+        }
+
+        @if (CurrentTable is not null)
+        {
+            <div class="table-workspace">
+                <div class="table-preview">
+                    <h3>@CurrentTable.TableName</h3>
+                    <DxGrid Data="@GridRows"
+                            PageSize="15"
+                            ShowSearchBox="true"
+                            TextWrapEnabled="true"
+                            CssClass="database-grid database-grid-preview">
+                        <Columns>
+                            <DxGridDataColumn FieldName="__rowid" Caption="rowid" />
+                            @foreach (var column in CurrentTable.Columns)
+                            {
+                                <DxGridDataColumn FieldName="@column.Name" Caption="@column.Name" />
+                            }
+                        </Columns>
+                    </DxGrid>
+                </div>
+
+                <div class="editor-panel">
+                    <label title="Select a row to edit. Use New Row for insertion.">
+                        Row
+                        <DxComboBox Data="@CurrentTable.Rows"
+                                    Value="@SelectedRow"
+                                    TextFieldName="@nameof(SqliteRowSnapshot.DisplayName)"
+                                    ValueChanged="@((SqliteRowSnapshot row) => SelectSqliteRow(row))" />
+                    </label>
+                    <p class="hint">Primary-key columns are editable only for a new row. Type <code>[null]</code> to save NULL in editable columns.</p>
+                    @foreach (var column in CurrentTable.Columns)
+                    {
+                        var value = GetEditValue(column.Name);
+                        var editorKind = GetEditorKind(column, value);
+                        var readOnly = column.IsPrimaryKey && SelectedRow is not null;
+                        <div class="sqlite-field-editor" title="@GridPresentation.BuildColumnTitle(column, Logger)">
+                            <div class="sqlite-field-heading">
+                                <label>@column.Name <small>@column.Type@if (column.IsPrimaryKey) { <text> primary key</text> }</small></label>
+                                <div class="sqlite-editor-choice">
+                                    <DxComboBox Data="@EditorKindOptions" Value="@editorKind" ValueChanged="@((string kind) => SetEditorKind(column, kind))" />
+                                    <DxButton Text="Remember" RenderStyle="ButtonRenderStyle.Secondary" RenderStyleMode="ButtonRenderStyleMode.Outline" Enabled="@(!isBusy)" Click="@(() => SaveEditorPreferenceAsync(column))" />
+                                </div>
+                            </div>
+                            @switch (editorKind)
+                            {
+                                case "LongText":
+                                case "Json":
+                                    <DxMemo Text="@value" TextChanged="@((string newValue) => SetEditValue(column.Name, newValue))" Rows="4" ReadOnly="@readOnly" />
+                                    break;
+                                case "Boolean":
+                                    <DxComboBox Data="@BooleanValueOptions" Value="@value" ValueChanged="@((string newValue) => SetEditValue(column.Name, newValue))" ReadOnly="@readOnly" />
+                                    break;
+                                case "Secret":
+                                    <input type="password" value="@value" readonly="@readOnly" @onchange="@((ChangeEventArgs args) => SetEditValue(column.Name, args.Value?.ToString() ?? string.Empty))" />
+                                    break;
+                                case "Number":
+                                    <input type="number" step="any" value="@value" readonly="@readOnly" @onchange="@((ChangeEventArgs args) => SetEditValue(column.Name, args.Value?.ToString() ?? string.Empty))" />
+                                    break;
+                                case "DateTime":
+                                    <input type="datetime-local" value="@ToDateTimeLocalValue(value)" readonly="@readOnly" @onchange="@((ChangeEventArgs args) => SetEditValue(column.Name, args.Value?.ToString() ?? string.Empty))" />
+                                    break;
+                                default:
+                                    <DxTextBox Text="@value" TextChanged="@((string newValue) => SetEditValue(column.Name, newValue))" ReadOnly="@readOnly" />
+                                    break;
+                            }
+                            @if (EditorOverrides.TryGetValue(column.Name, out var preference) && !string.IsNullOrWhiteSpace(preference.InputMask))
+                            {
+                                <small class="hint">Mask hint: @preference.InputMask</small>
+                            }
+                        </div>
+                    }
+                    <div class="run-row">
+                        <DxButton Text="Save Row"
+                                  RenderStyle="ButtonRenderStyle.Primary"
+                                  RenderStyleMode="ButtonRenderStyleMode.Contained"
+                                  Enabled="@(!isBusy && CurrentTable is not null)"
+                                  Click="SaveSqliteRowAsync" />
+                        <DxButton Text="Delete Row"
+                                  RenderStyle="ButtonRenderStyle.Danger"
+                                  RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                  Enabled="@(!isBusy && SelectedRow is not null)"
+                                  Click="DeleteSqliteRowAsync" />
+                    </div>
+                </div>
+            </div>
+        }
+    </section>
+</main>
+
+@code {
+    readonly string toastName = "DatabaseToasts";
+    readonly string[] ReviewStatusOptions =
+    [
+        "Current",
+        "NeedsUserReview",
+        "NeedsSourceRefresh",
+        "NeedsDiagnosticVerification",
+        "Expired",
+        "Deprecated",
+        "Superseded",
+        "Archived"
+    ];
+    readonly string[] KnowledgeAccuracyOptions = ["Unrated", "Supported", "Mixed", "NeedsCorrection", "Rejected"];
+    readonly string[] EditorKindOptions = ["Automatic", "Text", "LongText", "Number", "Boolean", "DateTime", "Guid", "Json", "Secret"];
+    readonly string[] BooleanValueOptions = ["true", "false", "1", "0", "[null]"];
+
+    List<CouncilKnowledgeEntry> KnowledgeEntries { get; set; } = [];
+    CouncilKnowledgeEntry? SelectedKnowledgeEntry { get; set; }
+    CouncilKnowledgeEntry KnowledgeEdit { get; set; } = new();
+    CouncilKnowledgeUserRating KnowledgeRatingEdit { get; set; } = new();
+
+    List<SqliteTableSummary> Tables { get; set; } = [];
+    SqliteTableSummary? SelectedTable { get; set; }
+    SqliteTableSnapshot? CurrentTable { get; set; }
+    SqliteRowSnapshot? SelectedRow { get; set; }
+    Dictionary<string, string?> RowEditValues { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    Dictionary<string, SqliteEditorFieldOverride> EditorOverrides { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    Dictionary<string, string> SessionEditorKinds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    List<ExpandoObject> GridRows { get; set; } = [];
+    int RowLimit { get; set; } = 100;
+    bool isBusy;
+    string statusText = string.Empty;
+    string KnowledgeReviewSummary => CouncilRuntime.BuildKnowledgeReviewSummary(KnowledgeEntries,Logger);
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            KnowledgeEdit = Catalog.CouncilKnowledgeEntryNew;
+
+            await RefreshAllAsync().ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+    }
+
+    async Task RefreshAllAsync()
+    {
+        try
+        {
+            await RunUiActionAsync(async () =>
+     {
+         KnowledgeEntries = CouncilRuntime.SortKnowledgeEntries(await CouncilKnowledge.GetEntriesAsync(includeArchived: true, take: 250).ConfigureAwait(false), Logger);
+         Tables = (await TableEditor.GetTablesAsync().ConfigureAwait(false)).ToList();
+         SelectedKnowledgeEntry = KnowledgeEntries.FirstOrDefault(entry => entry.Id == SelectedKnowledgeEntry?.Id) ?? KnowledgeEntries.FirstOrDefault();
+         if (SelectedKnowledgeEntry is not null)
+             SelectKnowledgeEntry(SelectedKnowledgeEntry);
+         else
+             NewKnowledgeEntry();
+
+         if (SelectedTable is not null)
+             SelectedTable = Tables.FirstOrDefault(table => table.Name.Equals(SelectedTable.Name, StringComparison.OrdinalIgnoreCase));
+         SelectedTable ??= Tables.FirstOrDefault(table => table.Name.Equals("CouncilKnowledgeEntries", StringComparison.OrdinalIgnoreCase)) ?? Tables.FirstOrDefault();
+         if (SelectedTable is not null)
+             await LoadTableAsync(SelectedTable).ConfigureAwait(false);
+
+         statusText = $"Loaded {Tables.Count} table(s) and {KnowledgeEntries.Count} knowledge note(s).";
+     }, "RefreshAllAsync").ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+
+    }
+
+    void SelectKnowledgeEntry(CouncilKnowledgeEntry entry)
+    {
+        try
+        {
+            SelectedKnowledgeEntry = entry;
+            KnowledgeEdit = CouncilRuntime.CopyKnowledgeEntry(entry, Logger) ?? Catalog.CouncilKnowledgeEntryNew;
+            KnowledgeRatingEdit = new CouncilKnowledgeUserRating
+            {
+                KnowledgeEntryId = entry.Id,
+                Rating = entry.Confidence,
+                AccuracyStatus = entry.IsUserApproved ? "Supported" : "Unrated",
+                ApprovedForCouncilUse = entry.IsUserApproved
+            };
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+    }
+
+    void NewKnowledgeEntry()
+    {
+        try
+        {
+            SelectedKnowledgeEntry = null;
+            KnowledgeEdit = Catalog.CouncilKnowledgeEntryNew;
+            statusText = "New council knowledge note ready.";
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+    }
+
+    async Task SaveKnowledgeAsync()
+    {
+        try
+        {
+            await RunUiActionAsync(async () =>
+       {
+           KnowledgeEdit = await CouncilKnowledge.SaveEntryAsync(KnowledgeEdit).ConfigureAwait(false);
+           KnowledgeEntries = CouncilRuntime.SortKnowledgeEntries(await CouncilKnowledge.GetEntriesAsync(includeArchived: true, take: 250).ConfigureAwait(false), Logger);
+           SelectedKnowledgeEntry = KnowledgeEntries.FirstOrDefault(entry => entry.Id == KnowledgeEdit.Id);
+           if (SelectedKnowledgeEntry is not null)
+               KnowledgeEdit = CouncilRuntime.CopyKnowledgeEntry(SelectedKnowledgeEntry, Logger) ?? new();
+           await RefreshTablesOnlyAsync(loadSelectedTable: true).ConfigureAwait(false);
+           statusText = $"Saved knowledge note: {KnowledgeEdit.Topic}";
+           Notifier.ShowSuccess(toastName, "Council knowledge saved to SQLite.", "Knowledge saved");
+       }, "SaveKnowledgeAsync").ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+
+    }
+
+    async Task DeleteKnowledgeAsync()
+    {
+        try
+        {
+            if (SelectedKnowledgeEntry is null)
+                return;
+
+            await RunUiActionAsync(async () =>
+            {
+                await CouncilKnowledge.DeleteEntryAsync(SelectedKnowledgeEntry.Id).ConfigureAwait(false);
+                SelectedKnowledgeEntry = null;
+                KnowledgeEdit = Catalog.CouncilKnowledgeEntryNew;
+                KnowledgeEntries = CouncilRuntime.SortKnowledgeEntries(await CouncilKnowledge.GetEntriesAsync(includeArchived: true, take: 250).ConfigureAwait(false), Logger);
+                await RefreshTablesOnlyAsync(loadSelectedTable: true).ConfigureAwait(false);
+                statusText = "Deleted council knowledge note.";
+                Notifier.ShowSuccess(toastName, "Council knowledge deleted.", "Knowledge deleted");
+            }, "DeleteKnowledgeAsync").ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+
+    }
+
+    void MarkKnowledgeCurrent()
+    {
+        try
+        {
+            ApplyKnowledgeReviewPreset("Current");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+    }
+
+    void MarkKnowledgeNeedsUserReview()
+    {
+        try
+        {
+
+            ApplyKnowledgeReviewPreset("NeedsUserReview");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+    }
+
+    void MarkKnowledgeNeedsSourceRefresh()
+    {
+        try
+        {
+            ApplyKnowledgeReviewPreset("NeedsSourceRefresh");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+
+    }
+
+    void MarkKnowledgeExpired()
+    {
+        try
+        {
+            ApplyKnowledgeReviewPreset("Expired");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+
+    }
+
+    void ApplyKnowledgeReviewPreset(string reviewStatus)
+    {
+        try
+        {
+            var now = DateTime.UtcNow;
+            KnowledgeEdit.ReviewStatus = reviewStatus;
+            switch (reviewStatus)
+            {
+                case "Current":
+                    KnowledgeEdit.IsArchived = false;
+                    KnowledgeEdit.IsUserApproved = true;
+                    KnowledgeEdit.VerificationStatus = KnowledgeEdit.VerificationStatus == "SourceBacked"
+                        ? "SourceBacked"
+                        : "UserVerified";
+                    KnowledgeEdit.LastVerifiedAtUtc = now;
+                    KnowledgeEdit.ExpiresAtUtc = null;
+                    KnowledgeEdit.StalenessReason = string.Empty;
+                    KnowledgeEdit.StalenessDetectedAtUtc = null;
+                    KnowledgeEdit.StalenessDetectedBy = string.Empty;
+                    break;
+                case "NeedsUserReview":
+                    KnowledgeEdit.IsArchived = false;
+                    KnowledgeEdit.IsUserApproved = false;
+                    if (KnowledgeEdit.VerificationStatus is "SourceBacked" or "UserVerified")
+                        KnowledgeEdit.VerificationStatus = "NeedsVerification";
+                    KnowledgeEdit.ExpiresAtUtc ??= now.AddDays(30);
+                    KnowledgeEdit.StalenessReason = CouncilText.Fallback(KnowledgeEdit.StalenessReason, "Needs user review before the council treats it as trusted knowledge.", Logger);
+                    KnowledgeEdit.StalenessDetectedAtUtc ??= now;
+                    KnowledgeEdit.StalenessDetectedBy = CouncilText.Fallback(KnowledgeEdit.StalenessDetectedBy, "Database editor", Logger);
+                    break;
+                case "NeedsSourceRefresh":
+                    KnowledgeEdit.IsArchived = false;
+                    KnowledgeEdit.ExpiresAtUtc ??= now.AddDays(14);
+                    KnowledgeEdit.StalenessReason = CouncilText.Fallback(KnowledgeEdit.StalenessReason, "Source should be refreshed before reuse in generation.", Logger);
+                    KnowledgeEdit.StalenessDetectedAtUtc ??= now;
+                    KnowledgeEdit.StalenessDetectedBy = CouncilText.Fallback(KnowledgeEdit.StalenessDetectedBy, "Database editor", Logger);
+                    break;
+                case "Expired":
+                    KnowledgeEdit.IsUserApproved = false;
+                    KnowledgeEdit.ExpiresAtUtc = now;
+                    KnowledgeEdit.StalenessReason = CouncilText.Fallback(KnowledgeEdit.StalenessReason, "Marked expired by the database editor.", Logger);
+                    KnowledgeEdit.StalenessDetectedAtUtc ??= now;
+                    KnowledgeEdit.StalenessDetectedBy = CouncilText.Fallback(KnowledgeEdit.StalenessDetectedBy, "Database editor", Logger);
+                    break;
+            }
+
+            statusText = $"Knowledge review status set to {reviewStatus}. Save the note to persist it.";
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+    }
+
+    async Task SelectTableAsync(SqliteTableSummary table)
+    {
+        try
+        {
+            await LoadTableAsync(table).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+    }
+
+    async Task LoadSelectedTableAsync()
+    {
+        try
+        {
+            if (SelectedTable is not null)
+                await LoadTableAsync(SelectedTable).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+    }
+
+    async Task LoadTableAsync(SqliteTableSummary table)
+    {
+        try
+        {
+            await RunUiActionAsync(async () =>
+        {
+            SelectedTable = table;
+            CurrentTable = await TableEditor.GetTableAsync(table.Name, RowLimit).ConfigureAwait(false);
+            EditorOverrides = new Dictionary<string, SqliteEditorFieldOverride>(await EditorPreferences.GetOverridesAsync(table.Name).ConfigureAwait(false), StringComparer.OrdinalIgnoreCase);
+            SessionEditorKinds.Clear();
+            GridRows.Clear();
+            foreach (var row in CurrentTable.Rows)
+            {
+                try
+                {
+                    var gridRow = GridPresentation.ToGridRow(row, Logger);
+                    ArgumentNullException.ThrowIfNull(gridRow);
+                    GridRows.Add(gridRow);
+                }
+                catch (Exception ex)
+                {
+                    Notifier.ShowWarning(toastName, "A row could not be displayed. See local application logs for details.", "Display warning");
+                    Logger.LogWarning(ex, "A database row could not be converted for display; row content was omitted from logs.");
+                }
+
+
+            }
+            SelectedRow = CurrentTable.Rows.FirstOrDefault();
+            if (SelectedRow is not null)
+                SelectSqliteRow(SelectedRow);
+            else
+                NewSqliteRow();
+            statusText = $"Loaded {CurrentTable.Rows.Count} row(s) from {CurrentTable.TableName}.";
+        }, "LoadTableAsync").ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+    }
+
+    void SelectSqliteRow(SqliteRowSnapshot row)
+    {
+        try
+        {
+            SelectedRow = row;
+            RowEditValues = CurrentTable?.Columns.ToDictionary(
+                column => column.Name,
+                column => row.Values.TryGetValue(column.Name, out var value) ? value : null,
+                StringComparer.OrdinalIgnoreCase) ?? new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+
+    }
+
+    void NewSqliteRow()
+    {
+        try
+        {
+
+            SelectedRow = null;
+            RowEditValues = CurrentTable?.Columns.ToDictionary(
+                column => column.Name,
+                _ => (string?)null,
+                StringComparer.OrdinalIgnoreCase) ?? new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+            statusText = "New SQLite row ready.";
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+    }
+
+    async Task SaveSqliteRowAsync()
+    {
+        try
+        {
+            if (CurrentTable is null)
+                return;
+
+            await RunUiActionAsync(async () =>
+            {
+                var editableValues = CurrentTable.Columns
+                    .Where(column => SelectedRow is null || !column.IsPrimaryKey)
+                    .ToDictionary(
+                        column => column.Name,
+                        column => CouncilText.NormalizeDBNullStringValue(GetEditValue(column.Name), Logger),
+                        StringComparer.OrdinalIgnoreCase);
+
+                if (SelectedRow is null)
+                {
+                    await TableEditor.InsertRowAsync(CurrentTable.TableName, editableValues).ConfigureAwait(false);
+                    statusText = $"Inserted row into {CurrentTable.TableName}.";
+                }
+                else
+                {
+                    var updates = editableValues
+                        .Select(pair => new SqliteCellUpdate { ColumnName = pair.Key, Value = pair.Value })
+                        .ToList();
+                    await TableEditor.UpdateRowAsync(CurrentTable.TableName, SelectedRow.RowId, updates).ConfigureAwait(false);
+                    statusText = $"Updated row {SelectedRow.RowId} in {CurrentTable.TableName}.";
+                }
+
+                await RefreshTablesOnlyAsync(loadSelectedTable: true).ConfigureAwait(false);
+                Notifier.ShowSuccess(toastName, "SQLite row saved.", "Database saved");
+            }, "SaveSqliteRowAsync").ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+
+    }
+
+    async Task DeleteSqliteRowAsync()
+    {
+        try
+        {
+            if (CurrentTable is null || SelectedRow is null)
+                return;
+
+            await RunUiActionAsync(async () =>
+            {
+                await TableEditor.DeleteRowAsync(CurrentTable.TableName, SelectedRow.RowId).ConfigureAwait(false);
+                statusText = $"Deleted row {SelectedRow.RowId} from {CurrentTable.TableName}.";
+                await RefreshTablesOnlyAsync(loadSelectedTable: true).ConfigureAwait(false);
+                Notifier.ShowSuccess(toastName, "SQLite row deleted.", "Database saved");
+            }, "DeleteSqliteRowAsync").ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+
+    }
+
+    async Task RefreshTablesOnlyAsync(bool loadSelectedTable)
+    {
+        try
+        {
+            Tables = (await TableEditor.GetTablesAsync().ConfigureAwait(false)).ToList();
+            if (!loadSelectedTable || CurrentTable is null)
+                return;
+
+            var table = Tables.FirstOrDefault(item => item.Name.Equals(CurrentTable.TableName, StringComparison.OrdinalIgnoreCase));
+            if (table is not null)
+            {
+                SelectedTable = table;
+                CurrentTable = await TableEditor.GetTableAsync(table.Name, RowLimit).ConfigureAwait(false);
+                EditorOverrides = new Dictionary<string, SqliteEditorFieldOverride>(await EditorPreferences.GetOverridesAsync(table.Name).ConfigureAwait(false), StringComparer.OrdinalIgnoreCase);
+                SessionEditorKinds.Clear();
+                GridRows.Clear();
+                foreach (var row in CurrentTable.Rows)
+                {
+                    try
+                    {
+                        var gridRow = GridPresentation.ToGridRow(row, Logger);
+                        ArgumentNullException.ThrowIfNull(gridRow);
+                        GridRows.Add(gridRow);
+                    }
+                    catch (Exception ex)
+                    {
+                        Notifier.ShowWarning(toastName, "A row could not be displayed. See local application logs for details.", "Display warning");
+                        Logger.LogWarning(ex, "A database row could not be converted for display; row content was omitted from logs.");
+                    }
+
+
+                }
+                SelectedRow = CurrentTable.Rows.FirstOrDefault(row => row.RowId == SelectedRow?.RowId) ?? CurrentTable.Rows.FirstOrDefault();
+                if (SelectedRow is not null)
+                    SelectSqliteRow(SelectedRow);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+        }
+
+    }
+
+    string GetEditValue(string columnName)
+    {
+        try
+        {
+            return RowEditValues.TryGetValue(columnName, out var value) ? value ?? "[null]" : string.Empty;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+            return string.Empty;
+        }
+
+    }
+
+    void SetEditValue(string columnName, string value)
+    {
+        try
+        {
+            RowEditValues[columnName] = value;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "UI operation failed; user and model content were omitted from logs.");
+            Notifier.ShowError(toastName, "The operation failed. See local application logs for technical details.", "Operation failed");
+
+        }
+    }
+
+
+
+    string GetEditorKind(SqliteColumnSummary column, string? value)
+    {
+        if (SessionEditorKinds.TryGetValue(column.Name, out var sessionKind) && !sessionKind.Equals("Automatic", StringComparison.OrdinalIgnoreCase))
+            return sessionKind;
+        if (EditorOverrides.TryGetValue(column.Name, out var persisted) && !persisted.EditorKind.Equals("Automatic", StringComparison.OrdinalIgnoreCase))
+            return persisted.EditorKind;
+        return EditorPreferences.InferEditorKind(column, value);
+    }
+
+    void SetEditorKind(SqliteColumnSummary column, string kind)
+    {
+        SessionEditorKinds[column.Name] = string.IsNullOrWhiteSpace(kind) ? "Automatic" : kind;
+    }
+
+    async Task SaveEditorPreferenceAsync(SqliteColumnSummary column)
+    {
+        if (CurrentTable is null)
+            return;
+        var kind = SessionEditorKinds.TryGetValue(column.Name, out var selected) ? selected : "Automatic";
+        var existing = EditorOverrides.GetValueOrDefault(column.Name);
+        var saved = await EditorPreferences.SaveOverrideAsync(new SqliteEditorFieldOverride
+        {
+            Id = existing?.Id ?? Guid.NewGuid(),
+            TableName = CurrentTable.TableName,
+            ColumnName = column.Name,
+            EditorKind = kind,
+            InputMask = existing?.InputMask ?? string.Empty,
+            FormatString = existing?.FormatString ?? string.Empty,
+            NullText = existing?.NullText ?? "[null]",
+            IsSensitive = kind.Equals("Secret", StringComparison.OrdinalIgnoreCase) || existing?.IsSensitive == true,
+            RequireHumanApproval = existing?.RequireHumanApproval == true
+        }, userConfirmed: true).ConfigureAwait(false);
+        EditorOverrides[column.Name] = saved;
+        statusText = $"Remembered {kind} editor for {CurrentTable.TableName}.{column.Name}.";
+        Notifier.ShowSuccess(toastName, statusText, "Editor preference saved");
+    }
+
+    string ToDateTimeLocalValue(string? value)
+    {
+        return DateTimeOffset.TryParse(value, out var parsed)
+            ? parsed.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")
+            : string.Empty;
+    }
+
+    async Task SaveKnowledgeRatingAsync()
+    {
+        if (SelectedKnowledgeEntry is null)
+            return;
+        KnowledgeRatingEdit.KnowledgeEntryId = SelectedKnowledgeEntry.Id;
+        KnowledgeRatingEdit = await KnowledgeRatings.SaveRatingAsync(KnowledgeRatingEdit, userConfirmed: true).ConfigureAwait(false);
+        KnowledgeEdit.Confidence = KnowledgeRatingEdit.Rating;
+        KnowledgeEdit.IsUserApproved = KnowledgeRatingEdit.ApprovedForCouncilUse;
+        KnowledgeEdit.ReviewStatus = KnowledgeRatingEdit.ApprovedForCouncilUse ? "Current" : "NeedsUserReview";
+        statusText = "Human knowledge rating saved.";
+        Notifier.ShowSuccess(toastName, statusText, "Knowledge rated");
+    }
+
+    async Task RunUiActionAsync(Func<Task> action, string operation)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+        isBusy = true;
+        ComponentActivity.RecordInformation(nameof(Database), operation, "The database UI operation started.");
+        try
+        {
+            await action().ConfigureAwait(false);
+            ComponentActivity.RecordInformation(nameof(Database), operation, "The database UI operation completed.");
+        }
+        catch (OperationCanceledException)
+        {
+            Logger.LogInformation("Database UI operation {Operation} was cancelled.", operation);
+            statusText = "The operation was cancelled.";
+            ComponentActivity.RecordWarning(nameof(Database), operation, "The database UI operation was cancelled.");
+            Notifier.ShowWarning(toastName, statusText, "Operation cancelled");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Database UI operation {Operation} failed; row and query content were omitted from logs.", operation);
+            statusText = "The operation failed. See local application logs for technical details.";
+            ComponentActivity.RecordFailure(nameof(Database), operation, ex);
+            Notifier.ShowError(toastName, statusText, "Operation failed");
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+}

@@ -1,0 +1,719 @@
+
+.main-container {
+    min-height: calc(100dvh - 4.5rem);
+}
+
+.top-container:first-child {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    padding: .65rem;
+    margin: -.65rem -.65rem .5rem;
+    background: color-mix(in srgb, var(--bs-body-bg, Canvas) 94%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--bs-border-color, #d0d5dd);
+}
+
+::deep .provider-save-button {
+    min-width: 14rem !important;
+    min-height: 3.75rem !important;
+    padding-inline: 1.2rem !important;
+    border-radius: .75rem !important;
+    font-size: 1.08rem !important;
+    font-weight: 850 !important;
+    box-shadow: 0 .35rem 1rem rgba(0, 0, 0, .18) !important;
+    touch-action: manipulation;
+}
+
+::deep .provider-save-button:focus-visible {
+    outline: .22rem solid color-mix(in srgb, var(--bs-primary, Highlight) 55%, transparent) !important;
+    outline-offset: .18rem;
+}
+
+@media (max-width: 680px) {
+    .top-container:first-child { display: grid; grid-template-columns: 1fr; }
+    ::deep .provider-save-button { width: 100% !important; min-width: 0 !important; min-height: 4.1rem !important; }
+}
+
+/* v24: provider process actions use the same visible, rounded touch contract as Save. */
+::deep .provider-action-button {
+    min-height: 3.15rem !important;
+    padding-inline: 1rem !important;
+    border-radius: .75rem !important;
+    font-weight: 750 !important;
+    touch-action: manipulation;
+}
+
+.ollama-process-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: .85rem;
+    padding-top: .85rem;
+    border-top: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+}
+
+.ollama-process-status {
+    min-width: 14rem;
+    display: grid;
+    gap: .2rem;
+}
+
+.ollama-process-status small {
+    overflow-wrap: anywhere;
+    opacity: .78;
+}
+
+.ollama-process-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .55rem;
+}
+
+@media (max-width: 900px) {
+    .ollama-process-panel { align-items: stretch; flex-direction: column; }
+    .ollama-process-actions { justify-content: flex-start; }
+}
+
+@media (pointer: coarse), (max-width: 680px) {
+    ::deep .provider-action-button { min-height: 3.6rem !important; }
+    .ollama-process-actions { display: grid; grid-template-columns: 1fr; }
+    .ollama-process-actions ::deep .provider-action-button { width: 100% !important; }
+}
+
+/* v2.1.21: persistent setup, Council quick starts and open language catalogs. */
+.installer-workbench-card {
+    display: grid;
+    gap: 1rem;
+    width: 100%;
+    padding: clamp(1rem, 1.5vw, 1.5rem);
+    border: 1px solid var(--bs-border-color);
+    border-radius: .8rem;
+    background: color-mix(in srgb, var(--bs-body-bg) 92%, var(--bs-secondary-bg));
+}
+
+.installer-card-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.installer-card-heading h3,
+.installer-quickstart-card h4 {
+    margin: 0;
+}
+
+.installer-card-heading p,
+.installer-quickstart-card p {
+    margin: .35rem 0 0;
+}
+
+.installer-status-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem 1.25rem;
+    align-items: center;
+    padding: .7rem .85rem;
+    border-radius: .55rem;
+    background: var(--bs-secondary-bg);
+}
+
+.installer-quickstart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: .8rem;
+}
+
+.installer-quickstart-card {
+    display: grid;
+    align-content: start;
+    gap: .65rem;
+    min-width: 0;
+    padding: .9rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .65rem;
+    background: var(--bs-body-bg);
+}
+
+.installer-quickstart-card code,
+.installer-quickstart-card small {
+    overflow-wrap: anywhere;
+}
+
+.installer-profile-details summary {
+    cursor: pointer;
+    font-weight: 700;
+    margin-bottom: .8rem;
+}
+
+.localization-catalog-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.localization-catalog-pill {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+    align-items: center;
+    padding: .45rem .65rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 999px;
+    background: var(--bs-body-bg);
+}
+
+.localization-import-grid {
+    display: grid;
+    grid-template-columns: minmax(12rem, .55fr) minmax(18rem, 1.2fr) minmax(16rem, 1fr);
+    gap: .8rem;
+    align-items: end;
+}
+
+.localization-import-grid label {
+    display: grid;
+    gap: .35rem;
+    min-width: 0;
+    font-weight: 650;
+}
+
+.localization-import-grid input[type="text"],
+.localization-import-grid input:not([type]) {
+    width: 100%;
+    min-height: 2.55rem;
+    padding: .45rem .6rem;
+    color: var(--bs-body-color);
+    background: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: .45rem;
+}
+
+.localization-overwrite {
+    grid-template-columns: auto 1fr !important;
+    align-items: center;
+    font-weight: 500 !important;
+}
+
+@media (max-width: 900px) {
+    .localization-import-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* v2.1.22: direct Council starters are explicitly distinguished from passive links. */
+.installer-direct-starter-hint {
+    display: block;
+    padding: .5rem .6rem;
+    border-left: .25rem solid var(--bs-primary);
+    border-radius: .35rem;
+    background: color-mix(in srgb, var(--bs-primary) 10%, var(--bs-body-bg));
+    font-size: .85rem;
+    line-height: 1.35;
+}
+
+/* v2.1.23: persisted compiler/runtime discovery workbench. */
+.toolchain-search-roots {
+    display: grid;
+    gap: .4rem;
+    font-weight: 650;
+}
+.toolchain-search-roots textarea {
+    width: 100%;
+    resize: vertical;
+    min-height: 5.5rem;
+    padding: .65rem;
+    color: var(--bs-body-color);
+    background: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: .55rem;
+}
+.toolchain-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+    gap: .8rem;
+}
+.toolchain-card {
+    display: grid;
+    align-content: start;
+    gap: .65rem;
+    min-width: 0;
+    padding: .9rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .65rem;
+    background: var(--bs-body-bg);
+}
+.toolchain-card header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: .75rem;
+}
+.toolchain-card h4 { margin: 0; }
+.toolchain-card code,
+.toolchain-validation-message { overflow-wrap: anywhere; }
+.toolchain-validation-message {
+    max-height: 8rem;
+    overflow: auto;
+    margin: 0;
+    padding: .55rem;
+    background: var(--bs-secondary-bg);
+    border-radius: .45rem;
+    white-space: pre-wrap;
+}
+.toolchain-default-badge {
+    padding: .25rem .5rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bs-success) 20%, var(--bs-body-bg));
+}
+.toolchain-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+/* v2.2.8: reusable provider-qualified model controls on discovery results. */
+.install-provider-model-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+    gap: .75rem;
+    margin-top: .65rem;
+}
+
+
+/* v2.4.9: make provider setup workflow explicit and keep long network addresses readable. */
+.discovered-host-status-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .65rem;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+.discovered-host-status-row > div { min-width: 0; overflow-wrap: anywhere; }
+.configured-host-badge {
+    display: inline-flex;
+    margin-inline-start: .45rem;
+    padding: .1rem .45rem;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    font-size: .75rem;
+    font-weight: 700;
+}
+.configured-provider-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .55rem;
+    align-items: center;
+    width: 100%;
+}
+.configured-provider-actions > * { flex: 0 1 auto; }
+@media (max-width: 680px) {
+    .configured-provider-actions { display: grid; grid-template-columns: 1fr; }
+    .configured-provider-actions ::deep .dxbl-btn { width: 100%; }
+}
+
+/* v2.5.3: PublisherStudio-inspired setup workbench. The page owns vertical scrolling,
+   while each configuration region stays in normal flow and remains fully reachable. */
+.install-page-scroll-owner {
+    box-sizing: border-box;
+    height: 100%;
+    min-height: 0;
+    max-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    padding: clamp(.65rem, 1vw, 1rem);
+}
+
+.install-workbench {
+    display: grid;
+    gap: .85rem;
+    width: min(100%, 118rem);
+    margin-inline: auto;
+    padding-bottom: 1rem;
+}
+
+.install-section-nav {
+    position: sticky;
+    top: 0;
+    z-index: 18;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+    min-width: 0;
+    padding: .55rem;
+    border: 1px solid var(--bs-border-color, #d6dce3);
+    border-radius: .65rem;
+    background: color-mix(in srgb, var(--bs-body-bg, Canvas) 96%, transparent);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 .25rem .8rem rgba(0, 0, 0, .06);
+}
+
+.install-section-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.25rem;
+    padding: .35rem .65rem;
+    border: 1px solid var(--bs-border-color, #d6dce3);
+    border-radius: .45rem;
+    background: var(--bs-body-bg, Canvas);
+    color: var(--bs-body-color, CanvasText);
+    font-size: .84rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.install-section-nav a:hover,
+.install-section-nav a:focus-visible {
+    border-color: var(--bs-primary, #ff6b00);
+    background: color-mix(in srgb, var(--bs-primary, #ff6b00) 9%, var(--bs-body-bg, Canvas));
+    outline: none;
+}
+
+.install-workbench-region {
+    scroll-margin-top: 4.4rem;
+    min-width: 0;
+}
+
+.install-provider-studio {
+    display: grid;
+    gap: .8rem;
+    padding: clamp(.8rem, 1.2vw, 1.15rem);
+    border: 1px solid var(--bs-border-color, #d6dce3);
+    border-radius: .75rem;
+    background: var(--bs-body-bg, Canvas);
+    box-shadow: 0 .3rem 1.1rem rgba(0, 0, 0, .05);
+}
+
+.install-region-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: .65rem;
+    border-bottom: 1px solid var(--bs-border-color, #d6dce3);
+}
+
+.install-region-heading h2 {
+    margin: .12rem 0 .2rem;
+    font-size: clamp(1.25rem, 1.6vw, 1.6rem);
+}
+
+.install-region-heading p {
+    max-width: 78rem;
+    margin: 0;
+    color: var(--bs-secondary-color, #64748b);
+}
+
+.install-region-kicker {
+    color: var(--bs-primary, #ff6b00);
+    font-size: .76rem;
+    font-weight: 800;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.install-provider-studio > .alert {
+    margin: 0;
+    border-radius: .6rem;
+}
+
+.install-provider-studio > .top-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    align-items: center;
+    margin: 0;
+}
+
+.install-provider-studio ::deep .dxbl-fl {
+    min-width: 0;
+}
+
+.install-provider-studio ::deep .dxbl-tabs {
+    min-width: 0;
+    border: 1px solid var(--bs-border-color, #d6dce3);
+    border-radius: .55rem;
+    overflow: hidden;
+}
+
+.install-provider-studio ::deep input,
+.install-provider-studio ::deep textarea,
+.install-provider-studio ::deep select,
+.installer-workbench-card ::deep input,
+.installer-workbench-card ::deep textarea,
+.installer-workbench-card ::deep select {
+    min-width: 0;
+}
+
+.installer-workbench-card {
+    border-radius: .75rem;
+    box-shadow: 0 .25rem .9rem rgba(0, 0, 0, .045);
+}
+
+.installer-card-heading {
+    padding-bottom: .55rem;
+    border-bottom: 1px solid var(--bs-border-color, #d6dce3);
+}
+
+.setup-log-card {
+    min-height: 16rem;
+}
+
+.setup-log-card ::deep textarea,
+.setup-log-editor {
+    min-height: 12rem;
+    resize: vertical;
+    font-family: Consolas, "Cascadia Mono", monospace;
+    font-size: .86rem;
+    line-height: 1.45;
+}
+
+@media (min-width: 1180px) {
+    .install-provider-studio > .alert {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ollama-process-panel {
+        display: grid;
+        grid-template-columns: minmax(16rem, .8fr) minmax(24rem, 1.4fr);
+    }
+}
+
+@media (max-width: 760px) {
+    .install-page-scroll-owner {
+        padding: .35rem;
+    }
+
+    .install-section-nav {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: thin;
+    }
+
+    .install-section-nav a {
+        flex: 0 0 auto;
+    }
+
+    .install-provider-studio,
+    .installer-workbench-card {
+        border-radius: .55rem;
+        padding: .7rem;
+    }
+}
+
+@media (min-width: 1050px) {
+    .install-workbench {
+        grid-template-columns: 15rem minmax(0, 1fr);
+        align-items: start;
+    }
+
+    .install-workbench ::deep .localgpt-workbench-header {
+        grid-column: 1 / -1;
+    }
+
+    .install-section-nav {
+        grid-column: 1;
+        grid-row: 2 / span 20;
+        align-self: start;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        top: .5rem;
+        max-height: calc(100dvh - 6rem);
+        overflow-y: auto;
+    }
+
+    .install-section-nav a {
+        width: 100%;
+    }
+
+    .install-workbench-region {
+        grid-column: 2;
+    }
+}
+
+/* v2.5.4: real PublisherStudio-style workbench navigation. Only the selected setup segment
+   is rendered in the stage, while the left rail remains stable and independently usable. */
+.install-workbench-layout {
+    display: grid;
+    grid-template-columns: minmax(13.5rem, 18rem) minmax(0, 1fr);
+    gap: .85rem;
+    align-items: start;
+    min-width: 0;
+}
+
+.install-workbench-layout ::deep .configuration-workbench-nav {
+    position: sticky;
+    top: .25rem;
+    max-height: calc(100dvh - 7rem);
+    overflow: auto;
+}
+
+.install-workbench-stage {
+    min-width: 0;
+    width: 100%;
+}
+
+.install-workbench-stage > ::deep .configuration-workbench-panel,
+.install-workbench-stage section {
+    min-width: 0;
+    width: 100%;
+}
+
+.configured-provider-catalog {
+    display: grid;
+    gap: .7rem;
+    padding: .75rem;
+    border: 1px solid var(--bs-border-color, #d6dce3);
+    border-radius: .65rem;
+    background: color-mix(in srgb, var(--bs-body-bg, #fff) 96%, var(--bs-primary, #ff6b00) 4%);
+}
+
+.configured-provider-catalog > header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .75rem;
+}
+
+.configured-provider-catalog > header > div {
+    display: grid;
+    gap: .12rem;
+    min-width: 0;
+}
+
+.configured-provider-catalog > header small {
+    color: var(--bs-secondary-color, #667085);
+}
+
+.configured-provider-count {
+    display: inline-grid;
+    place-items: center;
+    min-width: 2rem;
+    min-height: 2rem;
+    padding: .2rem .45rem;
+    border-radius: 999px;
+    background: var(--bs-primary, #ff6b00);
+    color: var(--bs-white, #fff);
+    font-weight: 800;
+}
+
+.configured-provider-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+    gap: .65rem;
+}
+
+.configured-provider-card {
+    display: grid;
+    align-content: start;
+    gap: .45rem;
+    min-width: 0;
+    padding: .7rem;
+    border: 1px solid var(--bs-border-color, #d6dce3);
+    border-radius: .6rem;
+    background: var(--bs-body-bg, #fff);
+}
+
+.configured-provider-card-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .55rem;
+}
+
+.configured-provider-card-heading > div {
+    display: grid;
+    min-width: 0;
+}
+
+.configured-provider-card-heading small {
+    color: var(--bs-secondary-color, #667085);
+}
+
+.configured-provider-card code,
+.configured-provider-card span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 860px) {
+    .install-workbench-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .install-workbench-layout ::deep .configuration-workbench-nav {
+        position: static;
+        max-height: none;
+    }
+}
+
+/* v2.5.5: the v2.5.3 outer two-column grid became obsolete once v2.5.4 introduced
+   install-workbench-layout. Keep exactly one desktop grid owner so the inner navigation/stage
+   can use the full application canvas instead of being squeezed into the legacy 15rem column. */
+.install-page-scroll-owner {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+.install-workbench {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin-inline: 0 !important;
+}
+
+.install-workbench ::deep .localgpt-workbench-header,
+.install-workbench-layout {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+}
+
+.install-workbench-layout {
+    grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr) !important;
+    align-items: stretch;
+}
+
+.install-workbench-stage,
+.install-workbench-stage > ::deep .configuration-workbench-panel {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+}
+
+@media (max-width: 860px) {
+    .install-workbench-layout {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+
+/* v2.5.6: /install delegates vertical page scrolling to the existing drawer viewport.
+   Removing the nested overflow owner restores native mouse-wheel and touch-pan behavior while
+   preserving the visible browser-side scrollbar and all bounded child scrollers. */
+.install-page-scroll-owner {
+    height: auto !important;
+    min-height: calc(100dvh - 4.5rem) !important;
+    max-height: none !important;
+    overflow: visible !important;
+    overscroll-behavior: auto !important;
+    scrollbar-gutter: auto !important;
+    touch-action: pan-y;
+}
+
+.install-scroll-anchor {
+    display: block;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    pointer-events: none;
+}

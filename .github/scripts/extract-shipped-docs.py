@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract the complete themed DocFX site already shipped inside a PublisherStudio release ZIP."""
+"""Extract the complete themed DocFX site already shipped inside a LocalGPT release ZIP."""
 
 from __future__ import annotations
 
@@ -15,21 +15,21 @@ from pathlib import Path, PurePosixPath
 
 
 CSS_MARKERS = (
-    "publisherstudio-kawaii-docs",
-    "publisherstudio-api-neko-note",
-    "publisherstudio-theme-control",
-    "publisherstudio-cursor-paw",
+    "localgpt-kawaii-docs",
+    "localgpt-api-neko-note",
+    "localgpt-theme-control",
+    "localgpt-cursor-paw",
 )
 JS_MARKERS = (
-    "publisherstudio-cursor-paw",
-    "publisherstudio-cat-scratch",
+    "localgpt-cursor-paw",
+    "localgpt-cat-scratch",
     "mountThemeControl",
-    "publisherstudio-docs-theme",
+    "localgpt-docs-theme",
 )
 HTML_MARKERS = (
-    "publisherstudio-kawaii-docs",
-    "data-publisherstudio-kawaii-style",
-    "data-publisherstudio-kawaii-script",
+    "localgpt-kawaii-docs",
+    "data-localgpt-kawaii-style",
+    "data-localgpt-kawaii-script",
 )
 
 
@@ -122,8 +122,8 @@ def find_candidates(archive_path: Path, expected_version: str) -> list[Candidate
             prefix = PurePosixPath(name).parent
             index_name = (prefix / "index.html").as_posix()
             api_index_name = (prefix / "api" / "index.html").as_posix()
-            style_name = (prefix / "styles" / "publisherstudio-kawaii.css").as_posix()
-            script_name = (prefix / "styles" / "publisherstudio-kawaii.js").as_posix()
+            style_name = (prefix / "styles" / "localgpt-kawaii.css").as_posix()
+            script_name = (prefix / "styles" / "localgpt-kawaii.js").as_posix()
             required_names = (index_name, api_index_name, style_name, script_name)
             if any(required_name not in members for required_name in required_names):
                 continue
@@ -159,7 +159,7 @@ def find_candidates(archive_path: Path, expected_version: str) -> list[Candidate
                 continue
 
             # Project Pages must keep asset URLs relative so /OWNER/REPOSITORY/ works.
-            if re.search(r'''(?:href|src)=["']/+styles/publisherstudio-kawaii\.(?:css|js)''', index_html, re.IGNORECASE):
+            if re.search(r'''(?:href|src)=["']/+styles/localgpt-kawaii\.(?:css|js)''', index_html, re.IGNORECASE):
                 print(
                     f"Ignoring documentation candidate with root-absolute theme assets "
                     f"{archive_path.name}:{prefix.as_posix()}",
@@ -235,8 +235,8 @@ def validate_output(output: Path, candidate: Candidate) -> None:
     if html_count < 10:
         raise RuntimeError(f"Only {html_count} HTML files were extracted; expected a complete DocFX site")
 
-    theme_style = output / "styles" / "publisherstudio-kawaii.css"
-    theme_script = output / "styles" / "publisherstudio-kawaii.js"
+    theme_style = output / "styles" / "localgpt-kawaii.css"
+    theme_script = output / "styles" / "localgpt-kawaii.js"
     if not theme_style.is_file() or not theme_script.is_file():
         raise RuntimeError("The cache-busted Kawaii DocFX website assets were not included in the shipped site")
 
@@ -244,7 +244,7 @@ def validate_output(output: Path, candidate: Candidate) -> None:
     script_text = theme_script.read_text(encoding="utf-8-sig")
     index_html = (output / "index.html").read_text(encoding="utf-8-sig")
     if not contains_all(index_html, HTML_MARKERS):
-        raise RuntimeError("The shipped DocFX index does not activate the PublisherStudio Kawaii website theme")
+        raise RuntimeError("The shipped DocFX index does not activate the LocalGPT Kawaii website theme")
     if not contains_all(style_text, CSS_MARKERS):
         raise RuntimeError("The shipped Kawaii stylesheet is stale or incomplete")
     if not contains_all(script_text, JS_MARKERS):
@@ -297,7 +297,7 @@ def main() -> int:
     selected = max(candidates, key=lambda item: item.score)
     print(
         f"Selected {selected.archive.name}:{selected.prefix.as_posix()} "
-        f"for PublisherStudio {selected.status.get('version')} (score={selected.score})"
+        f"for LocalGPT {selected.status.get('version')} (score={selected.score})"
     )
     extract_candidate(selected, arguments.output)
     validate_output(arguments.output, selected)

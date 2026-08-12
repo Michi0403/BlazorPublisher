@@ -1,44 +1,22 @@
-# LocalGPT 2.5.5 source validation
+# PublisherStudio 2.5.5 source validation
 
-This validation is intentionally source/static only. No `dotnet`, MSBuild, restore, build, publish or runtime compilation was executed.
+This package was edited and inspected directly from the supplied PublisherStudio 2.5.4 source ZIP. No GitHub/network repository access was used. No `dotnet`, MSBuild, restore, build, test, publish or DocFX command was invoked; the user's Windows/.NET build remains authoritative.
 
-## Repository audits executed
+## Completed source/static validation
 
-- `python build/audit_async_continuations.py --source-root src/LocalGPT`
-  - Passed for 152 source files.
-  - 2,237 await tokens reviewed.
-  - 2,032 `.ConfigureAwait(false)` continuations.
-  - 30 explicitly renderer-affine `.ConfigureAwait(true)` continuations.
-  - 0 unconfigured ordinary await expressions under the maintained policy.
-- `python build/audit_application_architecture.py --root . --product localgpt --mode static`
-  - Passed.
-- `python build/audit_service_resilience.py --root . --product localgpt`
-  - Passed for 1,721 service methods owning the required resilience/diagnostic boundary.
-- `python build/audit_provider_qualified_council.py --root .`
-  - Passed all 101 provider-qualified Council checks.
-- `python build/audit_chat_ascii_console.py --root .`
-  - Passed all 17 checks.
-- `python build/audit_documentation_onewire_contracts.py`
-  - Passed the documentation/1-Wire contract audit.
+- XML documentation: coverage passes for **4,904** maintained C# type/method/public API declarations.
+- Architecture policy: passes application static/diagnostic/C# structure boundaries.
+- Service resilience: **1,250 service methods** own try/catch + diagnostics; 4 iterator/yield and 4 direct Program/Startup methods are intentionally excluded.
+- PublisherStudio documentation/1-Wire contract audit passes.
+- Maintained JavaScript diagnostics SHA-256 inventory contains **16 files** with **0 mismatches**; this release changes CSS/Razor/C# rather than maintained browser JavaScript.
+- Existing Publisher async-continuation policy remains at the reviewed state from 2.5.4: **74 files**, **1,036 await tokens**, **195 ConfigureAwait(false)**, **3 reviewed ConfigureAwait(true)** and no policy finding under the maintained baseline.
+- Panel Studio persistence/lifecycle source checks from the previous release remain intact: queued interaction commits are flushed before module/panel snapshots.
+- `/organic-plugins` retains `@rendermode InteractiveServer`.
+- PublisherStudio Web/installer projects are versioned **2.5.5**.
 
-## Additional source checks executed
+## Targeted source checks
 
-- Parsed LocalGPT, LocalGPTInstallerConsole and LocalGPTWebviewWrapper project files as XML and verified version `2.5.5`.
-- Confirmed the separately versioned LocalGPT.WireProtocolVersion project remains unchanged at `2.1.1`.
-- Parsed `Localization/en-US.json` and `Localization/de-DE.json`; both are valid JSON and contain the same 1,493 keys.
-- Verified `@rendermode InteractiveServer` remains present on Install, Chat, Minecraft Mod Builder, Test Lab and 1-Wire Security; 12 page components currently carry that render mode.
-- Verified balanced `ConfigurationWorkbenchPanel` composition counts: Install 7, Test Lab 6, Chat 4 and 1-Wire Security 4.
-- Verified the final Install CSS establishes one outer workbench column and a full-width navigation/stage grid, overriding the obsolete 2.5.3 outer two-column layout.
-- Verified the final Chat CSS establishes a near-full-viewport modal, 100%-height workbench/stage/panel chain and removes Council/model-list height caps inside that modal.
-- Verified the Minecraft Mod Builder now uses `WorkbenchHeader`, the responsive builder card hierarchy, viewport-width layout and retains `@rendermode InteractiveServer`.
-- Verified brace balance for the modified Install, Chat and Minecraft component stylesheets.
-
-## Not executed
-
-- .NET restore
-- .NET compile/build
-- runtime launch
-- browser automation against a compiled build
-- publish/package generation through the repository PowerShell build pipeline
-
-Those checks require the .NET environment that the delivery request explicitly excludes.
+- The 1-Wire receive dispatcher now completes a pending correlation for `CapabilityResponse`, `SkillResponse` and `SkillStateUpdate`, closing the observed `WaitForResultAsync` timeout path used by the round-trip test.
+- The Organic/AI Assist page owns `height:100%`, `min-height:0`, `overflow-y:auto` and `overflow-x:hidden`, so it can scroll inside the fixed application shell.
+- Primary AI Assist context is derived from `EditorStateService`; negotiated LocalGPT routes/capabilities and dynamically advertised Council team data remain the authority.
+- Advanced Council/protocol/security controls are retained but are no longer the default creative surface.

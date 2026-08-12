@@ -1,10 +1,7 @@
 apiRules:
 - include:
-    uidRegex: ^LocalGPT
+    uidRegex: ^PublisherStudio
     type: Namespace
 - exclude:
-    uidRegex: ^LocalGPT\.Migrations
-    type: Namespace
-- exclude:
-    uidRegex: ^LocalGPT\.Components\.Account
-    type: Namespace
+    uidRegex: ^PublisherStudio\.Components\..*__Generated
+    type: Type

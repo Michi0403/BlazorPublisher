@@ -5,6 +5,6 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 & (Join-Path $PSScriptRoot 'Update-JavaScriptDiagnosticsManifest.Common.ps1') `
     -RepositoryRoot $root `
-    -JavaScriptRoot (Join-Path $root 'src\LocalGPT\wwwroot\js') `
+    -JavaScriptRoot (Join-Path $root 'src\PublisherStudio.Web\wwwroot\js') `
     -ManifestPath (Join-Path $PSScriptRoot 'javascript-diagnostics-files.sha256') `
-    -ProductName 'LocalGPT'
+    -ProductName 'PublisherStudio'

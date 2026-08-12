@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate and prepare the single tracked LocalGPT GitHub Pages artifact."""
+"""Validate and prepare the single tracked PublisherStudio GitHub Pages artifact."""
 from __future__ import annotations
 import argparse, hashlib, json, re, shutil, stat, sys, tempfile, zlib
 from html.parser import HTMLParser
@@ -7,16 +7,16 @@ from pathlib import Path, PurePosixPath
 from urllib.parse import unquote, urlsplit
 from zipfile import BadZipFile, ZipFile
 
-PRODUCT = 'LocalGPT'
-STYLE_FILE = 'styles/localgpt-kawaii.css'
-SCRIPT_FILE = 'styles/localgpt-kawaii.js'
-FAVICON_LABEL = 'LocalGPT cat paw'
-INDEX_MARKERS = ('localgpt-kawaii-docs', 'data-localgpt-theme-bootstrap', 'data-localgpt-favicon', 'data-localgpt-kawaii-style', 'data-localgpt-kawaii-script')
-CSS_MARKERS = ('localgpt-theme-control', 'localgpt-kawaii-sky', 'localgpt-cursor-paw', '--kawaii-docs-rail-width')
-JS_MARKERS = ('mountThemeControl', 'localgpt-docs-theme', 'persistTheme', 'localgpt-cursor-paw')
+PRODUCT = 'PublisherStudio'
+STYLE_FILE = 'styles/publisherstudio-kawaii.css'
+SCRIPT_FILE = 'styles/publisherstudio-kawaii.js'
+FAVICON_LABEL = 'PublisherStudio cat paw'
+INDEX_MARKERS = ('publisherstudio-kawaii-docs', 'data-publisherstudio-theme-bootstrap', 'data-publisherstudio-favicon', 'data-publisherstudio-kawaii-style', 'data-publisherstudio-kawaii-script')
+CSS_MARKERS = ('publisherstudio-theme-control', 'publisherstudio-kawaii-sky', 'publisherstudio-cursor-paw', '--kawaii-docs-rail-width')
+JS_MARKERS = ('mountThemeControl', 'publisherstudio-docs-theme', 'persistTheme', 'publisherstudio-cursor-paw')
 MAX_UNCOMPRESSED_BYTES = 512 * 1024 * 1024
 MAX_FILE_COUNT = 20_000
-MIN_PDF_BYTES = 524_288
+MIN_PDF_BYTES = 1_048_576
 
 REQUIRED_FILES = (
     "index.html", "api/index.html", "documentation-status.json",
@@ -188,6 +188,7 @@ def validate_source(source: Path, expected_version: str | None = None) -> dict[s
         "kawaiiStyleSha256": sha256(source / STYLE_FILE),
         "kawaiiScriptSha256": sha256(source / SCRIPT_FILE),
         "faviconSvgSha256": sha256(source / "favicon.svg"),
+        "apiIndexSha256": sha256(source / "api/index.html"),
     }
 
 def safe_extract_zip(archive: Path, destination: Path) -> Path:
@@ -229,7 +230,7 @@ def main() -> int:
         output = args.output.resolve(strict=False)
         if args.archive is not None:
             archive = args.archive.resolve(strict=True)
-            with tempfile.TemporaryDirectory(prefix='localgpt-pages-') as temp_dir:
+            with tempfile.TemporaryDirectory(prefix='publisherstudio-pages-') as temp_dir:
                 source = safe_extract_zip(archive, Path(temp_dir))
                 metadata = validate_source(source, args.expected_version)
                 copy_tree(source, output)

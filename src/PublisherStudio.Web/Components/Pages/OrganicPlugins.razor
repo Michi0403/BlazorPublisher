@@ -12,6 +12,7 @@
 @inject IUserNotificationService Notifications
 @inject ILogger<OrganicPlugins> Logger
 @inject NavigationManager Navigation
+@inject EditorStateService EditorState
 @inject IJSRuntime JS
 @inject IOptions<OrganicPluginOptions> OrganicOptions
 
@@ -22,8 +23,8 @@
     <header class="organic-plugin-header">
         <div>
             <p class="organic-plugin-kicker">PublisherStudio · LocalGPT</p>
-            <h1>Organic plugin control</h1>
-            <p>Discover LocalGPT, negotiate capabilities, approve eye/hand actions, and start a role-based Council round.</p>
+            <h1>LocalGPT AI Assist</h1>
+            <p>Use LocalGPT as a connected writing, spreadsheet, project and 3D assistant. Connection diagnostics and advanced Council controls stay available below when you need them.</p>
         </div>
         <button type="button" class="organic-secondary" @onclick="BackToPublisher">Back to Publisher</button>
     </header>
@@ -56,11 +57,57 @@
         }
     </section>
 
-    <OrganicSecurityPanel />
+    <section class="organic-card organic-ai-assist-card" data-testid="publisher-ai-text-generation">
+        <div class="organic-ai-assist-heading">
+            <div>
+                <span class="organic-badge">1-Wire AI</span>
+                <h2>Create with LocalGPT</h2>
+                <p class="organic-note">Describe the result you want. PublisherStudio chooses a suitable LocalGPT team/preset when possible and keeps the returned text reviewable before it changes your publication.</p>
+            </div>
+            <span class="organic-link-state">@(Connection.State.IsLinked ? "Ready" : "Connect LocalGPT first")</span>
+        </div>
+        @if (EditorState.SelectedElement is { } selectedAiElement)
+        {
+            <p class="organic-ai-context"><strong>Current object:</strong> @selectedAiElement.Name · @selectedAiElement.Kind · @EditorState.CurrentPage.Name</p>
+        }
+        <div class="organic-form-grid organic-ai-assist-grid">
+            <label>What are you working on?
+                <select @bind="_aiAssistProfile">
+                    <option value="auto">Auto · choose from my prompt/target</option>
+                    <option value="writing">Text / story / document</option>
+                    <option value="spreadsheet">Spreadsheet / table</option>
+                    <option value="openscad">3D / OpenSCAD object</option>
+                    <option value="project">Project / source files</option>
+                </select>
+            </label>
+            <label>Target in PublisherStudio
+                <input @bind="_textGenerationTarget" placeholder="Selected text, article body, spreadsheet notes, SCAD object…" />
+            </label>
+            <label class="organic-form-wide">What should LocalGPT create?
+                <textarea rows="4" @bind="_textGenerationPrompt" @bind:event="oninput" placeholder="Example: Rewrite the selected paragraph for a technical audience, summarize this sheet, or create an OpenSCAD description for the selected object."></textarea>
+            </label>
+        </div>
+        <div class="organic-ai-assist-actions">
+            <button type="button" class="organic-primary" disabled="@(!CanGenerateTextProposal)" @onclick="GenerateTextProposalAsync">Create proposal</button>
+            <small>Inserted proposals become normal PublisherStudio content and are therefore baked into normal HTML/export output.</small>
+        </div>
+        <details class="organic-inline-advanced">
+            <summary>Team / preset override</summary>
+            <label>LocalGPT team or preset
+                <select @bind="_textGenerationTeamKey">
+                    @foreach (var team in CouncilTeams)
+                    {
+                        <option value="@team.Key">@team.Name</option>
+                    }
+                </select>
+            </label>
+            <p class="organic-note">Auto uses LocalGPT's advertised team keys when available. The override stays useful for custom presets created on the LocalGPT side.</p>
+        </details>
+    </section>
 
     <div class="organic-grid organic-grid-two">
         <section class="organic-card">
-            <h2>Discovered LocalGPT instances</h2>
+            <h2>LocalGPT connection</h2>
             @if (_peers.Count == 0)
             {
                 <p class="organic-empty">No LocalGPT broadcast has been received yet. LocalGPT remains available on its normal application port; organic discovery is optional.</p>
@@ -83,8 +130,21 @@
             }
         </section>
 
+        <section class="organic-card organic-workflow-card">
+            <h2>Useful AI workflows</h2>
+            <div class="organic-capability-grid">
+                <article class="organic-capability"><strong>Writing</strong><p>Generate, rewrite, summarize or review story/document text and insert the approved result in the editor.</p></article>
+                <article class="organic-capability"><strong>Spreadsheet</strong><p>Ask a spreadsheet-oriented LocalGPT team to inspect the connected workbook context and return reviewable text or next actions.</p></article>
+                <article class="organic-capability"><strong>3D / OpenSCAD</strong><p>Use the OpenSCAD team and advertised PublisherStudio 3D capabilities for prompt-driven objects and project guidance.</p></article>
+                <article class="organic-capability"><strong>Project files</strong><p>Use LocalGPT's project/code generation and generic source-file functions instead of forcing a C#-only workflow.</p></article>
+            </div>
+        </section>
+    </div>
+
+    <details class="organic-advanced-section">
+        <summary>Advanced Council request</summary>
         <section class="organic-card">
-            <h2>Start an AI Council round</h2>
+            <h2>Start a custom AI Council round</h2>
             <label>
                 Council team
                 <select @bind="_councilRequest.TeamKey" disabled="@(!CanRunCouncil)">
@@ -96,7 +156,7 @@
             </label>
             <label>
                 User assignment
-                <textarea rows="7" @bind="_councilRequest.Prompt" @bind:event="oninput" placeholder="Example: Build an OpenSCAD assembly from blocks and forms, or help me inspect this spreadsheet through a sequential eye/hand workflow."></textarea>
+                <textarea rows="5" @bind="_councilRequest.Prompt" @bind:event="oninput" placeholder="Use this only when the simple AI Assist request above is not enough."></textarea>
             </label>
             <label>
                 External project context (JSON)
@@ -104,33 +164,21 @@
             </label>
             <div class="organic-inline-fields">
                 <label>Rounds <input type="number" min="1" max="20" @bind="_councilRequest.MaxRounds" /></label>
-                <label>Parallel models <input type="number" min="1" max="8" @bind="_councilRequest.MaxParallelModels" /></label>
+                <label>Parallel models <input type="number" min="1" @bind="_councilRequest.MaxParallelModels" /></label>
             </div>
             <button type="button" class="organic-primary" disabled="@(!CanRunCouncil || string.IsNullOrWhiteSpace(_councilRequest.Prompt))" @onclick="SendCouncilAsync">Submit with user authorization</button>
-            <p class="organic-note">The request only enters LocalGPT after this explicit frontend action. Any required PublisherStudio eye/hand call is still checked against the permission matrix below.</p>
         </section>
-    </div>
+    </details>
 
-    <section class="organic-card" data-testid="publisher-ai-text-generation">
-        <h2>Generate a text proposal through LocalGPT</h2>
-        <p class="organic-note">This starts the selected LocalGPT Council from PublisherStudio and requires it to return the generated text through <code>publisher.text.insert.propose</code>. The proposal is reviewable and is never inserted automatically.</p>
-        <div class="organic-form-grid">
-            <label>Target document/component <input @bind="_textGenerationTarget" placeholder="Publication intro, selected text component, article body…" /></label>
-            <label>Learning/Council team
-                <select @bind="_textGenerationTeamKey">
-                    @foreach (var team in CouncilTeams)
-                    {
-                        <option value="@team.Key">@team.Name</option>
-                    }
-                </select>
-            </label>
-            <label class="organic-form-wide">Prompt <textarea rows="5" @bind="_textGenerationPrompt" @bind:event="oninput" placeholder="Write the requested text and return it as a reviewable PublisherStudio insertion proposal."></textarea></label>
-        </div>
-        <button type="button" class="organic-primary" disabled="@(!CanGenerateTextProposal)" @onclick="GenerateTextProposalAsync">Generate reviewable text proposal</button>
-    </section>
+    <details class="organic-advanced-section">
+        <summary>1-Wire security and trust</summary>
+        <OrganicSecurityPanel />
+    </details>
 
     @if (Connection.State.IsConnected)
     {
+        <details class="organic-advanced-section">
+            <summary>Negotiated LocalGPT routes and capabilities</summary>
         <section class="organic-card">
             <h2>Negotiated LocalGPT surface</h2>
             <p class="organic-note">These are the active methods received from LocalGPT during the current 1-Wire handshake. Routes, methods and policy keys remain visible so a user can verify what either application may call.</p>
@@ -161,8 +209,11 @@
                 </table>
             </div>
         </section>
+        </details>
     }
 
+    <details class="organic-advanced-section">
+        <summary>Protocol settings and diagnostics</summary>
     <section class="organic-card">
         <h2>Active PublisherStudio protocol settings</h2>
         <div class="organic-capability-grid">
@@ -173,7 +224,10 @@
         </div>
         <p class="organic-note">Machine-readable profile: <code>GET /api/organic/onewire/http-json/profile</code>. Documentation profile: <code>GET /api/documentation/profile</code>.</p>
     </section>
+    </details>
 
+    <details class="organic-advanced-section">
+        <summary>PublisherStudio organic capabilities and permissions</summary>
     <section class="organic-card">
         <h2>PublisherStudio organ capabilities</h2>
         <div class="organic-capability-grid">
@@ -333,9 +387,10 @@
             }
         </section>
     </div>
+    </details>
 
     <section class="organic-card">
-        <h2>Council responses and proposals</h2>
+        <h2>LocalGPT responses and proposals</h2>
         @if (_results.Count == 0 && _textProposals.Count == 0)
         {
             <p class="organic-empty">No responses have been received from LocalGPT.</p>
@@ -373,6 +428,7 @@
     private string _textGenerationTarget = "PublisherStudio text component";
     private string _textGenerationPrompt = string.Empty;
     private string _textGenerationTeamKey = "general";
+    private string _aiAssistProfile = "auto";
     private OrganicCouncilPromptRequest _councilRequest = null!;
     private OrganicPermissionRule _permission = null!;
     private string _roundTripStatus = string.Empty;
@@ -390,6 +446,7 @@
         RecurringScreenReader.Changed += OnServiceChanged;
         _capabilities = await CapabilityCatalog.GetCapabilitiesAsync();
         Refresh();
+        ApplyCurrentPublisherContext();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -477,25 +534,20 @@
         if (!Connection.State.IsConnected) return;
         try
         {
-            _roundTripStatus = "Testing protocol negotiation…";
+            _roundTripStatus = "Testing the linked 1-Wire transport…";
             var envelope = new OrganicWireEnvelope
             {
-                MessageType = OrganicWireMessageType.CapabilityRequest,
+                MessageType = OrganicWireMessageType.Ping,
                 TargetPeerId = Connection.State.PeerId,
-                CapabilityKey = "onewire.capabilities",
                 UserConfirmed = true,
                 ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(10)
             };
             var correlationId = await Connection.SendEnvelopeAsync(envelope);
             var result = await Connection.WaitForResultAsync(correlationId, TimeSpan.FromSeconds(10));
-            var capabilityCount = result.Properties is not null && result.Properties.TryGetValue("Capabilities", out var value) && value.ValueKind == JsonValueKind.Array
-                ? value.GetArrayLength()
-                : Connection.State.RemoteCapabilities.Count;
-            var ocrCapability = Connection.State.RemoteCapabilities.FirstOrDefault(item => string.Equals(item.Key, "localgpt.vision.ocr", StringComparison.OrdinalIgnoreCase));
-            var ocrState = ocrCapability is null
-                ? "DeepSeek-compatible OCR was not advertised"
-                : $"OCR advertised as {ocrCapability.Method} {ocrCapability.Route} ({ocrCapability.ConfigurationKey})";
-            _roundTripStatus = $"1-Wire {result.ProtocolVersion} round trip succeeded; LocalGPT reported {capabilityCount} capabilities; {ocrState}.";
+            if (result.MessageType != OrganicWireMessageType.Pong)
+                throw new InvalidDataException($"Expected a 1-Wire Pong but received {result.MessageType}.");
+
+            _roundTripStatus = $"1-Wire {result.ProtocolVersion} Ping/Pong succeeded; {Connection.State.RemoteCapabilities.Count} LocalGPT capabilities are currently negotiated.";
             Notifications.Success(_roundTripStatus, "Organic connection verified", nameof(OrganicPlugins));
         }
         catch (Exception exception)
@@ -564,22 +616,34 @@
 
         try
         {
-            var request = NewCouncilRequest(_textGenerationTeamKey);
-            request.RequestedOrganicCapabilities = ["publisher.business-context", "publisher.text.insert.propose"];
+            var resolvedTeamKey = ResolveAiAssistTeamKey();
+            var request = NewCouncilRequest(resolvedTeamKey);
+            request.RequestedOrganicCapabilities = ResolveAiAssistCapabilities();
             request.ExternalProjectContextJson = System.Text.Json.JsonSerializer.Serialize(new
             {
                 Source = "PublisherStudio",
                 Target = _textGenerationTarget,
-                Workflow = "Reviewable text insertion proposal"
+                Workflow = "Reviewable PublisherStudio AI Assist proposal",
+                Profile = _aiAssistProfile,
+                TeamKey = resolvedTeamKey,
+                Publication = EditorState.Document.Name,
+                Page = EditorState.CurrentPage.Name,
+                SelectedElementId = EditorState.SelectedElement?.Id,
+                SelectedElementName = EditorState.SelectedElement?.Name,
+                SelectedElementKind = EditorState.SelectedElement?.Kind.ToString()
             });
             request.Prompt = $"""
-PublisherStudio user request:
+PublisherStudio AI Assist request:
+Profile: {_aiAssistProfile}
+Target: {_textGenerationTarget.Trim()}
+User request:
 {_textGenerationPrompt.Trim()}
 
 Required result contract:
-1. Generate the final text for target '{_textGenerationTarget.Trim()}'.
-2. Before completing the Council run, invoke the LocalGPT DX function publisher.text.proposal.request with JSON parameters containing target, text and a concise reason.
-3. Do not insert or mutate the publication automatically. The PublisherStudio user reviews the proposal and performs the final insertion.
+1. Use the connected PublisherStudio context and any requested organic capability that is actually advertised; do not invent unavailable routes.
+2. Generate the final reviewable text/result description for the target above. For spreadsheet, project or OpenSCAD work, preserve domain-specific structure and include exact source/formula/code where useful.
+3. Before completing the Council run, invoke the LocalGPT DX function publisher.text.proposal.request with JSON parameters containing target, text and a concise reason.
+4. Do not mutate the publication automatically. Once the user inserts the proposal it becomes ordinary PublisherStudio content and is included in normal HTML/export output.
 """;
             var id = await Connection.SendCouncilRequestAsync(request);
             Notifications.Success($"Text-generation Council request {id} was submitted.", "Text proposal requested", nameof(OrganicPlugins));
@@ -589,6 +653,98 @@ Required result contract:
         {
             Logger.LogError(ex, "Could not submit the PublisherStudio text-generation request to LocalGPT.");
             Notifications.Error(ex.Message, "Text proposal request failed", nameof(OrganicPlugins));
+        }
+    }
+
+    /// <summary>
+    /// Prefills AI Assist from the currently selected PublisherStudio object without copying private document payloads into navigation state.
+    /// </summary>
+    private void ApplyCurrentPublisherContext()
+    {
+        try
+        {
+            var selected = EditorState.SelectedElement;
+            if (selected is null)
+            {
+                _textGenerationTarget = $"{EditorState.CurrentPage.Name} in {EditorState.Document.Name}";
+                return;
+            }
+
+            _textGenerationTarget = $"{selected.Name} ({selected.Kind})";
+            _aiAssistProfile = selected switch
+            {
+                TextFrameElement or WordArtElement => "writing",
+                SpreadsheetElement => "spreadsheet",
+                HtmlEmbedElement or DevExtremeComponentElement => "project",
+                _ when selected.Name.Contains("OpenSCAD", StringComparison.OrdinalIgnoreCase) || selected.Name.Contains("3D", StringComparison.OrdinalIgnoreCase) => "openscad",
+                _ => "auto"
+            };
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "PublisherStudio could not prefill LocalGPT AI Assist from the current selection.");
+        }
+    }
+
+    /// <summary>
+    /// Resolves the simple AI Assist profile to an advertised LocalGPT team while preserving the explicit team override as a fallback.
+    /// </summary>
+    private string ResolveAiAssistTeamKey()
+    {
+        try
+        {
+            var target = $"{_textGenerationTarget} {_textGenerationPrompt}".ToLowerInvariant();
+            var preferredKey = _aiAssistProfile switch
+            {
+                "spreadsheet" => "spreadsheet-team",
+                "openscad" => "openscad-team",
+                "project" => "general-project",
+                "writing" => "general",
+                _ when target.Contains("spreadsheet", StringComparison.Ordinal) || target.Contains("sheet", StringComparison.Ordinal) || target.Contains("table", StringComparison.Ordinal) => "spreadsheet-team",
+                _ when target.Contains("openscad", StringComparison.Ordinal) || target.Contains("scad", StringComparison.Ordinal) || target.Contains("3d", StringComparison.Ordinal) => "openscad-team",
+                _ when target.Contains("project", StringComparison.Ordinal) || target.Contains("source", StringComparison.Ordinal) || target.Contains("code", StringComparison.Ordinal) || target.Contains("file", StringComparison.Ordinal) => "general-project",
+                _ => _textGenerationTeamKey
+            };
+
+            return CouncilTeams.FirstOrDefault(team => string.Equals(team.Key, preferredKey, StringComparison.OrdinalIgnoreCase)).Key
+                ?? CouncilTeams.FirstOrDefault(team => string.Equals(team.Key, _textGenerationTeamKey, StringComparison.OrdinalIgnoreCase)).Key
+                ?? CouncilTeams.First().Key;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "PublisherStudio could not resolve the requested AI Assist profile to a LocalGPT Council team.");
+            return _textGenerationTeamKey;
+        }
+    }
+
+    /// <summary>
+    /// Builds the PublisherStudio capabilities that may help the selected AI Assist profile without requiring unavailable routes.
+    /// </summary>
+    private List<string> ResolveAiAssistCapabilities()
+    {
+        try
+        {
+            var requested = new List<string> { "publisher.business-context", "publisher.text.insert.propose" };
+            switch (_aiAssistProfile)
+            {
+                case "spreadsheet":
+                    requested.Add("publisher.spreadsheet.inspect");
+                    break;
+                case "openscad":
+                    requested.Add("publisher.openscad.generate");
+                    break;
+            }
+
+            var localKeys = _capabilities
+                .Where(item => item.IsEnabled && item.IsOnline)
+                .Select(item => item.Key)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            return requested.Where(key => localKeys.Contains(key)).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "PublisherStudio could not build the AI Assist organic capability request.");
+            return ["publisher.business-context", "publisher.text.insert.propose"];
         }
     }
 

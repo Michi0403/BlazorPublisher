@@ -1,15 +1,31 @@
 items:
-- name: User guide
-  href: index.md
+- name: Documentation home
+  href: ../index.md
 - name: Getting started
-  href: getting-started.md
-- name: Chat and AI Council
-  href: chat-and-council.md
-- name: Projects and workspaces
-  href: projects-and-workspaces.md
-- name: Code generation and DXFunctions
-  href: code-generation-and-dxfunctions.md
-- name: Embedded planning and games
-  href: embedded-and-games.md
-- name: Documentation inside LocalGPT
-  href: documentation.md
+  href: ../articles/getting-started.md
+- name: Editor workspace
+  href: ../articles/editor-workspace.md
+- name: Stories and spreadsheets
+  href: ../articles/stories-and-spreadsheets.md
+- name: Pictures and media
+  href: ../articles/pictures-and-media.md
+- name: Animation and interaction
+  href: ../articles/animation-and-interaction.md
+- name: Streaming and recording
+  href: ../articles/streaming-and-recording.md
+- name: Publishing and export
+  href: ../articles/publishing-and-export.md
+- name: Installer and updates
+  href: ../articles/installer-and-updates.md
+- name: LocalGPT and 1-Wire
+  href: ../articles/localgpt-and-onewire.md
+- name: Privacy and security
+  href: ../articles/privacy-and-security.md
+- name: Architecture
+  href: ../articles/architecture.md
+- name: Developer build
+  href: ../articles/developer-build.md
+- name: Troubleshooting
+  href: ../articles/troubleshooting.md
+- name: Documentation system
+  href: ../articles/documentation-system.md

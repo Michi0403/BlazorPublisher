@@ -1,48 +1,52 @@
-﻿param(
+param(
     [ValidateSet("all", "win-x64", "win-x86", "win-arm64", "linux-x64", "linux-arm64", "osx-x64", "osx-arm64")]
     [string]$Runtime = "all",
     [ValidateSet("Release", "Debug")]
     [string]$Configuration = "Release",
     [string]$WireProtocolVersion = "2.1.1",
     [string]$WireProtocolPackageUrl = "",
+    [string]$LocalGptRepository = "",
     [switch]$UseBundledWireProtocolPackage,
-    [switch]$IncludeWindowsWrapper
+    [switch]$RefreshWireProtocolPackage
 )
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-Write-Host "Refreshing reviewed LocalGPT frontend SHA-256 inventory before the ordered CLI build..." -ForegroundColor DarkCyan
+Write-Host "Refreshing reviewed PublisherStudio frontend SHA-256 inventory before the ordered CLI build..." -ForegroundColor DarkCyan
 & (Join-Path $root 'build\Update-JavaScriptDiagnosticsManifest.ps1')
 & (Join-Path $root 'build\Assert-JavaScriptDiagnostics.ps1')
+& (Join-Path $root 'build\Assert-InteractiveServerRenderModes.ps1')
+& (Join-Path $root 'build\Assert-PanelStudioAuthoringGeometry.ps1')
+& (Join-Path $root 'build\Assert-PanelStudioInteractionLifecycle.ps1')
+& (Join-Path $root 'build\Assert-PanelStudioPersistence.ps1')
+& (Join-Path $root 'build\Assert-XmlDocumentationCoverage.ps1')
 Write-Host "Clearing repository-local bin/obj build state for the authoritative release build..." -ForegroundColor Cyan
 Get-ChildItem (Join-Path $root "src") -Directory -Recurse -Force |
     Where-Object { $_.Name -in @("bin", "obj") } |
     Sort-Object FullName -Descending |
     Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
-$solutionRoot = Join-Path $root "src"
 $artifacts = Join-Path $root "artifacts\release"
 $packageDirectory = Join-Path $root "packages"
-$appProject = Join-Path $solutionRoot "LocalGPT\LocalGPT.csproj"
-$setupProject = Join-Path $solutionRoot "LocalGPTInstallerConsole\LocalGPTInstallerConsole.csproj"
-$wrapperProject = Join-Path $solutionRoot "LocalGPTWebviewWrapper\LocalGPTWebviewWrapper.csproj"
-$wireProject = Join-Path $solutionRoot "LocalGPT.WireProtocolVersion\LocalGPT.WireProtocolVersion.csproj"
+$webProject = Join-Path $root "src\PublisherStudio.Web\PublisherStudio.Web.csproj"
+$webDirectory = Split-Path -Parent $webProject
+$setupProject = Join-Path $root "src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj"
 $documentationScript = Join-Path $root "build\Build-Documentation.ps1"
 $pagesSnapshotScript = Join-Path $root "build\Update-GitHubPagesSnapshot.ps1"
-$pagesSnapshotArchive = Join-Path $root ".github\pages\localgpt-kawaii-docs.zip"
-$wirePackageName = "LocalGPT.WireProtocolVersion.$WireProtocolVersion.nupkg"
-$wirePackage = Join-Path $packageDirectory $wirePackageName
-$localApplicationData = [Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)
-$sharedWirePackageDirectory = if ([string]::IsNullOrWhiteSpace($localApplicationData)) { $null } else { Join-Path $localApplicationData "LocalGPT\NuGet" }
+$pagesSnapshotArchive = Join-Path $root ".github\pages\publisherstudio-kawaii-docs.zip"
+$wireProtocolPackageName = "LocalGPT.WireProtocolVersion.$WireProtocolVersion.nupkg"
+$wireProtocolPackage = Join-Path $packageDirectory $wireProtocolPackageName
 $documentationCacheRoot = Join-Path $artifacts ".documentation-cache"
 $documentationPrepared = $false
 $releaseZipPaths = New-Object 'System.Collections.Generic.List[string]'
 
-& (Join-Path $root 'build\Assert-PowerShellCompatibility.ps1')
-
 function Invoke-DotNet {
-    param([Parameter(Mandatory)][string[]]$Arguments, [Parameter(Mandatory)][string]$FailureMessage)
+    param(
+        [Parameter(Mandatory)][string[]]$Arguments,
+        [Parameter(Mandatory)][string]$FailureMessage
+    )
+
     & dotnet @Arguments
     if ($LASTEXITCODE -ne 0) { throw $FailureMessage }
 }
@@ -60,102 +64,6 @@ function Resolve-ProjectVersion {
     return $versions[0]
 }
 
-function Assert-LocalGptDocumentationPayload {
-    param(
-        [Parameter(Mandatory)][string]$DocumentationRoot,
-        [Parameter(Mandatory)][string]$Version
-    )
-    $requiredArtifacts = @(
-        (Join-Path $DocumentationRoot "index.html"),
-        (Join-Path $DocumentationRoot "documentation-status.json"),
-        (Join-Path $DocumentationRoot "LocalGPT.xml"),
-        (Join-Path $DocumentationRoot "LocalGPT-$Version.pdf")
-    )
-    foreach ($requiredArtifact in $requiredArtifacts) {
-        if (-not (Test-Path -LiteralPath $requiredArtifact -PathType Leaf)) {
-            throw "Published LocalGPT documentation is incomplete: $requiredArtifact"
-        }
-    }
-
-    $statusPath = Join-Path $DocumentationRoot "documentation-status.json"
-    $status = Get-Content -LiteralPath $statusPath -Raw | ConvertFrom-Json
-    if (-not [string]::Equals([string]$status.version, $Version, [StringComparison]::OrdinalIgnoreCase)) {
-        throw "Published LocalGPT documentation version '$($status.version)' does not match application version '$Version'."
-    }
-    $versionedPdfs = @(Get-ChildItem -LiteralPath $DocumentationRoot -File -Filter 'LocalGPT-*.pdf' -ErrorAction SilentlyContinue)
-    if ($versionedPdfs.Count -ne 1 -or -not [string]::Equals($versionedPdfs[0].Name, "LocalGPT-$Version.pdf", [StringComparison]::OrdinalIgnoreCase)) {
-        throw "Published LocalGPT documentation must contain exactly one current versioned PDF (LocalGPT-$Version.pdf). Found: $($versionedPdfs.Name -join ', ')"
-    }
-    $apiIndex = Join-Path $DocumentationRoot 'api\index.html'
-    if (-not (Test-Path -LiteralPath $apiIndex -PathType Leaf)) { throw "Published LocalGPT documentation is missing api/index.html: $apiIndex" }
-    $physicalApiHtmlCount = @(Get-ChildItem -LiteralPath (Join-Path $DocumentationRoot 'api') -Filter '*.html' -File -Recurse -ErrorAction SilentlyContinue).Count
-    if ($physicalApiHtmlCount -le 1) { throw "Published LocalGPT documentation API directory is physically incomplete ($physicalApiHtmlCount HTML file(s))." }
-    if ([string]$status.documentationMode -ne "docfx") { throw "Published LocalGPT documentation did not use the DocFX modern site." }
-    if ([string]$status.pdfMode -notin @("html-browser-print", "docfx-pdf-plugin")) { throw "Published LocalGPT documentation does not contain the complete HTML-backed documentation PDF." }
-    if ([string]$status.pdfMode -eq "html-browser-print" -and [int]$status.pdfSourcePageCount -lt 10) { throw "The LocalGPT documentation PDF did not include the expected HTML page set." }
-    if ([string]$status.pdfMode -eq "html-browser-print" -and [int]$status.apiHtmlCount -gt 0 -and [int]$status.pdfSourcePageCount -lt [int]$status.apiHtmlCount) { throw "The LocalGPT documentation PDF omitted generated API pages." }
-    if (-not ([bool]$status.completeApiReference)) { throw "Published LocalGPT documentation is missing the complete XML-generated API reference." }
-    if ([int]$status.apiYamlCount -le 1 -or [int]$status.apiHtmlCount -le 1) { throw "Published LocalGPT documentation contains an incomplete API graph." }
-    if ([long]$status.pdfBytes -lt 1048576) { throw "Published LocalGPT documentation contains an unexpectedly small PDF." }
-    if ([int]$status.pdfCandidateCount -lt 1 -or [string]::IsNullOrWhiteSpace([string]$status.pdfGeneratedSourcePath)) { throw "Published LocalGPT documentation did not record a real documentation PDF source." }
-
-    Write-Host "Verified complete LocalGPT $Version DocFX modern HTML and HTML-backed PDF documentation in $DocumentationRoot" -ForegroundColor Green
-}
-
-$appVersion = Resolve-ProjectVersion -ProjectPath $appProject
-
-function Prepare-LocalGptDocumentation {
-    if ($script:documentationPrepared) { return }
-
-    if (-not (Test-Path -LiteralPath $documentationScript -PathType Leaf)) {
-        throw "Documentation build script not found: $documentationScript"
-    }
-
-    $appProjectDirectory = Split-Path -Parent $appProject
-    $neutralOutputRoot = Join-Path $appProjectDirectory "bin\$Configuration\net10.0"
-    $documentationAssembly = Join-Path $neutralOutputRoot "LocalGPT.dll"
-    $documentationXml = Join-Path $neutralOutputRoot "LocalGPT.xml"
-    $documentationOutput = Join-Path $neutralOutputRoot "wwwroot\help-docs"
-    # Documentation is produced from the authoritative source-project graph. The release package is still
-    # packed and delivered for package-mode consumers, but rebuilding that same mutable local package
-    # version through NuGet can reuse a stale global-packages entry. That failure presents as hundreds of
-    # missing LocalGPT.WireProtocol types even though packing itself succeeded.
-    $documentationBuildProperties = @(
-        "-p:UseLocalWireProtocolProject=true",
-        "-p:RuntimeIdentifier=",
-        "-p:RuntimeIdentifiers=",
-        "-p:BuildLocalGptDocumentation=false",
-        "-p:SeedLocalGptGitHubPagesSnapshotOnBuild=false"
-    )
-
-    Write-Host "Building the RID-neutral LocalGPT assembly once for shared release documentation..." -ForegroundColor Cyan
-    Invoke-DotNet -Arguments (@("restore", $appProject, "--disable-parallel", "--force-evaluate") + $documentationBuildProperties) -FailureMessage "RID-neutral LocalGPT restore for documentation failed."
-    Invoke-DotNet -Arguments (@("build", $appProject, "-c", $Configuration, "--no-restore", "-maxcpucount:1", "-p:BuildProjectReferences=false", "-p:BuildLocalGptDocumentation=false") + $documentationBuildProperties) -FailureMessage "RID-neutral LocalGPT build for documentation failed."
-
-    if (-not (Test-Path -LiteralPath $documentationAssembly -PathType Leaf)) { throw "Documentation assembly not found: $documentationAssembly" }
-    if (-not (Test-Path -LiteralPath $documentationXml -PathType Leaf)) { throw "Documentation XML not found: $documentationXml" }
-
-    Write-Host "Generating the complete LocalGPT documentation once for all runtime packages..." -ForegroundColor Cyan
-    & $documentationScript `
-        -RepositoryRoot $root `
-        -AssemblyPath $documentationAssembly `
-        -XmlDocumentationPath $documentationXml `
-        -Version $appVersion `
-        -OutputWebRoot $documentationOutput `
-        -RequirePdf
-
-    Assert-LocalGptDocumentationPayload -DocumentationRoot $documentationOutput -Version $appVersion
-    if (-not (Test-Path -LiteralPath $pagesSnapshotScript -PathType Leaf)) { throw "GitHub Pages snapshot script not found: $pagesSnapshotScript" }
-    Write-Host "Validating and seeding the LocalGPT $appVersion GitHub Pages snapshot from the release documentation payload..." -ForegroundColor Cyan
-    & $pagesSnapshotScript -DocumentationRoot $documentationOutput -OutputArchive $pagesSnapshotArchive
-    if (-not (Test-Path -LiteralPath $pagesSnapshotArchive -PathType Leaf)) { throw "LocalGPT GitHub Pages snapshot update failed to create $pagesSnapshotArchive." }
-    Remove-Item -LiteralPath $script:documentationCacheRoot -Recurse -Force -ErrorAction SilentlyContinue
-    New-Item -ItemType Directory -Path $script:documentationCacheRoot -Force | Out-Null
-    Copy-Item -Path (Join-Path $documentationOutput "*") -Destination $script:documentationCacheRoot -Recurse -Force
-    $script:documentationPrepared = $true
-    Write-Host "Cached one verified documentation payload for all RID publishes." -ForegroundColor Green
-}
-
 function Resolve-PublishProfilePath {
     param(
         [Parameter(Mandatory)][string]$ProjectPath,
@@ -164,10 +72,9 @@ function Resolve-PublishProfilePath {
 
     $projectDirectory = Split-Path -Parent $ProjectPath
     $profilePath = Join-Path $projectDirectory "Properties\PublishProfiles\$ProfileName.pubxml"
-    if (-not (Test-Path -LiteralPath $profilePath)) {
+    if (-not (Test-Path -LiteralPath $profilePath -PathType Leaf)) {
         throw "Publish profile not found: $profilePath"
     }
-
     return $profilePath
 }
 
@@ -201,29 +108,187 @@ function Resolve-ProfilePublishFolder {
     $projectDirectory = Split-Path -Parent $ProjectPath
     $resolved = if ([IO.Path]::IsPathRooted([string]$publishDirectory)) {
         [string]$publishDirectory
-    } else {
+    }
+    else {
         Join-Path $projectDirectory ([string]$publishDirectory)
     }
-
     return [IO.Path]::GetFullPath($resolved)
 }
 
 function Resolve-ReleaseProfile {
     param([Parameter(Mandatory)][string]$Rid)
+
     switch ($Rid) {
-        "win-x64"     { return @{ AppAsset = "winx64.zip";     SetupAsset = "setupwinx64.zip";     AppProfile = "winx64";     SetupProfile = "winx64";     WrapperProfile = "winx64" } }
-        "win-x86"     { return @{ AppAsset = "winx86.zip";     SetupAsset = "setupwinx86.zip";     AppProfile = "winx86";     SetupProfile = "winx86";     WrapperProfile = "winx86" } }
-        "win-arm64"   { return @{ AppAsset = "winarm64.zip";   SetupAsset = "setupwinarm64.zip";   AppProfile = "winarm64";   SetupProfile = "winarm64";   WrapperProfile = "winarm64" } }
-        "linux-x64"   { return @{ AppAsset = "linuxx64.zip";   SetupAsset = "setuplinuxx64.zip";   AppProfile = "linuxx64";   SetupProfile = "linuxx64";   WrapperProfile = $null } }
-        "linux-arm64" { return @{ AppAsset = "linuxarm64.zip"; SetupAsset = "setuplinuxarm64.zip"; AppProfile = "linuxarm64"; SetupProfile = "linuxarm64"; WrapperProfile = $null } }
-        "osx-x64"     { return @{ AppAsset = "macosx64.zip";   SetupAsset = "setupmacosx64.zip";   AppProfile = "macosx64";   SetupProfile = "macosx64";   WrapperProfile = $null } }
-        "osx-arm64"   { return @{ AppAsset = "macosarm64.zip"; SetupAsset = "setupmacosarm64.zip"; AppProfile = "macosarm64"; SetupProfile = "macosarm64"; WrapperProfile = $null } }
+        "win-x64"     { return @{ AppAsset = "winx64.zip";     SetupAsset = "setupwinx64.zip";     AppProfile = "winx64";     SetupProfile = "winx64";     AppFolder = "winx64";     SetupFolder = "setupwinx64" } }
+        "win-x86"     { return @{ AppAsset = "winx86.zip";     SetupAsset = "setupwinx86.zip";     AppProfile = "winx86";     SetupProfile = "winx86";     AppFolder = "winx86";     SetupFolder = "setupwinx86" } }
+        "win-arm64"   { return @{ AppAsset = "winarm64.zip";   SetupAsset = "setupwinarm64.zip";   AppProfile = "winarm64";   SetupProfile = "winarm64";   AppFolder = "winarm64";   SetupFolder = "setupwinarm64" } }
+        "linux-x64"   { return @{ AppAsset = "linx64.zip";     SetupAsset = "setuplinx64.zip";     AppProfile = "linx64";     SetupProfile = "linx64";     AppFolder = "linx64";     SetupFolder = "setuplinx64" } }
+        "linux-arm64" { return @{ AppAsset = "linarm64.zip";   SetupAsset = "setuplinarm64.zip";   AppProfile = "linarm64";   SetupProfile = "linarm64";   AppFolder = "linarm64";   SetupFolder = "setuplinarm64" } }
+        "osx-x64"     { return @{ AppAsset = "macosx64.zip";   SetupAsset = "setupmacosx64.zip";   AppProfile = "macosx64";   SetupProfile = "macosx64";   AppFolder = "macosx64";   SetupFolder = "setupmacosx64" } }
+        "osx-arm64"   { return @{ AppAsset = "macosarm64.zip"; SetupAsset = "setupmacosarm64.zip"; AppProfile = "macosarm64"; SetupProfile = "macosarm64"; AppFolder = "macosarm64"; SetupFolder = "setupmacosarm64" } }
         default { throw "Unsupported release runtime: $Rid" }
     }
 }
 
+function Assert-PublishedConfigurationFiles {
+    param(
+        [Parameter(Mandatory)][string]$SourceRoot,
+        [Parameter(Mandatory)][string]$PublishRoot
+    )
 
-function New-PortableReleaseArchive {
+    $configurationSources = [System.Collections.Generic.List[System.IO.FileInfo]]::new()
+    foreach ($file in Get-ChildItem -LiteralPath $SourceRoot -File -Filter "appsettings*.json") { $configurationSources.Add($file) }
+    foreach ($directory in @("Configuration", "Localization")) {
+        $sourceDirectory = Join-Path $SourceRoot $directory
+        if (-not (Test-Path -LiteralPath $sourceDirectory -PathType Container)) {
+            throw "Required PublisherStudio configuration directory is unavailable: $sourceDirectory"
+        }
+        foreach ($file in Get-ChildItem -LiteralPath $sourceDirectory -File -Recurse) { $configurationSources.Add($file) }
+    }
+
+    $missing = [System.Collections.Generic.List[string]]::new()
+    foreach ($source in $configurationSources) {
+        $relative = $source.FullName.Substring($SourceRoot.Length).TrimStart([char[]]"\/")
+        $published = Join-Path $PublishRoot $relative
+        if (-not (Test-Path -LiteralPath $published -PathType Leaf)) { $missing.Add($relative) }
+    }
+    if ($missing.Count -gt 0) {
+        throw "PublisherStudio publish output is missing configuration files: $($missing -join ', ')"
+    }
+    Write-Host "Published configuration validation passed for $($configurationSources.Count) files." -ForegroundColor Green
+}
+
+function Assert-PublisherStudioDocumentationPayload {
+    param(
+        [Parameter(Mandatory)][string]$DocumentationRoot,
+        [Parameter(Mandatory)][string]$Version
+    )
+
+    $requiredArtifacts = @(
+        (Join-Path $DocumentationRoot "index.html"),
+        (Join-Path $DocumentationRoot "api\index.html"),
+        (Join-Path $DocumentationRoot "api\toc.html"),
+        (Join-Path $DocumentationRoot "public\docfx.min.css"),
+        (Join-Path $DocumentationRoot "public\docfx.min.js"),
+        (Join-Path $DocumentationRoot "documentation-status.json"),
+        (Join-Path $DocumentationRoot "PublisherStudio.Web.xml"),
+        (Join-Path $DocumentationRoot "PublisherStudio-$Version.pdf"),
+        (Join-Path $DocumentationRoot "styles\publisherstudio-kawaii.css"),
+        (Join-Path $DocumentationRoot "styles\publisherstudio-kawaii.js"),
+        (Join-Path $DocumentationRoot "favicon.svg"),
+        (Join-Path $DocumentationRoot "favicon.ico"),
+        (Join-Path $DocumentationRoot "logo.svg")
+    )
+    foreach ($requiredArtifact in $requiredArtifacts) {
+        if (-not (Test-Path -LiteralPath $requiredArtifact -PathType Leaf)) {
+            throw "Published PublisherStudio documentation is incomplete: $requiredArtifact"
+        }
+    }
+
+    $status = Get-Content -LiteralPath (Join-Path $DocumentationRoot "documentation-status.json") -Raw | ConvertFrom-Json
+    if (-not [string]::Equals([string]$status.version, $Version, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Published PublisherStudio documentation version '$($status.version)' does not match application version '$Version'."
+    }
+    $versionedPdfs = @(Get-ChildItem -LiteralPath $DocumentationRoot -File -Filter 'PublisherStudio-*.pdf' -ErrorAction SilentlyContinue)
+    if ($versionedPdfs.Count -ne 1 -or -not [string]::Equals($versionedPdfs[0].Name, "PublisherStudio-$Version.pdf", [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Published PublisherStudio documentation must contain exactly one current versioned PDF (PublisherStudio-$Version.pdf). Found: $($versionedPdfs.Name -join ', ')"
+    }
+    if ([string]$status.documentationMode -ne "docfx") { throw "Published PublisherStudio documentation did not use the DocFX modern site." }
+    if ([string]$status.pdfMode -notin @("html-browser-print", "docfx-pdf-plugin")) { throw "Published PublisherStudio documentation does not contain the complete HTML-backed documentation PDF." }
+    if ([string]$status.pdfMode -eq "html-browser-print" -and [int]$status.pdfSourcePageCount -lt 10) { throw "The PublisherStudio documentation PDF did not include the expected HTML page set." }
+    if ([string]$status.pdfMode -eq "html-browser-print" -and [int]$status.apiHtmlCount -gt 0 -and [int]$status.pdfSourcePageCount -lt [int]$status.apiHtmlCount) { throw "The PublisherStudio documentation PDF omitted generated API pages." }
+    if (-not ([bool]$status.completeApiReference)) { throw "Published PublisherStudio documentation is missing the complete XML-generated API reference." }
+    if ([int]$status.apiYamlCount -le 1 -or [int]$status.apiHtmlCount -le 1) { throw "Published PublisherStudio documentation contains an incomplete API graph." }
+    $physicalApiHtmlCount = @(Get-ChildItem -LiteralPath (Join-Path $DocumentationRoot "api") -Filter "*.html" -File -Recurse -ErrorAction SilentlyContinue).Count
+    if ($physicalApiHtmlCount -le 1) { throw "Published PublisherStudio documentation API directory is physically incomplete ($physicalApiHtmlCount HTML file(s))." }
+    $apiIndexText = Get-Content -LiteralPath (Join-Path $DocumentationRoot "api\index.html") -Raw
+    if ($apiIndexText.IndexOf("PublisherStudio API reference", [StringComparison]::OrdinalIgnoreCase) -lt 0) { throw "Published PublisherStudio api/index.html is not the generated API reference entry point." }
+    if ([long]$status.pdfBytes -lt 1048576) { throw "Published PublisherStudio documentation contains an unexpectedly small PDF." }
+    if ([int]$status.pdfCandidateCount -lt 1 -or [string]::IsNullOrWhiteSpace([string]$status.pdfGeneratedSourcePath)) { throw "Published PublisherStudio documentation did not record a real documentation PDF source." }
+
+    $index = Get-Content -LiteralPath (Join-Path $DocumentationRoot "index.html") -Raw
+    foreach ($marker in @(
+        "publisherstudio-kawaii-docs",
+        "data-publisherstudio-theme-bootstrap",
+        "data-publisherstudio-favicon",
+        "data-publisherstudio-kawaii-style",
+        "data-publisherstudio-kawaii-script"
+    )) {
+        if ($index.IndexOf($marker, [StringComparison]::Ordinal) -lt 0) {
+            throw "Published PublisherStudio documentation is missing Kawaii marker: $marker"
+        }
+    }
+
+    Write-Host "Verified complete PublisherStudio $Version DocFX modern HTML and HTML-backed PDF documentation in $DocumentationRoot" -ForegroundColor Green
+}
+
+function Assert-ReleaseArchiveLayout {
+    param(
+        [Parameter(Mandatory)][string]$ArchivePath,
+        [Parameter(Mandatory)][string]$RootFolderName,
+        [Parameter(Mandatory)][string]$Executable,
+        [string]$Version = "",
+        [switch]$RequireDocumentation
+    )
+
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $archive = [IO.Compression.ZipFile]::OpenRead($ArchivePath)
+    try {
+        $rawNames = @($archive.Entries | ForEach-Object { $_.FullName })
+        $backslashEntries = @($rawNames | Where-Object { $_.Contains('\') })
+        if ($backslashEntries.Count -gt 0) {
+            throw "Release archive contains Windows-style backslash entry names that flatten on POSIX extractors: $($backslashEntries -join ', ')"
+        }
+        $names = @($rawNames | ForEach-Object { $_.TrimStart('/') })
+        $expectedExecutable = "$RootFolderName/$Executable"
+        if (-not ($names -contains $expectedExecutable)) {
+            throw "Release archive does not contain ${expectedExecutable}: $ArchivePath"
+        }
+        if ($RequireDocumentation) {
+            $requiredDocumentation = @(
+                "$RootFolderName/wwwroot/help-docs/index.html",
+                "$RootFolderName/wwwroot/help-docs/api/index.html",
+                "$RootFolderName/wwwroot/help-docs/documentation-status.json",
+                "$RootFolderName/wwwroot/help-docs/public/docfx.min.css",
+                "$RootFolderName/wwwroot/help-docs/public/docfx.min.js",
+                "$RootFolderName/wwwroot/help-docs/styles/publisherstudio-kawaii.css",
+                "$RootFolderName/wwwroot/help-docs/styles/publisherstudio-kawaii.js"
+            )
+            foreach ($requiredDocumentationEntry in $requiredDocumentation) {
+                if (-not ($names -contains $requiredDocumentationEntry)) {
+                    throw "Release archive is missing required installed documentation entry ${requiredDocumentationEntry}: $ArchivePath"
+                }
+                $documentationEntry = $archive.Entries | Where-Object { $_.FullName.TrimStart('/') -ieq $requiredDocumentationEntry } | Select-Object -First 1
+                $minimumBytes = if ($requiredDocumentationEntry.EndsWith('documentation-status.json', [StringComparison]::OrdinalIgnoreCase)) { 64L } else { 512L }
+                if ($null -eq $documentationEntry -or $documentationEntry.Length -lt $minimumBytes) {
+                    throw "Release archive contains empty or truncated installed documentation entry ${requiredDocumentationEntry}: $ArchivePath"
+                }
+            }
+            if ([string]::IsNullOrWhiteSpace($Version)) { throw "Version is required when validating release documentation." }
+            $pdfPrefix = "$RootFolderName/wwwroot/help-docs/PublisherStudio-"
+            $versionedPdfs = @($names | Where-Object { $_.StartsWith($pdfPrefix, [StringComparison]::OrdinalIgnoreCase) -and $_.EndsWith('.pdf', [StringComparison]::OrdinalIgnoreCase) })
+            $expectedPdf = "$RootFolderName/wwwroot/help-docs/PublisherStudio-$Version.pdf"
+            if ($versionedPdfs.Count -ne 1 -or -not ($versionedPdfs -contains $expectedPdf)) {
+                throw "Release archive must contain exactly the current PublisherStudio documentation PDF '$expectedPdf'. Found: $($versionedPdfs -join ', ')"
+            }
+        }
+        foreach ($name in $names) {
+            if ([string]::IsNullOrWhiteSpace($name)) { continue }
+            if (-not $name.StartsWith("$RootFolderName/", [StringComparison]::OrdinalIgnoreCase)) {
+                throw "Release archive entry '$name' escapes expected wrapper '$RootFolderName'."
+            }
+            if ($name.StartsWith('/', [StringComparison]::Ordinal) -or $name.Split('/') -contains '..') {
+                throw "Unsafe archive path '$name' in $ArchivePath"
+            }
+        }
+    }
+    finally {
+        $archive.Dispose()
+    }
+}
+
+
+function New-PublisherStudioReleaseArchive {
     param(
         [Parameter(Mandatory)][string]$SourceDirectory,
         [Parameter(Mandatory)][string]$DestinationPath,
@@ -254,7 +319,8 @@ function New-PortableReleaseArchive {
     $unixExecutableFileAttributes = [int]-2115174400 # 0100755 << 16
 
     $destination = [IO.Path]::GetFullPath($DestinationPath)
-    New-Item -ItemType Directory -Path (Split-Path -Parent $destination) -Force | Out-Null
+    $destinationDirectory = Split-Path -Parent $destination
+    New-Item -ItemType Directory -Path $destinationDirectory -Force | Out-Null
     $temporaryArchive = "$destination.$([Guid]::NewGuid().ToString('N')).tmp"
 
     Add-Type -AssemblyName System.IO.Compression -ErrorAction SilentlyContinue
@@ -268,22 +334,36 @@ function New-PortableReleaseArchive {
                     throw "Unsafe release archive source path: $($file.FullName)"
                 }
                 $entryName = "$RootFolderName/$relative"
-                if ($entryName.Contains('\')) {
-                    throw "Portable ZIP entries may not contain Windows path separators: $entryName"
+                $written = $false
+                $lastReadError = $null
+                for ($attempt = 1; $attempt -le 4 -and -not $written; $attempt++) {
+                    $entry = $null
+                    try {
+                        $input = [IO.File]::Open($file.FullName, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::Read)
+                        try {
+                            $entry = $archive.CreateEntry($entryName, [IO.Compression.CompressionLevel]::Optimal)
+                            $entry.LastWriteTime = [DateTimeOffset]::new(1980, 1, 1, 0, 0, 0, [TimeSpan]::Zero)
+                            if ($WriteUnixPermissions) {
+                                $entry.ExternalAttributes = if ($unixExecutableSet.Contains($relative)) { $unixExecutableFileAttributes } else { $unixRegularFileAttributes }
+                            }
+                            $output = $entry.Open()
+                            try { $input.CopyTo($output) }
+                            finally { $output.Dispose() }
+                        }
+                        finally { $input.Dispose() }
+                        $written = $true
+                    }
+                    catch {
+                        $lastReadError = $_.Exception
+                        if ($null -ne $entry) {
+                            try { $entry.Delete() } catch { }
+                        }
+                        if ($attempt -lt 4) { Start-Sleep -Milliseconds (150 * $attempt) }
+                    }
                 }
-
-                $entry = $archive.CreateEntry($entryName, [IO.Compression.CompressionLevel]::Optimal)
-                $entry.LastWriteTime = [DateTimeOffset]::new(1980, 1, 1, 0, 0, 0, [TimeSpan]::Zero)
-                if ($WriteUnixPermissions) {
-                    $entry.ExternalAttributes = if ($unixExecutableSet.Contains($relative)) { $unixExecutableFileAttributes } else { $unixRegularFileAttributes }
+                if (-not $written) {
+                    throw "Could not add release file '$($file.FullName)' after 4 attempts: $($lastReadError.Message)"
                 }
-                $input = [IO.File]::Open($file.FullName, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::Read)
-                try {
-                    $output = $entry.Open()
-                    try { $input.CopyTo($output) }
-                    finally { $output.Dispose() }
-                }
-                finally { $input.Dispose() }
             }
         }
         finally { $archive.Dispose() }
@@ -303,14 +383,6 @@ function New-PortableReleaseArchive {
                     if ($permissionBits -ne 493) { throw "Unix executable entry '$expectedEntryName' does not carry mode 0755 (actual permission bits: $permissionBits)." }
                 }
             }
-            foreach ($entry in $entries) {
-                if ($entry.FullName.Contains('\')) {
-                    throw "Release archive is not POSIX/ZIP portable because it contains a backslash entry: $($entry.FullName)"
-                }
-                if (-not $entry.FullName.StartsWith("$RootFolderName/", [StringComparison]::Ordinal)) {
-                    throw "Release archive entry '$($entry.FullName)' escapes expected wrapper '$RootFolderName'."
-                }
-            }
         }
         finally { $verification.Dispose() }
 
@@ -321,6 +393,11 @@ function New-PortableReleaseArchive {
         Remove-Item -LiteralPath $temporaryArchive -Force -ErrorAction SilentlyContinue
     }
 }
+
+$appVersion = Resolve-ProjectVersion -ProjectPath $webProject
+$setupVersion = Resolve-ProjectVersion -ProjectPath $setupProject
+if ($appVersion -ne $setupVersion) { throw "PublisherStudio application version $appVersion does not match setup version $setupVersion." }
+
 
 function Test-VersionDirectoryName {
     param([Parameter(Mandatory)][string]$Name)
@@ -367,7 +444,7 @@ function Complete-ReleaseBundle {
         Copy-Item -LiteralPath $ReadmePath -Destination (Join-Path $stagingDirectory ([IO.Path]::GetFileName($ReadmePath))) -Force
         Copy-Item -LiteralPath $LicensePath -Destination (Join-Path $stagingDirectory ([IO.Path]::GetFileName($LicensePath))) -Force
         Copy-Item -LiteralPath $WireProtocolPackagePath -Destination (Join-Path $stagingDirectory ([IO.Path]::GetFileName($WireProtocolPackagePath))) -Force
-        Copy-Item -LiteralPath $SetupIconPath -Destination (Join-Path $stagingDirectory "LocalGPT.ico") -Force
+        Copy-Item -LiteralPath $SetupIconPath -Destination (Join-Path $stagingDirectory ([IO.Path]::GetFileName($SetupIconPath))) -Force
         if (Test-Path -LiteralPath $WindowsX64SetupExecutablePath -PathType Leaf) {
             Copy-Item -LiteralPath $WindowsX64SetupExecutablePath -Destination (Join-Path $stagingDirectory ([IO.Path]::GetFileName($WindowsX64SetupExecutablePath))) -Force
         }
@@ -398,152 +475,208 @@ function Ensure-WireProtocolPackage {
     New-Item -ItemType Directory -Path $packageDirectory -Force | Out-Null
 
     if ($UseBundledWireProtocolPackage) {
-        if (-not (Test-Path $wirePackage)) {
-            throw "The bundled RID-neutral LocalGPT 1-Wire package is missing: $wirePackage"
+        if (-not (Test-Path -LiteralPath $wireProtocolPackage -PathType Leaf)) {
+            throw "The cached official LocalGPT protocol package is unavailable: $wireProtocolPackage"
         }
         return
     }
 
-    if (-not [string]::IsNullOrWhiteSpace($WireProtocolPackageUrl)) {
-        Write-Host "Downloading LocalGPT.WireProtocolVersion $WireProtocolVersion..." -ForegroundColor Cyan
-        $temporary = "$wirePackage.download"
-        Remove-Item $temporary -Force -ErrorAction SilentlyContinue
-        Invoke-WebRequest -Uri $WireProtocolPackageUrl -OutFile $temporary -UseBasicParsing
-        if (-not (Test-Path $temporary)) { throw "The protocol package download did not create a file." }
-        Move-Item $temporary $wirePackage -Force
-        return
+    $ensureArguments = @{
+        Version = $WireProtocolVersion
+        PackageDirectory = $packageDirectory
+        PackageUrl = $WireProtocolPackageUrl
+        LocalGptRepository = $LocalGptRepository
+    }
+    if ($RefreshWireProtocolPackage) { $ensureArguments.ForceDownload = $true }
+    & (Join-Path $root "build\Ensure-WireProtocolPackage.ps1") @ensureArguments | Out-Null
+    if (-not (Test-Path -LiteralPath $wireProtocolPackage -PathType Leaf)) {
+        throw "LocalGPT protocol package preparation did not produce $wireProtocolPackage"
+    }
+}
+
+function Prepare-PublisherStudioClientAssets {
+    Write-Host "Preparing local DevExpress client assets and runtime license..." -ForegroundColor Cyan
+    & (Join-Path $root "Prepare-DevExpressAssets.ps1")
+
+    $requiredAssets = @(
+        "wwwroot\vendor\devexpress-aspnetcore-spreadsheet\dist\dx-aspnetcore-spreadsheet.js",
+        "wwwroot\vendor\devexpress-aspnetcore-spreadsheet\dist\dx-aspnetcore-spreadsheet.css",
+        "wwwroot\vendor\devextreme-dist\js\dx.all.js",
+        "wwwroot\vendor\devextreme-dist\css\dx.light.css",
+        "wwwroot\vendor\jquery\jquery.min.js",
+        "wwwroot\vendor\devextreme-license.js",
+        "wwwroot\vendor\devextreme-license.meta.json",
+        "wwwroot\vendor\devextreme-license.version",
+        "wwwroot\vendor\devextreme-assets.meta.json"
+    )
+    $missingAssets = @($requiredAssets | Where-Object { -not (Test-Path -LiteralPath (Join-Path $webDirectory $_) -PathType Leaf) })
+    if ($missingAssets.Count -gt 0) {
+        throw "DevExpress client assets are incomplete. Missing: $($missingAssets -join ', ')"
+    }
+}
+
+function Get-WireProperties {
+    return @(
+        "-p:LocalGptWireProtocolVersion=$WireProtocolVersion",
+        "-p:LocalGptWireProtocolPackageDirectory=$packageDirectory",
+        "-p:RestoreAdditionalProjectSources=$packageDirectory",
+        "-p:SkipWireProtocolBootstrap=true"
+    )
+}
+
+function Prepare-PublisherStudioDocumentation {
+    if ($script:documentationPrepared) { return }
+    if (-not (Test-Path -LiteralPath $documentationScript -PathType Leaf)) {
+        throw "Documentation build script not found: $documentationScript"
     }
 
-    Write-Host "Packing the RID-neutral LocalGPT 1-Wire protocol once..." -ForegroundColor Cyan
-    Remove-Item $wirePackage -Force -ErrorAction SilentlyContinue
-    Invoke-DotNet -Arguments @(
-        "pack", $wireProject,
-        "-c", $Configuration,
-        "-o", $packageDirectory,
-        "-p:PackageVersion=$WireProtocolVersion",
-        "-p:GeneratePackageOnBuild=false",
-        "-p:Platform=AnyCPU",
-        "-p:PlatformTarget=AnyCPU",
+    $neutralOutputRoot = Join-Path $webDirectory "bin\$Configuration\net10.0"
+    $documentationAssembly = Join-Path $neutralOutputRoot "PublisherStudio.Web.dll"
+    $documentationXml = Join-Path $neutralOutputRoot "PublisherStudio.Web.xml"
+    $documentationOutput = Join-Path $neutralOutputRoot "wwwroot\help-docs"
+    $wireProperties = Get-WireProperties
+    $documentationProperties = @(
         "-p:RuntimeIdentifier=",
-        "-p:RuntimeIdentifiers="
-    ) -FailureMessage "LocalGPT 1-Wire package creation failed."
+        "-p:RuntimeIdentifiers=",
+        "-p:BuildPublisherStudioDocumentation=false",
+        "-p:SeedPublisherStudioGitHubPagesSnapshotOnBuild=false",
+        "-p:RequirePublisherStudioDocumentationPdf=false"
+    )
 
-    if (-not (Test-Path $wirePackage)) {
-        throw "The expected protocol package was not produced: $wirePackage"
-    }
+    Write-Host "Building the RID-neutral PublisherStudio assembly once for shared release documentation..." -ForegroundColor Cyan
+    Invoke-DotNet -Arguments (@("restore", $webProject, "--disable-parallel", "--force-evaluate") + $wireProperties + $documentationProperties) -FailureMessage "RID-neutral PublisherStudio restore for documentation failed."
+    Invoke-DotNet -Arguments (@("build", $webProject, "-c", $Configuration, "--no-restore", "-maxcpucount:1") + $wireProperties + $documentationProperties) -FailureMessage "RID-neutral PublisherStudio build for documentation failed."
+
+    if (-not (Test-Path -LiteralPath $documentationAssembly -PathType Leaf)) { throw "Documentation assembly not found: $documentationAssembly" }
+    if (-not (Test-Path -LiteralPath $documentationXml -PathType Leaf)) { throw "Documentation XML not found: $documentationXml" }
+
+    Write-Host "Generating the complete PublisherStudio documentation once for all runtime packages..." -ForegroundColor Cyan
+    & $documentationScript `
+        -RepositoryRoot $root `
+        -AssemblyPath $documentationAssembly `
+        -XmlDocumentationPath $documentationXml `
+        -Version $appVersion `
+        -OutputWebRoot $documentationOutput `
+        -RequirePdf
+
+    Assert-PublisherStudioDocumentationPayload -DocumentationRoot $documentationOutput -Version $appVersion
+    if (-not (Test-Path -LiteralPath $pagesSnapshotScript -PathType Leaf)) { throw "GitHub Pages snapshot script not found: $pagesSnapshotScript" }
+    Write-Host "Validating and seeding the PublisherStudio $appVersion GitHub Pages snapshot from the release documentation payload..." -ForegroundColor Cyan
+    & $pagesSnapshotScript -DocumentationRoot $documentationOutput -OutputArchive $pagesSnapshotArchive
+    if (-not (Test-Path -LiteralPath $pagesSnapshotArchive -PathType Leaf)) { throw "PublisherStudio GitHub Pages snapshot update failed to create $pagesSnapshotArchive." }
+    Remove-Item -LiteralPath $script:documentationCacheRoot -Recurse -Force -ErrorAction SilentlyContinue
+    New-Item -ItemType Directory -Path $script:documentationCacheRoot -Force | Out-Null
+    Copy-Item -Path (Join-Path $documentationOutput "*") -Destination $script:documentationCacheRoot -Recurse -Force
+    $script:documentationPrepared = $true
+    Write-Host "Cached one verified documentation payload for all RID publishes." -ForegroundColor Green
 }
 
 function Publish-Runtime {
     param([Parameter(Mandatory)][string]$Rid)
 
-    $profile = Resolve-ReleaseProfile $Rid
-    $appFolder = Resolve-ProfilePublishFolder -ProjectPath $appProject -ProfileName $profile.AppProfile
+    $profile = Resolve-ReleaseProfile -Rid $Rid
+    $appFolder = Resolve-ProfilePublishFolder -ProjectPath $webProject -ProfileName $profile.AppProfile
     $setupFolder = Resolve-ProfilePublishFolder -ProjectPath $setupProject -ProfileName $profile.SetupProfile
     $appZip = Join-Path $artifacts $profile.AppAsset
     $setupZip = Join-Path $artifacts $profile.SetupAsset
 
     Remove-Item $appFolder, $setupFolder, $appZip, $setupZip -Recurse -Force -ErrorAction SilentlyContinue
+    $wireProperties = Get-WireProperties
 
-    $appExecutable = if ($Rid.StartsWith("win-")) { "LocalGPT.exe" } else { "LocalGPT" }
-    $setupExecutable = if ($Rid.StartsWith("win-")) { "LocalGPTInstallerConsole.exe" } else { "LocalGPTInstallerConsole" }
+    Write-Host "Restoring PublisherStudio application for $Rid after protocol preparation..." -ForegroundColor Cyan
+    Invoke-DotNet -Arguments (@("restore", $webProject, "-r", $Rid, "--disable-parallel") + $wireProperties) -FailureMessage "PublisherStudio application restore failed for $Rid."
 
-    $buildDocumentation = "false"
-    $requireDocumentationPdf = "false"
-    Write-Host "Publishing LocalGPT application through profile $($profile.AppProfile)..." -ForegroundColor Cyan
-    Invoke-DotNet -Arguments @(
-        "publish", $appProject,
+    Write-Host "Publishing PublisherStudio application through profile $($profile.AppProfile)..." -ForegroundColor Cyan
+    Invoke-DotNet -Arguments (@(
+        "publish", $webProject,
         "-c", $Configuration,
         "-p:PublishProfile=$($profile.AppProfile)",
-        "-p:BuildLocalGptDocumentation=$buildDocumentation",
-        "-p:SeedLocalGptGitHubPagesSnapshotOnBuild=false",
-        "-p:RequireLocalGptDocumentationPdf=$requireDocumentationPdf"
-    ) -FailureMessage "LocalGPT application publish failed for $Rid."
+        "-p:BuildPublisherStudioDocumentation=false",
+        "-p:SeedPublisherStudioGitHubPagesSnapshotOnBuild=false",
+        "-p:RequirePublisherStudioDocumentationPdf=false",
+        "--no-restore",
+        "-maxcpucount:1"
+    ) + $wireProperties) -FailureMessage "PublisherStudio application publish failed for $Rid."
 
-    Write-Host "Publishing LocalGPT setup through profile $($profile.SetupProfile)..." -ForegroundColor Cyan
+    Write-Host "Restoring PublisherStudio setup for $Rid..." -ForegroundColor Cyan
+    Invoke-DotNet -Arguments @("restore", $setupProject, "-r", $Rid, "--disable-parallel") -FailureMessage "PublisherStudio setup restore failed for $Rid."
+
+    Write-Host "Publishing PublisherStudio setup through profile $($profile.SetupProfile)..." -ForegroundColor Cyan
     Invoke-DotNet -Arguments @(
         "publish", $setupProject,
         "-c", $Configuration,
-        "-p:PublishProfile=$($profile.SetupProfile)"
-    ) -FailureMessage "LocalGPT setup publish failed for $Rid."
+        "-p:PublishProfile=$($profile.SetupProfile)",
+        "--no-restore",
+        "-maxcpucount:1",
+        "-p:DebugType=None",
+        "-p:DebugSymbols=false"
+    ) -FailureMessage "PublisherStudio setup publish failed for $Rid."
 
-    if (-not (Test-Path (Join-Path $appFolder $appExecutable))) {
-        throw "Published LocalGPT executable not found in the publish-profile output: $(Join-Path $appFolder $appExecutable)"
-    }
-    if (-not (Test-Path (Join-Path $setupFolder $setupExecutable))) {
-        throw "Published LocalGPT setup executable not found in the publish-profile output: $(Join-Path $setupFolder $setupExecutable)"
-    }
+    $appExecutable = if ($Rid.StartsWith("win-")) { "PublisherStudio.Web.exe" } else { "PublisherStudio.Web" }
+    $setupExecutable = if ($Rid.StartsWith("win-")) { "PublisherStudio.Setup.exe" } else { "PublisherStudio.Setup" }
+    if (-not (Test-Path -LiteralPath (Join-Path $appFolder $appExecutable) -PathType Leaf)) { throw "Published PublisherStudio executable not found: $(Join-Path $appFolder $appExecutable)" }
+    if (-not (Test-Path -LiteralPath (Join-Path $setupFolder $setupExecutable) -PathType Leaf)) { throw "Published PublisherStudio setup executable not found: $(Join-Path $setupFolder $setupExecutable)" }
 
+    if (-not (Test-Path -LiteralPath $script:documentationCacheRoot -PathType Container)) {
+        throw "The shared PublisherStudio documentation cache is missing: $script:documentationCacheRoot"
+    }
     $publishedDocumentationRoot = Join-Path $appFolder "wwwroot\help-docs"
-    if ($script:documentationPrepared) {
-        if (-not (Test-Path -LiteralPath $script:documentationCacheRoot -PathType Container)) {
-            throw "The shared LocalGPT documentation cache is missing: $script:documentationCacheRoot"
-        }
-        Remove-Item -LiteralPath $publishedDocumentationRoot -Recurse -Force -ErrorAction SilentlyContinue
-        New-Item -ItemType Directory -Path $publishedDocumentationRoot -Force | Out-Null
-        Copy-Item -Path (Join-Path $script:documentationCacheRoot "*") -Destination $publishedDocumentationRoot -Recurse -Force
-        Write-Host "Reused the verified complete documentation payload for $Rid." -ForegroundColor Cyan
-    }
+    Remove-Item -LiteralPath $publishedDocumentationRoot -Recurse -Force -ErrorAction SilentlyContinue
+    New-Item -ItemType Directory -Path $publishedDocumentationRoot -Force | Out-Null
+    Copy-Item -Path (Join-Path $script:documentationCacheRoot "*") -Destination $publishedDocumentationRoot -Recurse -Force
+    Write-Host "Reused the verified complete documentation payload for $Rid." -ForegroundColor Cyan
 
-    Assert-LocalGptDocumentationPayload -DocumentationRoot $publishedDocumentationRoot -Version $appVersion
-    $requiredSetupFiles = @(
-        "Default.cmd", "Install.cmd", "Update.cmd", "Start.cmd", "Start-NoBrowser.cmd",
-        "Install-Ollama.cmd", "Pull-Models-Slim.cmd", "Pull-Models-RTX3060.cmd",
-        "Pull-Models-Full.cmd", "Setup-Learning-Base.cmd", "Import-Recommended.cmd", "Uninstall.cmd"
-    )
- 
+    Assert-PublishedConfigurationFiles -SourceRoot $webDirectory -PublishRoot $appFolder
+    Assert-PublisherStudioDocumentationPayload -DocumentationRoot $publishedDocumentationRoot -Version $appVersion
+
+    $protocolAppDirectory = Join-Path $appFolder "protocol"
     $protocolSetupDirectory = Join-Path $setupFolder "protocol"
-    New-Item -ItemType Directory -Path $protocolSetupDirectory -Force | Out-Null
-    Copy-Item $wirePackage (Join-Path $protocolSetupDirectory $wirePackageName) -Force
+    New-Item -ItemType Directory -Path $protocolAppDirectory, $protocolSetupDirectory -Force | Out-Null
+    Copy-Item -LiteralPath $wireProtocolPackage -Destination (Join-Path $protocolAppDirectory $wireProtocolPackageName) -Force
+    Copy-Item -LiteralPath $wireProtocolPackage -Destination (Join-Path $protocolSetupDirectory $wireProtocolPackageName) -Force
 
-    if ($IncludeWindowsWrapper -and $profile.WrapperProfile) {
-        $wrapperFolder = Resolve-ProfilePublishFolder -ProjectPath $wrapperProject -ProfileName $profile.WrapperProfile
-        Remove-Item $wrapperFolder -Recurse -Force -ErrorAction SilentlyContinue
-        Write-Host "Publishing the optional WinUI wrapper through profile $($profile.WrapperProfile)..." -ForegroundColor Cyan
-        Invoke-DotNet -Arguments @(
-            "publish", $wrapperProject,
-            "-c", $Configuration,
-            "-p:PublishProfile=$($profile.WrapperProfile)"
-        ) -FailureMessage "WinUI wrapper publish failed for $Rid."
-        Copy-Item (Join-Path $wrapperFolder "*") $appFolder -Recurse -Force
-    }
+    $publisherIcon = Join-Path $root "assets\PublisherStudio.ico"
+    if (-not (Test-Path -LiteralPath $publisherIcon -PathType Leaf)) { throw "PublisherStudio release icon is unavailable: $publisherIcon" }
+    Copy-Item -LiteralPath $publisherIcon -Destination (Join-Path $setupFolder "PublisherStudio.ico") -Force
+    Copy-Item -LiteralPath $publisherIcon -Destination (Join-Path $appFolder "PublisherStudio.ico") -Force
 
-    # Final release-boundary check: optional wrapper/publish steps must not reintroduce stale documentation.
-    Assert-LocalGptDocumentationPayload -DocumentationRoot $publishedDocumentationRoot -Version $appVersion
-    $appRootFolderName = Split-Path -Leaf $appFolder
-    $setupRootFolderName = Split-Path -Leaf $setupFolder
-    New-PortableReleaseArchive -SourceDirectory $appFolder -DestinationPath $appZip -RootFolderName $appRootFolderName -WriteUnixPermissions:(!$Rid.StartsWith("win-")) -UnixExecutableRelativePaths @($appExecutable)
-    New-PortableReleaseArchive -SourceDirectory $setupFolder -DestinationPath $setupZip -RootFolderName $setupRootFolderName -WriteUnixPermissions:(!$Rid.StartsWith("win-")) -UnixExecutableRelativePaths @($setupExecutable)
+    $requiredSetupFiles = @("Install.cmd", "Update.cmd", "Start.cmd", "PublisherStudio.ico")
+    $missingSetupFiles = @($requiredSetupFiles | Where-Object { -not (Test-Path -LiteralPath (Join-Path $setupFolder $_) -PathType Leaf) })
+    if ($missingSetupFiles.Count -gt 0) { throw "Published setup is incomplete. Missing: $($missingSetupFiles -join ', ')" }
+
+    # Final release-boundary check: no later publish step may reintroduce stale help-docs.
+    Assert-PublisherStudioDocumentationPayload -DocumentationRoot $publishedDocumentationRoot -Version $appVersion
+    New-PublisherStudioReleaseArchive -SourceDirectory $appFolder -DestinationPath $appZip -RootFolderName $profile.AppFolder -WriteUnixPermissions:(!$Rid.StartsWith("win-")) -UnixExecutableRelativePaths @($appExecutable)
+    New-PublisherStudioReleaseArchive -SourceDirectory $setupFolder -DestinationPath $setupZip -RootFolderName $profile.SetupFolder -WriteUnixPermissions:(!$Rid.StartsWith("win-")) -UnixExecutableRelativePaths @($setupExecutable)
+    Assert-ReleaseArchiveLayout -ArchivePath $appZip -RootFolderName $profile.AppFolder -Executable $appExecutable -Version $appVersion -RequireDocumentation
+    Assert-ReleaseArchiveLayout -ArchivePath $setupZip -RootFolderName $profile.SetupFolder -Executable $setupExecutable
     $script:releaseZipPaths.Add($appZip)
     $script:releaseZipPaths.Add($setupZip)
     Write-Host "Created portable ZIP $appZip" -ForegroundColor Green
     Write-Host "Created portable ZIP $setupZip" -ForegroundColor Green
 }
 
-New-Item -ItemType Directory -Path $artifacts -Force | Out-Null
+New-Item -ItemType Directory -Path $packageDirectory, $artifacts -Force | Out-Null
 Remove-Item -LiteralPath $documentationCacheRoot -Recurse -Force -ErrorAction SilentlyContinue
 Ensure-WireProtocolPackage
-Copy-Item $wirePackage (Join-Path $artifacts $wirePackageName) -Force
-if ($sharedWirePackageDirectory) {
-    New-Item -ItemType Directory -Path $sharedWirePackageDirectory -Force | Out-Null
-    Copy-Item $wirePackage (Join-Path $sharedWirePackageDirectory $wirePackageName) -Force
-    Write-Host "Updated shared LocalGPT protocol package cache: $sharedWirePackageDirectory" -ForegroundColor Green
-}
-
-Prepare-LocalGptDocumentation
+Copy-Item -LiteralPath $wireProtocolPackage -Destination (Join-Path $artifacts $wireProtocolPackageName) -Force
+Prepare-PublisherStudioClientAssets
+Prepare-PublisherStudioDocumentation
 
 $runtimes = if ($Runtime -eq "all") {
     @("win-x64", "win-x86", "win-arm64", "linux-x64", "linux-arm64", "osx-x64", "osx-arm64")
-} else {
+}
+else {
     @($Runtime)
 }
 
 try {
-    foreach ($rid in $runtimes) { Publish-Runtime $rid }
+    foreach ($rid in $runtimes) { Publish-Runtime -Rid $rid }
 
-    $documentationPdf = Join-Path $documentationCacheRoot "LocalGPT-$appVersion.pdf"
+    $documentationPdf = Join-Path $documentationCacheRoot "PublisherStudio-$appVersion.pdf"
     $winX64Profile = Resolve-ReleaseProfile -Rid "win-x64"
     $winX64SetupFolder = Resolve-ProfilePublishFolder -ProjectPath $setupProject -ProfileName $winX64Profile.SetupProfile
-    $winX64SetupExecutable = Join-Path $winX64SetupFolder "LocalGPTInstallerConsole.exe"
+    $winX64SetupExecutable = Join-Path $winX64SetupFolder "PublisherStudio.Setup.exe"
     $requireWinX64Setup = @($runtimes) -contains "win-x64"
     $licensePath = Join-Path $root "LICENSE.MD"
     if (-not (Test-Path -LiteralPath $licensePath -PathType Leaf)) { $licensePath = Join-Path $root "LICENSE" }
@@ -555,8 +688,8 @@ try {
         -WindowsX64SetupExecutablePath $winX64SetupExecutable `
         -ReadmePath (Join-Path $root "README.md") `
         -LicensePath $licensePath `
-        -WireProtocolPackagePath $wirePackage `
-        -SetupIconPath (Join-Path $root "src\LocalGPT\wwwroot\favicon.ico") `
+        -WireProtocolPackagePath $wireProtocolPackage `
+        -SetupIconPath (Join-Path $root "assets\PublisherStudio.ico") `
         -RequireWindowsX64Setup $requireWinX64Setup
 }
 finally {
@@ -565,4 +698,4 @@ finally {
 
 $releaseBundle = Join-Path $artifacts $appVersion
 Write-Host "Release output: $releaseBundle" -ForegroundColor Green
-Write-Host "Protocol package cache: $(Join-Path $artifacts $wirePackageName)" -ForegroundColor Green
+Write-Host "Protocol package cache: $(Join-Path $artifacts $wireProtocolPackageName)" -ForegroundColor Green

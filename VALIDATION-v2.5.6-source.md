@@ -1,44 +1,26 @@
-# LocalGPT 2.5.6 source validation
+# PublisherStudio 2.5.6 source validation
 
-This validation is intentionally source/static only. No `dotnet`, MSBuild, restore, build, publish or runtime compilation was executed.
+This package was edited and inspected directly from the supplied PublisherStudio 2.5.5 source ZIP. No GitHub/network repository access was used. No `dotnet`, MSBuild, restore, build, test, publish or DocFX command was invoked; the user's Windows/.NET build remains authoritative.
 
-## Repository audits executed
+## Completed source/static validation
 
-- `python build/audit_async_continuations.py --source-root src/LocalGPT`
-  - Passed for 152 source files.
-  - 2,238 await tokens reviewed.
-  - 2,033 `.ConfigureAwait(false)` continuations.
-  - 30 explicitly renderer-affine `.ConfigureAwait(true)` continuations.
-  - 2 preconfigured awaitables, 171 reviewed await-using disposals and 2 configured async streams.
-- `python build/audit_application_architecture.py --root . --product localgpt --mode static`
-  - Passed.
-- `python build/audit_service_resilience.py --root . --product localgpt`
-  - Passed for 1,721 service methods owning the required resilience/diagnostic boundary.
-- `python build/audit_provider_qualified_council.py --root .`
-  - Passed all 101 provider-qualified Council checks.
-- `python build/audit_chat_ascii_console.py --root .`
-  - Passed all 17 checks.
-- `python build/audit_documentation_onewire_contracts.py`
-  - Passed the documentation/1-Wire contract audit.
+- Architecture policy passes application static/diagnostic/C# structure boundaries.
+- Service resilience passes for **1,250 service methods**; 4 iterator/yield methods and 4 direct Program/Startup methods are intentionally excluded.
+- XML documentation coverage passes for **4,904 maintained C# type/method/public API declarations**.
+- PublisherStudio documentation/1-Wire contract audit passes.
+- Panel Studio persistence audit passes queued-pointer flushing, authored geometry promotion, reviewed InteractiveServer boundaries and the maintained JavaScript diagnostics hash.
+- Publisher async-continuation policy was emulated directly from `Assert-AsyncContinuationPolicy.ps1` and its checked-in baseline: **74 files**, **1,036 await tokens**, **195 ConfigureAwait(false)**, **3 reviewed ConfigureAwait(true)** and no findings.
+- `publisherInterop.js` passes Node module syntax checking.
+- Maintained JavaScript diagnostics SHA-256 inventory contains **16 files** with no mismatch.
+- PublisherStudio `en-US` and `de-DE` localization catalogs contain **3,036 keys each** with exact key-set equality.
+- Both PublisherStudio project files parse as XML.
+- PublisherStudio Web/installer projects are versioned **2.5.6**.
 
-## Additional source checks executed
+## Targeted source checks
 
-- Parsed LocalGPT, LocalGPTInstallerConsole and LocalGPTWebviewWrapper project files as XML and verified version `2.5.6`.
-- Confirmed the separately versioned LocalGPT.WireProtocolVersion project remains unchanged at `2.1.1`.
-- Parsed `Localization/en-US.json` and `Localization/de-DE.json`; both are valid JSON, contain 1,496 keys and have identical key sets.
-- Verified `@rendermode InteractiveServer` remains present on Install and the maintained interactive page set.
-- Verified the configured-provider catalog renders one `Delete` action for every configured provider card rather than suppressing removal for primary entries.
-- Verified `RemoveConfiguredProviderHostAsync` persists removal through the existing `Save().ConfigureAwait(false)` path and covers primary/additional OpenAI-compatible, primary/additional Ollama, OpenAI cloud and Azure provider state.
-- Verified `/install` no longer creates a second page-level `overflow-y:auto` owner in its final CSS override and explicitly permits native `touch-action: pan-y`.
-- Verified the install-only assistant-rail helpers target the maintained `install-scroll-top` and `install-scroll-bottom` anchors without JavaScript scroll emulation.
-- Verified brace balance for modified component stylesheets and JSON structure for both localization catalogs.
-
-## Not executed
-
-- .NET restore
-- .NET compile/build
-- runtime launch
-- browser automation against a compiled build
-- publish/package generation through the repository PowerShell build pipeline
-
-Those checks require the .NET environment that the delivery request explicitly excludes.
+- `/organic-plugins` sends `OrganicWireMessageType.Ping` and requires a correlated `Pong` for the user-facing transport test.
+- The 1-Wire receive path treats `Pong` as a waiter-completing response while retaining capability/skill synchronization handling.
+- Internal waiter expiry is reported as `TimeoutException`; explicit caller cancellation remains cancellation rather than an error.
+- The LocalGPT AI Assist page owns a robust vertical scroll area inside the fixed PublisherStudio shell, with the linked-connection status/actions kept visible while scrolling.
+- The primary page remains the simplified AI Assist workflow; protocol/security/custom-Council controls are retained in expandable advanced areas.
+- PublisherStudio no longer imposes a UI-only maximum of eight parallel models on the advanced custom Council request.

@@ -40,9 +40,9 @@
                 </DxRibbonTab>
                 @if (CanUseAiCouncil)
                 {
-                    <DxRibbonTab Text="AI Council">
-                        <DxRibbonGroup Text="Story assistance">
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-text" Text="Write story" IsPrimary="true" Click="OpenAiStoryPanel" />
+                    <DxRibbonTab Text="LocalGPT AI">
+                        <DxRibbonGroup Text="Text generation">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-text" Text="Generate text" IsPrimary="true" Click="OpenAiStoryPanel" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-command" Text="Refresh proposals" Click="RefreshAiProposals" />
                         </DxRibbonGroup>
                     </DxRibbonTab>
@@ -71,13 +71,13 @@
             </DxRibbon>
             @if (_aiStoryPanelVisible && CanUseAiCouncil)
             {
-                <section class="story-ai-workspace" aria-label="AI Council story assistance">
+                <section class="story-ai-workspace" aria-label="LocalGPT AI story assistance">
                     <header>
                         <div>
-                            <strong>AI Council story assistance</strong>
+                            <strong>LocalGPT AI text generation</strong>
                             <span>Paired with @LocalGptConnection.State.DisplayName. The Council returns a reviewable proposal; only you can insert it.</span>
                         </div>
-                        <button class="window-close" @onclick="CloseAiStoryPanel" aria-label="Close AI Council story assistance">×</button>
+                        <button class="window-close" @onclick="CloseAiStoryPanel" aria-label="Close LocalGPT AI story assistance">×</button>
                     </header>
                     <div class="story-ai-request">
                         <label>Team
@@ -91,7 +91,7 @@
                         <label class="story-ai-prompt">What should the story contain?
                             <textarea rows="4" @bind="_aiStoryPrompt" @bind:event="oninput" @onkeydown="HandleAiPromptKeyDown" placeholder="Describe the topic, audience, tone, facts and desired length. Press Ctrl+Enter to send."></textarea>
                         </label>
-                        <button type="button" disabled="@(!CanSendAiStoryRequest)" @onclick="RequestAiStoryAsync">Send to AI Council</button>
+                        <button type="button" disabled="@(!CanSendAiStoryRequest)" @onclick="RequestAiStoryAsync">Generate proposal</button>
                     </div>
                     <div class="story-ai-proposals" aria-live="polite">
                         <div class="story-ai-proposal-heading">

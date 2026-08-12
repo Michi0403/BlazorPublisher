@@ -14,9 +14,9 @@ foreach ($file in @(Get-ChildItem -LiteralPath (Join-Path $root 'src') -Recurse 
 }
 
 if ($removed.Count -gt 0) {
-    Write-Host "Removed $($removed.Count) machine-specific LocalGPT publish-profile overlay(s):"
+    Write-Host "Removed $($removed.Count) machine-specific PublisherStudio publish-profile overlay(s):"
     foreach ($relative in $removed | Sort-Object -Unique) { Write-Host "  - $relative" }
 }
 else {
-    Write-Host 'No machine-specific LocalGPT publish-profile overlays required migration.'
+    Write-Host 'No machine-specific PublisherStudio publish-profile overlays required migration.'
 }

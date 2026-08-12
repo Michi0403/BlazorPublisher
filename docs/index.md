@@ -1,52 +1,52 @@
-﻿# LocalGPT documentation
+﻿# PublisherStudio documentation
 
-**Version 2.3.7**
+**Version 2.5.0**
 
-LocalGPT is a local-first AI workbench for direct chat, configurable AI Councils, project maintenance, persistent knowledge, provider-qualified model routing, embedded planning, game runtimes, and guarded local execution.
+PublisherStudio is a local-first publishing workspace for page layout, stories, spreadsheets, pictures, audio, video, streaming, interactive content, and self-contained exports.
 
-This site is the maintained product and architecture documentation. It deliberately separates stable design from historical experiments, so you can understand *what LocalGPT is now* without walking through every learning step that shaped it. 🐾
+This site is the maintained product and architecture documentation. It uses the same documentation shell as LocalGPT, so navigation, search, themes, side rails, and generated API pages behave consistently. 🐾
 
 ## Choose a path
 
-<div class="localgpt-doc-grid">
+<div class="publisherstudio-doc-grid">
 
-<div class="localgpt-doc-card">
+<div class="publisherstudio-doc-card">
 
-### 🌸 Use LocalGPT
+### 🌸 Use PublisherStudio
 
-Start with the application concepts, common workflows, and the boundaries around actions that can change files, run tools, or operate hardware.
+Create a publication, learn the workspace, and understand pages, objects, stories, ribbons, and export workflows.
 
-[Open the user guide](guide/index.md)
-
-</div>
-
-<div class="localgpt-doc-card">
-
-### 🧠 Understand the architecture
-
-Follow the modular-monolith boundaries from Blazor UI through services, provider adapters, persistence, the AI Host control plane, Council orchestration, and 1-Wire transports.
-
-[Explore the architecture](architecture/index.md)
+[Open the user guide](articles/getting-started.md)
 
 </div>
 
-<div class="localgpt-doc-card">
+<div class="publisherstudio-doc-card">
+
+### 🎨 Build rich content
+
+Work with stories, spreadsheets, pictures, audio, video, animation, interaction, streaming, and recording.
+
+[Explore pictures and media](articles/pictures-and-media.md)
+
+</div>
+
+<div class="publisherstudio-doc-card">
 
 ### 🛠️ Build and maintain it
 
-Read the compilation truth, diagnostics policy, documentation pipeline, release checks, and the rules that keep generated work reviewable.
+Read the modular architecture, development requirements, installer behavior, documentation pipeline, and release checks.
 
-[Open engineering guidance](engineering/index.md)
+[Open engineering guidance](articles/developer-build.md)
 
 </div>
 
-<div class="localgpt-doc-card">
+<div class="publisherstudio-doc-card">
 
 ### 📚 Look up details
 
-Use the capability map, design evolution notes, documentation migration map, or the complete XML-generated API reference.
+Browse publishing and export behavior, privacy boundaries, the optional LocalGPT connection, and the generated API reference.
 
-[Browse reference material](reference/index.md)
+[Browse reference material](articles/documentation-system.md)
 
 </div>
 
@@ -56,29 +56,23 @@ Use the capability map, design evolution notes, documentation migration map, or 
 
 ```mermaid
 flowchart LR
-    U[Human user] --> UI[Blazor + DevExpress UI]
+    U[Human author] --> UI[Blazor + DevExpress workspace]
     UI --> APP[Application services]
-    APP --> COUNCIL[Chat and Council runtime]
-    APP --> PROJECTS[Projects, workspaces and knowledge]
-    APP --> HOST[Provider-qualified AI Host control plane]
-    APP --> WIRE[Organic 1-Wire boundary]
-    COUNCIL --> PROVIDERS[Ollama / OpenAI-compatible / cloud providers]
-    PROJECTS --> DB[(SQLite + EF Core)]
-    HOST --> PROVIDERS
-    WIRE --> PEERS[Approved peers, publishers and devices]
+    APP --> DOC[Publication model]
+    APP --> MEDIA[Media and streaming services]
+    APP --> EXPORT[Print, PDF, web and recording exports]
+    APP --> WIRE[Optional LocalGPT 1-Wire boundary]
+    DOC --> STORE[(Local project data)]
+    MEDIA --> DEVICE[Approved local devices]
+    WIRE --> PEER[Approved LocalGPT peer]
 ```
 
-The human request remains the authority. Model output, uploaded content, repository text, remote peers, and generated artifacts are data—not permission.
+The editable publication remains authoritative. Browser runtimes accelerate interaction and rendering, while C# services own project state, validation, persistence, export, and approved external connections.
 
 ## Complete documentation set
 
-The conceptual pages are built together with compiler-generated XML documentation for public types and members. The same themed HTML site is shipped inside LocalGPT and published to GitHub Pages.
+The conceptual pages are built together with compiler-generated XML documentation for public types and members. The same themed HTML site is shipped inside PublisherStudio and published to GitHub Pages.
 
-The packaged PDF is rendered from the same reviewed Kawaii HTML tree as the website. It contains every maintained guide, architecture, engineering, and reference chapter together with every generated API page; a tiny source-only or fallback PDF is rejected by the release and Pages gates.
+The packaged PDF is built from the same reviewed Kawaii HTML tree as the website. It contains every maintained PublisherStudio chapter and every generated API namespace/type page; a tiny source-only or fallback PDF is rejected by the release and Pages gates.
 
-<a class="btn btn-primary" href="LocalGPT-2.3.7.pdf" download>🐾 Download the Kawaii handbook</a>
-
-
-
-
-
+<a class="btn btn-primary" href="PublisherStudio-2.2.5.pdf" download>🐾 Download the Kawaii handbook</a>

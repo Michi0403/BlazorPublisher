@@ -259,25 +259,46 @@ public sealed class LocalGptConnectionService(
         try
         {
             logger.LogTrace($"Entering LocalGptConnectionService.WaitForResultAsync.");
-                    if (correlationId == Guid.Empty) throw new ArgumentException("A correlation id is required.", nameof(correlationId));
-                    if (recentResponses.TryRemove(correlationId, out var cached)) return cached;
-                    var waiter = responseWaiters.GetOrAdd(correlationId, _ => new TaskCompletionSource<OrganicWireEnvelope>(TaskCreationOptions.RunContinuationsAsynchronously));
-                    if (recentResponses.TryRemove(correlationId, out cached))
-                    {
-                        responseWaiters.TryRemove(correlationId, out _);
-                        return cached;
-                    }
-                    using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                    timeoutCts.CancelAfter(timeout);
-                    try
-                    {
-                        return await waiter.Task.WaitAsync(timeoutCts.Token).ConfigureAwait(false);
-                    }
-                    finally
-                    {
-                        responseWaiters.TryRemove(correlationId, out _);
-                    }
-    
+            if (correlationId == Guid.Empty)
+                throw new ArgumentException("A correlation id is required.", nameof(correlationId));
+            if (recentResponses.TryRemove(correlationId, out var cached))
+                return cached;
+
+            var waiter = responseWaiters.GetOrAdd(
+                correlationId,
+                _ => new TaskCompletionSource<OrganicWireEnvelope>(TaskCreationOptions.RunContinuationsAsynchronously));
+            if (recentResponses.TryRemove(correlationId, out cached))
+            {
+                responseWaiters.TryRemove(correlationId, out _);
+                return cached;
+            }
+
+            using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeoutCts.CancelAfter(timeout);
+            try
+            {
+                return await waiter.Task.WaitAsync(timeoutCts.Token).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException exception) when (!cancellationToken.IsCancellationRequested)
+            {
+                throw new TimeoutException(
+                    $"No 1-Wire response for correlation {correlationId} arrived within {timeout.TotalSeconds:0.#} seconds.",
+                    exception);
+            }
+            finally
+            {
+                responseWaiters.TryRemove(correlationId, out _);
+            }
+        }
+        catch (OperationCanceledException exception) when (cancellationToken.IsCancellationRequested)
+        {
+            logger.LogDebug(exception, $"LocalGptConnectionService.WaitForResultAsync was canceled by its caller.");
+            throw;
+        }
+        catch (TimeoutException exception)
+        {
+            logger.LogWarning(exception, $"LocalGptConnectionService.WaitForResultAsync timed out.");
+            throw;
         }
         catch (Exception exception)
         {
@@ -356,7 +377,13 @@ public sealed class LocalGptConnectionService(
     {
         try
         {
-            if (envelope.MessageType is OrganicWireMessageType.WorkResult or OrganicWireMessageType.Error or OrganicWireMessageType.ApprovalRequired)
+            if (envelope.MessageType is OrganicWireMessageType.WorkResult
+                or OrganicWireMessageType.Error
+                or OrganicWireMessageType.ApprovalRequired
+                or OrganicWireMessageType.CapabilityResponse
+                or OrganicWireMessageType.SkillResponse
+                or OrganicWireMessageType.SkillStateUpdate
+                or OrganicWireMessageType.Pong)
             {
                 // A live waiter owns the response exclusively. Caching the same ApprovalRequired envelope
                 // as well caused the next wait cycle to consume that stale intermediate response instead of

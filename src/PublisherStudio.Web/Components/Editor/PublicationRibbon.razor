@@ -254,9 +254,9 @@
 
     @if (CanShowAiCouncil)
     {
-        <DxRibbonTab Text="AI Council">
-            <DxRibbonGroup Text="LocalGPT" IconCssClass="pub-icon pub-icon-command">
-                <DxRibbonItem Text="Organic plugins" IconCssClass="pub-icon pub-icon-command" IsPrimary="true" Click="OpenOrganicPlugins" />
+        <DxRibbonTab Text="LocalGPT AI">
+            <DxRibbonGroup Text="Create with AI" IconCssClass="pub-icon pub-icon-command">
+                <DxRibbonItem Text="AI Assist selected object" IconCssClass="pub-icon pub-icon-command" IsPrimary="true" Click="OpenOrganicPlugins" />
                 @if (HasCouncilTeam("openscad-team"))
                 {
                     <DxRibbonItem Text="OpenSCAD Team" IconCssClass="pub-icon pub-icon-effects" Click="OpenOrganicPlugins" />
@@ -266,7 +266,7 @@
                     <DxRibbonItem Text="Spreadsheet Team" IconCssClass="pub-icon pub-icon-spreadsheet" Click="OpenOrganicPlugins" />
                 }
             </DxRibbonGroup>
-            <DxRibbonGroup Text="Safety" IconCssClass="pub-icon pub-icon-info">
+            <DxRibbonGroup Text="Connection & safety" IconCssClass="pub-icon pub-icon-info">
                 <DxRibbonItem Text="Eye/hand actions require permission" Enabled="false" />
             </DxRibbonGroup>
         </DxRibbonTab>
@@ -626,7 +626,7 @@
 </DxRibbon>
 
 @code {
-    private string LocalGptButtonText => LocalGptConnection.State.IsConnected ? "Organic plugins connected" : "Connect LocalGPT";
+    private string LocalGptButtonText => LocalGptConnection.State.IsLinked ? "LocalGPT AI Assist" : LocalGptConnection.State.IsConnected ? "Approve LocalGPT link" : "Connect LocalGPT";
     private bool CanShowAiCouncil => LocalGptConnection.State.HasCapability("council.run");
 
     protected override void OnInitialized()

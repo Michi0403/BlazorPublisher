@@ -178,6 +178,11 @@ public sealed class LocalGptDiscoveryRegistry(ILogger<LocalGptDiscoveryRegistry>
 /// </summary>
 public sealed class OrganicPermissionStore : IOrganicPermissionStore
 {
+    /// <summary>
+    /// Occurs when organic permission exposure or invocation rules change.
+    /// </summary>
+    public event Action? Changed;
+
     private readonly ILogger<OrganicPermissionStore> logger;
     private readonly IOrganicPluginProtocolCodec codec;
     /// <summary>
@@ -232,15 +237,18 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
             ArgumentNullException.ThrowIfNull(rule);
             ArgumentException.ThrowIfNullOrWhiteSpace(rule.PeerId);
             ArgumentException.ThrowIfNullOrWhiteSpace(rule.CapabilityKey);
+            OrganicPermissionRule saved;
             lock (gate)
             {
                 var existing = Rules.FindIndex(candidate => SameKey(candidate, rule));
                 rule.UpdatedUtc = DateTimeOffset.UtcNow;
                 if (existing >= 0) Rules[existing] = Clone(rule); else Rules.Add(Clone(rule));
                 Persist();
-                logger.LogInformation("Saved organic permission {ApprovalMode} for {PeerId}/{CapabilityKey}/{Organ}.", rule.ApprovalMode, rule.PeerId, rule.CapabilityKey, rule.Organ);
-                return Clone(rule);
+                saved = Clone(rule);
             }
+            logger.LogInformation("Saved organic permission {ApprovalMode} for {PeerId}/{CapabilityKey}/{Organ}.", rule.ApprovalMode, rule.PeerId, rule.CapabilityKey, rule.Organ);
+            Changed?.Invoke();
+            return saved;
     
     }
     catch (Exception __serviceMethodException)
@@ -260,15 +268,18 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
     {
     try
     {
+            bool removed;
             lock (gate)
             {
-                var removed = Rules.RemoveAll(rule =>
+                removed = Rules.RemoveAll(rule =>
                     string.Equals(rule.PeerId, peerId, StringComparison.OrdinalIgnoreCase) &&
                     string.Equals(rule.CapabilityKey, capabilityKey, StringComparison.OrdinalIgnoreCase) &&
                     string.Equals(rule.Organ, organ, StringComparison.OrdinalIgnoreCase)) > 0;
                 if (removed) Persist();
-                return removed;
             }
+            if (removed)
+                Changed?.Invoke();
+            return removed;
     
     }
     catch (Exception __serviceMethodException)

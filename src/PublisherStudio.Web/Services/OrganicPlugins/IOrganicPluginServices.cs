@@ -159,6 +159,10 @@ public interface IOrganicRuntimeSecurityService
 public interface IOrganicCapabilityCatalog : LocalGPT.WireProtocol.IOneWireCapabilityProvider
 {
     /// <summary>
+    /// Occurs when the effective local capability directory changes and linked peers should refresh it.
+    /// </summary>
+    event Action? Changed;
+    /// <summary>
     /// Gets capabilities async.
     /// </summary>
     new Task<IReadOnlyList<OrganicCapabilityDescriptor>> GetCapabilitiesAsync(CancellationToken cancellationToken = default);
@@ -181,6 +185,10 @@ public interface IOrganicCapabilityCatalog : LocalGPT.WireProtocol.IOneWireCapab
 /// </summary>
 public interface IOrganicPermissionStore
 {
+    /// <summary>
+    /// Occurs when peer exposure or invocation policy changes.
+    /// </summary>
+    event Action? Changed;
     /// <summary>
     /// Gets rules.
     /// </summary>

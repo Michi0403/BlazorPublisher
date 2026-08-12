@@ -1391,7 +1391,7 @@
 
         // Pointer-up commits are serialized by browser interop. Flush immediately before
         // cloning so the reusable prototype contains the exact last arranged bounds.
-        await FlushPanelStudioInteractionsAsync().ConfigureAwait(true);
+        await FlushPanelStudioInteractionsAsync().ConfigureAwait(false);
         template.Prototype = Files.CloneElement(SelectedElement);
         template.Prototype.Id = Guid.NewGuid();
         template.Name = name;
@@ -1407,7 +1407,7 @@
     private async Task SaveSelectedAsNewTemplate()
     {
         _selectedTemplateId = null;
-        await SaveSelectedAsTemplate().ConfigureAwait(true);
+        await SaveSelectedAsTemplate().ConfigureAwait(false);
     }
 
     private void DeleteSelectedTemplate()
@@ -1526,7 +1526,7 @@
     private async Task FlushPanelStudioInteractionsAsync()
     {
         if (!_dropSurfaceBound) return;
-        _ = await JS.InvokeAsync<bool>("publisherStudio.flushPanelStudioInteractions", _canvasElement).ConfigureAwait(true);
+        _ = await JS.InvokeAsync<bool>("publisherStudio.flushPanelStudioInteractions", _canvasElement).ConfigureAwait(false);
     }
 
     private string Text(ChangeEventArgs args) => PanelText.Text(args, Logger);
@@ -1540,7 +1540,7 @@
         _error = string.Empty;
         try
         {
-            await FlushPanelStudioInteractionsAsync().ConfigureAwait(true);
+            await FlushPanelStudioInteractionsAsync().ConfigureAwait(false);
             Panels.Normalize(Document, _draft);
             // Pass an isolated graph to the parent. Closing or rerendering the dialog must
             // not mutate the object that was just committed to the Mainframe.

@@ -807,6 +807,8 @@ public ActionResult&lt;IReadOnlyList&lt;PublisherDocumentationComment&gt;&gt; Co
   <div class="codewrapper">
     <pre><code class="lang-csharp hljs">[HttpGet(&quot;/help-docs&quot;)]
 [HttpGet(&quot;/help-docs/{**relativePath}&quot;)]
+[HttpGet(&quot;html&quot;)]
+[HttpGet(&quot;html/{**relativePath}&quot;)]
 public IActionResult Html(string? relativePath = null)</code></pre>
   </div>
 
@@ -949,7 +951,7 @@ public ActionResult&lt;PublisherDocumentationStatus&gt; Status()</code></pre>
     <footer class="border-top text-secondary">
       <div class="container-xxl">
         <div class="flex-fill">
-          PublisherStudio 2.3.6 Â· generated documentation
+          PublisherStudio 2.5.4 Â· generated documentation
         </div>
       </div>
     </footer>

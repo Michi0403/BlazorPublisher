@@ -20,6 +20,12 @@ These contracts stay separate so both applications can run side by side.
 
 The shared wire protocol is versioned independently and consumed from the authoritative `LocalGPT.WireProtocolVersion` package. PublisherStudio does not carry a second copy of the protocol project.
 
+## Live organic capability synchronization
+
+Once both frontends approve a link, PublisherStudio keeps its effective organic capability directory synchronized without requiring either application to restart or reconnect. The serializable deployed/user DX-function catalogs are watched for replacement or content changes, and peer permission changes use the same notification path. Changes are coalesced and PublisherStudio sends a fresh `CapabilityResponse` over the existing protected 1-Wire connection.
+
+LocalGPT updates the already-linked peer registry immediately. PublisherStudio also answers explicit `CapabilityRequest` and `SkillRequest` messages, and performs a fresh comparison when `HelloAck` arrives so a catalog edit made while link approval was pending is not lost. This refreshes descriptors for functionality already executable by PublisherStudio; it does not attempt to load arbitrary new .NET code into the running process.
+
 ## Quiet standalone behavior
 
 When LocalGPT is absent, PublisherStudio continues normally. The Organic Plugins page reports that no peer is connected instead of treating the optional capability as an application failure.

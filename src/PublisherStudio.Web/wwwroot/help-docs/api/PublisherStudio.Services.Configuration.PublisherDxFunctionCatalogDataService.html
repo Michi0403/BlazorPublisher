@@ -137,7 +137,7 @@ Class PublisherDxFunctionCatalogDataService
   <div class="markdown conceptual"></div>
 
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public sealed class PublisherDxFunctionCatalogDataService : IPublisherDxFunctionCatalogDataService</code></pre>
+    <pre><code class="lang-csharp hljs">public sealed class PublisherDxFunctionCatalogDataService : IPublisherDxFunctionCatalogDataService, IDisposable</code></pre>
   </div>
 
 
@@ -155,6 +155,7 @@ Class PublisherDxFunctionCatalogDataService
     <dt>Implements</dt>
     <dd>
       <div><a class="xref" href="PublisherStudio.Services.Configuration.IPublisherDxFunctionCatalogDataService.html">IPublisherDxFunctionCatalogDataService</a></div>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.idisposable">IDisposable</a></div>
     </dd>
   </dl>
 
@@ -226,12 +227,39 @@ Class PublisherDxFunctionCatalogDataService
 
 
   </div></section></div></section><section class="publisherstudio-api-member-panel publisherstudio-api-member-panel--methods" data-member-kind="Methods" style="--publisherstudio-api-accent:#3b82f6;" role="region" aria-labelledby="methods"><h2 class="section" id="methods"><span class="publisherstudio-api-member-icon" aria-hidden="true">&#x2699;&#xFE0F;</span>Methods
-<span class="publisherstudio-api-member-count" aria-label="1 item">1</span></h2><div class="publisherstudio-api-member-panel-body">
+<span class="publisherstudio-api-member-count" aria-label="2 items">2</span></h2><div class="publisherstudio-api-member-panel-body">
+
+
+  <a id="PublisherStudio_Services_Configuration_PublisherDxFunctionCatalogDataService_Dispose_" data-uid="PublisherStudio.Services.Configuration.PublisherDxFunctionCatalogDataService.Dispose*"></a>
+
+  <section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_Configuration_PublisherDxFunctionCatalogDataService_Dispose" data-uid="PublisherStudio.Services.Configuration.PublisherDxFunctionCatalogDataService.Dispose">
+  Dispose()
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Releases the live serializable-catalog file watchers.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Dispose()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
 
 
   <a id="PublisherStudio_Services_Configuration_PublisherDxFunctionCatalogDataService_GetFunctionsAsync_" data-uid="PublisherStudio.Services.Configuration.PublisherDxFunctionCatalogDataService.GetFunctionsAsync*"></a>
 
-  <section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_Configuration_PublisherDxFunctionCatalogDataService_GetFunctionsAsync_System_Threading_CancellationToken_" data-uid="PublisherStudio.Services.Configuration.PublisherDxFunctionCatalogDataService.GetFunctionsAsync(System.Threading.CancellationToken)">
+  </div></section><section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_Configuration_PublisherDxFunctionCatalogDataService_GetFunctionsAsync_System_Threading_CancellationToken_" data-uid="PublisherStudio.Services.Configuration.PublisherDxFunctionCatalogDataService.GetFunctionsAsync(System.Threading.CancellationToken)">
   GetFunctionsAsync(CancellationToken)
   
   </h3><div class="publisherstudio-api-member-item-body">
@@ -266,6 +294,41 @@ Class PublisherDxFunctionCatalogDataService
 
 
 
+  </div></section></div></section><section class="publisherstudio-api-member-panel publisherstudio-api-member-panel--events" data-member-kind="Events" style="--publisherstudio-api-accent:#ec4899;" role="region" aria-labelledby="events"><h2 class="section" id="events"><span class="publisherstudio-api-member-icon" aria-hidden="true">&#x26A1;</span>Events
+<span class="publisherstudio-api-member-count" aria-label="1 item">1</span></h2><div class="publisherstudio-api-member-panel-body">
+
+
+
+  <section class="publisherstudio-api-member-item"><h3 id="PublisherStudio_Services_Configuration_PublisherDxFunctionCatalogDataService_Changed" data-uid="PublisherStudio.Services.Configuration.PublisherDxFunctionCatalogDataService.Changed">
+  Changed
+  
+  </h3><div class="publisherstudio-api-member-item-body">
+
+  <div class="markdown level1 summary"><p>Occurs when either serializable function catalog changes.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public event Action? Changed</code></pre>
+  </div>
+
+
+
+
+
+
+  <h4 class="section">Event Type</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.action">Action</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
 </div></section>
 </div></section></article>
 
@@ -283,7 +346,7 @@ Class PublisherDxFunctionCatalogDataService
     <footer class="border-top text-secondary">
       <div class="container-xxl">
         <div class="flex-fill">
-          PublisherStudio 2.3.6 Â· generated documentation
+          PublisherStudio 2.5.4 Â· generated documentation
         </div>
       </div>
     </footer>

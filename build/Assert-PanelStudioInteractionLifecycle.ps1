@@ -28,8 +28,8 @@ Require $panel 'refreshPanelStudioDesignSurface", _canvasElement\)\.ConfigureAwa
 Require $panel 'TokenCancellationRequested:\{exception\.CancellationToken\.IsCancellationRequested\}' 'Cancellation diagnostics must include token state.'
 Require $panel 'Panel Studio browser interaction ended normally\. Binding:' 'Expected browser shutdown and cancellation must be logged with binding context.'
 Require $panel '_lastInteractionSurfaceNotification' 'Repeated browser interop failures must be notification-deduplicated instead of flooding the user interface.'
-Require $panel 'await FlushPanelStudioInteractionsAsync\(\)\.ConfigureAwait\(true\);[\s\S]{0,260}template\.Prototype = Files\.CloneElement\(SelectedElement\);' 'Saving/updating a reusable module must flush queued pointer bounds before cloning it.'
-Require $panel 'private async Task Save\(\)[\s\S]{0,260}await FlushPanelStudioInteractionsAsync\(\)\.ConfigureAwait\(true\);' 'Applying a panel must flush queued pointer bounds before cloning the complete graph.'
+Require $panel 'await FlushPanelStudioInteractionsAsync\(\)\.ConfigureAwait\(false\);[\s\S]{0,260}template\.Prototype = Files\.CloneElement\(SelectedElement\);' 'Saving/updating a reusable module must flush queued pointer bounds before cloning it.'
+Require $panel 'private async Task Save\(\)[\s\S]{0,260}await FlushPanelStudioInteractionsAsync\(\)\.ConfigureAwait\(false\);' 'Applying a panel must flush queued pointer bounds before cloning the complete graph.'
 
 $modeBlock = [regex]::Match($panel, '(?s)private void EnableInteractionPreview\(\).*?private Task EditSelectedComponent').Value
 if ([string]::IsNullOrWhiteSpace($modeBlock)) { Fail 'Panel Studio mode methods could not be inspected.' }

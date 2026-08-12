@@ -35,6 +35,8 @@ public sealed class LocalGptConnectionService(
     /// Runs the new operation.
     /// </summary>
     private readonly SemaphoreSlim writeGate = new(1, 1);
+    /// <summary>Coalesces capability-catalog and permission changes for the live 1-Wire directory synchronization loop.</summary>
+    private readonly SemaphoreSlim capabilitySynchronizationSignal = new(0, 1);
     /// <summary>
     /// Runs the new operation.
     /// </summary>
@@ -52,6 +54,8 @@ public sealed class LocalGptConnectionService(
     private StreamWriter? writer;
     private CancellationTokenSource? connectionCancellation;
     private Task? readLoop;
+    private Task? capabilitySynchronizationLoop;
+    private string lastAdvertisedCapabilityFingerprint = string.Empty;
     private string peerId = string.Empty;
     private Guid connectionId;
     private readonly string localPeerId = $"publisherstudio:{Environment.MachineName}";
@@ -75,6 +79,8 @@ public sealed class LocalGptConnectionService(
         try
         {
             await DisconnectCoreAsync().ConfigureAwait(false);
+            capabilities.Changed += SignalCapabilitySynchronization;
+            permissions.Changed += SignalCapabilitySynchronization;
             var peer = discovery.GetPeer(requestedPeerId) ?? throw new KeyNotFoundException("The selected LocalGPT discovery entry is no longer available.");
             var address = NormalizeAddress(peer.Address, peer.HostName);
             var tcp = new TcpClient();
@@ -102,13 +108,11 @@ public sealed class LocalGptConnectionService(
             readLoop = ReadLoopAsync(connectedId, requestedPeerId, connectedReader, connectedWriter, isLoopback, connectionCancellation.Token);
             Changed?.Invoke();
 
-            var localCapabilities = (await capabilities.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false))
-                .Select(capability => ApplyPermissionPolicy(requestedPeerId, capability))
-                .Where(capability => capability.IsExposedToPeer)
-                .ToList();
-            var localSkills = await capabilities.GetSkillsAsync(cancellationToken).ConfigureAwait(false);
-            var localUiFeatures = await capabilities.GetUiFeaturesAsync(cancellationToken).ConfigureAwait(false);
-            var localHardware = await capabilities.GetHardwareAsync(cancellationToken).ConfigureAwait(false);
+            var localDirectory = await BuildLocalCapabilityDirectoryAsync(requestedPeerId, cancellationToken).ConfigureAwait(false);
+            var localCapabilities = localDirectory.Capabilities;
+            var localSkills = localDirectory.Skills;
+            var localUiFeatures = localDirectory.UiFeatures;
+            var localHardware = localDirectory.Hardware;
             var localSecurity = await security.GetPublicDescriptorAsync(cancellationToken).ConfigureAwait(false);
             var hello = new OrganicWireEnvelope
             {
@@ -122,7 +126,7 @@ public sealed class LocalGptConnectionService(
                         PeerId = localPeerId,
                         DisplayName = "PublisherStudio / BlazorPublisher",
                         Application = "PublisherStudio",
-                        ApplicationVersion = "2.2.4-organic-wire",
+                        ApplicationVersion = typeof(LocalGptConnectionService).Assembly.GetName().Version?.ToString(3) ?? string.Empty,
                         HostName = Environment.MachineName,
                         Address = "0.0.0.0",
                         ServicePort = 0,
@@ -140,6 +144,13 @@ public sealed class LocalGptConnectionService(
                 }
             };
             await SendEnvelopeAsync(hello, cancellationToken).ConfigureAwait(false);
+            lastAdvertisedCapabilityFingerprint = localDirectory.Fingerprint;
+            capabilitySynchronizationLoop = SynchronizeLocalCapabilityDirectoryAsync(
+                connectedId,
+                requestedPeerId,
+                connectedWriter,
+                isLoopback,
+                connectionCancellation.Token);
             logger.LogInformation("Connected PublisherStudio organic plugin to LocalGPT peer {PeerId} at {Address}:{Port}.", requestedPeerId, address, peer.ServicePort);
             return State;
         }
@@ -374,6 +385,9 @@ public sealed class LocalGptConnectionService(
                 case OrganicWireMessageType.HelloAck:
                     State.IsLinked = true;
                     State.LastError = string.Empty;
+                    // Re-check the local directory now that both frontends approved the link. Any catalog or
+                    // permission change that happened while approval was pending must not require reconnecting.
+                    SignalCapabilitySynchronization();
                     await SendEnvelopeCoreAsync(new OrganicWireEnvelope
                     {
                         MessageType = OrganicWireMessageType.CapabilityRequest,
@@ -382,6 +396,41 @@ public sealed class LocalGptConnectionService(
                         TargetPeerId = connectedPeerId
                     }, connectedWriter, connectedPeerId, isLoopback, cancellationToken).ConfigureAwait(false);
                     goto case OrganicWireMessageType.CapabilityResponse;
+                case OrganicWireMessageType.CapabilityRequest:
+                {
+                    var localDirectory = await BuildLocalCapabilityDirectoryAsync(connectedPeerId, cancellationToken).ConfigureAwait(false);
+                    await SendEnvelopeCoreAsync(new OrganicWireEnvelope
+                    {
+                        MessageType = OrganicWireMessageType.CapabilityResponse,
+                        CorrelationId = envelope.CorrelationId,
+                        ReplyToMessageId = envelope.MessageId,
+                        SourcePeerId = localPeerId,
+                        TargetPeerId = connectedPeerId,
+                        Properties = localDirectory.Properties
+                    }, connectedWriter, connectedPeerId, isLoopback, cancellationToken).ConfigureAwait(false);
+                    lastAdvertisedCapabilityFingerprint = localDirectory.Fingerprint;
+                    results.RecordEnvelope(envelope);
+                    break;
+                }
+                case OrganicWireMessageType.SkillRequest:
+                {
+                    var localDirectory = await BuildLocalCapabilityDirectoryAsync(connectedPeerId, cancellationToken).ConfigureAwait(false);
+                    await SendEnvelopeCoreAsync(new OrganicWireEnvelope
+                    {
+                        MessageType = OrganicWireMessageType.SkillResponse,
+                        CorrelationId = envelope.CorrelationId,
+                        ReplyToMessageId = envelope.MessageId,
+                        SourcePeerId = localPeerId,
+                        TargetPeerId = connectedPeerId,
+                        Properties = new Dictionary<string, JsonElement>
+                        {
+                            ["Skills"] = JsonSerializer.SerializeToElement(localDirectory.Skills, codec.JsonOptions),
+                            ["UiFeatures"] = JsonSerializer.SerializeToElement(localDirectory.UiFeatures, codec.JsonOptions)
+                        }
+                    }, connectedWriter, connectedPeerId, isLoopback, cancellationToken).ConfigureAwait(false);
+                    results.RecordEnvelope(envelope);
+                    break;
+                }
                 case OrganicWireMessageType.CapabilityResponse:
                 case OrganicWireMessageType.SkillResponse:
                 case OrganicWireMessageType.SkillStateUpdate:
@@ -476,6 +525,121 @@ public sealed class LocalGptConnectionService(
     }
 
     /// <summary>
+    /// Builds the current local organic directory for a linked peer and a stable content fingerprint.
+    /// </summary>
+    private async Task<(List<OrganicCapabilityDescriptor> Capabilities,
+        List<OrganicSkillDescriptor> Skills,
+        List<OrganicUiFeatureDescriptor> UiFeatures,
+        List<OrganicHardwareDescriptor> Hardware,
+        Dictionary<string, JsonElement> Properties,
+        string Fingerprint)> BuildLocalCapabilityDirectoryAsync(string connectedPeerId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var localCapabilities = (await capabilities.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false))
+                .Select(capability => ApplyPermissionPolicy(connectedPeerId, capability))
+                .Where(capability => capability.IsExposedToPeer)
+                .OrderBy(capability => capability.Key, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            var localSkills = (await capabilities.GetSkillsAsync(cancellationToken).ConfigureAwait(false))
+                .OrderBy(skill => skill.Key, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            var localUiFeatures = (await capabilities.GetUiFeaturesAsync(cancellationToken).ConfigureAwait(false))
+                .OrderBy(feature => feature.Key, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            var localHardware = (await capabilities.GetHardwareAsync(cancellationToken).ConfigureAwait(false))
+                .OrderBy(hardware => hardware.LaneKey, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            var properties = new Dictionary<string, JsonElement>
+            {
+                ["Capabilities"] = JsonSerializer.SerializeToElement(localCapabilities, codec.JsonOptions),
+                ["Skills"] = JsonSerializer.SerializeToElement(localSkills, codec.JsonOptions),
+                ["UiFeatures"] = JsonSerializer.SerializeToElement(localUiFeatures, codec.JsonOptions),
+                ["Hardware"] = JsonSerializer.SerializeToElement(localHardware, codec.JsonOptions)
+            };
+            // Skill/UI metadata contains observation timestamps. Hash the effective capability contracts instead so
+            // unchanged linked peers do not receive a synthetic refresh on every observation cycle.
+            var serialized = JsonSerializer.Serialize(localCapabilities, codec.JsonOptions);
+            var fingerprint = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(serialized)));
+            return (localCapabilities, localSkills, localUiFeatures, localHardware, properties, fingerprint);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Could not build the live PublisherStudio organic capability directory.");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Coalesces catalog and permission change notifications into the live asynchronous 1-Wire synchronization loop.
+    /// </summary>
+    private void SignalCapabilitySynchronization()
+    {
+        try
+        {
+            if (capabilitySynchronizationSignal.CurrentCount == 0)
+            {
+                try { capabilitySynchronizationSignal.Release(); }
+                catch (SemaphoreFullException) { }
+            }
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Could not signal PublisherStudio live organic capability synchronization.");
+        }
+    }
+
+    /// <summary>
+    /// Keeps the already-linked LocalGPT peer synchronized with PublisherStudio capability changes without reconnecting either application.
+    /// </summary>
+    private async Task SynchronizeLocalCapabilityDirectoryAsync(
+        Guid connectedId,
+        string connectedPeerId,
+        StreamWriter connectedWriter,
+        bool isLoopback,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                await capabilitySynchronizationSignal.WaitAsync(cancellationToken).ConfigureAwait(false);
+                if (connectionId != connectedId || !State.IsConnected || !State.IsLinked)
+                    continue;
+
+                var localDirectory = await BuildLocalCapabilityDirectoryAsync(connectedPeerId, cancellationToken).ConfigureAwait(false);
+                if (string.Equals(localDirectory.Fingerprint, lastAdvertisedCapabilityFingerprint, StringComparison.Ordinal))
+                    continue;
+
+                await SendEnvelopeCoreAsync(new OrganicWireEnvelope
+                {
+                    MessageType = OrganicWireMessageType.CapabilityResponse,
+                    SourcePeerId = localPeerId,
+                    TargetPeerId = connectedPeerId,
+                    Properties = localDirectory.Properties
+                }, connectedWriter, connectedPeerId, isLoopback, cancellationToken).ConfigureAwait(false);
+                lastAdvertisedCapabilityFingerprint = localDirectory.Fingerprint;
+                logger.LogInformation(
+                    "Broadcast refreshed PublisherStudio organic directory with {CapabilityCount} capability(s) to linked LocalGPT peer {PeerId} without reconnecting.",
+                    localDirectory.Capabilities.Count,
+                    connectedPeerId);
+            }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            logger.LogDebug("PublisherStudio live organic capability synchronization stopped with its 1-Wire connection.");
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "PublisherStudio live organic capability synchronization failed for peer {PeerId}.", connectedPeerId);
+        }
+    }
+
+    /// <summary>
     /// Runs the send envelope core async operation.
     /// </summary>
     private async Task<Guid> SendEnvelopeCoreAsync(OrganicWireEnvelope envelope, StreamWriter connectedWriter, string targetPeerId, bool isLoopback, CancellationToken cancellationToken)
@@ -514,11 +678,15 @@ public sealed class LocalGptConnectionService(
     {
         var oldPeerId = peerId;
         var oldConnectionId = connectionId;
+        capabilities.Changed -= SignalCapabilitySynchronization;
+        permissions.Changed -= SignalCapabilitySynchronization;
         connectionId = Guid.Empty;
         connectionCancellation?.Cancel();
         try
         {
             if (readLoop is not null && !readLoop.IsCompleted) await readLoop.WaitAsync(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
+            if (capabilitySynchronizationLoop is not null && !capabilitySynchronizationLoop.IsCompleted)
+                await capabilitySynchronizationLoop.WaitAsync(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
             var runningInvocations = activeInvocations.Values.ToArray();
             if (runningInvocations.Length > 0)
                 await Task.WhenAll(runningInvocations).WaitAsync(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
@@ -528,7 +696,9 @@ public sealed class LocalGptConnectionService(
         writer?.Dispose();
         client?.Dispose();
         connectionCancellation?.Dispose();
-        client = null; reader = null; writer = null; connectionCancellation = null; readLoop = null; peerId = string.Empty;
+        client = null; reader = null; writer = null; connectionCancellation = null; readLoop = null; capabilitySynchronizationLoop = null; peerId = string.Empty;
+        lastAdvertisedCapabilityFingerprint = string.Empty;
+        while (capabilitySynchronizationSignal.Wait(0)) { }
         runtimeState.Reset(oldConnectionId);
         State.IsConnected = false;
         State.IsLinked = false;
@@ -617,6 +787,7 @@ public sealed class LocalGptConnectionService(
                     await DisconnectAsync().ConfigureAwait(false);
                     lifecycleGate.Dispose();
                     writeGate.Dispose();
+                    capabilitySynchronizationSignal.Dispose();
     
         }
         catch (Exception exception)

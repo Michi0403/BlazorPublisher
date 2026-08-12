@@ -18,6 +18,11 @@ public sealed class OrganicCapabilityCatalog(
     ILogger<OrganicCapabilityCatalog> logger) : IOrganicCapabilityCatalog
 {
     /// <summary>
+    /// Occurs when this reviewed legacy metadata catalog changes. Its current descriptors are runtime-derived and do not own external mutation state.
+    /// </summary>
+    public event Action? Changed;
+
+    /// <summary>
     /// Gets capabilities async.
     /// </summary>
     public async Task<IReadOnlyList<OrganicCapabilityDescriptor>> GetCapabilitiesAsync(CancellationToken cancellationToken = default)

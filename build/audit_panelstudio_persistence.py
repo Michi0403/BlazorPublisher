@@ -40,9 +40,9 @@ req(PANEL,'private async Task SaveSelectedAsNewTemplate()','async save-as-new te
 req(PANEL,'private async Task FlushPanelStudioInteractionsAsync()','Blazor queue flush helper')
 order(PANEL,'private async Task SaveSelectedAsTemplate()','template.Prototype = Files.CloneElement(SelectedElement);','template save section')
 template_block=PANEL[PANEL.find('private async Task SaveSelectedAsTemplate()'):PANEL.find('private async Task SaveSelectedAsNewTemplate()')]
-req(template_block,'await FlushPanelStudioInteractionsAsync().ConfigureAwait(true);','flush before template clone')
+req(template_block,'await FlushPanelStudioInteractionsAsync().ConfigureAwait(false);','flush before template clone')
 save_block=PANEL[PANEL.find('private async Task Save()'):PANEL.find('private async Task Save()', PANEL.find('private async Task Save()')+1)] if PANEL.count('private async Task Save()')>1 else PANEL[PANEL.find('private async Task Save()'):]
-req(save_block,'await FlushPanelStudioInteractionsAsync().ConfigureAwait(true);','flush before panel apply clone')
+req(save_block,'await FlushPanelStudioInteractionsAsync().ConfigureAwait(false);','flush before panel apply clone')
 
 req(JS,'export async function flushPanelStudioInteractions(element)','browser queue flush export')
 req(JS,'await (binding.invokeQueue || Promise.resolve());','browser queue wait')

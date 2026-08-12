@@ -37,6 +37,9 @@ if ($connection -and $connection -notmatch 'SourcePeerId does not match the peer
 if ($discovery -and $discovery -notmatch 'automaticallyAttemptedPeers\.Remove') { Add-Finding 'Failed automatic connections will not become retryable.' }
 if ($applicationHost -and $applicationHost -notmatch 'systemVariables\.DefaultPort') { Add-Finding 'PublisherStudio port resolution no longer uses systemVariables.DefaultPort.' }
 if ($systemVariableStore -and $systemVariableStore -notmatch 'Application\.DefaultPort') { Add-Finding 'SystemVariableStoreService.cs no longer owns Application.DefaultPort.' }
+if ($connection -and ($connection -notmatch 'SynchronizeLocalCapabilityDirectoryAsync' -or $connection -notmatch 'capabilities\.Changed \+= SignalCapabilitySynchronization')) { Add-Finding 'PublisherStudio no longer performs event-driven post-link capability synchronization.' }
+if ($connection -and $connection -notmatch 'OrganicWireMessageType\.CapabilityRequest') { Add-Finding 'PublisherStudio no longer answers linked-peer capability refresh requests.' }
+if ($connection -and $connection -notmatch 'OrganicWireMessageType\.CapabilityResponse') { Add-Finding 'PublisherStudio no longer broadcasts refreshed capability directories.' }
 
 if (-not (Test-Path -LiteralPath $settingsPath -PathType Leaf)) {
     Add-Finding 'Missing PublisherStudio appsettings.json.'

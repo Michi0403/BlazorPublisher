@@ -9,6 +9,10 @@ namespace PublisherStudio.Services.Configuration;
 public interface IPublisherDxFunctionCatalogDataService
 {
     /// <summary>
+    /// Occurs when either the deployed or user-local function catalog changes on disk.
+    /// </summary>
+    event Action? Changed;
+    /// <summary>
     /// Gets functions async.
     /// </summary>
     Task<IReadOnlyList<OrganicCapabilityDescriptor>> GetFunctionsAsync(CancellationToken cancellationToken = default);
@@ -35,8 +39,19 @@ public sealed class PublisherDxFunctionCatalogDocument
 /// </summary>
 public sealed class PublisherDxFunctionCatalogDataService(
     IWebHostEnvironment environment,
-    ILogger<PublisherDxFunctionCatalogDataService> logger) : IPublisherDxFunctionCatalogDataService
+    ILogger<PublisherDxFunctionCatalogDataService> logger) : IPublisherDxFunctionCatalogDataService, IDisposable
 {
+    /// <summary>Serializes initialization and disposal of exact-catalog file watchers.</summary>
+    private readonly object watcherGate = new();
+    private FileSystemWatcher? deployedWatcher;
+    private FileSystemWatcher? userWatcher;
+    private bool watchersInitialized;
+
+    /// <summary>
+    /// Occurs when either serializable function catalog changes.
+    /// </summary>
+    public event Action? Changed;
+
     /// <summary>
     /// Runs the new operation.
     /// </summary>
@@ -53,6 +68,7 @@ public sealed class PublisherDxFunctionCatalogDataService(
     {
         try
         {
+            EnsureWatchers();
             var seedPath = Path.Combine(environment.ContentRootPath, "Configuration", "publisher-dx-functions.json");
             var seed = await ReadRequiredDocumentAsync(seedPath, "deployed", cancellationToken).ConfigureAwait(false);
             ValidateDocument(seed, "deployed");
@@ -99,6 +115,118 @@ public sealed class PublisherDxFunctionCatalogDataService(
         catch (Exception ex)
         {
             logger.LogError(ex, $"Could not load the PublisherStudio DX function catalog.");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Ensures file-system notifications are active for both serializable capability catalogs.
+    /// </summary>
+    private void EnsureWatchers()
+    {
+        try
+        {
+            lock (watcherGate)
+            {
+                if (watchersInitialized)
+                    return;
+
+                var deployedPath = Path.Combine(environment.ContentRootPath, "Configuration", "publisher-dx-functions.json");
+                var userPath = GetUserCatalogPath();
+                Directory.CreateDirectory(Path.GetDirectoryName(userPath)!);
+                deployedWatcher = CreateWatcher(deployedPath);
+                userWatcher = CreateWatcher(userPath);
+                watchersInitialized = true;
+            }
+            logger.LogDebug("PublisherStudio DX function catalog live-change watchers are active.");
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Could not initialize PublisherStudio DX function catalog live-change watchers.");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Creates a watcher for one exact serializable catalog file.
+    /// </summary>
+    private FileSystemWatcher CreateWatcher(string filePath)
+    {
+        try
+        {
+            var directory = Path.GetDirectoryName(filePath) ?? throw new InvalidOperationException("A PublisherStudio DX function catalog has no directory.");
+            Directory.CreateDirectory(directory);
+            var watcher = new FileSystemWatcher(directory, Path.GetFileName(filePath))
+            {
+                NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.CreationTime,
+                IncludeSubdirectories = false,
+                EnableRaisingEvents = false
+            };
+            watcher.Changed += OnCatalogFileChanged;
+            watcher.Created += OnCatalogFileChanged;
+            watcher.Deleted += OnCatalogFileChanged;
+            watcher.Renamed += OnCatalogFileRenamed;
+            watcher.EnableRaisingEvents = true;
+            return watcher;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Could not create a PublisherStudio DX function catalog watcher; path omitted from logs.");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Signals a live capability-directory refresh after an exact catalog file change.
+    /// </summary>
+    private void OnCatalogFileChanged(object sender, FileSystemEventArgs args)
+    {
+        try
+        {
+            logger.LogInformation("PublisherStudio DX function catalog changed; linked 1-Wire peers will receive a refreshed organic directory.");
+            Changed?.Invoke();
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Could not publish a PublisherStudio DX function catalog change notification.");
+        }
+    }
+
+    /// <summary>
+    /// Signals a live capability-directory refresh after an exact catalog file rename or replacement.
+    /// </summary>
+    private void OnCatalogFileRenamed(object sender, RenamedEventArgs args)
+    {
+        try
+        {
+            logger.LogInformation("PublisherStudio DX function catalog was replaced; linked 1-Wire peers will receive a refreshed organic directory.");
+            Changed?.Invoke();
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Could not publish a replaced PublisherStudio DX function catalog notification.");
+        }
+    }
+
+    /// <summary>
+    /// Releases the live serializable-catalog file watchers.
+    /// </summary>
+    public void Dispose()
+    {
+        try
+        {
+            lock (watcherGate)
+            {
+                deployedWatcher?.Dispose();
+                userWatcher?.Dispose();
+                deployedWatcher = null;
+                userWatcher = null;
+                watchersInitialized = false;
+            }
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Could not dispose PublisherStudio DX function catalog watchers.");
             throw;
         }
     }

@@ -15,6 +15,15 @@ public sealed class ObjectStoreOrganicCapabilityCatalog(
     ILogger<ObjectStoreOrganicCapabilityCatalog> logger) : IOrganicCapabilityCatalog
 {
     /// <summary>
+    /// Occurs when the serializable DX function catalog changes and linked 1-Wire peers should refresh immediately.
+    /// </summary>
+    public event Action? Changed
+    {
+        add => functionCatalog.Changed += value;
+        remove => functionCatalog.Changed -= value;
+    }
+
+    /// <summary>
     /// Gets capabilities async.
     /// </summary>
     public async Task<IReadOnlyList<OrganicCapabilityDescriptor>> GetCapabilitiesAsync(CancellationToken cancellationToken = default)

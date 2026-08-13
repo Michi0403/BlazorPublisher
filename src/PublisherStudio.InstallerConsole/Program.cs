@@ -1978,8 +1978,9 @@ internal static class Program
     }
 
     /// <summary>
-    /// Gets architecture token.
+    /// Retrieves architecture token for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <returns>The string produced by the operation.</returns>
     private static string GetArchitectureToken() => RuntimeInformation.OSArchitecture switch
     {
         Architecture.X64 => "x64",

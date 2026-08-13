@@ -50,6 +50,7 @@ public sealed class VideoLayerInterchangeController(
     /// Returns the normalize projection for the video layer interchange API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
     /// <returns>The HTTP-facing result produced for the caller.</returns>
+    /// <param name="points">Points value supplied to the video layer interchange operation and used when producing its result.</param>
     [HttpPost("geometry/normalize")]
     public ActionResult<IReadOnlyList<MediaFramePoint>> Normalize([FromBody] List<MediaFramePoint>? points) => Ok(geometry.Normalize(points));
 
@@ -57,6 +58,7 @@ public sealed class VideoLayerInterchangeController(
     /// Returns the resample projection for the video layer interchange API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
     /// <returns>The HTTP-facing result produced for the caller.</returns>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
     [HttpPost("geometry/resample")]
     public ActionResult<IReadOnlyList<MediaFramePoint>> Resample([FromBody] PolygonResampleRequest request) => Ok(geometry.Resample(request.Points, Math.Clamp(request.Count, 3, 128)));
 

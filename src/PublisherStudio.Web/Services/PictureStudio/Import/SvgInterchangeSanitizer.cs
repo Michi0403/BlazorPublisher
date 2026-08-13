@@ -11,7 +11,7 @@ namespace PublisherStudio.Services.PictureStudio.Import;
 public sealed class SvgInterchangeSanitizer(ILogger<SvgInterchangeSanitizer> logger)
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory removed elements collection maintained internally by <see cref="SvgInterchangeSanitizer"/> for its current workflow state.
     /// </summary>
     private readonly HashSet<string> RemovedElements = new(StringComparer.OrdinalIgnoreCase)
     {

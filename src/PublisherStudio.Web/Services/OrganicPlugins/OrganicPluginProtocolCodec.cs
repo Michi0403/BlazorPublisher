@@ -23,8 +23,9 @@ public sealed class OrganicPluginProtocolCodec : IOrganicPluginProtocolCodec
     };
 
     /// <summary>
-    /// Gets JSON options.
+    /// Gets the JSON options value that forms part of the organic plugin protocol codec state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The JSON options value exposed by <see cref="OrganicPluginProtocolCodec"/>.</value>
     public JsonSerializerOptions JsonOptions => jsonOptions;
 
     /// <summary>

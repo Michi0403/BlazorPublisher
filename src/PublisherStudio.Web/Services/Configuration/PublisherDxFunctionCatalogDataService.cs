@@ -68,7 +68,7 @@ public sealed class PublisherDxFunctionCatalogDataService(
     public event Action? Changed;
 
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal JSON options state used by <see cref="PublisherDxFunctionCatalogDataService"/> while executing its surrounding workflow.
     /// </summary>
     private readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {

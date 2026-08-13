@@ -13,7 +13,7 @@ namespace PublisherStudio.Controllers;
 public sealed class AssetController(PublicationMediaAssetStore mediaAssets) : ControllerBase
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory allowed types collection maintained internally by <see cref="AssetController"/> for its current workflow state.
     /// </summary>
     private readonly HashSet<string> AllowedTypes = new(StringComparer.OrdinalIgnoreCase)
     {

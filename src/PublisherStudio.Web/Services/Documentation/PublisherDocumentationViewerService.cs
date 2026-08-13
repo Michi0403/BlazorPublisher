@@ -43,14 +43,12 @@ public sealed class PublisherDocumentationViewerService(ILogger<PublisherDocumen
     /// Gets or sets the state value that forms part of the publisher documentation viewer state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <inheritdoc />
-    /// <value>The state value exposed by <see cref="PublisherDocumentationViewerService"/>.</value>
     public PublisherDocumentationViewerState State { get; private set; } = new();
 
     /// <summary>
     /// Performs open as part of the publisher documentation viewer service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     /// <inheritdoc />
-    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
     public void Open(PublisherDocumentationViewerRequest request)
     {
         try

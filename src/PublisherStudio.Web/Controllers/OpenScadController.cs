@@ -48,6 +48,8 @@ public sealed class OpenScadController(IOpenScadCatalogService catalog, IOpenSca
     /// Returns the identifier projection for the open OpenSCAD API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
     /// <returns>The HTTP-facing result produced for the caller.</returns>
+    /// <param name="value">Value value supplied to the open OpenSCAD operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the open OpenSCAD operation and used when producing its result.</param>
     [HttpGet("identifier")]
     public ActionResult<string> Identifier([FromQuery] string value, [FromQuery] string fallback = "part") => Ok(values.Identifier(value, fallback));
 
@@ -55,6 +57,7 @@ public sealed class OpenScadController(IOpenScadCatalogService catalog, IOpenSca
     /// Returns the quote projection for the open OpenSCAD API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
     /// <returns>The HTTP-facing result produced for the caller.</returns>
+    /// <param name="value">Value value supplied to the open OpenSCAD operation and used when producing its result.</param>
     [HttpGet("quote")]
     public ActionResult<string> Quote([FromQuery] string value) => Ok(values.Quote(value));
 
@@ -69,6 +72,7 @@ public sealed class OpenScadController(IOpenScadCatalogService catalog, IOpenSca
     /// Returns the validate projection for the open OpenSCAD API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
     /// <returns>The HTTP-facing result produced for the caller.</returns>
+    /// <param name="document">Document value supplied to the open OpenSCAD operation and used when producing its result.</param>
     [HttpPost("validate")]
     public ActionResult<OpenScadValidationResult> Validate([FromBody] OpenScadDocument document) => Ok(documents.Validate(document));
 
@@ -76,12 +80,15 @@ public sealed class OpenScadController(IOpenScadCatalogService catalog, IOpenSca
     /// Returns the generate projection for the open OpenSCAD API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
     /// <returns>The HTTP-facing result produced for the caller.</returns>
+    /// <param name="document">Document value supplied to the open OpenSCAD operation and used when producing its result.</param>
     [HttpPost("generate")]
     public ActionResult<OpenScadGenerationResult> Generate([FromBody] OpenScadDocument document) => Ok(documents.Generate(document));
 
     /// <summary>
-    /// Runs the generate video layer operation.
+    /// Generates video layer for the open OpenSCAD API operation, delegating application logic to the controller's services and returning the resulting HTTP-facing value.
     /// </summary>
+    /// <param name="layer">Layer value supplied to the open OpenSCAD operation and used when producing its result.</param>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpPost("video-layer")]
     public ActionResult<OpenScadGenerationResult> GenerateVideoLayer([FromBody] VideoEffectLayer layer) => Ok(new OpenScadGenerationResult
     {

@@ -12,11 +12,13 @@ public sealed class GlobalHotkeyHostedService(GlobalHotkeyService hotkeys) : IHo
     /// Performs start as part of the global hotkey service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     /// <returns>The task start async cancellation token cancellation token hotkeys produced by the operation.</returns>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
     public Task StartAsync(CancellationToken cancellationToken) => hotkeys.StartAsync(cancellationToken);
 
     /// <summary>
     /// Performs stop as part of the global hotkey service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     /// <returns>The task stop async cancellation token cancellation token hotkeys produced by the operation.</returns>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
     public Task StopAsync(CancellationToken cancellationToken) => hotkeys.StopAsync(cancellationToken);
 }

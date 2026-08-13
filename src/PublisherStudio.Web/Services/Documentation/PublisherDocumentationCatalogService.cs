@@ -35,7 +35,6 @@ public sealed class PublisherDocumentationCatalogService(
     /// Retrieves status as part of the publisher documentation catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     /// <inheritdoc />
-    /// <returns>The publisher documentation status produced by the operation.</returns>
     public PublisherDocumentationStatus GetStatus()
     {
     try
@@ -74,8 +73,6 @@ public sealed class PublisherDocumentationCatalogService(
     /// Retrieves HTML file path as part of the publisher documentation catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     /// <inheritdoc />
-    /// <param name="relativePath">Relative path value supplied to the publisher documentation catalog operation and used when producing its result.</param>
-    /// <returns>The string produced by the operation.</returns>
     public string? GetHtmlFilePath(string? relativePath)
     {
     try
@@ -112,7 +109,6 @@ public sealed class PublisherDocumentationCatalogService(
     /// Retrieves PDF path as part of the publisher documentation catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     /// <inheritdoc />
-    /// <returns>The string produced by the operation.</returns>
     public string? GetPdfPath()
     {
     try
@@ -141,9 +137,6 @@ public sealed class PublisherDocumentationCatalogService(
     /// Searches comments as part of the publisher documentation catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     /// <inheritdoc />
-    /// <param name="query">Query value supplied to the publisher documentation catalog operation and used when producing its result.</param>
-    /// <param name="limit">Limit value supplied to the publisher documentation catalog operation and used when producing its result.</param>
-    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<PublisherDocumentationComment> SearchComments(string? query, int limit)
     {
     try

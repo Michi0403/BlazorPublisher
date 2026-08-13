@@ -438,9 +438,6 @@ public sealed class EncoderSessionService : IDisposable
                     if (_session.RecordingDefinition.Variant == 0)
                         return
                         [
-                            /// <summary>
-                            /// Runs the recording variant operation.
-                            /// </summary>
                             new RecordingVariant(
                                 "clean-master",
                                 "Clean Master",

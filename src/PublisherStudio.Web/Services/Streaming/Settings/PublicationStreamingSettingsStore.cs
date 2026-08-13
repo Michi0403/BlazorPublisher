@@ -35,6 +35,9 @@ public sealed class PublicationStreamingSettingsStore
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         Converters = { new JsonStringEnumConverter() }
     };
+    /// <summary>
+    /// Stores the in-memory cache collection maintained internally by <see cref="PublicationStreamingSettingsStore"/> for its current workflow state.
+    /// </summary>
     private Dictionary<Guid, PublicationStreamingSettings>? _cache;
 
     /// <summary>

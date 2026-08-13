@@ -11,7 +11,7 @@ public sealed class OrganicReplayPolicyDataService(
     ILogger<OrganicReplayPolicyDataService> logger) : IOrganicReplayPolicyDataService
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal snapshot state used by <see cref="OrganicReplayPolicyDataService"/> while executing its surrounding workflow.
     /// </summary>
     private readonly OrganicReplayPolicySnapshot snapshot = new()
     {

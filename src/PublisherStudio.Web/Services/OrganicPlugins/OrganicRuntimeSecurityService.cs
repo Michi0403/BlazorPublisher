@@ -36,6 +36,9 @@ public sealed class OrganicRuntimeSecurityService(
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         Converters = { new JsonStringEnumConverter() }
     };
+    /// <summary>
+    /// Stores the internal cached state used by <see cref="OrganicRuntimeSecurityService"/> while executing its surrounding workflow.
+    /// </summary>
     private RuntimeSecretFile? cached;
     /// <summary>
     /// Stores the internal resolved path state used by <see cref="OrganicRuntimeSecurityService"/> while executing its surrounding workflow.

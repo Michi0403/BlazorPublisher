@@ -77,6 +77,7 @@ public sealed class NativeCaptureController(NativeCaptureUseCases useCases) : Co
     /// Returns the stop projection for the native capture API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
     /// <returns>The HTTP-facing result produced for the caller.</returns>
+    /// <param name="captureId">Identifier of the capture to use for this operation.</param>
     [HttpDelete("{captureId:guid}")]
     public IActionResult Stop(Guid captureId) =>
         _useCases.Stop(captureId) ? NoContent() : NotFound();

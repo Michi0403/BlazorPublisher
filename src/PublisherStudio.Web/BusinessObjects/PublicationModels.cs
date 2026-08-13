@@ -979,8 +979,9 @@ public abstract class PublicationMediaElement : PublicationElement
         }];
 
     /// <summary>
-    /// Gets timeline length seconds.
+    /// Gets the timeline length seconds value that forms part of the publication media element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The timeline length seconds value exposed by <see cref="PublicationMediaElement"/>.</value>
     [JsonIgnore]
     public double TimelineLengthSeconds => Math.Max(.05, EffectiveSegments.Sum(segment =>
         segment.TimelineDurationSeconds > 0

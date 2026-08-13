@@ -8,6 +8,9 @@ namespace PublisherStudio.Services.Configuration;
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class RenderExportCatalogService(ILogger<RenderExportCatalogService> logger) : IRenderExportCatalogService
 {
+    /// <summary>
+    /// Stores the in-memory capabilities collection maintained internally by <see cref="RenderExportCatalogService"/> for its current workflow state.
+    /// </summary>
     private readonly IReadOnlyList<RenderExportCapability> _capabilities = new List<RenderExportCapability>
     {
         new() { Format = "png", MimeType = "image/png", CapturesVideoFrames = true, CapturesCanvasEffects = true, PreservesVectorContent = false, HtmlSupport = PublicationHtmlExportSupport.CanvasRuntime, Note = "Rendered still frame with live video/effect canvases frozen at export time." },

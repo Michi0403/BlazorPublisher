@@ -82,6 +82,8 @@ public sealed class StreamingIngestController(StreamingIngestUseCases useCases, 
     /// Returns the announce projection for the streaming ingest API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
     /// <returns>The HTTP-facing result produced for the caller.</returns>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <param name="announcement">Ingest announcement dependency used by the streaming ingest workflow to provide the corresponding application capability.</param>
     [HttpPost("ingest/announce")]
     public IActionResult Announce(Guid sessionId, [FromBody] IngestAnnouncement announcement) =>
         _useCases.Announce(sessionId, announcement.OutputId, announcement) ? Accepted() : NotFound();

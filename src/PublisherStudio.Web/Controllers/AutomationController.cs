@@ -46,6 +46,8 @@ public sealed class AutomationInputController(IUserInputAutomationService input,
     /// Returns the complete projection for the automation input API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
     /// <returns>The HTTP-facing result produced for the caller.</returns>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="completion">Completion value supplied to the automation input operation and used when producing its result.</param>
     [HttpPost("{id:guid}/complete")]
     public IActionResult Complete(Guid id, [FromBody] AutomationCompletion completion) => input.Complete(id, completion) ? NoContent() : NotFound();
 
@@ -53,6 +55,7 @@ public sealed class AutomationInputController(IUserInputAutomationService input,
     /// Determines whether cel for the automation input API operation, delegating application logic to the controller's services and returning the resulting HTTP-facing value.
     /// </summary>
     /// <returns>The HTTP-facing result produced for the caller.</returns>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     [HttpDelete("{id:guid}")]
     public IActionResult Cancel(Guid id) => input.Cancel(id) ? NoContent() : NotFound();
 }
@@ -98,6 +101,8 @@ public sealed class AutomationScreenshotController(IScreenshotCaptureService scr
     /// Returns the complete projection for the automation screenshot API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
     /// <returns>The HTTP-facing result produced for the caller.</returns>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="completion">Completion value supplied to the automation screenshot operation and used when producing its result.</param>
     [HttpPost("{id:guid}/complete")]
     [DisableRequestSizeLimit]
     public IActionResult Complete(Guid id, [FromBody] ScreenshotCompletion completion) => screenshots.Complete(id, completion) ? NoContent() : NotFound();
@@ -131,6 +136,7 @@ public sealed class AutomationScreenshotController(IScreenshotCaptureService scr
     /// Determines whether cel for the automation screenshot API operation, delegating application logic to the controller's services and returning the resulting HTTP-facing value.
     /// </summary>
     /// <returns>The HTTP-facing result produced for the caller.</returns>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     [HttpDelete("{id:guid}")]
     public IActionResult Cancel(Guid id) => screenshots.Cancel(id) ? NoContent() : NotFound();
 }
@@ -145,8 +151,9 @@ public sealed class AutomationScreenshotController(IScreenshotCaptureService scr
 public sealed class AutomationRuntimeController(ILocalGptConnectionService connection) : ControllerBase
 {
     /// <summary>
-    /// Runs the status operation.
+    /// Returns the status projection for the automation runtime API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpGet("status")]
     public IActionResult Status() => Ok(new
     {

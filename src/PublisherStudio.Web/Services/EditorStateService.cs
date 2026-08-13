@@ -4537,8 +4537,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the minimum element size operation.
+    /// Performs minimum element size as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="element">Element value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The double width double height produced by the operation.</returns>
     private (double Width, double Height) MinimumElementSize(PublicationElement element) => element switch
     {
         DataVisualElement { VisualKind: DataVisualKind.Sparkline } => (55, 18),

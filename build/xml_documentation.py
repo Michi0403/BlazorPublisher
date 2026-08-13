@@ -191,7 +191,7 @@ def find_type_scopes(orig:list[str], code:list[str], before:list[int])->list[Typ
   if not m: continue
   # exclude obvious typeof or generic constraints weirdness, and require line prefix resembles declaration/attributes/modifiers
   prefix=line[:m.start()].strip()
-  if prefix and any(x in prefix for x in ('=', 'return ', 'new ', '.', '=>')): continue
+  if prefix and any(x in prefix for x in ('=', 'return ', 'new ', '.', '=>', '(', ')')): continue
   # gather header until { or ; up to 40 lines
   hdr=[]; open_line=None; semi_line=None
   par=br=0
@@ -248,7 +248,7 @@ def parse_params(header:str, method_name:str)->list[tuple[str,str]]:
   pos=header.find('operator')
  else:
   ms=list(re.finditer(r'\b'+re.escape(method_name)+r'\s*(?:<[^>{};=()]+>)?\s*\(',header))
-  if ms: pos=ms[-1].start()
+  if ms: pos=ms[0].start()
  if pos<0:return []
  p=header.find('(',pos)
  dep=0; end=-1
@@ -293,7 +293,7 @@ def parse_return_type(header:str,name:str,container:str|None)->str|None:
  else:
   ms=list(re.finditer(r'\b'+re.escape(name)+r'\s*(?:<[^>{};=()]+>)?\s*\(',s))
   if not ms:return None
-  idx=ms[-1].start()
+  idx=ms[0].start()
  prefix=s[:idx].strip()
  if not prefix:return None
  # remove explicit interface qualifier trailing e.g. IFoo.
@@ -420,6 +420,14 @@ def scan_members(orig:list[str], code:list[str], before:list[int], scope:TypeSco
   header_parts=[]; j=decl_line
   while j<scope.body_close_line:
    line=code[j]
+   # A multiline field/property initializer can close its object/collection brace and terminate
+   # with `;` on the same physical line while the line-level depth still reports the nested
+   # initializer depth. Treat that closing line as the member terminator instead of scanning
+   # the next declaration as though it belonged to the initializer.
+   if (assignment or arrow) and before[j]>depth and line.lstrip().startswith('}') and line.rstrip().endswith(';'):
+    header_parts.append(line.strip())
+    semi=j; header_end=j; member_end=j
+    break
    # ignore lines that are deeper because of initializer braces; still scan semicolon only when global before returns depth
    if before[j]<depth: break
    k=0
@@ -455,8 +463,35 @@ def scan_members(orig:list[str], code:list[str], before:list[int], scope:TypeSco
   if body_open is not None:
    close=find_matching_close(code,body_open,depth)
    member_end=close
-   # auto-property initializer may continue = ... ; after close. not necessary for jump if next line same may contain =; but skip until semicolon if same/next
-   # nested type/method/property all body consumed.
+   # Auto-properties may continue with an initializer after the accessor body, for example
+   # `Descriptor { get; } = new(...);`. Consume that initializer through its member-level
+   # semicolon so named constructor arguments are never misclassified as fields/properties.
+   close_tail=code[close].rsplit('}',1)[-1] if '}' in code[close] else ''
+   initializer_line=close if close_tail.lstrip().startswith('=') else None
+   if initializer_line is None:
+    probe=close+1
+    while probe<scope.body_close_line and not code[probe].strip(): probe+=1
+    if probe<scope.body_close_line and before[probe]==depth and code[probe].lstrip().startswith('='):
+     initializer_line=probe
+   if initializer_line is not None:
+    par_i=br_i=brace_i=0
+    for k in range(initializer_line,scope.body_close_line):
+     segment=code[k]
+     if k==close and '}' in segment:
+      segment=segment.rsplit('}',1)[-1]
+     for ch in segment:
+      if ch=='(': par_i+=1
+      elif ch==')': par_i=max(0,par_i-1)
+      elif ch=='[': br_i+=1
+      elif ch==']': br_i=max(0,br_i-1)
+      elif ch=='{': brace_i+=1
+      elif ch=='}': brace_i=max(0,brace_i-1)
+      elif ch==';' and par_i==0 and br_i==0 and brace_i==0:
+       member_end=k
+       break
+     if member_end==k and ';' in segment:
+      break
+   # Nested type/method/property bodies are now consumed, including an optional auto-property initializer.
   assert member_end is not None
   # classify using header + marker info
   hnorm=' '.join(header.split())
@@ -715,6 +750,12 @@ def enrich_block(d:Decl,path:Path,orig:list[str],existing:list[str]|None)->list[
  ind=doc_indent(orig,d); block=list(existing or [])
  summ=extract_summary(block)
  if is_generic(summ): block=replace_summary(block,ind,make_summary(d,path))
+ # An inheritdoc block receives parameter/return/value contract documentation from the inherited
+ # member. Adding local copies makes DocFX merge duplicate tags and emit warnings. Keep a local
+ # contextual summary when present, but let inheritdoc remain authoritative for contract tags.
+ inherited=any('<inheritdoc' in line.lower() for line in block)
+ if inherited:
+  return block
  # tags, inserted after summary block (append is valid)
  for tp in d.typeparams:
   if not has_tag(block,'typeparam',tp): block.append(f'{ind}/// <typeparam name="{tp}">{typeparam_desc(tp,d)}</typeparam>')
@@ -757,12 +798,14 @@ def validate_file(path:Path)->tuple[list[str],Counter]:
   block=orig[d.doc_start:d.doc_end+1]; summ=extract_summary(block)
   if not summ: failures.append(f'{path}:{d.start_line+1}: empty XML summary for {d.kind} {d.name}')
   elif is_generic(summ): failures.append(f'{path}:{d.start_line+1}: generic XML summary remains for {d.kind} {d.name}: {summ}')
-  for tp in d.typeparams:
-   if not has_tag(block,'typeparam',tp): failures.append(f'{path}:{d.start_line+1}: missing typeparam {tp} for {d.name}')
-  for typ,n in d.params:
-   if not has_tag(block,'param',n): failures.append(f'{path}:{d.start_line+1}: missing param {n} for {d.name}')
-  if d.kind=='property' and not has_tag(block,'value'): failures.append(f'{path}:{d.start_line+1}: missing value tag for property {d.name}')
-  if d.kind=='method' and return_desc(d) and not has_tag(block,'returns'): failures.append(f'{path}:{d.start_line+1}: missing returns tag for {d.name}')
+  inherited=any('<inheritdoc' in line.lower() for line in block)
+  if not inherited:
+   for tp in d.typeparams:
+    if not has_tag(block,'typeparam',tp): failures.append(f'{path}:{d.start_line+1}: missing typeparam {tp} for {d.name}')
+   for typ,n in d.params:
+    if not has_tag(block,'param',n): failures.append(f'{path}:{d.start_line+1}: missing param {n} for {d.name}')
+   if d.kind=='property' and not has_tag(block,'value'): failures.append(f'{path}:{d.start_line+1}: missing value tag for property {d.name}')
+   if d.kind=='method' and return_desc(d) and not has_tag(block,'returns'): failures.append(f'{path}:{d.start_line+1}: missing returns tag for {d.name}')
   # validate block XML by wrapping after stripping ///
   import xml.etree.ElementTree as ET
   xml='\n'.join(re.sub(r'^\s*///\s?','',x) for x in block)

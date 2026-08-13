@@ -16,6 +16,7 @@ public sealed class PublicationLayoutController(IPublicationElementLayoutService
     /// Returns the constrain projection for the publication layout API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
     /// <returns>The HTTP-facing result produced for the caller.</returns>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
     [HttpPost("constrain")]
     public ActionResult<PublicationCanvasBounds> Constrain([FromBody] PublicationLayoutConstraintRequest request) =>
         Ok(layout.Constrain(request.Bounds, request.CanvasWidth, request.CanvasHeight));
@@ -24,6 +25,7 @@ public sealed class PublicationLayoutController(IPublicationElementLayoutService
     /// Returns the reorder projection for the publication layout API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
     /// <returns>The HTTP-facing result produced for the caller.</returns>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
     [HttpPost("reorder")]
     public ActionResult<IReadOnlyList<PublicationLayerItem>> Reorder([FromBody] PublicationLayerOrderRequest request) =>
         Ok(layout.Reorder(request.Elements, request.ElementId, request.Move));

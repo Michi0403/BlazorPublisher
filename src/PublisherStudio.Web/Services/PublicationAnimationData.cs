@@ -12,7 +12,7 @@ namespace PublisherStudio.Services;
 public sealed class PublicationAnimationData(ILogger<PublicationAnimationData> logger)
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal options state used by <see cref="PublicationAnimationData"/> while executing its surrounding workflow.
     /// </summary>
     private readonly JsonSerializerOptions Options = new(JsonSerializerDefaults.Web)
     {

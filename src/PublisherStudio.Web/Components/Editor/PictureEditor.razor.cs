@@ -434,6 +434,10 @@ public partial class PictureEditor
         PictureDrawTool.Arrow => "Drag from the arrow tail to its point. The result remains an editable, rotatable shape layer.",
         _ => "Draw directly on the canvas. A paint layer is created automatically when necessary. Right-click does not draw."
     };
+    /// <summary>
+    /// Gets the canvas color value that forms part of the picture editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The canvas color value exposed by <see cref="PictureEditor"/>.</value>
     private string CanvasColor => State.Document.Background.StartsWith('#') && State.Document.Background.Length is 4 or 7
         ? State.Document.Background
         : "#ffffff";
@@ -2025,7 +2029,7 @@ public partial class PictureEditor
         layer.BlendMode = PictureBlendMode.Screen;
     });
     /// <summary>
-    /// Applies neon effect.
+    /// Applies neon effect for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
     /// </summary>
     private void ApplyNeonEffect() => State.UpdateSelected(layer =>
     {
@@ -2036,7 +2040,7 @@ public partial class PictureEditor
         layer.BlendMode = PictureBlendMode.Screen;
     });
     /// <summary>
-    /// Applies lens flare effect.
+    /// Applies lens flare effect for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
     /// </summary>
     private void ApplyLensFlareEffect() => State.UpdateSelected(layer =>
     {
@@ -2049,7 +2053,7 @@ public partial class PictureEditor
     });
 
     /// <summary>
-    /// Runs the shape rectangle operation.
+    /// Performs shape rectangle for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
     /// </summary>
     private void ShapeRectangle() => WithShape(layer => layer.Shape = PictureShapeKind.Rectangle);
     /// <summary>
@@ -2471,6 +2475,7 @@ public partial class PictureEditor
     /// Performs end live edit for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
     /// </summary>
     /// <returns>The void end live edit change event args state produced by the operation.</returns>
+    /// <param name="_">_ value supplied to the picture editor operation and used when producing its result.</param>
     private void EndLiveEdit(ChangeEventArgs _) => State.EndLiveEdit();
 
     /// <summary>
@@ -2634,15 +2639,16 @@ public partial class PictureEditor
         });
     });
     /// <summary>
-    /// Removes shape path point.
+    /// Removes shape path point for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
     /// </summary>
+    /// <param name="index">Index value supplied to the picture editor operation and used when producing its result.</param>
     private void RemoveShapePathPoint(int index) => WithShape(layer =>
     {
         if (layer.PathPoints is { Count: > 2 } && index >= 0 && index < layer.PathPoints.Count)
             layer.PathPoints.RemoveAt(index);
     });
     /// <summary>
-    /// Runs the reverse shape path operation.
+    /// Performs reverse shape path for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
     /// </summary>
     private void ReverseShapePath() => WithShape(layer => { layer.PathPoints?.Reverse(); });
     /// <summary>
@@ -2672,16 +2678,18 @@ public partial class PictureEditor
     });
 
     /// <summary>
-    /// Runs the change fill kind operation.
+    /// Performs change fill kind for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
     /// </summary>
+    /// <param name="args">Args value supplied to the picture editor operation and used when producing its result.</param>
     private void ChangeFillKind(ChangeEventArgs args)
     {
         if (Enum.TryParse<PictureFillKind>(Text(args), true, out var value))
             WithFill(layer => layer.FillKind = value);
     }
     /// <summary>
-    /// Runs the change fill primary operation.
+    /// Performs change fill primary for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
     /// </summary>
+    /// <param name="args">Args value supplied to the picture editor operation and used when producing its result.</param>
     private void ChangeFillPrimary(ChangeEventArgs args) => WithFill(layer => layer.PrimaryColor = Text(args));
     /// <summary>
     /// Performs change fill secondary for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
@@ -2941,8 +2949,9 @@ public partial class PictureEditor
     });
 
     /// <summary>
-    /// Runs the change brightness operation.
+    /// Performs change brightness for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
     /// </summary>
+    /// <param name="args">Args value supplied to the picture editor operation and used when producing its result.</param>
     private void ChangeBrightness(ChangeEventArgs args) => State.UpdateSelectedLive("adjust-brightness", layer => layer.Brightness = Number(args, layer.Brightness));
     /// <summary>
     /// Performs change contrast for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
@@ -3132,8 +3141,10 @@ public partial class PictureEditor
     };
 
     /// <summary>
-    /// Runs the picture text font size menu text operation.
+    /// Performs picture text font size menu text for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
     /// </summary>
+    /// <param name="text">Text value supplied to the picture editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string PictureTextFontSizeMenuText(TextPictureLayer text) =>
         $"Font size · {Math.Round(text.FontSizePx).ToString(CultureInfo.InvariantCulture)} px";
 
@@ -3203,8 +3214,11 @@ public partial class PictureEditor
     };
 
     /// <summary>
-    /// Runs the truncate operation.
+    /// Performs truncate for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
     /// </summary>
+    /// <param name="value">Value value supplied to the picture editor operation and used when producing its result.</param>
+    /// <param name="length">Length value supplied to the picture editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Truncate(string value, int length) => string.IsNullOrWhiteSpace(value)
         ? "Empty"
         : value.Length <= length ? value : value[..length] + "…";

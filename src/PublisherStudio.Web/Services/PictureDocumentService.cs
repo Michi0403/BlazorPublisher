@@ -10,7 +10,7 @@ namespace PublisherStudio.Services;
 public sealed class PictureDocumentService
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal options state used by <see cref="PictureDocumentService"/> while executing its surrounding workflow.
     /// </summary>
     private readonly JsonSerializerOptions _options = new(JsonSerializerDefaults.Web)
     {

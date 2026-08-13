@@ -42,6 +42,7 @@ public sealed class MediaConversionController(IMediaConversionService conversion
     /// Persists profile for the media conversion API operation, delegating application logic to the controller's services and returning the resulting HTTP-facing value.
     /// </summary>
     /// <returns>The HTTP-facing result produced for the caller.</returns>
+    /// <param name="profile">Profile value supplied to the media conversion operation and used when producing its result.</param>
     [HttpPost("profiles")]
     public ActionResult<MediaConversionProfile> SaveProfile([FromBody] MediaConversionProfile profile) =>
         Ok(_conversions.SaveProfile(profile));
@@ -50,6 +51,7 @@ public sealed class MediaConversionController(IMediaConversionService conversion
     /// Deletes profile for the media conversion API operation, delegating application logic to the controller's services and returning the resulting HTTP-facing value.
     /// </summary>
     /// <returns>The HTTP-facing result produced for the caller.</returns>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     [HttpDelete("profiles/{id:guid}")]
     public IActionResult DeleteProfile(Guid id) => _conversions.DeleteProfile(id) ? NoContent() : NotFound();
 

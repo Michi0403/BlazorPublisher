@@ -460,7 +460,7 @@ public sealed class RtspLanServer : IAsyncDisposable
             FullMode = BoundedChannelFullMode.DropOldest
         });
         /// <summary>
-        /// Runs the new operation.
+        /// Stores the cancellation source used by <see cref="RtspClient"/> to stop its current background or asynchronous operation.
         /// </summary>
         private readonly CancellationTokenSource _disconnected = new();
         /// <summary>

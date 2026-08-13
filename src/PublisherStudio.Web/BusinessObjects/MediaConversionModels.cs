@@ -237,8 +237,9 @@ public sealed class MediaConversionOptions
     public Dictionary<string, string> Metadata { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
-    /// Runs the clone operation.
+    /// Performs clone for <see cref="MediaConversionOptions"/>, keeping the operation consistent with the state and invariants of the surrounding media conversion workflow.
     /// </summary>
+    /// <returns>The media conversion options produced by the operation.</returns>
     public MediaConversionOptions Clone() => new()
     {
         Target = Target,

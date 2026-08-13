@@ -167,31 +167,19 @@ public sealed class WindowsProcessLoopbackNativeService : IWindowsProcessLoopbac
         try
         {
             if (!IsAvailable || activateAudioInterface is null)
-               /// <summary>
-               /// Runs the platform not supported exception operation.
-               /// </summary>
                 throw new PlatformNotSupportedException("Windows process-loopback native bindings are unavailable.");
-            /// <summary>
-            /// Runs the activate audio interface operation.
-            /// </summary>
             var result = activateAudioInterface(
                 deviceInterfacePath,
                 ref interfaceId,
                 activationParameters,
                 completionHandler,
                 out activationOperation);
-            /// <summary>
-            /// Runs the log trace operation.
-            /// </summary>
             logger.LogTrace($"Requested Windows process-loopback audio activation with result {result}.");
             return result;
         }
         catch (Exception exception)
         {
             activationOperation = null!;
-            /// <summary>
-            /// Runs the log error operation.
-            /// </summary>
             logger.LogError(exception, $"Could not activate the Windows process-loopback audio interface: {exception.Message}");
             throw;
         }

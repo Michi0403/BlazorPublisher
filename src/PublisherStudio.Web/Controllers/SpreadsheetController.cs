@@ -195,8 +195,10 @@ public sealed class SpreadsheetController : Controller
     }
 
     /// <summary>
-    /// Runs the content type operation.
+    /// Returns the content type projection for the spreadsheet API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <param name="format">Format value supplied to the spreadsheet operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ContentType(SpreadsheetStorageFormat format) => format switch
     {
         SpreadsheetStorageFormat.Xlsm => "application/vnd.ms-excel.sheet.macroEnabled.12",
@@ -207,8 +209,10 @@ public sealed class SpreadsheetController : Controller
     };
 
     /// <summary>
-    /// Runs the to DevExpress format operation.
+    /// Returns the to dev express format projection for the spreadsheet API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <param name="format">Format value supplied to the spreadsheet operation and used when producing its result.</param>
+    /// <returns>The document format produced by the operation.</returns>
     private DocumentFormat ToDevExpressFormat(SpreadsheetStorageFormat format) => format switch
     {
         SpreadsheetStorageFormat.Xlsm => DocumentFormat.Xlsm,

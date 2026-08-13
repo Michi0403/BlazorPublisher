@@ -25,7 +25,7 @@ public sealed class PublicationComponentService
     /// </summary>
     private readonly IPublicationMarkupService _markup;
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal JSON state used by <see cref="PublicationComponentService"/> while executing its surrounding workflow.
     /// </summary>
     private readonly JsonSerializerOptions _json = new(JsonSerializerDefaults.Web)
     {
@@ -1156,8 +1156,10 @@ public sealed class PublicationComponentService
     }
 
     /// <summary>
-    /// Runs the default size operation.
+    /// Performs default size as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="kind">Kind value supplied to the publication component operation and used when producing its result.</param>
+    /// <returns>The double width double height produced by the operation.</returns>
     private (double Width, double Height) DefaultSize(PublicationComponentKind kind) => kind switch
     {
         PublicationComponentKind.Button => (42, 14),

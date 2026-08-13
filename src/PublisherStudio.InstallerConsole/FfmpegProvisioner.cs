@@ -236,33 +236,12 @@ ProvisioningFinished:
         var elevated = !string.Equals(Environment.UserName, "root", StringComparison.OrdinalIgnoreCase) && CommandExists("sudo");
         foreach (var command in new[]
         {
-            /// <summary>
-            /// Runs the install command operation.
-            /// </summary>
             new InstallCommand("apt-get", ["update"], "APT update", TimeSpan.FromMinutes(10), 1),
-            /// <summary>
-            /// Runs the install command operation.
-            /// </summary>
             new InstallCommand("apt-get", ["install", "-y", "ffmpeg"], "APT", TimeSpan.FromMinutes(20), 1),
-            /// <summary>
-            /// Runs the install command operation.
-            /// </summary>
             new InstallCommand("dnf", ["install", "-y", "ffmpeg"], "DNF", TimeSpan.FromMinutes(20), 1),
-            /// <summary>
-            /// Runs the install command operation.
-            /// </summary>
             new InstallCommand("yum", ["install", "-y", "ffmpeg"], "YUM", TimeSpan.FromMinutes(20), 1),
-            /// <summary>
-            /// Runs the install command operation.
-            /// </summary>
             new InstallCommand("zypper", ["--non-interactive", "install", "ffmpeg"], "Zypper", TimeSpan.FromMinutes(20), 1),
-            /// <summary>
-            /// Runs the install command operation.
-            /// </summary>
             new InstallCommand("pacman", ["--noconfirm", "-S", "ffmpeg"], "Pacman", TimeSpan.FromMinutes(20), 1),
-            /// <summary>
-            /// Runs the install command operation.
-            /// </summary>
             new InstallCommand("apk", ["add", "ffmpeg"], "APK", TimeSpan.FromMinutes(20), 1)
         })
         {

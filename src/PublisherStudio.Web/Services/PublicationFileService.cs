@@ -77,7 +77,7 @@ public sealed partial class PublicationFileService
     /// </summary>
     private readonly ILogger<PublicationFileService> logger;
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal options state used by <see cref="PublicationFileService"/> while executing its surrounding workflow.
     /// </summary>
     private readonly JsonSerializerOptions _options = new(JsonSerializerDefaults.Web)
     {

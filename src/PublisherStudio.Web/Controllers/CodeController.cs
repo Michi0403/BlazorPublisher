@@ -24,6 +24,8 @@ public sealed class CodeController(ICodeLanguageService languages, ICodeFormatti
     /// Returns the detect projection for the code API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
     /// <returns>The HTTP-facing result produced for the caller.</returns>
+    /// <param name="fileName">File name value supplied to the code operation and used when producing its result.</param>
+    /// <param name="sample">Sample value supplied to the code operation and used when producing its result.</param>
     [HttpGet("detect")]
     public ActionResult<CodeLanguageProfile> Detect([FromQuery] string fileName, [FromQuery] string? sample = null) => Ok(languages.Detect(fileName, sample));
 
@@ -31,6 +33,7 @@ public sealed class CodeController(ICodeLanguageService languages, ICodeFormatti
     /// Returns the format projection for the code API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
     /// <returns>The HTTP-facing result produced for the caller.</returns>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
     [HttpPost("format")]
     public ActionResult<CodeTextResult> Format([FromBody] CodeTextRequest request) => Ok(formatting.Format(request));
 
@@ -46,6 +49,7 @@ public sealed class CodeController(ICodeLanguageService languages, ICodeFormatti
     /// Returns the analyze projection for the code API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
     /// <returns>The HTTP-facing result produced for the caller.</returns>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
     [HttpPost("analyze")]
     public ActionResult<CodeTextResult> Analyze([FromBody] CodeTextRequest request) => Ok(formatting.Analyze(request));
 }

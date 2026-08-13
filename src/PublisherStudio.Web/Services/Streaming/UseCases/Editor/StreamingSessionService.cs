@@ -3,37 +3,49 @@ using PublisherStudio.BusinessObjects;
 namespace PublisherStudio.Services.Streaming.UseCases.Editor;
 
 /// <summary>
-/// Provides streaming session service operations.
+/// Coordinates streaming session behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
+/// <param name="mediaHost">Streaming media host client dependency used by the streaming session workflow to provide the corresponding application capability.</param>
 public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
 {
+    /// <summary>
+    /// Stores the streaming media host client dependency used by <see cref="StreamingSessionService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly StreamingMediaHostClient _mediaHost = mediaHost;
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the synchronization primitive that protects concurrent access to gate state owned by <see cref="StreamingSessionService"/>.
     /// </summary>
     private readonly SemaphoreSlim _gate = new(1, 1);
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal snapshot state used by <see cref="StreamingSessionService"/> while executing its surrounding workflow.
     /// </summary>
     private StreamingSessionSnapshot _snapshot = new();
+    /// <summary>
+    /// Stores the cancellation source used by <see cref="StreamingSessionService"/> to stop its current background or asynchronous operation.
+    /// </summary>
     private CancellationTokenSource? _eventPollCancellation;
 
     /// <summary>
-    /// Occurs when changed.
+    /// Occurs when changed changes or completes in <see cref="StreamingSessionService"/>, allowing interested callers to react without polling internal state.
     /// </summary>
     public event Action? Changed;
     /// <summary>
-    /// Occurs when hotkey triggered.
+    /// Occurs when hotkey triggered changes or completes in <see cref="StreamingSessionService"/>, allowing interested callers to react without polling internal state.
     /// </summary>
     public event Action<MediaHostHotkeyEvent>? HotkeyTriggered;
     /// <summary>
-    /// Gets snapshot.
+    /// Gets the snapshot value that forms part of the streaming session state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The snapshot value exposed by <see cref="StreamingSessionService"/>.</value>
     public StreamingSessionSnapshot Snapshot => _snapshot;
 
     /// <summary>
-    /// Starts async.
+    /// Performs start as part of the streaming session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the streaming session operation and used when producing its result.</param>
+    /// <param name="dryRun">Value indicating whether dry run should apply to this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task StartAsync(PublicationDocument document, bool dryRun, CancellationToken cancellationToken = default)
     {
     try
@@ -83,8 +95,10 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
 }
 
     /// <summary>
-    /// Stops async.
+    /// Performs stop as part of the streaming session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task StopAsync(CancellationToken cancellationToken = default)
     {
     try
@@ -118,8 +132,10 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
 }
 
     /// <summary>
-    /// Stops streaming outputs async.
+    /// Stops streaming outputs as part of the streaming session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public async Task<bool> StopStreamingOutputsAsync(CancellationToken cancellationToken = default)
     {
     try
@@ -158,8 +174,11 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
 }
 
     /// <summary>
-    /// Runs the toggle output async operation.
+    /// Performs toggle output as part of the streaming session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="outputId">Identifier of the output to use for this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task ToggleOutputAsync(Guid outputId, CancellationToken cancellationToken = default)
     {
     try
@@ -188,8 +207,10 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
 }
 
     /// <summary>
-    /// Runs the toggle recording async operation.
+    /// Performs toggle recording as part of the streaming session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task ToggleRecordingAsync(CancellationToken cancellationToken = default)
     {
     try
@@ -213,8 +234,11 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
 }
 
     /// <summary>
-    /// Sets recording async.
+    /// Sets recording as part of the streaming session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="enabled">Value indicating whether enabled should apply to this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public async Task<bool> SetRecordingAsync(bool enabled, CancellationToken cancellationToken = default)
     {
     try
@@ -238,8 +262,11 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
 }
 
     /// <summary>
-    /// Sets recording core async.
+    /// Sets recording core as part of the streaming session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="enabled">Value indicating whether enabled should apply to this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private async Task<bool> SetRecordingCoreAsync(bool enabled, CancellationToken cancellationToken)
     {
     try
@@ -262,8 +289,9 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
 }
 
     /// <summary>
-    /// Sets program page.
+    /// Sets program page as part of the streaming session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="pageId">Identifier of the page to use for this operation.</param>
     public void SetProgramPage(Guid pageId)
     {
     try
@@ -281,8 +309,9 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
 }
 
     /// <summary>
-    /// Runs the describe active state operation.
+    /// Performs describe active state as part of the streaming session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The string produced by the operation.</returns>
     private string DescribeActiveState()
     {
     try
@@ -309,7 +338,7 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
 }
 
     /// <summary>
-    /// Stops event polling.
+    /// Stops event polling as part of the streaming session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     private void StopEventPolling()
     {
@@ -328,8 +357,9 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
 }
 
     /// <summary>
-    /// Starts event polling.
+    /// Starts event polling as part of the streaming session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
     private void StartEventPolling(Guid sessionId)
     {
     try
@@ -365,8 +395,10 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
 }
 
     /// <summary>
-    /// Resolves program page.
+    /// Resolves program page as part of the streaming session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the streaming session operation and used when producing its result.</param>
+    /// <returns>The GUID produced by the operation.</returns>
     private Guid? ResolveProgramPage(PublicationDocument document) {
     try
     {

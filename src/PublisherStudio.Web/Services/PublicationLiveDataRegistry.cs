@@ -11,27 +11,34 @@ namespace PublisherStudio.Services;
 public sealed class PublicationLiveDataRegistry
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory documents collection maintained internally by <see cref="PublicationLiveDataRegistry"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<Guid, LivePublicationSnapshot> _documents = new();
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory export tokens collection maintained internally by <see cref="PublicationLiveDataRegistry"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<(Guid DocumentId, Guid DataId), string> _exportTokens = new();
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory document webhook bindings collection maintained internally by <see cref="PublicationLiveDataRegistry"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<Guid, HashSet<Guid>> _documentWebhookBindings = new();
+    /// <summary>
+    /// Stores the publication webhook store dependency used by <see cref="PublicationLiveDataRegistry"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly PublicationWebhookStore _webhooks;
 
     /// <summary>
-    /// Runs the publication live data registry operation.
+    /// Initializes a new <see cref="PublicationLiveDataRegistry"/> instance and captures the dependencies or initial state required by its publication live data workflow.
     /// </summary>
+    /// <param name="webhooks">Publication webhook store dependency used by the publication live data workflow to provide the corresponding application capability.</param>
     public PublicationLiveDataRegistry(PublicationWebhookStore webhooks) => _webhooks = webhooks;
 
     /// <summary>
-    /// Runs the register operation.
+    /// Performs register in the publication live data directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication live data operation and used when producing its result.</param>
+    /// <param name="dataService">Publication data service dependency used by the publication live data workflow to provide the corresponding application capability.</param>
+    /// <param name="currentPageId">Identifier of the current page to use for this operation.</param>
     public void Register(PublicationDocument document, PublicationDataService dataService, Guid? currentPageId = null)
     {
     try
@@ -112,8 +119,11 @@ public sealed class PublicationLiveDataRegistry
 
 
     /// <summary>
-    /// Determines whether reuse data snapshot.
+    /// Determines whether reuse data snapshot in the publication live data directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="previous">Previous value supplied to the publication live data operation and used when producing its result.</param>
+    /// <param name="item">Item value supplied to the publication live data operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool CanReuseDataSnapshot(LivePublicationSnapshot? previous, PublicationDataObject item)
         {
     try
@@ -136,8 +146,9 @@ public sealed class PublicationLiveDataRegistry
 }
 
     /// <summary>
-    /// Runs the unregister operation.
+    /// Performs unregister in the publication live data directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="documentId">Identifier of the document to use for this operation.</param>
     public void Unregister(Guid documentId)
     {
     try
@@ -157,8 +168,9 @@ public sealed class PublicationLiveDataRegistry
 }
 
     /// <summary>
-    /// Unregisters webhook when unused.
+    /// Unregisters webhook when unused in the publication live data directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="bindingId">Identifier of the binding to use for this operation.</param>
     private void UnregisterWebhookWhenUnused(Guid bindingId)
     {
     try
@@ -175,8 +187,11 @@ public sealed class PublicationLiveDataRegistry
 }
 
     /// <summary>
-    /// Attempts to get.
+    /// Attempts to get in the publication live data directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="documentId">Identifier of the document to use for this operation.</param>
+    /// <param name="snapshot">Snapshot value supplied to the publication live data operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool TryGet(Guid documentId, out LivePublicationSnapshot snapshot)
         {
     try
@@ -191,8 +206,13 @@ public sealed class PublicationLiveDataRegistry
 }
 
     /// <summary>
-    /// Attempts to get export rows.
+    /// Attempts to retrieve export rows in the publication live data directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="documentId">Identifier of the document to use for this operation.</param>
+    /// <param name="dataId">Identifier of the data to use for this operation.</param>
+    /// <param name="token">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <param name="rows">String dependency used by the publication live data workflow to provide the corresponding application capability.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool TryGetExportRows(Guid documentId, Guid dataId, string token, out IReadOnlyList<Dictionary<string, string>> rows)
     {
     try
@@ -214,8 +234,9 @@ public sealed class PublicationLiveDataRegistry
 }
 
     /// <summary>
-    /// Runs the summaries operation.
+    /// Performs summaries in the publication live data directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<LivePublicationSummary> Summaries()
         {
     try
@@ -234,29 +255,63 @@ public sealed class PublicationLiveDataRegistry
 }
 
 /// <summary>
-/// Represents a live publication summary.
+/// Represents a live publication summary application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="Id">Identifier of the resource to use for this operation.</param>
+/// <param name="Name">Name value supplied to the live publication summary operation and used when producing its result.</param>
+/// <param name="ModifiedUtc">Modified utc value supplied to the live publication summary operation and used when producing its result.</param>
+/// <param name="PageCount">Page count value supplied to the live publication summary operation and used when producing its result.</param>
+/// <param name="DataObjectCount">Data object count value supplied to the live publication summary operation and used when producing its result.</param>
 public sealed record LivePublicationSummary(Guid Id, string Name, DateTimeOffset ModifiedUtc, int PageCount, int DataObjectCount);
 /// <summary>
-/// Represents a live publication snapshot.
+/// Represents a live publication snapshot application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="Id">Identifier of the resource to use for this operation.</param>
+/// <param name="Name">Name value supplied to the live publication snapshot operation and used when producing its result.</param>
+/// <param name="ModifiedUtc">Modified utc value supplied to the live publication snapshot operation and used when producing its result.</param>
+/// <param name="DataObjects">Live data object snapshot dependency used by the live publication snapshot workflow to provide the corresponding application capability.</param>
+/// <param name="Pages">Live page snapshot dependency used by the live publication snapshot workflow to provide the corresponding application capability.</param>
 public sealed record LivePublicationSnapshot(Guid Id, string Name, DateTimeOffset ModifiedUtc,
     IReadOnlyDictionary<Guid, LiveDataObjectSnapshot> DataObjects, IReadOnlyList<LivePageSnapshot> Pages);
 /// <summary>
-/// Represents a live data object snapshot.
+/// Represents a live data object snapshot application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="Id">Identifier of the resource to use for this operation.</param>
+/// <param name="Name">Name value supplied to the live data object snapshot operation and used when producing its result.</param>
+/// <param name="SourceKind">Source kind value supplied to the live data object snapshot operation and used when producing its result.</param>
+/// <param name="ModifiedUtc">Modified utc value supplied to the live data object snapshot operation and used when producing its result.</param>
+/// <param name="Columns">Live data column dependency used by the live data object snapshot workflow to provide the corresponding application capability.</param>
+/// <param name="Rows">String dependency used by the live data object snapshot workflow to provide the corresponding application capability.</param>
 public sealed record LiveDataObjectSnapshot(Guid Id, string Name, string SourceKind, DateTimeOffset ModifiedUtc,
     IReadOnlyList<LiveDataColumn> Columns, IReadOnlyList<Dictionary<string, string>> Rows);
 /// <summary>
-/// Represents a live data column.
+/// Represents a live data column application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="Name">Name value supplied to the live data column operation and used when producing its result.</param>
+/// <param name="ValueKind">Value kind value supplied to the live data column operation and used when producing its result.</param>
 public sealed record LiveDataColumn(string Name, string ValueKind);
 /// <summary>
-/// Represents a live page snapshot.
+/// Represents a live page snapshot application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="Id">Identifier of the resource to use for this operation.</param>
+/// <param name="Name">Name value supplied to the live page snapshot operation and used when producing its result.</param>
+/// <param name="WidthMm">Width mm value supplied to the live page snapshot operation and used when producing its result.</param>
+/// <param name="HeightMm">Height mm value supplied to the live page snapshot operation and used when producing its result.</param>
+/// <param name="Elements">Live element snapshot dependency used by the live page snapshot workflow to provide the corresponding application capability.</param>
 public sealed record LivePageSnapshot(Guid Id, string Name, double WidthMm, double HeightMm, IReadOnlyList<LiveElementSnapshot> Elements);
 /// <summary>
-/// Represents a live element snapshot.
+/// Represents a live element snapshot application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="Id">Identifier of the resource to use for this operation.</param>
+/// <param name="Name">Name value supplied to the live element snapshot operation and used when producing its result.</param>
+/// <param name="Kind">Kind value supplied to the live element snapshot operation and used when producing its result.</param>
+/// <param name="X">X value supplied to the live element snapshot operation and used when producing its result.</param>
+/// <param name="Y">Y value supplied to the live element snapshot operation and used when producing its result.</param>
+/// <param name="Width">Width value supplied to the live element snapshot operation and used when producing its result.</param>
+/// <param name="Height">Height value supplied to the live element snapshot operation and used when producing its result.</param>
+/// <param name="Rotation">Rotation value supplied to the live element snapshot operation and used when producing its result.</param>
+/// <param name="Layer">Layer value supplied to the live element snapshot operation and used when producing its result.</param>
+/// <param name="Visible">Value indicating whether the value is visible should apply to this operation.</param>
+/// <param name="Locked">Value indicating whether locked should apply to this operation.</param>
 public sealed record LiveElementSnapshot(Guid Id, string Name, string Kind, double X, double Y, double Width, double Height,
     double Rotation, int Layer, bool Visible, bool Locked);

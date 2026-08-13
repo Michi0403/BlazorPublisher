@@ -1,26 +1,29 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Publication;
 
 namespace PublisherStudio.Controllers;
 
 /// <summary>
-/// Provides publication layout controller operations.
+/// Exposes the publication layout application operations through PublisherStudio's web/API boundary and delegates domain work to the corresponding services.
 /// </summary>
+/// <param name="layout">Publication element layout service dependency used by the publication layout workflow to provide the corresponding application capability.</param>
 [ApiController]
 [Route("api/publication/layout")]
 public sealed class PublicationLayoutController(IPublicationElementLayoutService layout) : ControllerBase
 {
     /// <summary>
-    /// Runs the constrain operation.
+    /// Returns the constrain projection for the publication layout API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpPost("constrain")]
     public ActionResult<PublicationCanvasBounds> Constrain([FromBody] PublicationLayoutConstraintRequest request) =>
         Ok(layout.Constrain(request.Bounds, request.CanvasWidth, request.CanvasHeight));
 
     /// <summary>
-    /// Runs the reorder operation.
+    /// Returns the reorder projection for the publication layout API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpPost("reorder")]
     public ActionResult<IReadOnlyList<PublicationLayerItem>> Reorder([FromBody] PublicationLayerOrderRequest request) =>
         Ok(layout.Reorder(request.Elements, request.ElementId, request.Move));

@@ -3,26 +3,40 @@ using PublisherStudio.BusinessObjects;
 namespace PublisherStudio.Services;
 
 /// <summary>
-/// Provides picture editor state service operations.
+/// Coordinates picture editor state behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
 public sealed class PictureEditorStateService
 {
+    /// <summary>
+    /// Stores the picture document service dependency used by <see cref="PictureEditorStateService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly PictureDocumentService _documents;
+    /// <summary>
+    /// Stores the publisher document factory dependency used by <see cref="PictureEditorStateService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly IPublisherDocumentFactory _documentFactory;
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal undo state used by <see cref="PictureEditorStateService"/> while executing its surrounding workflow.
     /// </summary>
     private readonly Stack<string> _undo = new();
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal redo state used by <see cref="PictureEditorStateService"/> while executing its surrounding workflow.
     /// </summary>
     private readonly Stack<string> _redo = new();
+    /// <summary>
+    /// Stores the internal live edit key state used by <see cref="PictureEditorStateService"/> while executing its surrounding workflow.
+    /// </summary>
     private string? _liveEditKey;
+    /// <summary>
+    /// Stores the internal clipboard state used by <see cref="PictureEditorStateService"/> while executing its surrounding workflow.
+    /// </summary>
     private PictureLayer? _clipboard;
 
     /// <summary>
-    /// Runs the picture editor state service operation.
+    /// Initializes a new <see cref="PictureEditorStateService"/> instance and captures the dependencies or initial state required by its picture editor state workflow.
     /// </summary>
+    /// <param name="documents">Picture document service dependency used by the picture editor state workflow to provide the corresponding application capability.</param>
+    /// <param name="documentFactory">Publisher document factory dependency used by the picture editor state workflow to provide the corresponding application capability.</param>
     public PictureEditorStateService(PictureDocumentService documents, IPublisherDocumentFactory documentFactory)
     {
         _documents = documents;
@@ -31,37 +45,46 @@ public sealed class PictureEditorStateService
     }
 
     /// <summary>
-    /// Occurs when changed.
+    /// Occurs when changed changes or completes in <see cref="PictureEditorStateService"/>, allowing interested callers to react without polling internal state.
     /// </summary>
     public event Action? Changed;
     /// <summary>
-    /// Gets or sets document.
+    /// Gets or sets the document value that forms part of the picture editor state state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The document value exposed by <see cref="PictureEditorStateService"/>.</value>
     public PictureDocument Document { get; private set; }
     /// <summary>
-    /// Gets or sets selected layer identifier.
+    /// Gets or sets the stable selected layer identifier used to identify or correlate this picture editor state instance with related application state.
     /// </summary>
+    /// <value>The selected layer identifier value exposed by <see cref="PictureEditorStateService"/>.</value>
     public Guid? SelectedLayerId { get; private set; }
     /// <summary>
-    /// Gets selected layer.
+    /// Gets the selected layer value that forms part of the picture editor state state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The selected layer value exposed by <see cref="PictureEditorStateService"/>.</value>
     public PictureLayer? SelectedLayer => Document.Layers.FirstOrDefault(layer => layer.Id == SelectedLayerId);
     /// <summary>
-    /// Gets can undo.
+    /// Gets a value indicating whether undo applies to the picture editor state state.
     /// </summary>
+    /// <value>The can undo value exposed by <see cref="PictureEditorStateService"/>.</value>
     public bool CanUndo => _undo.Count > 0;
     /// <summary>
-    /// Gets can redo.
+    /// Gets a value indicating whether redo applies to the picture editor state state.
     /// </summary>
+    /// <value>The can redo value exposed by <see cref="PictureEditorStateService"/>.</value>
     public bool CanRedo => _redo.Count > 0;
     /// <summary>
-    /// Gets can paste.
+    /// Gets a value indicating whether paste applies to the picture editor state state.
     /// </summary>
+    /// <value>The can paste value exposed by <see cref="PictureEditorStateService"/>.</value>
     public bool CanPaste => _clipboard is not null;
 
     /// <summary>
-    /// Starts new.
+    /// Starts new as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="widthPx">Width px value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="heightPx">Height px value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="transparent">Value indicating whether transparent should apply to this operation.</param>
     public void StartNew(int widthPx = 1200, int heightPx = 800, bool transparent = true)
     {
     try
@@ -82,6 +105,7 @@ public sealed class PictureEditorStateService
     /// <summary>
     /// Starts from document.
     /// </summary>
+    /// <param name="document">Document value supplied to the picture editor state operation and used when producing its result.</param>
     public void StartFromDocument(PictureDocument document)
     {
     try
@@ -100,8 +124,12 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Starts from raster.
+    /// Starts from raster as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="dataUrl">Data url value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="widthPx">Width px value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="heightPx">Height px value supplied to the picture editor state operation and used when producing its result.</param>
     public void StartFromRaster(string dataUrl, string name, int widthPx = 1200, int heightPx = 800)
     {
     try
@@ -120,8 +148,9 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the clone document operation.
+    /// Performs clone document as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The picture document produced by the operation.</returns>
     public PictureDocument CloneDocument() {
     try
     {
@@ -135,8 +164,9 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Sets document name.
+    /// Sets document name as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="name">Name value supplied to the picture editor state operation and used when producing its result.</param>
     public void SetDocumentName(string name)
     {
     try
@@ -156,8 +186,10 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Sets document size.
+    /// Sets document size as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="widthPx">Width px value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="heightPx">Height px value supplied to the picture editor state operation and used when producing its result.</param>
     public void SetDocumentSize(int widthPx, int heightPx)
     {
     try
@@ -190,8 +222,9 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Sets background.
+    /// Sets background as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the picture editor state operation and used when producing its result.</param>
     public void SetBackground(string value)
     {
     try
@@ -211,8 +244,9 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Sets zoom.
+    /// Sets zoom as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="zoom">Zoom value supplied to the picture editor state operation and used when producing its result.</param>
     public void SetZoom(double zoom)
     {
     try
@@ -229,8 +263,9 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Sets grid.
+    /// Sets grid as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="visible">Value indicating whether visible should apply to this operation.</param>
     public void SetGrid(bool visible) {
     try
     {
@@ -243,8 +278,9 @@ public sealed class PictureEditorStateService
     }
 }
     /// <summary>
-    /// Sets snap.
+    /// Sets snap as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="enabled">Value indicating whether enabled should apply to this operation.</param>
     public void SetSnap(bool enabled) {
     try
     {
@@ -257,8 +293,9 @@ public sealed class PictureEditorStateService
     }
 }
     /// <summary>
-    /// Sets grid spacing.
+    /// Sets grid spacing as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="pixels">Pixels value supplied to the picture editor state operation and used when producing its result.</param>
     public void SetGridSpacing(int pixels) {
     try
     {
@@ -272,8 +309,9 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the select layer operation.
+    /// Performs select layer as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     public void SelectLayer(Guid? id)
     {
     try
@@ -292,8 +330,15 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Adds raster.
+    /// Adds raster as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="dataUrl">Data url value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="naturalWidth">Natural width value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="naturalHeight">Natural height value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="centerX">Center x value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="centerY">Center y value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <returns>The raster picture layer produced by the operation.</returns>
     public RasterPictureLayer AddRaster(
         string dataUrl,
         string name,
@@ -319,8 +364,13 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Adds imported layers.
+    /// Adds imported layers as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="importedDocument">Imported document value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="groupName">Group name value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="centerX">Center x value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="centerY">Center y value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     public int AddImportedLayers(
         PictureDocument importedDocument,
         string? groupName = null,
@@ -369,8 +419,11 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the replace raster operation.
+    /// Performs replace raster as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="dataUrl">Data url value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool ReplaceRaster(Guid id, string dataUrl)
     {
     try
@@ -391,8 +444,9 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Adds text.
+    /// Adds text as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The text picture layer produced by the operation.</returns>
     public TextPictureLayer AddText()
     {
     try
@@ -421,8 +475,10 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Adds shape.
+    /// Adds shape as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="shape">Shape value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <returns>The shape picture layer produced by the operation.</returns>
     public ShapePictureLayer AddShape(PictureShapeKind shape = PictureShapeKind.Rectangle)
     {
     try
@@ -444,8 +500,15 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Adds shape at.
+    /// Adds shape at as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="shape">Shape value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="x">X value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="y">Y value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="width">Width value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="height">Height value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="rotation">Rotation value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <returns>The shape picture layer produced by the operation.</returns>
     public ShapePictureLayer AddShapeAt(PictureShapeKind shape, double x, double y, double width, double height, double rotation = 0)
     {
     try
@@ -475,8 +538,14 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Adds path.
+    /// Adds path as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="points">Picture point dependency used by the picture editor state workflow to provide the corresponding application capability.</param>
+    /// <param name="strokeColor">Stroke color value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="strokeWidth">Stroke width value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="closed">Value indicating whether closed should apply to this operation.</param>
+    /// <param name="smooth">Value indicating whether smooth should apply to this operation.</param>
+    /// <returns>The shape picture layer produced by the operation.</returns>
     public ShapePictureLayer AddPath(IReadOnlyList<PicturePoint> points, string strokeColor, double strokeWidth, bool closed = false, bool smooth = true)
     {
     try
@@ -518,8 +587,14 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Adds area fill.
+    /// Adds area fill as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="selectionKind">Selection kind value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="points">Picture point dependency used by the picture editor state workflow to provide the corresponding application capability.</param>
+    /// <param name="primaryColor">Primary color value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="secondaryColor">Secondary color value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="gradient">Value indicating whether gradient should apply to this operation.</param>
+    /// <returns>The shape picture layer produced by the operation.</returns>
     public ShapePictureLayer AddAreaFill(string selectionKind, IReadOnlyList<PicturePoint> points, string primaryColor, string secondaryColor, bool gradient)
     {
     try
@@ -569,8 +644,10 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Adds fill.
+    /// Adds fill as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="fillKind">Fill kind value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <returns>The fill picture layer produced by the operation.</returns>
     public FillPictureLayer AddFill(PictureFillKind fillKind = PictureFillKind.LinearGradient)
     {
     try
@@ -599,8 +676,10 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Adds render.
+    /// Adds render as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="renderKind">Render kind value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <returns>The render picture layer produced by the operation.</returns>
     public RenderPictureLayer AddRender(PictureRenderKind renderKind = PictureRenderKind.Clouds)
     {
     try
@@ -630,8 +709,10 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Adds paint.
+    /// Adds paint as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="name">Name value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <returns>The paint picture layer produced by the operation.</returns>
     public PaintPictureLayer AddPaint(string name = "Paint")
     {
     try
@@ -650,8 +731,14 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Adds stroke.
+    /// Adds stroke as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="kind">Kind value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="points">Picture point dependency used by the picture editor state workflow to provide the corresponding application capability.</param>
+    /// <param name="color">Color value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="widthPx">Width px value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="opacity">Opacity value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="hardness">Hardness value supplied to the picture editor state operation and used when producing its result.</param>
     public void AddStroke(PictureStrokeKind kind, IReadOnlyList<PicturePoint> points, string color, double widthPx, double opacity, double hardness)
     {
     try
@@ -688,7 +775,7 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the clear selected paint operation.
+    /// Performs clear selected paint as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void ClearSelectedPaint()
     {
@@ -708,7 +795,7 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Deletes selected.
+    /// Deletes selected as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void DeleteSelected()
     {
@@ -731,7 +818,7 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the copy selected operation.
+    /// Performs copy selected as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void CopySelected()
     {
@@ -751,8 +838,11 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the copy selected region operation.
+    /// Performs copy selected region as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="points">Picture point dependency used by the picture editor state workflow to provide the corresponding application capability.</param>
+    /// <param name="inverted">Value indicating whether inverted should apply to this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool CopySelectedRegion(IReadOnlyList<PicturePoint> points, bool inverted = false)
     {
     try
@@ -775,8 +865,11 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Applies selected clip.
+    /// Applies selected clip as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="points">Picture point dependency used by the picture editor state workflow to provide the corresponding application capability.</param>
+    /// <param name="inverted">Value indicating whether inverted should apply to this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool ApplySelectedClip(IReadOnlyList<PicturePoint> points, bool inverted)
     {
     try
@@ -800,8 +893,9 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the clear selected clip operation.
+    /// Performs clear selected clip as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool ClearSelectedClip()
     {
     try
@@ -823,7 +917,7 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the paste operation.
+    /// Performs paste as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void Paste()
     {
@@ -849,7 +943,7 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the duplicate selected operation.
+    /// Performs duplicate selected as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void DuplicateSelected()
     {
@@ -876,7 +970,7 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the center selected operation.
+    /// Performs center selected as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void CenterSelected()
     {
@@ -898,7 +992,7 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the fit selected to canvas operation.
+    /// Performs fit selected to canvas as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void FitSelectedToCanvas()
     {
@@ -923,8 +1017,9 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the move selected layer operation.
+    /// Performs move selected layer as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="delta">Delta value supplied to the picture editor state operation and used when producing its result.</param>
     public void MoveSelectedLayer(int delta)
     {
     try
@@ -948,7 +1043,7 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the bring selected to front operation.
+    /// Performs bring selected to front as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void BringSelectedToFront()
     {
@@ -970,7 +1065,7 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the send selected to back operation.
+    /// Performs send selected to back as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void SendSelectedToBack()
     {
@@ -992,8 +1087,9 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the toggle visibility operation.
+    /// Performs toggle visibility as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     public void ToggleVisibility(Guid id)
     {
     try
@@ -1013,8 +1109,9 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the toggle lock operation.
+    /// Performs toggle lock as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     public void ToggleLock(Guid id)
     {
     try
@@ -1034,8 +1131,14 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the commit transform operation.
+    /// Performs commit transform as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="x">X value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="y">Y value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="width">Width value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="height">Height value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="rotation">Rotation value supplied to the picture editor state operation and used when producing its result.</param>
     public void CommitTransform(Guid id, double x, double y, double width, double height, double rotation)
     {
     try
@@ -1076,8 +1179,11 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Updates selected.
+    /// Updates selected as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="update">Update value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="capture">Value indicating whether capture should apply to this operation.</param>
+    /// <param name="allowLocked">Value indicating whether allow locked should apply to this operation.</param>
     public void UpdateSelected(Action<PictureLayer> update, bool capture = true, bool allowLocked = false)
     {
     try
@@ -1098,8 +1204,10 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Updates selected live.
+    /// Updates selected live as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="key">Key value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="update">Update value supplied to the picture editor state operation and used when producing its result.</param>
     public void UpdateSelectedLive(string key, Action<PictureLayer> update)
     {
     try
@@ -1124,7 +1232,7 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the end live edit operation.
+    /// Performs end live edit as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void EndLiveEdit() {
     try
@@ -1139,7 +1247,7 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the undo operation.
+    /// Performs undo as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void Undo()
     {
@@ -1158,7 +1266,7 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the redo operation.
+    /// Performs redo as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void Redo()
     {
@@ -1177,8 +1285,9 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the restore operation.
+    /// Performs restore as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="json">Json value supplied to the picture editor state operation and used when producing its result.</param>
     private void Restore(string json)
     {
     try
@@ -1197,7 +1306,7 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the reset history operation.
+    /// Performs reset history as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     private void ResetHistory()
     {
@@ -1216,7 +1325,7 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the capture operation.
+    /// Performs capture as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     private void Capture()
     {
@@ -1241,8 +1350,10 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Creates paint layer.
+    /// Creates paint layer as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="name">Name value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <returns>The paint picture layer produced by the operation.</returns>
     private PaintPictureLayer CreatePaintLayer(string name)
     {
     try
@@ -1268,8 +1379,10 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the clone layer operation.
+    /// Performs clone layer as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="layer">Layer value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <returns>The picture layer produced by the operation.</returns>
     private PictureLayer CloneLayer(PictureLayer layer)
     {
     try
@@ -1287,8 +1400,10 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the next name operation.
+    /// Performs next name as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="basis">Basis value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NextName(string basis)
     {
     try
@@ -1309,8 +1424,13 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the fit size operation.
+    /// Performs fit size as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="width">Width value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="height">Height value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="maxWidth">Max width value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="maxHeight">Max height value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <returns>The double width double height produced by the operation.</returns>
     private (double Width, double Height) FitSize(double width, double height, double maxWidth, double maxHeight)
     {
         width = Math.Max(1, width);
@@ -1321,8 +1441,9 @@ public sealed class PictureEditorStateService
     }
 
     /// <summary>
-    /// Normalizes layer.
+    /// Normalizes layer as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="layer">Layer value supplied to the picture editor state operation and used when producing its result.</param>
     private void NormalizeLayer(PictureLayer layer)
     {
     try
@@ -1380,8 +1501,10 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Normalizes clip polygon.
+    /// Normalizes clip polygon as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="points">Picture point dependency used by the picture editor state workflow to provide the corresponding application capability.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private List<PicturePoint> NormalizeClipPolygon(IEnumerable<PicturePoint>? points)
     {
     try
@@ -1409,8 +1532,11 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
-    /// Runs the nearly equal operation.
+    /// Performs nearly equal as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="first">First value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <param name="second">Second value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool NearlyEqual(double first, double second) {
     try
     {
@@ -1423,8 +1549,10 @@ public sealed class PictureEditorStateService
     }
 }
     /// <summary>
-    /// Normalizes angle.
+    /// Normalizes angle as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the picture editor state operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double NormalizeAngle(double value) {
     try
     {
@@ -1437,8 +1565,9 @@ public sealed class PictureEditorStateService
     }
 }
     /// <summary>
-    /// Runs the notify operation.
+    /// Performs notify as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="markChanged">Value indicating whether mark changed should apply to this operation.</param>
     private void Notify(bool markChanged = true) {
     try
     {

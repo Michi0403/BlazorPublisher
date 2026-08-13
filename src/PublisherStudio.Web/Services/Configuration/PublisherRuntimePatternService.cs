@@ -5,16 +5,24 @@ using PublisherStudio.BusinessObjects;
 namespace PublisherStudio.Services.Configuration;
 
 /// <summary>
-/// Provides publisher runtime pattern service operations.
+/// Coordinates publisher runtime pattern behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
 public sealed class PublisherRuntimePatternService : IPublisherRuntimePatternService
 {
+    /// <summary>
+    /// Stores the in-memory patterns collection maintained internally by <see cref="PublisherRuntimePatternService"/> for its current workflow state.
+    /// </summary>
     private readonly FrozenDictionary<PublisherRuntimePattern, Regex> patterns;
+    /// <summary>
+    /// Stores the logger used by <see cref="PublisherRuntimePatternService"/> to record operational diagnostics without coupling callers to logging details.
+    /// </summary>
     private readonly ILogger<PublisherRuntimePatternService> logger;
 
     /// <summary>
-    /// Publishes er runtime pattern service.
+    /// Initializes a new <see cref="PublisherRuntimePatternService"/> instance and captures the dependencies or initial state required by its publisher runtime pattern workflow.
     /// </summary>
+    /// <param name="options">Options containing the caller-supplied values that control this operation.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     public PublisherRuntimePatternService(
         PublisherRuntimePolicyOptions options,
         ILogger<PublisherRuntimePatternService> logger)
@@ -35,8 +43,10 @@ public sealed class PublisherRuntimePatternService : IPublisherRuntimePatternSer
     }
 
     /// <summary>
-    /// Gets regex.
+    /// Retrieves regex as part of the publisher runtime pattern service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="pattern">Pattern value supplied to the publisher runtime pattern operation and used when producing its result.</param>
+    /// <returns>The regex produced by the operation.</returns>
     public Regex GetRegex(PublisherRuntimePattern pattern)
     {
         try
@@ -55,8 +65,11 @@ public sealed class PublisherRuntimePatternService : IPublisherRuntimePatternSer
     }
 
     /// <summary>
-    /// Runs the compile operation.
+    /// Performs compile as part of the publisher runtime pattern service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="key">Key value supplied to the publisher runtime pattern operation and used when producing its result.</param>
+    /// <param name="policy">Policy value supplied to the publisher runtime pattern operation and used when producing its result.</param>
+    /// <returns>The regex produced by the operation.</returns>
     private Regex Compile(PublisherRuntimePattern key, PublisherRegexPolicy policy)
     {
         try
@@ -77,8 +90,10 @@ public sealed class PublisherRuntimePatternService : IPublisherRuntimePatternSer
     }
 
     /// <summary>
-    /// Parses options.
+    /// Parses options as part of the publisher runtime pattern service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the publisher runtime pattern operation and used when producing its result.</param>
+    /// <returns>The regex options produced by the operation.</returns>
     private RegexOptions ParseOptions(string value)
     {
         try

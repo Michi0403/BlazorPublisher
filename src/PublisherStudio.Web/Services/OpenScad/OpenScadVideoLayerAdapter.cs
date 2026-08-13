@@ -4,15 +4,19 @@ using PublisherStudio.Services.VideoStudio.Export;
 namespace PublisherStudio.Services.OpenScad;
 
 /// <summary>
-/// Represents an open scad video layer adapter.
+/// Represents an open OpenSCAD video layer adapter application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="geometry">Polygon geometry service dependency used by the open OpenSCAD video layer adapter workflow to provide the corresponding application capability.</param>
+/// <param name="documents">Open openscad document service dependency used by the open OpenSCAD video layer adapter workflow to provide the corresponding application capability.</param>
 public sealed class OpenScadVideoLayerAdapter(
     IPolygonGeometryService geometry,
     IOpenScadDocumentService documents) : IOpenScadVideoLayerAdapter
 {
     /// <summary>
-    /// Creates script.
+    /// Creates script for <see cref="OpenScadVideoLayerAdapter"/>, keeping the operation consistent with the state and invariants of the surrounding open OpenSCAD video layer adapter workflow.
     /// </summary>
+    /// <param name="layer">Layer value supplied to the open OpenSCAD video layer adapter operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string CreateScript(VideoEffectLayer layer)
     {
     try

@@ -5,8 +5,14 @@ using System.Text.Json;
 namespace PublisherStudio.Services.Streaming.Sessions;
 
 /// <summary>
-/// Provides media session registry operations.
+/// Maintains the authoritative directory of media session entries used for discovery, validation, and runtime lookup.
 /// </summary>
+/// <param name="hotkeys">Global hotkey service dependency used by the media session workflow to provide the corresponding application capability.</param>
+/// <param name="encoder">Encoder value supplied to the media session operation and used when producing its result.</param>
+/// <param name="mediaSessionFactory">Media session factory dependency used by the media session workflow to provide the corresponding application capability.</param>
+/// <param name="chatFactory">Platform chat service factory dependency used by the media session workflow to provide the corresponding application capability.</param>
+/// <param name="lanServerFactory">Lan streaming server factory dependency used by the media session workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class MediaSessionRegistry(
     GlobalHotkeyService hotkeys,
     EncoderOrchestrator encoder,
@@ -16,15 +22,23 @@ public sealed class MediaSessionRegistry(
     ILogger<MediaSessionRegistry> logger) : IDisposable
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory sessions collection maintained internally by <see cref="MediaSessionRegistry"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<Guid, MediaSession> _sessions = new();
+    /// <summary>
+    /// Stores the global hotkey service dependency used by <see cref="MediaSessionRegistry"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly GlobalHotkeyService _hotkeys = hotkeys;
+    /// <summary>
+    /// Stores the internal encoder state used by <see cref="MediaSessionRegistry"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly EncoderOrchestrator _encoder = encoder;
 
     /// <summary>
-    /// Runs the create operation.
+    /// Performs create in the media session directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
+    /// <returns>The media session produced by the operation.</returns>
     public MediaSession Create(JsonElement request)
     {
         try
@@ -70,8 +84,11 @@ public sealed class MediaSessionRegistry(
     }
 
     /// <summary>
-    /// Attempts to get.
+    /// Attempts to get in the media session directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="session">Session value supplied to the media session operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool TryGet(Guid id, out MediaSession session) {
         try
         {
@@ -86,8 +103,10 @@ public sealed class MediaSessionRegistry(
     }
 
     /// <summary>
-    /// Runs the stop operation.
+    /// Performs stop in the media session directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool Stop(Guid id)
     {
         try
@@ -120,8 +139,10 @@ public sealed class MediaSessionRegistry(
     }
 
     /// <summary>
-    /// Runs the drain events operation.
+    /// Performs drain events in the media session directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<MediaHostHotkeyEvent> DrainEvents(Guid sessionId) {
         try
         {
@@ -136,8 +157,12 @@ public sealed class MediaSessionRegistry(
     }
 
     /// <summary>
-    /// Sets output.
+    /// Sets output in the media session directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <param name="outputId">Identifier of the output to use for this operation.</param>
+    /// <param name="enabled">Value indicating whether enabled should apply to this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool SetOutput(Guid sessionId, Guid outputId, bool enabled)
     {
         try
@@ -157,8 +182,11 @@ public sealed class MediaSessionRegistry(
     }
 
     /// <summary>
-    /// Sets recording.
+    /// Sets recording in the media session directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <param name="enabled">Value indicating whether enabled should apply to this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool SetRecording(Guid sessionId, bool enabled)
     {
         try
@@ -179,8 +207,11 @@ public sealed class MediaSessionRegistry(
     }
 
     /// <summary>
-    /// Sets program page.
+    /// Sets program page in the media session directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <param name="pageId">Identifier of the page to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool SetProgramPage(Guid sessionId, Guid pageId)
     {
         try
@@ -199,8 +230,12 @@ public sealed class MediaSessionRegistry(
     }
 
     /// <summary>
-    /// Runs the announce ingest operation.
+    /// Performs announce ingest in the media session directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <param name="outputId">Identifier of the output to use for this operation.</param>
+    /// <param name="announcement">Ingest announcement dependency used by the media session workflow to provide the corresponding application capability.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool AnnounceIngest(Guid sessionId, Guid? outputId, IngestAnnouncement announcement)
     {
         try
@@ -220,8 +255,12 @@ public sealed class MediaSessionRegistry(
     }
 
     /// <summary>
-    /// Runs the push ingest operation.
+    /// Performs push ingest in the media session directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <param name="outputId">Identifier of the output to use for this operation.</param>
+    /// <param name="chunk">Chunk value supplied to the media session operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool PushIngest(Guid sessionId, Guid? outputId, byte[] chunk)
     {
         try
@@ -241,7 +280,7 @@ public sealed class MediaSessionRegistry(
     }
 
     /// <summary>
-    /// Runs the dispose operation.
+    /// Releases resources owned by <see cref="MediaSessionRegistry"/> and leaves the media session workflow in a safely disposed state.
     /// </summary>
     public void Dispose()
     {

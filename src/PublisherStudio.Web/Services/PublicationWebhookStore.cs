@@ -10,17 +10,19 @@ namespace PublisherStudio.Services;
 public sealed class PublicationWebhookStore
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory tokens collection maintained internally by <see cref="PublicationWebhookStore"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<Guid, string> _tokens = new();
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory payloads collection maintained internally by <see cref="PublicationWebhookStore"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<Guid, WebhookPayload> _payloads = new();
 
     /// <summary>
-    /// Runs the register operation.
+    /// Performs register in the publication webhook persistence workflow while keeping storage-specific behavior contained within <see cref="PublicationWebhookStore"/>.
     /// </summary>
+    /// <param name="bindingId">Identifier of the binding to use for this operation.</param>
+    /// <param name="token">Cancellation token that allows the caller to stop the asynchronous operation.</param>
     public void Register(Guid bindingId, string token)
     {
     try
@@ -37,8 +39,9 @@ public sealed class PublicationWebhookStore
 }
 
     /// <summary>
-    /// Runs the unregister operation.
+    /// Performs unregister in the publication webhook persistence workflow while keeping storage-specific behavior contained within <see cref="PublicationWebhookStore"/>.
     /// </summary>
+    /// <param name="bindingId">Identifier of the binding to use for this operation.</param>
     public void Unregister(Guid bindingId)
     {
     try
@@ -55,8 +58,13 @@ public sealed class PublicationWebhookStore
 }
 
     /// <summary>
-    /// Attempts to put.
+    /// Attempts to put in the publication webhook persistence workflow while keeping storage-specific behavior contained within <see cref="PublicationWebhookStore"/>.
     /// </summary>
+    /// <param name="bindingId">Identifier of the binding to use for this operation.</param>
+    /// <param name="token">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <param name="content">Content value supplied to the publication webhook operation and used when producing its result.</param>
+    /// <param name="contentType">Content type value supplied to the publication webhook operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool TryPut(Guid bindingId, string token, string content, string contentType)
     {
     try
@@ -75,8 +83,11 @@ public sealed class PublicationWebhookStore
 }
 
     /// <summary>
-    /// Attempts to get.
+    /// Attempts to get in the publication webhook persistence workflow while keeping storage-specific behavior contained within <see cref="PublicationWebhookStore"/>.
     /// </summary>
+    /// <param name="bindingId">Identifier of the binding to use for this operation.</param>
+    /// <param name="payload">Payload value supplied to the publication webhook operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool TryGet(Guid bindingId, out WebhookPayload payload)
         {
     try
@@ -91,8 +102,10 @@ public sealed class PublicationWebhookStore
 }
 
     /// <summary>
-    /// Determines whether registered.
+    /// Determines whether registered in the publication webhook persistence workflow while keeping storage-specific behavior contained within <see cref="PublicationWebhookStore"/>.
     /// </summary>
+    /// <param name="bindingId">Identifier of the binding to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool IsRegistered(Guid bindingId) {
     try
     {
@@ -107,6 +120,9 @@ public sealed class PublicationWebhookStore
 }
 
 /// <summary>
-/// Represents a webhook payload.
+/// Represents a webhook payload application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="Content">Content value supplied to the webhook payload operation and used when producing its result.</param>
+/// <param name="ContentType">Content type value supplied to the webhook payload operation and used when producing its result.</param>
+/// <param name="ReceivedUtc">Received utc value supplied to the webhook payload operation and used when producing its result.</param>
 public sealed record WebhookPayload(string Content, string ContentType, DateTimeOffset ReceivedUtc);

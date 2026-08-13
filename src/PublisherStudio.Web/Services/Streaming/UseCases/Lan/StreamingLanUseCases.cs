@@ -5,13 +5,19 @@ namespace PublisherStudio.Services.Streaming.UseCases.Lan;
 /// <summary>
 /// Resolves LAN status, safe HLS assets and the local watch page without coupling controllers to session internals.
 /// </summary>
+/// <param name="sessions">Media session registry dependency used by the streaming LAN use cases workflow to provide the corresponding application capability.</param>
 public sealed class StreamingLanUseCases(MediaSessionRegistry sessions)
 {
+    /// <summary>
+    /// Stores the media session registry dependency used by <see cref="StreamingLanUseCases"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly MediaSessionRegistry _sessions = sessions;
 
     /// <summary>
-    /// Gets status.
+    /// Retrieves status for <see cref="StreamingLanUseCases"/>, keeping the operation consistent with the state and invariants of the surrounding streaming LAN use cases workflow.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <returns>The streaming LAN status produced by the operation.</returns>
     public StreamingLanStatus? GetStatus(Guid sessionId)
     {
     try
@@ -38,8 +44,11 @@ public sealed class StreamingLanUseCases(MediaSessionRegistry sessions)
 }
 
     /// <summary>
-    /// Resolves asset.
+    /// Resolves asset for <see cref="StreamingLanUseCases"/>, keeping the operation consistent with the state and invariants of the surrounding streaming LAN use cases workflow.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <param name="asset">Asset value supplied to the streaming LAN use cases operation and used when producing its result.</param>
+    /// <returns>The streaming asset produced by the operation.</returns>
     public StreamingAsset? ResolveAsset(Guid sessionId, string? asset)
     {
     try
@@ -68,8 +77,10 @@ public sealed class StreamingLanUseCases(MediaSessionRegistry sessions)
 }
 
     /// <summary>
-    /// Builds watch page.
+    /// Builds watch page for <see cref="StreamingLanUseCases"/>, keeping the operation consistent with the state and invariants of the surrounding streaming LAN use cases workflow.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string? BuildWatchPage(Guid sessionId)
     {
     try
@@ -91,45 +102,55 @@ public sealed class StreamingLanUseCases(MediaSessionRegistry sessions)
 }
 
 /// <summary>
-/// Represents a streaming LAN status.
+/// Represents a streaming LAN status application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public sealed class StreamingLanStatus
 {
     /// <summary>
-    /// Gets or sets session identifier.
+    /// Gets or sets the stable session identifier used to identify or correlate this streaming LAN status instance with related application state.
     /// </summary>
+    /// <value>The session identifier value exposed by <see cref="StreamingLanStatus"/>.</value>
     public Guid SessionId { get; init; }
     /// <summary>
-    /// Gets or sets whether the feature is enabled.
+    /// Gets or sets a value indicating whether the option is enabled applies to the streaming LAN status state.
     /// </summary>
+    /// <value>The enabled value exposed by <see cref="StreamingLanStatus"/>.</value>
     public bool Enabled { get; init; }
     /// <summary>
-    /// Gets or sets status.
+    /// Gets or sets the status value that forms part of the streaming LAN status state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The status value exposed by <see cref="StreamingLanStatus"/>.</value>
     public string Status { get; init; } = string.Empty;
     /// <summary>
-    /// Gets or sets error.
+    /// Gets or sets the error value that forms part of the streaming LAN status state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The error value exposed by <see cref="StreamingLanStatus"/>.</value>
     public string Error { get; init; } = string.Empty;
     /// <summary>
-    /// Gets or sets browser URL.
+    /// Gets or sets the browser URL that identifies the network or application endpoint associated with this streaming LAN status state.
     /// </summary>
+    /// <value>The browser URL value exposed by <see cref="StreamingLanStatus"/>.</value>
     public string? BrowserUrl { get; init; }
     /// <summary>
-    /// Gets or sets hls URL.
+    /// Gets or sets the hls URL that identifies the network or application endpoint associated with this streaming LAN status state.
     /// </summary>
+    /// <value>The hls URL value exposed by <see cref="StreamingLanStatus"/>.</value>
     public string? HlsUrl { get; init; }
     /// <summary>
-    /// Gets or sets rtsp URL.
+    /// Gets or sets the rtsp URL that identifies the network or application endpoint associated with this streaming LAN status state.
     /// </summary>
+    /// <value>The rtsp URL value exposed by <see cref="StreamingLanStatus"/>.</value>
     public string? RtspUrl { get; init; }
     /// <summary>
-    /// Gets or sets access token.
+    /// Gets or sets the access token value that forms part of the streaming LAN status state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The access token value exposed by <see cref="StreamingLanStatus"/>.</value>
     public string? AccessToken { get; init; }
 }
 
 /// <summary>
-/// Represents a streaming asset.
+/// Represents a streaming asset application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="Path">Path value supplied to the streaming asset operation and used when producing its result.</param>
+/// <param name="ContentType">Content type value supplied to the streaming asset operation and used when producing its result.</param>
 public sealed record StreamingAsset(string Path, string ContentType);

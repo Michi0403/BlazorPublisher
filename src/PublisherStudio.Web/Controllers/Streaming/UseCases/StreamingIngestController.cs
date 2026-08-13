@@ -6,22 +6,33 @@ using Microsoft.AspNetCore.Mvc;
 namespace PublisherStudio.Controllers.Streaming.UseCases;
 
 /// <summary>
-/// Provides streaming ingest controller operations.
+/// Exposes the streaming ingest application operations through PublisherStudio's web/API boundary and delegates domain work to the corresponding services.
 /// </summary>
+/// <param name="useCases">Use cases value supplied to the streaming ingest operation and used when producing its result.</param>
+/// <param name="webRtcHub">Web rtc hub value supplied to the streaming ingest operation and used when producing its result.</param>
 [ApiController]
 [Route("api/mediahost/sessions/{sessionId:guid}")]
 public sealed class StreamingIngestController(StreamingIngestUseCases useCases, WebRtcSignalingHub webRtcHub) : ControllerBase
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal ingest JSON state used by <see cref="StreamingIngestController"/> while executing its surrounding workflow.
     /// </summary>
     private readonly JsonSerializerOptions IngestJson = new() { PropertyNameCaseInsensitive = true };
+    /// <summary>
+    /// Stores the internal use cases state used by <see cref="StreamingIngestController"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly StreamingIngestUseCases _useCases = useCases;
+    /// <summary>
+    /// Stores the internal web rtc hub state used by <see cref="StreamingIngestController"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly WebRtcSignalingHub _webRtcHub = webRtcHub;
 
     /// <summary>
-    /// Runs the ingest operation.
+    /// Returns the ingest projection for the streaming ingest API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <param name="outputId">Identifier of the output to use for this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [HttpGet("ingest/websocket")]
     public async Task Ingest(Guid sessionId, [FromQuery] Guid? outputId)
     {
@@ -68,15 +79,18 @@ public sealed class StreamingIngestController(StreamingIngestUseCases useCases, 
     }
 
     /// <summary>
-    /// Runs the announce operation.
+    /// Returns the announce projection for the streaming ingest API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpPost("ingest/announce")]
     public IActionResult Announce(Guid sessionId, [FromBody] IngestAnnouncement announcement) =>
         _useCases.Announce(sessionId, announcement.OutputId, announcement) ? Accepted() : NotFound();
 
     /// <summary>
-    /// Publishes web rtc.
+    /// Publishes web rtc for the streaming ingest API operation, delegating application logic to the controller's services and returning the resulting HTTP-facing value.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [HttpGet("webrtc/publisher")]
     public async Task PublishWebRtc(Guid sessionId)
     {

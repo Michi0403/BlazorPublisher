@@ -3,81 +3,102 @@ using System.Runtime.InteropServices;
 namespace PublisherStudio.Services.Streaming.Hotkeys;
 
 /// <summary>
-/// Defines the windows hotkey native service contract.
+/// Defines the contract for windows hotkey native behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
 public interface IWindowsHotkeyNativeService
 {
+    /// <summary>
+    /// Gets a value indicating whether available applies to the windows hotkey native state.
+    /// </summary>
+    /// <value>The is available value exposed by <see cref="IWindowsHotkeyNativeService"/>.</value>
     bool IsAvailable { get; }
     /// <summary>
-    /// Attempts to initialize message queue.
+    /// Attempts to initialize message queue as part of the windows hotkey native service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="threadId">Identifier of the thread to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     bool TryInitializeMessageQueue(out uint threadId);
     /// <summary>
-    /// Attempts to register hot key.
+    /// Attempts to register hot key as part of the windows hotkey native service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="windowHandle">Int ptr dependency used by the windows hotkey native workflow to provide the corresponding application capability.</param>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="modifiers">Modifiers value supplied to the windows hotkey native operation and used when producing its result.</param>
+    /// <param name="virtualKey">Virtual key value supplied to the windows hotkey native operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     bool TryRegisterHotKey(IntPtr windowHandle, int id, uint modifiers, uint virtualKey);
     /// <summary>
-    /// Attempts to unregister hot key.
+    /// Attempts to unregister hot key as part of the windows hotkey native service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="windowHandle">Int ptr dependency used by the windows hotkey native workflow to provide the corresponding application capability.</param>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     bool TryUnregisterHotKey(IntPtr windowHandle, int id);
     /// <summary>
-    /// Reads message.
+    /// Reads message as part of the windows hotkey native service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="message">Message value supplied to the windows hotkey native operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     int ReadMessage(out WindowsHotkeyNativeMessage message);
     /// <summary>
-    /// Attempts to post thread message.
+    /// Attempts to post thread message as part of the windows hotkey native service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="threadId">Identifier of the thread to use for this operation.</param>
+    /// <param name="message">Message value supplied to the windows hotkey native operation and used when producing its result.</param>
+    /// <param name="wordParameter">Word parameter value supplied to the windows hotkey native operation and used when producing its result.</param>
+    /// <param name="longParameter">Int ptr dependency used by the windows hotkey native workflow to provide the corresponding application capability.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     bool TryPostThreadMessage(uint threadId, uint message, UIntPtr wordParameter, IntPtr longParameter);
 }
 
 /// <summary>
-/// Represents a windows hotkey native message.
+/// Represents a windows hotkey native message application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 [StructLayout(LayoutKind.Sequential)]
 public struct WindowsHotkeyNativeMessage
 {
     /// <summary>
-    /// Stores window handle.
+    /// Stores the internal window handle state used by <see cref="WindowsHotkeyNativeMessage"/> while executing its surrounding workflow.
     /// </summary>
     public IntPtr WindowHandle;
     /// <summary>
-    /// Stores message.
+    /// Stores the internal message state used by <see cref="WindowsHotkeyNativeMessage"/> while executing its surrounding workflow.
     /// </summary>
     public uint Message;
     /// <summary>
-    /// Stores word parameter.
+    /// Stores the internal word parameter state used by <see cref="WindowsHotkeyNativeMessage"/> while executing its surrounding workflow.
     /// </summary>
     public UIntPtr WordParameter;
     /// <summary>
-    /// Stores long parameter.
+    /// Stores the internal long parameter state used by <see cref="WindowsHotkeyNativeMessage"/> while executing its surrounding workflow.
     /// </summary>
     public IntPtr LongParameter;
     /// <summary>
-    /// Stores time.
+    /// Stores the internal time state used by <see cref="WindowsHotkeyNativeMessage"/> while executing its surrounding workflow.
     /// </summary>
     public uint Time;
     /// <summary>
-    /// Stores point.
+    /// Stores the internal point state used by <see cref="WindowsHotkeyNativeMessage"/> while executing its surrounding workflow.
     /// </summary>
     public WindowsHotkeyNativePoint Point;
     /// <summary>
-    /// Stores private.
+    /// Stores the internal private state used by <see cref="WindowsHotkeyNativeMessage"/> while executing its surrounding workflow.
     /// </summary>
     public uint Private;
 }
 
 /// <summary>
-/// Represents a windows hotkey native point.
+/// Represents a windows hotkey native point application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 [StructLayout(LayoutKind.Sequential)]
 public struct WindowsHotkeyNativePoint
 {
     /// <summary>
-    /// Stores horizontal position.
+    /// Stores the internal x state used by <see cref="WindowsHotkeyNativePoint"/> while executing its surrounding workflow.
     /// </summary>
     public int X;
     /// <summary>
-    /// Stores vertical position.
+    /// Stores the internal y state used by <see cref="WindowsHotkeyNativePoint"/> while executing its surrounding workflow.
     /// </summary>
     public int Y;
 }
@@ -89,20 +110,51 @@ public struct WindowsHotkeyNativePoint
 /// </summary>
 public sealed class WindowsHotkeyNativeService : IWindowsHotkeyNativeService, IDisposable
 {
+    /// <summary>
+    /// Stores the logger used by <see cref="WindowsHotkeyNativeService"/> to record operational diagnostics without coupling callers to logging details.
+    /// </summary>
     private readonly ILogger<WindowsHotkeyNativeService> logger;
+    /// <summary>
+    /// Stores the internal user32 library state used by <see cref="WindowsHotkeyNativeService"/> while executing its surrounding workflow.
+    /// </summary>
     private IntPtr user32Library;
+    /// <summary>
+    /// Stores the internal kernel32 library state used by <see cref="WindowsHotkeyNativeService"/> while executing its surrounding workflow.
+    /// </summary>
     private IntPtr kernel32Library;
+    /// <summary>
+    /// Stores the internal register hot key state used by <see cref="WindowsHotkeyNativeService"/> while executing its surrounding workflow.
+    /// </summary>
     private RegisterHotKeyDelegate? registerHotKey;
+    /// <summary>
+    /// Stores the internal unregister hot key state used by <see cref="WindowsHotkeyNativeService"/> while executing its surrounding workflow.
+    /// </summary>
     private UnregisterHotKeyDelegate? unregisterHotKey;
+    /// <summary>
+    /// Stores the internal get message state used by <see cref="WindowsHotkeyNativeService"/> while executing its surrounding workflow.
+    /// </summary>
     private GetMessageDelegate? getMessage;
+    /// <summary>
+    /// Stores the internal peek message state used by <see cref="WindowsHotkeyNativeService"/> while executing its surrounding workflow.
+    /// </summary>
     private PeekMessageDelegate? peekMessage;
+    /// <summary>
+    /// Stores the internal post thread message state used by <see cref="WindowsHotkeyNativeService"/> while executing its surrounding workflow.
+    /// </summary>
     private PostThreadMessageDelegate? postThreadMessage;
+    /// <summary>
+    /// Stores the internal get current thread identifier state used by <see cref="WindowsHotkeyNativeService"/> while executing its surrounding workflow.
+    /// </summary>
     private GetCurrentThreadIdDelegate? getCurrentThreadId;
+    /// <summary>
+    /// Stores the internal disposed state used by <see cref="WindowsHotkeyNativeService"/> while executing its surrounding workflow.
+    /// </summary>
     private bool disposed;
 
     /// <summary>
-    /// Runs the windows hotkey native service operation.
+    /// Initializes a new <see cref="WindowsHotkeyNativeService"/> instance and captures the dependencies or initial state required by its windows hotkey native workflow.
     /// </summary>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     public WindowsHotkeyNativeService(ILogger<WindowsHotkeyNativeService> logger)
     {
         this.logger = logger;
@@ -133,13 +185,16 @@ public sealed class WindowsHotkeyNativeService : IWindowsHotkeyNativeService, ID
     }
 
     /// <summary>
-    /// Gets or sets is available.
+    /// Gets or sets a value indicating whether available applies to the windows hotkey native state.
     /// </summary>
+    /// <value>The is available value exposed by <see cref="WindowsHotkeyNativeService"/>.</value>
     public bool IsAvailable { get; private set; }
 
     /// <summary>
-    /// Attempts to initialize message queue.
+    /// Attempts to initialize message queue as part of the windows hotkey native service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="threadId">Identifier of the thread to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool TryInitializeMessageQueue(out uint threadId)
     {
         try
@@ -162,8 +217,13 @@ public sealed class WindowsHotkeyNativeService : IWindowsHotkeyNativeService, ID
     }
 
     /// <summary>
-    /// Attempts to register hot key.
+    /// Attempts to register hot key as part of the windows hotkey native service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="windowHandle">Int ptr dependency used by the windows hotkey native workflow to provide the corresponding application capability.</param>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="modifiers">Modifiers value supplied to the windows hotkey native operation and used when producing its result.</param>
+    /// <param name="virtualKey">Virtual key value supplied to the windows hotkey native operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool TryRegisterHotKey(IntPtr windowHandle, int id, uint modifiers, uint virtualKey)
     {
         try
@@ -183,8 +243,11 @@ public sealed class WindowsHotkeyNativeService : IWindowsHotkeyNativeService, ID
     }
 
     /// <summary>
-    /// Attempts to unregister hot key.
+    /// Attempts to unregister hot key as part of the windows hotkey native service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="windowHandle">Int ptr dependency used by the windows hotkey native workflow to provide the corresponding application capability.</param>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool TryUnregisterHotKey(IntPtr windowHandle, int id)
     {
         try
@@ -204,8 +267,10 @@ public sealed class WindowsHotkeyNativeService : IWindowsHotkeyNativeService, ID
     }
 
     /// <summary>
-    /// Reads message.
+    /// Reads message as part of the windows hotkey native service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="message">Message value supplied to the windows hotkey native operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     public int ReadMessage(out WindowsHotkeyNativeMessage message)
     {
         try
@@ -227,8 +292,13 @@ public sealed class WindowsHotkeyNativeService : IWindowsHotkeyNativeService, ID
     }
 
     /// <summary>
-    /// Attempts to post thread message.
+    /// Attempts to post thread message as part of the windows hotkey native service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="threadId">Identifier of the thread to use for this operation.</param>
+    /// <param name="message">Message value supplied to the windows hotkey native operation and used when producing its result.</param>
+    /// <param name="wordParameter">Word parameter value supplied to the windows hotkey native operation and used when producing its result.</param>
+    /// <param name="longParameter">Int ptr dependency used by the windows hotkey native workflow to provide the corresponding application capability.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool TryPostThreadMessage(uint threadId, uint message, UIntPtr wordParameter, IntPtr longParameter)
     {
         try
@@ -248,8 +318,12 @@ public sealed class WindowsHotkeyNativeService : IWindowsHotkeyNativeService, ID
     }
 
     /// <summary>
-    /// Loads delegate.
+    /// Loads delegate as part of the windows hotkey native service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <typeparam name="TDelegate">Type used for t delegate values handled by <see cref="WindowsHotkeyNativeService"/>.</typeparam>
+    /// <param name="library">Int ptr dependency used by the windows hotkey native workflow to provide the corresponding application capability.</param>
+    /// <param name="exportName">Export name value supplied to the windows hotkey native operation and used when producing its result.</param>
+    /// <returns>The t delegate produced by the operation.</returns>
     private TDelegate LoadDelegate<TDelegate>(IntPtr library, string exportName)
         where TDelegate : Delegate
     {
@@ -268,7 +342,7 @@ public sealed class WindowsHotkeyNativeService : IWindowsHotkeyNativeService, ID
     }
 
     /// <summary>
-    /// Runs the dispose operation.
+    /// Releases resources owned by <see cref="WindowsHotkeyNativeService"/> and leaves the windows hotkey native workflow in a safely disposed state.
     /// </summary>
     public void Dispose()
     {
@@ -294,7 +368,7 @@ public sealed class WindowsHotkeyNativeService : IWindowsHotkeyNativeService, ID
     }
 
     /// <summary>
-    /// Runs the release libraries operation.
+    /// Performs release libraries as part of the windows hotkey native service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     private void ReleaseLibraries()
     {
@@ -318,41 +392,41 @@ public sealed class WindowsHotkeyNativeService : IWindowsHotkeyNativeService, ID
     }
 
     /// <summary>
-    /// Represents the bool callback.
+    /// Defines the callback signature used to report or process bool information between collaborating components.
     /// </summary>
     [UnmanagedFunctionPointer(CallingConvention.Winapi, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private delegate bool RegisterHotKeyDelegate(IntPtr windowHandle, int id, uint modifiers, uint virtualKey);
 
     /// <summary>
-    /// Represents the bool callback.
+    /// Defines the callback signature used to report or process bool information between collaborating components.
     /// </summary>
     [UnmanagedFunctionPointer(CallingConvention.Winapi, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private delegate bool UnregisterHotKeyDelegate(IntPtr windowHandle, int id);
 
     /// <summary>
-    /// Represents the int callback.
+    /// Defines the callback signature used to report or process int information between collaborating components.
     /// </summary>
     [UnmanagedFunctionPointer(CallingConvention.Winapi, SetLastError = true)]
     private delegate int GetMessageDelegate(out WindowsHotkeyNativeMessage message, IntPtr windowHandle, uint minimumFilter, uint maximumFilter);
 
     /// <summary>
-    /// Represents the bool callback.
+    /// Defines the callback signature used to report or process bool information between collaborating components.
     /// </summary>
     [UnmanagedFunctionPointer(CallingConvention.Winapi, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private delegate bool PeekMessageDelegate(out WindowsHotkeyNativeMessage message, IntPtr windowHandle, uint minimumFilter, uint maximumFilter, uint removeMessage);
 
     /// <summary>
-    /// Represents the bool callback.
+    /// Defines the callback signature used to report or process bool information between collaborating components.
     /// </summary>
     [UnmanagedFunctionPointer(CallingConvention.Winapi, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private delegate bool PostThreadMessageDelegate(uint threadId, uint message, UIntPtr wordParameter, IntPtr longParameter);
 
     /// <summary>
-    /// Represents the uint callback.
+    /// Defines the callback signature used to report or process uint information between collaborating components.
     /// </summary>
     [UnmanagedFunctionPointer(CallingConvention.Winapi)]
     private delegate uint GetCurrentThreadIdDelegate();

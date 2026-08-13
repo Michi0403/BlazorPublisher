@@ -8,8 +8,13 @@ using System.Text.Json;
 namespace PublisherStudio.HostedServices.OrganicPlugins;
 
 /// <summary>
-/// Provides local gpt discovery hosted service operations.
+/// Coordinates LocalGPT discovery behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
+/// <param name="options">Options containing the caller-supplied values that control this operation.</param>
+/// <param name="registry">Local gpt discovery registry dependency used by the LocalGPT discovery workflow to provide the corresponding application capability.</param>
+/// <param name="connection">Local gpt connection service dependency used by the LocalGPT discovery workflow to provide the corresponding application capability.</param>
+/// <param name="codec">Organic plugin protocol codec dependency used by the LocalGPT discovery workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class LocalGptDiscoveryHostedService(
     IOptions<OrganicPluginOptions> options,
     ILocalGptDiscoveryRegistry registry,
@@ -17,15 +22,20 @@ public sealed class LocalGptDiscoveryHostedService(
     IOrganicPluginProtocolCodec codec,
     ILogger<LocalGptDiscoveryHostedService> logger) : BackgroundService
 {
+    /// <summary>
+    /// Stores the internal auto connect in progress state used by <see cref="LocalGptDiscoveryHostedService"/> while executing its surrounding workflow.
+    /// </summary>
     private int autoConnectInProgress;
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory automatically attempted peers collection maintained internally by <see cref="LocalGptDiscoveryHostedService"/> for its current workflow state.
     /// </summary>
     private readonly HashSet<string> automaticallyAttemptedPeers = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
-    /// Runs the execute async operation.
+    /// Performs execute as part of the LocalGPT discovery service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="stoppingToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         if (!options.Value.Enabled || !options.Value.EnableDiscovery) return;

@@ -8,18 +8,31 @@ using PublisherStudio.BusinessObjects;
 namespace PublisherStudio.Services.PictureStudio.Import;
 
 /// <summary>
-/// Provides open raster import service operations.
+/// Coordinates open raster import behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
+/// <param name="documentFactory">Publisher document factory dependency used by the open raster import workflow to provide the corresponding application capability.</param>
+/// <param name="svgSanitizer">Svg sanitizer value supplied to the open raster import operation and used when producing its result.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFactory, 
     SvgInterchangeSanitizer svgSanitizer,
     ILogger<OpenRasterImportService> logger)
 {
+    /// <summary>
+    /// Stores the internal layer name state used by <see cref="OpenRasterImportService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly XName LayerName = "layer";
+    /// <summary>
+    /// Stores the internal stack name state used by <see cref="OpenRasterImportService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly XName StackName = "stack";
 
     /// <summary>
-    /// Imports async.
+    /// Performs import as part of the open raster import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="input">Input value supplied to the open raster import operation and used when producing its result.</param>
+    /// <param name="fileName">File name value supplied to the open raster import operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The picture import result produced by the operation.</returns>
     public async Task<PictureImportResult> ImportAsync(Stream input, string fileName, CancellationToken cancellationToken = default)
     {
         try
@@ -89,8 +102,18 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
     }
 
     /// <summary>
-    /// Reads stack async.
+    /// Reads stack as part of the open raster import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="archive">Archive value supplied to the open raster import operation and used when producing its result.</param>
+    /// <param name="stack">Stack value supplied to the open raster import operation and used when producing its result.</param>
+    /// <param name="layers">Layers value supplied to the open raster import operation and used when producing its result.</param>
+    /// <param name="issues">Issues value supplied to the open raster import operation and used when producing its result.</param>
+    /// <param name="parentPath">Parent path value supplied to the open raster import operation and used when producing its result.</param>
+    /// <param name="parentOpacity">Parent opacity value supplied to the open raster import operation and used when producing its result.</param>
+    /// <param name="parentVisible">Value indicating whether parent visible should apply to this operation.</param>
+    /// <param name="scale">Scale value supplied to the open raster import operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ReadStackAsync(
         ZipArchive archive,
         XElement stack,
@@ -228,8 +251,11 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
     }
 
     /// <summary>
-    /// Reads image size.
+    /// Reads image size as part of the open raster import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="bytes">Bytes value supplied to the open raster import operation and used when producing its result.</param>
+    /// <param name="extension">Extension value supplied to the open raster import operation and used when producing its result.</param>
+    /// <returns>The int width int height produced by the operation.</returns>
     private (int Width, int Height) ReadImageSize(byte[] bytes, string extension)
     {
         if (extension == ".png" && bytes.Length >= 24 && bytes.AsSpan(0, 8).SequenceEqual(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 }))
@@ -241,8 +267,11 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
 
 
     /// <summary>
-    /// Reads int.
+    /// Reads int as part of the open raster import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the open raster import operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the open raster import operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     private int ReadInt(string? value, int fallback) {
         try
         {
@@ -257,8 +286,11 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
     }
 
     /// <summary>
-    /// Reads double.
+    /// Reads double as part of the open raster import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the open raster import operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the open raster import operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double ReadDouble(string? value, double fallback) {
         try
         {
@@ -275,8 +307,10 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
     }
 
     /// <summary>
-    /// Runs the map blend mode operation.
+    /// Performs map blend mode as part of the open raster import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the open raster import operation and used when producing its result.</param>
+    /// <returns>The picture blend mode produced by the operation.</returns>
     private PictureBlendMode MapBlendMode(string? value)
     {
         try
@@ -305,8 +339,10 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
     }
 
     /// <summary>
-    /// Runs the decode SVG operation.
+    /// Performs decode SVG as part of the open raster import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="bytes">Bytes value supplied to the open raster import operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string DecodeSvg(byte[] bytes)
     {
         try
@@ -325,8 +361,10 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
     }
 
     /// <summary>
-    /// Runs the decompress SVG operation.
+    /// Performs decompress SVG as part of the open raster import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="bytes">Bytes value supplied to the open raster import operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string DecompressSvg(byte[] bytes)
     {
         try
@@ -358,8 +396,11 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
     }
 
     /// <summary>
-    /// Reads big endian int.
+    /// Reads big endian int as part of the open raster import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="bytes">Bytes value supplied to the open raster import operation and used when producing its result.</param>
+    /// <param name="offset">Offset value supplied to the open raster import operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     private int ReadBigEndianInt(byte[] bytes, int offset)
     {
         try
@@ -382,8 +423,11 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
 
 
     /// <summary>
-    /// Runs the clean name operation.
+    /// Performs clean name as part of the open raster import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the open raster import operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the open raster import operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string CleanName(string? value, string fallback) {
         try
         {
@@ -397,8 +441,10 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
         }
     }
     /// <summary>
-    /// Determines whether true.
+    /// Determines whether true as part of the open raster import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the open raster import operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool IsTrue(string? value) {
         try
         {
@@ -412,8 +458,11 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
         }
     }
     /// <summary>
-    /// Runs the nearly operation.
+    /// Performs nearly as part of the open raster import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="left">Left value supplied to the open raster import operation and used when producing its result.</param>
+    /// <param name="right">Right value supplied to the open raster import operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool Nearly(double left, double right) {
         try
         {

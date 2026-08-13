@@ -5,13 +5,16 @@ using PublisherStudio.BusinessObjects;
 namespace PublisherStudio.Services.OpenScad;
 
 /// <summary>
-/// Represents an open scad value formatter.
+/// Represents an open OpenSCAD value formatter application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public sealed class OpenScadValueFormatter : IOpenScadValueFormatter
 {
     /// <summary>
-    /// Runs the format operation.
+    /// Performs format for <see cref="OpenScadValueFormatter"/>, keeping the operation consistent with the state and invariants of the surrounding open OpenSCAD value formatter workflow.
     /// </summary>
+    /// <param name="value">Value value supplied to the open OpenSCAD value formatter operation and used when producing its result.</param>
+    /// <param name="fallbackExpression">Fallback expression value supplied to the open OpenSCAD value formatter operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string Format(OpenScadValue? value, string fallbackExpression = "undef")
     {
     try
@@ -40,8 +43,10 @@ public sealed class OpenScadValueFormatter : IOpenScadValueFormatter
 }
 
     /// <summary>
-    /// Runs the quote operation.
+    /// Performs quote for <see cref="OpenScadValueFormatter"/>, keeping the operation consistent with the state and invariants of the surrounding open OpenSCAD value formatter workflow.
     /// </summary>
+    /// <param name="value">Value value supplied to the open OpenSCAD value formatter operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string Quote(string value)
     {
     try
@@ -60,8 +65,11 @@ public sealed class OpenScadValueFormatter : IOpenScadValueFormatter
 }
 
     /// <summary>
-    /// Runs the identifier operation.
+    /// Performs identifier for <see cref="OpenScadValueFormatter"/>, keeping the operation consistent with the state and invariants of the surrounding open OpenSCAD value formatter workflow.
     /// </summary>
+    /// <param name="value">Value value supplied to the open OpenSCAD value formatter operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the open OpenSCAD value formatter operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string Identifier(string value, string fallback = "part")
     {
     try
@@ -82,8 +90,10 @@ public sealed class OpenScadValueFormatter : IOpenScadValueFormatter
 }
 
     /// <summary>
-    /// Runs the vector operation.
+    /// Performs vector for <see cref="OpenScadValueFormatter"/>, keeping the operation consistent with the state and invariants of the surrounding open OpenSCAD value formatter workflow.
     /// </summary>
+    /// <param name="values">Double dependency used by the open OpenSCAD value formatter workflow to provide the corresponding application capability.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Vector(IEnumerable<double> values) {
     try
     {
@@ -96,8 +106,10 @@ public sealed class OpenScadValueFormatter : IOpenScadValueFormatter
     }
 }
     /// <summary>
-    /// Runs the matrix operation.
+    /// Performs matrix for <see cref="OpenScadValueFormatter"/>, keeping the operation consistent with the state and invariants of the surrounding open OpenSCAD value formatter workflow.
     /// </summary>
+    /// <param name="rows">Double dependency used by the open OpenSCAD value formatter workflow to provide the corresponding application capability.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Matrix(IEnumerable<IEnumerable<double>> rows) {
     try
     {
@@ -111,8 +123,10 @@ public sealed class OpenScadValueFormatter : IOpenScadValueFormatter
 }
 
     /// <summary>
-    /// Runs the faces operation.
+    /// Performs faces for <see cref="OpenScadValueFormatter"/>, keeping the operation consistent with the state and invariants of the surrounding open OpenSCAD value formatter workflow.
     /// </summary>
+    /// <param name="rows">Int dependency used by the open OpenSCAD value formatter workflow to provide the corresponding application capability.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Faces(IEnumerable<IEnumerable<int>> rows)
     {
     try
@@ -128,8 +142,10 @@ public sealed class OpenScadValueFormatter : IOpenScadValueFormatter
     }
 }
     /// <summary>
-    /// Runs the number operation.
+    /// Performs number for <see cref="OpenScadValueFormatter"/>, keeping the operation consistent with the state and invariants of the surrounding open OpenSCAD value formatter workflow.
     /// </summary>
+    /// <param name="value">Value value supplied to the open OpenSCAD value formatter operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Number(double value) {
     try
     {

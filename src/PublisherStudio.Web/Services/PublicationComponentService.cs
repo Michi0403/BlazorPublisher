@@ -11,9 +11,18 @@ namespace PublisherStudio.Services;
 /// </summary>
 public sealed class PublicationComponentService
 {
+        /// <summary>
+        /// Stores the logger used by <see cref="PublicationComponentService"/> to record operational diagnostics without coupling callers to logging details.
+        /// </summary>
         private readonly ILogger<PublicationComponentService> logger;
 
+    /// <summary>
+    /// Stores the publication data service dependency used by <see cref="PublicationComponentService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly PublicationDataService _data;
+    /// <summary>
+    /// Stores the publication markup service dependency used by <see cref="PublicationComponentService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly IPublicationMarkupService _markup;
     /// <summary>
     /// Runs the new operation.
@@ -25,8 +34,11 @@ public sealed class PublicationComponentService
     };
 
     /// <summary>
-    /// Runs the publication component service operation.
+    /// Initializes a new <see cref="PublicationComponentService"/> instance and captures the dependencies or initial state required by its publication component workflow.
     /// </summary>
+    /// <param name="data">Publication data service dependency used by the publication component workflow to provide the corresponding application capability.</param>
+    /// <param name="markup">Publication markup service dependency used by the publication component workflow to provide the corresponding application capability.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     public PublicationComponentService(PublicationDataService data, IPublicationMarkupService markup, ILogger<PublicationComponentService> logger)
     {
         _data = data;
@@ -35,8 +47,10 @@ public sealed class PublicationComponentService
     }
 
     /// <summary>
-    /// Runs the clone operation.
+    /// Performs clone as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the publication component operation and used when producing its result.</param>
+    /// <returns>The dev extreme component element produced by the operation.</returns>
     public DevExtremeComponentElement Clone(DevExtremeComponentElement source)
     {
         try
@@ -54,8 +68,11 @@ public sealed class PublicationComponentService
     }
 
     /// <summary>
-    /// Runs the copy configuration operation.
+    /// Performs copy configuration as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the publication component operation and used when producing its result.</param>
+    /// <param name="target">Target value supplied to the publication component operation and used when producing its result.</param>
+    /// <param name="preservePlacement">Value indicating whether preserve placement should apply to this operation.</param>
     public void CopyConfiguration(DevExtremeComponentElement source, DevExtremeComponentElement target, bool preservePlacement = true)
     {
         try
@@ -101,8 +118,11 @@ public sealed class PublicationComponentService
     }
 
     /// <summary>
-    /// Runs the create operation.
+    /// Performs create as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication component operation and used when producing its result.</param>
+    /// <param name="kind">Kind value supplied to the publication component operation and used when producing its result.</param>
+    /// <returns>The dev extreme component element produced by the operation.</returns>
     public DevExtremeComponentElement Create(PublicationDocument document, PublicationComponentKind kind)
     {
         try
@@ -163,8 +183,10 @@ public sealed class PublicationComponentService
     }
 
     /// <summary>
-    /// Runs the normalize operation.
+    /// Performs normalize as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication component operation and used when producing its result.</param>
+    /// <param name="item">Item value supplied to the publication component operation and used when producing its result.</param>
     public void Normalize(PublicationDocument document, DevExtremeComponentElement item)
     {
         try
@@ -363,6 +385,9 @@ public sealed class PublicationComponentService
     /// <summary>
     /// Applies fields from data object.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication component operation and used when producing its result.</param>
+    /// <param name="item">Item value supplied to the publication component operation and used when producing its result.</param>
+    /// <param name="replace">Value indicating whether replace should apply to this operation.</param>
     public void ApplyFieldsFromDataObject(PublicationDocument document, DevExtremeComponentElement item, bool replace)
     {
         try
@@ -394,8 +419,14 @@ public sealed class PublicationComponentService
     }
 
     /// <summary>
-    /// Builds client configuration.
+    /// Builds client configuration as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication component operation and used when producing its result.</param>
+    /// <param name="item">Item value supplied to the publication component operation and used when producing its result.</param>
+    /// <param name="currentPageId">Identifier of the current page to use for this operation.</param>
+    /// <param name="designerMode">Value indicating whether designer mode should apply to this operation.</param>
+    /// <param name="designerInteractionMode">Designer interaction mode value supplied to the publication component operation and used when producing its result.</param>
+    /// <returns>The object produced by the operation.</returns>
     public object BuildClientConfiguration(PublicationDocument document, DevExtremeComponentElement item, Guid currentPageId, bool designerMode = false, string designerInteractionMode = "content")
     {
         try
@@ -537,8 +568,14 @@ public sealed class PublicationComponentService
     }
 
     /// <summary>
-    /// Builds client configuration base64.
+    /// Builds client configuration base64 as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication component operation and used when producing its result.</param>
+    /// <param name="item">Item value supplied to the publication component operation and used when producing its result.</param>
+    /// <param name="currentPageId">Identifier of the current page to use for this operation.</param>
+    /// <param name="designerMode">Value indicating whether designer mode should apply to this operation.</param>
+    /// <param name="designerInteractionMode">Designer interaction mode value supplied to the publication component operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string BuildClientConfigurationBase64(PublicationDocument document, DevExtremeComponentElement item, Guid currentPageId, bool designerMode = false, string designerInteractionMode = "content") {
         try
         {
@@ -554,8 +591,10 @@ public sealed class PublicationComponentService
 
 
     /// <summary>
-    /// Builds menu items.
+    /// Builds menu items as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="item">Item value supplied to the publication component operation and used when producing its result.</param>
+    /// <returns>The object produced by the operation.</returns>
     private object[] BuildMenuItems(DevExtremeComponentElement item)
         {
             try
@@ -584,8 +623,12 @@ public sealed class PublicationComponentService
         }
 
     /// <summary>
-    /// Builds fields.
+    /// Builds fields as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication component operation and used when producing its result.</param>
+    /// <param name="fields">Publication component field dependency used by the publication component workflow to provide the corresponding application capability.</param>
+    /// <param name="currentPageId">Identifier of the current page to use for this operation.</param>
+    /// <returns>The object produced by the operation.</returns>
     private object[] BuildFields(PublicationDocument document, IEnumerable<PublicationComponentField> fields, Guid currentPageId)
     {
         try
@@ -644,8 +687,12 @@ public sealed class PublicationComponentService
     }
 
     /// <summary>
-    /// Builds actions.
+    /// Builds actions as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication component operation and used when producing its result.</param>
+    /// <param name="item">Item value supplied to the publication component operation and used when producing its result.</param>
+    /// <param name="currentPageId">Identifier of the current page to use for this operation.</param>
+    /// <returns>The object produced by the operation.</returns>
     private object[] BuildActions(PublicationDocument document, DevExtremeComponentElement item, Guid currentPageId)
     {
         try
@@ -691,8 +738,12 @@ public sealed class PublicationComponentService
     }
 
     /// <summary>
-    /// Builds panel configuration.
+    /// Builds panel configuration as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication component operation and used when producing its result.</param>
+    /// <param name="panel">Panel value supplied to the publication component operation and used when producing its result.</param>
+    /// <param name="currentPageId">Identifier of the current page to use for this operation.</param>
+    /// <returns>The object produced by the operation.</returns>
     private object BuildPanelConfiguration(PublicationDocument document, PublicationComponentPanel panel, Guid currentPageId)
     {
         try
@@ -739,8 +790,11 @@ public sealed class PublicationComponentService
     }
 
     /// <summary>
-    /// Builds connection.
+    /// Builds connection as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="connection">Connection value supplied to the publication component operation and used when producing its result.</param>
+    /// <param name="dataObjectLive">Data object live value supplied to the publication component operation and used when producing its result.</param>
+    /// <returns>The object produced by the operation.</returns>
     private object BuildConnection(PublicationComponentConnection connection, object? dataObjectLive) {
         try
         {
@@ -780,8 +834,11 @@ public sealed class PublicationComponentService
     }
 
     /// <summary>
-    /// Builds live data.
+    /// Builds live data as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication component operation and used when producing its result.</param>
+    /// <param name="data">Data value supplied to the publication component operation and used when producing its result.</param>
+    /// <returns>The object produced by the operation.</returns>
     private object? BuildLiveData(PublicationDocument document, PublicationDataObject? data)
     {
         try
@@ -819,8 +876,10 @@ public sealed class PublicationComponentService
     }
 
     /// <summary>
-    /// Ensures data object.
+    /// Ensures data object as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication component operation and used when producing its result.</param>
+    /// <returns>The publication data object produced by the operation.</returns>
     private PublicationDataObject EnsureDataObject(PublicationDocument document)
     {
         try
@@ -845,8 +904,10 @@ public sealed class PublicationComponentService
     }
 
     /// <summary>
-    /// Ensures publication media object.
+    /// Ensures publication media object as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication component operation and used when producing its result.</param>
+    /// <returns>The publication data object produced by the operation.</returns>
     private PublicationDataObject EnsurePublicationMediaObject(PublicationDocument document)
     {
         try
@@ -864,8 +925,10 @@ public sealed class PublicationComponentService
     }
 
     /// <summary>
-    /// Ensures chat preview object.
+    /// Ensures chat preview object as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication component operation and used when producing its result.</param>
+    /// <returns>The publication data object produced by the operation.</returns>
     private PublicationDataObject EnsureChatPreviewObject(PublicationDocument document)
     {
         try
@@ -893,8 +956,11 @@ public sealed class PublicationComponentService
     }
 
     /// <summary>
-    /// Converts value.
+    /// Converts value as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the publication component operation and used when producing its result.</param>
+    /// <param name="kind">Kind value supplied to the publication component operation and used when producing its result.</param>
+    /// <returns>The object produced by the operation.</returns>
     private object? ConvertValue(string value, PublicationDataValueKind? kind)
     {
         try
@@ -916,6 +982,7 @@ public sealed class PublicationComponentService
     /// <summary>
     /// Applies mappings from fields.
     /// </summary>
+    /// <param name="item">Item value supplied to the publication component operation and used when producing its result.</param>
     private void ApplyMappingsFromFields(DevExtremeComponentElement item)
     {
         try
@@ -965,8 +1032,11 @@ public sealed class PublicationComponentService
     }
 
     /// <summary>
-    /// Runs the find operation.
+    /// Performs find as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="fields">Publication component field dependency used by the publication component workflow to provide the corresponding application capability.</param>
+    /// <param name="names">Names value supplied to the publication component operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string? Find(IEnumerable<PublicationComponentField> fields, params string[] names)
     {
         try
@@ -988,8 +1058,11 @@ public sealed class PublicationComponentService
     }
 
     /// <summary>
-    /// Applies kind defaults.
+    /// Applies kind defaults as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication component operation and used when producing its result.</param>
+    /// <param name="item">Item value supplied to the publication component operation and used when producing its result.</param>
+    /// <param name="onlyMissing">Value indicating whether only missing should apply to this operation.</param>
     private void ApplyKindDefaults(PublicationDocument document, DevExtremeComponentElement item, bool onlyMissing = false)
     {
         try
@@ -1059,8 +1132,10 @@ public sealed class PublicationComponentService
     }
 
     /// <summary>
-    /// Runs the editor for operation.
+    /// Performs editor for as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="kind">Kind value supplied to the publication component operation and used when producing its result.</param>
+    /// <returns>The publication component editor kind produced by the operation.</returns>
     private PublicationComponentEditorKind EditorFor(PublicationDataValueKind kind) {
         try
         {
@@ -1099,8 +1174,10 @@ public sealed class PublicationComponentService
     };
 
     /// <summary>
-    /// Runs the component name operation.
+    /// Performs component name as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="kind">Kind value supplied to the publication component operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string ComponentName(PublicationComponentKind kind) {
         try
         {
@@ -1137,8 +1214,10 @@ public sealed class PublicationComponentService
     }
 
     /// <summary>
-    /// Runs the friendly operation.
+    /// Performs friendly as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the publication component operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string Friendly(string value)
     {
         try
@@ -1157,8 +1236,10 @@ public sealed class PublicationComponentService
     }
 
     /// <summary>
-    /// Runs the sanitize CSS class operation.
+    /// Performs sanitize CSS class as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the publication component operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string SanitizeCssClass(string? value) {
         try
         {
@@ -1176,8 +1257,10 @@ public sealed class PublicationComponentService
     }
 
     /// <summary>
-    /// Runs the sanitize inline CSS operation.
+    /// Performs sanitize inline CSS as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the publication component operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string SanitizeInlineCss(string? value)
     {
         try
@@ -1199,8 +1282,10 @@ public sealed class PublicationComponentService
     }
 
     /// <summary>
-    /// Normalizes JSON object.
+    /// Normalizes JSON object as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="json">Json value supplied to the publication component operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeJsonObject(string? json)
     {
         try
@@ -1226,8 +1311,10 @@ public sealed class PublicationComponentService
     }
 
     /// <summary>
-    /// Normalizes odata key type.
+    /// Normalizes o data key type as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the publication component operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeODataKeyType(string? value)
     {
         try

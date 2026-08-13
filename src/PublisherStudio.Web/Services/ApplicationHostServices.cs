@@ -7,28 +7,37 @@ using PublisherStudio.Services.Configuration;
 namespace PublisherStudio.Services;
 
 /// <summary>
-/// Defines the application port resolver contract.
+/// Defines the contract for application port behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
 public interface IApplicationPortResolver
 {
     /// <summary>
-    /// Runs the resolve operation.
+    /// Performs resolve for <see cref="IApplicationPortResolver"/>, keeping the operation consistent with the state and invariants of the surrounding application port workflow.
     /// </summary>
+    /// <param name="args">String dependency used by the application port workflow to provide the corresponding application capability.</param>
+    /// <returns>The int produced by the operation.</returns>
     int Resolve(IReadOnlyList<string> args);
 }
 
 /// <summary>
-/// Provides application port resolver operations.
+/// Resolves application port choices from the available runtime state and returns the application-appropriate result to callers.
 /// </summary>
+/// <param name="systemVariables">System variable store service dependency used by the application port workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class ApplicationPortResolver(
     ISystemVariableStoreService systemVariables,
     ILogger<ApplicationPortResolver>? logger = null) : IApplicationPortResolver
 {
+    /// <summary>
+    /// Stores the logger used by <see cref="ApplicationPortResolver"/> to record operational diagnostics without coupling callers to logging details.
+    /// </summary>
     private readonly ILogger<ApplicationPortResolver> logger = logger ?? NullLogger<ApplicationPortResolver>.Instance;
 
     /// <summary>
-    /// Runs the resolve operation.
+    /// Performs resolve for <see cref="ApplicationPortResolver"/>, keeping the operation consistent with the state and invariants of the surrounding application port workflow.
     /// </summary>
+    /// <param name="args">String dependency used by the application port workflow to provide the corresponding application capability.</param>
+    /// <returns>The int produced by the operation.</returns>
     public int Resolve(IReadOnlyList<string> args)
     {
         try
@@ -63,32 +72,45 @@ public sealed class ApplicationPortResolver(
 
 
 /// <summary>
-/// Defines the runtime endpoint state contract.
+/// Defines the contract for runtime endpoint behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
 public interface IRuntimeEndpointState
 {
+    /// <summary>
+    /// Gets the base URL that identifies the network or application endpoint associated with this runtime endpoint state.
+    /// </summary>
+    /// <value>The base URL value exposed by <see cref="IRuntimeEndpointState"/>.</value>
     string BaseUrl { get; }
     /// <summary>
-    /// Sets base URL.
+    /// Sets base URL for <see cref="IRuntimeEndpointState"/>, keeping the operation consistent with the state and invariants of the surrounding runtime endpoint workflow.
     /// </summary>
+    /// <param name="baseUrl">Base url value supplied to the runtime endpoint operation and used when producing its result.</param>
     void SetBaseUrl(string baseUrl);
     /// <summary>
-    /// Runs the clear operation.
+    /// Performs clear for <see cref="IRuntimeEndpointState"/>, keeping the operation consistent with the state and invariants of the surrounding runtime endpoint workflow.
     /// </summary>
     void Clear();
 }
 
 /// <summary>
-/// Represents a runtime endpoint state.
+/// Represents runtime endpoint state exchanged or persisted by the surrounding application workflow, with each member describing one part of that state.
 /// </summary>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class RuntimeEndpointState(ILogger<RuntimeEndpointState> logger) : IRuntimeEndpointState
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal sync state used by <see cref="RuntimeEndpointState"/> while executing its surrounding workflow.
     /// </summary>
     private readonly System.Threading.Lock sync = new();
+    /// <summary>
+    /// Stores the internal base URL state used by <see cref="RuntimeEndpointState"/> while executing its surrounding workflow.
+    /// </summary>
     private string baseUrl = string.Empty;
 
+    /// <summary>
+    /// Gets the base URL that identifies the network or application endpoint associated with this runtime endpoint state.
+    /// </summary>
+    /// <value>The base URL value exposed by <see cref="RuntimeEndpointState"/>.</value>
     public string BaseUrl
     {
         get
@@ -110,8 +132,9 @@ public sealed class RuntimeEndpointState(ILogger<RuntimeEndpointState> logger) :
     }
 
     /// <summary>
-    /// Sets base URL.
+    /// Sets base URL for <see cref="RuntimeEndpointState"/>, keeping the operation consistent with the state and invariants of the surrounding runtime endpoint workflow.
     /// </summary>
+    /// <param name="baseUrl">Base url value supplied to the runtime endpoint operation and used when producing its result.</param>
     public void SetBaseUrl(string baseUrl)
     {
         try
@@ -128,7 +151,7 @@ public sealed class RuntimeEndpointState(ILogger<RuntimeEndpointState> logger) :
     }
 
     /// <summary>
-    /// Runs the clear operation.
+    /// Performs clear for <see cref="RuntimeEndpointState"/>, keeping the operation consistent with the state and invariants of the surrounding runtime endpoint workflow.
     /// </summary>
     public void Clear()
     {
@@ -146,37 +169,53 @@ public sealed class RuntimeEndpointState(ILogger<RuntimeEndpointState> logger) :
 }
 
 /// <summary>
-/// Defines the runtime endpoint writer contract.
+/// Defines the contract for runtime endpoint behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
 public interface IRuntimeEndpointWriter
 {
     /// <summary>
-    /// Runs the write operation.
+    /// Performs write for <see cref="IRuntimeEndpointWriter"/>, keeping the operation consistent with the state and invariants of the surrounding runtime endpoint workflow.
     /// </summary>
+    /// <param name="app">App value supplied to the runtime endpoint operation and used when producing its result.</param>
     void Write(WebApplication app);
     /// <summary>
-    /// Deletes owned endpoint.
+    /// Deletes owned endpoint for <see cref="IRuntimeEndpointWriter"/>, keeping the operation consistent with the state and invariants of the surrounding runtime endpoint workflow.
     /// </summary>
     void DeleteOwnedEndpoint();
 }
 
 /// <summary>
-/// Provides runtime endpoint writer operations.
+/// Represents a runtime endpoint application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public sealed class RuntimeEndpointWriter : IRuntimeEndpointWriter
 {
+    /// <summary>
+    /// Stores the logger used by <see cref="RuntimeEndpointWriter"/> to record operational diagnostics without coupling callers to logging details.
+    /// </summary>
     private readonly ILogger<RuntimeEndpointWriter> logger;
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal JSON options state used by <see cref="RuntimeEndpointWriter"/> while executing its surrounding workflow.
     /// </summary>
     private readonly System.Text.Json.JsonSerializerOptions _jsonOptions = new() { WriteIndented = true };
+    /// <summary>
+    /// Stores the internal runtime directory state used by <see cref="RuntimeEndpointWriter"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _runtimeDirectory;
+    /// <summary>
+    /// Stores the internal runtime file path state used by <see cref="RuntimeEndpointWriter"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _runtimeFilePath;
+    /// <summary>
+    /// Stores the runtime endpoint state dependency used by <see cref="RuntimeEndpointWriter"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly IRuntimeEndpointState _runtimeEndpointState;
 
     /// <summary>
-    /// Runs the runtime endpoint writer operation.
+    /// Initializes a new <see cref="RuntimeEndpointWriter"/> instance and captures the dependencies or initial state required by its runtime endpoint workflow.
     /// </summary>
+    /// <param name="systemVariables">System variable store service dependency used by the runtime endpoint workflow to provide the corresponding application capability.</param>
+    /// <param name="runtimeEndpointState">Runtime endpoint state dependency used by the runtime endpoint workflow to provide the corresponding application capability.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     public RuntimeEndpointWriter(
         ISystemVariableStoreService systemVariables,
         IRuntimeEndpointState runtimeEndpointState,
@@ -192,8 +231,9 @@ public sealed class RuntimeEndpointWriter : IRuntimeEndpointWriter
     }
 
     /// <summary>
-    /// Runs the write operation.
+    /// Performs write for <see cref="RuntimeEndpointWriter"/>, keeping the operation consistent with the state and invariants of the surrounding runtime endpoint workflow.
     /// </summary>
+    /// <param name="app">App value supplied to the runtime endpoint operation and used when producing its result.</param>
     public void Write(WebApplication app)
     {
         try
@@ -222,7 +262,7 @@ public sealed class RuntimeEndpointWriter : IRuntimeEndpointWriter
     }
 
     /// <summary>
-    /// Deletes owned endpoint.
+    /// Deletes owned endpoint for <see cref="RuntimeEndpointWriter"/>, keeping the operation consistent with the state and invariants of the surrounding runtime endpoint workflow.
     /// </summary>
     public void DeleteOwnedEndpoint()
     {

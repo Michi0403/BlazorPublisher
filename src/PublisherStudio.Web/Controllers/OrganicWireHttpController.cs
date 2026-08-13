@@ -13,6 +13,16 @@ namespace PublisherStudio.Controllers;
 /// Transport-neutral HTTP/JSON adapter for user-built organic add-ons and small gateway devices.
 /// The endpoint shares PublisherStudio's capability catalog, permission store, approval queue and runtime trust service.
 /// </summary>
+/// <param name="codec">Organic plugin protocol codec dependency used by the organic wire HTTP workflow to provide the corresponding application capability.</param>
+/// <param name="security">Organic runtime security service dependency used by the organic wire HTTP workflow to provide the corresponding application capability.</param>
+/// <param name="capabilities">Organic capability catalog dependency used by the organic wire HTTP workflow to provide the corresponding application capability.</param>
+/// <param name="work">Organic work coordinator dependency used by the organic wire HTTP workflow to provide the corresponding application capability.</param>
+/// <param name="replayGuard">Organic replay guard dependency used by the organic wire HTTP workflow to provide the corresponding application capability.</param>
+/// <param name="transportSecurityPolicy">Organic transport security policy dependency used by the organic wire HTTP workflow to provide the corresponding application capability.</param>
+/// <param name="envelopeFactory">Organic wire envelope factory dependency used by the organic wire HTTP workflow to provide the corresponding application capability.</param>
+/// <param name="apiSurfaces">Api surface catalog service dependency used by the organic wire HTTP workflow to provide the corresponding application capability.</param>
+/// <param name="configuredOptions">Organic plugin options dependency used by the organic wire HTTP workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 [ApiController]
 [Route("api/organic/onewire/http-json")]
 public sealed class OrganicWireHttpController(
@@ -28,8 +38,10 @@ public sealed class OrganicWireHttpController(
     ILogger<OrganicWireHttpController> logger) : ControllerBase
 {
     /// <summary>
-    /// Runs the profile operation.
+    /// Returns the profile projection for the organic wire HTTP API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpGet("profile")]
     public async Task<ActionResult<OrganicProtocolProfile>> Profile(CancellationToken cancellationToken)
     {
@@ -64,8 +76,11 @@ public sealed class OrganicWireHttpController(
     }
 
     /// <summary>
-    /// Runs the dispatch operation.
+    /// Returns the dispatch projection for the organic wire HTTP API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <param name="body">Body value supplied to the organic wire HTTP operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpPost]
     [RequestSizeLimit(OrganicWireProtocol.MaximumMessageBytes)]
     public async Task<IActionResult> Dispatch([FromBody] JsonElement body, CancellationToken cancellationToken)
@@ -113,8 +128,11 @@ public sealed class OrganicWireHttpController(
     }
 
     /// <summary>
-    /// Runs the work operation.
+    /// Returns the work projection for the organic wire HTTP API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <param name="correlationId">Identifier of the correlation to use for this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpGet("work/{correlationId:guid}")]
     public async Task<IActionResult> Work(Guid correlationId, CancellationToken cancellationToken)
     {

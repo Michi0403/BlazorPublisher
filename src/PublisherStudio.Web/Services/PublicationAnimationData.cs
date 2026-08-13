@@ -6,8 +6,9 @@ using System.Text.Json.Serialization;
 namespace PublisherStudio.Services;
 
 /// <summary>
-/// Represents a publication animation data.
+/// Represents a publication animation data application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class PublicationAnimationData(ILogger<PublicationAnimationData> logger)
 {
     /// <summary>
@@ -20,8 +21,10 @@ public sealed class PublicationAnimationData(ILogger<PublicationAnimationData> l
     };
 
     /// <summary>
-    /// Runs the animations operation.
+    /// Performs animations for <see cref="PublicationAnimationData"/>, keeping the operation consistent with the state and invariants of the surrounding publication animation data workflow.
     /// </summary>
+    /// <param name="element">Element value supplied to the publication animation data operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string Animations(PublicationElement element)
     {
     try
@@ -42,8 +45,10 @@ public sealed class PublicationAnimationData(ILogger<PublicationAnimationData> l
 }
 
     /// <summary>
-    /// Runs the interaction operation.
+    /// Performs interaction for <see cref="PublicationAnimationData"/>, keeping the operation consistent with the state and invariants of the surrounding publication animation data workflow.
     /// </summary>
+    /// <param name="element">Element value supplied to the publication animation data operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string Interaction(PublicationElement element) {
     try
     {
@@ -61,8 +66,10 @@ public sealed class PublicationAnimationData(ILogger<PublicationAnimationData> l
 }
 
     /// <summary>
-    /// Runs the signal operation.
+    /// Performs signal for <see cref="PublicationAnimationData"/>, keeping the operation consistent with the state and invariants of the surrounding publication animation data workflow.
     /// </summary>
+    /// <param name="connector">Connector value supplied to the publication animation data operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string Signal(ConnectorElement connector) {
     try
     {

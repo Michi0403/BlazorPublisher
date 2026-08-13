@@ -10,6 +10,11 @@ namespace PublisherStudio.Services.OrganicPlugins;
 /// User-started, single-flight screen-reader sessions. A session never queues a new screenshot or LocalGPT
 /// request while the previous evidence package is still pending, which prevents timer pile-ups and race conditions.
 /// </summary>
+/// <param name="codec">Organic plugin protocol codec dependency used by the recurring screen reader workflow to provide the corresponding application capability.</param>
+/// <param name="screenshots">Screenshot capture service dependency used by the recurring screen reader workflow to provide the corresponding application capability.</param>
+/// <param name="services">Service provider dependency used by the recurring screen reader workflow to provide the corresponding application capability.</param>
+/// <param name="options">Options containing the caller-supplied values that control this operation.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class RecurringScreenReaderService(
     IOrganicPluginProtocolCodec codec,
     IScreenshotCaptureService screenshots,
@@ -18,21 +23,25 @@ public sealed class RecurringScreenReaderService(
     ILogger<RecurringScreenReaderService> logger) : IRecurringScreenReaderService, IAsyncDisposable
 {
     /// <summary>
-    /// Represents a runtime.
+    /// Represents a runtime helper type nested within <see cref="RecurringScreenReaderService"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
+    /// <param name="Session">Session value supplied to the recurring screen reader operation and used when producing its result.</param>
+    /// <param name="Cancellation">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <param name="Loop">Loop value supplied to the recurring screen reader operation and used when producing its result.</param>
     private sealed record Runtime(RecurringScreenReaderSession Session, CancellationTokenSource Cancellation, Task Loop);
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory runtimes collection maintained internally by <see cref="RecurringScreenReaderService"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<Guid, Runtime> runtimes = new();
     /// <summary>
-    /// Occurs when changed.
+    /// Occurs when changed changes or completes in <see cref="RecurringScreenReaderService"/>, allowing interested callers to react without polling internal state.
     /// </summary>
     public event Action? Changed;
 
     /// <summary>
-    /// Gets sessions.
+    /// Retrieves sessions as part of the recurring screen reader service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<RecurringScreenReaderSession> GetSessions() {
     try
     {
@@ -52,8 +61,14 @@ public sealed class RecurringScreenReaderService(
 }
 
     /// <summary>
-    /// Starts async.
+    /// Performs start as part of the recurring screen reader service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="peerId">Identifier of the peer to use for this operation.</param>
+    /// <param name="selector">Selector value supplied to the recurring screen reader operation and used when producing its result.</param>
+    /// <param name="prompt">Prompt value supplied to the recurring screen reader operation and used when producing its result.</param>
+    /// <param name="intervalSeconds">Interval seconds value supplied to the recurring screen reader operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The recurring screen reader session produced by the operation.</returns>
     public Task<RecurringScreenReaderSession> StartAsync(
         string peerId,
         string selector,
@@ -105,8 +120,10 @@ public sealed class RecurringScreenReaderService(
 }
 
     /// <summary>
-    /// Stops async.
+    /// Performs stop as part of the recurring screen reader service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public async Task<bool> StopAsync(Guid sessionId)
     {
         if (!runtimes.TryRemove(sessionId, out var runtime))
@@ -124,8 +141,11 @@ public sealed class RecurringScreenReaderService(
     }
 
     /// <summary>
-    /// Runs the run async operation.
+    /// Performs run as part of the recurring screen reader service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="session">Session value supplied to the recurring screen reader operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task RunAsync(RecurringScreenReaderSession session, CancellationToken cancellationToken)
     {
         try
@@ -166,8 +186,11 @@ public sealed class RecurringScreenReaderService(
     }
 
     /// <summary>
-    /// Runs the execute single flight async operation.
+    /// Executes single flight as part of the recurring screen reader service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="session">Session value supplied to the recurring screen reader operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ExecuteSingleFlightAsync(RecurringScreenReaderSession session, CancellationToken cancellationToken)
     {
     try
@@ -259,8 +282,12 @@ public sealed class RecurringScreenReaderService(
 }
 
     /// <summary>
-    /// Runs the wait for screenshot async operation.
+    /// Performs wait for screenshot as part of the recurring screen reader service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="requestId">Identifier of the request to use for this operation.</param>
+    /// <param name="timeout">Timeout value supplied to the recurring screen reader operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The browser screenshot request produced by the operation.</returns>
     private async Task<BrowserScreenshotRequest> WaitForScreenshotAsync(Guid requestId, TimeSpan timeout, CancellationToken cancellationToken)
     {
     try
@@ -290,8 +317,9 @@ public sealed class RecurringScreenReaderService(
 }
 
     /// <summary>
-    /// Runs the dispose async operation.
+    /// Releases resources owned by <see cref="RecurringScreenReaderService"/> and leaves the recurring screen reader workflow in a safely disposed state.
     /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async ValueTask DisposeAsync()
     {
     try

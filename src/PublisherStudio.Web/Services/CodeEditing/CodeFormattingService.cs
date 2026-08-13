@@ -6,16 +6,21 @@ using PublisherStudio.Services.Configuration;
 namespace PublisherStudio.Services.CodeEditing;
 
 /// <summary>
-/// Provides code formatting service operations.
+/// Coordinates code formatting behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
+/// <param name="languages">Code language service dependency used by the code formatting workflow to provide the corresponding application capability.</param>
+/// <param name="runtimePatterns">Publisher runtime pattern service dependency used by the code formatting workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class CodeFormattingService(
     ICodeLanguageService languages,
     IPublisherRuntimePatternService runtimePatterns,
     ILogger<CodeFormattingService> logger) : ICodeFormattingService
 {
     /// <summary>
-    /// Runs the format operation.
+    /// Performs format as part of the code formatting service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
+    /// <returns>The code text result produced by the operation.</returns>
     public CodeTextResult Format(CodeTextRequest request)
     {
         try
@@ -48,8 +53,10 @@ public sealed class CodeFormattingService(
     }
 
     /// <summary>
-    /// Runs the toggle comment operation.
+    /// Performs toggle comment as part of the code formatting service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
+    /// <returns>The code text result produced by the operation.</returns>
     public CodeTextResult ToggleComment(CodeCommentRequest request)
     {
         try
@@ -84,8 +91,10 @@ public sealed class CodeFormattingService(
     }
 
     /// <summary>
-    /// Runs the analyze operation.
+    /// Performs analyze as part of the code formatting service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
+    /// <returns>The code text result produced by the operation.</returns>
     public CodeTextResult Analyze(CodeTextRequest request)
     {
         try
@@ -104,8 +113,11 @@ public sealed class CodeFormattingService(
     }
 
     /// <summary>
-    /// Runs the tokenize operation.
+    /// Performs tokenize as part of the code formatting service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="profile">Profile value supplied to the code formatting operation and used when producing its result.</param>
+    /// <param name="text">Text value supplied to the code formatting operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IReadOnlyList<CodeTokenSpan> Tokenize(CodeLanguageProfile profile, string text)
     {
         try
@@ -134,8 +146,10 @@ public sealed class CodeFormattingService(
     }
 
     /// <summary>
-    /// Normalizes lines.
+    /// Normalizes lines as part of the code formatting service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="text">Text value supplied to the code formatting operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeLines(string? text) {
         try
         {
@@ -149,8 +163,10 @@ public sealed class CodeFormattingService(
         }
     }
     /// <summary>
-    /// Starts s with closing token.
+    /// Starts s with closing token as part of the code formatting service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="line">Line value supplied to the code formatting operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool StartsWithClosingToken(string line) {
         try
         {
@@ -164,8 +180,10 @@ public sealed class CodeFormattingService(
         }
     }
     /// <summary>
-    /// Runs the brace delta operation.
+    /// Performs brace delta as part of the code formatting service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="line">Line value supplied to the code formatting operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     private int BraceDelta(string line) {
         try
         {
@@ -179,8 +197,11 @@ public sealed class CodeFormattingService(
         }
     }
     /// <summary>
-    /// Adds line comment.
+    /// Adds line comment as part of the code formatting service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="line">Line value supplied to the code formatting operation and used when producing its result.</param>
+    /// <param name="token">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string AddLineComment(string line, string token) {
         try
         {
@@ -194,8 +215,11 @@ public sealed class CodeFormattingService(
         }
     }
     /// <summary>
-    /// Removes line comment.
+    /// Removes line comment as part of the code formatting service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="line">Line value supplied to the code formatting operation and used when producing its result.</param>
+    /// <param name="token">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string RemoveLineComment(string line, string token)
     {
         try

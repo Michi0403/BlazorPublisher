@@ -1,10 +1,11 @@
-﻿using PublisherStudio.BusinessObjects;
+using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Configuration;
 
 /// <summary>
-/// Provides render export catalog service operations.
+/// Coordinates render export catalog behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class RenderExportCatalogService(ILogger<RenderExportCatalogService> logger) : IRenderExportCatalogService
 {
     private readonly IReadOnlyList<RenderExportCapability> _capabilities = new List<RenderExportCapability>
@@ -17,8 +18,9 @@ public sealed class RenderExportCatalogService(ILogger<RenderExportCatalogServic
     }.AsReadOnly();
 
     /// <summary>
-    /// Gets capabilities.
+    /// Retrieves capabilities as part of the render export catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<RenderExportCapability> GetCapabilities() {
         try
         {
@@ -32,8 +34,10 @@ public sealed class RenderExportCatalogService(ILogger<RenderExportCatalogServic
         }
     }
     /// <summary>
-    /// Runs the find operation.
+    /// Performs find as part of the render export catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="format">Format value supplied to the render export catalog operation and used when producing its result.</param>
+    /// <returns>The render export capability produced by the operation.</returns>
     public RenderExportCapability? Find(string format) {
         try
         {

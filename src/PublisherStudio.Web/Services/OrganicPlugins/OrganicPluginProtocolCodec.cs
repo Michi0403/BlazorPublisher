@@ -7,13 +7,14 @@ using System.Text.Json.Serialization;
 namespace PublisherStudio.Services.OrganicPlugins;
 
 /// <summary>
-/// Represents an organic plugin protocol codec.
+/// Represents an organic plugin protocol codec application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public sealed class OrganicPluginProtocolCodec : IOrganicPluginProtocolCodec
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Gets the JSON options value that forms part of the organic plugin protocol codec state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The JSON options value exposed by <see cref="OrganicPluginProtocolCodec"/>.</value>
     private readonly JsonSerializerOptions jsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
@@ -27,8 +28,11 @@ public sealed class OrganicPluginProtocolCodec : IOrganicPluginProtocolCodec
     public JsonSerializerOptions JsonOptions => jsonOptions;
 
     /// <summary>
-    /// Runs the serialize operation.
+    /// Performs serialize for <see cref="OrganicPluginProtocolCodec"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugin protocol codec workflow.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the organic plugin protocol codec operation and used when producing its result.</param>
+    /// <param name="seal">Value indicating whether seal should apply to this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string Serialize(OrganicWireEnvelope envelope, bool seal = true)
     {
     try
@@ -53,8 +57,10 @@ public sealed class OrganicPluginProtocolCodec : IOrganicPluginProtocolCodec
 }
 
     /// <summary>
-    /// Runs the deserialize and validate operation.
+    /// Performs deserialize and validate for <see cref="OrganicPluginProtocolCodec"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugin protocol codec workflow.
     /// </summary>
+    /// <param name="json">Json value supplied to the organic plugin protocol codec operation and used when producing its result.</param>
+    /// <returns>The organic wire envelope produced by the operation.</returns>
     public OrganicWireEnvelope DeserializeAndValidate(string json)
     {
     try
@@ -76,8 +82,11 @@ public sealed class OrganicPluginProtocolCodec : IOrganicPluginProtocolCodec
 }
 
     /// <summary>
-    /// Runs the validate operation.
+    /// Performs validate for <see cref="OrganicPluginProtocolCodec"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugin protocol codec workflow.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the organic plugin protocol codec operation and used when producing its result.</param>
+    /// <param name="error">Error value supplied to the organic plugin protocol codec operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool Validate(OrganicWireEnvelope envelope, out string error)
     {
     try
@@ -118,8 +127,9 @@ public sealed class OrganicPluginProtocolCodec : IOrganicPluginProtocolCodec
 }
 
     /// <summary>
-    /// Validates payload shape.
+    /// Validates payload shape for <see cref="OrganicPluginProtocolCodec"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugin protocol codec workflow.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the organic plugin protocol codec operation and used when producing its result.</param>
     private void ValidatePayloadShape(OrganicWireEnvelope envelope)
     {
     try
@@ -138,8 +148,10 @@ public sealed class OrganicPluginProtocolCodec : IOrganicPluginProtocolCodec
 }
 
     /// <summary>
-    /// Builds integrity bytes.
+    /// Builds integrity bytes for <see cref="OrganicPluginProtocolCodec"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugin protocol codec workflow.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the organic plugin protocol codec operation and used when producing its result.</param>
+    /// <returns>The byte produced by the operation.</returns>
     private byte[] BuildIntegrityBytes(OrganicWireEnvelope envelope)
     {
     try
@@ -171,8 +183,10 @@ public sealed class OrganicPluginProtocolCodec : IOrganicPluginProtocolCodec
 }
 
     /// <summary>
-    /// Computes crc32.
+    /// Computes crc32 for <see cref="OrganicPluginProtocolCodec"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugin protocol codec workflow.
     /// </summary>
+    /// <param name="data">Data value supplied to the organic plugin protocol codec operation and used when producing its result.</param>
+    /// <returns>The uint produced by the operation.</returns>
     private uint ComputeCrc32(ReadOnlySpan<byte> data)
     {
     try

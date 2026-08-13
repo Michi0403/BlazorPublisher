@@ -4,18 +4,21 @@ using PublisherStudio.BusinessObjects;
 namespace PublisherStudio.Services.Automation;
 
 /// <summary>
-/// Provides user input automation service operations.
+/// Coordinates user input automation behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class UserInputAutomationService(ILogger<UserInputAutomationService> logger) : IUserInputAutomationService
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory commands collection maintained internally by <see cref="UserInputAutomationService"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<Guid, BrowserAutomationCommand> _commands = new();
 
     /// <summary>
-    /// Runs the enqueue operation.
+    /// Performs enqueue as part of the user input automation service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="command">Command value supplied to the user input automation operation and used when producing its result.</param>
+    /// <returns>The browser automation command produced by the operation.</returns>
     public BrowserAutomationCommand Enqueue(BrowserAutomationCommand command)
     {
     try
@@ -41,8 +44,9 @@ public sealed class UserInputAutomationService(ILogger<UserInputAutomationServic
 }
 
     /// <summary>
-    /// Gets all.
+    /// Retrieves all as part of the user input automation service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<BrowserAutomationCommand> GetAll() {
     try
     {
@@ -59,8 +63,10 @@ public sealed class UserInputAutomationService(ILogger<UserInputAutomationServic
 }
 
     /// <summary>
-    /// Runs the claim pending operation.
+    /// Performs claim pending as part of the user input automation service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="maximum">Maximum value supplied to the user input automation operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<BrowserAutomationCommand> ClaimPending(int maximum = 25)
     {
     try
@@ -89,8 +95,11 @@ public sealed class UserInputAutomationService(ILogger<UserInputAutomationServic
 }
 
     /// <summary>
-    /// Runs the complete operation.
+    /// Performs complete as part of the user input automation service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="completion">Completion value supplied to the user input automation operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool Complete(Guid id, AutomationCompletion completion)
     {
     try
@@ -116,8 +125,10 @@ public sealed class UserInputAutomationService(ILogger<UserInputAutomationServic
 }
 
     /// <summary>
-    /// Determines whether cel.
+    /// Determines whether cel as part of the user input automation service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool Cancel(Guid id)
     {
     try
@@ -140,7 +151,7 @@ public sealed class UserInputAutomationService(ILogger<UserInputAutomationServic
 }
 
     /// <summary>
-    /// Runs the trim completed operation.
+    /// Performs trim completed as part of the user input automation service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     private void TrimCompleted()
     {
@@ -167,18 +178,21 @@ public sealed class UserInputAutomationService(ILogger<UserInputAutomationServic
 }
 
 /// <summary>
-/// Provides screenshot capture service operations.
+/// Coordinates screenshot capture behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class ScreenshotCaptureService(ILogger<ScreenshotCaptureService> logger) : IScreenshotCaptureService
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory requests collection maintained internally by <see cref="ScreenshotCaptureService"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<Guid, BrowserScreenshotRequest> _requests = new();
 
     /// <summary>
-    /// Runs the enqueue operation.
+    /// Performs enqueue as part of the screenshot capture service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
+    /// <returns>The browser screenshot request produced by the operation.</returns>
     public BrowserScreenshotRequest Enqueue(BrowserScreenshotRequest request)
     {
     try
@@ -204,8 +218,9 @@ public sealed class ScreenshotCaptureService(ILogger<ScreenshotCaptureService> l
 }
 
     /// <summary>
-    /// Gets all.
+    /// Retrieves all as part of the screenshot capture service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<BrowserScreenshotRequest> GetAll() {
     try
     {
@@ -222,8 +237,10 @@ public sealed class ScreenshotCaptureService(ILogger<ScreenshotCaptureService> l
 }
 
     /// <summary>
-    /// Runs the claim pending operation.
+    /// Performs claim pending as part of the screenshot capture service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="maximum">Maximum value supplied to the screenshot capture operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<BrowserScreenshotRequest> ClaimPending(int maximum = 5)
     {
     try
@@ -252,8 +269,11 @@ public sealed class ScreenshotCaptureService(ILogger<ScreenshotCaptureService> l
 }
 
     /// <summary>
-    /// Runs the complete operation.
+    /// Performs complete as part of the screenshot capture service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="completion">Completion value supplied to the screenshot capture operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool Complete(Guid id, ScreenshotCompletion completion)
     {
     try
@@ -281,8 +301,11 @@ public sealed class ScreenshotCaptureService(ILogger<ScreenshotCaptureService> l
 }
 
     /// <summary>
-    /// Attempts to get.
+    /// Attempts to get as part of the screenshot capture service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool TryGet(Guid id, out BrowserScreenshotRequest request) {
     try
     {
@@ -299,8 +322,10 @@ public sealed class ScreenshotCaptureService(ILogger<ScreenshotCaptureService> l
 }
 
     /// <summary>
-    /// Determines whether cel.
+    /// Determines whether cel as part of the screenshot capture service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool Cancel(Guid id)
     {
     try

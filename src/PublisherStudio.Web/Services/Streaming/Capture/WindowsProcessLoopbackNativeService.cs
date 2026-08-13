@@ -3,22 +3,33 @@ using System.Runtime.InteropServices;
 namespace PublisherStudio.Services.Streaming.Capture;
 
 /// <summary>
-/// Defines the windows process loopback native service contract.
+/// Defines the contract for windows process loopback native behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
 public interface IWindowsProcessLoopbackNativeService
 {
+    /// <summary>
+    /// Gets a value indicating whether available applies to the windows process loopback native state.
+    /// </summary>
+    /// <value>The is available value exposed by <see cref="IWindowsProcessLoopbackNativeService"/>.</value>
     bool IsAvailable { get; }
     /// <summary>
-    /// Runs the initialize multithreaded apartment operation.
+    /// Performs initialize multithreaded apartment as part of the windows process loopback native service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The int produced by the operation.</returns>
     int InitializeMultithreadedApartment();
     /// <summary>
-    /// Runs the uninitialize apartment operation.
+    /// Performs uninitialize apartment as part of the windows process loopback native service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     void UninitializeApartment();
     /// <summary>
-    /// Runs the activate audio interface operation.
+    /// Performs activate audio interface as part of the windows process loopback native service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="deviceInterfacePath">Device interface path value supplied to the windows process loopback native operation and used when producing its result.</param>
+    /// <param name="interfaceId">Identifier of the interface to use for this operation.</param>
+    /// <param name="activationParameters">Int ptr dependency used by the windows process loopback native workflow to provide the corresponding application capability.</param>
+    /// <param name="completionHandler">Completion handler value supplied to the windows process loopback native operation and used when producing its result.</param>
+    /// <param name="activationOperation">Activation operation value supplied to the windows process loopback native operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     int ActivateAudioInterface(
         string deviceInterfacePath,
         ref Guid interfaceId,
@@ -33,17 +44,39 @@ public interface IWindowsProcessLoopbackNativeService
 /// </summary>
 public sealed class WindowsProcessLoopbackNativeService : IWindowsProcessLoopbackNativeService, IDisposable
 {
+    /// <summary>
+    /// Stores the logger used by <see cref="WindowsProcessLoopbackNativeService"/> to record operational diagnostics without coupling callers to logging details.
+    /// </summary>
     private readonly ILogger<WindowsProcessLoopbackNativeService> logger;
+    /// <summary>
+    /// Stores the internal multimedia device library state used by <see cref="WindowsProcessLoopbackNativeService"/> while executing its surrounding workflow.
+    /// </summary>
     private IntPtr multimediaDeviceLibrary;
+    /// <summary>
+    /// Stores the internal ole library state used by <see cref="WindowsProcessLoopbackNativeService"/> while executing its surrounding workflow.
+    /// </summary>
     private IntPtr oleLibrary;
+    /// <summary>
+    /// Stores the internal activate audio interface state used by <see cref="WindowsProcessLoopbackNativeService"/> while executing its surrounding workflow.
+    /// </summary>
     private ActivateAudioInterfaceDelegate? activateAudioInterface;
+    /// <summary>
+    /// Stores the internal initialize apartment state used by <see cref="WindowsProcessLoopbackNativeService"/> while executing its surrounding workflow.
+    /// </summary>
     private CoInitializeExDelegate? initializeApartment;
+    /// <summary>
+    /// Stores the internal uninitialize apartment state used by <see cref="WindowsProcessLoopbackNativeService"/> while executing its surrounding workflow.
+    /// </summary>
     private CoUninitializeDelegate? uninitializeApartment;
+    /// <summary>
+    /// Stores the internal disposed state used by <see cref="WindowsProcessLoopbackNativeService"/> while executing its surrounding workflow.
+    /// </summary>
     private bool disposed;
 
     /// <summary>
-    /// Runs the windows process loopback native service operation.
+    /// Initializes a new <see cref="WindowsProcessLoopbackNativeService"/> instance and captures the dependencies or initial state required by its windows process loopback native workflow.
     /// </summary>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     public WindowsProcessLoopbackNativeService(ILogger<WindowsProcessLoopbackNativeService> logger)
     {
         this.logger = logger;
@@ -71,13 +104,15 @@ public sealed class WindowsProcessLoopbackNativeService : IWindowsProcessLoopbac
     }
 
     /// <summary>
-    /// Gets or sets is available.
+    /// Gets or sets a value indicating whether available applies to the windows process loopback native state.
     /// </summary>
+    /// <value>The is available value exposed by <see cref="WindowsProcessLoopbackNativeService"/>.</value>
     public bool IsAvailable { get; private set; }
 
     /// <summary>
-    /// Runs the initialize multithreaded apartment operation.
+    /// Performs initialize multithreaded apartment as part of the windows process loopback native service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The int produced by the operation.</returns>
     public int InitializeMultithreadedApartment()
     {
         try
@@ -96,7 +131,7 @@ public sealed class WindowsProcessLoopbackNativeService : IWindowsProcessLoopbac
     }
 
     /// <summary>
-    /// Runs the uninitialize apartment operation.
+    /// Performs uninitialize apartment as part of the windows process loopback native service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void UninitializeApartment()
     {
@@ -114,8 +149,14 @@ public sealed class WindowsProcessLoopbackNativeService : IWindowsProcessLoopbac
     }
 
     /// <summary>
-    /// Runs the activate audio interface operation.
+    /// Performs activate audio interface as part of the windows process loopback native service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="deviceInterfacePath">Device interface path value supplied to the windows process loopback native operation and used when producing its result.</param>
+    /// <param name="interfaceId">Identifier of the interface to use for this operation.</param>
+    /// <param name="activationParameters">Int ptr dependency used by the windows process loopback native workflow to provide the corresponding application capability.</param>
+    /// <param name="completionHandler">Completion handler value supplied to the windows process loopback native operation and used when producing its result.</param>
+    /// <param name="activationOperation">Activation operation value supplied to the windows process loopback native operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     public int ActivateAudioInterface(
         string deviceInterfacePath,
         ref Guid interfaceId,
@@ -157,8 +198,12 @@ public sealed class WindowsProcessLoopbackNativeService : IWindowsProcessLoopbac
     }
 
     /// <summary>
-    /// Loads delegate.
+    /// Loads delegate as part of the windows process loopback native service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <typeparam name="TDelegate">Type used for t delegate values handled by <see cref="WindowsProcessLoopbackNativeService"/>.</typeparam>
+    /// <param name="library">Int ptr dependency used by the windows process loopback native workflow to provide the corresponding application capability.</param>
+    /// <param name="exportName">Export name value supplied to the windows process loopback native operation and used when producing its result.</param>
+    /// <returns>The t delegate produced by the operation.</returns>
     private TDelegate LoadDelegate<TDelegate>(IntPtr library, string exportName)
         where TDelegate : Delegate
     {
@@ -177,7 +222,7 @@ public sealed class WindowsProcessLoopbackNativeService : IWindowsProcessLoopbac
     }
 
     /// <summary>
-    /// Runs the dispose operation.
+    /// Releases resources owned by <see cref="WindowsProcessLoopbackNativeService"/> and leaves the windows process loopback native workflow in a safely disposed state.
     /// </summary>
     public void Dispose()
     {
@@ -200,7 +245,7 @@ public sealed class WindowsProcessLoopbackNativeService : IWindowsProcessLoopbac
     }
 
     /// <summary>
-    /// Runs the release libraries operation.
+    /// Performs release libraries as part of the windows process loopback native service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     private void ReleaseLibraries()
     {
@@ -224,7 +269,7 @@ public sealed class WindowsProcessLoopbackNativeService : IWindowsProcessLoopbac
     }
 
     /// <summary>
-    /// Represents the int callback.
+    /// Defines the callback signature used to report or process int information between collaborating components.
     /// </summary>
     [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode)]
     private delegate int ActivateAudioInterfaceDelegate(
@@ -235,13 +280,13 @@ public sealed class WindowsProcessLoopbackNativeService : IWindowsProcessLoopbac
         [MarshalAs(UnmanagedType.Interface)] out object activationOperation);
 
     /// <summary>
-    /// Represents the int callback.
+    /// Defines the callback signature used to report or process int information between collaborating components.
     /// </summary>
     [UnmanagedFunctionPointer(CallingConvention.Winapi)]
     private delegate int CoInitializeExDelegate(IntPtr reserved, uint concurrencyModel);
 
     /// <summary>
-    /// Represents the void callback.
+    /// Defines the callback signature used to report or process void information between collaborating components.
     /// </summary>
     [UnmanagedFunctionPointer(CallingConvention.Winapi)]
     private delegate void CoUninitializeDelegate();

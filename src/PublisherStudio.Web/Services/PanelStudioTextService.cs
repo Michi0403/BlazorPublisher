@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using PublisherStudio.Services.Configuration;
 using System.Globalization;
@@ -7,15 +7,22 @@ using System.Net;
 namespace PublisherStudio.Services;
 
 /// <summary>
-/// Provides panel studio text service operations.
+/// Coordinates panel studio text behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
+/// <param name="patterns">Panel studio text pattern data service dependency used by the panel studio text workflow to provide the corresponding application capability.</param>
 public sealed class PanelStudioTextService(IPanelStudioTextPatternDataService patterns)
 {
+    /// <summary>
+    /// Stores the panel studio text pattern data service dependency used by <see cref="PanelStudioTextService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly IPanelStudioTextPatternDataService _patterns = patterns;
 
     /// <summary>
-    /// Determines whether expected interaction shutdown.
+    /// Determines whether expected interaction shutdown as part of the panel studio text service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="message">Message value supplied to the panel studio text operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool IsExpectedInteractionShutdown(string? message, ILogger logger)
     {
         try
@@ -32,8 +39,13 @@ public sealed class PanelStudioTextService(IPanelStudioTextPatternDataService pa
     }
 
     /// <summary>
-    /// Reads number.
+    /// Reads number as part of the panel studio text service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="node">Node value supplied to the panel studio text operation and used when producing its result.</param>
+    /// <param name="propertyName">Property name value supplied to the panel studio text operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the panel studio text operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>The double produced by the operation.</returns>
     public double ReadNumber(System.Text.Json.JsonElement node, string propertyName, double fallback, ILogger logger)
     {
         try
@@ -48,8 +60,11 @@ public sealed class PanelStudioTextService(IPanelStudioTextPatternDataService pa
     }
 
     /// <summary>
-    /// Runs the plain text operation.
+    /// Performs plain text as part of the panel studio text service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="markup">Markup value supplied to the panel studio text operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string PlainText(string? markup, ILogger logger)
     {
         try
@@ -66,8 +81,11 @@ public sealed class PanelStudioTextService(IPanelStudioTextPatternDataService pa
     }
 
     /// <summary>
-    /// Parses list.
+    /// Parses list as part of the panel studio text service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the panel studio text operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<string> ParseList(string? value, ILogger logger)
     {
         try
@@ -88,8 +106,12 @@ public sealed class PanelStudioTextService(IPanelStudioTextPatternDataService pa
     }
 
     /// <summary>
-    /// Runs the safe file name operation.
+    /// Performs safe file name as part of the panel studio text service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the panel studio text operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the panel studio text operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string SafeFileName(string? value, string fallback, ILogger logger)
     {
         try
@@ -105,8 +127,11 @@ public sealed class PanelStudioTextService(IPanelStudioTextPatternDataService pa
     }
 
     /// <summary>
-    /// Runs the as bool operation.
+    /// Performs as bool as part of the panel studio text service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="args">Args value supplied to the panel studio text operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool AsBool(ChangeEventArgs args, ILogger logger)
     {
         try
@@ -121,8 +146,11 @@ public sealed class PanelStudioTextService(IPanelStudioTextPatternDataService pa
     }
 
     /// <summary>
-    /// Runs the text operation.
+    /// Performs text as part of the panel studio text service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="args">Args value supplied to the panel studio text operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string Text(ChangeEventArgs args, ILogger logger)
     {
         try { return args.Value?.ToString() ?? string.Empty; }
@@ -134,8 +162,11 @@ public sealed class PanelStudioTextService(IPanelStudioTextPatternDataService pa
     }
 
     /// <summary>
-    /// Runs the invariant operation.
+    /// Performs invariant as part of the panel studio text service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the panel studio text operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string Invariant(double value, ILogger logger)
     {
         try { return value.ToString("0.###", CultureInfo.InvariantCulture); }
@@ -147,8 +178,11 @@ public sealed class PanelStudioTextService(IPanelStudioTextPatternDataService pa
     }
 
     /// <summary>
-    /// Runs the change number operation.
+    /// Performs change number as part of the panel studio text service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="args">Args value supplied to the panel studio text operation and used when producing its result.</param>
+    /// <param name="update">Update value supplied to the panel studio text operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     public void ChangeNumber(ChangeEventArgs args, Action<double> update, ILogger logger)
     {
         try
@@ -159,8 +193,11 @@ public sealed class PanelStudioTextService(IPanelStudioTextPatternDataService pa
     }
 
     /// <summary>
-    /// Runs the change int operation.
+    /// Performs change int as part of the panel studio text service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="args">Args value supplied to the panel studio text operation and used when producing its result.</param>
+    /// <param name="update">Update value supplied to the panel studio text operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     public void ChangeInt(ChangeEventArgs args, Action<int> update, ILogger logger)
     {
         try

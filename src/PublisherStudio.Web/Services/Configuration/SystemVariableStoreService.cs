@@ -5,38 +5,84 @@ using Microsoft.Extensions.Logging.Abstractions;
 namespace PublisherStudio.Services.Configuration;
 
 /// <summary>
-/// Provides system variable store service operations.
+/// Coordinates system variable store behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
 public sealed class SystemVariableStoreService : ISystemVariableStoreService
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal sync state used by <see cref="SystemVariableStoreService"/> while executing its surrounding workflow.
     /// </summary>
     private readonly object _sync = new();
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory values collection maintained internally by <see cref="SystemVariableStoreService"/> for its current workflow state.
     /// </summary>
     private readonly Dictionary<string, string> _values = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>
+    /// Stores the internal storage path state used by <see cref="SystemVariableStoreService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _storagePath;
+    /// <summary>
+    /// Stores the logger used by <see cref="SystemVariableStoreService"/> to record operational diagnostics without coupling callers to logging details.
+    /// </summary>
     private ILogger<SystemVariableStoreService> logger = NullLogger<SystemVariableStoreService>.Instance;
 
+    /// <summary>
+    /// Stores the internal default port name state used by <see cref="SystemVariableStoreService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _defaultPortName = "Application.DefaultPort";
+    /// <summary>
+    /// Stores the internal port environment variable name state used by <see cref="SystemVariableStoreService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _portEnvironmentVariableName = "Application.PortEnvironmentVariable";
+    /// <summary>
+    /// Stores the internal default culture name state used by <see cref="SystemVariableStoreService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _defaultCultureName = "Application.DefaultCulture";
+    /// <summary>
+    /// Stores the internal cors policy name state used by <see cref="SystemVariableStoreService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _corsPolicyName = "Application.CorsPolicyName";
+    /// <summary>
+    /// Stores the internal data protection directory name state used by <see cref="SystemVariableStoreService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _dataProtectionDirectoryName = "Application.DataProtectionDirectoryName";
+    /// <summary>
+    /// Stores the internal data protection application name state used by <see cref="SystemVariableStoreService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _dataProtectionApplicationName = "Application.DataProtectionApplicationName";
+    /// <summary>
+    /// Stores the internal spreadsheet hibernation directory name state used by <see cref="SystemVariableStoreService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _spreadsheetHibernationDirectoryName = "Spreadsheet.HibernationDirectoryName";
+    /// <summary>
+    /// Stores the internal spreadsheet hibernation minutes name state used by <see cref="SystemVariableStoreService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _spreadsheetHibernationMinutesName = "Spreadsheet.HibernationMinutes";
+    /// <summary>
+    /// Stores the internal spreadsheet documents dispose hours name state used by <see cref="SystemVariableStoreService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _spreadsheetDocumentsDisposeHoursName = "Spreadsheet.DocumentsDisposeHours";
+    /// <summary>
+    /// Stores the internal twitch HTTP timeout seconds name state used by <see cref="SystemVariableStoreService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _twitchHttpTimeoutSecondsName = "Networking.TwitchTimeoutSeconds";
+    /// <summary>
+    /// Stores the internal runtime directory name state used by <see cref="SystemVariableStoreService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _runtimeDirectoryName = "Application.RuntimeDirectoryName";
+    /// <summary>
+    /// Stores the internal runtime endpoint file name state used by <see cref="SystemVariableStoreService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _runtimeEndpointFileName = "Application.RuntimeEndpointFileName";
+    /// <summary>
+    /// Stores the internal default document name state used by <see cref="SystemVariableStoreService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _defaultDocumentName = "Editor.DefaultDocumentName";
 
     /// <summary>
-    /// Runs the system variable store service operation.
+    /// Initializes a new <see cref="SystemVariableStoreService"/> instance and captures the dependencies or initial state required by its system variable store workflow.
     /// </summary>
+    /// <param name="configuration">Configuration containing the caller-supplied values that control this operation.</param>
     public SystemVariableStoreService(IConfiguration configuration)
     {
         var root = Path.Combine(
@@ -64,61 +110,75 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
     }
 
     /// <summary>
-    /// Gets default port.
+    /// Gets the default port value that forms part of the system variable store state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The default port value exposed by <see cref="SystemVariableStoreService"/>.</value>
     public int DefaultPort => GetInt(_defaultPortName, 58071);
     /// <summary>
-    /// Gets port environment variable name.
+    /// Gets the port environment variable name value that forms part of the system variable store state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The port environment variable name value exposed by <see cref="SystemVariableStoreService"/>.</value>
     public string PortEnvironmentVariableName => GetString(_portEnvironmentVariableName, "PUBLISHERSTUDIO_PORT");
     /// <summary>
-    /// Gets default culture.
+    /// Gets the default culture value that forms part of the system variable store state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The default culture value exposed by <see cref="SystemVariableStoreService"/>.</value>
     public string DefaultCulture => GetString(_defaultCultureName, "en-US");
     /// <summary>
-    /// Gets cors policy name.
+    /// Gets the cors policy name value that forms part of the system variable store state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The cors policy name value exposed by <see cref="SystemVariableStoreService"/>.</value>
     public string CorsPolicyName => GetString(_corsPolicyName, "PublisherExport");
     /// <summary>
-    /// Gets data protection directory name.
+    /// Gets the data protection directory name used by this system variable store instance to locate the associated file-system resource.
     /// </summary>
+    /// <value>The data protection directory name value exposed by <see cref="SystemVariableStoreService"/>.</value>
     public string DataProtectionDirectoryName => GetString(_dataProtectionDirectoryName, "DataProtection");
     /// <summary>
-    /// Gets data protection application name.
+    /// Gets the data protection application name value that forms part of the system variable store state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The data protection application name value exposed by <see cref="SystemVariableStoreService"/>.</value>
     public string DataProtectionApplicationName => GetString(_dataProtectionApplicationName, "PublisherStudio");
     /// <summary>
-    /// Gets spreadsheet hibernation directory name.
+    /// Gets the spreadsheet hibernation directory name used by this system variable store instance to locate the associated file-system resource.
     /// </summary>
+    /// <value>The spreadsheet hibernation directory name value exposed by <see cref="SystemVariableStoreService"/>.</value>
     public string SpreadsheetHibernationDirectoryName => GetString(_spreadsheetHibernationDirectoryName, "SpreadsheetHibernation");
     /// <summary>
-    /// Gets spreadsheet hibernation timeout.
+    /// Gets the spreadsheet hibernation timeout duration used to control timing in the system variable store workflow.
     /// </summary>
+    /// <value>The spreadsheet hibernation timeout value exposed by <see cref="SystemVariableStoreService"/>.</value>
     public TimeSpan SpreadsheetHibernationTimeout => GetTimeSpan(_spreadsheetHibernationMinutesName, TimeSpan.FromMinutes(20));
     /// <summary>
-    /// Gets spreadsheet documents dispose timeout.
+    /// Gets the spreadsheet documents dispose timeout duration used to control timing in the system variable store workflow.
     /// </summary>
+    /// <value>The spreadsheet documents dispose timeout value exposed by <see cref="SystemVariableStoreService"/>.</value>
     public TimeSpan SpreadsheetDocumentsDisposeTimeout => GetTimeSpan(_spreadsheetDocumentsDisposeHoursName, TimeSpan.FromHours(4));
     /// <summary>
-    /// Gets twitch HTTP timeout.
+    /// Gets the twitch HTTP timeout duration used to control timing in the system variable store workflow.
     /// </summary>
+    /// <value>The twitch HTTP timeout value exposed by <see cref="SystemVariableStoreService"/>.</value>
     public TimeSpan TwitchHttpTimeout => TimeSpan.FromSeconds(GetInt(_twitchHttpTimeoutSecondsName, 20));
     /// <summary>
-    /// Gets runtime directory name.
+    /// Gets the runtime directory name used by this system variable store instance to locate the associated file-system resource.
     /// </summary>
+    /// <value>The runtime directory name value exposed by <see cref="SystemVariableStoreService"/>.</value>
     public string RuntimeDirectoryName => GetString(_runtimeDirectoryName, "runtime");
     /// <summary>
-    /// Gets runtime endpoint file name.
+    /// Gets the runtime endpoint file name used by this system variable store instance to locate the associated file-system resource.
     /// </summary>
+    /// <value>The runtime endpoint file name value exposed by <see cref="SystemVariableStoreService"/>.</value>
     public string RuntimeEndpointFileName => GetString(_runtimeEndpointFileName, "server.json");
     /// <summary>
-    /// Gets default document name.
+    /// Gets the default document name value that forms part of the system variable store state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The default document name value exposed by <see cref="SystemVariableStoreService"/>.</value>
     public string DefaultDocumentName => GetString(_defaultDocumentName, "Untitled Publication");
 
     /// <summary>
-    /// Runs the attach logger operation.
+    /// Performs attach logger as part of the system variable store service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     public void AttachLogger(ILogger<SystemVariableStoreService> logger)
     {
         try
@@ -134,8 +194,11 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
     }
 
     /// <summary>
-    /// Gets string.
+    /// Retrieves string as part of the system variable store service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="name">Name value supplied to the system variable store operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the system variable store operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string GetString(string name, string fallback)
     {
         try
@@ -158,8 +221,11 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
     }
 
     /// <summary>
-    /// Gets int.
+    /// Retrieves int as part of the system variable store service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="name">Name value supplied to the system variable store operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the system variable store operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     public int GetInt(string name, int fallback)
     {
         try
@@ -177,8 +243,11 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
     }
 
     /// <summary>
-    /// Gets time span.
+    /// Retrieves time span as part of the system variable store service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="name">Name value supplied to the system variable store operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the system variable store operation and used when producing its result.</param>
+    /// <returns>The time span produced by the operation.</returns>
     public TimeSpan GetTimeSpan(string name, TimeSpan fallback)
     {
         try
@@ -200,8 +269,11 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
     }
 
     /// <summary>
-    /// Runs the set operation.
+    /// Performs set as part of the system variable store service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <typeparam name="T">Type used for t values handled by <see cref="SystemVariableStoreService"/>.</typeparam>
+    /// <param name="name">Name value supplied to the system variable store operation and used when producing its result.</param>
+    /// <param name="value">Value value supplied to the system variable store operation and used when producing its result.</param>
     public void Set<T>(string name, T value)
     {
         try
@@ -223,8 +295,9 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
     }
 
     /// <summary>
-    /// Runs the snapshot operation.
+    /// Performs snapshot as part of the system variable store service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The i read only dictionary string string produced by the operation.</returns>
     public IReadOnlyDictionary<string, string> Snapshot()
     {
         try
@@ -243,8 +316,9 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
     }
 
     /// <summary>
-    /// Loads configuration.
+    /// Loads configuration as part of the system variable store service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="configuration">Configuration containing the caller-supplied values that control this operation.</param>
     private void LoadConfiguration(IConfiguration configuration)
     {
         try
@@ -264,7 +338,7 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
     }
 
     /// <summary>
-    /// Loads persisted.
+    /// Loads persisted as part of the system variable store service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     private void LoadPersisted()
     {
@@ -287,7 +361,7 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
     }
 
     /// <summary>
-    /// Runs the persist operation.
+    /// Performs persist as part of the system variable store service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     private void Persist()
     {

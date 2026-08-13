@@ -12,36 +12,44 @@ using TextEncoding = global::System.Text.Encoding;
 namespace PublisherStudio.Services.Streaming.Chat;
 
 /// <summary>
-/// Provides platform chat service operations.
+/// Coordinates platform chat behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
 public sealed class PlatformChatService : IAsyncDisposable
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal JSON options state used by <see cref="PlatformChatService"/> while executing its surrounding workflow.
     /// </summary>
     private readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+    /// <summary>
+    /// Stores the internal session state used by <see cref="PlatformChatService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly MediaSession _session;
+    /// <summary>
+    /// Stores the logger used by <see cref="PlatformChatService"/> to record operational diagnostics without coupling callers to logging details.
+    /// </summary>
     private readonly ILogger<PlatformChatService> _logger;
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory adapters collection maintained internally by <see cref="PlatformChatService"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<Guid, IPlatformChatAdapter> _adapters = new();
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory history collection maintained internally by <see cref="PlatformChatService"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<Guid, ConcurrentQueue<PlatformChatMessage>> _history = new();
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory subscribers collection maintained internally by <see cref="PlatformChatService"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<Guid, ConcurrentDictionary<Guid, Channel<PlatformChatMessage>>> _subscribers = new();
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the cancellation source used by <see cref="PlatformChatService"/> to stop its current background or asynchronous operation.
     /// </summary>
     private readonly CancellationTokenSource _lifetime = new();
 
     /// <summary>
-    /// Runs the platform chat service operation.
+    /// Initializes a new <see cref="PlatformChatService"/> instance and captures the dependencies or initial state required by its platform chat workflow.
     /// </summary>
+    /// <param name="session">Session value supplied to the platform chat operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     public PlatformChatService(MediaSession session, ILogger<PlatformChatService> logger)
     {
         _session = session;
@@ -49,12 +57,13 @@ public sealed class PlatformChatService : IAsyncDisposable
     }
 
     /// <summary>
-    /// Gets status.
+    /// Gets the status collection maintained or exposed by this platform chat instance for downstream processing.
     /// </summary>
+    /// <value>The status value exposed by <see cref="PlatformChatService"/>.</value>
     public IReadOnlyDictionary<Guid, string> Status => _adapters.ToDictionary(pair => pair.Key, pair => pair.Value.Status);
 
     /// <summary>
-    /// Runs the start operation.
+    /// Performs start as part of the platform chat service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void Start()
     {
@@ -81,8 +90,12 @@ public sealed class PlatformChatService : IAsyncDisposable
     }
 
     /// <summary>
-    /// Runs the send async operation.
+    /// Performs send as part of the platform chat service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="outputId">Identifier of the output to use for this operation.</param>
+    /// <param name="message">Message value supplied to the platform chat operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public async Task<bool> SendAsync(Guid outputId, string message, CancellationToken cancellationToken)
     {
     try
@@ -103,8 +116,12 @@ public sealed class PlatformChatService : IAsyncDisposable
 }
 
     /// <summary>
-    /// Runs the run subscriber async operation.
+    /// Performs run subscriber as part of the platform chat service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="outputId">Identifier of the output to use for this operation.</param>
+    /// <param name="socket">Socket value supplied to the platform chat operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task RunSubscriberAsync(Guid outputId, WebSocket socket, CancellationToken cancellationToken)
     {
         if (!_session.OutputDefinitions.Any(item => item.OutputId == outputId))
@@ -148,8 +165,10 @@ public sealed class PlatformChatService : IAsyncDisposable
     }
 
     /// <summary>
-    /// Determines whether chat configuration.
+    /// Determines whether chat configuration as part of the platform chat service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="output">Output value supplied to the platform chat operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool HasChatConfiguration(MediaOutputDefinition output) {
     try
     {
@@ -168,8 +187,9 @@ public sealed class PlatformChatService : IAsyncDisposable
 }
 
     /// <summary>
-    /// Runs the publish operation.
+    /// Performs publish as part of the platform chat service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="message">Message value supplied to the platform chat operation and used when producing its result.</param>
     private void Publish(PlatformChatMessage message)
     {
     try
@@ -192,8 +212,9 @@ public sealed class PlatformChatService : IAsyncDisposable
 }
 
     /// <summary>
-    /// Runs the dispose async operation.
+    /// Releases resources owned by <see cref="PlatformChatService"/> and leaves the platform chat workflow in a safely disposed state.
     /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async ValueTask DisposeAsync()
     {
         _lifetime.Cancel();
@@ -209,39 +230,64 @@ public sealed class PlatformChatService : IAsyncDisposable
 }
 
 /// <summary>
-/// Defines the platform chat adapter contract.
+/// Defines the contract for platform chat adapter behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
 internal interface IPlatformChatAdapter : IAsyncDisposable
 {
+    /// <summary>
+    /// Gets the status value that forms part of the platform chat adapter state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The status value exposed by <see cref="IPlatformChatAdapter"/>.</value>
     string Status { get; }
     /// <summary>
-    /// Runs the start operation.
+    /// Performs start for <see cref="IPlatformChatAdapter"/>, keeping the operation consistent with the state and invariants of the surrounding platform chat adapter workflow.
     /// </summary>
     void Start();
     /// <summary>
-    /// Runs the send async operation.
+    /// Performs send for <see cref="IPlatformChatAdapter"/>, keeping the operation consistent with the state and invariants of the surrounding platform chat adapter workflow.
     /// </summary>
+    /// <param name="message">Message value supplied to the platform chat adapter operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     Task SendAsync(string message, CancellationToken cancellationToken);
 }
 
 /// <summary>
-/// Represents a twitch irc chat adapter.
+/// Represents a twitch irc chat adapter application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
 {
+    /// <summary>
+    /// Stores the internal output state used by <see cref="TwitchIrcChatAdapter"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly MediaOutputDefinition _output;
+    /// <summary>
+    /// Stores the internal publish state used by <see cref="TwitchIrcChatAdapter"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly Action<PlatformChatMessage> _publish;
+    /// <summary>
+    /// Stores the cancellation source used by <see cref="TwitchIrcChatAdapter"/> to stop its current background or asynchronous operation.
+    /// </summary>
     private readonly CancellationTokenSource _lifetime;
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the synchronization primitive that protects concurrent access to send gate state owned by <see cref="TwitchIrcChatAdapter"/>.
     /// </summary>
     private readonly SemaphoreSlim _sendGate = new(1, 1);
+    /// <summary>
+    /// Stores the internal run task state used by <see cref="TwitchIrcChatAdapter"/> while executing its surrounding workflow.
+    /// </summary>
     private Task? _runTask;
+    /// <summary>
+    /// Stores the internal writer state used by <see cref="TwitchIrcChatAdapter"/> while executing its surrounding workflow.
+    /// </summary>
     private StreamWriter? _writer;
 
     /// <summary>
-    /// Runs the twitch irc chat adapter operation.
+    /// Initializes a new <see cref="TwitchIrcChatAdapter"/> instance and captures the dependencies or initial state required by its twitch irc chat adapter workflow.
     /// </summary>
+    /// <param name="output">Output value supplied to the twitch irc chat adapter operation and used when producing its result.</param>
+    /// <param name="publish">Publish value supplied to the twitch irc chat adapter operation and used when producing its result.</param>
+    /// <param name="sessionToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
     public TwitchIrcChatAdapter(MediaOutputDefinition output, Action<PlatformChatMessage> publish, CancellationToken sessionToken)
     {
         _output = output;
@@ -250,11 +296,12 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
     }
 
     /// <summary>
-    /// Gets or sets status.
+    /// Gets or sets the status value that forms part of the twitch irc chat adapter state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The status value exposed by <see cref="TwitchIrcChatAdapter"/>.</value>
     public string Status { get; private set; } = "configured";
     /// <summary>
-    /// Runs the start operation.
+    /// Performs start for <see cref="TwitchIrcChatAdapter"/>, keeping the operation consistent with the state and invariants of the surrounding twitch irc chat adapter workflow.
     /// </summary>
     public void Start() {
     try
@@ -269,8 +316,11 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
 }
 
     /// <summary>
-    /// Runs the send async operation.
+    /// Performs send for <see cref="TwitchIrcChatAdapter"/>, keeping the operation consistent with the state and invariants of the surrounding twitch irc chat adapter workflow.
     /// </summary>
+    /// <param name="message">Message value supplied to the twitch irc chat adapter operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task SendAsync(string message, CancellationToken cancellationToken)
     {
     try
@@ -289,8 +339,9 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
 }
 
     /// <summary>
-    /// Runs the run async operation.
+    /// Performs run for <see cref="TwitchIrcChatAdapter"/>, keeping the operation consistent with the state and invariants of the surrounding twitch irc chat adapter workflow.
     /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task RunAsync()
     {
     try
@@ -354,8 +405,11 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
 }
 
     /// <summary>
-    /// Attempts to parse priv msg.
+    /// Attempts to parse priv msg for <see cref="TwitchIrcChatAdapter"/>, keeping the operation consistent with the state and invariants of the surrounding twitch irc chat adapter workflow.
     /// </summary>
+    /// <param name="line">Line value supplied to the twitch irc chat adapter operation and used when producing its result.</param>
+    /// <param name="message">Message value supplied to the twitch irc chat adapter operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool TryParsePrivMsg(string line, out PlatformChatMessage message)
     {
     try
@@ -408,8 +462,10 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
 }
 
     /// <summary>
-    /// Normalizes account.
+    /// Normalizes account for <see cref="TwitchIrcChatAdapter"/>, keeping the operation consistent with the state and invariants of the surrounding twitch irc chat adapter workflow.
     /// </summary>
+    /// <param name="value">Value value supplied to the twitch irc chat adapter operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeAccount(string value) {
     try
     {
@@ -422,8 +478,10 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
     }
 }
     /// <summary>
-    /// Normalizes channel.
+    /// Normalizes channel for <see cref="TwitchIrcChatAdapter"/>, keeping the operation consistent with the state and invariants of the surrounding twitch irc chat adapter workflow.
     /// </summary>
+    /// <param name="value">Value value supplied to the twitch irc chat adapter operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeChannel(string value) {
     try
     {
@@ -436,8 +494,10 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
     }
 }
     /// <summary>
-    /// Runs the sanitize message operation.
+    /// Performs sanitize message for <see cref="TwitchIrcChatAdapter"/>, keeping the operation consistent with the state and invariants of the surrounding twitch irc chat adapter workflow.
     /// </summary>
+    /// <param name="value">Value value supplied to the twitch irc chat adapter operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string SanitizeMessage(string value) {
     try
     {
@@ -450,8 +510,10 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
     }
 }
     /// <summary>
-    /// Runs the decode tag operation.
+    /// Performs decode tag for <see cref="TwitchIrcChatAdapter"/>, keeping the operation consistent with the state and invariants of the surrounding twitch irc chat adapter workflow.
     /// </summary>
+    /// <param name="value">Value value supplied to the twitch irc chat adapter operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string DecodeTag(string value) {
     try
     {
@@ -465,8 +527,9 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
 }
 
     /// <summary>
-    /// Runs the dispose async operation.
+    /// Releases resources owned by <see cref="TwitchIrcChatAdapter"/> and leaves the twitch irc chat adapter workflow in a safely disposed state.
     /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async ValueTask DisposeAsync()
     {
     try
@@ -486,31 +549,49 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
 }
 
 /// <summary>
-/// Represents a you tube live chat adapter.
+/// Represents a you tube live chat adapter application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 internal sealed class YouTubeLiveChatAdapter : IPlatformChatAdapter
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal JSON options state used by <see cref="YouTubeLiveChatAdapter"/> while executing its surrounding workflow.
     /// </summary>
     private readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+    /// <summary>
+    /// Stores the internal output state used by <see cref="YouTubeLiveChatAdapter"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly MediaOutputDefinition _output;
+    /// <summary>
+    /// Stores the internal publish state used by <see cref="YouTubeLiveChatAdapter"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly Action<PlatformChatMessage> _publish;
+    /// <summary>
+    /// Stores the cancellation source used by <see cref="YouTubeLiveChatAdapter"/> to stop its current background or asynchronous operation.
+    /// </summary>
     private readonly CancellationTokenSource _lifetime;
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the HTTP client dependency used by <see cref="YouTubeLiveChatAdapter"/> to delegate that application responsibility to its owning collaborator.
     /// </summary>
     private readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(30) };
+    /// <summary>
+    /// Stores the internal run task state used by <see cref="YouTubeLiveChatAdapter"/> while executing its surrounding workflow.
+    /// </summary>
     private Task? _runTask;
+    /// <summary>
+    /// Stores the internal page token state used by <see cref="YouTubeLiveChatAdapter"/> while executing its surrounding workflow.
+    /// </summary>
     private string _pageToken = string.Empty;
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory seen collection maintained internally by <see cref="YouTubeLiveChatAdapter"/> for its current workflow state.
     /// </summary>
     private readonly HashSet<string> _seen = new(StringComparer.Ordinal);
 
     /// <summary>
-    /// Runs the you tube live chat adapter operation.
+    /// Initializes a new <see cref="YouTubeLiveChatAdapter"/> instance and captures the dependencies or initial state required by its you tube live chat adapter workflow.
     /// </summary>
+    /// <param name="output">Output value supplied to the you tube live chat adapter operation and used when producing its result.</param>
+    /// <param name="publish">Publish value supplied to the you tube live chat adapter operation and used when producing its result.</param>
+    /// <param name="sessionToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
     public YouTubeLiveChatAdapter(MediaOutputDefinition output, Action<PlatformChatMessage> publish, CancellationToken sessionToken)
     {
         _output = output;
@@ -520,11 +601,12 @@ internal sealed class YouTubeLiveChatAdapter : IPlatformChatAdapter
     }
 
     /// <summary>
-    /// Gets or sets status.
+    /// Gets or sets the status value that forms part of the you tube live chat adapter state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The status value exposed by <see cref="YouTubeLiveChatAdapter"/>.</value>
     public string Status { get; private set; } = "configured";
     /// <summary>
-    /// Runs the start operation.
+    /// Performs start for <see cref="YouTubeLiveChatAdapter"/>, keeping the operation consistent with the state and invariants of the surrounding you tube live chat adapter workflow.
     /// </summary>
     public void Start() {
     try
@@ -539,8 +621,11 @@ internal sealed class YouTubeLiveChatAdapter : IPlatformChatAdapter
 }
 
     /// <summary>
-    /// Runs the send async operation.
+    /// Performs send for <see cref="YouTubeLiveChatAdapter"/>, keeping the operation consistent with the state and invariants of the surrounding you tube live chat adapter workflow.
     /// </summary>
+    /// <param name="message">Message value supplied to the you tube live chat adapter operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task SendAsync(string message, CancellationToken cancellationToken)
     {
     try
@@ -571,8 +656,9 @@ internal sealed class YouTubeLiveChatAdapter : IPlatformChatAdapter
 }
 
     /// <summary>
-    /// Runs the run async operation.
+    /// Performs run for <see cref="YouTubeLiveChatAdapter"/>, keeping the operation consistent with the state and invariants of the surrounding you tube live chat adapter workflow.
     /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task RunAsync()
     {
     try
@@ -620,8 +706,9 @@ internal sealed class YouTubeLiveChatAdapter : IPlatformChatAdapter
 }
 
     /// <summary>
-    /// Publishes item.
+    /// Publishes item for <see cref="YouTubeLiveChatAdapter"/>, keeping the operation consistent with the state and invariants of the surrounding you tube live chat adapter workflow.
     /// </summary>
+    /// <param name="item">Item value supplied to the you tube live chat adapter operation and used when producing its result.</param>
     private void PublishItem(JsonElement item)
     {
     try
@@ -651,8 +738,9 @@ internal sealed class YouTubeLiveChatAdapter : IPlatformChatAdapter
 }
 
     /// <summary>
-    /// Runs the dispose async operation.
+    /// Releases resources owned by <see cref="YouTubeLiveChatAdapter"/> and leaves the you tube live chat adapter workflow in a safely disposed state.
     /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async ValueTask DisposeAsync()
     {
     try

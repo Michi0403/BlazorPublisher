@@ -14,13 +14,19 @@ namespace PublisherStudio.Services.Streaming.Settings;
 public sealed class PublicationStreamingSettingsStore
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal gate state used by <see cref="PublicationStreamingSettingsStore"/> while executing its surrounding workflow.
     /// </summary>
     private readonly object _gate = new();
+    /// <summary>
+    /// Stores the data protector dependency used by <see cref="PublicationStreamingSettingsStore"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly IDataProtector _protector;
+    /// <summary>
+    /// Stores the internal file path state used by <see cref="PublicationStreamingSettingsStore"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _filePath;
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory JSON collection maintained internally by <see cref="PublicationStreamingSettingsStore"/> for its current workflow state.
     /// </summary>
     private readonly JsonSerializerOptions _json = new(JsonSerializerDefaults.Web)
     {
@@ -32,8 +38,9 @@ public sealed class PublicationStreamingSettingsStore
     private Dictionary<Guid, PublicationStreamingSettings>? _cache;
 
     /// <summary>
-    /// Runs the publication streaming settings store operation.
+    /// Initializes a new <see cref="PublicationStreamingSettingsStore"/> instance and captures the dependencies or initial state required by its publication streaming settings workflow.
     /// </summary>
+    /// <param name="protectionProvider">Data protection provider dependency used by the publication streaming settings workflow to provide the corresponding application capability.</param>
     public PublicationStreamingSettingsStore(IDataProtectionProvider protectionProvider)
     {
         _protector = protectionProvider.CreateProtector("PublisherStudio.PublicationStreamingSettings.v1");
@@ -45,8 +52,11 @@ public sealed class PublicationStreamingSettingsStore
     }
 
     /// <summary>
-    /// Attempts to load.
+    /// Attempts to load in the publication streaming settings persistence workflow while keeping storage-specific behavior contained within <see cref="PublicationStreamingSettingsStore"/>.
     /// </summary>
+    /// <param name="publicationId">Identifier of the publication to use for this operation.</param>
+    /// <param name="settings">Settings containing the caller-supplied values that control this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool TryLoad(Guid publicationId, out PublicationStreamingSettings settings)
     {
     try
@@ -73,8 +83,10 @@ public sealed class PublicationStreamingSettingsStore
 }
 
     /// <summary>
-    /// Loads or default.
+    /// Loads or default in the publication streaming settings persistence workflow while keeping storage-specific behavior contained within <see cref="PublicationStreamingSettingsStore"/>.
     /// </summary>
+    /// <param name="publicationId">Identifier of the publication to use for this operation.</param>
+    /// <returns>The publication streaming settings produced by the operation.</returns>
     public PublicationStreamingSettings LoadOrDefault(Guid publicationId) {
     try
     {
@@ -88,8 +100,10 @@ public sealed class PublicationStreamingSettingsStore
 }
 
     /// <summary>
-    /// Runs the save operation.
+    /// Performs save in the publication streaming settings persistence workflow while keeping storage-specific behavior contained within <see cref="PublicationStreamingSettingsStore"/>.
     /// </summary>
+    /// <param name="publicationId">Identifier of the publication to use for this operation.</param>
+    /// <param name="settings">Settings containing the caller-supplied values that control this operation.</param>
     public void Save(Guid publicationId, PublicationStreamingSettings settings)
     {
     try
@@ -113,8 +127,9 @@ public sealed class PublicationStreamingSettingsStore
 }
 
     /// <summary>
-    /// Loads core.
+    /// Loads core in the publication streaming settings persistence workflow while keeping storage-specific behavior contained within <see cref="PublicationStreamingSettingsStore"/>.
     /// </summary>
+    /// <returns>The dictionary GUID publication streaming settings produced by the operation.</returns>
     private Dictionary<Guid, PublicationStreamingSettings> LoadCore()
     {
     try
@@ -144,8 +159,9 @@ public sealed class PublicationStreamingSettingsStore
 }
 
     /// <summary>
-    /// Saves core.
+    /// Persists core in the publication streaming settings persistence workflow while keeping storage-specific behavior contained within <see cref="PublicationStreamingSettingsStore"/>.
     /// </summary>
+    /// <param name="values">Values value supplied to the publication streaming settings operation and used when producing its result.</param>
     private void SaveCore(Dictionary<Guid, PublicationStreamingSettings> values)
     {
     try
@@ -165,8 +181,10 @@ public sealed class PublicationStreamingSettingsStore
 }
 
     /// <summary>
-    /// Runs the clone operation.
+    /// Performs clone in the publication streaming settings persistence workflow while keeping storage-specific behavior contained within <see cref="PublicationStreamingSettingsStore"/>.
     /// </summary>
+    /// <param name="settings">Settings containing the caller-supplied values that control this operation.</param>
+    /// <returns>The publication streaming settings produced by the operation.</returns>
     private PublicationStreamingSettings Clone(PublicationStreamingSettings settings) {
     try
     {

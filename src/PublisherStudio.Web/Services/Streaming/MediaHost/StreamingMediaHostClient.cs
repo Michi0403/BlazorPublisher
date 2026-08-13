@@ -8,6 +8,10 @@ namespace PublisherStudio.Services.Streaming.MediaHost;
 /// No second executable, loopback port, or HTTP client is involved. Browser-facing
 /// capture and ingest sockets remain available as same-origin application endpoints.
 /// </summary>
+/// <param name="profiles">Streaming profile store dependency used by the streaming media host workflow to provide the corresponding application capability.</param>
+/// <param name="twitchOAuth">Twitch o auth service dependency used by the streaming media host workflow to provide the corresponding application capability.</param>
+/// <param name="runtime">Runtime value supplied to the streaming media host operation and used when producing its result.</param>
+/// <param name="sessions">Sessions value supplied to the streaming media host operation and used when producing its result.</param>
 public sealed class StreamingMediaHostClient(
     StreamingProfileStore profiles,
     TwitchOAuthService twitchOAuth,
@@ -15,17 +19,31 @@ public sealed class StreamingMediaHostClient(
     StreamingSessionUseCases sessions)
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal web JSON state used by <see cref="StreamingMediaHostClient"/> while executing its surrounding workflow.
     /// </summary>
     private readonly JsonSerializerOptions WebJson = new(JsonSerializerDefaults.Web);
+    /// <summary>
+    /// Stores the streaming profile store dependency used by <see cref="StreamingMediaHostClient"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly StreamingProfileStore _profiles = profiles;
+    /// <summary>
+    /// Stores the twitch o auth service dependency used by <see cref="StreamingMediaHostClient"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly TwitchOAuthService _twitchOAuth = twitchOAuth;
+    /// <summary>
+    /// Stores the internal runtime state used by <see cref="StreamingMediaHostClient"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly StreamingRuntimeUseCases _runtime = runtime;
+    /// <summary>
+    /// Stores the internal sessions state used by <see cref="StreamingMediaHostClient"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly StreamingSessionUseCases _sessions = sessions;
 
     /// <summary>
-    /// Runs the discover native devices async operation.
+    /// Discovers native devices for <see cref="StreamingMediaHostClient"/>, keeping the operation consistent with the state and invariants of the surrounding streaming media host workflow.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public async Task<List<PublisherStudio.BusinessObjects.NativeMediaDeviceInfo>> DiscoverNativeDevicesAsync(CancellationToken cancellationToken = default)
     {
     try
@@ -43,8 +61,10 @@ public sealed class StreamingMediaHostClient(
 }
 
     /// <summary>
-    /// Determines whether available async.
+    /// Determines whether available for <see cref="StreamingMediaHostClient"/>, keeping the operation consistent with the state and invariants of the surrounding streaming media host workflow.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public Task<bool> IsAvailableAsync(CancellationToken cancellationToken = default) {
     try
     {
@@ -58,8 +78,12 @@ public sealed class StreamingMediaHostClient(
 }
 
     /// <summary>
-    /// Starts async.
+    /// Performs start for <see cref="StreamingMediaHostClient"/>, keeping the operation consistent with the state and invariants of the surrounding streaming media host workflow.
     /// </summary>
+    /// <param name="document">Document value supplied to the streaming media host operation and used when producing its result.</param>
+    /// <param name="dryRun">Value indicating whether dry run should apply to this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The media host session response produced by the operation.</returns>
     public async Task<MediaHostSessionResponse?> StartAsync(PublicationDocument document, bool dryRun, CancellationToken cancellationToken = default)
     {
     try
@@ -159,8 +183,11 @@ public sealed class StreamingMediaHostClient(
 }
 
     /// <summary>
-    /// Stops async.
+    /// Performs stop for <see cref="StreamingMediaHostClient"/>, keeping the operation consistent with the state and invariants of the surrounding streaming media host workflow.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public Task<bool> StopAsync(Guid sessionId, CancellationToken cancellationToken = default) {
     try
     {
@@ -174,8 +201,13 @@ public sealed class StreamingMediaHostClient(
 }
 
     /// <summary>
-    /// Sets output enabled async.
+    /// Sets output enabled for <see cref="StreamingMediaHostClient"/>, keeping the operation consistent with the state and invariants of the surrounding streaming media host workflow.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <param name="outputId">Identifier of the output to use for this operation.</param>
+    /// <param name="enabled">Value indicating whether enabled should apply to this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public Task<bool> SetOutputEnabledAsync(Guid sessionId, Guid outputId, bool enabled, CancellationToken cancellationToken = default) {
     try
     {
@@ -189,8 +221,12 @@ public sealed class StreamingMediaHostClient(
 }
 
     /// <summary>
-    /// Sets program page async.
+    /// Sets program page for <see cref="StreamingMediaHostClient"/>, keeping the operation consistent with the state and invariants of the surrounding streaming media host workflow.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <param name="pageId">Identifier of the page to use for this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public Task<bool> SetProgramPageAsync(Guid sessionId, Guid pageId, CancellationToken cancellationToken = default) {
     try
     {
@@ -204,8 +240,12 @@ public sealed class StreamingMediaHostClient(
 }
 
     /// <summary>
-    /// Sets recording async.
+    /// Sets recording for <see cref="StreamingMediaHostClient"/>, keeping the operation consistent with the state and invariants of the surrounding streaming media host workflow.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <param name="enabled">Value indicating whether enabled should apply to this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public Task<bool> SetRecordingAsync(Guid sessionId, bool enabled, CancellationToken cancellationToken = default) {
     try
     {
@@ -219,8 +259,11 @@ public sealed class StreamingMediaHostClient(
 }
 
     /// <summary>
-    /// Reads events async.
+    /// Reads events for <see cref="StreamingMediaHostClient"/>, keeping the operation consistent with the state and invariants of the surrounding streaming media host workflow.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public Task<IReadOnlyList<MediaHostHotkeyEvent>> ReadEventsAsync(Guid sessionId, CancellationToken cancellationToken = default) {
     try
     {
@@ -235,163 +278,198 @@ public sealed class StreamingMediaHostClient(
 }
 
 /// <summary>
-/// Represents a media host start session request.
+/// Represents the input contract for media host start session, carrying the values a caller supplies to the corresponding application operation.
 /// </summary>
 public sealed class MediaHostStartSessionRequest
 {
     /// <summary>
-    /// Gets or sets publication identifier.
+    /// Gets or sets the stable publication identifier used to identify or correlate this media host start session instance with related application state.
     /// </summary>
+    /// <value>The publication identifier value exposed by <see cref="MediaHostStartSessionRequest"/>.</value>
     public Guid PublicationId { get; set; }
     /// <summary>
-    /// Gets or sets publication name.
+    /// Gets or sets the publication name value that forms part of the media host start session state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The publication name value exposed by <see cref="MediaHostStartSessionRequest"/>.</value>
     public string PublicationName { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets dry run.
+    /// Gets or sets a value indicating whether dry run applies to the media host start session state.
     /// </summary>
+    /// <value>The dry run value exposed by <see cref="MediaHostStartSessionRequest"/>.</value>
     public bool DryRun { get; set; }
     /// <summary>
-    /// Gets or sets master width.
+    /// Gets or sets the master width value that forms part of the media host start session state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The master width value exposed by <see cref="MediaHostStartSessionRequest"/>.</value>
     public int MasterWidth { get; set; }
     /// <summary>
-    /// Gets or sets master height.
+    /// Gets or sets the master height value that forms part of the media host start session state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The master height value exposed by <see cref="MediaHostStartSessionRequest"/>.</value>
     public int MasterHeight { get; set; }
     /// <summary>
-    /// Gets or sets master frame rate.
+    /// Gets or sets the master frame rate value that forms part of the media host start session state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The master frame rate value exposed by <see cref="MediaHostStartSessionRequest"/>.</value>
     public int MasterFrameRate { get; set; }
     /// <summary>
-    /// Gets or sets prefer device timestamps.
+    /// Gets or sets a value indicating whether prefer device timestamps applies to the media host start session state.
     /// </summary>
+    /// <value>The prefer device timestamps value exposed by <see cref="MediaHostStartSessionRequest"/>.</value>
     public bool PreferDeviceTimestamps { get; set; }
     /// <summary>
-    /// Gets or sets FFmpeg path.
+    /// Gets or sets the FFmpeg path used by this media host start session instance to locate the associated file-system resource.
     /// </summary>
+    /// <value>The FFmpeg path value exposed by <see cref="MediaHostStartSessionRequest"/>.</value>
     public string FfmpegPath { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets hardware encoder.
+    /// Gets or sets the hardware encoder value that forms part of the media host start session state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The hardware encoder value exposed by <see cref="MediaHostStartSessionRequest"/>.</value>
     public StreamingHardwareEncoderPreference HardwareEncoder { get; set; } = StreamingHardwareEncoderPreference.Auto;
     /// <summary>
-    /// Gets or sets outputs.
+    /// Gets or sets the outputs collection maintained or exposed by this media host start session instance for downstream processing.
     /// </summary>
+    /// <value>The outputs value exposed by <see cref="MediaHostStartSessionRequest"/>.</value>
     public List<MediaHostOutputRequest> Outputs { get; set; } = [];
     /// <summary>
-    /// Gets or sets recording.
+    /// Gets or sets the recording value that forms part of the media host start session state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The recording value exposed by <see cref="MediaHostStartSessionRequest"/>.</value>
     public PublicationRecordingSettings Recording { get; set; } = new();
     /// <summary>
-    /// Gets or sets LAN.
+    /// Gets or sets the LAN value that forms part of the media host start session state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The LAN value exposed by <see cref="MediaHostStartSessionRequest"/>.</value>
     public PublicationLanStreamingSettings Lan { get; set; } = new();
     /// <summary>
-    /// Gets or sets hotkeys.
+    /// Gets or sets the hotkeys collection maintained or exposed by this media host start session instance for downstream processing.
     /// </summary>
+    /// <value>The hotkeys value exposed by <see cref="MediaHostStartSessionRequest"/>.</value>
     public List<PublicationStreamingHotkey> Hotkeys { get; set; } = [];
 }
 
 /// <summary>
-/// Represents a media host output request.
+/// Represents the input contract for media host output, carrying the values a caller supplies to the corresponding application operation.
 /// </summary>
 public sealed class MediaHostOutputRequest
 {
     /// <summary>
-    /// Gets or sets output identifier.
+    /// Gets or sets the stable output identifier used to identify or correlate this media host output instance with related application state.
     /// </summary>
+    /// <value>The output identifier value exposed by <see cref="MediaHostOutputRequest"/>.</value>
     public Guid OutputId { get; set; }
     /// <summary>
-    /// Gets or sets the display name.
+    /// Gets or sets the name value that forms part of the media host output state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The name value exposed by <see cref="MediaHostOutputRequest"/>.</value>
     public string Name { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets whether the feature is enabled.
+    /// Gets or sets a value indicating whether the option is enabled applies to the media host output state.
     /// </summary>
+    /// <value>The enabled value exposed by <see cref="MediaHostOutputRequest"/>.</value>
     public bool Enabled { get; set; } = true;
     /// <summary>
-    /// Gets or sets provider.
+    /// Gets or sets the provider value that forms part of the media host output state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The provider value exposed by <see cref="MediaHostOutputRequest"/>.</value>
     public PublicationStreamProvider Provider { get; set; }
     /// <summary>
-    /// Gets or sets transport.
+    /// Gets or sets the transport value that forms part of the media host output state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The transport value exposed by <see cref="MediaHostOutputRequest"/>.</value>
     public PublicationStreamTransport Transport { get; set; }
     /// <summary>
-    /// Gets or sets endpoint.
+    /// Gets or sets the endpoint that identifies the network or application endpoint associated with this media host output state.
     /// </summary>
+    /// <value>The endpoint value exposed by <see cref="MediaHostOutputRequest"/>.</value>
     public string Endpoint { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets channel identifier.
+    /// Gets or sets the stable channel identifier used to identify or correlate this media host output instance with related application state.
     /// </summary>
+    /// <value>The channel identifier value exposed by <see cref="MediaHostOutputRequest"/>.</value>
     public string ChannelId { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets account name.
+    /// Gets or sets the account name value that forms part of the media host output state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The account name value exposed by <see cref="MediaHostOutputRequest"/>.</value>
     public string AccountName { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets secret.
+    /// Gets or sets the secret value that forms part of the media host output state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The secret value exposed by <see cref="MediaHostOutputRequest"/>.</value>
     public string Secret { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets chat enabled.
+    /// Gets or sets a value indicating whether chat enabled applies to the media host output state.
     /// </summary>
+    /// <value>The chat enabled value exposed by <see cref="MediaHostOutputRequest"/>.</value>
     public bool ChatEnabled { get; set; }
     /// <summary>
-    /// Gets or sets chat secret.
+    /// Gets or sets the chat secret value that forms part of the media host output state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The chat secret value exposed by <see cref="MediaHostOutputRequest"/>.</value>
     public string ChatSecret { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets test mode.
+    /// Gets or sets a value indicating whether test mode applies to the media host output state.
     /// </summary>
+    /// <value>The test mode value exposed by <see cref="MediaHostOutputRequest"/>.</value>
     public bool TestMode { get; set; }
     /// <summary>
-    /// Gets or sets width.
+    /// Gets or sets the width value that forms part of the media host output state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The width value exposed by <see cref="MediaHostOutputRequest"/>.</value>
     public int Width { get; set; }
     /// <summary>
-    /// Gets or sets height.
+    /// Gets or sets the height value that forms part of the media host output state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The height value exposed by <see cref="MediaHostOutputRequest"/>.</value>
     public int Height { get; set; }
     /// <summary>
-    /// Gets or sets frame rate.
+    /// Gets or sets the frame rate value that forms part of the media host output state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The frame rate value exposed by <see cref="MediaHostOutputRequest"/>.</value>
     public int FrameRate { get; set; }
     /// <summary>
-    /// Gets or sets video bitrate kbps.
+    /// Gets or sets the video bitrate kbps value that forms part of the media host output state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The video bitrate kbps value exposed by <see cref="MediaHostOutputRequest"/>.</value>
     public int VideoBitrateKbps { get; set; }
     /// <summary>
-    /// Gets or sets audio bitrate kbps.
+    /// Gets or sets the audio bitrate kbps value that forms part of the media host output state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The audio bitrate kbps value exposed by <see cref="MediaHostOutputRequest"/>.</value>
     public int AudioBitrateKbps { get; set; }
     /// <summary>
-    /// Gets or sets key frame interval seconds.
+    /// Gets or sets the key frame interval seconds value that forms part of the media host output state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The key frame interval seconds value exposed by <see cref="MediaHostOutputRequest"/>.</value>
     public int KeyFrameIntervalSeconds { get; set; }
     /// <summary>
-    /// Gets or sets video codec.
+    /// Gets or sets the video codec value that forms part of the media host output state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The video codec value exposed by <see cref="MediaHostOutputRequest"/>.</value>
     public PublicationStreamVideoCodec VideoCodec { get; set; }
     /// <summary>
-    /// Gets or sets audio codec.
+    /// Gets or sets the audio codec value that forms part of the media host output state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The audio codec value exposed by <see cref="MediaHostOutputRequest"/>.</value>
     public PublicationStreamAudioCodec AudioCodec { get; set; }
 }
 
 /// <summary>
-/// Represents a media host session response.
+/// Represents the outcome of media host session, carrying the data and status produced by the corresponding application operation.
 /// </summary>
 public sealed class MediaHostSessionResponse
 {
     /// <summary>
-    /// Gets or sets session identifier.
+    /// Gets or sets the stable session identifier used to identify or correlate this media host session instance with related application state.
     /// </summary>
+    /// <value>The session identifier value exposed by <see cref="MediaHostSessionResponse"/>.</value>
     public Guid SessionId { get; set; }
     /// <summary>
-    /// Gets or sets status.
+    /// Gets or sets the status value that forms part of the media host session state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The status value exposed by <see cref="MediaHostSessionResponse"/>.</value>
     public string Status { get; set; } = string.Empty;
 }
 

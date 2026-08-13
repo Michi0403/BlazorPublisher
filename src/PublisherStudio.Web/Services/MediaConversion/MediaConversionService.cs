@@ -12,111 +12,162 @@ using TextEncoding = global::System.Text.Encoding;
 namespace PublisherStudio.Services.MediaConversion;
 
 /// <summary>
-/// Provides media conversion service operations.
+/// Coordinates media conversion behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
 public sealed class MediaConversionService : IMediaConversionService, IDisposable
 {
     /// <summary>
-    /// Represents a job state.
+    /// Represents job state exchanged or persisted by the surrounding application workflow, with each member describing one part of that state.
     /// </summary>
     private sealed class JobState
     {
         /// <summary>
-        /// Gets or sets the stable identifier.
+        /// Gets or sets the stable identifier used to identify or correlate this job instance with related application state.
         /// </summary>
+        /// <value>The identifier value exposed by <see cref="JobState"/>.</value>
         public required Guid Id { get; init; }
         /// <summary>
-        /// Gets or sets source file name.
+        /// Gets or sets the source file name used by this job instance to locate the associated file-system resource.
         /// </summary>
+        /// <value>The source file name value exposed by <see cref="JobState"/>.</value>
         public required string SourceFileName { get; init; }
         /// <summary>
-        /// Gets or sets source path.
+        /// Gets or sets the source path used by this job instance to locate the associated file-system resource.
         /// </summary>
+        /// <value>The source path value exposed by <see cref="JobState"/>.</value>
         public required string SourcePath { get; init; }
         /// <summary>
-        /// Gets or sets output path.
+        /// Gets or sets the output path used by this job instance to locate the associated file-system resource.
         /// </summary>
+        /// <value>The output path value exposed by <see cref="JobState"/>.</value>
         public required string OutputPath { get; init; }
         /// <summary>
-        /// Gets or sets output mime type.
+        /// Gets or sets the output MIME type value that forms part of the job state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The output MIME type value exposed by <see cref="JobState"/>.</value>
         public required string OutputMimeType { get; init; }
         /// <summary>
-        /// Gets or sets preset.
+        /// Gets or sets the preset value that forms part of the job state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The preset value exposed by <see cref="JobState"/>.</value>
         public required MediaConversionPreset Preset { get; init; }
         /// <summary>
-        /// Gets or sets options.
+        /// Gets or sets the options value that forms part of the job state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The options value exposed by <see cref="JobState"/>.</value>
         public required MediaConversionOptions Options { get; init; }
         /// <summary>
-        /// Gets or sets cancellation.
+        /// Gets or sets the cancellation signal used to stop or abandon work associated with this job operation.
         /// </summary>
+        /// <value>The cancellation value exposed by <see cref="JobState"/>.</value>
         public required CancellationTokenSource Cancellation { get; init; }
         /// <summary>
-        /// Gets or sets status.
+        /// Gets or sets the status value that forms part of the job state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The status value exposed by <see cref="JobState"/>.</value>
         public MediaConversionJobStatus Status { get; set; } = MediaConversionJobStatus.Queued;
         /// <summary>
-        /// Gets or sets progress.
+        /// Gets or sets the progress value that forms part of the job state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The progress value exposed by <see cref="JobState"/>.</value>
         public double Progress { get; set; }
         /// <summary>
-        /// Gets or sets message.
+        /// Gets or sets the message value that forms part of the job state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The message value exposed by <see cref="JobState"/>.</value>
         public string Message { get; set; } = "Queued";
         /// <summary>
-        /// Gets or sets output size.
+        /// Gets or sets the output size that quantifies the associated job data.
         /// </summary>
+        /// <value>The output size value exposed by <see cref="JobState"/>.</value>
         public long OutputSize { get; set; }
         /// <summary>
-        /// Gets or sets the UTC creation time.
+        /// Gets or sets the created UTC associated with this job state, using the time semantics implied by the member name.
         /// </summary>
+        /// <value>The created UTC value exposed by <see cref="JobState"/>.</value>
         public DateTimeOffset CreatedUtc { get; init; } = DateTimeOffset.UtcNow;
         /// <summary>
-        /// Gets or sets completed UTC.
+        /// Gets or sets the completed UTC associated with this job state, using the time semantics implied by the member name.
         /// </summary>
+        /// <value>The completed UTC value exposed by <see cref="JobState"/>.</value>
         public DateTimeOffset? CompletedUtc { get; set; }
         /// <summary>
-        /// Gets or sets process.
+        /// Gets or sets the process value that forms part of the job state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The process value exposed by <see cref="JobState"/>.</value>
         public Process? Process { get; set; }
         /// <summary>
-        /// Gets sync.
+        /// Gets the sync value that forms part of the job state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The sync value exposed by <see cref="JobState"/>.</value>
         public object Sync { get; } = new();
     }
 
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal JSON options state used by <see cref="MediaConversionService"/> while executing its surrounding workflow.
     /// </summary>
     private readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web) { WriteIndented = true };
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory jobs collection maintained internally by <see cref="MediaConversionService"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<Guid, JobState> _jobs = new();
+    /// <summary>
+    /// Stores the logger used by <see cref="MediaConversionService"/> to record operational diagnostics without coupling callers to logging details.
+    /// </summary>
     private readonly ILogger<MediaConversionService> logger;
+    /// <summary>
+    /// Stores the internal FFmpeg locator state used by <see cref="MediaConversionService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly FfmpegLocator _ffmpegLocator;
+    /// <summary>
+    /// Stores the publisher runtime policy data service dependency used by <see cref="MediaConversionService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly IPublisherRuntimePolicyDataService _runtimePolicy;
+    /// <summary>
+    /// Stores the publisher runtime pattern service dependency used by <see cref="MediaConversionService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly IPublisherRuntimePatternService _runtimePatterns;
+    /// <summary>
+    /// Stores the internal publisher configuration state used by <see cref="MediaConversionService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly PublisherStudioConfigurationNode _publisherConfiguration;
+    /// <summary>
+    /// Stores the internal root state used by <see cref="MediaConversionService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _root;
+    /// <summary>
+    /// Stores the internal profiles path state used by <see cref="MediaConversionService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _profilesPath;
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal profiles sync state used by <see cref="MediaConversionService"/> while executing its surrounding workflow.
     /// </summary>
     private readonly object _profilesSync = new();
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the synchronization primitive that protects concurrent access to capability lock state owned by <see cref="MediaConversionService"/>.
     /// </summary>
     private readonly SemaphoreSlim _capabilityLock = new(1, 1);
+    /// <summary>
+    /// Stores the internal capabilities state used by <see cref="MediaConversionService"/> while executing its surrounding workflow.
+    /// </summary>
     private MediaConversionCapabilities? _capabilities;
+    /// <summary>
+    /// Stores the in-memory user profiles collection maintained internally by <see cref="MediaConversionService"/> for its current workflow state.
+    /// </summary>
     private List<MediaConversionProfile>? _userProfiles;
+    /// <summary>
+    /// Stores the internal disposed state used by <see cref="MediaConversionService"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _disposed;
 
     /// <summary>
-    /// Runs the media conversion service operation.
+    /// Initializes a new <see cref="MediaConversionService"/> instance and captures the dependencies or initial state required by its media conversion workflow.
     /// </summary>
+    /// <param name="ffmpegLocator">Ffmpeg locator value supplied to the media conversion operation and used when producing its result.</param>
+    /// <param name="runtimePolicy">Publisher runtime policy data service dependency used by the media conversion workflow to provide the corresponding application capability.</param>
+    /// <param name="runtimePatterns">Publisher runtime pattern service dependency used by the media conversion workflow to provide the corresponding application capability.</param>
+    /// <param name="publisherConfiguration">Publisher configuration value supplied to the media conversion operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     public MediaConversionService(
         FfmpegLocator ffmpegLocator,
         IPublisherRuntimePolicyDataService runtimePolicy,
@@ -137,8 +188,10 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Gets capabilities async.
+    /// Retrieves capabilities as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The media conversion capabilities produced by the operation.</returns>
     public async Task<MediaConversionCapabilities> GetCapabilitiesAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -200,8 +253,14 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Runs the queue async operation.
+    /// Performs queue as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the media conversion operation and used when producing its result.</param>
+    /// <param name="fileName">File name value supplied to the media conversion operation and used when producing its result.</param>
+    /// <param name="mimeType">Mime type value supplied to the media conversion operation and used when producing its result.</param>
+    /// <param name="presetId">Identifier of the preset to use for this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The media conversion job info produced by the operation.</returns>
     public Task<MediaConversionJobInfo> QueueAsync(Stream source, string fileName, string mimeType, string presetId, CancellationToken cancellationToken = default) {
         try
         {
@@ -216,8 +275,15 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Runs the queue async operation.
+    /// Performs queue as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the media conversion operation and used when producing its result.</param>
+    /// <param name="fileName">File name value supplied to the media conversion operation and used when producing its result.</param>
+    /// <param name="mimeType">Mime type value supplied to the media conversion operation and used when producing its result.</param>
+    /// <param name="presetId">Identifier of the preset to use for this operation.</param>
+    /// <param name="options">Options containing the caller-supplied values that control this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The media conversion job info produced by the operation.</returns>
     public async Task<MediaConversionJobInfo> QueueAsync(Stream source, string fileName, string mimeType, string presetId, MediaConversionOptions options, CancellationToken cancellationToken = default)
     {
         try
@@ -275,8 +341,10 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Gets job.
+    /// Retrieves job as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>The media conversion job info produced by the operation.</returns>
     public MediaConversionJobInfo? GetJob(Guid id) {
         try
         {
@@ -291,8 +359,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Gets jobs.
+    /// Retrieves jobs as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<MediaConversionJobInfo> GetJobs() {
         try
         {
@@ -310,8 +379,11 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Opens output async.
+    /// Opens output as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The stream produced by the operation.</returns>
     public Task<Stream?> OpenOutputAsync(Guid id, CancellationToken cancellationToken = default)
     {
         try
@@ -332,8 +404,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Gets profiles.
+    /// Retrieves profiles as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<MediaConversionProfile> GetProfiles()
     {
         try
@@ -354,8 +427,10 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Saves profile.
+    /// Persists profile as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="profile">Profile value supplied to the media conversion operation and used when producing its result.</param>
+    /// <returns>The media conversion profile produced by the operation.</returns>
     public MediaConversionProfile SaveProfile(MediaConversionProfile profile)
     {
         try
@@ -388,8 +463,10 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Deletes profile.
+    /// Deletes profile as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool DeleteProfile(Guid id)
     {
         try
@@ -412,8 +489,10 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Determines whether cel.
+    /// Determines whether cel as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool Cancel(Guid id)
     {
         try
@@ -438,8 +517,10 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Runs the remove operation.
+    /// Performs remove as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool Remove(Guid id)
     {
         try
@@ -460,8 +541,11 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Runs the execute async operation.
+    /// Performs execute as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="job">Job value supplied to the media conversion operation and used when producing its result.</param>
+    /// <param name="executable">Executable value supplied to the media conversion operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ExecuteAsync(JobState job, string executable)
     {
         double durationSeconds = job.Options.DurationSeconds.GetValueOrDefault();
@@ -570,8 +654,13 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Builds arguments.
+    /// Builds arguments as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="preset">Preset value supplied to the media conversion operation and used when producing its result.</param>
+    /// <param name="options">Options containing the caller-supplied values that control this operation.</param>
+    /// <param name="inputPath">Input path value supplied to the media conversion operation and used when producing its result.</param>
+    /// <param name="outputPath">Output path value supplied to the media conversion operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     internal IReadOnlyList<string> BuildArguments(MediaConversionPreset preset, MediaConversionOptions options, string inputPath, string outputPath)
     {
         try
@@ -601,8 +690,10 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Runs the preset arguments operation.
+    /// Performs preset arguments as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="presetId">Identifier of the preset to use for this operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IReadOnlyList<string> PresetArguments(string presetId) {
         try
         {
@@ -634,8 +725,10 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Applies stream overrides.
+    /// Applies stream overrides as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="arguments">Arguments value supplied to the media conversion operation and used when producing its result.</param>
+    /// <param name="options">Options containing the caller-supplied values that control this operation.</param>
     private void ApplyStreamOverrides(List<string> arguments, MediaConversionOptions options)
     {
         try
@@ -675,8 +768,10 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Applies filters.
+    /// Applies filters as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="arguments">Arguments value supplied to the media conversion operation and used when producing its result.</param>
+    /// <param name="options">Options containing the caller-supplied values that control this operation.</param>
     private void ApplyFilters(List<string> arguments, MediaConversionOptions options)
     {
         try
@@ -703,8 +798,10 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Runs the scale filter operation.
+    /// Performs scale filter as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="options">Options containing the caller-supplied values that control this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ScaleFilter(MediaConversionOptions options)
     {
         try
@@ -733,8 +830,10 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Applies metadata.
+    /// Applies metadata as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="arguments">Arguments value supplied to the media conversion operation and used when producing its result.</param>
+    /// <param name="options">Options containing the caller-supplied values that control this operation.</param>
     private void ApplyMetadata(List<string> arguments, MediaConversionOptions options)
     {
         try
@@ -757,8 +856,11 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Adds override.
+    /// Adds override as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="arguments">Arguments value supplied to the media conversion operation and used when producing its result.</param>
+    /// <param name="key">Key value supplied to the media conversion operation and used when producing its result.</param>
+    /// <param name="value">Value value supplied to the media conversion operation and used when producing its result.</param>
     private void AddOverride(List<string> arguments, string key, string? value)
     {
         try
@@ -784,8 +886,10 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Parses advanced arguments.
+    /// Parses advanced arguments as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the media conversion operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     internal IReadOnlyList<string> ParseAdvancedArguments(string? source)
     {
         try
@@ -859,8 +963,10 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Normalizes options.
+    /// Normalizes options as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the media conversion operation and used when producing its result.</param>
+    /// <returns>The media conversion options produced by the operation.</returns>
     private MediaConversionOptions NormalizeOptions(MediaConversionOptions source)
     {
         try
@@ -902,8 +1008,10 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Validates requested encoders.
+    /// Validates requested encoders as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="capabilities">Capabilities value supplied to the media conversion operation and used when producing its result.</param>
+    /// <param name="options">Options containing the caller-supplied values that control this operation.</param>
     private void ValidateRequestedEncoders(MediaConversionCapabilities capabilities, MediaConversionOptions options)
     {
         try
@@ -922,8 +1030,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Runs the built in profiles operation.
+    /// Performs built in profiles as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     private IReadOnlyList<MediaConversionProfile> BuiltInProfiles() {
         try
         {
@@ -945,8 +1054,13 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Runs the profile operation.
+    /// Performs profile as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="name">Name value supplied to the media conversion operation and used when producing its result.</param>
+    /// <param name="description">Description value supplied to the media conversion operation and used when producing its result.</param>
+    /// <param name="presetId">Identifier of the preset to use for this operation.</param>
+    /// <param name="options">Options containing the caller-supplied values that control this operation.</param>
+    /// <returns>The media conversion profile produced by the operation.</returns>
     private MediaConversionProfile Profile(string name, string description, string presetId, MediaConversionOptions options) {
         try
         {
@@ -970,8 +1084,10 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Runs the stable profile identifier operation.
+    /// Performs stable profile identifier as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the media conversion operation and used when producing its result.</param>
+    /// <returns>The GUID produced by the operation.</returns>
     private Guid StableProfileId(string value)
     {
         try
@@ -989,8 +1105,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Loads user profiles.
+    /// Loads user profiles as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     private List<MediaConversionProfile> LoadUserProfiles()
     {
         if (_userProfiles is not null) return _userProfiles;
@@ -1014,8 +1131,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Runs the persist profiles operation.
+    /// Persists profiles as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="profiles">Profiles value supplied to the media conversion operation and used when producing its result.</param>
     private void PersistProfiles(List<MediaConversionProfile> profiles)
     {
         try
@@ -1036,8 +1154,10 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Runs the clone profile operation.
+    /// Performs clone profile as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="profile">Profile value supplied to the media conversion operation and used when producing its result.</param>
+    /// <returns>The media conversion profile produced by the operation.</returns>
     private MediaConversionProfile CloneProfile(MediaConversionProfile profile) {
         try
         {
@@ -1061,8 +1181,11 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Reads encoders async.
+    /// Reads encoders as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="executable">Executable value supplied to the media conversion operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private async Task<IReadOnlyList<string>> ReadEncodersAsync(string executable, CancellationToken cancellationToken)
     {
         try
@@ -1100,8 +1223,10 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Runs the snapshot operation.
+    /// Performs snapshot as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="job">Job value supplied to the media conversion operation and used when producing its result.</param>
+    /// <returns>The media conversion job info produced by the operation.</returns>
     private MediaConversionJobInfo Snapshot(JobState job)
     {
         try
@@ -1135,8 +1260,11 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Runs the safe file name operation.
+    /// Performs safe file name as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="fileName">File name value supplied to the media conversion operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the media conversion operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string SafeFileName(string? fileName, string fallback)
     {
         try
@@ -1156,8 +1284,11 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Normalizes extension.
+    /// Normalizes extension as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="requested">Requested value supplied to the media conversion operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the media conversion operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeExtension(string? requested, string fallback)
     {
         try
@@ -1177,8 +1308,10 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Runs the clean option value operation.
+    /// Performs clean option value as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the media conversion operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string CleanOptionValue(string? value)
     {
         try
@@ -1196,8 +1329,10 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Runs the positive operation.
+    /// Performs positive as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the media conversion operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     private int? Positive(int? value) {
         try
         {
@@ -1211,8 +1346,10 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
     /// <summary>
-    /// Runs the finite positive operation.
+    /// Performs finite positive as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the media conversion operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double? FinitePositive(double? value) {
         try
         {
@@ -1226,8 +1363,10 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
     /// <summary>
-    /// Runs the finite positive or zero operation.
+    /// Performs finite positive or zero as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the media conversion operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double? FinitePositiveOrZero(double? value) {
         try
         {
@@ -1241,8 +1380,10 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         }
     }
     /// <summary>
-    /// Runs the number operation.
+    /// Performs number as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the media conversion operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Number(double value) {
         try
         {
@@ -1257,7 +1398,7 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Runs the cleanup old directories operation.
+    /// Performs cleanup old directories as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     private void CleanupOldDirectories()
     {
@@ -1286,8 +1427,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Attempts to delete.
+    /// Attempts to delete as part of the media conversion service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="path">Path value supplied to the media conversion operation and used when producing its result.</param>
     private void TryDelete(string path) {
         try
         {
@@ -1304,6 +1446,7 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     /// <summary>
     /// Determines whether cel state.
     /// </summary>
+    /// <param name="job">Job value supplied to the media conversion operation and used when producing its result.</param>
     private void CancelState(JobState job)
     {
         try
@@ -1321,7 +1464,7 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     }
 
     /// <summary>
-    /// Runs the dispose operation.
+    /// Releases resources owned by <see cref="MediaConversionService"/> and leaves the media conversion workflow in a safely disposed state.
     /// </summary>
     public void Dispose()
     {

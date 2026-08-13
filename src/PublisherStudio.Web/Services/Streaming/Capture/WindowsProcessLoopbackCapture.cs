@@ -5,30 +5,38 @@ using System.Runtime.Versioning;
 namespace PublisherStudio.Services.Streaming.Capture;
 
 /// <summary>
-/// Defines the windows process loopback capture contract.
+/// Defines the contract for windows process loopback capture behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
 public interface IWindowsProcessLoopbackCapture : IDisposable
 {
     /// <summary>
-    /// Runs the start operation.
+    /// Performs start for <see cref="IWindowsProcessLoopbackCapture"/>, keeping the operation consistent with the state and invariants of the surrounding windows process loopback capture workflow.
     /// </summary>
     void Start();
 }
 
 /// <summary>
-/// Defines the windows process loopback capture factory contract.
+/// Defines the contract for windows process loopback capture behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
 public interface IWindowsProcessLoopbackCaptureFactory
 {
     /// <summary>
-    /// Runs the create operation.
+    /// Performs create using the configuration and dependencies owned by <see cref="IWindowsProcessLoopbackCaptureFactory"/>.
     /// </summary>
+    /// <param name="processId">Identifier of the process to use for this operation.</param>
+    /// <param name="destination">Destination value supplied to the windows process loopback capture operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The i windows process loopback capture produced by the operation.</returns>
     IWindowsProcessLoopbackCapture Create(uint processId, Stream destination, CancellationToken cancellationToken);
 }
 
 /// <summary>
-/// Provides windows process loopback capture factory operations.
+/// Creates configured windows process loopback capture instances from the application's current dependencies and runtime settings.
 /// </summary>
+/// <param name="nativeService">Windows process loopback native service dependency used by the windows process loopback capture workflow to provide the corresponding application capability.</param>
+/// <param name="runtimePolicy">Publisher runtime policy data service dependency used by the windows process loopback capture workflow to provide the corresponding application capability.</param>
+/// <param name="loggerFactory">Logger factory dependency used by the windows process loopback capture workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class WindowsProcessLoopbackCaptureFactory(
     IWindowsProcessLoopbackNativeService nativeService,
     IPublisherRuntimePolicyDataService runtimePolicy,
@@ -36,8 +44,12 @@ public sealed class WindowsProcessLoopbackCaptureFactory(
     ILogger<WindowsProcessLoopbackCaptureFactory> logger) : IWindowsProcessLoopbackCaptureFactory
 {
     /// <summary>
-    /// Runs the create operation.
+    /// Performs create using the configuration and dependencies owned by <see cref="WindowsProcessLoopbackCaptureFactory"/>.
     /// </summary>
+    /// <param name="processId">Identifier of the process to use for this operation.</param>
+    /// <param name="destination">Destination value supplied to the windows process loopback capture operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The i windows process loopback capture produced by the operation.</returns>
     public IWindowsProcessLoopbackCapture Create(uint processId, Stream destination, CancellationToken cancellationToken)
     {
         if (!OperatingSystem.IsWindows())
@@ -71,32 +83,90 @@ public sealed class WindowsProcessLoopbackCaptureFactory(
 [SupportedOSPlatform("windows")]
 internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCapture
 {
+    /// <summary>
+    /// Defines the virtual audio device process loopback constant used by <see cref="WindowsProcessLoopbackCapture"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const string VirtualAudioDeviceProcessLoopback = "VAD\\Process_Loopback";
+    /// <summary>
+    /// Defines the audclnt streamflags loopback constant used by <see cref="WindowsProcessLoopbackCapture"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const uint AudclntStreamflagsLoopback = 0x00020000;
+    /// <summary>
+    /// Defines the audclnt streamflags event callback constant used by <see cref="WindowsProcessLoopbackCapture"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const uint AudclntStreamflagsEventCallback = 0x00040000;
+    /// <summary>
+    /// Defines the audclnt streamflags src default quality constant used by <see cref="WindowsProcessLoopbackCapture"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const uint AudclntStreamflagsSrcDefaultQuality = 0x08000000;
+    /// <summary>
+    /// Defines the audclnt streamflags auto convert pcm constant used by <see cref="WindowsProcessLoopbackCapture"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const uint AudclntStreamflagsAutoConvertPcm = 0x80000000;
+    /// <summary>
+    /// Defines the audclnt bufferflags silent constant used by <see cref="WindowsProcessLoopbackCapture"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const uint AudclntBufferflagsSilent = 0x00000002;
+    /// <summary>
+    /// Defines the vt blob constant used by <see cref="WindowsProcessLoopbackCapture"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const ushort VtBlob = 65;
 
+    /// <summary>
+    /// Stores the internal audio client interface identifier state used by <see cref="WindowsProcessLoopbackCapture"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly Guid _audioClientInterfaceId;
+    /// <summary>
+    /// Stores the logger used by <see cref="WindowsProcessLoopbackCapture"/> to record operational diagnostics without coupling callers to logging details.
+    /// </summary>
     private readonly ILogger<WindowsProcessLoopbackCapture> _logger;
+    /// <summary>
+    /// Stores the internal audio capture client interface identifier state used by <see cref="WindowsProcessLoopbackCapture"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly Guid _audioCaptureClientInterfaceId;
+    /// <summary>
+    /// Stores the windows process loopback native service dependency used by <see cref="WindowsProcessLoopbackCapture"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly IWindowsProcessLoopbackNativeService _nativeService;
+    /// <summary>
+    /// Stores the internal process identifier state used by <see cref="WindowsProcessLoopbackCapture"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly uint _processId;
+    /// <summary>
+    /// Stores the internal destination state used by <see cref="WindowsProcessLoopbackCapture"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly Stream _destination;
+    /// <summary>
+    /// Stores the cancellation source used by <see cref="WindowsProcessLoopbackCapture"/> to stop its current background or asynchronous operation.
+    /// </summary>
     private readonly CancellationTokenSource _cancellation;
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal started state used by <see cref="WindowsProcessLoopbackCapture"/> while executing its surrounding workflow.
     /// </summary>
     private readonly ManualResetEventSlim _started = new(false);
+    /// <summary>
+    /// Stores the internal thread state used by <see cref="WindowsProcessLoopbackCapture"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly Thread _thread;
+    /// <summary>
+    /// Stores the internal startup error state used by <see cref="WindowsProcessLoopbackCapture"/> while executing its surrounding workflow.
+    /// </summary>
     private Exception? _startupError;
+    /// <summary>
+    /// Stores the internal disposed state used by <see cref="WindowsProcessLoopbackCapture"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _disposed;
 
     /// <summary>
-    /// Runs the windows process loopback capture operation.
+    /// Initializes a new <see cref="WindowsProcessLoopbackCapture"/> instance and captures the dependencies or initial state required by its windows process loopback capture workflow.
     /// </summary>
+    /// <param name="processId">Identifier of the process to use for this operation.</param>
+    /// <param name="destination">Destination value supplied to the windows process loopback capture operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <param name="nativeService">Windows process loopback native service dependency used by the windows process loopback capture workflow to provide the corresponding application capability.</param>
+    /// <param name="audioClientInterfaceId">Identifier of the audio client interface to use for this operation.</param>
+    /// <param name="audioCaptureClientInterfaceId">Identifier of the audio capture client interface to use for this operation.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     public WindowsProcessLoopbackCapture(
         uint processId,
         Stream destination,
@@ -122,7 +192,7 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
     }
 
     /// <summary>
-    /// Runs the start operation.
+    /// Performs start for <see cref="WindowsProcessLoopbackCapture"/>, keeping the operation consistent with the state and invariants of the surrounding windows process loopback capture workflow.
     /// </summary>
     public void Start()
     {
@@ -146,7 +216,7 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
 }
 
     /// <summary>
-    /// Runs the capture thread operation.
+    /// Performs capture thread for <see cref="WindowsProcessLoopbackCapture"/>, keeping the operation consistent with the state and invariants of the surrounding windows process loopback capture workflow.
     /// </summary>
     private void CaptureThread()
     {
@@ -240,8 +310,10 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
     }
 
     /// <summary>
-    /// Runs the activate audio client operation.
+    /// Performs activate audio client for <see cref="WindowsProcessLoopbackCapture"/>, keeping the operation consistent with the state and invariants of the surrounding windows process loopback capture workflow.
     /// </summary>
+    /// <param name="processId">Identifier of the process to use for this operation.</param>
+    /// <returns>The i audio client produced by the operation.</returns>
     private IAudioClient ActivateAudioClient(uint processId)
     {
     try
@@ -299,8 +371,9 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
 }
 
     /// <summary>
-    /// Runs the throw if failed operation.
+    /// Performs throw if failed for <see cref="WindowsProcessLoopbackCapture"/>, keeping the operation consistent with the state and invariants of the surrounding windows process loopback capture workflow.
     /// </summary>
+    /// <param name="hresult">Hresult value supplied to the windows process loopback capture operation and used when producing its result.</param>
     private void ThrowIfFailed(int hresult)
     {
     try
@@ -319,8 +392,9 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
 }
 
     /// <summary>
-    /// Runs the release com object operation.
+    /// Performs release com object for <see cref="WindowsProcessLoopbackCapture"/>, keeping the operation consistent with the state and invariants of the surrounding windows process loopback capture workflow.
     /// </summary>
+    /// <param name="value">Value value supplied to the windows process loopback capture operation and used when producing its result.</param>
     private void ReleaseComObject(object? value)
     {
     try
@@ -340,7 +414,7 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
 }
 
     /// <summary>
-    /// Runs the dispose operation.
+    /// Releases resources owned by <see cref="WindowsProcessLoopbackCapture"/> and leaves the windows process loopback capture workflow in a safely disposed state.
     /// </summary>
     public void Dispose()
     {
@@ -365,19 +439,22 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
 }
 
     /// <summary>
-    /// Represents an audio activation completion handler.
+    /// Represents an audio activation completion helper type nested within <see cref="WindowsProcessLoopbackCapture"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
+    /// <param name="owner">Owner value supplied to the windows process loopback capture operation and used when producing its result.</param>
     private sealed class AudioActivationCompletionHandler(WindowsProcessLoopbackCapture owner)
         : IActivateAudioInterfaceCompletionHandler
     {
         /// <summary>
-        /// Runs the new operation.
+        /// Stores the internal completion state used by <see cref="AudioActivationCompletionHandler"/> while executing its surrounding workflow.
         /// </summary>
         private readonly TaskCompletionSource<IAudioClient> _completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         /// <summary>
-        /// Runs the activate completed operation.
+        /// Performs activate completed for <see cref="AudioActivationCompletionHandler"/>, keeping the operation consistent with the state and invariants of the surrounding audio activation completion workflow.
         /// </summary>
+        /// <param name="operation">Activate audio interface async operation dependency used by the audio activation completion workflow to provide the corresponding application capability.</param>
+        /// <returns>The int produced by the operation.</returns>
         public int ActivateCompleted(IActivateAudioInterfaceAsyncOperation operation)
         {
     try
@@ -400,8 +477,10 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
 }
 
         /// <summary>
-        /// Runs the wait operation.
+        /// Performs wait for <see cref="AudioActivationCompletionHandler"/>, keeping the operation consistent with the state and invariants of the surrounding audio activation completion workflow.
         /// </summary>
+        /// <param name="timeout">Timeout value supplied to the audio activation completion operation and used when producing its result.</param>
+        /// <returns>The i audio client produced by the operation.</returns>
         public IAudioClient Wait(TimeSpan timeout)
         {
     try
@@ -419,204 +498,249 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
     }
 
     /// <summary>
-    /// Represents an audio client activation params.
+    /// Represents an audio client activation params helper type nested within <see cref="WindowsProcessLoopbackCapture"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     private struct AudioClientActivationParams
     {
         /// <summary>
-        /// Stores activation type.
+        /// Stores the internal activation type state used by <see cref="AudioClientActivationParams"/> while executing its surrounding workflow.
         /// </summary>
         public int ActivationType;
         /// <summary>
-        /// Stores process loopback params.
+        /// Stores the internal process loopback params state used by <see cref="AudioClientActivationParams"/> while executing its surrounding workflow.
         /// </summary>
         public AudioClientProcessLoopbackParams ProcessLoopbackParams;
     }
 
     /// <summary>
-    /// Represents an audio client process loopback params.
+    /// Represents an audio client process loopback params helper type nested within <see cref="WindowsProcessLoopbackCapture"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     private struct AudioClientProcessLoopbackParams
     {
         /// <summary>
-        /// Stores target process identifier.
+        /// Stores the internal target process identifier state used by <see cref="AudioClientProcessLoopbackParams"/> while executing its surrounding workflow.
         /// </summary>
         public uint TargetProcessId;
         /// <summary>
-        /// Stores process loopback mode.
+        /// Stores the internal process loopback mode state used by <see cref="AudioClientProcessLoopbackParams"/> while executing its surrounding workflow.
         /// </summary>
         public int ProcessLoopbackMode;
     }
 
     /// <summary>
-    /// Represents a prop variant.
+    /// Represents a prop variant helper type nested within <see cref="WindowsProcessLoopbackCapture"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
     [StructLayout(LayoutKind.Explicit)]
     private struct PropVariant
     {
         /// <summary>
-        /// Stores variant type.
+        /// Stores the internal variant type state used by <see cref="PropVariant"/> while executing its surrounding workflow.
         /// </summary>
         [FieldOffset(0)] public ushort VariantType;
         /// <summary>
-        /// Stores blob.
+        /// Stores the internal blob state used by <see cref="PropVariant"/> while executing its surrounding workflow.
         /// </summary>
         [FieldOffset(8)] public Blob Blob;
     }
 
     /// <summary>
-    /// Represents a blob.
+    /// Represents a blob helper type nested within <see cref="WindowsProcessLoopbackCapture"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     private struct Blob
     {
         /// <summary>
-        /// Stores size.
+        /// Stores the internal size state used by <see cref="Blob"/> while executing its surrounding workflow.
         /// </summary>
         public uint Size;
         /// <summary>
-        /// Stores data.
+        /// Stores the internal data state used by <see cref="Blob"/> while executing its surrounding workflow.
         /// </summary>
         public IntPtr Data;
     }
 
     /// <summary>
-    /// Represents a wave format ex.
+    /// Represents a wave format ex helper type nested within <see cref="WindowsProcessLoopbackCapture"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 2)]
     private struct WaveFormatEx
     {
         /// <summary>
-        /// Stores format tag.
+        /// Stores the internal format tag state used by <see cref="WaveFormatEx"/> while executing its surrounding workflow.
         /// </summary>
         public ushort FormatTag;
         /// <summary>
-        /// Stores channels.
+        /// Stores the internal channels state used by <see cref="WaveFormatEx"/> while executing its surrounding workflow.
         /// </summary>
         public ushort Channels;
         /// <summary>
-        /// Stores samples per sec.
+        /// Stores the internal samples per sec state used by <see cref="WaveFormatEx"/> while executing its surrounding workflow.
         /// </summary>
         public uint SamplesPerSec;
         /// <summary>
-        /// Stores avg bytes per sec.
+        /// Stores the internal avg bytes per sec state used by <see cref="WaveFormatEx"/> while executing its surrounding workflow.
         /// </summary>
         public uint AvgBytesPerSec;
         /// <summary>
-        /// Stores block align.
+        /// Stores the synchronization primitive that protects concurrent access to block align state owned by <see cref="WaveFormatEx"/>.
         /// </summary>
         public ushort BlockAlign;
         /// <summary>
-        /// Stores bits per sample.
+        /// Stores the internal bits per sample state used by <see cref="WaveFormatEx"/> while executing its surrounding workflow.
         /// </summary>
         public ushort BitsPerSample;
         /// <summary>
-        /// Stores size.
+        /// Stores the internal size state used by <see cref="WaveFormatEx"/> while executing its surrounding workflow.
         /// </summary>
         public ushort Size;
     }
 
     /// <summary>
-    /// Defines the activate audio interface completion handler contract.
+    /// Defines the contract for activate audio interface completion behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
     /// </summary>
     [ComImport, Guid("41D949AB-9862-444A-80F6-C261334DA5EB"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     private interface IActivateAudioInterfaceCompletionHandler
     {
         /// <summary>
-        /// Runs the activate completed operation.
+        /// Performs activate completed for <see cref="IActivateAudioInterfaceCompletionHandler"/>, keeping the operation consistent with the state and invariants of the surrounding activate audio interface completion workflow.
         /// </summary>
+        /// <param name="operation">Activate audio interface async operation dependency used by the activate audio interface completion workflow to provide the corresponding application capability.</param>
+        /// <returns>The int produced by the operation.</returns>
         [PreserveSig]
         int ActivateCompleted([MarshalAs(UnmanagedType.Interface)] IActivateAudioInterfaceAsyncOperation operation);
     }
 
     /// <summary>
-    /// Defines the activate audio interface async operation contract.
+    /// Defines the contract for activate audio interface async operation behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
     /// </summary>
     [ComImport, Guid("72A22D78-CDE4-431D-B8CC-843A71199B6D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     private interface IActivateAudioInterfaceAsyncOperation
     {
         /// <summary>
-        /// Gets activate result.
+        /// Retrieves activate result for <see cref="IActivateAudioInterfaceAsyncOperation"/>, keeping the operation consistent with the state and invariants of the surrounding activate audio interface async operation workflow.
         /// </summary>
+        /// <param name="activateResult">Activate result value supplied to the activate audio interface async operation operation and used when producing its result.</param>
+        /// <param name="activatedInterface">Activated interface value supplied to the activate audio interface async operation operation and used when producing its result.</param>
+        /// <returns>The int produced by the operation.</returns>
         [PreserveSig]
         int GetActivateResult(out int activateResult, [MarshalAs(UnmanagedType.IUnknown)] out object activatedInterface);
     }
 
     /// <summary>
-    /// Defines the audio client contract.
+    /// Defines the contract for audio behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
     /// </summary>
     [ComImport, Guid("1CB9AD4C-DBFA-4c32-B178-C2F568A703B2"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     private interface IAudioClient
     {
-       /// <summary>
-       /// Runs the initialize operation.
-       /// </summary>
+        /// <summary>
+        /// Performs initialize for <see cref="IAudioClient"/>, keeping the operation consistent with the state and invariants of the surrounding audio workflow.
+        /// </summary>
+        /// <param name="shareMode">Share mode value supplied to the audio operation and used when producing its result.</param>
+        /// <param name="streamFlags">Stream flags value supplied to the audio operation and used when producing its result.</param>
+        /// <param name="bufferDuration">Buffer duration value supplied to the audio operation and used when producing its result.</param>
+        /// <param name="periodicity">Periodicity value supplied to the audio operation and used when producing its result.</param>
+        /// <param name="format">Int ptr dependency used by the audio workflow to provide the corresponding application capability.</param>
+        /// <param name="audioSessionGuid">Identifier of the audio session gu to use for this operation.</param>
+        /// <returns>The int produced by the operation.</returns>
         [PreserveSig] int Initialize(int shareMode, uint streamFlags, long bufferDuration, long periodicity, IntPtr format, IntPtr audioSessionGuid);
-       /// <summary>
-       /// Gets buffer size.
-       /// </summary>
+        /// <summary>
+        /// Retrieves buffer size for <see cref="IAudioClient"/>, keeping the operation consistent with the state and invariants of the surrounding audio workflow.
+        /// </summary>
+        /// <param name="bufferFrames">Buffer frames value supplied to the audio operation and used when producing its result.</param>
+        /// <returns>The int produced by the operation.</returns>
         [PreserveSig] int GetBufferSize(out uint bufferFrames);
-       /// <summary>
-       /// Gets stream latency.
-       /// </summary>
+        /// <summary>
+        /// Retrieves stream latency for <see cref="IAudioClient"/>, keeping the operation consistent with the state and invariants of the surrounding audio workflow.
+        /// </summary>
+        /// <param name="latency">Latency value supplied to the audio operation and used when producing its result.</param>
+        /// <returns>The int produced by the operation.</returns>
         [PreserveSig] int GetStreamLatency(out long latency);
-       /// <summary>
-       /// Gets current padding.
-       /// </summary>
+        /// <summary>
+        /// Retrieves current padding for <see cref="IAudioClient"/>, keeping the operation consistent with the state and invariants of the surrounding audio workflow.
+        /// </summary>
+        /// <param name="currentPadding">Current padding value supplied to the audio operation and used when producing its result.</param>
+        /// <returns>The int produced by the operation.</returns>
         [PreserveSig] int GetCurrentPadding(out uint currentPadding);
-       /// <summary>
-       /// Determines whether format supported.
-       /// </summary>
+        /// <summary>
+        /// Determines whether format supported for <see cref="IAudioClient"/>, keeping the operation consistent with the state and invariants of the surrounding audio workflow.
+        /// </summary>
+        /// <param name="shareMode">Share mode value supplied to the audio operation and used when producing its result.</param>
+        /// <param name="format">Int ptr dependency used by the audio workflow to provide the corresponding application capability.</param>
+        /// <param name="closestMatch">Int ptr dependency used by the audio workflow to provide the corresponding application capability.</param>
+        /// <returns>The int produced by the operation.</returns>
         [PreserveSig] int IsFormatSupported(int shareMode, IntPtr format, out IntPtr closestMatch);
-       /// <summary>
-       /// Gets mix format.
-       /// </summary>
+        /// <summary>
+        /// Retrieves mix format for <see cref="IAudioClient"/>, keeping the operation consistent with the state and invariants of the surrounding audio workflow.
+        /// </summary>
+        /// <param name="deviceFormat">Int ptr dependency used by the audio workflow to provide the corresponding application capability.</param>
+        /// <returns>The int produced by the operation.</returns>
         [PreserveSig] int GetMixFormat(out IntPtr deviceFormat);
-       /// <summary>
-       /// Gets device period.
-       /// </summary>
+        /// <summary>
+        /// Retrieves device period for <see cref="IAudioClient"/>, keeping the operation consistent with the state and invariants of the surrounding audio workflow.
+        /// </summary>
+        /// <param name="defaultDevicePeriod">Default device period value supplied to the audio operation and used when producing its result.</param>
+        /// <param name="minimumDevicePeriod">Minimum device period value supplied to the audio operation and used when producing its result.</param>
+        /// <returns>The int produced by the operation.</returns>
         [PreserveSig] int GetDevicePeriod(out long defaultDevicePeriod, out long minimumDevicePeriod);
-       /// <summary>
-       /// Runs the start operation.
-       /// </summary>
+        /// <summary>
+        /// Performs start for <see cref="IAudioClient"/>, keeping the operation consistent with the state and invariants of the surrounding audio workflow.
+        /// </summary>
+        /// <returns>The int produced by the operation.</returns>
         [PreserveSig] int Start();
-       /// <summary>
-       /// Runs the stop operation.
-       /// </summary>
+        /// <summary>
+        /// Performs stop for <see cref="IAudioClient"/>, keeping the operation consistent with the state and invariants of the surrounding audio workflow.
+        /// </summary>
+        /// <returns>The int produced by the operation.</returns>
         [PreserveSig] int Stop();
-       /// <summary>
-       /// Runs the reset operation.
-       /// </summary>
+        /// <summary>
+        /// Performs reset for <see cref="IAudioClient"/>, keeping the operation consistent with the state and invariants of the surrounding audio workflow.
+        /// </summary>
+        /// <returns>The int produced by the operation.</returns>
         [PreserveSig] int Reset();
-       /// <summary>
-       /// Sets event handle.
-       /// </summary>
+        /// <summary>
+        /// Sets event handle for <see cref="IAudioClient"/>, keeping the operation consistent with the state and invariants of the surrounding audio workflow.
+        /// </summary>
+        /// <param name="eventHandle">Int ptr dependency used by the audio workflow to provide the corresponding application capability.</param>
+        /// <returns>The int produced by the operation.</returns>
         [PreserveSig] int SetEventHandle(IntPtr eventHandle);
-       /// <summary>
-       /// Gets service.
-       /// </summary>
+        /// <summary>
+        /// Retrieves service for <see cref="IAudioClient"/>, keeping the operation consistent with the state and invariants of the surrounding audio workflow.
+        /// </summary>
+        /// <param name="riid">Identifier of the ri to use for this operation.</param>
+        /// <param name="service">Service value supplied to the audio operation and used when producing its result.</param>
+        /// <returns>The int produced by the operation.</returns>
         [PreserveSig] int GetService(ref Guid riid, [MarshalAs(UnmanagedType.IUnknown)] out object service);
     }
 
     /// <summary>
-    /// Defines the audio capture client contract.
+    /// Defines the contract for audio capture behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
     /// </summary>
     [ComImport, Guid("C8ADBD64-E71E-48A0-A4DE-185C395CD317"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     private interface IAudioCaptureClient
     {
-       /// <summary>
-       /// Gets buffer.
-       /// </summary>
+        /// <summary>
+        /// Retrieves buffer for <see cref="IAudioCaptureClient"/>, keeping the operation consistent with the state and invariants of the surrounding audio capture workflow.
+        /// </summary>
+        /// <param name="data">Int ptr dependency used by the audio capture workflow to provide the corresponding application capability.</param>
+        /// <param name="frames">Frames value supplied to the audio capture operation and used when producing its result.</param>
+        /// <param name="flags">Flags value supplied to the audio capture operation and used when producing its result.</param>
+        /// <param name="devicePosition">Device position value supplied to the audio capture operation and used when producing its result.</param>
+        /// <param name="qpcPosition">Qpc position value supplied to the audio capture operation and used when producing its result.</param>
+        /// <returns>The int produced by the operation.</returns>
         [PreserveSig] int GetBuffer(out IntPtr data, out uint frames, out uint flags, out ulong devicePosition, out ulong qpcPosition);
-       /// <summary>
-       /// Runs the release buffer operation.
-       /// </summary>
+        /// <summary>
+        /// Performs release buffer for <see cref="IAudioCaptureClient"/>, keeping the operation consistent with the state and invariants of the surrounding audio capture workflow.
+        /// </summary>
+        /// <param name="frames">Frames value supplied to the audio capture operation and used when producing its result.</param>
+        /// <returns>The int produced by the operation.</returns>
         [PreserveSig] int ReleaseBuffer(uint frames);
-       /// <summary>
-       /// Gets next packet size.
-       /// </summary>
+        /// <summary>
+        /// Retrieves next packet size for <see cref="IAudioCaptureClient"/>, keeping the operation consistent with the state and invariants of the surrounding audio capture workflow.
+        /// </summary>
+        /// <param name="packetFrames">Packet frames value supplied to the audio capture operation and used when producing its result.</param>
+        /// <returns>The int produced by the operation.</returns>
         [PreserveSig] int GetNextPacketSize(out uint packetFrames);
     }
 }

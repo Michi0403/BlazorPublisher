@@ -4,16 +4,20 @@ using PublisherStudio.Services.Configuration;
 namespace PublisherStudio.Services.Streaming.Metadata;
 
 /// <summary>
-/// Provides now playing reader operations.
+/// Represents a now playing application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="runtimePolicy">Publisher runtime policy data service dependency used by the now playing workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class NowPlayingReader(
     IPublisherRuntimePolicyDataService runtimePolicy,
     ILogger<NowPlayingReader> logger)
 {
 
     /// <summary>
-    /// Runs the read operation.
+    /// Performs read for <see cref="NowPlayingReader"/>, keeping the operation consistent with the state and invariants of the surrounding now playing workflow.
     /// </summary>
+    /// <param name="directory">Directory value supplied to the now playing operation and used when producing its result.</param>
+    /// <returns>The object produced by the operation.</returns>
     public object? Read(string directory)
     {
         try
@@ -49,8 +53,10 @@ public sealed class NowPlayingReader(
     }
 
     /// <summary>
-    /// Reads mp3.
+    /// Reads mp3 for <see cref="NowPlayingReader"/>, keeping the operation consistent with the state and invariants of the surrounding now playing workflow.
     /// </summary>
+    /// <param name="path">Path value supplied to the now playing operation and used when producing its result.</param>
+    /// <returns>The audio tags produced by the operation.</returns>
     private AudioTags ReadMp3(string path)
     {
         try
@@ -95,8 +101,12 @@ public sealed class NowPlayingReader(
     }
 
     /// <summary>
-    /// Reads id3 v2.
+    /// Reads id3 v2 for <see cref="NowPlayingReader"/>, keeping the operation consistent with the state and invariants of the surrounding now playing workflow.
     /// </summary>
+    /// <param name="stream">Stream value supplied to the now playing operation and used when producing its result.</param>
+    /// <param name="tagSize">Tag size value supplied to the now playing operation and used when producing its result.</param>
+    /// <param name="version">Version value supplied to the now playing operation and used when producing its result.</param>
+    /// <param name="tags">Tags value supplied to the now playing operation and used when producing its result.</param>
     private void ReadId3V2(Stream stream, int tagSize, byte version, AudioTags tags)
     {
         try
@@ -142,8 +152,10 @@ public sealed class NowPlayingReader(
     }
 
     /// <summary>
-    /// Runs the decode text frame operation.
+    /// Performs decode text frame for <see cref="NowPlayingReader"/>, keeping the operation consistent with the state and invariants of the surrounding now playing workflow.
     /// </summary>
+    /// <param name="payload">Payload value supplied to the now playing operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string DecodeTextFrame(byte[] payload)
     {
         try
@@ -161,8 +173,11 @@ public sealed class NowPlayingReader(
     }
 
     /// <summary>
-    /// Runs the decode picture frame operation.
+    /// Performs decode picture frame for <see cref="NowPlayingReader"/>, keeping the operation consistent with the state and invariants of the surrounding now playing workflow.
     /// </summary>
+    /// <param name="payload">Payload value supplied to the now playing operation and used when producing its result.</param>
+    /// <param name="version">Version value supplied to the now playing operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string DecodePictureFrame(byte[] payload, byte version)
     {
         try
@@ -200,8 +215,12 @@ public sealed class NowPlayingReader(
     }
 
     /// <summary>
-    /// Runs the skip terminated text operation.
+    /// Performs skip terminated text for <see cref="NowPlayingReader"/>, keeping the operation consistent with the state and invariants of the surrounding now playing workflow.
     /// </summary>
+    /// <param name="bytes">Bytes value supplied to the now playing operation and used when producing its result.</param>
+    /// <param name="index">Index value supplied to the now playing operation and used when producing its result.</param>
+    /// <param name="encoding">Encoding value supplied to the now playing operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     private int SkipTerminatedText(byte[] bytes, int index, byte encoding)
     {
         try
@@ -225,8 +244,11 @@ public sealed class NowPlayingReader(
     }
 
     /// <summary>
-    /// Runs the decode encoded text operation.
+    /// Performs decode encoded text for <see cref="NowPlayingReader"/>, keeping the operation consistent with the state and invariants of the surrounding now playing workflow.
     /// </summary>
+    /// <param name="encoding">Encoding value supplied to the now playing operation and used when producing its result.</param>
+    /// <param name="bytes">Bytes value supplied to the now playing operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string DecodeEncodedText(byte encoding, ReadOnlySpan<byte> bytes)
     {
         try
@@ -249,8 +271,10 @@ public sealed class NowPlayingReader(
     }
 
     /// <summary>
-    /// Runs the decode latin1 operation.
+    /// Performs decode latin1 for <see cref="NowPlayingReader"/>, keeping the operation consistent with the state and invariants of the surrounding now playing workflow.
     /// </summary>
+    /// <param name="bytes">Bytes value supplied to the now playing operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string DecodeLatin1(ReadOnlySpan<byte> bytes) {
         try
         {
@@ -265,8 +289,13 @@ public sealed class NowPlayingReader(
     }
 
     /// <summary>
-    /// Runs the synchsafe operation.
+    /// Performs synchsafe for <see cref="NowPlayingReader"/>, keeping the operation consistent with the state and invariants of the surrounding now playing workflow.
     /// </summary>
+    /// <param name="a">A value supplied to the now playing operation and used when producing its result.</param>
+    /// <param name="b">B value supplied to the now playing operation and used when producing its result.</param>
+    /// <param name="c">C value supplied to the now playing operation and used when producing its result.</param>
+    /// <param name="d">D value supplied to the now playing operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     private int Synchsafe(byte a, byte b, byte c, byte d) {
         try
         {
@@ -280,8 +309,10 @@ public sealed class NowPlayingReader(
         }
     }
     /// <summary>
-    /// Reads big endian int.
+    /// Reads big endian int for <see cref="NowPlayingReader"/>, keeping the operation consistent with the state and invariants of the surrounding now playing workflow.
     /// </summary>
+    /// <param name="bytes">Bytes value supplied to the now playing operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     private int ReadBigEndianInt(ReadOnlySpan<byte> bytes) {
         try
         {
@@ -295,8 +326,11 @@ public sealed class NowPlayingReader(
         }
     }
     /// <summary>
-    /// Runs the first operation.
+    /// Performs first for <see cref="NowPlayingReader"/>, keeping the operation consistent with the state and invariants of the surrounding now playing workflow.
     /// </summary>
+    /// <param name="current">Current value supplied to the now playing operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the now playing operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string First(string current, string fallback) {
         try
         {
@@ -311,37 +345,44 @@ public sealed class NowPlayingReader(
     }
 
     /// <summary>
-    /// Represents an audio tags.
+    /// Represents an audio tags helper type nested within <see cref="NowPlayingReader"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
     private sealed class AudioTags
     {
         /// <summary>
-        /// Gets or sets title.
+        /// Gets or sets the title value that forms part of the audio tags state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The title value exposed by <see cref="AudioTags"/>.</value>
         public string Title { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets artist.
+        /// Gets or sets the artist value that forms part of the audio tags state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The artist value exposed by <see cref="AudioTags"/>.</value>
         public string Artist { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets album.
+        /// Gets or sets the album value that forms part of the audio tags state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The album value exposed by <see cref="AudioTags"/>.</value>
         public string Album { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets year.
+        /// Gets or sets the year value that forms part of the audio tags state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The year value exposed by <see cref="AudioTags"/>.</value>
         public string Year { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets track.
+        /// Gets or sets the track value that forms part of the audio tags state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The track value exposed by <see cref="AudioTags"/>.</value>
         public string Track { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets genre.
+        /// Gets or sets the genre value that forms part of the audio tags state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The genre value exposed by <see cref="AudioTags"/>.</value>
         public string Genre { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets cover image.
+        /// Gets or sets the cover image value that forms part of the audio tags state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The cover image value exposed by <see cref="AudioTags"/>.</value>
         public string CoverImage { get; set; } = string.Empty;
     }
 }

@@ -3,16 +3,22 @@ using PublisherStudio.BusinessObjects;
 namespace PublisherStudio.Services.OpenScad;
 
 /// <summary>
-/// Provides open scad primitive node renderer operations.
+/// Renders open OpenSCAD primitive node state into the representation required by the surrounding UI, export, or publishing workflow.
 /// </summary>
+/// <param name="catalog">Open openscad catalog service dependency used by the open OpenSCAD primitive node workflow to provide the corresponding application capability.</param>
 public sealed class OpenScadPrimitiveNodeRenderer(IOpenScadCatalogService catalog) : IOpenScadNodeRenderer
 {
+    /// <summary>
+    /// Stores the in-memory categories collection maintained internally by <see cref="OpenScadPrimitiveNodeRenderer"/> for its current workflow state.
+    /// </summary>
     private readonly HashSet<OpenScadNodeCategory> _categories =
     [OpenScadNodeCategory.Primitive2D, OpenScadNodeCategory.Primitive3D, OpenScadNodeCategory.Import];
 
     /// <summary>
-    /// Determines whether render.
+    /// Determines whether render for <see cref="OpenScadPrimitiveNodeRenderer"/>, keeping the operation consistent with the state and invariants of the surrounding open OpenSCAD primitive node workflow.
     /// </summary>
+    /// <param name="node">Node value supplied to the open OpenSCAD primitive node operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool CanRender(OpenScadNode node) {
     try
     {
@@ -26,8 +32,11 @@ public sealed class OpenScadPrimitiveNodeRenderer(IOpenScadCatalogService catalo
 }
 
     /// <summary>
-    /// Runs the render operation.
+    /// Performs render for <see cref="OpenScadPrimitiveNodeRenderer"/>, keeping the operation consistent with the state and invariants of the surrounding open OpenSCAD primitive node workflow.
     /// </summary>
+    /// <param name="node">Node value supplied to the open OpenSCAD primitive node operation and used when producing its result.</param>
+    /// <param name="context">Context value supplied to the open OpenSCAD primitive node operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string Render(OpenScadNode node, OpenScadRenderContext context)
     {
     try
@@ -48,16 +57,22 @@ public sealed class OpenScadPrimitiveNodeRenderer(IOpenScadCatalogService catalo
 }
 
 /// <summary>
-/// Provides open scad wrapper node renderer operations.
+/// Renders open OpenSCAD wrapper node state into the representation required by the surrounding UI, export, or publishing workflow.
 /// </summary>
+/// <param name="catalog">Open openscad catalog service dependency used by the open OpenSCAD wrapper node workflow to provide the corresponding application capability.</param>
 public sealed class OpenScadWrapperNodeRenderer(IOpenScadCatalogService catalog) : IOpenScadNodeRenderer
 {
+    /// <summary>
+    /// Stores the in-memory categories collection maintained internally by <see cref="OpenScadWrapperNodeRenderer"/> for its current workflow state.
+    /// </summary>
     private readonly HashSet<OpenScadNodeCategory> _categories =
     [OpenScadNodeCategory.Transform, OpenScadNodeCategory.BooleanOperation, OpenScadNodeCategory.Extrusion, OpenScadNodeCategory.Projection, OpenScadNodeCategory.Utility];
 
     /// <summary>
-    /// Determines whether render.
+    /// Determines whether render for <see cref="OpenScadWrapperNodeRenderer"/>, keeping the operation consistent with the state and invariants of the surrounding open OpenSCAD wrapper node workflow.
     /// </summary>
+    /// <param name="node">Node value supplied to the open OpenSCAD wrapper node operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool CanRender(OpenScadNode node) {
     try
     {
@@ -71,8 +86,11 @@ public sealed class OpenScadWrapperNodeRenderer(IOpenScadCatalogService catalog)
 }
 
     /// <summary>
-    /// Runs the render operation.
+    /// Performs render for <see cref="OpenScadWrapperNodeRenderer"/>, keeping the operation consistent with the state and invariants of the surrounding open OpenSCAD wrapper node workflow.
     /// </summary>
+    /// <param name="node">Node value supplied to the open OpenSCAD wrapper node operation and used when producing its result.</param>
+    /// <param name="context">Context value supplied to the open OpenSCAD wrapper node operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string Render(OpenScadNode node, OpenScadRenderContext context)
     {
     try
@@ -94,13 +112,15 @@ public sealed class OpenScadWrapperNodeRenderer(IOpenScadCatalogService catalog)
 }
 
 /// <summary>
-/// Provides open scad raw node renderer operations.
+/// Renders open OpenSCAD raw node state into the representation required by the surrounding UI, export, or publishing workflow.
 /// </summary>
 public sealed class OpenScadRawNodeRenderer : IOpenScadNodeRenderer
 {
     /// <summary>
-    /// Determines whether render.
+    /// Determines whether render for <see cref="OpenScadRawNodeRenderer"/>, keeping the operation consistent with the state and invariants of the surrounding open OpenSCAD raw node workflow.
     /// </summary>
+    /// <param name="node">Node value supplied to the open OpenSCAD raw node operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool CanRender(OpenScadNode node) {
     try
     {
@@ -114,8 +134,11 @@ public sealed class OpenScadRawNodeRenderer : IOpenScadNodeRenderer
 }
 
     /// <summary>
-    /// Runs the render operation.
+    /// Performs render for <see cref="OpenScadRawNodeRenderer"/>, keeping the operation consistent with the state and invariants of the surrounding open OpenSCAD raw node workflow.
     /// </summary>
+    /// <param name="node">Node value supplied to the open OpenSCAD raw node operation and used when producing its result.</param>
+    /// <param name="context">Context value supplied to the open OpenSCAD raw node operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string Render(OpenScadNode node, OpenScadRenderContext context)
     {
     try
@@ -133,13 +156,16 @@ public sealed class OpenScadRawNodeRenderer : IOpenScadNodeRenderer
 }
 
 /// <summary>
-/// Provides open scad module call node renderer operations.
+/// Renders open OpenSCAD module call node state into the representation required by the surrounding UI, export, or publishing workflow.
 /// </summary>
+/// <param name="values">Open openscad value formatter dependency used by the open OpenSCAD module call node workflow to provide the corresponding application capability.</param>
 public sealed class OpenScadModuleCallNodeRenderer(IOpenScadValueFormatter values) : IOpenScadNodeRenderer
 {
     /// <summary>
-    /// Determines whether render.
+    /// Determines whether render for <see cref="OpenScadModuleCallNodeRenderer"/>, keeping the operation consistent with the state and invariants of the surrounding open OpenSCAD module call node workflow.
     /// </summary>
+    /// <param name="node">Node value supplied to the open OpenSCAD module call node operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool CanRender(OpenScadNode node) {
     try
     {
@@ -153,8 +179,11 @@ public sealed class OpenScadModuleCallNodeRenderer(IOpenScadValueFormatter value
 }
 
     /// <summary>
-    /// Runs the render operation.
+    /// Performs render for <see cref="OpenScadModuleCallNodeRenderer"/>, keeping the operation consistent with the state and invariants of the surrounding open OpenSCAD module call node workflow.
     /// </summary>
+    /// <param name="node">Node value supplied to the open OpenSCAD module call node operation and used when producing its result.</param>
+    /// <param name="context">Context value supplied to the open OpenSCAD module call node operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string Render(OpenScadNode node, OpenScadRenderContext context)
     {
     try

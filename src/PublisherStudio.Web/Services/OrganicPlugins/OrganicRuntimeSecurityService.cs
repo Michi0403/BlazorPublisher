@@ -10,17 +10,24 @@ namespace PublisherStudio.Services.OrganicPlugins;
 /// Owns the runtime-generated PublisherStudio 1-Wire identity. Private keys and the MFA seed are created only at runtime,
 /// are never compiled into the application, and can be discarded from the frontend to reset every trusted link.
 /// </summary>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class OrganicRuntimeSecurityService(
     ILogger<OrganicRuntimeSecurityService> logger) : IOrganicRuntimeSecurityService
 {
+    /// <summary>
+    /// Defines the schema version constant used by <see cref="OrganicRuntimeSecurityService"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const int SchemaVersion = 1;
+    /// <summary>
+    /// Defines the totp period seconds constant used by <see cref="OrganicRuntimeSecurityService"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const int TotpPeriodSeconds = 30;
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the synchronization primitive that protects concurrent access to gate state owned by <see cref="OrganicRuntimeSecurityService"/>.
     /// </summary>
     private readonly SemaphoreSlim gate = new(1, 1);
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal JSON options state used by <see cref="OrganicRuntimeSecurityService"/> while executing its surrounding workflow.
     /// </summary>
     private readonly JsonSerializerOptions jsonOptions = new()
     {
@@ -30,11 +37,16 @@ public sealed class OrganicRuntimeSecurityService(
         Converters = { new JsonStringEnumConverter() }
     };
     private RuntimeSecretFile? cached;
+    /// <summary>
+    /// Stores the internal resolved path state used by <see cref="OrganicRuntimeSecurityService"/> while executing its surrounding workflow.
+    /// </summary>
     private string? resolvedPath;
 
     /// <summary>
-    /// Gets status async.
+    /// Retrieves status as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The one wire runtime security status produced by the operation.</returns>
     public async Task<OneWireRuntimeSecurityStatus> GetStatusAsync(CancellationToken cancellationToken = default)
     {
         await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -59,8 +71,10 @@ public sealed class OrganicRuntimeSecurityService(
     }
 
     /// <summary>
-    /// Ensures created async.
+    /// Ensures created as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task EnsureCreatedAsync(CancellationToken cancellationToken = default)
     {
         await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -77,8 +91,10 @@ public sealed class OrganicRuntimeSecurityService(
     }
 
     /// <summary>
-    /// Runs the regenerate async operation.
+    /// Performs regenerate as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task RegenerateAsync(CancellationToken cancellationToken = default)
     {
         await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -99,8 +115,10 @@ public sealed class OrganicRuntimeSecurityService(
     }
 
     /// <summary>
-    /// Deletes async.
+    /// Performs delete as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task DeleteAsync(CancellationToken cancellationToken = default)
     {
         await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -120,8 +138,10 @@ public sealed class OrganicRuntimeSecurityService(
     }
 
     /// <summary>
-    /// Gets public descriptor async.
+    /// Retrieves public descriptor as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The one wire security descriptor produced by the operation.</returns>
     public async Task<OneWireSecurityDescriptor> GetPublicDescriptorAsync(CancellationToken cancellationToken = default)
     {
         await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -139,8 +159,11 @@ public sealed class OrganicRuntimeSecurityService(
     }
 
     /// <summary>
-    /// Creates pairing ticket async.
+    /// Creates pairing ticket as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="lifetime">Lifetime value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The one wire pairing ticket produced by the operation.</returns>
     public async Task<OneWirePairingTicket> CreatePairingTicketAsync(TimeSpan lifetime, CancellationToken cancellationToken = default)
     {
         await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -178,8 +201,10 @@ public sealed class OrganicRuntimeSecurityService(
     }
 
     /// <summary>
-    /// Gets otp auth URI async.
+    /// Retrieves otp auth URI as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     public async Task<string> GetOtpAuthUriAsync(CancellationToken cancellationToken = default)
     {
         await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -200,8 +225,11 @@ public sealed class OrganicRuntimeSecurityService(
     }
 
     /// <summary>
-    /// Runs the establish trust async operation.
+    /// Performs establish trust as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public async Task<bool> EstablishTrustAsync(OneWireTrustEstablishmentRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -246,8 +274,11 @@ public sealed class OrganicRuntimeSecurityService(
     }
 
     /// <summary>
-    /// Runs the revoke trust async operation.
+    /// Performs revoke trust as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="peerId">Identifier of the peer to use for this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public async Task<bool> RevokeTrustAsync(string peerId, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(peerId);
@@ -274,8 +305,10 @@ public sealed class OrganicRuntimeSecurityService(
     }
 
     /// <summary>
-    /// Gets trusted peers async.
+    /// Retrieves trusted peers as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public async Task<IReadOnlyList<OneWireTrustedPeerDescriptor>> GetTrustedPeersAsync(CancellationToken cancellationToken = default)
     {
         await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -293,8 +326,11 @@ public sealed class OrganicRuntimeSecurityService(
     }
 
     /// <summary>
-    /// Runs the protect outgoing async operation.
+    /// Performs protect outgoing as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task ProtectOutgoingAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(envelope);
@@ -341,8 +377,11 @@ public sealed class OrganicRuntimeSecurityService(
     }
 
     /// <summary>
-    /// Runs the unprotect incoming async operation.
+    /// Performs unprotect incoming as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task UnprotectIncomingAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(envelope);
@@ -383,8 +422,11 @@ public sealed class OrganicRuntimeSecurityService(
     }
 
     /// <summary>
-    /// Loads core async.
+    /// Loads core as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="createWhenMissing">Value indicating whether create when missing should apply to this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The runtime secret file produced by the operation.</returns>
     private async Task<RuntimeSecretFile?> LoadCoreAsync(bool createWhenMissing, CancellationToken cancellationToken)
     {
     try
@@ -419,8 +461,11 @@ public sealed class OrganicRuntimeSecurityService(
 }
 
     /// <summary>
-    /// Runs the persist core async operation.
+    /// Persists core as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="file">File value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task PersistCoreAsync(RuntimeSecretFile file, CancellationToken cancellationToken)
     {
     try
@@ -446,8 +491,9 @@ public sealed class OrganicRuntimeSecurityService(
 }
 
     /// <summary>
-    /// Attempts to restrict secret permissions.
+    /// Attempts to restrict secret permissions as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="path">Path value supplied to the organic runtime security operation and used when producing its result.</param>
     private void TryRestrictSecretPermissions(string path)
     {
     try
@@ -475,8 +521,9 @@ public sealed class OrganicRuntimeSecurityService(
 }
 
     /// <summary>
-    /// Resolves secret path.
+    /// Resolves secret path as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The string produced by the operation.</returns>
     private string ResolveSecretPath()
     {
     try
@@ -501,8 +548,10 @@ public sealed class OrganicRuntimeSecurityService(
 }
 
     /// <summary>
-    /// Determines whether write directory.
+    /// Determines whether write directory as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="directory">Directory value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool CanWriteDirectory(string directory)
     {
     try
@@ -529,8 +578,11 @@ public sealed class OrganicRuntimeSecurityService(
 }
 
     /// <summary>
-    /// Creates secret.
+    /// Creates secret as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="createdUtc">Created utc value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <param name="rotatedUtc">Rotated utc value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <returns>The runtime secret file produced by the operation.</returns>
     private RuntimeSecretFile CreateSecret(DateTimeOffset createdUtc, DateTimeOffset? rotatedUtc)
     {
     try
@@ -568,8 +620,9 @@ public sealed class OrganicRuntimeSecurityService(
 }
 
     /// <summary>
-    /// Validates secret.
+    /// Validates secret as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="file">File value supplied to the organic runtime security operation and used when producing its result.</param>
     private void ValidateSecret(RuntimeSecretFile file)
     {
     try
@@ -591,8 +644,10 @@ public sealed class OrganicRuntimeSecurityService(
 }
 
     /// <summary>
-    /// Creates status.
+    /// Creates status as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="file">File value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <returns>The one wire runtime security status produced by the operation.</returns>
     private OneWireRuntimeSecurityStatus CreateStatus(RuntimeSecretFile file) {
     try
     {
@@ -619,8 +674,10 @@ public sealed class OrganicRuntimeSecurityService(
 }
 
     /// <summary>
-    /// Creates public descriptor.
+    /// Creates public descriptor as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="file">File value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <returns>The one wire security descriptor produced by the operation.</returns>
     private OneWireSecurityDescriptor CreatePublicDescriptor(RuntimeSecretFile file) {
     try
     {
@@ -644,8 +701,9 @@ public sealed class OrganicRuntimeSecurityService(
 }
 
     /// <summary>
-    /// Validates pairing ticket.
+    /// Validates pairing ticket as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="ticket">Ticket value supplied to the organic runtime security operation and used when producing its result.</param>
     private void ValidatePairingTicket(OneWirePairingTicket ticket)
     {
     try
@@ -677,8 +735,10 @@ public sealed class OrganicRuntimeSecurityService(
 }
 
     /// <summary>
-    /// Builds ticket bytes.
+    /// Builds ticket bytes as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="ticket">Ticket value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <returns>The byte produced by the operation.</returns>
     private byte[] BuildTicketBytes(OneWirePairingTicket ticket) {
     try
     {
@@ -699,8 +759,10 @@ public sealed class OrganicRuntimeSecurityService(
 }
 
     /// <summary>
-    /// Builds signature bytes.
+    /// Builds signature bytes as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <returns>The byte produced by the operation.</returns>
     private byte[] BuildSignatureBytes(OrganicWireEnvelope envelope) {
     try
     {
@@ -727,8 +789,10 @@ public sealed class OrganicRuntimeSecurityService(
 }
 
     /// <summary>
-    /// Builds associated data.
+    /// Builds associated data as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <returns>The byte produced by the operation.</returns>
     private byte[] BuildAssociatedData(OrganicWireEnvelope envelope) {
     try
     {
@@ -746,8 +810,13 @@ public sealed class OrganicRuntimeSecurityService(
 }
 
     /// <summary>
-    /// Runs the derive peer key operation.
+    /// Performs derive peer key as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="file">File value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <param name="peer">Peer value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <param name="sourcePeerId">Identifier of the source peer to use for this operation.</param>
+    /// <param name="targetPeerId">Identifier of the target peer to use for this operation.</param>
+    /// <returns>The byte produced by the operation.</returns>
     private byte[] DerivePeerKey(RuntimeSecretFile file, OneWireTrustedPeerDescriptor peer, string sourcePeerId, string targetPeerId)
     {
     try
@@ -779,8 +848,13 @@ public sealed class OrganicRuntimeSecurityService(
 }
 
     /// <summary>
-    /// Runs the hkdf sha256 operation.
+    /// Performs hkdf SHA-256 as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="inputKeyMaterial">Input key material value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <param name="salt">Salt value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <param name="info">Info value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <param name="outputLength">Output length value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <returns>The byte produced by the operation.</returns>
     private byte[] HkdfSha256(ReadOnlySpan<byte> inputKeyMaterial, ReadOnlySpan<byte> salt, ReadOnlySpan<byte> info, int outputLength)
     {
     try
@@ -822,8 +896,11 @@ public sealed class OrganicRuntimeSecurityService(
 }
 
     /// <summary>
-    /// Runs the verify totp operation.
+    /// Verifies totp as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="seedBase64">Seed base64 value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <param name="code">Code value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool VerifyTotp(string seedBase64, string code)
     {
     try
@@ -857,8 +934,10 @@ public sealed class OrganicRuntimeSecurityService(
 }
 
     /// <summary>
-    /// Runs the base32 encode operation.
+    /// Performs base32 encode as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="data">Data value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Base32Encode(ReadOnlySpan<byte> data)
     {
     try
@@ -892,8 +971,11 @@ public sealed class OrganicRuntimeSecurityService(
 }
 
     /// <summary>
-    /// Determines whether current trust.
+    /// Determines whether current trust as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="peer">Peer value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <param name="peerId">Identifier of the peer to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool IsCurrentTrust(OneWireTrustedPeerDescriptor peer, string peerId) {
     try
     {
@@ -913,8 +995,10 @@ public sealed class OrganicRuntimeSecurityService(
 }
 
     /// <summary>
-    /// Determines whether security bootstrap.
+    /// Determines whether security bootstrap as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="type">Type value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool IsSecurityBootstrap(OrganicWireMessageType type) {
     try
     {
@@ -934,8 +1018,12 @@ public sealed class OrganicRuntimeSecurityService(
 }
 
     /// <summary>
-    /// Runs the clamp operation.
+    /// Performs clamp as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <param name="minimum">Minimum value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <param name="maximum">Maximum value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <returns>The time span produced by the operation.</returns>
     private TimeSpan Clamp(TimeSpan value, TimeSpan minimum, TimeSpan maximum) {
     try
     {
@@ -952,8 +1040,10 @@ public sealed class OrganicRuntimeSecurityService(
 }
 
     /// <summary>
-    /// Runs the clone trusted peer operation.
+    /// Performs clone trusted peer as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="peer">Peer value supplied to the organic runtime security operation and used when producing its result.</param>
+    /// <returns>The one wire trusted peer descriptor produced by the operation.</returns>
     private OneWireTrustedPeerDescriptor CloneTrustedPeer(OneWireTrustedPeerDescriptor peer) {
     try
     {
@@ -976,61 +1066,74 @@ public sealed class OrganicRuntimeSecurityService(
 }
 
     /// <summary>
-    /// Represents a runtime secret file.
+    /// Represents a runtime secret file helper type nested within <see cref="OrganicRuntimeSecurityService"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
     private sealed class RuntimeSecretFile
     {
         /// <summary>
-        /// Gets or sets schema version.
+        /// Gets or sets the schema version value that forms part of the runtime secret file state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The schema version value exposed by <see cref="RuntimeSecretFile"/>.</value>
         public int SchemaVersion { get; set; }
         /// <summary>
-        /// Gets or sets peer identifier.
+        /// Gets or sets the stable peer identifier used to identify or correlate this runtime secret file instance with related application state.
         /// </summary>
+        /// <value>The peer identifier value exposed by <see cref="RuntimeSecretFile"/>.</value>
         public string PeerId { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets the UTC creation time.
+        /// Gets or sets the created UTC associated with this runtime secret file state, using the time semantics implied by the member name.
         /// </summary>
+        /// <value>The created UTC value exposed by <see cref="RuntimeSecretFile"/>.</value>
         public DateTimeOffset CreatedUtc { get; set; }
         /// <summary>
-        /// Gets or sets rotated UTC.
+        /// Gets or sets the rotated UTC associated with this runtime secret file state, using the time semantics implied by the member name.
         /// </summary>
+        /// <value>The rotated UTC value exposed by <see cref="RuntimeSecretFile"/>.</value>
         public DateTimeOffset? RotatedUtc { get; set; }
         /// <summary>
-        /// Gets or sets root secret.
+        /// Gets or sets the root secret value that forms part of the runtime secret file state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The root secret value exposed by <see cref="RuntimeSecretFile"/>.</value>
         public string RootSecret { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets key identifier.
+        /// Gets or sets the stable key identifier used to identify or correlate this runtime secret file instance with related application state.
         /// </summary>
+        /// <value>The key identifier value exposed by <see cref="RuntimeSecretFile"/>.</value>
         public string KeyId { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets fingerprint.
+        /// Gets or sets the fingerprint value that forms part of the runtime secret file state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The fingerprint value exposed by <see cref="RuntimeSecretFile"/>.</value>
         public string Fingerprint { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets key agreement private key.
+        /// Gets or sets the stable key agreement private key used to identify or correlate this runtime secret file instance with related application state.
         /// </summary>
+        /// <value>The key agreement private key value exposed by <see cref="RuntimeSecretFile"/>.</value>
         public string KeyAgreementPrivateKey { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets key agreement public key.
+        /// Gets or sets the stable key agreement public key used to identify or correlate this runtime secret file instance with related application state.
         /// </summary>
+        /// <value>The key agreement public key value exposed by <see cref="RuntimeSecretFile"/>.</value>
         public string KeyAgreementPublicKey { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets signing private key.
+        /// Gets or sets the stable signing private key used to identify or correlate this runtime secret file instance with related application state.
         /// </summary>
+        /// <value>The signing private key value exposed by <see cref="RuntimeSecretFile"/>.</value>
         public string SigningPrivateKey { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets signing public key.
+        /// Gets or sets the stable signing public key used to identify or correlate this runtime secret file instance with related application state.
         /// </summary>
+        /// <value>The signing public key value exposed by <see cref="RuntimeSecretFile"/>.</value>
         public string SigningPublicKey { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets mfa seed.
+        /// Gets or sets the MFA seed value that forms part of the runtime secret file state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The MFA seed value exposed by <see cref="RuntimeSecretFile"/>.</value>
         public string MfaSeed { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets trusted peers.
+        /// Gets or sets the trusted peers collection maintained or exposed by this runtime secret file instance for downstream processing.
         /// </summary>
+        /// <value>The trusted peers value exposed by <see cref="RuntimeSecretFile"/>.</value>
         public List<OneWireTrustedPeerDescriptor> TrustedPeers { get; set; } = [];
     }
 }

@@ -6,16 +6,26 @@ namespace PublisherStudio.Services.MediaStudio.UseCases;
 /// Reusable, non-destructive clip orchestration shared by Video Studio, Audio Studio and live video inputs.
 /// Components own pointer state; this service owns deterministic timeline, cut-section and video-layer mutations.
 /// </summary>
+/// <param name="mediaData">Media data value supplied to the media timeline edit operation and used when producing its result.</param>
+/// <param name="runtimePolicy">Publisher studio.services.configuration.i publisher runtime policy data service dependency used by the media timeline edit workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class MediaTimelineEditService(
     PublicationMediaData mediaData,
     PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService runtimePolicy,
     ILogger<MediaTimelineEditService> logger)
 {
+    /// <summary>
+    /// Gets the minimum source length that quantifies the associated media timeline edit data.
+    /// </summary>
+    /// <value>The minimum source length value exposed by <see cref="MediaTimelineEditService"/>.</value>
     private double MinimumSourceLength => runtimePolicy.MinimumMediaSourceLength;
 
     /// <summary>
-    /// Runs the normalize operation.
+    /// Performs normalize as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Publication media segment dependency used by the media timeline edit workflow to provide the corresponding application capability.</param>
+    /// <param name="video">Value indicating whether video should apply to this operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public List<PublicationMediaSegment> Normalize(IEnumerable<PublicationMediaSegment>? source, bool video)
     {
         try
@@ -74,8 +84,10 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Runs the clone video project operation.
+    /// Performs clone video project as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <returns>The video project document produced by the operation.</returns>
     public VideoProjectDocument CloneVideoProject(VideoProjectDocument? source)
     {
         try
@@ -136,8 +148,11 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Creates track projection.
+    /// Creates track projection as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="project">Project value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <param name="trackId">Identifier of the track to use for this operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public List<PublicationMediaSegment> CreateTrackProjection(VideoProjectDocument project, Guid trackId)
     {
         try
@@ -194,8 +209,11 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Runs the replace track projection operation.
+    /// Performs replace track projection as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="project">Project value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <param name="trackId">Identifier of the track to use for this operation.</param>
+    /// <param name="projection">Publication media segment dependency used by the media timeline edit workflow to provide the corresponding application capability.</param>
     public void ReplaceTrackProjection(VideoProjectDocument project, Guid trackId, IEnumerable<PublicationMediaSegment> projection)
     {
         try
@@ -225,8 +243,10 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Creates default video layer.
+    /// Creates default video layer as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="name">Name value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <returns>The video effect layer produced by the operation.</returns>
     public VideoEffectLayer CreateDefaultVideoLayer(string? name = null) {
         try
         {
@@ -249,8 +269,13 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Normalizes video layers.
+    /// Normalizes video layers as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Video effect layer dependency used by the media timeline edit workflow to provide the corresponding application capability.</param>
+    /// <param name="minimumSeconds">Minimum seconds value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <param name="maximumSeconds">Maximum seconds value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <param name="defaultName">Default name value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public List<VideoEffectLayer> NormalizeVideoLayers(
         IEnumerable<VideoEffectLayer>? source,
         double minimumSeconds,
@@ -279,8 +304,11 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Runs the timeline length operation.
+    /// Performs timeline length as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="segments">Publication media segment dependency used by the media timeline edit workflow to provide the corresponding application capability.</param>
+    /// <param name="playbackRate">Playback rate value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     public double TimelineLength(IReadOnlyList<PublicationMediaSegment> segments, double playbackRate)
         {
             try
@@ -296,8 +324,12 @@ public sealed class MediaTimelineEditService(
         }
 
     /// <summary>
-    /// Runs the segment index at operation.
+    /// Performs segment index at as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="segments">Publication media segment dependency used by the media timeline edit workflow to provide the corresponding application capability.</param>
+    /// <param name="playbackRate">Playback rate value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <param name="timelineSeconds">Timeline seconds value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     public int SegmentIndexAt(IReadOnlyList<PublicationMediaSegment> segments, double playbackRate, double timelineSeconds)
     {
         try
@@ -323,8 +355,12 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Runs the segment timeline start operation.
+    /// Performs segment timeline start as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="segments">Publication media segment dependency used by the media timeline edit workflow to provide the corresponding application capability.</param>
+    /// <param name="index">Index value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <param name="playbackRate">Playback rate value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     public double SegmentTimelineStart(IReadOnlyList<PublicationMediaSegment> segments, int index, double playbackRate)
         {
             try
@@ -340,8 +376,13 @@ public sealed class MediaTimelineEditService(
         }
 
     /// <summary>
-    /// Runs the source position at operation.
+    /// Performs source position at as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="segments">Publication media segment dependency used by the media timeline edit workflow to provide the corresponding application capability.</param>
+    /// <param name="index">Index value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <param name="playbackRate">Playback rate value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <param name="timelineSeconds">Timeline seconds value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     public double SourcePositionAt(IReadOnlyList<PublicationMediaSegment> segments, int index, double playbackRate, double timelineSeconds)
     {
         try
@@ -363,8 +404,12 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Runs the split at operation.
+    /// Performs split at as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="segments">Segments value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <param name="playbackRate">Playback rate value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <param name="timelineSeconds">Timeline seconds value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <returns>The GUID produced by the operation.</returns>
     public Guid? SplitAt(List<PublicationMediaSegment> segments, double playbackRate, double timelineSeconds)
     {
         try
@@ -401,8 +446,13 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Runs the insert at operation.
+    /// Performs insert at as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="segments">Segments value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <param name="playbackRate">Playback rate value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <param name="timelineSeconds">Timeline seconds value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <param name="inserted">Inserted value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <returns>The GUID produced by the operation.</returns>
     public Guid InsertAt(
         List<PublicationMediaSegment> segments,
         double playbackRate,
@@ -474,8 +524,11 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Determines whether merge boundary.
+    /// Determines whether merge boundary as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="segments">Publication media segment dependency used by the media timeline edit workflow to provide the corresponding application capability.</param>
+    /// <param name="rightIndex">Right index value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool CanMergeBoundary(IReadOnlyList<PublicationMediaSegment> segments, int rightIndex)
     {
         try
@@ -499,8 +552,11 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Runs the merge boundary operation.
+    /// Performs merge boundary as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="segments">Segments value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <param name="rightIndex">Right index value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool MergeBoundary(List<PublicationMediaSegment> segments, int rightIndex)
     {
         try
@@ -527,8 +583,10 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Runs the clone operation.
+    /// Performs clone as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="segment">Segment value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <returns>The publication media segment produced by the operation.</returns>
     public PublicationMediaSegment Clone(PublicationMediaSegment segment) {
         try
         {
@@ -569,8 +627,11 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Runs the segment timeline length operation.
+    /// Performs segment timeline length as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="segment">Segment value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <param name="playbackRate">Playback rate value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double SegmentTimelineLength(PublicationMediaSegment segment, double playbackRate)
     {
         try
@@ -590,8 +651,10 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Runs the clone source reference operation.
+    /// Performs clone source reference as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <returns>The media source reference produced by the operation.</returns>
     private MediaSourceReference CloneSourceReference(MediaSourceReference? source) {
         try
         {
@@ -615,8 +678,10 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Runs the duplicate operation.
+    /// Performs duplicate as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="segment">Segment value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <returns>The publication media segment produced by the operation.</returns>
     public PublicationMediaSegment Duplicate(PublicationMediaSegment segment)
     {
         try
@@ -644,8 +709,10 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Runs the clone video layer operation.
+    /// Performs clone video layer as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="layer">Layer value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <returns>The video effect layer produced by the operation.</returns>
     public VideoEffectLayer CloneVideoLayer(VideoEffectLayer layer) {
         try
         {
@@ -684,8 +751,10 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Creates filter.
+    /// Creates filter as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="kind">Kind value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <returns>The video effect filter produced by the operation.</returns>
     public VideoEffectFilter CreateFilter(VideoEffectFilterKind kind) {
         try
         {
@@ -719,6 +788,7 @@ public sealed class MediaTimelineEditService(
     /// any additional user-authored layers. Streaming preview and program output therefore use the same
     /// layer/filter renderer as Video Studio instead of a separate chroma/filter implementation.
     /// </summary>
+    /// <param name="source">Source value supplied to the media timeline edit operation and used when producing its result.</param>
     public void SynchronizeLiveSourceLayer(LiveSourceElement source)
     {
         try
@@ -787,8 +857,12 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Runs the upsert live filter operation.
+    /// Performs upsert live filter as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="layer">Layer value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <param name="kind">Kind value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <param name="value">Value value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <param name="neutral">Neutral value supplied to the media timeline edit operation and used when producing its result.</param>
     private void UpsertLiveFilter(VideoEffectLayer layer, VideoEffectFilterKind kind, double value, double neutral)
     {
         try
@@ -816,8 +890,10 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Runs the clone temporal sections operation.
+    /// Performs clone temporal sections as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="sections">Media temporal section dependency used by the media timeline edit workflow to provide the corresponding application capability.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private List<MediaTemporalSection> CloneTemporalSections(IEnumerable<MediaTemporalSection>? sections) {
         try
         {
@@ -843,8 +919,10 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Runs the clone video layers operation.
+    /// Performs clone video layers as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="layers">Video effect layer dependency used by the media timeline edit workflow to provide the corresponding application capability.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private List<VideoEffectLayer> CloneVideoLayers(IEnumerable<VideoEffectLayer>? layers) {
         try
         {
@@ -863,8 +941,10 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Runs the clone video region operation.
+    /// Performs clone video region as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="region">Region value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <returns>The video frame region produced by the operation.</returns>
     private VideoFrameRegion CloneVideoRegion(VideoFrameRegion? region) {
         try
         {
@@ -889,8 +969,10 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Runs the clone video filters operation.
+    /// Performs clone video filters as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="filters">Video effect filter dependency used by the media timeline edit workflow to provide the corresponding application capability.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private List<VideoEffectFilter> CloneVideoFilters(IEnumerable<VideoEffectFilter>? filters) {
         try
         {
@@ -922,8 +1004,13 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Normalizes video layer.
+    /// Normalizes video layer as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="layer">Layer value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <param name="minimum">Minimum value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <param name="maximum">Maximum value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <param name="index">Index value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <returns>The video effect layer produced by the operation.</returns>
     private VideoEffectLayer NormalizeVideoLayer(VideoEffectLayer layer, double minimum, double maximum, int index)
     {
         try
@@ -1002,8 +1089,9 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Normalizes filter.
+    /// Normalizes filter as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="filter">Filter value supplied to the media timeline edit operation and used when producing its result.</param>
     private void NormalizeFilter(VideoEffectFilter filter)
     {
         try
@@ -1058,8 +1146,11 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Normalizes color.
+    /// Normalizes color as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeColor(string? value, string fallback)
     {
         try
@@ -1078,8 +1169,11 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Runs the suffix operation.
+    /// Performs suffix as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="name">Name value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <param name="suffix">Suffix value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Suffix(string name, string suffix)
     {
         try
@@ -1097,8 +1191,9 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Normalizes temporal selection.
+    /// Normalizes temporal selection as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="segment">Segment value supplied to the media timeline edit operation and used when producing its result.</param>
     private void NormalizeTemporalSelection(PublicationMediaSegment segment)
     {
         try
@@ -1152,8 +1247,9 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Normalizes cut sections.
+    /// Normalizes cut sections as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="segment">Segment value supplied to the media timeline edit operation and used when producing its result.</param>
     private void NormalizeCutSections(PublicationMediaSegment segment)
     {
         try
@@ -1185,8 +1281,11 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
-    /// Runs the merge name operation.
+    /// Performs merge name as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="left">Left value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <param name="right">Right value supplied to the media timeline edit operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string MergeName(string left, string right)
     {
         try

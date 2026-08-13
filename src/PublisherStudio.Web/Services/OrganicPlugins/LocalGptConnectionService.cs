@@ -10,8 +10,21 @@ using System.Text.Json;
 namespace PublisherStudio.Services.OrganicPlugins;
 
 /// <summary>
-/// Provides local gpt connection service operations.
+/// Coordinates LocalGPT connection behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
+/// <param name="discovery">Local gpt discovery registry dependency used by the LocalGPT connection workflow to provide the corresponding application capability.</param>
+/// <param name="codec">Organic plugin protocol codec dependency used by the LocalGPT connection workflow to provide the corresponding application capability.</param>
+/// <param name="security">Organic runtime security service dependency used by the LocalGPT connection workflow to provide the corresponding application capability.</param>
+/// <param name="capabilities">Organic capability catalog dependency used by the LocalGPT connection workflow to provide the corresponding application capability.</param>
+/// <param name="permissions">Organic permission store dependency used by the LocalGPT connection workflow to provide the corresponding application capability.</param>
+/// <param name="work">Organic work coordinator dependency used by the LocalGPT connection workflow to provide the corresponding application capability.</param>
+/// <param name="results">Organic result store dependency used by the LocalGPT connection workflow to provide the corresponding application capability.</param>
+/// <param name="replayGuard">Organic replay guard dependency used by the LocalGPT connection workflow to provide the corresponding application capability.</param>
+/// <param name="transportSecurityPolicy">Organic transport security policy dependency used by the LocalGPT connection workflow to provide the corresponding application capability.</param>
+/// <param name="runtimeState">Organic connection runtime state dependency used by the LocalGPT connection workflow to provide the corresponding application capability.</param>
+/// <param name="envelopeFactory">Organic wire envelope factory dependency used by the LocalGPT connection workflow to provide the corresponding application capability.</param>
+/// <param name="runtimeEndpointState">Runtime endpoint state dependency used by the LocalGPT connection workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class LocalGptConnectionService(
     ILocalGptDiscoveryRegistry discovery,
     IOrganicPluginProtocolCodec codec,
@@ -28,50 +41,84 @@ public sealed class LocalGptConnectionService(
     ILogger<LocalGptConnectionService> logger) : ILocalGptConnectionService
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the synchronization primitive that protects concurrent access to lifecycle gate state owned by <see cref="LocalGptConnectionService"/>.
     /// </summary>
     private readonly SemaphoreSlim lifecycleGate = new(1, 1);
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the synchronization primitive that protects concurrent access to write gate state owned by <see cref="LocalGptConnectionService"/>.
     /// </summary>
     private readonly SemaphoreSlim writeGate = new(1, 1);
     /// <summary>Coalesces capability-catalog and permission changes for the live 1-Wire directory synchronization loop.</summary>
     private readonly SemaphoreSlim capabilitySynchronizationSignal = new(0, 1);
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory active invocations collection maintained internally by <see cref="LocalGptConnectionService"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<Guid, Task> activeInvocations = new();
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory response waiters collection maintained internally by <see cref="LocalGptConnectionService"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<Guid, TaskCompletionSource<OrganicWireEnvelope>> responseWaiters = new();
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory recent responses collection maintained internally by <see cref="LocalGptConnectionService"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<Guid, OrganicWireEnvelope> recentResponses = new();
+    /// <summary>
+    /// Stores the TCP client dependency used by <see cref="LocalGptConnectionService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private TcpClient? client;
+    /// <summary>
+    /// Stores the internal reader state used by <see cref="LocalGptConnectionService"/> while executing its surrounding workflow.
+    /// </summary>
     private StreamReader? reader;
+    /// <summary>
+    /// Stores the internal writer state used by <see cref="LocalGptConnectionService"/> while executing its surrounding workflow.
+    /// </summary>
     private StreamWriter? writer;
+    /// <summary>
+    /// Stores the cancellation source used by <see cref="LocalGptConnectionService"/> to stop its current background or asynchronous operation.
+    /// </summary>
     private CancellationTokenSource? connectionCancellation;
+    /// <summary>
+    /// Stores the internal read loop state used by <see cref="LocalGptConnectionService"/> while executing its surrounding workflow.
+    /// </summary>
     private Task? readLoop;
+    /// <summary>
+    /// Stores the internal capability synchronization loop state used by <see cref="LocalGptConnectionService"/> while executing its surrounding workflow.
+    /// </summary>
     private Task? capabilitySynchronizationLoop;
+    /// <summary>
+    /// Stores the internal last advertised capability fingerprint state used by <see cref="LocalGptConnectionService"/> while executing its surrounding workflow.
+    /// </summary>
     private string lastAdvertisedCapabilityFingerprint = string.Empty;
+    /// <summary>
+    /// Stores the internal peer identifier state used by <see cref="LocalGptConnectionService"/> while executing its surrounding workflow.
+    /// </summary>
     private string peerId = string.Empty;
+    /// <summary>
+    /// Stores the internal connection identifier state used by <see cref="LocalGptConnectionService"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid connectionId;
+    /// <summary>
+    /// Stores the internal local peer identifier state used by <see cref="LocalGptConnectionService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string localPeerId = $"publisherstudio:{Environment.MachineName}";
 
     /// <summary>
-    /// Occurs when changed.
+    /// Occurs when changed changes or completes in <see cref="LocalGptConnectionService"/>, allowing interested callers to react without polling internal state.
     /// </summary>
     public event Action? Changed;
     /// <summary>
-    /// Gets state.
+    /// Gets the state value that forms part of the LocalGPT connection state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The state value exposed by <see cref="LocalGptConnectionService"/>.</value>
     public OrganicConnectionState State { get; } = new();
 
     /// <summary>
-    /// Runs the connect async operation.
+    /// Performs connect as part of the LocalGPT connection service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="requestedPeerId">Identifier of the requested peer to use for this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The organic connection state produced by the operation.</returns>
     public async Task<OrganicConnectionState> ConnectAsync(string requestedPeerId, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(requestedPeerId);
@@ -175,8 +222,9 @@ public sealed class LocalGptConnectionService(
     }
 
     /// <summary>
-    /// Runs the disconnect async operation.
+    /// Performs disconnect as part of the LocalGPT connection service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task DisconnectAsync()
     {
         try
@@ -195,8 +243,11 @@ public sealed class LocalGptConnectionService(
     }
 
     /// <summary>
-    /// Runs the send council request async operation.
+    /// Performs send council request as part of the LocalGPT connection service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The GUID produced by the operation.</returns>
     public async Task<Guid> SendCouncilRequestAsync(OrganicCouncilPromptRequest request, CancellationToken cancellationToken = default)
     {
         try
@@ -229,8 +280,11 @@ public sealed class LocalGptConnectionService(
     }
 
     /// <summary>
-    /// Runs the send envelope async operation.
+    /// Performs send envelope as part of the LocalGPT connection service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the LocalGPT connection operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The GUID produced by the operation.</returns>
     public Task<Guid> SendEnvelopeAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default)
     {
         try
@@ -252,8 +306,12 @@ public sealed class LocalGptConnectionService(
     }
 
     /// <summary>
-    /// Runs the wait for result async operation.
+    /// Performs wait for result as part of the LocalGPT connection service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="correlationId">Identifier of the correlation to use for this operation.</param>
+    /// <param name="timeout">Timeout value supplied to the LocalGPT connection operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The organic wire envelope produced by the operation.</returns>
     public async Task<OrganicWireEnvelope> WaitForResultAsync(Guid correlationId, TimeSpan timeout, CancellationToken cancellationToken = default)
     {
         try
@@ -308,8 +366,11 @@ public sealed class LocalGptConnectionService(
     }
 
     /// <summary>
-    /// Runs the send work result async operation.
+    /// Performs send work result as part of the LocalGPT connection service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="item">Item value supplied to the LocalGPT connection operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task SendWorkResultAsync(OrganicPluginWorkItem item, CancellationToken cancellationToken = default)
     {
         try
@@ -327,8 +388,15 @@ public sealed class LocalGptConnectionService(
     }
 
     /// <summary>
-    /// Reads loop async.
+    /// Reads loop as part of the LocalGPT connection service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="connectedId">Identifier of the connected to use for this operation.</param>
+    /// <param name="connectedPeerId">Identifier of the connected peer to use for this operation.</param>
+    /// <param name="connectedReader">Connected reader value supplied to the LocalGPT connection operation and used when producing its result.</param>
+    /// <param name="connectedWriter">Connected writer value supplied to the LocalGPT connection operation and used when producing its result.</param>
+    /// <param name="isLoopback">Value indicating whether is loopback should apply to this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ReadLoopAsync(Guid connectedId, string connectedPeerId, StreamReader connectedReader, StreamWriter connectedWriter, bool isLoopback, CancellationToken cancellationToken)
     {
         try
@@ -371,8 +439,15 @@ public sealed class LocalGptConnectionService(
     }
 
     /// <summary>
-    /// Handles incoming async.
+    /// Handles incoming as part of the LocalGPT connection service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the LocalGPT connection operation and used when producing its result.</param>
+    /// <param name="connectedId">Identifier of the connected to use for this operation.</param>
+    /// <param name="connectedPeerId">Identifier of the connected peer to use for this operation.</param>
+    /// <param name="connectedWriter">Connected writer value supplied to the LocalGPT connection operation and used when producing its result.</param>
+    /// <param name="isLoopback">Value indicating whether is loopback should apply to this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task HandleIncomingAsync(OrganicWireEnvelope envelope, Guid connectedId, string connectedPeerId, StreamWriter connectedWriter, bool isLoopback, CancellationToken cancellationToken)
     {
         try
@@ -509,8 +584,13 @@ public sealed class LocalGptConnectionService(
     }
 
     /// <summary>
-    /// Starts invoke.
+    /// Starts invoke as part of the LocalGPT connection service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the LocalGPT connection operation and used when producing its result.</param>
+    /// <param name="connectedId">Identifier of the connected to use for this operation.</param>
+    /// <param name="connectedWriter">Connected writer value supplied to the LocalGPT connection operation and used when producing its result.</param>
+    /// <param name="isLoopback">Value indicating whether is loopback should apply to this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
     private void StartInvoke(OrganicWireEnvelope envelope, Guid connectedId, StreamWriter connectedWriter, bool isLoopback, CancellationToken cancellationToken)
     {
         try
@@ -530,8 +610,14 @@ public sealed class LocalGptConnectionService(
     }
 
     /// <summary>
-    /// Runs the process invoke async operation.
+    /// Processes invoke as part of the LocalGPT connection service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the LocalGPT connection operation and used when producing its result.</param>
+    /// <param name="connectedId">Identifier of the connected to use for this operation.</param>
+    /// <param name="connectedWriter">Connected writer value supplied to the LocalGPT connection operation and used when producing its result.</param>
+    /// <param name="isLoopback">Value indicating whether is loopback should apply to this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ProcessInvokeAsync(OrganicWireEnvelope envelope, Guid connectedId, StreamWriter connectedWriter, bool isLoopback, CancellationToken cancellationToken)
     {
         try
@@ -554,6 +640,9 @@ public sealed class LocalGptConnectionService(
     /// <summary>
     /// Builds the current local organic directory for a linked peer and a stable content fingerprint.
     /// </summary>
+    /// <param name="connectedPeerId">Identifier of the connected peer to use for this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private async Task<(List<OrganicCapabilityDescriptor> Capabilities,
         List<OrganicSkillDescriptor> Skills,
         List<OrganicUiFeatureDescriptor> UiFeatures,
@@ -623,6 +712,12 @@ public sealed class LocalGptConnectionService(
     /// <summary>
     /// Keeps the already-linked LocalGPT peer synchronized with PublisherStudio capability changes without reconnecting either application.
     /// </summary>
+    /// <param name="connectedId">Identifier of the connected to use for this operation.</param>
+    /// <param name="connectedPeerId">Identifier of the connected peer to use for this operation.</param>
+    /// <param name="connectedWriter">Connected writer value supplied to the LocalGPT connection operation and used when producing its result.</param>
+    /// <param name="isLoopback">Value indicating whether is loopback should apply to this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SynchronizeLocalCapabilityDirectoryAsync(
         Guid connectedId,
         string connectedPeerId,
@@ -667,8 +762,14 @@ public sealed class LocalGptConnectionService(
     }
 
     /// <summary>
-    /// Runs the send envelope core async operation.
+    /// Performs send envelope core as part of the LocalGPT connection service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the LocalGPT connection operation and used when producing its result.</param>
+    /// <param name="connectedWriter">Connected writer value supplied to the LocalGPT connection operation and used when producing its result.</param>
+    /// <param name="targetPeerId">Identifier of the target peer to use for this operation.</param>
+    /// <param name="isLoopback">Value indicating whether is loopback should apply to this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The GUID produced by the operation.</returns>
     private async Task<Guid> SendEnvelopeCoreAsync(OrganicWireEnvelope envelope, StreamWriter connectedWriter, string targetPeerId, bool isLoopback, CancellationToken cancellationToken)
     {
         try
@@ -699,8 +800,9 @@ public sealed class LocalGptConnectionService(
 
 
     /// <summary>
-    /// Runs the disconnect core async operation.
+    /// Performs disconnect core as part of the LocalGPT connection service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task DisconnectCoreAsync()
     {
         var oldPeerId = peerId;
@@ -745,8 +847,13 @@ public sealed class LocalGptConnectionService(
     }
 
     /// <summary>
-    /// Attempts to read.
+    /// Attempts to read as part of the LocalGPT connection service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <typeparam name="T">Type used for t values handled by <see cref="LocalGptConnectionService"/>.</typeparam>
+    /// <param name="envelope">Envelope value supplied to the LocalGPT connection operation and used when producing its result.</param>
+    /// <param name="key">Key value supplied to the LocalGPT connection operation and used when producing its result.</param>
+    /// <param name="value">Value value supplied to the LocalGPT connection operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool TryRead<T>(OrganicWireEnvelope envelope, string key, out T? value)
     {
         value = default;
@@ -756,8 +863,11 @@ public sealed class LocalGptConnectionService(
     }
 
     /// <summary>
-    /// Applies permission policy.
+    /// Applies permission policy as part of the LocalGPT connection service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="requestedPeerId">Identifier of the requested peer to use for this operation.</param>
+    /// <param name="capability">Capability value supplied to the LocalGPT connection operation and used when producing its result.</param>
+    /// <returns>The organic capability descriptor produced by the operation.</returns>
     private OrganicCapabilityDescriptor ApplyPermissionPolicy(string requestedPeerId, OrganicCapabilityDescriptor capability)
     {
         try
@@ -784,8 +894,11 @@ public sealed class LocalGptConnectionService(
     }
 
     /// <summary>
-    /// Normalizes address.
+    /// Normalizes address as part of the LocalGPT connection service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="address">Address value supplied to the LocalGPT connection operation and used when producing its result.</param>
+    /// <param name="hostName">Host name value supplied to the LocalGPT connection operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeAddress(string address, string hostName)
     {
         try
@@ -804,8 +917,9 @@ public sealed class LocalGptConnectionService(
     }
 
     /// <summary>
-    /// Runs the dispose async operation.
+    /// Releases resources owned by <see cref="LocalGptConnectionService"/> and leaves the LocalGPT connection workflow in a safely disposed state.
     /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async ValueTask DisposeAsync()
     {
         try

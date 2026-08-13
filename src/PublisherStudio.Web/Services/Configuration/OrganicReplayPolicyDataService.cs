@@ -4,8 +4,9 @@ using PublisherStudio.Services.OrganicPlugins;
 namespace PublisherStudio.Services.Configuration;
 
 /// <summary>
-/// Provides organic replay policy data service operations.
+/// Coordinates organic replay policy behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class OrganicReplayPolicyDataService(
     ILogger<OrganicReplayPolicyDataService> logger) : IOrganicReplayPolicyDataService
 {
@@ -21,8 +22,9 @@ public sealed class OrganicReplayPolicyDataService(
     };
 
     /// <summary>
-    /// Gets snapshot.
+    /// Retrieves snapshot as part of the organic replay policy service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The organic replay policy snapshot produced by the operation.</returns>
     public OrganicReplayPolicySnapshot GetSnapshot()
     {
         try

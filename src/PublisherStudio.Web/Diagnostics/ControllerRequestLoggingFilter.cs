@@ -1,17 +1,21 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace PublisherStudio.Diagnostics;
 
 /// <summary>
-/// Provides controller request logging filter operations.
+/// Represents a controller request logging application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class ControllerRequestLoggingFilter(
     ILogger<ControllerRequestLoggingFilter> logger) : IAsyncActionFilter
 {
     /// <summary>
-    /// Runs the on action execution async operation.
+    /// Handles the action execution async lifecycle or event notification for <see cref="ControllerRequestLoggingFilter"/>, updating the state required by the surrounding workflow.
     /// </summary>
+    /// <param name="context">Context value supplied to the controller request logging operation and used when producing its result.</param>
+    /// <param name="next">Next value supplied to the controller request logging operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         var stopwatch = Stopwatch.StartNew();

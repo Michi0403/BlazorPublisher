@@ -5,42 +5,117 @@ using PublisherStudio.Services.Configuration;
 namespace PublisherStudio.Services;
 
 /// <summary>
-/// Provides editor state service operations.
+/// Coordinates editor state behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
 public sealed class EditorStateService : IDisposable
 {
+    /// <summary>
+    /// Stores the publication file service dependency used by <see cref="EditorStateService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly PublicationFileService _files;
+    /// <summary>
+    /// Stores the publication data service dependency used by <see cref="EditorStateService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly PublicationDataService _data;
+    /// <summary>
+    /// Stores the publication component service dependency used by <see cref="EditorStateService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly PublicationComponentService _components;
+    /// <summary>
+    /// Stores the publication media asset store dependency used by <see cref="EditorStateService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly PublicationMediaAssetStore _mediaAssets;
+    /// <summary>
+    /// Stores the spreadsheet document service dependency used by <see cref="EditorStateService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly SpreadsheetDocumentService _spreadsheets;
+    /// <summary>
+    /// Stores the publication live data registry dependency used by <see cref="EditorStateService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly PublicationLiveDataRegistry _liveData;
+    /// <summary>
+    /// Stores the publication web data service dependency used by <see cref="EditorStateService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly PublicationWebDataService _webData;
+    /// <summary>
+    /// Stores the publication streaming settings store dependency used by <see cref="EditorStateService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly PublicationStreamingSettingsStore _streamingSettings;
+    /// <summary>
+    /// Stores the panel document service dependency used by <see cref="EditorStateService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly PanelDocumentService _panels;
+    /// <summary>
+    /// Stores the system variable store service dependency used by <see cref="EditorStateService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly ISystemVariableStoreService _systemVariables;
+    /// <summary>
+    /// Stores the internal media data state used by <see cref="EditorStateService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly PublicationMediaData _mediaData;
+    /// <summary>
+    /// Stores the internal element traversal state used by <see cref="EditorStateService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly PublicationElementTraversal _elementTraversal;
+    /// <summary>
+    /// Stores the logger used by <see cref="EditorStateService"/> to record operational diagnostics without coupling callers to logging details.
+    /// </summary>
     private readonly ILogger<EditorStateService> logger;
+    /// <summary>
+    /// Stores the rich text document factory dependency used by <see cref="EditorStateService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly RichTextDocumentFactory _richTextFactory;
+    /// <summary>
+    /// Stores the publisher document factory dependency used by <see cref="EditorStateService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly IPublisherDocumentFactory _documentFactory;
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal undo state used by <see cref="EditorStateService"/> while executing its surrounding workflow.
     /// </summary>
     private readonly Stack<string> _undo = new();
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal redo state used by <see cref="EditorStateService"/> while executing its surrounding workflow.
     /// </summary>
     private readonly Stack<string> _redo = new();
+    /// <summary>
+    /// Stores the in-memory clipboard collection maintained internally by <see cref="EditorStateService"/> for its current workflow state.
+    /// </summary>
     private readonly List<PublicationElement> _clipboard = [];
+    /// <summary>
+    /// Stores the in-memory selected element identifiers collection maintained internally by <see cref="EditorStateService"/> for its current workflow state.
+    /// </summary>
     private readonly HashSet<Guid> _selectedElementIds = [];
+    /// <summary>
+    /// Stores the internal live edit key state used by <see cref="EditorStateService"/> while executing its surrounding workflow.
+    /// </summary>
     private string? _liveEditKey;
+    /// <summary>
+    /// Stores the internal last insertion x state used by <see cref="EditorStateService"/> while executing its surrounding workflow.
+    /// </summary>
     private double? _lastInsertionX;
+    /// <summary>
+    /// Stores the internal last insertion y state used by <see cref="EditorStateService"/> while executing its surrounding workflow.
+    /// </summary>
     private double? _lastInsertionY;
 
     /// <summary>
-    /// Runs the editor state service operation.
+    /// Initializes a new <see cref="EditorStateService"/> instance and captures the dependencies or initial state required by its editor state workflow.
     /// </summary>
+    /// <param name="files">Publication file service dependency used by the editor state workflow to provide the corresponding application capability.</param>
+    /// <param name="data">Publication data service dependency used by the editor state workflow to provide the corresponding application capability.</param>
+    /// <param name="components">Publication component service dependency used by the editor state workflow to provide the corresponding application capability.</param>
+    /// <param name="mediaAssets">Publication media asset store dependency used by the editor state workflow to provide the corresponding application capability.</param>
+    /// <param name="spreadsheets">Spreadsheet document service dependency used by the editor state workflow to provide the corresponding application capability.</param>
+    /// <param name="liveData">Publication live data registry dependency used by the editor state workflow to provide the corresponding application capability.</param>
+    /// <param name="webData">Publication web data service dependency used by the editor state workflow to provide the corresponding application capability.</param>
+    /// <param name="streamingSettings">Publication streaming settings store dependency used by the editor state workflow to provide the corresponding application capability.</param>
+    /// <param name="panels">Panel document service dependency used by the editor state workflow to provide the corresponding application capability.</param>
+    /// <param name="systemVariables">System variable store service dependency used by the editor state workflow to provide the corresponding application capability.</param>
+    /// <param name="mediaData">Media data value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="elementTraversal">Element traversal value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="richTextFactory">Rich text document factory dependency used by the editor state workflow to provide the corresponding application capability.</param>
+    /// <param name="documentFactory">Publisher document factory dependency used by the editor state workflow to provide the corresponding application capability.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     public EditorStateService(
         PublicationFileService files,
         PublicationDataService data,
@@ -81,91 +156,112 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Occurs when changed.
+    /// Occurs when changed changes or completes in <see cref="EditorStateService"/>, allowing interested callers to react without polling internal state.
     /// </summary>
     public event Action? Changed;
     /// <summary>
-    /// Gets or sets document.
+    /// Gets or sets the document value that forms part of the editor state state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The document value exposed by <see cref="EditorStateService"/>.</value>
     public PublicationDocument Document { get; private set; }
     /// <summary>
-    /// Gets or sets selected page identifier.
+    /// Gets or sets the stable selected page identifier used to identify or correlate this editor state instance with related application state.
     /// </summary>
+    /// <value>The selected page identifier value exposed by <see cref="EditorStateService"/>.</value>
     public Guid SelectedPageId { get; private set; }
     /// <summary>
-    /// Gets or sets selected element identifier.
+    /// Gets or sets the stable selected element identifier used to identify or correlate this editor state instance with related application state.
     /// </summary>
+    /// <value>The selected element identifier value exposed by <see cref="EditorStateService"/>.</value>
     public Guid? SelectedElementId { get; private set; }
     /// <summary>
-    /// Gets or sets is dirty.
+    /// Gets or sets a value indicating whether dirty applies to the editor state state.
     /// </summary>
+    /// <value>The is dirty value exposed by <see cref="EditorStateService"/>.</value>
     public bool IsDirty { get; private set; }
     /// <summary>
-    /// Gets or sets revision.
+    /// Gets or sets the revision value that forms part of the editor state state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The revision value exposed by <see cref="EditorStateService"/>.</value>
     public long Revision { get; private set; }
     /// <summary>
-    /// Gets or sets crop mode.
+    /// Gets or sets a value indicating whether crop mode applies to the editor state state.
     /// </summary>
+    /// <value>The crop mode value exposed by <see cref="EditorStateService"/>.</value>
     public bool CropMode { get; private set; }
     /// <summary>
-    /// Gets or sets content pan mode.
+    /// Gets or sets a value indicating whether content pan mode applies to the editor state state.
     /// </summary>
+    /// <value>The content pan mode value exposed by <see cref="EditorStateService"/>.</value>
     public bool ContentPanMode { get; private set; }
     /// <summary>
-    /// Gets or sets connector tool.
+    /// Gets or sets the connector tool value that forms part of the editor state state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The connector tool value exposed by <see cref="EditorStateService"/>.</value>
     public ConnectorToolKind ConnectorTool { get; private set; }
     /// <summary>
-    /// Gets can undo.
+    /// Gets a value indicating whether undo applies to the editor state state.
     /// </summary>
+    /// <value>The can undo value exposed by <see cref="EditorStateService"/>.</value>
     public bool CanUndo => _undo.Count > 0;
     /// <summary>
-    /// Gets can redo.
+    /// Gets a value indicating whether redo applies to the editor state state.
     /// </summary>
+    /// <value>The can redo value exposed by <see cref="EditorStateService"/>.</value>
     public bool CanRedo => _redo.Count > 0;
     /// <summary>
-    /// Gets can paste.
+    /// Gets a value indicating whether paste applies to the editor state state.
     /// </summary>
+    /// <value>The can paste value exposed by <see cref="EditorStateService"/>.</value>
     public bool CanPaste => _clipboard.Count > 0;
     /// <summary>
-    /// Gets or sets clipboard revision.
+    /// Gets or sets the clipboard revision value that forms part of the editor state state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The clipboard revision value exposed by <see cref="EditorStateService"/>.</value>
     public long ClipboardRevision { get; private set; }
     /// <summary>
-    /// Gets current page.
+    /// Gets the current page value that forms part of the editor state state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The current page value exposed by <see cref="EditorStateService"/>.</value>
     public PublicationPage CurrentPage => Document.Pages.First(p => p.Id == SelectedPageId);
     /// <summary>
-    /// Gets selected element.
+    /// Gets the selected element value that forms part of the editor state state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The selected element value exposed by <see cref="EditorStateService"/>.</value>
     public PublicationElement? SelectedElement => CurrentPage.Elements.FirstOrDefault(e => e.Id == SelectedElementId);
     /// <summary>
-    /// Gets selected elements.
+    /// Gets the selected elements collection maintained or exposed by this editor state instance for downstream processing.
     /// </summary>
+    /// <value>The selected elements value exposed by <see cref="EditorStateService"/>.</value>
     public IReadOnlyList<PublicationElement> SelectedElements => CurrentPage.Elements
         .Where(element => _selectedElementIds.Contains(element.Id))
         .OrderBy(element => element.ZIndex)
         .ToList();
     /// <summary>
-    /// Gets selected element identifiers.
+    /// Gets the selected element identifiers collection maintained or exposed by this editor state instance for downstream processing.
     /// </summary>
+    /// <value>The selected element identifiers value exposed by <see cref="EditorStateService"/>.</value>
     public IReadOnlyCollection<Guid> SelectedElementIds => _selectedElementIds;
     /// <summary>
-    /// Gets has multiple selection.
+    /// Gets a value indicating whether multiple selection applies to the editor state state.
     /// </summary>
+    /// <value>The has multiple selection value exposed by <see cref="EditorStateService"/>.</value>
     public bool HasMultipleSelection => _selectedElementIds.Count > 1;
     /// <summary>
-    /// Gets can group selection.
+    /// Gets a value indicating whether group selection applies to the editor state state.
     /// </summary>
+    /// <value>The can group selection value exposed by <see cref="EditorStateService"/>.</value>
     public bool CanGroupSelection => SelectedElements.Count(element => element is not ConnectorElement && !element.Locked) > 1;
     /// <summary>
-    /// Gets can ungroup selection.
+    /// Gets a value indicating whether ungroup selection applies to the editor state state.
     /// </summary>
+    /// <value>The can ungroup selection value exposed by <see cref="EditorStateService"/>.</value>
     public bool CanUngroupSelection => SelectedElements.Any(element => element.GroupId is not null);
     /// <summary>
-    /// Determines whether selected.
+    /// Determines whether selected as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool IsSelected(Guid id) {
         try
         {
@@ -180,7 +276,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the new document operation.
+    /// Performs new document as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void NewDocument()
     {
@@ -214,8 +310,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the load operation.
+    /// Performs load as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="json">Json value supplied to the editor state operation and used when producing its result.</param>
     public void Load(string json)
     {
         try
@@ -261,8 +358,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Loads recovery.
+    /// Loads recovery as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="json">Json value supplied to the editor state operation and used when producing its result.</param>
     public void LoadRecovery(string json)
     {
         try
@@ -282,7 +380,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the mark saved operation.
+    /// Performs mark saved as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void MarkSaved()
     {
@@ -302,8 +400,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the rename document operation.
+    /// Performs rename document as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the editor state operation and used when producing its result.</param>
     public void RenameDocument(string value)
     {
         try
@@ -324,8 +423,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Sets publication culture.
+    /// Sets publication culture as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="culture">Culture value supplied to the editor state operation and used when producing its result.</param>
     public void SetPublicationCulture(string culture)
     {
         try
@@ -346,8 +446,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Sets insertion point.
+    /// Sets insertion point as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="x">X value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="y">Y value supplied to the editor state operation and used when producing its result.</param>
     public void SetInsertionPoint(double x, double y)
     {
         try
@@ -365,8 +467,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the select page operation.
+    /// Performs select page as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     public void SelectPage(Guid id)
     {
         try
@@ -392,8 +495,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the select element operation.
+    /// Performs select element as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="additive">Value indicating whether additive should apply to this operation.</param>
     public void SelectElement(Guid? id, bool additive = false)
     {
         try
@@ -449,8 +554,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Sets selection.
+    /// Sets selection as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="ids">Guid dependency used by the editor state workflow to provide the corresponding application capability.</param>
     public void SetSelection(IEnumerable<Guid> ids)
     {
         try
@@ -486,8 +592,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Sets primary selection.
+    /// Sets primary selection as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     public void SetPrimarySelection(Guid id)
     {
         try
@@ -514,7 +621,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the group selected operation.
+    /// Performs group selected as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void GroupSelected()
     {
@@ -538,7 +645,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the ungroup selected operation.
+    /// Performs ungroup selected as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void UngroupSelected()
     {
@@ -563,8 +670,11 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Adds text.
+    /// Adds text as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="centerX">Center x value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="centerY">Center y value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The text frame element produced by the operation.</returns>
     public TextFrameElement AddText(double? centerX = null, double? centerY = null)
     {
         try
@@ -598,8 +708,14 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Adds spreadsheet.
+    /// Adds spreadsheet as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="content">Content value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="fileName">File name value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="format">Format value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="centerX">Center x value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="centerY">Center y value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The spreadsheet element produced by the operation.</returns>
     public SpreadsheetElement AddSpreadsheet(byte[] content, string fileName, SpreadsheetStorageFormat format, double? centerX = null, double? centerY = null)
     {
         try
@@ -637,8 +753,12 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Adds panel.
+    /// Adds panel as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="presetId">Identifier of the preset to use for this operation.</param>
+    /// <param name="centerX">Center x value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="centerY">Center y value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The panel element produced by the operation.</returns>
     public PanelElement AddPanel(string presetId = "blank", double? centerX = null, double? centerY = null)
     {
         try
@@ -663,8 +783,11 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Adds HTML embed.
+    /// Adds HTML embed as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="centerX">Center x value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="centerY">Center y value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The HTML embed element produced by the operation.</returns>
     public HtmlEmbedElement AddHtmlEmbed(double? centerX = null, double? centerY = null) {
         try
         {
@@ -679,8 +802,12 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Adds HTML embed.
+    /// Adds HTML embed as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="configure">Configure value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="centerX">Center x value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="centerY">Center y value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The HTML embed element produced by the operation.</returns>
     public HtmlEmbedElement AddHtmlEmbed(Action<HtmlEmbedElement> configure, double? centerX = null, double? centerY = null)
     {
         try
@@ -713,8 +840,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Applies selected panel.
+    /// Applies selected panel as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="draft">Draft value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool ApplySelectedPanel(PanelElement draft)
     {
         try
@@ -754,8 +883,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Sets panel library visible.
+    /// Sets panel library visible as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="visible">Value indicating whether visible should apply to this operation.</param>
     public void SetPanelLibraryVisible(bool visible)
     {
         try
@@ -775,8 +905,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Applies selected HTML embed.
+    /// Applies selected HTML embed as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="draft">Draft value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool ApplySelectedHtmlEmbed(HtmlEmbedElement draft)
     {
         try
@@ -814,6 +946,8 @@ public sealed class EditorStateService : IDisposable
     /// Mainframe bounds and interaction metadata stay stable while the complete panel graph
     /// replaces the original object.
     /// </summary>
+    /// <param name="draft">Draft value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool PromoteSelectedHtmlEmbedToPanel(PanelElement draft)
     {
         try
@@ -854,8 +988,16 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Adds image.
+    /// Adds image as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="dataUrl">Data url value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="pictureSource">Picture source value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="centerX">Center x value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="centerY">Center y value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="pixelWidth">Pixel width value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="pixelHeight">Pixel height value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The image frame element produced by the operation.</returns>
     public ImageFrameElement AddImage(string dataUrl, string name, PictureDocument? pictureSource = null, double? centerX = null, double? centerY = null, int pixelWidth = 0, int pixelHeight = 0)
     {
         try
@@ -894,8 +1036,16 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Adds video.
+    /// Adds video as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="dataUrl">Data url value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="mimeType">Mime type value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="durationSeconds">Duration seconds value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="posterDataUrl">Poster data url value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="centerX">Center x value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="centerY">Center y value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The video element produced by the operation.</returns>
     public VideoElement AddVideo(string dataUrl, string mimeType, string name, double durationSeconds, string posterDataUrl = "", double? centerX = null, double? centerY = null)
     {
         try
@@ -935,8 +1085,16 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Adds audio.
+    /// Adds audio as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="dataUrl">Data url value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="mimeType">Mime type value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="durationSeconds">Duration seconds value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="waveformSamples">Double dependency used by the editor state workflow to provide the corresponding application capability.</param>
+    /// <param name="centerX">Center x value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="centerY">Center y value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The audio element produced by the operation.</returns>
     public AudioElement AddAudio(string dataUrl, string mimeType, string name, double durationSeconds, IReadOnlyList<double>? waveformSamples = null, double? centerX = null, double? centerY = null)
     {
         try
@@ -975,8 +1133,12 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Adds live source.
+    /// Adds live source as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="kind">Kind value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="centerX">Center x value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="centerY">Center y value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The live source element produced by the operation.</returns>
     public LiveSourceElement AddLiveSource(PublicationLiveSourceKind kind, double? centerX = null, double? centerY = null)
     {
         try
@@ -1026,8 +1188,11 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Updates live source.
+    /// Updates live source as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="update">Update value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="capture">Value indicating whether capture should apply to this operation.</param>
     public void UpdateLiveSource(Guid id, Action<LiveSourceElement> update, bool capture = true)
     {
         try
@@ -1063,8 +1228,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Applies streaming settings.
+    /// Applies streaming settings as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="settings">Settings containing the caller-supplied values that control this operation.</param>
     public void ApplyStreamingSettings(PublicationStreamingSettings settings)
     {
         try
@@ -1085,8 +1251,11 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Updates media.
+    /// Updates media as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="update">Update value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="capture">Value indicating whether capture should apply to this operation.</param>
     public void UpdateMedia(Guid id, Action<PublicationMediaElement> update, bool capture = true)
     {
         try
@@ -1110,8 +1279,11 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Updates media live.
+    /// Updates media live as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="key">Key value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="update">Update value supplied to the editor state operation and used when producing its result.</param>
     public void UpdateMediaLive(Guid id, string key, Action<PublicationMediaElement> update)
     {
         try
@@ -1141,8 +1313,11 @@ public sealed class EditorStateService : IDisposable
 
 
     /// <summary>
-    /// Adds word art.
+    /// Adds word art as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="centerX">Center x value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="centerY">Center y value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The word art element produced by the operation.</returns>
     public WordArtElement AddWordArt(double? centerX = null, double? centerY = null)
     {
         try
@@ -1174,8 +1349,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Ensures data object.
+    /// Ensures data object as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The publication data object produced by the operation.</returns>
     public PublicationDataObject EnsureDataObject()
     {
         try
@@ -1195,8 +1371,11 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Adds barcode.
+    /// Adds barcode as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="centerX">Center x value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="centerY">Center y value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The barcode element produced by the operation.</returns>
     public BarcodeElement AddBarcode(double? centerX = null, double? centerY = null)
     {
         try
@@ -1227,8 +1406,12 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Adds data visual.
+    /// Adds data visual as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="kind">Kind value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="centerX">Center x value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="centerY">Center y value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The data visual element produced by the operation.</returns>
     public DataVisualElement AddDataVisual(DataVisualKind kind, double? centerX = null, double? centerY = null)
     {
         try
@@ -1291,8 +1474,12 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Adds dev extreme component.
+    /// Adds dev extreme component as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="kind">Kind value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="centerX">Center x value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="centerY">Center y value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The dev extreme component element produced by the operation.</returns>
     public DevExtremeComponentElement AddDevExtremeComponent(PublicationComponentKind kind, double? centerX = null, double? centerY = null)
     {
         try
@@ -1317,8 +1504,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Applies selected component.
+    /// Applies selected component as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="draft">Draft value supplied to the editor state operation and used when producing its result.</param>
     public void ApplySelectedComponent(DevExtremeComponentElement draft)
     {
         try
@@ -1354,8 +1542,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Sets selected component scope.
+    /// Sets selected component scope as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="scope">Scope value supplied to the editor state operation and used when producing its result.</param>
     public void SetSelectedComponentScope(PublicationComponentScope scope)
     {
         try
@@ -1392,8 +1581,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the upsert data object operation.
+    /// Performs upsert data object as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the editor state operation and used when producing its result.</param>
     public void UpsertDataObject(PublicationDataObject value)
     {
         try
@@ -1416,8 +1606,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Deletes data object.
+    /// Deletes data object as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool DeleteDataObject(Guid id)
     {
         try
@@ -1444,7 +1636,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the refresh data visuals operation.
+    /// Refreshes data visuals as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void RefreshDataVisuals() {
         try
@@ -1460,13 +1652,18 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Gets has due web data.
+    /// Gets a value indicating whether due web data applies to the editor state state.
     /// </summary>
+    /// <value>The has due web data value exposed by <see cref="EditorStateService"/>.</value>
     public bool HasDueWebData => Document.DataObjects.Any(data => _webData.IsDue(data, DateTimeOffset.UtcNow));
 
     /// <summary>
-    /// Runs the refresh web data async operation.
+    /// Refreshes web data as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="dataId">Identifier of the data to use for this operation.</param>
+    /// <param name="force">Value indicating whether force should apply to this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task RefreshWebDataAsync(Guid? dataId = null, bool force = true, CancellationToken cancellationToken = default)
     {
         try
@@ -1489,8 +1686,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the refresh web data on open async operation.
+    /// Refreshes web data on open as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public Task RefreshWebDataOnOpenAsync(CancellationToken cancellationToken = default)
         {
             try
@@ -1510,8 +1709,11 @@ public sealed class EditorStateService : IDisposable
         }
 
     /// <summary>
-    /// Runs the refresh web data objects async operation.
+    /// Refreshes web data objects as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="candidates">Publication data object dependency used by the editor state workflow to provide the corresponding application capability.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task RefreshWebDataObjectsAsync(IReadOnlyList<PublicationDataObject> candidates, CancellationToken cancellationToken)
     {
         try
@@ -1534,8 +1736,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the data visual name operation.
+    /// Performs data visual name as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="kind">Kind value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string DataVisualName(DataVisualKind kind) {
         try
         {
@@ -1567,8 +1771,12 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Adds connector port.
+    /// Adds connector port as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="elementId">Identifier of the element to use for this operation.</param>
+    /// <param name="xPercent">X percent value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="yPercent">Y percent value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The publication connector port produced by the operation.</returns>
     public PublicationConnectorPort? AddConnectorPort(Guid elementId, double xPercent = .5, double yPercent = .5)
     {
         try
@@ -1598,8 +1806,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Removes connector port.
+    /// Removes connector port as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="elementId">Identifier of the element to use for this operation.</param>
+    /// <param name="portId">Identifier of the port to use for this operation.</param>
     public void RemoveConnectorPort(Guid elementId, Guid portId)
     {
         try
@@ -1634,8 +1844,14 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Adds connector.
+    /// Adds connector as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="sourceElementId">Identifier of the source element to use for this operation.</param>
+    /// <param name="sourceAnchor">Source anchor value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="targetElementId">Identifier of the target element to use for this operation.</param>
+    /// <param name="targetAnchor">Target anchor value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="endMarker">End marker value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The connector element produced by the operation.</returns>
     public ConnectorElement? AddConnector(Guid sourceElementId, ConnectorAnchor sourceAnchor, Guid targetElementId, ConnectorAnchor targetAnchor, ConnectorMarker endMarker = ConnectorMarker.Arrow)
     {
         try
@@ -1657,8 +1873,12 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Adds signal connector.
+    /// Adds signal connector as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="target">Target value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="endMarker">End marker value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The connector element produced by the operation.</returns>
     public ConnectorElement? AddSignalConnector(ConnectorEndpoint source, ConnectorEndpoint target, ConnectorMarker endMarker = ConnectorMarker.Arrow)
         {
             try
@@ -1674,8 +1894,15 @@ public sealed class EditorStateService : IDisposable
         }
 
     /// <summary>
-    /// Adds connector advanced.
+    /// Adds connector advanced as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="target">Target value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="endMarker">End marker value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="signal">Value indicating whether signal should apply to this operation.</param>
+    /// <param name="sourcePort">Source port value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="targetPort">Target port value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The connector element produced by the operation.</returns>
     public ConnectorElement? AddConnectorAdvanced(
         ConnectorEndpoint source,
         ConnectorEndpoint target,
@@ -1725,8 +1952,12 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Attempts to prepare endpoint.
+    /// Attempts to prepare endpoint as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="endpoint">Endpoint value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="pendingPort">Pending port value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="owner">Owner value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool TryPrepareEndpoint(ConnectorEndpoint endpoint, PublicationConnectorPort? pendingPort, out PublicationElement? owner)
     {
         try
@@ -1766,8 +1997,11 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the attach pending port operation.
+    /// Performs attach pending port as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="endpoint">Endpoint value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="owner">Owner value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="pendingPort">Pending port value supplied to the editor state operation and used when producing its result.</param>
     private void AttachPendingPort(ConnectorEndpoint endpoint, PublicationElement? owner, PublicationConnectorPort? pendingPort)
     {
         try
@@ -1786,8 +2020,12 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the reconnect connector operation.
+    /// Performs reconnect connector as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="connectorId">Identifier of the connector to use for this operation.</param>
+    /// <param name="sourceEnd">Value indicating whether source end should apply to this operation.</param>
+    /// <param name="elementId">Identifier of the element to use for this operation.</param>
+    /// <param name="anchor">Anchor value supplied to the editor state operation and used when producing its result.</param>
     public void ReconnectConnector(Guid connectorId, bool sourceEnd, Guid elementId, ConnectorAnchor anchor)
         {
             try
@@ -1808,8 +2046,12 @@ public sealed class EditorStateService : IDisposable
         }
 
     /// <summary>
-    /// Runs the reconnect connector endpoint operation.
+    /// Performs reconnect connector endpoint as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="connectorId">Identifier of the connector to use for this operation.</param>
+    /// <param name="sourceEnd">Value indicating whether source end should apply to this operation.</param>
+    /// <param name="replacement">Replacement value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="pendingPort">Pending port value supplied to the editor state operation and used when producing its result.</param>
     public void ReconnectConnectorEndpoint(Guid connectorId, bool sourceEnd, ConnectorEndpoint replacement, PublicationConnectorPort? pendingPort = null)
     {
         try
@@ -1839,8 +2081,12 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the commit connector control operation.
+    /// Performs commit connector control as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="connectorId">Identifier of the connector to use for this operation.</param>
+    /// <param name="controlIndex">Control index value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="x">X value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="y">Y value supplied to the editor state operation and used when producing its result.</param>
     public void CommitConnectorControl(Guid connectorId, int controlIndex, double x, double y)
     {
         try
@@ -1871,8 +2117,13 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the commit connector route operation.
+    /// Performs commit connector route as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="connectorId">Identifier of the connector to use for this operation.</param>
+    /// <param name="control1X">Control1 x value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="control1Y">Control1 y value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="control2X">Control2 x value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="control2Y">Control2 y value supplied to the editor state operation and used when producing its result.</param>
     public void CommitConnectorRoute(Guid connectorId, double control1X, double control1Y, double control2X, double control2Y)
     {
         try
@@ -1897,8 +2148,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the reset connector route operation.
+    /// Performs reset connector route as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="connectorId">Identifier of the connector to use for this operation.</param>
     public void ResetConnectorRoute(Guid connectorId)
     {
         try
@@ -1919,8 +2171,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Sets connector tool.
+    /// Sets connector tool as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="tool">Tool value supplied to the editor state operation and used when producing its result.</param>
     public void SetConnectorTool(ConnectorToolKind tool)
     {
         try
@@ -1940,7 +2193,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Determines whether cel active tool.
+    /// Determines whether cel active tool as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void CancelActiveTool()
     {
@@ -1961,8 +2214,12 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Adds shape.
+    /// Adds shape as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="shape">Shape value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="centerX">Center x value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="centerY">Center y value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The shape element produced by the operation.</returns>
     public ShapeElement AddShape(PublicationShape shape, double? centerX = null, double? centerY = null)
     {
         try
@@ -1994,7 +2251,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Adds page.
+    /// Adds page as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void AddPage()
     {
@@ -2036,7 +2293,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the duplicate page operation.
+    /// Performs duplicate page as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void DuplicatePage()
     {
@@ -2087,7 +2344,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Deletes page.
+    /// Deletes page as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void DeletePage()
     {
@@ -2115,7 +2372,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Deletes selected.
+    /// Deletes selected as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void DeleteSelected()
     {
@@ -2198,7 +2455,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the copy selected operation.
+    /// Performs copy selected as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void CopySelected()
     {
@@ -2221,7 +2478,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the cut selected operation.
+    /// Performs cut selected as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void CutSelected()
     {
@@ -2241,7 +2498,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the paste operation.
+    /// Performs paste as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void Paste()
     {
@@ -2260,7 +2517,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the duplicate selected operation.
+    /// Performs duplicate selected as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void DuplicateSelected()
     {
@@ -2280,7 +2537,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the select all operation.
+    /// Performs select all as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void SelectAll()
     {
@@ -2305,8 +2562,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the nudge selection operation.
+    /// Performs nudge selection as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="dx">Devexpress value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="dy">Dy value supplied to the editor state operation and used when producing its result.</param>
     public void NudgeSelection(double dx, double dy)
     {
         try
@@ -2338,8 +2597,12 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Adds animation.
+    /// Adds animation as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="effect">Effect value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="phase">Phase value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="trigger">Trigger value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The publication animation produced by the operation.</returns>
     public PublicationAnimation? AddAnimation(
         PublicationAnimationEffect effect,
         PublicationAnimationPhase phase,
@@ -2382,8 +2645,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Updates animation.
+    /// Updates animation as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="animationId">Identifier of the animation to use for this operation.</param>
+    /// <param name="update">Update value supplied to the editor state operation and used when producing its result.</param>
     public void UpdateAnimation(Guid animationId, Action<PublicationAnimation> update)
     {
         try
@@ -2406,8 +2671,11 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Updates animation live.
+    /// Updates animation live as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="animationId">Identifier of the animation to use for this operation.</param>
+    /// <param name="key">Key value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="update">Update value supplied to the editor state operation and used when producing its result.</param>
     public void UpdateAnimationLive(Guid animationId, string key, Action<PublicationAnimation> update)
     {
         try
@@ -2435,8 +2703,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the duplicate animation operation.
+    /// Performs duplicate animation as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="animationId">Identifier of the animation to use for this operation.</param>
+    /// <returns>The publication animation produced by the operation.</returns>
     public PublicationAnimation? DuplicateAnimation(Guid animationId)
     {
         try
@@ -2481,8 +2751,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Deletes animation.
+    /// Deletes animation as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="animationId">Identifier of the animation to use for this operation.</param>
     public void DeleteAnimation(Guid animationId)
     {
         try
@@ -2506,8 +2777,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the move animation operation.
+    /// Performs move animation as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="animationId">Identifier of the animation to use for this operation.</param>
+    /// <param name="offset">Offset value supplied to the editor state operation and used when producing its result.</param>
     public void MoveAnimation(Guid animationId, int offset)
     {
         try
@@ -2538,7 +2811,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the clear selected animations operation.
+    /// Performs clear selected animations as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void ClearSelectedAnimations()
     {
@@ -2561,8 +2834,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Updates interaction.
+    /// Updates interaction as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="update">Update value supplied to the editor state operation and used when producing its result.</param>
     public void UpdateInteraction(Action<PublicationInteraction> update)
     {
         try
@@ -2584,8 +2858,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Updates page transition.
+    /// Updates page transition as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="update">Update value supplied to the editor state operation and used when producing its result.</param>
     public void UpdatePageTransition(Action<PublicationPageTransition> update)
     {
         try
@@ -2607,8 +2882,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Updates page transition live.
+    /// Updates page transition live as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="key">Key value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="update">Update value supplied to the editor state operation and used when producing its result.</param>
     public void UpdatePageTransitionLive(string key, Action<PublicationPageTransition> update)
     {
         try
@@ -2635,8 +2912,11 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Sets animation timeline range.
+    /// Sets animation timeline range as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="animationId">Identifier of the animation to use for this operation.</param>
+    /// <param name="startSeconds">Start seconds value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="durationSeconds">Duration seconds value supplied to the editor state operation and used when producing its result.</param>
     public void SetAnimationTimelineRange(Guid animationId, double startSeconds, double durationSeconds)
     {
         try
@@ -2660,8 +2940,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the clear animation timeline position operation.
+    /// Performs clear animation timeline position as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="animationId">Identifier of the animation to use for this operation.</param>
     public void ClearAnimationTimelinePosition(Guid animationId)
     {
         try
@@ -2682,8 +2963,12 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Sets media timeline range.
+    /// Sets media timeline range as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="elementId">Identifier of the element to use for this operation.</param>
+    /// <param name="mode">Mode value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="startSeconds">Start seconds value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="lengthSeconds">Length seconds value supplied to the editor state operation and used when producing its result.</param>
     public void SetMediaTimelineRange(Guid elementId, string mode, double startSeconds, double lengthSeconds)
     {
         try
@@ -2731,8 +3016,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Sets page timeline duration.
+    /// Sets page timeline duration as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="seconds">Seconds value supplied to the editor state operation and used when producing its result.</param>
     public void SetPageTimelineDuration(double seconds)
     {
         try
@@ -2752,8 +3038,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the effective animation start operation.
+    /// Performs effective animation start as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="target">Target value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     public double EffectiveAnimationStart(PublicationAnimation target)
     {
         try
@@ -2784,8 +3072,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the effective page timeline duration operation.
+    /// Performs effective page timeline duration as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The double produced by the operation.</returns>
     public double EffectivePageTimelineDuration()
     {
         try
@@ -2810,8 +3099,12 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the commit move operation.
+    /// Performs commit move as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="x">X value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="y">Y value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="movingIds">Guid dependency used by the editor state workflow to provide the corresponding application capability.</param>
     public void CommitMove(Guid id, double x, double y, IReadOnlyCollection<Guid>? movingIds = null)
     {
         try
@@ -2869,8 +3162,13 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the commit bounds operation.
+    /// Performs commit bounds as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="x">X value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="y">Y value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="width">Width value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="height">Height value supplied to the editor state operation and used when producing its result.</param>
     public void CommitBounds(Guid id, double x, double y, double width, double height)
     {
         try
@@ -2901,8 +3199,12 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the commit crop operation.
+    /// Performs commit crop as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="cropX">Crop x value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="cropY">Crop y value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="cropScale">Crop scale value supplied to the editor state operation and used when producing its result.</param>
     public void CommitCrop(Guid id, double cropX, double cropY, double cropScale)
     {
         try
@@ -2925,8 +3227,11 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Updates selected.
+    /// Updates selected as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="update">Update value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="capture">Value indicating whether capture should apply to this operation.</param>
+    /// <param name="allowLocked">Value indicating whether allow locked should apply to this operation.</param>
     public void UpdateSelected(Action<PublicationElement> update, bool capture = true, bool allowLocked = false)
     {
         try
@@ -2952,8 +3257,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Updates selected live.
+    /// Updates selected live as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="key">Key value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="update">Update value supplied to the editor state operation and used when producing its result.</param>
     public void UpdateSelectedLive(string key, Action<PublicationElement> update)
     {
         try
@@ -2983,7 +3290,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the end live edit operation.
+    /// Performs end live edit as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void EndLiveEdit() {
         try
@@ -2999,8 +3306,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Updates page.
+    /// Updates page as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="update">Update value supplied to the editor state operation and used when producing its result.</param>
     public void UpdatePage(Action<PublicationPage> update)
     {
         try
@@ -3019,8 +3327,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Sets page size.
+    /// Sets page size as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="widthMm">Width mm value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="heightMm">Height mm value supplied to the editor state operation and used when producing its result.</param>
     public void SetPageSize(double widthMm, double heightMm)
     {
         try
@@ -3042,7 +3352,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the swap page orientation operation.
+    /// Performs swap page orientation as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void SwapPageOrientation() {
         try
@@ -3058,8 +3368,13 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Updates spreadsheet document.
+    /// Updates spreadsheet document as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="content">Content value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="fileName">File name value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="format">Format value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="previewHtml">Preview html value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="activeSheetName">Active sheet name value supplied to the editor state operation and used when producing its result.</param>
     public void UpdateSpreadsheetDocument(byte[] content, string fileName, SpreadsheetStorageFormat format, string previewHtml, string activeSheetName)
     {
         try
@@ -3084,8 +3399,12 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Updates text document.
+    /// Updates text document as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="content">Content value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="previewHtml">Preview html value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="documentBackground">Document background value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="format">Format value supplied to the editor state operation and used when producing its result.</param>
     public void UpdateTextDocument(byte[] content, string previewHtml, string documentBackground, StoryStorageFormat format = StoryStorageFormat.OpenXml)
     {
         try
@@ -3108,7 +3427,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the toggle crop mode operation.
+    /// Performs toggle crop mode as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void ToggleCropMode()
     {
@@ -3129,7 +3448,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the toggle content pan mode operation.
+    /// Performs toggle content pan mode as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void ToggleContentPanMode()
     {
@@ -3154,8 +3473,12 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the commit content viewport operation.
+    /// Performs commit content viewport as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="offsetX">Offset x value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="offsetY">Offset y value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="scale">Scale value supplied to the editor state operation and used when producing its result.</param>
     public void CommitContentViewport(Guid id, double offsetX, double offsetY, double scale)
     {
         try
@@ -3184,8 +3507,12 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the commit map viewport operation.
+    /// Performs commit map viewport as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="longitude">Longitude value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="latitude">Latitude value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="zoom">Zoom value supplied to the editor state operation and used when producing its result.</param>
     public void CommitMapViewport(Guid id, double longitude, double latitude, double zoom)
     {
         try
@@ -3219,7 +3546,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the reset content viewport operation.
+    /// Performs reset content viewport as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void ResetContentViewport()
     {
@@ -3238,8 +3565,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Determines whether pan content.
+    /// Determines whether pan content as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="element">Element value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool CanPanContent(PublicationElement? element) {
         try
         {
@@ -3255,8 +3584,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Adds guide.
+    /// Adds guide as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="orientation">Orientation value supplied to the editor state operation and used when producing its result.</param>
     public void AddGuide(GuideOrientation orientation)
     {
         try
@@ -3273,8 +3603,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Adds guide at.
+    /// Adds guide at as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="orientation">Orientation value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="positionMm">Position mm value supplied to the editor state operation and used when producing its result.</param>
     public void AddGuideAt(GuideOrientation orientation, double positionMm)
     {
         try
@@ -3299,8 +3631,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the commit guide operation.
+    /// Performs commit guide as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="positionMm">Position mm value supplied to the editor state operation and used when producing its result.</param>
     public void CommitGuide(Guid id, double positionMm)
     {
         try
@@ -3322,8 +3656,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Deletes guide.
+    /// Deletes guide as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     public void DeleteGuide(Guid id)
     {
         try
@@ -3344,7 +3679,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the clear guides operation.
+    /// Performs clear guides as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void ClearGuides()
     {
@@ -3365,8 +3700,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Sets zoom.
+    /// Sets zoom as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="zoom">Zoom value supplied to the editor state operation and used when producing its result.</param>
     public void SetZoom(double zoom)
     {
         try
@@ -3387,8 +3723,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Sets zoom percent.
+    /// Sets zoom percent as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="percent">Percent value supplied to the editor state operation and used when producing its result.</param>
     public void SetZoomPercent(double percent) {
         try
         {
@@ -3403,8 +3740,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the step zoom percent operation.
+    /// Performs step zoom percent as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="deltaPercent">Delta percent value supplied to the editor state operation and used when producing its result.</param>
     public void StepZoomPercent(int deltaPercent)
     {
         try
@@ -3422,8 +3760,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Sets canvas zoom mode.
+    /// Sets canvas zoom mode as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="mode">Mode value supplied to the editor state operation and used when producing its result.</param>
     public void SetCanvasZoomMode(PublicationCanvasZoomMode mode)
     {
         try
@@ -3442,8 +3781,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Sets ruler unit.
+    /// Sets ruler unit as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="unit">Unit value supplied to the editor state operation and used when producing its result.</param>
     public void SetRulerUnit(MeasurementUnit unit)
     {
         try
@@ -3462,7 +3802,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the cycle ruler unit operation.
+    /// Performs cycle ruler unit as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void CycleRulerUnit()
     {
@@ -3482,8 +3822,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Sets view option.
+    /// Sets view option as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="update">Update value supplied to the editor state operation and used when producing its result.</param>
     public void SetViewOption(Action<PublicationViewSettings> update)
     {
         try
@@ -3503,8 +3844,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Sets playback.
+    /// Sets playback as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the editor state operation and used when producing its result.</param>
     public void SetPlayback(PublicationPlaybackSettings value)
     {
         try
@@ -3523,7 +3865,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the bring to front operation.
+    /// Performs bring to front as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void BringToFront() {
         try
@@ -3538,7 +3880,7 @@ public sealed class EditorStateService : IDisposable
         }
     }
     /// <summary>
-    /// Runs the send to back operation.
+    /// Performs send to back as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void SendToBack() {
         try
@@ -3553,7 +3895,7 @@ public sealed class EditorStateService : IDisposable
         }
     }
     /// <summary>
-    /// Runs the bring forward operation.
+    /// Performs bring forward as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void BringForward() {
         try
@@ -3568,7 +3910,7 @@ public sealed class EditorStateService : IDisposable
         }
     }
     /// <summary>
-    /// Runs the send backward operation.
+    /// Performs send backward as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void SendBackward() {
         try
@@ -3584,8 +3926,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Sets selected layer position.
+    /// Sets selected layer position as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="position">Position value supplied to the editor state operation and used when producing its result.</param>
     public void SetSelectedLayerPosition(int position)
     {
         try
@@ -3614,8 +3957,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the align operation.
+    /// Performs align as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="mode">Mode value supplied to the editor state operation and used when producing its result.</param>
     public void Align(string mode)
     {
         try
@@ -3659,7 +4003,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the undo operation.
+    /// Performs undo as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void Undo()
     {
@@ -3679,7 +4023,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the redo operation.
+    /// Performs redo as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void Redo()
     {
@@ -3699,8 +4043,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the restore operation.
+    /// Performs restore as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="json">Json value supplied to the editor state operation and used when producing its result.</param>
     private void Restore(string json)
     {
         try
@@ -3728,8 +4073,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Finds animation.
+    /// Finds animation as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>The publication animation produced by the operation.</returns>
     private PublicationAnimation? FindAnimation(Guid id) {
         try
         {
@@ -3744,8 +4091,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the next animation order operation.
+    /// Performs next animation order as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The int produced by the operation.</returns>
     private int NextAnimationOrder() {
         try
         {
@@ -3760,7 +4108,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the reindex animations operation.
+    /// Performs reindex animations as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     private void ReindexAnimations()
     {
@@ -3779,8 +4127,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the renew animation identifiers operation.
+    /// Performs renew animation identifiers as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="element">Element value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="preserveOrder">Value indicating whether preserve order should apply to this operation.</param>
     private void RenewAnimationIds(PublicationElement element, bool preserveOrder)
     {
         try
@@ -3803,7 +4153,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Ensures timeline duration.
+    /// Ensures timeline duration as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     private void EnsureTimelineDuration()
     {
@@ -3821,8 +4171,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the animation span operation.
+    /// Performs animation span as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="animation">Animation value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double AnimationSpan(PublicationAnimation animation) {
         try
         {
@@ -3837,8 +4189,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Normalizes media.
+    /// Normalizes media as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="media">Media value supplied to the editor state operation and used when producing its result.</param>
     private void NormalizeMedia(PublicationMediaElement media)
     {
         try
@@ -3892,8 +4245,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Normalizes animation.
+    /// Normalizes animation as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="animation">Animation value supplied to the editor state operation and used when producing its result.</param>
     private void NormalizeAnimation(PublicationAnimation animation)
     {
         try
@@ -3918,8 +4272,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the clone transition operation.
+    /// Performs clone transition as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The publication page transition produced by the operation.</returns>
     private PublicationPageTransition CloneTransition(PublicationPageTransition source) {
         try
         {
@@ -3943,8 +4299,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the reorder selected operation.
+    /// Performs reorder selected as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="movement">Movement value supplied to the editor state operation and used when producing its result.</param>
     private void ReorderSelected(int movement)
     {
         try
@@ -3980,8 +4337,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the clipboard selection operation.
+    /// Performs clipboard selection as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     private List<PublicationElement> ClipboardSelection()
     {
         try
@@ -4012,8 +4370,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the clone selection operation.
+    /// Performs clone selection as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="sources">Publication element dependency used by the editor state workflow to provide the corresponding application capability.</param>
+    /// <param name="useInsertionPoint">Value indicating whether use insertion point should apply to this operation.</param>
     private void CloneSelection(IReadOnlyList<PublicationElement> sources, bool useInsertionPoint)
     {
         try
@@ -4132,8 +4492,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the layer selection block operation.
+    /// Performs layer selection block as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     private List<PublicationElement> LayerSelectionBlock()
     {
         try
@@ -4155,8 +4516,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the transform selection block operation.
+    /// Performs transform selection block as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     private List<PublicationElement> TransformSelectionBlock()
     {
         try
@@ -4194,8 +4556,9 @@ public sealed class EditorStateService : IDisposable
     };
 
     /// <summary>
-    /// Runs the ordered elements operation.
+    /// Performs ordered elements as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     private List<PublicationElement> OrderedElements() {
         try
         {
@@ -4215,8 +4578,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Determines whether normalized zorder.
+    /// Determines whether normalized z order as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="ordered">Publication element dependency used by the editor state workflow to provide the corresponding application capability.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool HasNormalizedZOrder(IReadOnlyList<PublicationElement> ordered)
     {
         try
@@ -4235,8 +4600,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Applies normalized zorder.
+    /// Applies normalized z order as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="ordered">Publication element dependency used by the editor state workflow to provide the corresponding application capability.</param>
     private void ApplyNormalizedZOrder(IReadOnlyList<PublicationElement> ordered)
     {
         try
@@ -4253,8 +4619,11 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the nearly equal operation.
+    /// Performs nearly equal as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="first">First value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="second">Second value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool NearlyEqual(double first, double second) {
         try
         {
@@ -4269,8 +4638,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the next z operation.
+    /// Performs next z as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The int produced by the operation.</returns>
     private int NextZ() {
         try
         {
@@ -4284,8 +4654,10 @@ public sealed class EditorStateService : IDisposable
         }
     }
     /// <summary>
-    /// Runs the next name operation.
+    /// Performs next name as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="basis">Basis value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NextName(string basis) {
         try
         {
@@ -4300,8 +4672,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the selection unit operation.
+    /// Performs selection unit as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="element">Element value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IEnumerable<PublicationElement> SelectionUnit(PublicationElement element)
     {
         try
@@ -4319,8 +4693,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the movable selection for operation.
+    /// Performs movable selection for as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="element">Element value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IEnumerable<PublicationElement> MovableSelectionFor(PublicationElement element)
     {
         try
@@ -4339,8 +4715,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Sets selection core.
+    /// Sets selection core as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="ids">Guid dependency used by the editor state workflow to provide the corresponding application capability.</param>
+    /// <param name="primary">Primary value supplied to the editor state operation and used when producing its result.</param>
     private void SetSelectionCore(IEnumerable<Guid> ids, Guid? primary)
     {
         try
@@ -4363,7 +4741,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the clear selection core operation.
+    /// Performs clear selection core as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     private void ClearSelectionCore()
     {
@@ -4382,8 +4760,11 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the place at operation.
+    /// Performs place at as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="element">Element value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="centerX">Center x value supplied to the editor state operation and used when producing its result.</param>
+    /// <param name="centerY">Center y value supplied to the editor state operation and used when producing its result.</param>
     private void PlaceAt(PublicationElement element, double? centerX, double? centerY)
     {
         try
@@ -4404,8 +4785,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Removes media assets.
+    /// Removes media assets as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the editor state operation and used when producing its result.</param>
     private void RemoveMediaAssets(PublicationDocument document)
     {
         try
@@ -4426,7 +4808,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the capture operation.
+    /// Performs capture as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     private void Capture()
     {
@@ -4452,8 +4834,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the synchronize document component operation.
+    /// Performs synchronize document component as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the editor state operation and used when producing its result.</param>
     private void SynchronizeDocumentComponent(DevExtremeComponentElement source)
     {
         try
@@ -4487,8 +4870,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the clone element operation.
+    /// Performs clone element as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="element">Element value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The publication element produced by the operation.</returns>
     private PublicationElement CloneElement(PublicationElement element) {
         try
         {
@@ -4503,8 +4888,10 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the clone page operation.
+    /// Performs clone page as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="publicationPage">Publication page value supplied to the editor state operation and used when producing its result.</param>
+    /// <returns>The publication page produced by the operation.</returns>
     private PublicationPage ClonePage(PublicationPage publicationPage) {
         try
         {
@@ -4519,8 +4906,9 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the notify operation.
+    /// Performs notify as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="markModified">Value indicating whether mark modified should apply to this operation.</param>
     private void Notify(bool markModified = true)
     {
         try
@@ -4544,7 +4932,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the persist streaming settings operation.
+    /// Persists streaming settings as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     private void PersistStreamingSettings()
     {
@@ -4563,7 +4951,7 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
-    /// Runs the dispose operation.
+    /// Releases resources owned by <see cref="EditorStateService"/> and leaves the editor state workflow in a safely disposed state.
     /// </summary>
     public void Dispose()
     {

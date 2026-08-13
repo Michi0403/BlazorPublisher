@@ -8,28 +8,49 @@ using TextEncoding = global::System.Text.Encoding;
 namespace PublisherStudio.Services.Streaming.Lan;
 
 /// <summary>
-/// Represents a rtsp LAN server.
+/// Represents a rtsp LAN server application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public sealed class RtspLanServer : IAsyncDisposable
 {
+    /// <summary>
+    /// Stores the internal listener state used by <see cref="RtspLanServer"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly TcpListener _listener;
+    /// <summary>
+    /// Stores the UDP client dependency used by <see cref="RtspLanServer"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly UdpClient _rtpInput;
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the cancellation source used by <see cref="RtspLanServer"/> to stop its current background or asynchronous operation.
     /// </summary>
     private readonly CancellationTokenSource _cancellation = new();
+    /// <summary>
+    /// Stores the in-memory clients collection maintained internally by <see cref="RtspLanServer"/> for its current workflow state.
+    /// </summary>
     private readonly Dictionary<Guid, RtspClient> _clients = [];
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal sync state used by <see cref="RtspLanServer"/> while executing its surrounding workflow.
     /// </summary>
     private readonly object _sync = new();
+    /// <summary>
+    /// Stores the internal accept task state used by <see cref="RtspLanServer"/> while executing its surrounding workflow.
+    /// </summary>
     private Task? _acceptTask;
+    /// <summary>
+    /// Stores the internal relay task state used by <see cref="RtspLanServer"/> while executing its surrounding workflow.
+    /// </summary>
     private Task? _relayTask;
+    /// <summary>
+    /// Stores the internal access token state used by <see cref="RtspLanServer"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _accessToken;
 
     /// <summary>
-    /// Runs the rtsp LAN server operation.
+    /// Initializes a new <see cref="RtspLanServer"/> instance and captures the dependencies or initial state required by its rtsp LAN server workflow.
     /// </summary>
+    /// <param name="bindAddress">P address dependency used by the rtsp LAN server workflow to provide the corresponding application capability.</param>
+    /// <param name="port">Port value supplied to the rtsp LAN server operation and used when producing its result.</param>
+    /// <param name="accessToken">Access token value supplied to the rtsp LAN server operation and used when producing its result.</param>
     public RtspLanServer(IPAddress bindAddress, int port, string? accessToken = null)
     {
         _accessToken = accessToken?.Trim() ?? string.Empty;
@@ -39,20 +60,23 @@ public sealed class RtspLanServer : IAsyncDisposable
     }
 
     /// <summary>
-    /// Gets rtp input port.
+    /// Gets the rtp input port value that forms part of the rtsp LAN server state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The rtp input port value exposed by <see cref="RtspLanServer"/>.</value>
     public int RtpInputPort { get; }
     /// <summary>
-    /// Gets or sets status.
+    /// Gets or sets the status value that forms part of the rtsp LAN server state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The status value exposed by <see cref="RtspLanServer"/>.</value>
     public string Status { get; private set; } = "stopped";
     /// <summary>
-    /// Gets or sets last error.
+    /// Gets or sets the last error value that forms part of the rtsp LAN server state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The last error value exposed by <see cref="RtspLanServer"/>.</value>
     public string LastError { get; private set; } = string.Empty;
 
     /// <summary>
-    /// Runs the start operation.
+    /// Performs start for <see cref="RtspLanServer"/>, keeping the operation consistent with the state and invariants of the surrounding rtsp LAN server workflow.
     /// </summary>
     public void Start()
     {
@@ -73,8 +97,10 @@ public sealed class RtspLanServer : IAsyncDisposable
 }
 
     /// <summary>
-    /// Runs the accept loop async operation.
+    /// Performs accept loop for <see cref="RtspLanServer"/>, keeping the operation consistent with the state and invariants of the surrounding rtsp LAN server workflow.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task AcceptLoopAsync(CancellationToken cancellationToken)
     {
     try
@@ -99,8 +125,10 @@ public sealed class RtspLanServer : IAsyncDisposable
 }
 
     /// <summary>
-    /// Runs the relay loop async operation.
+    /// Performs relay loop for <see cref="RtspLanServer"/>, keeping the operation consistent with the state and invariants of the surrounding rtsp LAN server workflow.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task RelayLoopAsync(CancellationToken cancellationToken)
     {
     try
@@ -127,8 +155,11 @@ public sealed class RtspLanServer : IAsyncDisposable
 }
 
     /// <summary>
-    /// Handles client async.
+    /// Handles client for <see cref="RtspLanServer"/>, keeping the operation consistent with the state and invariants of the surrounding rtsp LAN server workflow.
     /// </summary>
+    /// <param name="tcpClient">Tcp client dependency used by the rtsp LAN server workflow to provide the corresponding application capability.</param>
+    /// <param name="serverCancellation">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task HandleClientAsync(TcpClient tcpClient, CancellationToken serverCancellation)
     {
     try
@@ -235,8 +266,10 @@ public sealed class RtspLanServer : IAsyncDisposable
 }
 
     /// <summary>
-    /// Runs the request base operation.
+    /// Performs request base for <see cref="RtspLanServer"/>, keeping the operation consistent with the state and invariants of the surrounding rtsp LAN server workflow.
     /// </summary>
+    /// <param name="requestUri">Request uri value supplied to the rtsp LAN server operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string RequestBase(string requestUri)
     {
     try
@@ -253,8 +286,10 @@ public sealed class RtspLanServer : IAsyncDisposable
 }
 
     /// <summary>
-    /// Runs the authorize operation.
+    /// Performs authorize for <see cref="RtspLanServer"/>, keeping the operation consistent with the state and invariants of the surrounding rtsp LAN server workflow.
     /// </summary>
+    /// <param name="requestUri">Request uri value supplied to the rtsp LAN server operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool Authorize(string requestUri)
     {
     try
@@ -278,8 +313,10 @@ public sealed class RtspLanServer : IAsyncDisposable
 }
 
     /// <summary>
-    /// Parses interleaved channel.
+    /// Parses interleaved channel for <see cref="RtspLanServer"/>, keeping the operation consistent with the state and invariants of the surrounding rtsp LAN server workflow.
     /// </summary>
+    /// <param name="transport">Transport value supplied to the rtsp LAN server operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     private int ParseInterleavedChannel(string transport)
     {
     try
@@ -299,8 +336,11 @@ public sealed class RtspLanServer : IAsyncDisposable
 }
 
     /// <summary>
-    /// Reads request async.
+    /// Reads request for <see cref="RtspLanServer"/>, keeping the operation consistent with the state and invariants of the surrounding rtsp LAN server workflow.
     /// </summary>
+    /// <param name="stream">Stream value supplied to the rtsp LAN server operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The rtsp request produced by the operation.</returns>
     private async Task<RtspRequest?> ReadRequestAsync(NetworkStream stream, CancellationToken cancellationToken)
     {
     try
@@ -337,8 +377,13 @@ public sealed class RtspLanServer : IAsyncDisposable
 }
 
     /// <summary>
-    /// Runs the response operation.
+    /// Performs response for <see cref="RtspLanServer"/>, keeping the operation consistent with the state and invariants of the surrounding rtsp LAN server workflow.
     /// </summary>
+    /// <param name="status">Status value supplied to the rtsp LAN server operation and used when producing its result.</param>
+    /// <param name="cseq">Cseq value supplied to the rtsp LAN server operation and used when producing its result.</param>
+    /// <param name="headers">String dependency used by the rtsp LAN server workflow to provide the corresponding application capability.</param>
+    /// <param name="body">Body value supplied to the rtsp LAN server operation and used when producing its result.</param>
+    /// <returns>The byte produced by the operation.</returns>
     private byte[] Response(int status, string cseq, IReadOnlyList<string>? headers = null, string body = "")
     {
     try
@@ -358,8 +403,9 @@ public sealed class RtspLanServer : IAsyncDisposable
 }
 
     /// <summary>
-    /// Runs the dispose async operation.
+    /// Releases resources owned by <see cref="RtspLanServer"/> and leaves the rtsp LAN server workflow in a safely disposed state.
     /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async ValueTask DisposeAsync()
     {
     try
@@ -384,22 +430,28 @@ public sealed class RtspLanServer : IAsyncDisposable
 }
 
     /// <summary>
-    /// Represents a rtsp request.
+    /// Represents the input contract for rtsp, carrying the values a caller supplies to the corresponding application operation.
     /// </summary>
+    /// <param name="Method">Method value supplied to the rtsp LAN server operation and used when producing its result.</param>
+    /// <param name="Uri">Uri value supplied to the rtsp LAN server operation and used when producing its result.</param>
+    /// <param name="Headers">Headers value supplied to the rtsp LAN server operation and used when producing its result.</param>
     private sealed record RtspRequest(string Method, string Uri, Dictionary<string, string> Headers);
 
     /// <summary>
-    /// Represents a rtsp client.
+    /// Represents a rtsp helper type nested within <see cref="RtspLanServer"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
     private sealed class RtspClient : IAsyncDisposable
     {
+        /// <summary>
+        /// Stores the TCP client dependency used by <see cref="RtspClient"/> to delegate that application responsibility to its owning collaborator.
+        /// </summary>
         private readonly TcpClient _client;
         /// <summary>
-        /// Runs the new operation.
+        /// Stores the synchronization primitive that protects concurrent access to control send state owned by <see cref="RtspClient"/>.
         /// </summary>
         private readonly SemaphoreSlim _controlSend = new(1, 1);
         /// <summary>
-        /// Creates bounded.
+        /// Stores the cancellation source used by <see cref="RtspClient"/> to stop its current background or asynchronous operation.
         /// </summary>
         private readonly Channel<byte[]> _rtp = Channel.CreateBounded<byte[]>(new BoundedChannelOptions(180)
         {
@@ -411,33 +463,45 @@ public sealed class RtspLanServer : IAsyncDisposable
         /// Runs the new operation.
         /// </summary>
         private readonly CancellationTokenSource _disconnected = new();
+        /// <summary>
+        /// Stores the internal sender state used by <see cref="RtspClient"/> while executing its surrounding workflow.
+        /// </summary>
         private Task? _sender;
+        /// <summary>
+        /// Stores the internal disposed state used by <see cref="RtspClient"/> while executing its surrounding workflow.
+        /// </summary>
         private int _disposed;
 
         /// <summary>
-        /// Runs the rtsp client operation.
+        /// Initializes a new <see cref="RtspClient"/> instance and captures the dependencies or initial state required by its rtsp workflow.
         /// </summary>
+        /// <param name="client">Tcp client dependency used by the rtsp workflow to provide the corresponding application capability.</param>
         public RtspClient(TcpClient client) { _client = client; Stream = client.GetStream(); }
         /// <summary>
-        /// Gets stream.
+        /// Gets the stream value that forms part of the rtsp state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The stream value exposed by <see cref="RtspClient"/>.</value>
         public NetworkStream Stream { get; }
         /// <summary>
-        /// Gets or sets playing.
+        /// Gets or sets a value indicating whether playing applies to the rtsp state.
         /// </summary>
+        /// <value>The playing value exposed by <see cref="RtspClient"/>.</value>
         public bool Playing { get; set; }
         /// <summary>
-        /// Gets or sets rtp channel.
+        /// Gets or sets the rtp channel value that forms part of the rtsp state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The rtp channel value exposed by <see cref="RtspClient"/>.</value>
         public int RtpChannel { get; set; }
         /// <summary>
-        /// Gets disconnected.
+        /// Gets the cancellation signal used to stop or abandon work associated with this rtsp operation.
         /// </summary>
+        /// <value>The disconnected value exposed by <see cref="RtspClient"/>.</value>
         public CancellationToken Disconnected => _disconnected.Token;
 
         /// <summary>
-        /// Starts sender.
+        /// Starts sender for <see cref="RtspClient"/>, keeping the operation consistent with the state and invariants of the surrounding rtsp workflow.
         /// </summary>
+        /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
         public void StartSender(CancellationToken cancellationToken) {
     try
     {
@@ -464,8 +528,9 @@ public sealed class RtspLanServer : IAsyncDisposable
 }
 
         /// <summary>
-        /// Runs the enqueue operation.
+        /// Performs enqueue for <see cref="RtspClient"/>, keeping the operation consistent with the state and invariants of the surrounding rtsp workflow.
         /// </summary>
+        /// <param name="packet">Packet value supplied to the rtsp operation and used when producing its result.</param>
         public void Enqueue(byte[] packet)
         {
     try
@@ -481,8 +546,11 @@ public sealed class RtspLanServer : IAsyncDisposable
 }
 
         /// <summary>
-        /// Runs the send control async operation.
+        /// Performs send control for <see cref="RtspClient"/>, keeping the operation consistent with the state and invariants of the surrounding rtsp workflow.
         /// </summary>
+        /// <param name="payload">Payload value supplied to the rtsp operation and used when producing its result.</param>
+        /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+        /// <returns>A task that completes when the operation has finished.</returns>
         public async Task SendControlAsync(byte[] payload, CancellationToken cancellationToken)
         {
     try
@@ -500,8 +568,9 @@ public sealed class RtspLanServer : IAsyncDisposable
 }
 
         /// <summary>
-        /// Runs the dispose async operation.
+        /// Releases resources owned by <see cref="RtspClient"/> and leaves the rtsp workflow in a safely disposed state.
         /// </summary>
+        /// <returns>A task that completes when the operation has finished.</returns>
         public async ValueTask DisposeAsync()
         {
     try

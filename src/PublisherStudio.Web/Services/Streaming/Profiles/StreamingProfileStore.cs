@@ -5,24 +5,31 @@ using PublisherStudio.BusinessObjects;
 namespace PublisherStudio.Services.Streaming.Profiles;
 
 /// <summary>
-/// Provides streaming profile store operations.
+/// Owns persistence and retrieval of streaming profile state, keeping storage-specific behavior behind a focused application abstraction.
 /// </summary>
 public sealed class StreamingProfileStore
 {
+    /// <summary>
+    /// Stores the data protector dependency used by <see cref="StreamingProfileStore"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly IDataProtector _protector;
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the synchronization primitive that protects concurrent access to gate state owned by <see cref="StreamingProfileStore"/>.
     /// </summary>
     private readonly SemaphoreSlim _gate = new(1, 1);
+    /// <summary>
+    /// Stores the internal file path state used by <see cref="StreamingProfileStore"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _filePath;
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal JSON state used by <see cref="StreamingProfileStore"/> while executing its surrounding workflow.
     /// </summary>
     private readonly JsonSerializerOptions _json = new() { WriteIndented = true, PropertyNameCaseInsensitive = true };
 
     /// <summary>
-    /// Runs the streaming profile store operation.
+    /// Initializes a new <see cref="StreamingProfileStore"/> instance and captures the dependencies or initial state required by its streaming profile workflow.
     /// </summary>
+    /// <param name="protectionProvider">Data protection provider dependency used by the streaming profile workflow to provide the corresponding application capability.</param>
     public StreamingProfileStore(IDataProtectionProvider protectionProvider)
     {
         // Keep the original purpose string so existing v1 streaming secrets remain readable.
@@ -35,8 +42,10 @@ public sealed class StreamingProfileStore
     }
 
     /// <summary>
-    /// Loads async.
+    /// Performs load in the streaming profile persistence workflow while keeping storage-specific behavior contained within <see cref="StreamingProfileStore"/>.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The streaming machine settings produced by the operation.</returns>
     public async Task<StreamingMachineSettings> LoadAsync(CancellationToken cancellationToken = default)
     {
     try
@@ -60,8 +69,11 @@ public sealed class StreamingProfileStore
 }
 
     /// <summary>
-    /// Saves provider async.
+    /// Persists provider in the streaming profile persistence workflow while keeping storage-specific behavior contained within <see cref="StreamingProfileStore"/>.
     /// </summary>
+    /// <param name="profile">Profile value supplied to the streaming profile operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The streaming provider profile produced by the operation.</returns>
     public async Task<StreamingProviderProfile> SaveProviderAsync(StreamingProviderProfile profile, CancellationToken cancellationToken = default)
     {
     try
@@ -130,8 +142,11 @@ public sealed class StreamingProfileStore
 }
 
     /// <summary>
-    /// Deletes provider async.
+    /// Deletes provider in the streaming profile persistence workflow while keeping storage-specific behavior contained within <see cref="StreamingProfileStore"/>.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task DeleteProviderAsync(Guid id, CancellationToken cancellationToken = default)
     {
     try
@@ -157,8 +172,11 @@ public sealed class StreamingProfileStore
 }
 
     /// <summary>
-    /// Saves machine options async.
+    /// Persists machine options in the streaming profile persistence workflow while keeping storage-specific behavior contained within <see cref="StreamingProfileStore"/>.
     /// </summary>
+    /// <param name="settings">Settings containing the caller-supplied values that control this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task SaveMachineOptionsAsync(StreamingMachineSettings settings, CancellationToken cancellationToken = default)
     {
     try
@@ -204,8 +222,11 @@ public sealed class StreamingProfileStore
 }
 
     /// <summary>
-    /// Resolves secret async.
+    /// Resolves secret in the streaming profile persistence workflow while keeping storage-specific behavior contained within <see cref="StreamingProfileStore"/>.
     /// </summary>
+    /// <param name="profileId">Identifier of the profile to use for this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     public Task<string?> ResolveSecretAsync(Guid profileId, CancellationToken cancellationToken = default) {
     try
     {
@@ -219,8 +240,11 @@ public sealed class StreamingProfileStore
 }
 
     /// <summary>
-    /// Resolves chat secret async.
+    /// Resolves chat secret in the streaming profile persistence workflow while keeping storage-specific behavior contained within <see cref="StreamingProfileStore"/>.
     /// </summary>
+    /// <param name="profileId">Identifier of the profile to use for this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     public Task<string?> ResolveChatSecretAsync(Guid profileId, CancellationToken cancellationToken = default) {
     try
     {
@@ -234,8 +258,11 @@ public sealed class StreamingProfileStore
 }
 
     /// <summary>
-    /// Reads OAuth credentials async.
+    /// Reads o auth credentials in the streaming profile persistence workflow while keeping storage-specific behavior contained within <see cref="StreamingProfileStore"/>.
     /// </summary>
+    /// <param name="profileId">Identifier of the profile to use for this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The streaming o auth credentials produced by the operation.</returns>
     internal async Task<StreamingOAuthCredentials?> ReadOAuthCredentialsAsync(Guid profileId, CancellationToken cancellationToken = default)
     {
     try
@@ -283,8 +310,11 @@ public sealed class StreamingProfileStore
 }
 
     /// <summary>
-    /// Saves twitch OAuth connection async.
+    /// Persists twitch o auth connection in the streaming profile persistence workflow while keeping storage-specific behavior contained within <see cref="StreamingProfileStore"/>.
     /// </summary>
+    /// <param name="update">Update value supplied to the streaming profile operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The streaming provider profile produced by the operation.</returns>
     internal async Task<StreamingProviderProfile> SaveTwitchOAuthConnectionAsync(
         TwitchOAuthCredentialUpdate update,
         CancellationToken cancellationToken = default)
@@ -333,8 +363,16 @@ public sealed class StreamingProfileStore
 }
 
     /// <summary>
-    /// Saves OAuth tokens async.
+    /// Persists o auth tokens in the streaming profile persistence workflow while keeping storage-specific behavior contained within <see cref="StreamingProfileStore"/>.
     /// </summary>
+    /// <param name="profileId">Identifier of the profile to use for this operation.</param>
+    /// <param name="accessToken">Access token value supplied to the streaming profile operation and used when producing its result.</param>
+    /// <param name="refreshToken">Refresh token value supplied to the streaming profile operation and used when producing its result.</param>
+    /// <param name="accessTokenExpiresUtc">Access token expires utc value supplied to the streaming profile operation and used when producing its result.</param>
+    /// <param name="lastValidatedUtc">Last validated utc value supplied to the streaming profile operation and used when producing its result.</param>
+    /// <param name="scopes">Scopes value supplied to the streaming profile operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     internal async Task SaveOAuthTokensAsync(
         Guid profileId,
         string accessToken,
@@ -373,8 +411,14 @@ public sealed class StreamingProfileStore
 }
 
     /// <summary>
-    /// Runs the mark OAuth validated async operation.
+    /// Performs mark o auth validated in the streaming profile persistence workflow while keeping storage-specific behavior contained within <see cref="StreamingProfileStore"/>.
     /// </summary>
+    /// <param name="profileId">Identifier of the profile to use for this operation.</param>
+    /// <param name="accessTokenExpiresUtc">Access token expires utc value supplied to the streaming profile operation and used when producing its result.</param>
+    /// <param name="lastValidatedUtc">Last validated utc value supplied to the streaming profile operation and used when producing its result.</param>
+    /// <param name="scopes">Scopes value supplied to the streaming profile operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     internal async Task MarkOAuthValidatedAsync(
         Guid profileId,
         DateTimeOffset accessTokenExpiresUtc,
@@ -409,8 +453,13 @@ public sealed class StreamingProfileStore
 }
 
     /// <summary>
-    /// Updates twitch ingest async.
+    /// Updates twitch ingest in the streaming profile persistence workflow while keeping storage-specific behavior contained within <see cref="StreamingProfileStore"/>.
     /// </summary>
+    /// <param name="profileId">Identifier of the profile to use for this operation.</param>
+    /// <param name="candidate">Candidate value supplied to the streaming profile operation and used when producing its result.</param>
+    /// <param name="testedUtc">Tested utc value supplied to the streaming profile operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     internal async Task UpdateTwitchIngestAsync(
         Guid profileId,
         TwitchIngestCandidate candidate,
@@ -446,8 +495,11 @@ public sealed class StreamingProfileStore
 }
 
     /// <summary>
-    /// Runs the clear OAuth session async operation.
+    /// Performs clear o auth session in the streaming profile persistence workflow while keeping storage-specific behavior contained within <see cref="StreamingProfileStore"/>.
     /// </summary>
+    /// <param name="profileId">Identifier of the profile to use for this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     internal async Task ClearOAuthSessionAsync(Guid profileId, CancellationToken cancellationToken = default)
     {
     try
@@ -480,8 +532,12 @@ public sealed class StreamingProfileStore
 }
 
     /// <summary>
-    /// Resolves protected value async.
+    /// Resolves protected value in the streaming profile persistence workflow while keeping storage-specific behavior contained within <see cref="StreamingProfileStore"/>.
     /// </summary>
+    /// <param name="profileId">Identifier of the profile to use for this operation.</param>
+    /// <param name="kind">Kind value supplied to the streaming profile operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private async Task<string?> ResolveProtectedValueAsync(
         Guid profileId,
         ProtectedValueKind kind,
@@ -517,8 +573,10 @@ public sealed class StreamingProfileStore
 }
 
     /// <summary>
-    /// Loads core async.
+    /// Loads core in the streaming profile persistence workflow while keeping storage-specific behavior contained within <see cref="StreamingProfileStore"/>.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The streaming machine settings produced by the operation.</returns>
     private async Task<StreamingMachineSettings> LoadCoreAsync(CancellationToken cancellationToken)
     {
     try
@@ -543,8 +601,10 @@ public sealed class StreamingProfileStore
 }
 
     /// <summary>
-    /// Runs the to public operation.
+    /// Performs to public in the streaming profile persistence workflow while keeping storage-specific behavior contained within <see cref="StreamingProfileStore"/>.
     /// </summary>
+    /// <param name="profile">Profile value supplied to the streaming profile operation and used when producing its result.</param>
+    /// <returns>The streaming provider profile produced by the operation.</returns>
     private StreamingProviderProfile ToPublic(StoredProviderProfile profile) {
     try
     {
@@ -582,8 +642,10 @@ public sealed class StreamingProfileStore
 }
 
     /// <summary>
-    /// Loads stored async.
+    /// Loads stored in the streaming profile persistence workflow while keeping storage-specific behavior contained within <see cref="StreamingProfileStore"/>.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The stored streaming machine settings produced by the operation.</returns>
     private async Task<StoredStreamingMachineSettings> LoadStoredAsync(CancellationToken cancellationToken)
     {
     try
@@ -611,8 +673,11 @@ public sealed class StreamingProfileStore
 }
 
     /// <summary>
-    /// Saves stored async.
+    /// Persists stored in the streaming profile persistence workflow while keeping storage-specific behavior contained within <see cref="StreamingProfileStore"/>.
     /// </summary>
+    /// <param name="settings">Settings containing the caller-supplied values that control this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SaveStoredAsync(StoredStreamingMachineSettings settings, CancellationToken cancellationToken)
     {
     try
@@ -631,7 +696,7 @@ public sealed class StreamingProfileStore
 }
 
     /// <summary>
-    /// Lists supported protected value kind values.
+    /// Defines the supported protected value kind values used to select or describe behavior in the surrounding workflow.
     /// </summary>
     private enum ProtectedValueKind
     {
@@ -640,234 +705,285 @@ public sealed class StreamingProfileStore
     }
 
     /// <summary>
-    /// Represents a stored streaming machine settings.
+    /// Carries the configurable stored streaming machine settings used to control the associated application behavior without hard-coding policy in consumers.
     /// </summary>
     private sealed class StoredStreamingMachineSettings
     {
         /// <summary>
-        /// Gets or sets providers.
+        /// Gets or sets the providers collection maintained or exposed by this stored streaming machine instance for downstream processing.
         /// </summary>
+        /// <value>The providers value exposed by <see cref="StoredStreamingMachineSettings"/>.</value>
         public List<StoredProviderProfile> Providers { get; set; } = [];
         /// <summary>
-        /// Gets or sets devices.
+        /// Gets or sets the devices collection maintained or exposed by this stored streaming machine instance for downstream processing.
         /// </summary>
+        /// <value>The devices value exposed by <see cref="StoredStreamingMachineSettings"/>.</value>
         public List<StreamingDeviceProfile> Devices { get; set; } = [];
         /// <summary>
-        /// Gets or sets FFmpeg path.
+        /// Gets or sets the FFmpeg path used by this stored streaming machine instance to locate the associated file-system resource.
         /// </summary>
+        /// <value>The FFmpeg path value exposed by <see cref="StoredStreamingMachineSettings"/>.</value>
         public string FfmpegPath { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets default recording directory.
+        /// Gets or sets the default recording directory used by this stored streaming machine instance to locate the associated file-system resource.
         /// </summary>
+        /// <value>The default recording directory value exposed by <see cref="StoredStreamingMachineSettings"/>.</value>
         public string DefaultRecordingDirectory { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets media host port.
+        /// Gets or sets the media host port value that forms part of the stored streaming machine state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The media host port value exposed by <see cref="StoredStreamingMachineSettings"/>.</value>
         public int MediaHostPort { get; set; } = 17847;
         /// <summary>
-        /// Gets or sets hardware encoder.
+        /// Gets or sets the hardware encoder value that forms part of the stored streaming machine state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The hardware encoder value exposed by <see cref="StoredStreamingMachineSettings"/>.</value>
         public StreamingHardwareEncoderPreference HardwareEncoder { get; set; } = StreamingHardwareEncoderPreference.Auto;
     }
 
     /// <summary>
-    /// Represents a stored provider profile.
+    /// Represents a stored provider profile helper type nested within <see cref="StreamingProfileStore"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
     private sealed class StoredProviderProfile
     {
         /// <summary>
-        /// Gets or sets the stable identifier.
+        /// Gets or sets the stable identifier used to identify or correlate this stored provider profile instance with related application state.
         /// </summary>
+        /// <value>The identifier value exposed by <see cref="StoredProviderProfile"/>.</value>
         public Guid Id { get; set; }
         /// <summary>
-        /// Gets or sets the display name.
+        /// Gets or sets the name value that forms part of the stored provider profile state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The name value exposed by <see cref="StoredProviderProfile"/>.</value>
         public string Name { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets provider.
+        /// Gets or sets the provider value that forms part of the stored provider profile state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The provider value exposed by <see cref="StoredProviderProfile"/>.</value>
         public PublicationStreamProvider Provider { get; set; }
         /// <summary>
-        /// Gets or sets authentication mode.
+        /// Gets or sets the authentication mode value that forms part of the stored provider profile state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The authentication mode value exposed by <see cref="StoredProviderProfile"/>.</value>
         public StreamingProviderAuthenticationMode AuthenticationMode { get; set; }
         /// <summary>
-        /// Gets or sets transport.
+        /// Gets or sets the transport value that forms part of the stored provider profile state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The transport value exposed by <see cref="StoredProviderProfile"/>.</value>
         public PublicationStreamTransport Transport { get; set; }
         /// <summary>
-        /// Gets or sets endpoint.
+        /// Gets or sets the endpoint that identifies the network or application endpoint associated with this stored provider profile state.
         /// </summary>
+        /// <value>The endpoint value exposed by <see cref="StoredProviderProfile"/>.</value>
         public string Endpoint { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets channel identifier.
+        /// Gets or sets the stable channel identifier used to identify or correlate this stored provider profile instance with related application state.
         /// </summary>
+        /// <value>The channel identifier value exposed by <see cref="StoredProviderProfile"/>.</value>
         public string ChannelId { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets account name.
+        /// Gets or sets the account name value that forms part of the stored provider profile state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The account name value exposed by <see cref="StoredProviderProfile"/>.</value>
         public string AccountName { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets protected secret.
+        /// Gets or sets the protected secret value that forms part of the stored provider profile state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The protected secret value exposed by <see cref="StoredProviderProfile"/>.</value>
         public string ProtectedSecret { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets chat enabled.
+        /// Gets or sets a value indicating whether chat enabled applies to the stored provider profile state.
         /// </summary>
+        /// <value>The chat enabled value exposed by <see cref="StoredProviderProfile"/>.</value>
         public bool ChatEnabled { get; set; }
         /// <summary>
-        /// Gets or sets protected chat secret.
+        /// Gets or sets the protected chat secret value that forms part of the stored provider profile state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The protected chat secret value exposed by <see cref="StoredProviderProfile"/>.</value>
         public string ProtectedChatSecret { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets OAuth client identifier.
+        /// Gets or sets the stable o auth client identifier used to identify or correlate this stored provider profile instance with related application state.
         /// </summary>
+        /// <value>The o auth client identifier value exposed by <see cref="StoredProviderProfile"/>.</value>
         public string OAuthClientId { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets protected OAuth access token.
+        /// Gets or sets the protected o auth access token value that forms part of the stored provider profile state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The protected o auth access token value exposed by <see cref="StoredProviderProfile"/>.</value>
         public string ProtectedOAuthAccessToken { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets protected OAuth refresh token.
+        /// Gets or sets the protected o auth refresh token value that forms part of the stored provider profile state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The protected o auth refresh token value exposed by <see cref="StoredProviderProfile"/>.</value>
         public string ProtectedOAuthRefreshToken { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets OAuth access token expires UTC.
+        /// Gets or sets the o auth access token expires UTC associated with this stored provider profile state, using the time semantics implied by the member name.
         /// </summary>
+        /// <value>The o auth access token expires UTC value exposed by <see cref="StoredProviderProfile"/>.</value>
         public DateTimeOffset? OAuthAccessTokenExpiresUtc { get; set; }
         /// <summary>
-        /// Gets or sets OAuth last validated UTC.
+        /// Gets or sets the o auth last validated UTC associated with this stored provider profile state, using the time semantics implied by the member name.
         /// </summary>
+        /// <value>The o auth last validated UTC value exposed by <see cref="StoredProviderProfile"/>.</value>
         public DateTimeOffset? OAuthLastValidatedUtc { get; set; }
         /// <summary>
-        /// Gets or sets OAuth scopes.
+        /// Gets or sets the o auth scopes value that forms part of the stored provider profile state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The o auth scopes value exposed by <see cref="StoredProviderProfile"/>.</value>
         public string OAuthScopes { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets auto select ingest.
+        /// Gets or sets a value indicating whether auto select ingest applies to the stored provider profile state.
         /// </summary>
+        /// <value>The auto select ingest value exposed by <see cref="StoredProviderProfile"/>.</value>
         public bool AutoSelectIngest { get; set; } = true;
         /// <summary>
-        /// Gets or sets ingest server name.
+        /// Gets or sets the ingest server name value that forms part of the stored provider profile state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The ingest server name value exposed by <see cref="StoredProviderProfile"/>.</value>
         public string IngestServerName { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets ingest latency milliseconds.
+        /// Gets or sets the ingest latency milliseconds value that forms part of the stored provider profile state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The ingest latency milliseconds value exposed by <see cref="StoredProviderProfile"/>.</value>
         public double? IngestLatencyMilliseconds { get; set; }
         /// <summary>
-        /// Gets or sets ingest last tested UTC.
+        /// Gets or sets the ingest last tested UTC associated with this stored provider profile state, using the time semantics implied by the member name.
         /// </summary>
+        /// <value>The ingest last tested UTC value exposed by <see cref="StoredProviderProfile"/>.</value>
         public DateTimeOffset? IngestLastTestedUtc { get; set; }
         /// <summary>
-        /// Gets or sets whether the feature is enabled.
+        /// Gets or sets a value indicating whether the option is enabled applies to the stored provider profile state.
         /// </summary>
+        /// <value>The enabled value exposed by <see cref="StoredProviderProfile"/>.</value>
         public bool Enabled { get; set; } = true;
     }
 }
 
 /// <summary>
-/// Represents a streaming OAuth credentials.
+/// Represents a streaming o auth credentials application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 internal sealed class StreamingOAuthCredentials
 {
     /// <summary>
-    /// Gets or sets profile identifier.
+    /// Gets or sets the stable profile identifier used to identify or correlate this streaming o auth credentials instance with related application state.
     /// </summary>
+    /// <value>The profile identifier value exposed by <see cref="StreamingOAuthCredentials"/>.</value>
     public Guid ProfileId { get; set; }
     /// <summary>
-    /// Gets or sets client identifier.
+    /// Gets or sets the stable client identifier used to identify or correlate this streaming o auth credentials instance with related application state.
     /// </summary>
+    /// <value>The client identifier value exposed by <see cref="StreamingOAuthCredentials"/>.</value>
     public string ClientId { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets access token.
+    /// Gets or sets the access token value that forms part of the streaming o auth credentials state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The access token value exposed by <see cref="StreamingOAuthCredentials"/>.</value>
     public string AccessToken { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets refresh token.
+    /// Gets or sets the refresh token value that forms part of the streaming o auth credentials state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The refresh token value exposed by <see cref="StreamingOAuthCredentials"/>.</value>
     public string RefreshToken { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets access token expires UTC.
+    /// Gets or sets the access token expires UTC associated with this streaming o auth credentials state, using the time semantics implied by the member name.
     /// </summary>
+    /// <value>The access token expires UTC value exposed by <see cref="StreamingOAuthCredentials"/>.</value>
     public DateTimeOffset? AccessTokenExpiresUtc { get; set; }
     /// <summary>
-    /// Gets or sets last validated UTC.
+    /// Gets or sets the last validated UTC associated with this streaming o auth credentials state, using the time semantics implied by the member name.
     /// </summary>
+    /// <value>The last validated UTC value exposed by <see cref="StreamingOAuthCredentials"/>.</value>
     public DateTimeOffset? LastValidatedUtc { get; set; }
     /// <summary>
-    /// Gets or sets scopes.
+    /// Gets or sets the scopes value that forms part of the streaming o auth credentials state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The scopes value exposed by <see cref="StreamingOAuthCredentials"/>.</value>
     public string Scopes { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets account name.
+    /// Gets or sets the account name value that forms part of the streaming o auth credentials state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The account name value exposed by <see cref="StreamingOAuthCredentials"/>.</value>
     public string AccountName { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets channel identifier.
+    /// Gets or sets the stable channel identifier used to identify or correlate this streaming o auth credentials instance with related application state.
     /// </summary>
+    /// <value>The channel identifier value exposed by <see cref="StreamingOAuthCredentials"/>.</value>
     public string ChannelId { get; set; } = string.Empty;
 }
 
 /// <summary>
-/// Represents a twitch OAuth credential update.
+/// Represents a twitch o auth credential update application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 internal sealed class TwitchOAuthCredentialUpdate
 {
     /// <summary>
-    /// Gets or sets profile identifier.
+    /// Gets or sets the stable profile identifier used to identify or correlate this twitch o auth credential update instance with related application state.
     /// </summary>
+    /// <value>The profile identifier value exposed by <see cref="TwitchOAuthCredentialUpdate"/>.</value>
     public Guid ProfileId { get; set; }
     /// <summary>
-    /// Gets or sets client identifier.
+    /// Gets or sets the stable client identifier used to identify or correlate this twitch o auth credential update instance with related application state.
     /// </summary>
+    /// <value>The client identifier value exposed by <see cref="TwitchOAuthCredentialUpdate"/>.</value>
     public string ClientId { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets access token.
+    /// Gets or sets the access token value that forms part of the twitch o auth credential update state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The access token value exposed by <see cref="TwitchOAuthCredentialUpdate"/>.</value>
     public string AccessToken { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets refresh token.
+    /// Gets or sets the refresh token value that forms part of the twitch o auth credential update state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The refresh token value exposed by <see cref="TwitchOAuthCredentialUpdate"/>.</value>
     public string RefreshToken { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets access token expires UTC.
+    /// Gets or sets the access token expires UTC associated with this twitch o auth credential update state, using the time semantics implied by the member name.
     /// </summary>
+    /// <value>The access token expires UTC value exposed by <see cref="TwitchOAuthCredentialUpdate"/>.</value>
     public DateTimeOffset AccessTokenExpiresUtc { get; set; }
     /// <summary>
-    /// Gets or sets last validated UTC.
+    /// Gets or sets the last validated UTC associated with this twitch o auth credential update state, using the time semantics implied by the member name.
     /// </summary>
+    /// <value>The last validated UTC value exposed by <see cref="TwitchOAuthCredentialUpdate"/>.</value>
     public DateTimeOffset LastValidatedUtc { get; set; }
     /// <summary>
-    /// Gets or sets scopes.
+    /// Gets or sets the scopes value that forms part of the twitch o auth credential update state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The scopes value exposed by <see cref="TwitchOAuthCredentialUpdate"/>.</value>
     public string Scopes { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets user identifier.
+    /// Gets or sets the stable user identifier used to identify or correlate this twitch o auth credential update instance with related application state.
     /// </summary>
+    /// <value>The user identifier value exposed by <see cref="TwitchOAuthCredentialUpdate"/>.</value>
     public string UserId { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets login.
+    /// Gets or sets the login value that forms part of the twitch o auth credential update state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The login value exposed by <see cref="TwitchOAuthCredentialUpdate"/>.</value>
     public string Login { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets stream key.
+    /// Gets or sets the stable stream key used to identify or correlate this twitch o auth credential update instance with related application state.
     /// </summary>
+    /// <value>The stream key value exposed by <see cref="TwitchOAuthCredentialUpdate"/>.</value>
     public string StreamKey { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets endpoint.
+    /// Gets or sets the endpoint that identifies the network or application endpoint associated with this twitch o auth credential update state.
     /// </summary>
+    /// <value>The endpoint value exposed by <see cref="TwitchOAuthCredentialUpdate"/>.</value>
     public string Endpoint { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets ingest server name.
+    /// Gets or sets the ingest server name value that forms part of the twitch o auth credential update state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The ingest server name value exposed by <see cref="TwitchOAuthCredentialUpdate"/>.</value>
     public string IngestServerName { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets ingest latency milliseconds.
+    /// Gets or sets the ingest latency milliseconds value that forms part of the twitch o auth credential update state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The ingest latency milliseconds value exposed by <see cref="TwitchOAuthCredentialUpdate"/>.</value>
     public double? IngestLatencyMilliseconds { get; set; }
     /// <summary>
-    /// Gets or sets ingest last tested UTC.
+    /// Gets or sets the ingest last tested UTC associated with this twitch o auth credential update state, using the time semantics implied by the member name.
     /// </summary>
+    /// <value>The ingest last tested UTC value exposed by <see cref="TwitchOAuthCredentialUpdate"/>.</value>
     public DateTimeOffset? IngestLastTestedUtc { get; set; }
 }

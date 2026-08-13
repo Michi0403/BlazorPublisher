@@ -5,8 +5,9 @@ using System.Xml.Linq;
 namespace PublisherStudio.Services.PictureStudio.Import;
 
 /// <summary>
-/// Represents a SVG interchange sanitizer.
+/// Represents a SVG interchange sanitizer application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class SvgInterchangeSanitizer(ILogger<SvgInterchangeSanitizer> logger)
 {
     /// <summary>
@@ -18,8 +19,10 @@ public sealed class SvgInterchangeSanitizer(ILogger<SvgInterchangeSanitizer> log
     };
 
     /// <summary>
-    /// Runs the sanitize operation.
+    /// Performs sanitize for <see cref="SvgInterchangeSanitizer"/>, keeping the operation consistent with the state and invariants of the surrounding SVG interchange sanitizer workflow.
     /// </summary>
+    /// <param name="svg">Svg value supplied to the SVG interchange sanitizer operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string Sanitize(string svg)
     {
         try
@@ -87,8 +90,10 @@ public sealed class SvgInterchangeSanitizer(ILogger<SvgInterchangeSanitizer> log
     }
 
     /// <summary>
-    /// Reads viewport.
+    /// Reads viewport for <see cref="SvgInterchangeSanitizer"/>, keeping the operation consistent with the state and invariants of the surrounding SVG interchange sanitizer workflow.
     /// </summary>
+    /// <param name="svg">Svg value supplied to the SVG interchange sanitizer operation and used when producing its result.</param>
+    /// <returns>The double width double height double min x double min y produced by the operation.</returns>
     public (double Width, double Height, double MinX, double MinY) ReadViewport(string svg)
     {
         var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null };
@@ -109,8 +114,11 @@ public sealed class SvgInterchangeSanitizer(ILogger<SvgInterchangeSanitizer> log
     }
 
     /// <summary>
-    /// Parses length.
+    /// Parses length for <see cref="SvgInterchangeSanitizer"/>, keeping the operation consistent with the state and invariants of the surrounding SVG interchange sanitizer workflow.
     /// </summary>
+    /// <param name="value">Value value supplied to the SVG interchange sanitizer operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the SVG interchange sanitizer operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     public double ParseLength(string? value, double fallback = 0)
     {
         try
@@ -145,8 +153,10 @@ public sealed class SvgInterchangeSanitizer(ILogger<SvgInterchangeSanitizer> log
     }
 
     /// <summary>
-    /// Runs the contains external CSS reference operation.
+    /// Performs contains external CSS reference for <see cref="SvgInterchangeSanitizer"/>, keeping the operation consistent with the state and invariants of the surrounding SVG interchange sanitizer workflow.
     /// </summary>
+    /// <param name="value">Value value supplied to the SVG interchange sanitizer operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool ContainsExternalCssReference(string value)
     {
         try
@@ -177,8 +187,11 @@ public sealed class SvgInterchangeSanitizer(ILogger<SvgInterchangeSanitizer> log
     }
 
     /// <summary>
-    /// Determines whether external reference.
+    /// Determines whether external reference for <see cref="SvgInterchangeSanitizer"/>, keeping the operation consistent with the state and invariants of the surrounding SVG interchange sanitizer workflow.
     /// </summary>
+    /// <param name="localName">Local name value supplied to the SVG interchange sanitizer operation and used when producing its result.</param>
+    /// <param name="value">Value value supplied to the SVG interchange sanitizer operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool IsExternalReference(string localName, string value)
     {
         try
@@ -199,8 +212,10 @@ public sealed class SvgInterchangeSanitizer(ILogger<SvgInterchangeSanitizer> log
     }
 
     /// <summary>
-    /// Determines whether safe embedded raster.
+    /// Determines whether safe embedded raster for <see cref="SvgInterchangeSanitizer"/>, keeping the operation consistent with the state and invariants of the surrounding SVG interchange sanitizer workflow.
     /// </summary>
+    /// <param name="value">Value value supplied to the SVG interchange sanitizer operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool IsSafeEmbeddedRaster(string value)
     {
         try
@@ -223,8 +238,11 @@ public sealed class SvgInterchangeSanitizer(ILogger<SvgInterchangeSanitizer> log
     }
 
     /// <summary>
-    /// Parses numbers.
+    /// Parses numbers for <see cref="SvgInterchangeSanitizer"/>, keeping the operation consistent with the state and invariants of the surrounding SVG interchange sanitizer workflow.
     /// </summary>
+    /// <param name="value">Value value supplied to the SVG interchange sanitizer operation and used when producing its result.</param>
+    /// <param name="maximum">Maximum value supplied to the SVG interchange sanitizer operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double[] ParseNumbers(string? value, int maximum)
     {
         try

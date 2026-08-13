@@ -19,20 +19,28 @@ using System.Threading.Tasks;
 
 namespace PublisherStudio.InstallerConsole;
 /// <summary>
-/// Represents a program.
+/// Represents a program application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 internal static class Program
 {
+    /// <summary>
+    /// Defines the PublisherStudio repo constant used by <see cref="Program"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const string PublisherStudioRepo = "Michi0403/BlazorPublisher";
     /// <summary>
-    /// Creates HTTP client.
+    /// Stores the shared read-only HTTP value used by <see cref="Program"/> across instances of the containing type.
     /// </summary>
     private static readonly HttpClient Http = CreateHttpClient();
+    /// <summary>
+    /// Defines the detached setup environment variable constant used by <see cref="Program"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const string DetachedSetupEnvironmentVariable = "PUBLISHERSTUDIO_SETUP_DETACHED";
 
     /// <summary>
-    /// Attempts to start detached setup.
+    /// Attempts to start detached setup for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="args">Args value supplied to the program operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private static bool TryStartDetachedSetup(string[] args)
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -77,8 +85,10 @@ internal static class Program
     }
 
     /// <summary>
-    /// Runs the main operation.
+    /// Performs main for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="args">Args value supplied to the program operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     public static async Task<int> Main(string[] args)
     {
         if (TryStartDetachedSetup(args))
@@ -113,8 +123,11 @@ internal static class Program
         
     }
     /// <summary>
-    /// Runs the run async operation.
+    /// Performs run for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="args">Args value supplied to the program operation and used when producing its result.</param>
+    /// <param name="options">Options containing the caller-supplied values that control this operation.</param>
+    /// <returns>The int produced by the operation.</returns>
     private static async Task<int> RunAsync(string[] args, CliOptions options)
     {
         try
@@ -214,8 +227,11 @@ internal static class Program
     }
 
     /// <summary>
-    /// Runs the install publisher studio async operation.
+    /// Performs install PublisherStudio for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="options">Options containing the caller-supplied values that control this operation.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private static async Task InstallPublisherStudioAsync(CliOptions options, ILogger logger)
     {
         try
@@ -333,8 +349,10 @@ internal static class Program
     }
 
     /// <summary>
-    /// Runs the uninstall publisher studio windows operation.
+    /// Performs uninstall PublisherStudio windows for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="options">Options containing the caller-supplied values that control this operation.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     private static void UninstallPublisherStudioWindows(CliOptions options, ILogger logger)
     {
         try
@@ -373,8 +391,11 @@ internal static class Program
         }
     }
     /// <summary>
-    /// Gets publisher studio uninstall targets.
+    /// Retrieves PublisherStudio uninstall targets for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="options">Options containing the caller-supplied values that control this operation.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private static List<string> GetPublisherStudioUninstallTargets(CliOptions options, ILogger logger)
     {
         try
@@ -409,8 +430,10 @@ internal static class Program
     }
 
     /// <summary>
-    /// Runs the provision windows shortcuts operation.
+    /// Performs provision windows shortcuts for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="options">Options containing the caller-supplied values that control this operation.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     private static void ProvisionWindowsShortcuts(CliOptions options, ILogger logger)
     {
         try
@@ -458,8 +481,11 @@ internal static class Program
         }
     }
     /// <summary>
-    /// Gets shortcut targets.
+    /// Retrieves shortcut targets for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="publisherStudioRoot">Publisher studio root value supplied to the program operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private static List<ShortcutDefinition> GetShortcutTargets(string publisherStudioRoot, ILogger logger)
     {
         try
@@ -502,8 +528,11 @@ internal static class Program
         }
     }
     /// <summary>
-    /// Creates shortcut set.
+    /// Creates shortcut set for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="shortcuts">Shortcuts value supplied to the program operation and used when producing its result.</param>
+    /// <param name="targetDirectory">Target directory value supplied to the program operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     private static void CreateShortcutSet(
     List<ShortcutDefinition> shortcuts,
     string targetDirectory,
@@ -538,8 +567,12 @@ internal static class Program
         }
     }
     /// <summary>
-    /// Creates windows URL shortcut.
+    /// Creates windows URL shortcut for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="shortcutPath">Shortcut path value supplied to the program operation and used when producing its result.</param>
+    /// <param name="targetPath">Target path value supplied to the program operation and used when producing its result.</param>
+    /// <param name="iconPath">Icon path value supplied to the program operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     private static void CreateWindowsUrlShortcut(
     string shortcutPath,
     string targetPath,
@@ -593,8 +626,12 @@ internal static class Program
         }
     }
     /// <summary>
-    /// Runs the enumerate files safe operation.
+    /// Performs enumerate files safe for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="root">Root value supplied to the program operation and used when producing its result.</param>
+    /// <param name="searchPattern">Search pattern value supplied to the program operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private static IEnumerable<string> EnumerateFilesSafe(
     string root,
     string searchPattern,
@@ -622,8 +659,10 @@ internal static class Program
         }
     }
     /// <summary>
-    /// Finds publisher studio icon.
+    /// Finds PublisherStudio icon for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>The string produced by the operation.</returns>
     private static string? FindPublisherStudioIcon(ILogger logger)
     {
         try
@@ -690,8 +729,12 @@ internal static class Program
         }
     }
     /// <summary>
-    /// Finds publisher studio file.
+    /// Finds PublisherStudio file for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="publisherStudioRoot">Publisher studio root value supplied to the program operation and used when producing its result.</param>
+    /// <param name="fileName">File name value supplied to the program operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>The string produced by the operation.</returns>
     private static string? FindPublisherStudioFile(
     string publisherStudioRoot,
     string fileName,
@@ -740,8 +783,11 @@ internal static class Program
         }
     }
     /// <summary>
-    /// Finds publisher studio executable.
+    /// Finds PublisherStudio executable for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="options">Options containing the caller-supplied values that control this operation.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>The string produced by the operation.</returns>
     private static string? FindPublisherStudioExecutable(CliOptions options, ILogger logger)
     {
         try
@@ -810,8 +856,11 @@ internal static class Program
         }
     }
     /// <summary>
-    /// Gets relative path depth.
+    /// Retrieves relative path depth for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="root">Root value supplied to the program operation and used when producing its result.</param>
+    /// <param name="path">Path value supplied to the program operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     private static int GetRelativePathDepth(string root, string path)
     {
         try
@@ -825,8 +874,13 @@ internal static class Program
         }
     }
     /// <summary>
-    /// Adds cmd shortcut if exists.
+    /// Adds cmd shortcut if exists for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="shortcuts">Shortcuts value supplied to the program operation and used when producing its result.</param>
+    /// <param name="publisherStudioRoot">Publisher studio root value supplied to the program operation and used when producing its result.</param>
+    /// <param name="cmdFileName">Cmd file name value supplied to the program operation and used when producing its result.</param>
+    /// <param name="shortcutName">Shortcut name value supplied to the program operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     private static void AddCmdShortcutIfExists(
     List<ShortcutDefinition> shortcuts,
     string publisherStudioRoot,
@@ -863,8 +917,10 @@ internal static class Program
         }
     }
     /// <summary>
-    /// Ensures windows only.
+    /// Ensures windows only for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="featureName">Feature name value supplied to the program operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     private static void EnsureWindowsOnly(string featureName, ILogger logger)
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
@@ -874,8 +930,10 @@ internal static class Program
     }
 
     /// <summary>
-    /// Gets publisher studio install root.
+    /// Retrieves PublisherStudio install root for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>The string produced by the operation.</returns>
     private static string GetPublisherStudioInstallRoot(ILogger logger)
     {
         try
@@ -895,8 +953,11 @@ internal static class Program
     }
 
     /// <summary>
-    /// Gets start menu folder.
+    /// Retrieves start menu folder for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="options">Options containing the caller-supplied values that control this operation.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>The string produced by the operation.</returns>
     private static string GetStartMenuFolder(CliOptions options, ILogger logger)
     {
         try
@@ -920,8 +981,11 @@ internal static class Program
         }
     }
     /// <summary>
-    /// Runs the sanitize shortcut group name operation.
+    /// Performs sanitize shortcut group name for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="value">Value value supplied to the program operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>The string produced by the operation.</returns>
     private static string SanitizeShortcutGroupName(string value, ILogger logger)
     {
         try
@@ -943,8 +1007,10 @@ internal static class Program
         }
     }
     /// <summary>
-    /// Gets desktop folder.
+    /// Retrieves desktop folder for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>The string produced by the operation.</returns>
     private static string GetDesktopFolder(ILogger logger)
     {
         try
@@ -964,8 +1030,10 @@ internal static class Program
     }
 
     /// <summary>
-    /// Starts publisher studio.
+    /// Starts PublisherStudio for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="options">Options containing the caller-supplied values that control this operation.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     private static void StartPublisherStudio(CliOptions options, ILogger logger)
     {
         try
@@ -1025,8 +1093,13 @@ internal static class Program
         }
     }
     /// <summary>
-    /// Attempts to get running endpoint.
+    /// Attempts to retrieve running endpoint for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="productName">Product name value supplied to the program operation and used when producing its result.</param>
+    /// <param name="runtimeProductDirectory">Runtime product directory value supplied to the program operation and used when producing its result.</param>
+    /// <param name="url">Url value supplied to the program operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private static bool TryGetRunningEndpoint(
         string productName,
         string runtimeProductDirectory,
@@ -1093,8 +1166,14 @@ internal static class Program
     }
 
     /// <summary>
-    /// Runs the wait for runtime endpoint operation.
+    /// Performs wait for runtime endpoint for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="productName">Product name value supplied to the program operation and used when producing its result.</param>
+    /// <param name="runtimeProductDirectory">Runtime product directory value supplied to the program operation and used when producing its result.</param>
+    /// <param name="process">Process value supplied to the program operation and used when producing its result.</param>
+    /// <param name="fallbackPort">Fallback port value supplied to the program operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>The string produced by the operation.</returns>
     private static string WaitForRuntimeEndpoint(
         string productName,
         string runtimeProductDirectory,
@@ -1178,8 +1257,10 @@ internal static class Program
     }
 
     /// <summary>
-    /// Opens default browser.
+    /// Opens default browser for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="url">Url value supplied to the program operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     private static void OpenDefaultBrowser(string url, ILogger logger)
     {
         try
@@ -1199,8 +1280,17 @@ internal static class Program
 
 
     /// <summary>
-    /// Ensures release asset async.
+    /// Ensures release asset for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="repo">Repo value supplied to the program operation and used when producing its result.</param>
+    /// <param name="expectedAssetName">Expected asset name value supplied to the program operation and used when producing its result.</param>
+    /// <param name="destinationPath">Destination path value supplied to the program operation and used when producing its result.</param>
+    /// <param name="explicitSourcePath">Explicit source path value supplied to the program operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <param name="options">Options containing the caller-supplied values that control this operation.</param>
+    /// <param name="setupAsset">Value indicating whether setup asset should apply to this operation.</param>
+    /// <param name="runtimeIdentifier">Runtime identifier value supplied to the program operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private static async Task EnsureReleaseAssetAsync(
         string repo,
         string expectedAssetName,
@@ -1251,8 +1341,12 @@ internal static class Program
     }
 
     /// <summary>
-    /// Validates release archive.
+    /// Validates release archive for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="archivePath">Archive path value supplied to the program operation and used when producing its result.</param>
+    /// <param name="expectedRootDirectory">Expected root directory value supplied to the program operation and used when producing its result.</param>
+    /// <param name="expectedExecutable">Expected executable value supplied to the program operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     private static void ValidateReleaseArchive(
         string archivePath,
         string expectedRootDirectory,
@@ -1340,8 +1434,15 @@ internal static class Program
     }
 
     /// <summary>
-    /// Runs the download latest release asset async operation.
+    /// Performs download latest release asset for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="repo">Repo value supplied to the program operation and used when producing its result.</param>
+    /// <param name="outFile">Out file value supplied to the program operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <param name="options">Options containing the caller-supplied values that control this operation.</param>
+    /// <param name="setupAsset">Value indicating whether setup asset should apply to this operation.</param>
+    /// <param name="runtimeIdentifier">Runtime identifier value supplied to the program operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private static async Task DownloadLatestReleaseAssetAsync(
         string repo,
         string outFile,
@@ -1411,8 +1512,11 @@ internal static class Program
     }
 
     /// <summary>
-    /// Gets JSON with retry async.
+    /// Retrieves JSON with retry for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="url">Url value supplied to the program operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>The JSON document produced by the operation.</returns>
     private static async Task<JsonDocument> GetJsonWithRetryAsync(string url, ILogger logger)
     {
         const int maxAttempts = 4;
@@ -1444,8 +1548,14 @@ internal static class Program
     }
 
     /// <summary>
-    /// Runs the download file async operation.
+    /// Performs download file for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="url">Url value supplied to the program operation and used when producing its result.</param>
+    /// <param name="outFile">Out file value supplied to the program operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <param name="options">Options containing the caller-supplied values that control this operation.</param>
+    /// <param name="expectedSize">Expected size value supplied to the program operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private static async Task DownloadFileAsync(
         string url,
         string outFile,
@@ -1622,8 +1732,12 @@ internal static class Program
     }
 
     /// <summary>
-    /// Reads with stall timeout async.
+    /// Reads with stall timeout for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="input">Input value supplied to the program operation and used when producing its result.</param>
+    /// <param name="buffer">Buffer value supplied to the program operation and used when producing its result.</param>
+    /// <param name="totalCancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The int produced by the operation.</returns>
     private static async Task<int> ReadWithStallTimeoutAsync(Stream input, byte[] buffer, CancellationToken totalCancellationToken)
     {
         using var stallTimeout = CancellationTokenSource.CreateLinkedTokenSource(totalCancellationToken);
@@ -1639,8 +1753,13 @@ internal static class Program
     }
 
     /// <summary>
-    /// Runs the move file with retry async operation.
+    /// Performs move file with retry for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="source">Source value supplied to the program operation and used when producing its result.</param>
+    /// <param name="destination">Destination value supplied to the program operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <param name="options">Options containing the caller-supplied values that control this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private static async Task MoveFileWithRetryAsync(string source, string destination, ILogger logger, CliOptions options)
     {
         try
@@ -1677,8 +1796,11 @@ internal static class Program
         }
     }
     /// <summary>
-    /// Runs the format bytes operation.
+    /// Performs format bytes for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="bytes">Bytes value supplied to the program operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>The string produced by the operation.</returns>
     private static string FormatBytes(long bytes, ILogger logger)
     {
         try
@@ -1704,8 +1826,10 @@ internal static class Program
     }
 
     /// <summary>
-    /// Deletes if exists.
+    /// Deletes if exists for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="path">Path value supplied to the program operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     private static void DeleteIfExists(string path, ILogger logger)
     {
         try
@@ -1727,8 +1851,11 @@ internal static class Program
         }
     }
     /// <summary>
-    /// Runs the extract zip with fallback operation.
+    /// Performs extract ZIP with fallback for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="zipPath">Zip path value supplied to the program operation and used when producing its result.</param>
+    /// <param name="targetPath">Target path value supplied to the program operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     private static void ExtractZipWithFallback(string zipPath, string targetPath, ILogger logger)
     {
         try
@@ -1758,8 +1885,12 @@ internal static class Program
     }
 
     /// <summary>
-    /// Runs the run process async operation.
+    /// Performs run process for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="fileName">File name value supplied to the program operation and used when producing its result.</param>
+    /// <param name="arguments">Arguments value supplied to the program operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private static async Task RunProcessAsync(string fileName, string arguments, ILogger logger)
     {
         try
@@ -1797,8 +1928,11 @@ internal static class Program
     }
 
     /// <summary>
-    /// Gets expected release asset name.
+    /// Retrieves expected release asset name for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="runtimeIdentifier">Runtime identifier value supplied to the program operation and used when producing its result.</param>
+    /// <param name="setupAsset">Value indicating whether setup asset should apply to this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private static string GetExpectedReleaseAssetName(string runtimeIdentifier, bool setupAsset)
     {
         var runtimeFolder = runtimeIdentifier.Trim().ToLowerInvariant() switch
@@ -1818,8 +1952,11 @@ internal static class Program
     }
 
     /// <summary>
-    /// Gets expected published executable.
+    /// Retrieves expected published executable for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="runtimeIdentifier">Runtime identifier value supplied to the program operation and used when producing its result.</param>
+    /// <param name="setupAsset">Value indicating whether setup asset should apply to this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private static string GetExpectedPublishedExecutable(string runtimeIdentifier, bool setupAsset)
     {
         var isWindows = runtimeIdentifier.StartsWith("win-", StringComparison.OrdinalIgnoreCase);
@@ -1828,8 +1965,9 @@ internal static class Program
     }
 
     /// <summary>
-    /// Gets platform token.
+    /// Retrieves platform token for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <returns>The string produced by the operation.</returns>
     private static string GetPlatformToken()
     {
 
@@ -1852,8 +1990,9 @@ internal static class Program
     };
 
     /// <summary>
-    /// Gets runtime identifier.
+    /// Retrieves runtime identifier for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <returns>The string produced by the operation.</returns>
     private static string GetRuntimeIdentifier()
     {
         var platform = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
@@ -1874,8 +2013,9 @@ internal static class Program
     }
 
     /// <summary>
-    /// Gets runtime folder name.
+    /// Retrieves runtime folder name for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <returns>The string produced by the operation.</returns>
     private static string GetRuntimeFolderName()
     {
         var platform = GetPlatformToken();
@@ -1884,8 +2024,10 @@ internal static class Program
     }
 
     /// <summary>
-    /// Validates repo.
+    /// Validates repo for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="repo">Repo value supplied to the program operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     private static void ValidateRepo(string repo, ILogger logger)
     {
         try
@@ -1902,8 +2044,9 @@ internal static class Program
     }
 
     /// <summary>
-    /// Creates HTTP client.
+    /// Creates HTTP client for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <returns>The HTTP client produced by the operation.</returns>
     private static HttpClient CreateHttpClient()
     {
         try
@@ -1922,8 +2065,12 @@ internal static class Program
 }
 
 /// <summary>
-/// Represents a shortcut definition.
+/// Represents a shortcut definition application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="ShortcutName">Shortcut name value supplied to the shortcut definition operation and used when producing its result.</param>
+/// <param name="TargetPath">Target path value supplied to the shortcut definition operation and used when producing its result.</param>
+/// <param name="Arguments">Arguments value supplied to the shortcut definition operation and used when producing its result.</param>
+/// <param name="WorkingDirectory">Working directory value supplied to the shortcut definition operation and used when producing its result.</param>
 internal sealed record ShortcutDefinition(
     string ShortcutName,
     string TargetPath,
@@ -1932,89 +2079,110 @@ internal sealed record ShortcutDefinition(
 );
 
 /// <summary>
-/// Represents a cli options.
+/// Carries the configurable CLI settings used to control the associated application behavior without hard-coding policy in consumers.
 /// </summary>
 internal sealed class CliOptions
 {
     /// <summary>
-    /// Gets or sets show help.
+    /// Gets or sets a value indicating whether show help applies to the CLI state.
     /// </summary>
+    /// <value>The show help value exposed by <see cref="CliOptions"/>.</value>
     public bool ShowHelp { get; private set; }
     /// <summary>
-    /// Gets or sets install blazor publisher.
+    /// Gets or sets a value indicating whether install PublisherStudio applies to the CLI state.
     /// </summary>
+    /// <value>The install PublisherStudio value exposed by <see cref="CliOptions"/>.</value>
     public bool InstallPublisherStudio { get; private set; }
     /// <summary>
-    /// Gets or sets update blazor publisher.
+    /// Gets or sets a value indicating whether update PublisherStudio applies to the CLI state.
     /// </summary>
+    /// <value>The update PublisherStudio value exposed by <see cref="CliOptions"/>.</value>
     public bool UpdatePublisherStudio { get; private set; }
     /// <summary>
-    /// Gets or sets start blazor publisher.
+    /// Gets or sets a value indicating whether start PublisherStudio applies to the CLI state.
     /// </summary>
+    /// <value>The start PublisherStudio value exposed by <see cref="CliOptions"/>.</value>
     public bool StartPublisherStudio { get; private set; }
     /// <summary>
-    /// Gets or sets verbose.
+    /// Gets or sets a value indicating whether verbose applies to the CLI state.
     /// </summary>
+    /// <value>The verbose value exposed by <see cref="CliOptions"/>.</value>
     public bool Verbose { get; private set; }
     /// <summary>
-    /// Gets or sets blazor publisher zip path.
+    /// Gets or sets the PublisherStudio ZIP path used by this CLI instance to locate the associated file-system resource.
     /// </summary>
+    /// <value>The PublisherStudio ZIP path value exposed by <see cref="CliOptions"/>.</value>
     public string? PublisherStudioZipPath { get; private set; }
     /// <summary>
-    /// Gets or sets blazor publisher setup zip path.
+    /// Gets or sets the PublisherStudio setup ZIP path used by this CLI instance to locate the associated file-system resource.
     /// </summary>
+    /// <value>The PublisherStudio setup ZIP path value exposed by <see cref="CliOptions"/>.</value>
     public string? PublisherStudioSetupZipPath { get; private set; }
     /// <summary>
-    /// Gets or sets blazor publisher exe path.
+    /// Gets or sets the PublisherStudio exe path used by this CLI instance to locate the associated file-system resource.
     /// </summary>
+    /// <value>The PublisherStudio exe path value exposed by <see cref="CliOptions"/>.</value>
     public string? PublisherStudioExePath { get; private set; }
     /// <summary>
-    /// Gets or sets blazor publisher port.
+    /// Gets or sets the PublisherStudio port value that forms part of the CLI state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The PublisherStudio port value exposed by <see cref="CliOptions"/>.</value>
     public int PublisherStudioPort { get; private set; } = 58071;
     /// <summary>
-    /// Gets or sets open browser.
+    /// Gets or sets a value indicating whether open browser applies to the CLI state.
     /// </summary>
+    /// <value>The open browser value exposed by <see cref="CliOptions"/>.</value>
     public bool OpenBrowser { get; private set; } = true;
     /// <summary>
-    /// Gets or sets force delete.
+    /// Gets or sets a value indicating whether force delete applies to the CLI state.
     /// </summary>
+    /// <value>The force delete value exposed by <see cref="CliOptions"/>.</value>
     public bool ForceDelete { get; private set; }
     /// <summary>
-    /// Gets or sets wait on exit.
+    /// Gets or sets a value indicating whether wait on exit applies to the CLI state.
     /// </summary>
+    /// <value>The wait on exit value exposed by <see cref="CliOptions"/>.</value>
     public bool WaitOnExit { get; private set; }
     /// <summary>
-    /// Gets or sets uninstall.
+    /// Gets or sets a value indicating whether uninstall applies to the CLI state.
     /// </summary>
+    /// <value>The uninstall value exposed by <see cref="CliOptions"/>.</value>
     public bool Uninstall { get; private set; }
     /// <summary>
-    /// Gets or sets desktop shortcuts.
+    /// Gets or sets a value indicating whether desktop shortcuts applies to the CLI state.
     /// </summary>
+    /// <value>The desktop shortcuts value exposed by <see cref="CliOptions"/>.</value>
     public bool DesktopShortcuts { get; private set; }
     /// <summary>
-    /// Gets or sets start menu shortcuts.
+    /// Gets or sets a value indicating whether start menu shortcuts applies to the CLI state.
     /// </summary>
+    /// <value>The start menu shortcuts value exposed by <see cref="CliOptions"/>.</value>
     public bool StartMenuShortcuts { get; private set; }
     /// <summary>
-    /// Gets or sets install FFmpeg.
+    /// Gets or sets a value indicating whether install FFmpeg applies to the CLI state.
     /// </summary>
+    /// <value>The install FFmpeg value exposed by <see cref="CliOptions"/>.</value>
     public bool InstallFfmpeg { get; private set; }
     /// <summary>
-    /// Gets or sets skip FFmpeg.
+    /// Gets or sets a value indicating whether skip FFmpeg applies to the CLI state.
     /// </summary>
+    /// <value>The skip FFmpeg value exposed by <see cref="CliOptions"/>.</value>
     public bool SkipFfmpeg { get; private set; }
     /// <summary>
-    /// Gets or sets check FFmpeg.
+    /// Gets or sets a value indicating whether check FFmpeg applies to the CLI state.
     /// </summary>
+    /// <value>The check FFmpeg value exposed by <see cref="CliOptions"/>.</value>
     public bool CheckFfmpeg { get; private set; }
     /// <summary>
-    /// Gets or sets shortcut group name.
+    /// Gets or sets the shortcut group name value that forms part of the CLI state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The shortcut group name value exposed by <see cref="CliOptions"/>.</value>
     public string ShortcutGroupName { get; private set; } = "PublisherStudio by Michi0403";
     /// <summary>
-    /// Runs the parse operation.
+    /// Performs parse for <see cref="CliOptions"/>, keeping the operation consistent with the state and invariants of the surrounding CLI workflow.
     /// </summary>
+    /// <param name="args">Args value supplied to the CLI operation and used when producing its result.</param>
+    /// <returns>The CLI options produced by the operation.</returns>
     public static CliOptions Parse(string[] args)
     {
         List<string> argsList = args.ToList();
@@ -2135,8 +2303,9 @@ internal sealed class CliOptions
         return options;
     }
     /// <summary>
-    /// Runs the to string operation.
+    /// Performs to string for <see cref="CliOptions"/>, keeping the operation consistent with the state and invariants of the surrounding CLI workflow.
     /// </summary>
+    /// <returns>The string produced by the operation.</returns>
     public override string ToString()
     {
         return string.Join(Environment.NewLine,
@@ -2163,8 +2332,9 @@ internal sealed class CliOptions
         ]);
     }
     /// <summary>
-    /// Runs the print help operation.
+    /// Performs print help for <see cref="CliOptions"/>, keeping the operation consistent with the state and invariants of the surrounding CLI workflow.
     /// </summary>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     public static void PrintHelp(ILogger logger)
     {
         logger.LogInformation("""
@@ -2212,8 +2382,12 @@ Compatibility aliases using the former --*-blazorpublisher names remain accepted
     }
 
     /// <summary>
-    /// Runs the next value operation.
+    /// Performs next value for <see cref="CliOptions"/>, keeping the operation consistent with the state and invariants of the surrounding CLI workflow.
     /// </summary>
+    /// <param name="args">Args value supplied to the CLI operation and used when producing its result.</param>
+    /// <param name="index">Index value supplied to the CLI operation and used when producing its result.</param>
+    /// <param name="optionName">Option name value supplied to the CLI operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private static string NextValue(List<string> args, ref int index, string optionName)
     {
         if (index + 1 >= args.Count)

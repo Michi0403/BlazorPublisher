@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace PublisherStudio.BusinessObjects;
 
@@ -37,7 +37,7 @@ public enum PublicationComponentKind
 
 
 /// <summary>
-/// Lists supported publication chat platform values.
+/// Defines the supported publication chat platform values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PublicationChatPlatform
 {
@@ -49,7 +49,7 @@ public enum PublicationChatPlatform
 }
 
 /// <summary>
-/// Lists supported publication chat display mode values.
+/// Defines the supported publication chat display mode values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PublicationChatDisplayMode
 {
@@ -60,7 +60,7 @@ public enum PublicationChatDisplayMode
 }
 
 /// <summary>
-/// Lists supported publication vector map base layer values.
+/// Defines the supported publication vector map base layer values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PublicationVectorMapBaseLayer
 {
@@ -74,7 +74,7 @@ public enum PublicationVectorMapBaseLayer
 }
 
 /// <summary>
-/// Lists supported publication vector feature kind values.
+/// Defines the supported publication vector feature kind values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PublicationVectorFeatureKind
 {
@@ -84,73 +84,86 @@ public enum PublicationVectorFeatureKind
 }
 
 /// <summary>
-/// Represents a publication map point.
+/// Represents a publication map point application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public sealed class PublicationMapPoint
 {
     /// <summary>
-    /// Gets or sets longitude.
+    /// Gets or sets the longitude value that forms part of the publication map point state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The longitude value exposed by <see cref="PublicationMapPoint"/>.</value>
     public double Longitude { get; set; }
     /// <summary>
-    /// Gets or sets latitude.
+    /// Gets or sets the latitude value that forms part of the publication map point state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The latitude value exposed by <see cref="PublicationMapPoint"/>.</value>
     public double Latitude { get; set; }
 }
 
 /// <summary>
-/// Represents a publication vector map feature.
+/// Represents a publication vector map feature application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public sealed class PublicationVectorMapFeature
 {
     /// <summary>
-    /// Gets or sets the stable identifier.
+    /// Gets or sets the stable identifier used to identify or correlate this publication vector map feature instance with related application state.
     /// </summary>
+    /// <value>The identifier value exposed by <see cref="PublicationVectorMapFeature"/>.</value>
     public Guid Id { get; set; } = Guid.NewGuid();
     /// <summary>
-    /// Gets or sets the display name.
+    /// Gets or sets the name value that forms part of the publication vector map feature state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The name value exposed by <see cref="PublicationVectorMapFeature"/>.</value>
     public string Name { get; set; } = "Feature";
     /// <summary>
-    /// Gets or sets kind.
+    /// Gets or sets the kind value that forms part of the publication vector map feature state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The kind value exposed by <see cref="PublicationVectorMapFeature"/>.</value>
     public PublicationVectorFeatureKind Kind { get; set; } = PublicationVectorFeatureKind.Marker;
     /// <summary>
-    /// Gets or sets points.
+    /// Gets or sets the points collection maintained or exposed by this publication vector map feature instance for downstream processing.
     /// </summary>
+    /// <value>The points value exposed by <see cref="PublicationVectorMapFeature"/>.</value>
     public List<PublicationMapPoint> Points { get; set; } = [];
     /// <summary>
-    /// Gets or sets color.
+    /// Gets or sets the color value that forms part of the publication vector map feature state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The color value exposed by <see cref="PublicationVectorMapFeature"/>.</value>
     public string Color { get; set; } = "#2563eb";
     /// <summary>
-    /// Gets or sets border color.
+    /// Gets or sets the border color value that forms part of the publication vector map feature state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The border color value exposed by <see cref="PublicationVectorMapFeature"/>.</value>
     public string BorderColor { get; set; } = "#1e3a8a";
     /// <summary>
-    /// Gets or sets opacity.
+    /// Gets or sets the opacity value that forms part of the publication vector map feature state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The opacity value exposed by <see cref="PublicationVectorMapFeature"/>.</value>
     public double Opacity { get; set; } = .82;
     /// <summary>
-    /// Gets or sets width.
+    /// Gets or sets the width value that forms part of the publication vector map feature state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The width value exposed by <see cref="PublicationVectorMapFeature"/>.</value>
     public double Width { get; set; } = 3;
     /// <summary>
-    /// Gets or sets size.
+    /// Gets or sets the size that quantifies the associated publication vector map feature data.
     /// </summary>
+    /// <value>The size value exposed by <see cref="PublicationVectorMapFeature"/>.</value>
     public double Size { get; set; } = 14;
     /// <summary>
-    /// Gets or sets label.
+    /// Gets or sets the label value that forms part of the publication vector map feature state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The label value exposed by <see cref="PublicationVectorMapFeature"/>.</value>
     public string Label { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets value.
+    /// Gets or sets the value value that forms part of the publication vector map feature state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The value value exposed by <see cref="PublicationVectorMapFeature"/>.</value>
     public double? Value { get; set; }
 }
 
 /// <summary>
-/// Lists supported publication component scope values.
+/// Defines the supported publication component scope values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PublicationComponentScope
 {
@@ -159,7 +172,7 @@ public enum PublicationComponentScope
 }
 
 /// <summary>
-/// Lists supported publication component data mode values.
+/// Defines the supported publication component data mode values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PublicationComponentDataMode
 {
@@ -170,7 +183,7 @@ public enum PublicationComponentDataMode
 }
 
 /// <summary>
-/// Lists supported publication component processing mode values.
+/// Defines the supported publication component processing mode values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PublicationComponentProcessingMode
 {
@@ -179,7 +192,7 @@ public enum PublicationComponentProcessingMode
 }
 
 /// <summary>
-/// Lists supported publication component edit mode values.
+/// Defines the supported publication component edit mode values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PublicationComponentEditMode
 {
@@ -192,7 +205,7 @@ public enum PublicationComponentEditMode
 }
 
 /// <summary>
-/// Lists supported publication component selection mode values.
+/// Defines the supported publication component selection mode values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PublicationComponentSelectionMode
 {
@@ -202,7 +215,7 @@ public enum PublicationComponentSelectionMode
 }
 
 /// <summary>
-/// Lists supported publication component editor kind values.
+/// Defines the supported publication component editor kind values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PublicationComponentEditorKind
 {
@@ -217,7 +230,7 @@ public enum PublicationComponentEditorKind
 }
 
 /// <summary>
-/// Lists supported publication component field area values.
+/// Defines the supported publication component field area values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PublicationComponentFieldArea
 {
@@ -229,7 +242,7 @@ public enum PublicationComponentFieldArea
 }
 
 /// <summary>
-/// Lists supported publication component summary type values.
+/// Defines the supported publication component summary type values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PublicationComponentSummaryType
 {
@@ -241,7 +254,7 @@ public enum PublicationComponentSummaryType
 }
 
 /// <summary>
-/// Lists supported publication component action trigger values.
+/// Defines the supported publication component action trigger values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PublicationComponentActionTrigger
 {
@@ -260,7 +273,7 @@ public enum PublicationComponentActionTrigger
 }
 
 /// <summary>
-/// Lists supported publication component action kind values.
+/// Defines the supported publication component action kind values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PublicationComponentActionKind
 {
@@ -283,7 +296,7 @@ public enum PublicationComponentActionKind
 }
 
 /// <summary>
-/// Lists supported publication component HTTP method values.
+/// Defines the supported publication component HTTP method values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PublicationComponentHttpMethod
 {
@@ -295,245 +308,299 @@ public enum PublicationComponentHttpMethod
 }
 
 /// <summary>
-/// Represents a publication component connection.
+/// Represents a publication component connection application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public sealed class PublicationComponentConnection
 {
     /// <summary>
-    /// Gets or sets mode.
+    /// Gets or sets the mode value that forms part of the publication component connection state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The mode value exposed by <see cref="PublicationComponentConnection"/>.</value>
     public PublicationComponentDataMode Mode { get; set; } = PublicationComponentDataMode.PublicationDataObject;
     /// <summary>
-    /// Gets or sets data object identifier.
+    /// Gets or sets the stable data object identifier used to identify or correlate this publication component connection instance with related application state.
     /// </summary>
+    /// <value>The data object identifier value exposed by <see cref="PublicationComponentConnection"/>.</value>
     public Guid DataObjectId { get; set; }
     /// <summary>
-    /// Gets or sets processing mode.
+    /// Gets or sets the processing mode value that forms part of the publication component connection state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The processing mode value exposed by <see cref="PublicationComponentConnection"/>.</value>
     public PublicationComponentProcessingMode ProcessingMode { get; set; } = PublicationComponentProcessingMode.Client;
     /// <summary>
-    /// Gets or sets URL.
+    /// Gets or sets the URL that identifies the network or application endpoint associated with this publication component connection state.
     /// </summary>
+    /// <value>The URL value exposed by <see cref="PublicationComponentConnection"/>.</value>
     public string Url { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets load method.
+    /// Gets or sets the load method value that forms part of the publication component connection state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The load method value exposed by <see cref="PublicationComponentConnection"/>.</value>
     public PublicationComponentHttpMethod LoadMethod { get; set; } = PublicationComponentHttpMethod.Get;
     /// <summary>
-    /// Gets or sets load body.
+    /// Gets or sets the load body value that forms part of the publication component connection state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The load body value exposed by <see cref="PublicationComponentConnection"/>.</value>
     public string LoadBody { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets JSON path.
+    /// Gets or sets the JSON path used by this publication component connection instance to locate the associated file-system resource.
     /// </summary>
+    /// <value>The JSON path value exposed by <see cref="PublicationComponentConnection"/>.</value>
     public string JsonPath { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets key field.
+    /// Gets or sets the key field value that forms part of the publication component connection state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The key field value exposed by <see cref="PublicationComponentConnection"/>.</value>
     public string KeyField { get; set; } = "id";
     /// <summary>
-    /// Gets or sets key type.
+    /// Gets or sets the key type value that forms part of the publication component connection state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The key type value exposed by <see cref="PublicationComponentConnection"/>.</value>
     public string KeyType { get; set; } = "Int32";
     /// <summary>
-    /// Gets or sets odata version.
+    /// Gets or sets the o data version value that forms part of the publication component connection state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The o data version value exposed by <see cref="PublicationComponentConnection"/>.</value>
     public int ODataVersion { get; set; } = 4;
     /// <summary>
-    /// Gets or sets with credentials.
+    /// Gets or sets a value indicating whether with credentials applies to the publication component connection state.
     /// </summary>
+    /// <value>The with credentials value exposed by <see cref="PublicationComponentConnection"/>.</value>
     public bool WithCredentials { get; set; }
     /// <summary>
-    /// Gets or sets allow load.
+    /// Gets or sets a value indicating whether load applies to the publication component connection state.
     /// </summary>
+    /// <value>The allow load value exposed by <see cref="PublicationComponentConnection"/>.</value>
     public bool AllowLoad { get; set; } = true;
     /// <summary>
-    /// Gets or sets allow insert.
+    /// Gets or sets a value indicating whether insert applies to the publication component connection state.
     /// </summary>
+    /// <value>The allow insert value exposed by <see cref="PublicationComponentConnection"/>.</value>
     public bool AllowInsert { get; set; }
     /// <summary>
-    /// Gets or sets allow update.
+    /// Gets or sets a value indicating whether update applies to the publication component connection state.
     /// </summary>
+    /// <value>The allow update value exposed by <see cref="PublicationComponentConnection"/>.</value>
     public bool AllowUpdate { get; set; }
     /// <summary>
-    /// Gets or sets allow delete.
+    /// Gets or sets a value indicating whether delete applies to the publication component connection state.
     /// </summary>
+    /// <value>The allow delete value exposed by <see cref="PublicationComponentConnection"/>.</value>
     public bool AllowDelete { get; set; }
     /// <summary>
-    /// Gets or sets insert URL.
+    /// Gets or sets the insert URL that identifies the network or application endpoint associated with this publication component connection state.
     /// </summary>
+    /// <value>The insert URL value exposed by <see cref="PublicationComponentConnection"/>.</value>
     public string InsertUrl { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets update URL.
+    /// Gets or sets the update URL that identifies the network or application endpoint associated with this publication component connection state.
     /// </summary>
+    /// <value>The update URL value exposed by <see cref="PublicationComponentConnection"/>.</value>
     public string UpdateUrl { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets delete URL.
+    /// Gets or sets the delete URL that identifies the network or application endpoint associated with this publication component connection state.
     /// </summary>
+    /// <value>The delete URL value exposed by <see cref="PublicationComponentConnection"/>.</value>
     public string DeleteUrl { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets insert method.
+    /// Gets or sets the insert method value that forms part of the publication component connection state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The insert method value exposed by <see cref="PublicationComponentConnection"/>.</value>
     public PublicationComponentHttpMethod InsertMethod { get; set; } = PublicationComponentHttpMethod.Post;
     /// <summary>
-    /// Gets or sets update method.
+    /// Gets or sets the update method value that forms part of the publication component connection state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The update method value exposed by <see cref="PublicationComponentConnection"/>.</value>
     public PublicationComponentHttpMethod UpdateMethod { get; set; } = PublicationComponentHttpMethod.Put;
     /// <summary>
-    /// Gets or sets delete method.
+    /// Gets or sets the delete method value that forms part of the publication component connection state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The delete method value exposed by <see cref="PublicationComponentConnection"/>.</value>
     public PublicationComponentHttpMethod DeleteMethod { get; set; } = PublicationComponentHttpMethod.Delete;
     /// <summary>
-    /// Gets or sets append key to write URL.
+    /// Gets or sets a value indicating whether append key to write URL applies to the publication component connection state.
     /// </summary>
+    /// <value>The append key to write URL value exposed by <see cref="PublicationComponentConnection"/>.</value>
     public bool AppendKeyToWriteUrl { get; set; } = true;
     /// <summary>
-    /// Gets or sets headers.
+    /// Gets or sets the headers collection maintained or exposed by this publication component connection instance for downstream processing.
     /// </summary>
+    /// <value>The headers value exposed by <see cref="PublicationComponentConnection"/>.</value>
     public List<PublicationWebHeader> Headers { get; set; } = [];
 }
 
 /// <summary>
-/// Represents a publication component field.
+/// Represents a publication component field application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public sealed class PublicationComponentField
 {
     /// <summary>
-    /// Gets or sets the stable identifier.
+    /// Gets or sets the stable identifier used to identify or correlate this publication component field instance with related application state.
     /// </summary>
+    /// <value>The identifier value exposed by <see cref="PublicationComponentField"/>.</value>
     public Guid Id { get; set; } = Guid.NewGuid();
     /// <summary>
-    /// Gets or sets data field.
+    /// Gets or sets the data field value that forms part of the publication component field state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The data field value exposed by <see cref="PublicationComponentField"/>.</value>
     public string DataField { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets caption.
+    /// Gets or sets the caption value that forms part of the publication component field state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The caption value exposed by <see cref="PublicationComponentField"/>.</value>
     public string Caption { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets value kind.
+    /// Gets or sets the value kind value that forms part of the publication component field state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The value kind value exposed by <see cref="PublicationComponentField"/>.</value>
     public PublicationDataValueKind ValueKind { get; set; } = PublicationDataValueKind.Text;
     /// <summary>
-    /// Gets or sets editor.
+    /// Gets or sets the editor value that forms part of the publication component field state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The editor value exposed by <see cref="PublicationComponentField"/>.</value>
     public PublicationComponentEditorKind Editor { get; set; } = PublicationComponentEditorKind.Auto;
     /// <summary>
-    /// Gets or sets whether the item is visible.
+    /// Gets or sets a value indicating whether the value is visible applies to the publication component field state.
     /// </summary>
+    /// <value>The visible value exposed by <see cref="PublicationComponentField"/>.</value>
     public bool Visible { get; set; } = true;
     /// <summary>
-    /// Gets or sets editable.
+    /// Gets or sets a value indicating whether editable applies to the publication component field state.
     /// </summary>
+    /// <value>The editable value exposed by <see cref="PublicationComponentField"/>.</value>
     public bool Editable { get; set; } = true;
     /// <summary>
-    /// Gets or sets required.
+    /// Gets or sets a value indicating whether the value is required applies to the publication component field state.
     /// </summary>
+    /// <value>The required value exposed by <see cref="PublicationComponentField"/>.</value>
     public bool Required { get; set; }
     /// <summary>
-    /// Gets or sets width.
+    /// Gets or sets the width value that forms part of the publication component field state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The width value exposed by <see cref="PublicationComponentField"/>.</value>
     public int Width { get; set; }
     /// <summary>
-    /// Gets or sets format.
+    /// Gets or sets the format value that forms part of the publication component field state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The format value exposed by <see cref="PublicationComponentField"/>.</value>
     public string Format { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets area.
+    /// Gets or sets the area value that forms part of the publication component field state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The area value exposed by <see cref="PublicationComponentField"/>.</value>
     public PublicationComponentFieldArea Area { get; set; }
     /// <summary>
-    /// Gets or sets summary type.
+    /// Gets or sets the summary type value that forms part of the publication component field state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The summary type value exposed by <see cref="PublicationComponentField"/>.</value>
     public PublicationComponentSummaryType SummaryType { get; set; } = PublicationComponentSummaryType.Sum;
     /// <summary>
-    /// Gets or sets lookup data field.
+    /// Gets or sets the lookup data field value that forms part of the publication component field state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The lookup data field value exposed by <see cref="PublicationComponentField"/>.</value>
     public string LookupDataField { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets lookup display field.
+    /// Gets or sets the lookup display field value that forms part of the publication component field state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The lookup display field value exposed by <see cref="PublicationComponentField"/>.</value>
     public string LookupDisplayField { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets lookup data object identifier.
+    /// Gets or sets the stable lookup data object identifier used to identify or correlate this publication component field instance with related application state.
     /// </summary>
+    /// <value>The lookup data object identifier value exposed by <see cref="PublicationComponentField"/>.</value>
     public Guid? LookupDataObjectId { get; set; }
 }
 
 /// <summary>
-/// Represents a publication component action.
+/// Represents a publication component action application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public sealed class PublicationComponentAction
 {
     /// <summary>
-    /// Gets or sets the stable identifier.
+    /// Gets or sets the stable identifier used to identify or correlate this publication component action instance with related application state.
     /// </summary>
+    /// <value>The identifier value exposed by <see cref="PublicationComponentAction"/>.</value>
     public Guid Id { get; set; } = Guid.NewGuid();
     /// <summary>
-    /// Gets or sets trigger.
+    /// Gets or sets the trigger value that forms part of the publication component action state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The trigger value exposed by <see cref="PublicationComponentAction"/>.</value>
     public PublicationComponentActionTrigger Trigger { get; set; } = PublicationComponentActionTrigger.Click;
     /// <summary>
-    /// Gets or sets action.
+    /// Gets or sets the action value that forms part of the publication component action state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The action value exposed by <see cref="PublicationComponentAction"/>.</value>
     public PublicationComponentActionKind Action { get; set; }
     /// <summary>
-    /// Gets or sets target page identifier.
+    /// Gets or sets the stable target page identifier used to identify or correlate this publication component action instance with related application state.
     /// </summary>
+    /// <value>The target page identifier value exposed by <see cref="PublicationComponentAction"/>.</value>
     public Guid? TargetPageId { get; set; }
     /// <summary>
-    /// Gets or sets target element identifier.
+    /// Gets or sets the stable target element identifier used to identify or correlate this publication component action instance with related application state.
     /// </summary>
+    /// <value>The target element identifier value exposed by <see cref="PublicationComponentAction"/>.</value>
     public Guid? TargetElementId { get; set; }
     /// <summary>
-    /// Gets or sets target shared component identifier.
+    /// Gets or sets the stable target shared component identifier used to identify or correlate this publication component action instance with related application state.
     /// </summary>
+    /// <value>The target shared component identifier value exposed by <see cref="PublicationComponentAction"/>.</value>
     public Guid? TargetSharedComponentId { get; set; }
     /// <summary>
-    /// Gets or sets URL.
+    /// Gets or sets the URL that identifies the network or application endpoint associated with this publication component action state.
     /// </summary>
+    /// <value>The URL value exposed by <see cref="PublicationComponentAction"/>.</value>
     public string Url { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets open in new window.
+    /// Gets or sets a value indicating whether open in new window applies to the publication component action state.
     /// </summary>
+    /// <value>The open in new window value exposed by <see cref="PublicationComponentAction"/>.</value>
     public bool OpenInNewWindow { get; set; } = true;
     /// <summary>
-    /// Gets or sets mail to.
+    /// Gets or sets the mail to value that forms part of the publication component action state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The mail to value exposed by <see cref="PublicationComponentAction"/>.</value>
     public string MailTo { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets mail subject.
+    /// Gets or sets the mail subject value that forms part of the publication component action state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The mail subject value exposed by <see cref="PublicationComponentAction"/>.</value>
     public string MailSubject { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets mail body.
+    /// Gets or sets the mail body value that forms part of the publication component action state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The mail body value exposed by <see cref="PublicationComponentAction"/>.</value>
     public string MailBody { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets confirmation text.
+    /// Gets or sets the confirmation text value that forms part of the publication component action state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The confirmation text value exposed by <see cref="PublicationComponentAction"/>.</value>
     public string ConfirmationText { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets source field.
+    /// Gets or sets the source field value that forms part of the publication component action state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The source field value exposed by <see cref="PublicationComponentAction"/>.</value>
     public string SourceField { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets target field.
+    /// Gets or sets the target field value that forms part of the publication component action state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The target field value exposed by <see cref="PublicationComponentAction"/>.</value>
     public string TargetField { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets value template.
+    /// Gets or sets the value template value that forms part of the publication component action state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The value template value exposed by <see cref="PublicationComponentAction"/>.</value>
     public string ValueTemplate { get; set; } = "{{value}}";
     /// <summary>
-    /// Gets or sets script.
+    /// Gets or sets the script value that forms part of the publication component action state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The script value exposed by <see cref="PublicationComponentAction"/>.</value>
     public string Script { get; set; } = string.Empty;
 }
 
 
 /// <summary>
-/// Lists supported publication menu source mode values.
+/// Defines the supported publication menu source mode values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PublicationMenuSourceMode
 {
@@ -542,7 +609,7 @@ public enum PublicationMenuSourceMode
 }
 
 /// <summary>
-/// Lists supported publication menu destination kind values.
+/// Defines the supported publication menu destination kind values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PublicationMenuDestinationKind
 {
@@ -552,556 +619,688 @@ public enum PublicationMenuDestinationKind
 }
 
 /// <summary>
-/// Represents a publication menu item.
+/// Represents a publication menu item application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public sealed class PublicationMenuItem
 {
     /// <summary>
-    /// Gets or sets the stable identifier.
+    /// Gets or sets the stable identifier used to identify or correlate this publication menu item instance with related application state.
     /// </summary>
+    /// <value>The identifier value exposed by <see cref="PublicationMenuItem"/>.</value>
     public Guid Id { get; set; } = Guid.NewGuid();
     /// <summary>
-    /// Gets or sets parent identifier.
+    /// Gets or sets the stable parent identifier used to identify or correlate this publication menu item instance with related application state.
     /// </summary>
+    /// <value>The parent identifier value exposed by <see cref="PublicationMenuItem"/>.</value>
     public Guid? ParentId { get; set; }
     /// <summary>
-    /// Gets or sets text.
+    /// Gets or sets the text value that forms part of the publication menu item state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The text value exposed by <see cref="PublicationMenuItem"/>.</value>
     public string Text { get; set; } = "Menu item";
     /// <summary>
-    /// Gets or sets destination.
+    /// Gets or sets the destination value that forms part of the publication menu item state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The destination value exposed by <see cref="PublicationMenuItem"/>.</value>
     public PublicationMenuDestinationKind Destination { get; set; }
     /// <summary>
-    /// Gets or sets target page identifier.
+    /// Gets or sets the stable target page identifier used to identify or correlate this publication menu item instance with related application state.
     /// </summary>
+    /// <value>The target page identifier value exposed by <see cref="PublicationMenuItem"/>.</value>
     public Guid? TargetPageId { get; set; }
     /// <summary>
-    /// Gets or sets URL.
+    /// Gets or sets the URL that identifies the network or application endpoint associated with this publication menu item state.
     /// </summary>
+    /// <value>The URL value exposed by <see cref="PublicationMenuItem"/>.</value>
     public string Url { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets open in new window.
+    /// Gets or sets a value indicating whether open in new window applies to the publication menu item state.
     /// </summary>
+    /// <value>The open in new window value exposed by <see cref="PublicationMenuItem"/>.</value>
     public bool OpenInNewWindow { get; set; } = true;
     /// <summary>
-    /// Gets or sets whether the feature is enabled.
+    /// Gets or sets a value indicating whether the option is enabled applies to the publication menu item state.
     /// </summary>
+    /// <value>The enabled value exposed by <see cref="PublicationMenuItem"/>.</value>
     public bool Enabled { get; set; } = true;
     /// <summary>
-    /// Gets or sets whether the item is visible.
+    /// Gets or sets a value indicating whether the value is visible applies to the publication menu item state.
     /// </summary>
+    /// <value>The visible value exposed by <see cref="PublicationMenuItem"/>.</value>
     public bool Visible { get; set; } = true;
     /// <summary>
-    /// Gets or sets icon CSS class.
+    /// Gets or sets the icon CSS class value that forms part of the publication menu item state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The icon CSS class value exposed by <see cref="PublicationMenuItem"/>.</value>
     public string IconCssClass { get; set; } = string.Empty;
 }
 
 /// <summary>
-/// Represents a publication component panel.
+/// Represents a publication component panel application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public sealed class PublicationComponentPanel
 {
     /// <summary>
-    /// Gets or sets the stable identifier.
+    /// Gets or sets the stable identifier used to identify or correlate this publication component panel instance with related application state.
     /// </summary>
+    /// <value>The identifier value exposed by <see cref="PublicationComponentPanel"/>.</value>
     public Guid Id { get; set; } = Guid.NewGuid();
     /// <summary>
-    /// Gets or sets title.
+    /// Gets or sets the title value that forms part of the publication component panel state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The title value exposed by <see cref="PublicationComponentPanel"/>.</value>
     public string Title { get; set; } = "Panel";
     /// <summary>
-    /// Gets or sets size.
+    /// Gets or sets the size that quantifies the associated publication component panel data.
     /// </summary>
+    /// <value>The size value exposed by <see cref="PublicationComponentPanel"/>.</value>
     public string Size { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets min size.
+    /// Gets or sets the min size that quantifies the associated publication component panel data.
     /// </summary>
+    /// <value>The min size value exposed by <see cref="PublicationComponentPanel"/>.</value>
     public string MinSize { get; set; } = "80px";
     /// <summary>
-    /// Gets or sets max size.
+    /// Gets or sets the max size that quantifies the associated publication component panel data.
     /// </summary>
+    /// <value>The max size value exposed by <see cref="PublicationComponentPanel"/>.</value>
     public string MaxSize { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets collapsible.
+    /// Gets or sets a value indicating whether collapsible applies to the publication component panel state.
     /// </summary>
+    /// <value>The collapsible value exposed by <see cref="PublicationComponentPanel"/>.</value>
     public bool Collapsible { get; set; } = true;
     /// <summary>
-    /// Gets or sets collapsed.
+    /// Gets or sets a value indicating whether collapsed applies to the publication component panel state.
     /// </summary>
+    /// <value>The collapsed value exposed by <see cref="PublicationComponentPanel"/>.</value>
     public bool Collapsed { get; set; }
     /// <summary>
-    /// Gets or sets child kind.
+    /// Gets or sets the child kind value that forms part of the publication component panel state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The child kind value exposed by <see cref="PublicationComponentPanel"/>.</value>
     public PublicationComponentKind ChildKind { get; set; } = PublicationComponentKind.DataGrid;
     /// <summary>
-    /// Gets or sets data object identifier.
+    /// Gets or sets the stable data object identifier used to identify or correlate this publication component panel instance with related application state.
     /// </summary>
+    /// <value>The data object identifier value exposed by <see cref="PublicationComponentPanel"/>.</value>
     public Guid DataObjectId { get; set; }
     /// <summary>
-    /// Gets or sets content HTML.
+    /// Gets or sets the content HTML value that forms part of the publication component panel state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The content HTML value exposed by <see cref="PublicationComponentPanel"/>.</value>
     public string ContentHtml { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets fields.
+    /// Gets or sets the fields collection maintained or exposed by this publication component panel instance for downstream processing.
     /// </summary>
+    /// <value>The fields value exposed by <see cref="PublicationComponentPanel"/>.</value>
     public List<PublicationComponentField> Fields { get; set; } = [];
 }
 
 /// <summary>
-/// Represents a dev extreme component element.
+/// Represents a dev extreme component element application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public sealed class DevExtremeComponentElement : PublicationElement
 {
     /// <summary>
-    /// Gets kind.
+    /// Gets the kind value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The kind value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public override PublicationElementKind Kind => PublicationElementKind.DevExtremeComponent;
     /// <summary>
-    /// Gets or sets component kind.
+    /// Gets or sets the component kind value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The component kind value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public PublicationComponentKind ComponentKind { get; set; } = PublicationComponentKind.DataGrid;
     /// <summary>
-    /// Gets or sets scope.
+    /// Gets or sets the scope value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The scope value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public PublicationComponentScope Scope { get; set; }
     /// <summary>
-    /// Gets or sets shared component identifier.
+    /// Gets or sets the stable shared component identifier used to identify or correlate this dev extreme component element instance with related application state.
     /// </summary>
+    /// <value>The shared component identifier value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public Guid? SharedComponentId { get; set; }
     /// <summary>
-    /// Gets or sets title.
+    /// Gets or sets the title value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The title value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string Title { get; set; } = "Data Grid";
     /// <summary>
-    /// Gets or sets connection.
+    /// Gets or sets the connection value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The connection value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public PublicationComponentConnection Connection { get; set; } = new();
     /// <summary>
-    /// Gets or sets fields.
+    /// Gets or sets the fields collection maintained or exposed by this dev extreme component element instance for downstream processing.
     /// </summary>
+    /// <value>The fields value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public List<PublicationComponentField> Fields { get; set; } = [];
     /// <summary>
-    /// Gets or sets actions.
+    /// Gets or sets the actions collection maintained or exposed by this dev extreme component element instance for downstream processing.
     /// </summary>
+    /// <value>The actions value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public List<PublicationComponentAction> Actions { get; set; } = [];
     /// <summary>
-    /// Gets or sets panels.
+    /// Gets or sets the panels collection maintained or exposed by this dev extreme component element instance for downstream processing.
     /// </summary>
+    /// <value>The panels value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public List<PublicationComponentPanel> Panels { get; set; } = [];
     /// <summary>
-    /// Gets or sets menu source mode.
+    /// Gets or sets the menu source mode value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The menu source mode value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public PublicationMenuSourceMode MenuSourceMode { get; set; } = PublicationMenuSourceMode.DataConnection;
     /// <summary>
-    /// Gets or sets menu items.
+    /// Gets or sets the menu items collection maintained or exposed by this dev extreme component element instance for downstream processing.
     /// </summary>
+    /// <value>The menu items value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public List<PublicationMenuItem> MenuItems { get; set; } = [];
 
     /// <summary>
-    /// Gets or sets edit mode.
+    /// Gets or sets the edit mode value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The edit mode value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public PublicationComponentEditMode EditMode { get; set; } = PublicationComponentEditMode.ReadOnly;
     /// <summary>
-    /// Gets or sets selection mode.
+    /// Gets or sets the selection mode value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The selection mode value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public PublicationComponentSelectionMode SelectionMode { get; set; } = PublicationComponentSelectionMode.Single;
     /// <summary>
-    /// Gets or sets show title.
+    /// Gets or sets a value indicating whether show title applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The show title value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool ShowTitle { get; set; } = true;
     /// <summary>
-    /// Gets or sets show borders.
+    /// Gets or sets a value indicating whether show borders applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The show borders value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool ShowBorders { get; set; } = true;
     /// <summary>
-    /// Gets or sets show filter row.
+    /// Gets or sets a value indicating whether show filter row applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The show filter row value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool ShowFilterRow { get; set; } = true;
     /// <summary>
-    /// Gets or sets show header filter.
+    /// Gets or sets a value indicating whether show header filter applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The show header filter value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool ShowHeaderFilter { get; set; }
     /// <summary>
-    /// Gets or sets show search panel.
+    /// Gets or sets a value indicating whether show search panel applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The show search panel value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool ShowSearchPanel { get; set; } = true;
     /// <summary>
-    /// Gets or sets show group panel.
+    /// Gets or sets a value indicating whether show group panel applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The show group panel value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool ShowGroupPanel { get; set; }
     /// <summary>
-    /// Gets or sets show column chooser.
+    /// Gets or sets a value indicating whether show column chooser applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The show column chooser value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool ShowColumnChooser { get; set; }
     /// <summary>
-    /// Gets or sets allow sorting.
+    /// Gets or sets a value indicating whether sorting applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The allow sorting value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool AllowSorting { get; set; } = true;
     /// <summary>
-    /// Gets or sets allow filtering.
+    /// Gets or sets a value indicating whether filtering applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The allow filtering value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool AllowFiltering { get; set; } = true;
     /// <summary>
-    /// Gets or sets allow paging.
+    /// Gets or sets a value indicating whether paging applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The allow paging value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool AllowPaging { get; set; } = true;
     /// <summary>
-    /// Gets or sets allow reordering.
+    /// Gets or sets a value indicating whether reordering applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The allow reordering value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool AllowReordering { get; set; } = true;
     /// <summary>
-    /// Gets or sets allow resizing.
+    /// Gets or sets a value indicating whether resizing applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The allow resizing value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool AllowResizing { get; set; } = true;
     /// <summary>
-    /// Gets or sets word wrap.
+    /// Gets or sets a value indicating whether word wrap applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The word wrap value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool WordWrap { get; set; }
     /// <summary>
-    /// Gets or sets auto expand all.
+    /// Gets or sets a value indicating whether auto expand all applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The auto expand all value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool AutoExpandAll { get; set; }
     /// <summary>
-    /// Gets or sets page size.
+    /// Gets or sets the page size that quantifies the associated dev extreme component element data.
     /// </summary>
+    /// <value>The page size value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public int PageSize { get; set; } = 20;
     /// <summary>
-    /// Gets or sets height mode.
+    /// Gets or sets the height mode value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The height mode value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string HeightMode { get; set; } = "fill";
 
     /// <summary>
-    /// Gets or sets key field.
+    /// Gets or sets the key field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The key field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string KeyField { get; set; } = "id";
     /// <summary>
-    /// Gets or sets parent field.
+    /// Gets or sets the parent field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The parent field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string ParentField { get; set; } = "parentId";
     /// <summary>
-    /// Gets or sets text field.
+    /// Gets or sets the text field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The text field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string TextField { get; set; } = "text";
     /// <summary>
-    /// Gets or sets value field.
+    /// Gets or sets the value field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The value field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string ValueField { get; set; } = "value";
     /// <summary>
-    /// Gets or sets display field.
+    /// Gets or sets the display field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The display field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string DisplayField { get; set; } = "text";
     /// <summary>
-    /// Gets or sets image field.
+    /// Gets or sets the image field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The image field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string ImageField { get; set; } = "image";
     /// <summary>
-    /// Gets or sets media kind field.
+    /// Gets or sets the media kind field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The media kind field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string MediaKindField { get; set; } = "mediaType";
     /// <summary>
-    /// Gets or sets media source field.
+    /// Gets or sets the media source field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The media source field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string MediaSourceField { get; set; } = "source";
     /// <summary>
-    /// Gets or sets media poster field.
+    /// Gets or sets the media poster field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The media poster field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string MediaPosterField { get; set; } = "poster";
     /// <summary>
-    /// Gets or sets media alt text field.
+    /// Gets or sets the media alt text field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The media alt text field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string MediaAltTextField { get; set; } = "altText";
     /// <summary>
-    /// Gets or sets media show controls.
+    /// Gets or sets a value indicating whether media show controls applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The media show controls value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool MediaShowControls { get; set; } = true;
     /// <summary>
-    /// Gets or sets media auto play.
+    /// Gets or sets a value indicating whether media auto play applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The media auto play value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool MediaAutoPlay { get; set; }
     /// <summary>
-    /// Gets or sets media muted.
+    /// Gets or sets a value indicating whether media muted applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The media muted value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool MediaMuted { get; set; } = true;
     /// <summary>
-    /// Gets or sets media loop.
+    /// Gets or sets a value indicating whether media loop applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The media loop value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool MediaLoop { get; set; } = true;
     /// <summary>
-    /// Gets or sets start date field.
+    /// Gets or sets the start date field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The start date field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string StartDateField { get; set; } = "startDate";
     /// <summary>
-    /// Gets or sets end date field.
+    /// Gets or sets the end date field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The end date field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string EndDateField { get; set; } = "endDate";
     /// <summary>
-    /// Gets or sets all day field.
+    /// Gets or sets the all day field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The all day field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string AllDayField { get; set; } = "allDay";
     /// <summary>
-    /// Gets or sets target page field.
+    /// Gets or sets the target page field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The target page field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string TargetPageField { get; set; } = "targetPageId";
     /// <summary>
-    /// Gets or sets URL field.
+    /// Gets or sets the URL field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The URL field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string UrlField { get; set; } = "url";
     /// <summary>
-    /// Gets or sets current view.
+    /// Gets or sets the current view value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The current view value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string CurrentView { get; set; } = "week";
     /// <summary>
-    /// Gets or sets orientation.
+    /// Gets or sets the orientation value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The orientation value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string Orientation { get; set; } = "horizontal";
     /// <summary>
-    /// Gets or sets column count.
+    /// Gets or sets the column count that quantifies the associated dev extreme component element data.
     /// </summary>
+    /// <value>The column count value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public int ColumnCount { get; set; } = 2;
     /// <summary>
-    /// Gets or sets button text.
+    /// Gets or sets the button text value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The button text value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string ButtonText { get; set; } = "Run";
     /// <summary>
-    /// Gets or sets chat platform.
+    /// Gets or sets the chat platform value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The chat platform value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public PublicationChatPlatform ChatPlatform { get; set; } = PublicationChatPlatform.OutputContext;
     /// <summary>
-    /// Gets or sets chat channel.
+    /// Gets or sets the chat channel value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The chat channel value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string ChatChannel { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets chat platform field.
+    /// Gets or sets the chat platform field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The chat platform field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string ChatPlatformField { get; set; } = "platform";
     /// <summary>
-    /// Gets or sets chat channel field.
+    /// Gets or sets the chat channel field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The chat channel field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string ChatChannelField { get; set; } = "channel";
     /// <summary>
-    /// Gets or sets chat message field.
+    /// Gets or sets the chat message field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The chat message field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string ChatMessageField { get; set; } = "text";
     /// <summary>
-    /// Gets or sets chat timestamp field.
+    /// Gets or sets the chat timestamp field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The chat timestamp field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string ChatTimestampField { get; set; } = "timestamp";
     /// <summary>
-    /// Gets or sets chat author identifier field.
+    /// Gets or sets the chat author identifier field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The chat author identifier field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string ChatAuthorIdField { get; set; } = "authorId";
     /// <summary>
-    /// Gets or sets chat author name field.
+    /// Gets or sets the chat author name field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The chat author name field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string ChatAuthorNameField { get; set; } = "authorName";
     /// <summary>
-    /// Gets or sets chat author avatar field.
+    /// Gets or sets the chat author avatar field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The chat author avatar field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string ChatAuthorAvatarField { get; set; } = "authorAvatar";
     /// <summary>
-    /// Gets or sets chat current user identifier.
+    /// Gets or sets the stable chat current user identifier used to identify or correlate this dev extreme component element instance with related application state.
     /// </summary>
+    /// <value>The chat current user identifier value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string ChatCurrentUserId { get; set; } = "publisher";
     /// <summary>
-    /// Gets or sets chat current user name.
+    /// Gets or sets the chat current user name value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The chat current user name value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string ChatCurrentUserName { get; set; } = "Streamer";
     /// <summary>
-    /// Gets or sets chat current user avatar.
+    /// Gets or sets the chat current user avatar value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The chat current user avatar value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string ChatCurrentUserAvatar { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets chat allow sending.
+    /// Gets or sets a value indicating whether chat allow sending applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The chat allow sending value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool ChatAllowSending { get; set; } = true;
     /// <summary>
-    /// Gets or sets chat show avatar.
+    /// Gets or sets a value indicating whether chat show avatar applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The chat show avatar value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool ChatShowAvatar { get; set; } = true;
     /// <summary>
-    /// Gets or sets chat show timestamp.
+    /// Gets or sets a value indicating whether chat show timestamp applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The chat show timestamp value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool ChatShowTimestamp { get; set; } = true;
     /// <summary>
-    /// Gets or sets chat optimistic send.
+    /// Gets or sets a value indicating whether chat optimistic send applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The chat optimistic send value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool ChatOptimisticSend { get; set; } = true;
     /// <summary>
-    /// Gets or sets chat display mode.
+    /// Gets or sets the chat display mode value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The chat display mode value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public PublicationChatDisplayMode ChatDisplayMode { get; set; } = PublicationChatDisplayMode.Auto;
     /// <summary>
-    /// Gets or sets chat max visible messages.
+    /// Gets or sets the chat max visible messages value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The chat max visible messages value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public int ChatMaxVisibleMessages { get; set; } = 12;
     /// <summary>
-    /// Gets or sets chat compact.
+    /// Gets or sets a value indicating whether chat compact applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The chat compact value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool ChatCompact { get; set; }
     /// <summary>
-    /// Gets or sets chat fade older messages.
+    /// Gets or sets a value indicating whether chat fade older messages applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The chat fade older messages value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool ChatFadeOlderMessages { get; set; } = true;
     /// <summary>
-    /// Gets or sets chat show platform badge.
+    /// Gets or sets a value indicating whether chat show platform badge applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The chat show platform badge value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool ChatShowPlatformBadge { get; set; } = true;
     /// <summary>
-    /// Gets or sets chat background opacity.
+    /// Gets or sets the chat background opacity value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The chat background opacity value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public double ChatBackgroundOpacity { get; set; } = .88;
     /// <summary>
-    /// Gets or sets chat message opacity.
+    /// Gets or sets the chat message opacity value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The chat message opacity value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public double ChatMessageOpacity { get; set; } = .78;
     /// <summary>
-    /// Gets or sets placeholder.
+    /// Gets or sets the placeholder value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The placeholder value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string Placeholder { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets initial value.
+    /// Gets or sets the initial value value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The initial value value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string InitialValue { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets background.
+    /// Gets or sets the background value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The background value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string Background { get; set; } = "#ffffff";
     /// <summary>
-    /// Gets or sets border color.
+    /// Gets or sets the border color value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The border color value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string BorderColor { get; set; } = "#cbd5e1";
     /// <summary>
-    /// Gets or sets border width millimetres.
+    /// Gets or sets the border width mm value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The border width mm value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public double BorderWidthMm { get; set; } = .25;
 
     /// <summary>
-    /// Gets or sets custom CSS class.
+    /// Gets or sets the custom CSS class value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The custom CSS class value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string CustomCssClass { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets custom CSS.
+    /// Gets or sets the custom CSS value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The custom CSS value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string CustomCss { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets content offset horizontal position.
+    /// Gets or sets the content offset x value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The content offset x value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public double ContentOffsetX { get; set; }
     /// <summary>
-    /// Gets or sets content offset vertical position.
+    /// Gets or sets the content offset y value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The content offset y value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public double ContentOffsetY { get; set; }
     /// <summary>
-    /// Gets or sets content scale.
+    /// Gets or sets the content scale value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The content scale value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public double ContentScale { get; set; } = 1;
 
     /// <summary>
-    /// Gets or sets map provider.
+    /// Gets or sets the map provider value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The map provider value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string MapProvider { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets map type.
+    /// Gets or sets the map type value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The map type value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string MapType { get; set; } = "roadmap";
     /// <summary>
-    /// Gets or sets map API key.
+    /// Gets or sets the stable map API key used to identify or correlate this dev extreme component element instance with related application state.
     /// </summary>
+    /// <value>The map API key value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string MapApiKey { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets map identifier.
+    /// Gets or sets the stable map identifier used to identify or correlate this dev extreme component element instance with related application state.
     /// </summary>
+    /// <value>The map identifier value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string MapId { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets map center latitude.
+    /// Gets or sets the map center latitude value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The map center latitude value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public double MapCenterLatitude { get; set; } = 51.1657;
     /// <summary>
-    /// Gets or sets map center longitude.
+    /// Gets or sets the map center longitude value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The map center longitude value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public double MapCenterLongitude { get; set; } = 10.4515;
     /// <summary>
-    /// Gets or sets map zoom.
+    /// Gets or sets the map zoom value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The map zoom value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public double MapZoom { get; set; } = 4;
     /// <summary>
-    /// Gets or sets map controls.
+    /// Gets or sets a value indicating whether map controls applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The map controls value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool MapControls { get; set; } = true;
     /// <summary>
-    /// Gets or sets map auto adjust.
+    /// Gets or sets a value indicating whether map auto adjust applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The map auto adjust value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool MapAutoAdjust { get; set; } = true;
     /// <summary>
-    /// Gets or sets map show routes.
+    /// Gets or sets a value indicating whether map show routes applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The map show routes value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool MapShowRoutes { get; set; } = true;
     /// <summary>
-    /// Gets or sets latitude field.
+    /// Gets or sets the latitude field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The latitude field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string LatitudeField { get; set; } = "latitude";
     /// <summary>
-    /// Gets or sets longitude field.
+    /// Gets or sets the longitude field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The longitude field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string LongitudeField { get; set; } = "longitude";
     /// <summary>
-    /// Gets or sets address field.
+    /// Gets or sets the address field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The address field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string AddressField { get; set; } = "address";
     /// <summary>
-    /// Gets or sets marker tooltip field.
+    /// Gets or sets the marker tooltip field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The marker tooltip field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string MarkerTooltipField { get; set; } = "text";
     /// <summary>
-    /// Gets or sets map route field.
+    /// Gets or sets the map route field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The map route field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string MapRouteField { get; set; } = "routeId";
     /// <summary>
-    /// Gets or sets map order field.
+    /// Gets or sets the map order field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The map order field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string MapOrderField { get; set; } = "order";
 
     /// <summary>
-    /// Gets or sets vector base layer.
+    /// Gets or sets the vector base layer value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The vector base layer value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public PublicationVectorMapBaseLayer VectorBaseLayer { get; set; } = PublicationVectorMapBaseLayer.World;
     /// <summary>
-    /// Gets or sets vector projection.
+    /// Gets or sets the vector projection value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The vector projection value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string VectorProjection { get; set; } = "mercator";
     /// <summary>
-    /// Gets or sets vector show labels.
+    /// Gets or sets a value indicating whether vector show labels applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The vector show labels value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool VectorShowLabels { get; set; } = true;
     /// <summary>
-    /// Gets or sets vector label field.
+    /// Gets or sets the vector label field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The vector label field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string VectorLabelField { get; set; } = "name";
     /// <summary>
-    /// Gets or sets vector value field.
+    /// Gets or sets the vector value field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The vector value field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string VectorValueField { get; set; } = "value";
     /// <summary>
-    /// Gets or sets vector color field.
+    /// Gets or sets the vector color field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The vector color field value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string VectorColorField { get; set; } = "color";
     /// <summary>
-    /// Gets or sets vector features.
+    /// Gets or sets the vector features collection maintained or exposed by this dev extreme component element instance for downstream processing.
     /// </summary>
+    /// <value>The vector features value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public List<PublicationVectorMapFeature> VectorFeatures { get; set; } = [];
 
     /// <summary>Additional DevExtreme options merged after the safe generated options.</summary>
+    /// <value>The advanced options JSON value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string AdvancedOptionsJson { get; set; } = "{}";
     /// <summary>
-    /// Gets or sets allow custom script.
+    /// Gets or sets a value indicating whether custom script applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The allow custom script value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public bool AllowCustomScript { get; set; }
 
     /// <summary>
-    /// Gets is layout container.
+    /// Gets a value indicating whether layout container applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The is layout container value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     [JsonIgnore]
     public bool IsLayoutContainer => ComponentKind is PublicationComponentKind.Splitter
         or PublicationComponentKind.TabPanel
@@ -1109,8 +1308,9 @@ public sealed class DevExtremeComponentElement : PublicationElement
         or PublicationComponentKind.ScrollView;
 
     /// <summary>
-    /// Gets supports content viewport.
+    /// Gets a value indicating whether content viewport applies to the dev extreme component element state.
     /// </summary>
+    /// <value>The supports content viewport value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     [JsonIgnore]
     public bool SupportsContentViewport => ComponentKind is PublicationComponentKind.Map or PublicationComponentKind.VectorMap;
 }

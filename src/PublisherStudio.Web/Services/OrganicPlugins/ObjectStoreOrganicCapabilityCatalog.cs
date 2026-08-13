@@ -1,4 +1,4 @@
-﻿using PublisherStudio.Services.Configuration;
+using PublisherStudio.Services.Configuration;
 using PublisherStudio.Services.MediaConversion;
 
 namespace PublisherStudio.Services.OrganicPlugins;
@@ -8,6 +8,10 @@ namespace PublisherStudio.Services.OrganicPlugins;
 /// serializable object store and advertised through the shared WireLibrary contracts. The
 /// reviewed legacy catalog remains intact for its non-DX UI and hardware metadata only.
 /// </summary>
+/// <param name="functionCatalog">Publisher devexpress function catalog data service dependency used by the object store organic capability workflow to provide the corresponding application capability.</param>
+/// <param name="legacyMetadataCatalog">Organic capability catalog dependency used by the object store organic capability workflow to provide the corresponding application capability.</param>
+/// <param name="mediaConversion">Media conversion service dependency used by the object store organic capability workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class ObjectStoreOrganicCapabilityCatalog(
     IPublisherDxFunctionCatalogDataService functionCatalog,
     OrganicCapabilityCatalog legacyMetadataCatalog,
@@ -24,8 +28,10 @@ public sealed class ObjectStoreOrganicCapabilityCatalog(
     }
 
     /// <summary>
-    /// Gets capabilities async.
+    /// Retrieves capabilities in the object store organic capability directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public async Task<IReadOnlyList<OrganicCapabilityDescriptor>> GetCapabilitiesAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -53,8 +59,10 @@ public sealed class ObjectStoreOrganicCapabilityCatalog(
     }
 
     /// <summary>
-    /// Gets skills async.
+    /// Retrieves skills in the object store organic capability directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public async Task<IReadOnlyList<OrganicSkillDescriptor>> GetSkillsAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -94,8 +102,10 @@ public sealed class ObjectStoreOrganicCapabilityCatalog(
     }
 
     /// <summary>
-    /// Gets UI features async.
+    /// Retrieves UI features in the object store organic capability directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public async Task<IReadOnlyList<OrganicUiFeatureDescriptor>> GetUiFeaturesAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -117,8 +127,10 @@ public sealed class ObjectStoreOrganicCapabilityCatalog(
     }
 
     /// <summary>
-    /// Gets hardware async.
+    /// Retrieves hardware in the object store organic capability directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public async Task<IReadOnlyList<OrganicHardwareDescriptor>> GetHardwareAsync(CancellationToken cancellationToken = default)
     {
         try

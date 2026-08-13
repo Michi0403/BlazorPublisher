@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace PublisherStudio.BusinessObjects;
 
@@ -10,116 +10,140 @@ namespace PublisherStudio.BusinessObjects;
 public sealed class PublicationWebBinding
 {
     /// <summary>
-    /// Gets or sets the stable identifier.
+    /// Gets or sets the stable identifier used to identify or correlate this publication web binding instance with related application state.
     /// </summary>
+    /// <value>The identifier value exposed by <see cref="PublicationWebBinding"/>.</value>
     public Guid Id { get; set; } = Guid.NewGuid();
     /// <summary>
-    /// Gets or sets transport.
+    /// Gets or sets the transport value that forms part of the publication web binding state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The transport value exposed by <see cref="PublicationWebBinding"/>.</value>
     public PublicationWebTransportKind Transport { get; set; } = PublicationWebTransportKind.MonolithApi;
     /// <summary>
-    /// Gets or sets method.
+    /// Gets or sets the method value that forms part of the publication web binding state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The method value exposed by <see cref="PublicationWebBinding"/>.</value>
     public PublicationWebHttpMethod Method { get; set; } = PublicationWebHttpMethod.Get;
     /// <summary>
-    /// Gets or sets URL.
+    /// Gets or sets the URL that identifies the network or application endpoint associated with this publication web binding state.
     /// </summary>
+    /// <value>The URL value exposed by <see cref="PublicationWebBinding"/>.</value>
     public string Url { get; set; } = "/api/publisher/system/status";
     /// <summary>
-    /// Gets or sets headers.
+    /// Gets or sets the headers collection maintained or exposed by this publication web binding instance for downstream processing.
     /// </summary>
+    /// <value>The headers value exposed by <see cref="PublicationWebBinding"/>.</value>
     public List<PublicationWebHeader> Headers { get; set; } = [];
     /// <summary>
-    /// Gets or sets request body.
+    /// Gets or sets the request body value that forms part of the publication web binding state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The request body value exposed by <see cref="PublicationWebBinding"/>.</value>
     public string RequestBody { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets response format.
+    /// Gets or sets the response format value that forms part of the publication web binding state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The response format value exposed by <see cref="PublicationWebBinding"/>.</value>
     public PublicationWebResponseFormat ResponseFormat { get; set; } = PublicationWebResponseFormat.Auto;
     /// <summary>
-    /// Gets or sets JSON path.
+    /// Gets or sets the JSON path used by this publication web binding instance to locate the associated file-system resource.
     /// </summary>
+    /// <value>The JSON path value exposed by <see cref="PublicationWebBinding"/>.</value>
     public string JsonPath { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets delimiter.
+    /// Gets or sets the delimiter value that forms part of the publication web binding state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The delimiter value exposed by <see cref="PublicationWebBinding"/>.</value>
     public string Delimiter { get; set; } = ",";
     /// <summary>
-    /// Gets or sets first row contains headers.
+    /// Gets or sets a value indicating whether first row contains headers applies to the publication web binding state.
     /// </summary>
+    /// <value>The first row contains headers value exposed by <see cref="PublicationWebBinding"/>.</value>
     public bool FirstRowContainsHeaders { get; set; } = true;
     /// <summary>
-    /// Gets or sets refresh interval seconds.
+    /// Gets or sets the refresh interval seconds value that forms part of the publication web binding state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The refresh interval seconds value exposed by <see cref="PublicationWebBinding"/>.</value>
     public int RefreshIntervalSeconds { get; set; } = 30;
     /// <summary>
-    /// Gets or sets timeout seconds.
+    /// Gets or sets the timeout seconds value that forms part of the publication web binding state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The timeout seconds value exposed by <see cref="PublicationWebBinding"/>.</value>
     public int TimeoutSeconds { get; set; } = 30;
     /// <summary>
-    /// Gets or sets whether the feature is enabled.
+    /// Gets or sets a value indicating whether the option is enabled applies to the publication web binding state.
     /// </summary>
+    /// <value>The enabled value exposed by <see cref="PublicationWebBinding"/>.</value>
     public bool Enabled { get; set; } = true;
     /// <summary>
-    /// Gets or sets refresh on open.
+    /// Gets or sets a value indicating whether refresh on open applies to the publication web binding state.
     /// </summary>
+    /// <value>The refresh on open value exposed by <see cref="PublicationWebBinding"/>.</value>
     public bool RefreshOnOpen { get; set; } = true;
     /// <summary>
-    /// Gets or sets allow exported HTML fetch.
+    /// Gets or sets a value indicating whether exported HTML fetch applies to the publication web binding state.
     /// </summary>
+    /// <value>The allow exported HTML fetch value exposed by <see cref="PublicationWebBinding"/>.</value>
     public bool AllowExportedHtmlFetch { get; set; } = false;
     /// <summary>
-    /// Gets or sets use snapshot on failure.
+    /// Gets or sets a value indicating whether snapshot on failure applies to the publication web binding state.
     /// </summary>
+    /// <value>The use snapshot on failure value exposed by <see cref="PublicationWebBinding"/>.</value>
     public bool UseSnapshotOnFailure { get; set; } = true;
     /// <summary>
-    /// Gets or sets webhook token.
+    /// Gets or sets the webhook token value that forms part of the publication web binding state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The webhook token value exposed by <see cref="PublicationWebBinding"/>.</value>
     public string WebhookToken { get; set; } = Convert.ToHexString(Guid.NewGuid().ToByteArray()).ToLowerInvariant();
     // Tokenized CORS endpoint used only when a user explicitly allows a standalone
     // HTML export to reconnect to the local PublisherStudio monolith.
     /// <summary>
-    /// Gets or sets export access token.
+    /// Gets or sets the export access token value that forms part of the publication web binding state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The export access token value exposed by <see cref="PublicationWebBinding"/>.</value>
     public string ExportAccessToken { get; set; } = Convert.ToHexString(Guid.NewGuid().ToByteArray()).ToLowerInvariant();
     /// <summary>
-    /// Gets or sets last success UTC.
+    /// Gets or sets the last success UTC associated with this publication web binding state, using the time semantics implied by the member name.
     /// </summary>
+    /// <value>The last success UTC value exposed by <see cref="PublicationWebBinding"/>.</value>
     public DateTimeOffset? LastSuccessUtc { get; set; }
     /// <summary>
-    /// Gets or sets last content type.
+    /// Gets or sets the last content type value that forms part of the publication web binding state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The last content type value exposed by <see cref="PublicationWebBinding"/>.</value>
     public string LastContentType { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets last error.
+    /// Gets or sets the last error value that forms part of the publication web binding state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The last error value exposed by <see cref="PublicationWebBinding"/>.</value>
     public string LastError { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets is push.
+    /// Gets a value indicating whether push applies to the publication web binding state.
     /// </summary>
+    /// <value>The is push value exposed by <see cref="PublicationWebBinding"/>.</value>
     [JsonIgnore]
     public bool IsPush => Transport == PublicationWebTransportKind.Webhook;
 }
 
 /// <summary>
-/// Represents a publication web header.
+/// Represents a publication web header application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public sealed class PublicationWebHeader
 {
     /// <summary>
-    /// Gets or sets the display name.
+    /// Gets or sets the name value that forms part of the publication web header state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The name value exposed by <see cref="PublicationWebHeader"/>.</value>
     public string Name { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets value.
+    /// Gets or sets the value value that forms part of the publication web header state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The value value exposed by <see cref="PublicationWebHeader"/>.</value>
     public string Value { get; set; } = string.Empty;
 }
 
 /// <summary>
-/// Lists supported publication web transport kind values.
+/// Defines the supported publication web transport kind values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PublicationWebTransportKind
 {
@@ -130,7 +154,7 @@ public enum PublicationWebTransportKind
 }
 
 /// <summary>
-/// Lists supported publication web HTTP method values.
+/// Defines the supported publication web HTTP method values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PublicationWebHttpMethod
 {
@@ -142,7 +166,7 @@ public enum PublicationWebHttpMethod
 }
 
 /// <summary>
-/// Lists supported publication web response format values.
+/// Defines the supported publication web response format values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PublicationWebResponseFormat
 {

@@ -9,19 +9,26 @@ using PublisherStudio.Services.Streaming.Encoding;
 namespace PublisherStudio.Services.Streaming.Capture;
 
 /// <summary>
-/// Defines the native capture session factory contract.
+/// Defines the contract for native capture session behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
 public interface INativeCaptureSessionFactory
 {
     /// <summary>
-    /// Runs the create operation.
+    /// Performs create using the configuration and dependencies owned by <see cref="INativeCaptureSessionFactory"/>.
     /// </summary>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
+    /// <returns>The native capture session produced by the operation.</returns>
     NativeCaptureSession Create(NativeCaptureRequest request);
 }
 
 /// <summary>
-/// Provides native capture session factory operations.
+/// Creates configured native capture session instances from the application's current dependencies and runtime settings.
 /// </summary>
+/// <param name="runtimePolicy">Publisher runtime policy data service dependency used by the native capture session workflow to provide the corresponding application capability.</param>
+/// <param name="ffmpegLocator">Ffmpeg locator value supplied to the native capture session operation and used when producing its result.</param>
+/// <param name="processLoopbackFactory">Windows process loopback capture factory dependency used by the native capture session workflow to provide the corresponding application capability.</param>
+/// <param name="loggerFactory">Logger factory dependency used by the native capture session workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class NativeCaptureSessionFactory(
     IPublisherRuntimePolicyDataService runtimePolicy,
     FfmpegLocator ffmpegLocator,
@@ -30,8 +37,10 @@ public sealed class NativeCaptureSessionFactory(
     ILogger<NativeCaptureSessionFactory> logger) : INativeCaptureSessionFactory
 {
     /// <summary>
-    /// Runs the create operation.
+    /// Performs create using the configuration and dependencies owned by <see cref="NativeCaptureSessionFactory"/>.
     /// </summary>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
+    /// <returns>The native capture session produced by the operation.</returns>
     public NativeCaptureSession Create(NativeCaptureRequest request)
     {
         try
@@ -53,20 +62,24 @@ public sealed class NativeCaptureSessionFactory(
 }
 
 /// <summary>
-/// Provides native capture registry operations.
+/// Maintains the authoritative directory of native capture entries used for discovery, validation, and runtime lookup.
 /// </summary>
+/// <param name="sessionFactory">Native capture session factory dependency used by the native capture workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class NativeCaptureRegistry(
     INativeCaptureSessionFactory sessionFactory,
     ILogger<NativeCaptureRegistry> logger) : IDisposable
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory captures collection maintained internally by <see cref="NativeCaptureRegistry"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<Guid, NativeCaptureSession> _captures = new();
 
     /// <summary>
-    /// Runs the create operation.
+    /// Performs create in the native capture directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
+    /// <returns>The native capture session produced by the operation.</returns>
     public NativeCaptureSession Create(NativeCaptureRequest request)
     {
         try
@@ -95,8 +108,11 @@ public sealed class NativeCaptureRegistry(
     }
 
     /// <summary>
-    /// Attempts to get.
+    /// Attempts to get in the native capture directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="session">Session value supplied to the native capture operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool TryGet(Guid id, out NativeCaptureSession session)
     {
         try
@@ -112,8 +128,10 @@ public sealed class NativeCaptureRegistry(
     }
 
     /// <summary>
-    /// Runs the stop operation.
+    /// Performs stop in the native capture directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool Stop(Guid id)
     {
         try
@@ -131,7 +149,7 @@ public sealed class NativeCaptureRegistry(
     }
 
     /// <summary>
-    /// Runs the dispose operation.
+    /// Releases resources owned by <see cref="NativeCaptureRegistry"/> and leaves the native capture workflow in a safely disposed state.
     /// </summary>
     public void Dispose()
     {
@@ -149,32 +167,67 @@ public sealed class NativeCaptureRegistry(
 }
 
 /// <summary>
-/// Represents a native capture session.
+/// Represents a native capture session application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public sealed class NativeCaptureSession : IDisposable
 {
+    /// <summary>
+    /// Stores the publisher runtime policy data service dependency used by <see cref="NativeCaptureSession"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly IPublisherRuntimePolicyDataService _runtimePolicy;
+    /// <summary>
+    /// Stores the internal request state used by <see cref="NativeCaptureSession"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly NativeCaptureRequest _request;
+    /// <summary>
+    /// Stores the internal FFmpeg locator state used by <see cref="NativeCaptureSession"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly FfmpegLocator _ffmpegLocator;
+    /// <summary>
+    /// Stores the windows process loopback capture factory dependency used by <see cref="NativeCaptureSession"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly IWindowsProcessLoopbackCaptureFactory _processLoopbackFactory;
+    /// <summary>
+    /// Stores the logger used by <see cref="NativeCaptureSession"/> to record operational diagnostics without coupling callers to logging details.
+    /// </summary>
     private readonly ILogger<NativeCaptureSession> logger;
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal sync state used by <see cref="NativeCaptureSession"/> while executing its surrounding workflow.
     /// </summary>
     private readonly object _sync = new();
+    /// <summary>
+    /// Stores the in-memory subscribers collection maintained internally by <see cref="NativeCaptureSession"/> for its current workflow state.
+    /// </summary>
     private readonly Dictionary<Guid, Channel<byte[]>> _subscribers = [];
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the cancellation source used by <see cref="NativeCaptureSession"/> to stop its current background or asynchronous operation.
     /// </summary>
     private readonly CancellationTokenSource _cancellation = new();
+    /// <summary>
+    /// Stores the internal process state used by <see cref="NativeCaptureSession"/> while executing its surrounding workflow.
+    /// </summary>
     private Process? _process;
+    /// <summary>
+    /// Stores the windows process loopback capture dependency used by <see cref="NativeCaptureSession"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private IWindowsProcessLoopbackCapture? _processLoopback;
+    /// <summary>
+    /// Stores the internal initialization state used by <see cref="NativeCaptureSession"/> while executing its surrounding workflow.
+    /// </summary>
     private byte[] _initialization = [];
+    /// <summary>
+    /// Stores the internal disposed state used by <see cref="NativeCaptureSession"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _disposed;
 
     /// <summary>
-    /// Runs the native capture session operation.
+    /// Initializes a new <see cref="NativeCaptureSession"/> instance and captures the dependencies or initial state required by its native capture session workflow.
     /// </summary>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
+    /// <param name="runtimePolicy">Publisher runtime policy data service dependency used by the native capture session workflow to provide the corresponding application capability.</param>
+    /// <param name="ffmpegLocator">Ffmpeg locator value supplied to the native capture session operation and used when producing its result.</param>
+    /// <param name="processLoopbackFactory">Windows process loopback capture factory dependency used by the native capture session workflow to provide the corresponding application capability.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     public NativeCaptureSession(
         NativeCaptureRequest request,
         IPublisherRuntimePolicyDataService runtimePolicy,
@@ -197,28 +250,33 @@ public sealed class NativeCaptureSession : IDisposable
     }
 
     /// <summary>
-    /// Gets the stable identifier.
+    /// Gets the stable identifier used to identify or correlate this native capture session instance with related application state.
     /// </summary>
+    /// <value>The identifier value exposed by <see cref="NativeCaptureSession"/>.</value>
     public Guid Id { get; }
     /// <summary>
-    /// Gets is audio only.
+    /// Gets a value indicating whether audio only applies to the native capture session state.
     /// </summary>
+    /// <value>The is audio only value exposed by <see cref="NativeCaptureSession"/>.</value>
     public bool IsAudioOnly { get; }
     /// <summary>
-    /// Gets mime type.
+    /// Gets the MIME type value that forms part of the native capture session state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The MIME type value exposed by <see cref="NativeCaptureSession"/>.</value>
     public string MimeType { get; }
     /// <summary>
-    /// Gets or sets status.
+    /// Gets or sets the status value that forms part of the native capture session state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The status value exposed by <see cref="NativeCaptureSession"/>.</value>
     public string Status { get; private set; } = "created";
     /// <summary>
-    /// Gets or sets last error.
+    /// Gets or sets the last error value that forms part of the native capture session state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The last error value exposed by <see cref="NativeCaptureSession"/>.</value>
     public string LastError { get; private set; } = string.Empty;
 
     /// <summary>
-    /// Runs the start operation.
+    /// Performs start for <see cref="NativeCaptureSession"/>, keeping the operation consistent with the state and invariants of the surrounding native capture session workflow.
     /// </summary>
     public void Start()
     {
@@ -269,8 +327,9 @@ public sealed class NativeCaptureSession : IDisposable
     }
 
     /// <summary>
-    /// Runs the subscribe operation.
+    /// Performs subscribe for <see cref="NativeCaptureSession"/>, keeping the operation consistent with the state and invariants of the surrounding native capture session workflow.
     /// </summary>
+    /// <returns>The GUID identifier byte initialization channel reader byte reader produced by the operation.</returns>
     public (Guid Id, byte[] Initialization, ChannelReader<byte[]> Reader) Subscribe()
     {
         lock (_sync)
@@ -288,8 +347,9 @@ public sealed class NativeCaptureSession : IDisposable
     }
 
     /// <summary>
-    /// Runs the unsubscribe operation.
+    /// Performs unsubscribe for <see cref="NativeCaptureSession"/>, keeping the operation consistent with the state and invariants of the surrounding native capture session workflow.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     public void Unsubscribe(Guid id)
     {
         try
@@ -311,8 +371,11 @@ public sealed class NativeCaptureSession : IDisposable
     }
 
     /// <summary>
-    /// Runs the pump async operation.
+    /// Performs pump for <see cref="NativeCaptureSession"/>, keeping the operation consistent with the state and invariants of the surrounding native capture session workflow.
     /// </summary>
+    /// <param name="stdout">Stdout value supplied to the native capture session operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task PumpAsync(Stream stdout, CancellationToken cancellationToken)
     {
         try
@@ -356,8 +419,9 @@ public sealed class NativeCaptureSession : IDisposable
     }
 
     /// <summary>
-    /// Builds arguments.
+    /// Builds arguments for <see cref="NativeCaptureSession"/>, keeping the operation consistent with the state and invariants of the surrounding native capture session workflow.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     private IReadOnlyList<string> BuildArguments()
     {
         try
@@ -435,8 +499,10 @@ public sealed class NativeCaptureSession : IDisposable
     }
 
     /// <summary>
-    /// Resolves backend.
+    /// Resolves backend for <see cref="NativeCaptureSession"/>, keeping the operation consistent with the state and invariants of the surrounding native capture session workflow.
     /// </summary>
+    /// <param name="kind">Kind value supplied to the native capture session operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ResolveBackend(string kind)
     {
         try
@@ -458,8 +524,10 @@ public sealed class NativeCaptureSession : IDisposable
     }
 
     /// <summary>
-    /// Runs the clamp even operation.
+    /// Performs clamp even for <see cref="NativeCaptureSession"/>, keeping the operation consistent with the state and invariants of the surrounding native capture session workflow.
     /// </summary>
+    /// <param name="value">Value value supplied to the native capture session operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     private int ClampEven(int value)
     {
         try
@@ -477,7 +545,7 @@ public sealed class NativeCaptureSession : IDisposable
     }
 
     /// <summary>
-    /// Runs the complete subscribers operation.
+    /// Completes subscribers for <see cref="NativeCaptureSession"/>, keeping the operation consistent with the state and invariants of the surrounding native capture session workflow.
     /// </summary>
     private void CompleteSubscribers()
     {
@@ -501,7 +569,7 @@ public sealed class NativeCaptureSession : IDisposable
     }
 
     /// <summary>
-    /// Runs the dispose operation.
+    /// Releases resources owned by <see cref="NativeCaptureSession"/> and leaves the native capture session workflow in a safely disposed state.
     /// </summary>
     public void Dispose()
     {

@@ -7,15 +7,19 @@ using PublisherStudio.Services.Configuration;
 namespace PublisherStudio.Services;
 
 /// <summary>
-/// Represents a word art path geometry.
+/// Represents a word art path geometry application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="runtimePolicy">Publisher runtime policy data service dependency used by the word art path geometry workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class WordArtPathGeometry(
     IPublisherRuntimePolicyDataService runtimePolicy,
     ILogger<WordArtPathGeometry> logger)
 {
     /// <summary>
-    /// Creates preset.
+    /// Creates preset for <see cref="WordArtPathGeometry"/>, keeping the operation consistent with the state and invariants of the surrounding word art path geometry workflow.
     /// </summary>
+    /// <param name="key">Key value supplied to the word art path geometry operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public List<WordArtPathPoint> CreatePreset(string key)
     {
     try
@@ -45,8 +49,10 @@ public sealed class WordArtPathGeometry(
 }
 
     /// <summary>
-    /// Runs the build operation.
+    /// Performs build for <see cref="WordArtPathGeometry"/>, keeping the operation consistent with the state and invariants of the surrounding word art path geometry workflow.
     /// </summary>
+    /// <param name="item">Item value supplied to the word art path geometry operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string Build(WordArtElement item)
     {
     try
@@ -76,8 +82,10 @@ public sealed class WordArtPathGeometry(
 }
 
     /// <summary>
-    /// Runs the build operation.
+    /// Performs build for <see cref="WordArtPathGeometry"/>, keeping the operation consistent with the state and invariants of the surrounding word art path geometry workflow.
     /// </summary>
+    /// <param name="points">Word art path point dependency used by the word art path geometry workflow to provide the corresponding application capability.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string Build(IReadOnlyList<WordArtPathPoint>? points)
     {
     try
@@ -119,8 +127,10 @@ public sealed class WordArtPathGeometry(
 }
 
     /// <summary>
-    /// Runs the normalize operation.
+    /// Performs normalize for <see cref="WordArtPathGeometry"/>, keeping the operation consistent with the state and invariants of the surrounding word art path geometry workflow.
     /// </summary>
+    /// <param name="points">Word art path point dependency used by the word art path geometry workflow to provide the corresponding application capability.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public List<WordArtPathPoint> Normalize(IReadOnlyList<WordArtPathPoint>? points)
     {
     try
@@ -152,8 +162,10 @@ public sealed class WordArtPathGeometry(
 }
 
     /// <summary>
-    /// Runs the reverse operation.
+    /// Performs reverse for <see cref="WordArtPathGeometry"/>, keeping the operation consistent with the state and invariants of the surrounding word art path geometry workflow.
     /// </summary>
+    /// <param name="points">Word art path point dependency used by the word art path geometry workflow to provide the corresponding application capability.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public List<WordArtPathPoint> Reverse(IReadOnlyList<WordArtPathPoint>? points) {
     try
     {
@@ -170,8 +182,11 @@ public sealed class WordArtPathGeometry(
 }
 
     /// <summary>
-    /// Runs the reduce operation.
+    /// Performs reduce for <see cref="WordArtPathGeometry"/>, keeping the operation consistent with the state and invariants of the surrounding word art path geometry workflow.
     /// </summary>
+    /// <param name="points">Word art path point dependency used by the word art path geometry workflow to provide the corresponding application capability.</param>
+    /// <param name="maximum">Maximum value supplied to the word art path geometry operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public List<WordArtPathPoint> Reduce(IReadOnlyList<WordArtPathPoint>? points, int maximum = 10)
     {
     try
@@ -200,8 +215,10 @@ public sealed class WordArtPathGeometry(
 }
 
     /// <summary>
-    /// Runs the points operation.
+    /// Performs points for <see cref="WordArtPathGeometry"/>, keeping the operation consistent with the state and invariants of the surrounding word art path geometry workflow.
     /// </summary>
+    /// <param name="values">Values value supplied to the word art path geometry operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private List<WordArtPathPoint> Points(params (double X, double Y)[] values) {
     try
     {
@@ -218,8 +235,10 @@ public sealed class WordArtPathGeometry(
 }
 
     /// <summary>
-    /// Runs the inv operation.
+    /// Performs inv for <see cref="WordArtPathGeometry"/>, keeping the operation consistent with the state and invariants of the surrounding word art path geometry workflow.
     /// </summary>
+    /// <param name="value">Value value supplied to the word art path geometry operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Inv(double value) {
     try
     {

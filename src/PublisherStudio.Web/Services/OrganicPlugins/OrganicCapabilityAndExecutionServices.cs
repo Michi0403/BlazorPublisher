@@ -11,8 +11,10 @@ using System.Text.Json;
 namespace PublisherStudio.Services.OrganicPlugins;
 
 /// <summary>
-/// Provides organic capability catalog operations.
+/// Maintains the authoritative directory of organic capability entries used for discovery, validation, and runtime lookup.
 /// </summary>
+/// <param name="mediaConversion">Media conversion service dependency used by the organic capability workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class OrganicCapabilityCatalog(
     IMediaConversionService mediaConversion,
     ILogger<OrganicCapabilityCatalog> logger) : IOrganicCapabilityCatalog
@@ -23,8 +25,10 @@ public sealed class OrganicCapabilityCatalog(
     public event Action? Changed;
 
     /// <summary>
-    /// Gets capabilities async.
+    /// Retrieves capabilities in the organic capability directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public async Task<IReadOnlyList<OrganicCapabilityDescriptor>> GetCapabilitiesAsync(CancellationToken cancellationToken = default)
     {
     try
@@ -62,8 +66,10 @@ public sealed class OrganicCapabilityCatalog(
 }
 
     /// <summary>
-    /// Gets skills async.
+    /// Retrieves skills in the organic capability directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public async Task<IReadOnlyList<OrganicSkillDescriptor>> GetSkillsAsync(CancellationToken cancellationToken = default)
     {
     try
@@ -100,8 +106,10 @@ public sealed class OrganicCapabilityCatalog(
 }
 
     /// <summary>
-    /// Gets UI features async.
+    /// Retrieves UI features in the organic capability directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public Task<IReadOnlyList<OrganicUiFeatureDescriptor>> GetUiFeaturesAsync(CancellationToken cancellationToken = default) {
     try
     {
@@ -127,8 +135,10 @@ public sealed class OrganicCapabilityCatalog(
 }
 
     /// <summary>
-    /// Gets hardware async.
+    /// Retrieves hardware in the organic capability directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public Task<IReadOnlyList<OrganicHardwareDescriptor>> GetHardwareAsync(CancellationToken cancellationToken = default) {
     try
     {
@@ -153,8 +163,16 @@ public sealed class OrganicCapabilityCatalog(
 }
 
     /// <summary>
-    /// Runs the capability operation.
+    /// Performs capability in the organic capability directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="key">Key value supplied to the organic capability operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the organic capability operation and used when producing its result.</param>
+    /// <param name="description">Description value supplied to the organic capability operation and used when producing its result.</param>
+    /// <param name="organ">Organ value supplied to the organic capability operation and used when producing its result.</param>
+    /// <param name="readOnly">Value indicating whether read only should apply to this operation.</param>
+    /// <param name="confirmation">Value indicating whether confirmation should apply to this operation.</param>
+    /// <param name="scheduling">Value indicating whether scheduling should apply to this operation.</param>
+    /// <returns>The organic capability descriptor produced by the operation.</returns>
     private OrganicCapabilityDescriptor Capability(string key, string name, string description, string organ, bool readOnly, bool confirmation, bool scheduling) {
     try
     {
@@ -196,8 +214,10 @@ public sealed class OrganicCapabilityCatalog(
 }
 
     /// <summary>
-    /// Runs the UI activation keys operation.
+    /// Performs UI activation keys in the organic capability directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="key">Key value supplied to the organic capability operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private List<string> UiActivationKeys(string key) {
     try
     {
@@ -222,8 +242,10 @@ public sealed class OrganicCapabilityCatalog(
 }
 
     /// <summary>
-    /// Runs the skills operation.
+    /// Performs skills in the organic capability directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="key">Key value supplied to the organic capability operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private List<string> Skills(string key) {
     try
     {
@@ -256,8 +278,10 @@ public sealed class OrganicCapabilityCatalog(
 }
 
     /// <summary>
-    /// Runs the schema operation.
+    /// Performs schema in the organic capability directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="key">Key value supplied to the organic capability operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Schema(string key) {
     try
     {
@@ -289,8 +313,10 @@ public sealed class OrganicCapabilityCatalog(
 }
 
     /// <summary>
-    /// Runs the input contract operation.
+    /// Performs input contract in the organic capability directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="key">Key value supplied to the organic capability operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string InputContract(string key) {
     try
     {
@@ -314,8 +340,10 @@ public sealed class OrganicCapabilityCatalog(
 }
 
     /// <summary>
-    /// Runs the output contract operation.
+    /// Performs output contract in the organic capability directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="key">Key value supplied to the organic capability operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string OutputContract(string key) {
     try
     {
@@ -339,8 +367,10 @@ public sealed class OrganicCapabilityCatalog(
 }
 
     /// <summary>
-    /// Runs the security contract operation.
+    /// Performs security contract in the organic capability directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="key">Key value supplied to the organic capability operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string SecurityContract(string key) {
     try
     {
@@ -362,8 +392,10 @@ public sealed class OrganicCapabilityCatalog(
 }
 
     /// <summary>
-    /// Runs the organic use case operation.
+    /// Performs organic use case in the organic capability directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="key">Key value supplied to the organic capability operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string OrganicUseCase(string key) {
     try
     {
@@ -386,8 +418,10 @@ public sealed class OrganicCapabilityCatalog(
 }
 
     /// <summary>
-    /// Runs the suggested council roles operation.
+    /// Performs suggested council roles in the organic capability directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="key">Key value supplied to the organic capability operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private List<string> SuggestedCouncilRoles(string key) {
     try
     {
@@ -411,8 +445,19 @@ public sealed class OrganicCapabilityCatalog(
 }
 
 /// <summary>
-/// Represents an organic work executor.
+/// Represents an organic work executor application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="codec">Organic plugin protocol codec dependency used by the organic work executor workflow to provide the corresponding application capability.</param>
+/// <param name="input">User input automation service dependency used by the organic work executor workflow to provide the corresponding application capability.</param>
+/// <param name="screenshots">Screenshot capture service dependency used by the organic work executor workflow to provide the corresponding application capability.</param>
+/// <param name="openScad">Open openscad document service dependency used by the organic work executor workflow to provide the corresponding application capability.</param>
+/// <param name="spreadsheetSessions">Spreadsheet session store dependency used by the organic work executor workflow to provide the corresponding application capability.</param>
+/// <param name="businessContext">Business object context service dependency used by the organic work executor workflow to provide the corresponding application capability.</param>
+/// <param name="documentation">Publisher documentation catalog service dependency used by the organic work executor workflow to provide the corresponding application capability.</param>
+/// <param name="mediaConversion">Media conversion service dependency used by the organic work executor workflow to provide the corresponding application capability.</param>
+/// <param name="resultStore">Organic result store dependency used by the organic work executor workflow to provide the corresponding application capability.</param>
+/// <param name="recurringScreenReader">Recurring screen reader service dependency used by the organic work executor workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class OrganicWorkExecutor(
     IOrganicPluginProtocolCodec codec,
     IUserInputAutomationService input,
@@ -427,8 +472,11 @@ public sealed class OrganicWorkExecutor(
     ILogger<OrganicWorkExecutor> logger) : IOrganicWorkExecutor
 {
     /// <summary>
-    /// Runs the execute async operation.
+    /// Performs execute for <see cref="OrganicWorkExecutor"/>, keeping the operation consistent with the state and invariants of the surrounding organic work executor workflow.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     public async Task<string> ExecuteAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default)
     {
     try
@@ -486,8 +534,10 @@ public sealed class OrganicWorkExecutor(
 }
 
     /// <summary>
-    /// Runs the queue screenshot operation.
+    /// Performs queue screenshot for <see cref="OrganicWorkExecutor"/>, keeping the operation consistent with the state and invariants of the surrounding organic work executor workflow.
     /// </summary>
+    /// <param name="parameters">Parameters value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <returns>The object produced by the operation.</returns>
     private object QueueScreenshot(JsonElement parameters)
     {
     try
@@ -524,8 +574,11 @@ public sealed class OrganicWorkExecutor(
 }
 
     /// <summary>
-    /// Reads secure capture.
+    /// Reads secure capture for <see cref="OrganicWorkExecutor"/>, keeping the operation consistent with the state and invariants of the surrounding organic work executor workflow.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <param name="expectedKind">Expected kind value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <returns>The object produced by the operation.</returns>
     private object ReadSecureCapture(OrganicWireEnvelope envelope, string expectedKind)
     {
     try
@@ -562,8 +615,11 @@ public sealed class OrganicWorkExecutor(
 }
 
     /// <summary>
-    /// Runs the return reviewed text operation.
+    /// Performs return reviewed text for <see cref="OrganicWorkExecutor"/>, keeping the operation consistent with the state and invariants of the surrounding organic work executor workflow.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <param name="parameters">Parameters value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <returns>The object produced by the operation.</returns>
     private object ReturnReviewedText(OrganicWireEnvelope envelope, JsonElement parameters)
     {
     try
@@ -594,8 +650,11 @@ public sealed class OrganicWorkExecutor(
 }
 
     /// <summary>
-    /// Runs the return approved web content operation.
+    /// Performs return approved web content for <see cref="OrganicWorkExecutor"/>, keeping the operation consistent with the state and invariants of the surrounding organic work executor workflow.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <param name="parameters">Parameters value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <returns>The object produced by the operation.</returns>
     private object ReturnApprovedWebContent(OrganicWireEnvelope envelope, JsonElement parameters)
     {
     try
@@ -627,8 +686,10 @@ public sealed class OrganicWorkExecutor(
 }
 
     /// <summary>
-    /// Runs the queue input operation.
+    /// Performs queue input for <see cref="OrganicWorkExecutor"/>, keeping the operation consistent with the state and invariants of the surrounding organic work executor workflow.
     /// </summary>
+    /// <param name="parameters">Parameters value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <returns>The object produced by the operation.</returns>
     private object QueueInput(JsonElement parameters)
     {
     try
@@ -660,8 +721,10 @@ public sealed class OrganicWorkExecutor(
 }
 
     /// <summary>
-    /// Reads screenshot result.
+    /// Reads screenshot result for <see cref="OrganicWorkExecutor"/>, keeping the operation consistent with the state and invariants of the surrounding organic work executor workflow.
     /// </summary>
+    /// <param name="parameters">Parameters value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <returns>The object produced by the operation.</returns>
     private object ReadScreenshotResult(JsonElement parameters)
     {
     try
@@ -694,8 +757,10 @@ public sealed class OrganicWorkExecutor(
 }
 
     /// <summary>
-    /// Reads input result.
+    /// Reads input result for <see cref="OrganicWorkExecutor"/>, keeping the operation consistent with the state and invariants of the surrounding organic work executor workflow.
     /// </summary>
+    /// <param name="parameters">Parameters value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <returns>The object produced by the operation.</returns>
     private object ReadInputResult(JsonElement parameters)
     {
     try
@@ -722,8 +787,10 @@ public sealed class OrganicWorkExecutor(
 }
 
     /// <summary>
-    /// Runs the generate open scad operation.
+    /// Generates open OpenSCAD for <see cref="OrganicWorkExecutor"/>, keeping the operation consistent with the state and invariants of the surrounding organic work executor workflow.
     /// </summary>
+    /// <param name="parameters">Parameters value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <returns>The object produced by the operation.</returns>
     private object GenerateOpenScad(JsonElement parameters)
     {
     try
@@ -744,8 +811,10 @@ public sealed class OrganicWorkExecutor(
 }
 
     /// <summary>
-    /// Runs the inspect spreadsheet operation.
+    /// Performs inspect spreadsheet for <see cref="OrganicWorkExecutor"/>, keeping the operation consistent with the state and invariants of the surrounding organic work executor workflow.
     /// </summary>
+    /// <param name="parameters">Parameters value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <returns>The object produced by the operation.</returns>
     private object InspectSpreadsheet(JsonElement parameters)
     {
     try
@@ -773,8 +842,10 @@ public sealed class OrganicWorkExecutor(
 }
 
     /// <summary>
-    /// Runs the propose text operation.
+    /// Performs propose text for <see cref="OrganicWorkExecutor"/>, keeping the operation consistent with the state and invariants of the surrounding organic work executor workflow.
     /// </summary>
+    /// <param name="parameters">Parameters value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <returns>The object produced by the operation.</returns>
     private object ProposeText(JsonElement parameters)
     {
     try
@@ -801,8 +872,10 @@ public sealed class OrganicWorkExecutor(
 }
 
     /// <summary>
-    /// Reads parameters.
+    /// Reads parameters for <see cref="OrganicWorkExecutor"/>, keeping the operation consistent with the state and invariants of the surrounding organic work executor workflow.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <returns>The JSON element produced by the operation.</returns>
     private JsonElement ReadParameters(OrganicWireEnvelope envelope)
     {
     try
@@ -821,8 +894,12 @@ public sealed class OrganicWorkExecutor(
     }
 }
     /// <summary>
-    /// Gets string.
+    /// Retrieves string for <see cref="OrganicWorkExecutor"/>, keeping the operation consistent with the state and invariants of the surrounding organic work executor workflow.
     /// </summary>
+    /// <param name="root">Root value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string GetString(JsonElement root, string name, string fallback) {
     try
     {
@@ -838,8 +915,12 @@ public sealed class OrganicWorkExecutor(
     }
 }
     /// <summary>
-    /// Gets double.
+    /// Retrieves double for <see cref="OrganicWorkExecutor"/>, keeping the operation consistent with the state and invariants of the surrounding organic work executor workflow.
     /// </summary>
+    /// <param name="root">Root value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double GetDouble(JsonElement root, string name, double fallback) {
     try
     {
@@ -855,8 +936,12 @@ public sealed class OrganicWorkExecutor(
     }
 }
     /// <summary>
-    /// Gets int.
+    /// Retrieves int for <see cref="OrganicWorkExecutor"/>, keeping the operation consistent with the state and invariants of the surrounding organic work executor workflow.
     /// </summary>
+    /// <param name="root">Root value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     private int GetInt(JsonElement root, string name, int fallback) {
     try
     {
@@ -872,8 +957,12 @@ public sealed class OrganicWorkExecutor(
     }
 }
     /// <summary>
-    /// Gets boolean.
+    /// Retrieves boolean for <see cref="OrganicWorkExecutor"/>, keeping the operation consistent with the state and invariants of the surrounding organic work executor workflow.
     /// </summary>
+    /// <param name="root">Root value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the organic work executor operation and used when producing its result.</param>
+    /// <param name="fallback">Value indicating whether fallback should apply to this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool GetBoolean(JsonElement root, string name, bool fallback) {
     try
     {
@@ -891,8 +980,13 @@ public sealed class OrganicWorkExecutor(
 }
 
 /// <summary>
-/// Represents an organic work coordinator.
+/// Represents an organic work application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="codec">Organic plugin protocol codec dependency used by the organic work workflow to provide the corresponding application capability.</param>
+/// <param name="permissions">Organic permission store dependency used by the organic work workflow to provide the corresponding application capability.</param>
+/// <param name="capabilityCatalog">Organic capability catalog dependency used by the organic work workflow to provide the corresponding application capability.</param>
+/// <param name="executor">Organic work executor dependency used by the organic work workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class OrganicWorkCoordinator(
     IOrganicPluginProtocolCodec codec,
     IOrganicPermissionStore permissions,
@@ -901,21 +995,22 @@ public sealed class OrganicWorkCoordinator(
     ILogger<OrganicWorkCoordinator> logger) : IOrganicWorkCoordinator
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory work collection maintained internally by <see cref="OrganicWorkCoordinator"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<Guid, OrganicPluginWorkItem> work = new();
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the synchronization primitive that protects concurrent access to workflow gates state owned by <see cref="OrganicWorkCoordinator"/>.
     /// </summary>
     private readonly ConcurrentDictionary<string, SemaphoreSlim> workflowGates = new(StringComparer.Ordinal);
     /// <summary>
-    /// Occurs when changed.
+    /// Occurs when changed changes or completes in <see cref="OrganicWorkCoordinator"/>, allowing interested callers to react without polling internal state.
     /// </summary>
     public event Action? Changed;
 
     /// <summary>
-    /// Gets work.
+    /// Retrieves work for <see cref="OrganicWorkCoordinator"/>, keeping the operation consistent with the state and invariants of the surrounding organic work workflow.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<OrganicPluginWorkItem> GetWork() {
     try
     {
@@ -931,8 +1026,10 @@ public sealed class OrganicWorkCoordinator(
     }
 }
     /// <summary>
-    /// Runs the get operation.
+    /// Performs get for <see cref="OrganicWorkCoordinator"/>, keeping the operation consistent with the state and invariants of the surrounding organic work workflow.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>The organic plugin work item produced by the operation.</returns>
     public OrganicPluginWorkItem? Get(Guid id) {
     try
     {
@@ -949,8 +1046,11 @@ public sealed class OrganicWorkCoordinator(
 }
 
     /// <summary>
-    /// Runs the receive async operation.
+    /// Performs receive for <see cref="OrganicWorkCoordinator"/>, keeping the operation consistent with the state and invariants of the surrounding organic work workflow.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the organic work operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The organic plugin work item produced by the operation.</returns>
     public async Task<OrganicPluginWorkItem> ReceiveAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default)
     {
     try
@@ -1022,8 +1122,11 @@ public sealed class OrganicWorkCoordinator(
 }
 
     /// <summary>
-    /// Runs the approve async operation.
+    /// Performs approve for <see cref="OrganicWorkCoordinator"/>, keeping the operation consistent with the state and invariants of the surrounding organic work workflow.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The organic plugin work item produced by the operation.</returns>
     public async Task<OrganicPluginWorkItem?> ApproveAsync(Guid id, CancellationToken cancellationToken = default)
     {
     try
@@ -1048,8 +1151,11 @@ public sealed class OrganicWorkCoordinator(
 }
 
     /// <summary>
-    /// Updates interaction value.
+    /// Updates interaction value for <see cref="OrganicWorkCoordinator"/>, keeping the operation consistent with the state and invariants of the surrounding organic work workflow.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="value">Value value supplied to the organic work operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool UpdateInteractionValue(Guid id, string value)
     {
     try
@@ -1077,8 +1183,10 @@ public sealed class OrganicWorkCoordinator(
 }
 
     /// <summary>
-    /// Reads interaction editor.
+    /// Reads interaction editor for <see cref="OrganicWorkCoordinator"/>, keeping the operation consistent with the state and invariants of the surrounding organic work workflow.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the organic work operation and used when producing its result.</param>
+    /// <returns>The organic interaction editor produced by the operation.</returns>
     private OrganicInteractionEditor ReadInteractionEditor(OrganicWireEnvelope envelope)
     {
     try
@@ -1104,8 +1212,11 @@ public sealed class OrganicWorkCoordinator(
 }
 
     /// <summary>
-    /// Runs the decline operation.
+    /// Performs decline for <see cref="OrganicWorkCoordinator"/>, keeping the operation consistent with the state and invariants of the surrounding organic work workflow.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="reason">Reason value supplied to the organic work operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool Decline(Guid id, string reason)
     {
     try
@@ -1129,8 +1240,11 @@ public sealed class OrganicWorkCoordinator(
 }
 
     /// <summary>
-    /// Runs the execute async operation.
+    /// Performs execute for <see cref="OrganicWorkCoordinator"/>, keeping the operation consistent with the state and invariants of the surrounding organic work workflow.
     /// </summary>
+    /// <param name="item">Item value supplied to the organic work operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ExecuteAsync(OrganicPluginWorkItem item, CancellationToken cancellationToken)
     {
         var key = string.IsNullOrWhiteSpace(item.Request.WorkOrderKey) ? item.Id.ToString("N") : item.Request.WorkOrderKey;

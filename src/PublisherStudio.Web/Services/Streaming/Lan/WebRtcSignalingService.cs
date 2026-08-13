@@ -6,23 +6,29 @@ using System.Text.Json;
 namespace PublisherStudio.Services.Streaming.Lan;
 
 /// <summary>
-/// Provides web rtc signaling service operations.
+/// Coordinates web rtc signaling behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
 public sealed class WebRtcSignalingService
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory viewers collection maintained internally by <see cref="WebRtcSignalingService"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<Guid, ViewerConnection> _viewers = new();
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the synchronization primitive that protects concurrent access to publisher send state owned by <see cref="WebRtcSignalingService"/>.
     /// </summary>
     private readonly SemaphoreSlim _publisherSend = new(1, 1);
+    /// <summary>
+    /// Stores the internal publisher state used by <see cref="WebRtcSignalingService"/> while executing its surrounding workflow.
+    /// </summary>
     private WebSocket? _publisher;
 
     /// <summary>
-    /// Runs the run publisher async operation.
+    /// Performs run publisher as part of the web rtc signaling service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="socket">Socket value supplied to the web rtc signaling operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task RunPublisherAsync(WebSocket socket, CancellationToken cancellationToken)
     {
     try
@@ -68,8 +74,11 @@ public sealed class WebRtcSignalingService
 }
 
     /// <summary>
-    /// Runs the run viewer async operation.
+    /// Performs run viewer as part of the web rtc signaling service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="socket">Socket value supplied to the web rtc signaling operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task RunViewerAsync(WebSocket socket, CancellationToken cancellationToken)
     {
     try
@@ -115,8 +124,9 @@ public sealed class WebRtcSignalingService
 }
 
     /// <summary>
-    /// Closes async.
+    /// Performs close as part of the web rtc signaling service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task CloseAsync()
     {
     try
@@ -139,8 +149,11 @@ public sealed class WebRtcSignalingService
 }
 
     /// <summary>
-    /// Runs the send publisher async operation.
+    /// Performs send publisher as part of the web rtc signaling service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="message">Message value supplied to the web rtc signaling operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SendPublisherAsync(object message, CancellationToken cancellationToken) {
     try
     {
@@ -154,8 +167,11 @@ public sealed class WebRtcSignalingService
 }
 
     /// <summary>
-    /// Runs the send publisher bytes async operation.
+    /// Performs send publisher bytes as part of the web rtc signaling service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="payload">Payload value supplied to the web rtc signaling operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SendPublisherBytesAsync(byte[] payload, CancellationToken cancellationToken)
     {
     try
@@ -180,8 +196,12 @@ public sealed class WebRtcSignalingService
 }
 
     /// <summary>
-    /// Runs the receive JSON async operation.
+    /// Performs receive JSON as part of the web rtc signaling service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="socket">Socket value supplied to the web rtc signaling operation and used when producing its result.</param>
+    /// <param name="onMessage">On message value supplied to the web rtc signaling operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ReceiveJsonAsync(WebSocket socket, Func<JsonDocument, Task> onMessage, CancellationToken cancellationToken)
     {
     try
@@ -219,8 +239,12 @@ public sealed class WebRtcSignalingService
 }
 
     /// <summary>
-    /// Runs the copy with viewer operation.
+    /// Performs copy with viewer as part of the web rtc signaling service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="root">Root value supplied to the web rtc signaling operation and used when producing its result.</param>
+    /// <param name="type">Type value supplied to the web rtc signaling operation and used when producing its result.</param>
+    /// <param name="viewerId">Identifier of the viewer to use for this operation.</param>
+    /// <returns>The byte produced by the operation.</returns>
     private byte[] CopyWithViewer(JsonElement root, string type, Guid viewerId)
     {
     try
@@ -249,8 +273,12 @@ public sealed class WebRtcSignalingService
 }
 
     /// <summary>
-    /// Runs the copy with type operation.
+    /// Performs copy with type as part of the web rtc signaling service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="root">Root value supplied to the web rtc signaling operation and used when producing its result.</param>
+    /// <param name="type">Type value supplied to the web rtc signaling operation and used when producing its result.</param>
+    /// <param name="includeViewerId">Identifier of the include viewer to use for this operation.</param>
+    /// <returns>The byte produced by the operation.</returns>
     private byte[] CopyWithType(JsonElement root, string type, bool includeViewerId)
     {
     try
@@ -278,8 +306,11 @@ public sealed class WebRtcSignalingService
 }
 
     /// <summary>
-    /// Reads string.
+    /// Reads string as part of the web rtc signaling service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="root">Root value supplied to the web rtc signaling operation and used when producing its result.</param>
+    /// <param name="property">Property value supplied to the web rtc signaling operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ReadString(JsonElement root, string property) {
     try
     {
@@ -293,8 +324,11 @@ public sealed class WebRtcSignalingService
 }
 
     /// <summary>
-    /// Attempts to read viewer identifier.
+    /// Attempts to read viewer identifier as part of the web rtc signaling service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="root">Root value supplied to the web rtc signaling operation and used when producing its result.</param>
+    /// <param name="viewerId">Identifier of the viewer to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool TryReadViewerId(JsonElement root, out Guid viewerId)
     {
     try
@@ -313,8 +347,11 @@ public sealed class WebRtcSignalingService
 }
 
     /// <summary>
-    /// Closes quietly async.
+    /// Closes quietly as part of the web rtc signaling service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="socket">Socket value supplied to the web rtc signaling operation and used when producing its result.</param>
+    /// <param name="reason">Reason value supplied to the web rtc signaling operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task CloseQuietlyAsync(WebSocket socket, string reason)
     {
     try
@@ -336,19 +373,26 @@ public sealed class WebRtcSignalingService
 }
 
     /// <summary>
-    /// Represents a viewer connection.
+    /// Represents a viewer connection helper type nested within <see cref="WebRtcSignalingService"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
+    /// <param name="socket">Socket value supplied to the web rtc signaling operation and used when producing its result.</param>
     private sealed class ViewerConnection(WebSocket socket) : IAsyncDisposable
     {
+        /// <summary>
+        /// Stores the internal socket state used by <see cref="ViewerConnection"/> while executing its surrounding workflow.
+        /// </summary>
         private readonly WebSocket _socket = socket;
         /// <summary>
-        /// Runs the new operation.
+        /// Stores the synchronization primitive that protects concurrent access to send state owned by <see cref="ViewerConnection"/>.
         /// </summary>
         private readonly SemaphoreSlim _send = new(1, 1);
 
         /// <summary>
-        /// Runs the send async operation.
+        /// Performs send for <see cref="ViewerConnection"/>, keeping the operation consistent with the state and invariants of the surrounding viewer connection workflow.
         /// </summary>
+        /// <param name="payload">Payload value supplied to the viewer connection operation and used when producing its result.</param>
+        /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+        /// <returns>A task that completes when the operation has finished.</returns>
         public async Task SendAsync(byte[] payload, CancellationToken cancellationToken)
         {
     try
@@ -372,8 +416,9 @@ public sealed class WebRtcSignalingService
 }
 
         /// <summary>
-        /// Runs the dispose async operation.
+        /// Releases resources owned by <see cref="ViewerConnection"/> and leaves the viewer connection workflow in a safely disposed state.
         /// </summary>
+        /// <returns>A task that completes when the operation has finished.</returns>
         public async ValueTask DisposeAsync()
         {
     try

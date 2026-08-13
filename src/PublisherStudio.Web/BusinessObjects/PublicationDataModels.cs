@@ -1,9 +1,9 @@
-﻿using System.Globalization;
+using System.Globalization;
 
 namespace PublisherStudio.BusinessObjects;
 
 /// <summary>
-/// Lists supported publication data source kind values.
+/// Defines the supported publication data source kind values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PublicationDataSourceKind
 {
@@ -18,7 +18,7 @@ public enum PublicationDataSourceKind
 }
 
 /// <summary>
-/// Lists supported publication data value kind values.
+/// Defines the supported publication data value kind values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PublicationDataValueKind
 {
@@ -29,7 +29,7 @@ public enum PublicationDataValueKind
 }
 
 /// <summary>
-/// Lists supported document object data scope values.
+/// Defines the supported document object data scope values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum DocumentObjectDataScope
 {
@@ -38,93 +38,112 @@ public enum DocumentObjectDataScope
 }
 
 /// <summary>
-/// Represents a publication data object.
+/// Represents a publication data object application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public sealed class PublicationDataObject
 {
     /// <summary>
-    /// Gets or sets the stable identifier.
+    /// Gets or sets the stable identifier used to identify or correlate this publication data object instance with related application state.
     /// </summary>
+    /// <value>The identifier value exposed by <see cref="PublicationDataObject"/>.</value>
     public Guid Id { get; set; } = Guid.NewGuid();
     /// <summary>
-    /// Gets or sets the display name.
+    /// Gets or sets the name value that forms part of the publication data object state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The name value exposed by <see cref="PublicationDataObject"/>.</value>
     public string Name { get; set; } = "Data";
     /// <summary>
-    /// Gets or sets source kind.
+    /// Gets or sets the source kind value that forms part of the publication data object state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The source kind value exposed by <see cref="PublicationDataObject"/>.</value>
     public PublicationDataSourceKind SourceKind { get; set; } = PublicationDataSourceKind.DelimitedText;
     /// <summary>
-    /// Gets or sets raw source.
+    /// Gets or sets the raw source value that forms part of the publication data object state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The raw source value exposed by <see cref="PublicationDataObject"/>.</value>
     public string RawSource { get; set; } = "Category,Value\nA,42\nB,67\nC,53";
     /// <summary>
-    /// Gets or sets source reference.
+    /// Gets or sets the source reference value that forms part of the publication data object state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The source reference value exposed by <see cref="PublicationDataObject"/>.</value>
     public string SourceReference { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets delimiter.
+    /// Gets or sets the delimiter value that forms part of the publication data object state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The delimiter value exposed by <see cref="PublicationDataObject"/>.</value>
     public string Delimiter { get; set; } = ",";
     /// <summary>
-    /// Gets or sets first row contains headers.
+    /// Gets or sets a value indicating whether first row contains headers applies to the publication data object state.
     /// </summary>
+    /// <value>The first row contains headers value exposed by <see cref="PublicationDataObject"/>.</value>
     public bool FirstRowContainsHeaders { get; set; } = true;
     /// <summary>
-    /// Gets or sets document scope.
+    /// Gets or sets the document scope value that forms part of the publication data object state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The document scope value exposed by <see cref="PublicationDataObject"/>.</value>
     public DocumentObjectDataScope DocumentScope { get; set; } = DocumentObjectDataScope.AllPages;
     /// <summary>
-    /// Gets or sets web.
+    /// Gets or sets the web value that forms part of the publication data object state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The web value exposed by <see cref="PublicationDataObject"/>.</value>
     public PublicationWebBinding Web { get; set; } = new();
     /// <summary>
-    /// Gets or sets columns.
+    /// Gets or sets the columns collection maintained or exposed by this publication data object instance for downstream processing.
     /// </summary>
+    /// <value>The columns value exposed by <see cref="PublicationDataObject"/>.</value>
     public List<PublicationDataColumn> Columns { get; set; } = [];
     /// <summary>
-    /// Gets or sets rows.
+    /// Gets or sets the rows collection maintained or exposed by this publication data object instance for downstream processing.
     /// </summary>
+    /// <value>The rows value exposed by <see cref="PublicationDataObject"/>.</value>
     public List<PublicationDataRow> Rows { get; set; } = [];
     /// <summary>
-    /// Gets or sets the UTC modification time.
+    /// Gets or sets the modified UTC associated with this publication data object state, using the time semantics implied by the member name.
     /// </summary>
+    /// <value>The modified UTC value exposed by <see cref="PublicationDataObject"/>.</value>
     public DateTimeOffset ModifiedUtc { get; set; } = DateTimeOffset.UtcNow;
 }
 
 /// <summary>
-/// Represents a publication data column.
+/// Represents a publication data column application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public sealed class PublicationDataColumn
 {
     /// <summary>
-    /// Gets or sets the display name.
+    /// Gets or sets the name value that forms part of the publication data column state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The name value exposed by <see cref="PublicationDataColumn"/>.</value>
     public string Name { get; set; } = "Column";
     /// <summary>
-    /// Gets or sets value kind.
+    /// Gets or sets the value kind value that forms part of the publication data column state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The value kind value exposed by <see cref="PublicationDataColumn"/>.</value>
     public PublicationDataValueKind ValueKind { get; set; } = PublicationDataValueKind.Text;
 }
 
 /// <summary>
-/// Represents a publication data row.
+/// Represents a publication data row application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public sealed class PublicationDataRow
 {
     /// <summary>
-    /// Gets or sets values.
+    /// Gets or sets the values collection maintained or exposed by this publication data row instance for downstream processing.
     /// </summary>
+    /// <value>The values value exposed by <see cref="PublicationDataRow"/>.</value>
     public Dictionary<string, string> Values { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
-    /// Runs the get operation.
+    /// Performs get for <see cref="PublicationDataRow"/>, keeping the operation consistent with the state and invariants of the surrounding publication data row workflow.
     /// </summary>
+    /// <param name="field">Field value supplied to the publication data row operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string Get(string field) => Values.TryGetValue(field, out var value) ? value : string.Empty;
 
     /// <summary>
-    /// Gets number.
+    /// Retrieves number for <see cref="PublicationDataRow"/>, keeping the operation consistent with the state and invariants of the surrounding publication data row workflow.
     /// </summary>
+    /// <param name="field">Field value supplied to the publication data row operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     public double GetNumber(string field)
     {
         var value = Get(field);
@@ -140,7 +159,7 @@ public sealed class PublicationDataRow
 }
 
 /// <summary>
-/// Lists supported data visual kind values.
+/// Defines the supported data visual kind values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum DataVisualKind
 {
@@ -161,7 +180,7 @@ public enum DataVisualKind
 }
 
 /// <summary>
-/// Lists supported cartesian chart style values.
+/// Defines the supported cartesian chart style values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum CartesianChartStyle
 {
@@ -191,7 +210,7 @@ public enum CartesianChartStyle
 }
 
 /// <summary>
-/// Lists supported pie chart style values.
+/// Defines the supported pie chart style values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PieChartStyle
 {
@@ -200,7 +219,7 @@ public enum PieChartStyle
 }
 
 /// <summary>
-/// Lists supported polar chart style values.
+/// Defines the supported polar chart style values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PolarChartStyle
 {
@@ -212,7 +231,7 @@ public enum PolarChartStyle
 }
 
 /// <summary>
-/// Lists supported sparkline chart style values.
+/// Defines the supported sparkline chart style values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum SparklineChartStyle
 {
@@ -227,7 +246,7 @@ public enum SparklineChartStyle
 }
 
 /// <summary>
-/// Lists supported data visual argument mode values.
+/// Defines the supported data visual argument mode values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum DataVisualArgumentMode
 {
@@ -238,7 +257,7 @@ public enum DataVisualArgumentMode
 }
 
 /// <summary>
-/// Lists supported data visual aggregation mode values.
+/// Defines the supported data visual aggregation mode values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum DataVisualAggregationMode
 {
@@ -252,7 +271,7 @@ public enum DataVisualAggregationMode
 }
 
 /// <summary>
-/// Lists supported data visual sort mode values.
+/// Defines the supported data visual sort mode values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum DataVisualSortMode
 {
@@ -264,209 +283,275 @@ public enum DataVisualSortMode
 }
 
 /// <summary>
-/// Represents a data visual element.
+/// Represents a data visual element application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public sealed class DataVisualElement : PublicationElement
 {
     /// <summary>
-    /// Gets kind.
+    /// Gets the kind value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The kind value exposed by <see cref="DataVisualElement"/>.</value>
     public override PublicationElementKind Kind => PublicationElementKind.DataVisual;
     /// <summary>
-    /// Gets or sets data object identifier.
+    /// Gets or sets the stable data object identifier used to identify or correlate this data visual element instance with related application state.
     /// </summary>
+    /// <value>The data object identifier value exposed by <see cref="DataVisualElement"/>.</value>
     public Guid DataObjectId { get; set; }
     /// <summary>
-    /// Gets or sets visual kind.
+    /// Gets or sets the visual kind value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The visual kind value exposed by <see cref="DataVisualElement"/>.</value>
     public DataVisualKind VisualKind { get; set; } = DataVisualKind.CartesianChart;
     /// <summary>
-    /// Gets or sets cartesian style.
+    /// Gets or sets the cartesian style value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The cartesian style value exposed by <see cref="DataVisualElement"/>.</value>
     public CartesianChartStyle CartesianStyle { get; set; } = CartesianChartStyle.Bar;
     /// <summary>
-    /// Gets or sets pie style.
+    /// Gets or sets the pie style value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The pie style value exposed by <see cref="DataVisualElement"/>.</value>
     public PieChartStyle PieStyle { get; set; }
     /// <summary>
-    /// Gets or sets polar style.
+    /// Gets or sets the polar style value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The polar style value exposed by <see cref="DataVisualElement"/>.</value>
     public PolarChartStyle PolarStyle { get; set; }
     /// <summary>
-    /// Gets or sets sparkline style.
+    /// Gets or sets the sparkline style value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The sparkline style value exposed by <see cref="DataVisualElement"/>.</value>
     public SparklineChartStyle SparklineStyle { get; set; }
     /// <summary>
-    /// Gets or sets title.
+    /// Gets or sets the title value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The title value exposed by <see cref="DataVisualElement"/>.</value>
     public string Title { get; set; } = "Chart";
     /// <summary>
-    /// Gets or sets argument field.
+    /// Gets or sets the argument field value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The argument field value exposed by <see cref="DataVisualElement"/>.</value>
     public string ArgumentField { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets series field.
+    /// Gets or sets the series field value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The series field value exposed by <see cref="DataVisualElement"/>.</value>
     public string SeriesField { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets argument mode.
+    /// Gets or sets the argument mode value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The argument mode value exposed by <see cref="DataVisualElement"/>.</value>
     public DataVisualArgumentMode ArgumentMode { get; set; } = DataVisualArgumentMode.Auto;
     /// <summary>
-    /// Gets or sets aggregation mode.
+    /// Gets or sets the aggregation mode value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The aggregation mode value exposed by <see cref="DataVisualElement"/>.</value>
     public DataVisualAggregationMode AggregationMode { get; set; } = DataVisualAggregationMode.Auto;
     /// <summary>
-    /// Gets or sets sort mode.
+    /// Gets or sets the sort mode value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The sort mode value exposed by <see cref="DataVisualElement"/>.</value>
     public DataVisualSortMode SortMode { get; set; } = DataVisualSortMode.DataOrder;
     /// <summary>
-    /// Gets or sets value fields.
+    /// Gets or sets the value fields collection maintained or exposed by this data visual element instance for downstream processing.
     /// </summary>
+    /// <value>The value fields value exposed by <see cref="DataVisualElement"/>.</value>
     public List<string> ValueFields { get; set; } = [];
     /// <summary>
-    /// Gets or sets low value field.
+    /// Gets or sets the low value field value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The low value field value exposed by <see cref="DataVisualElement"/>.</value>
     public string LowValueField { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets high value field.
+    /// Gets or sets the high value field value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The high value field value exposed by <see cref="DataVisualElement"/>.</value>
     public string HighValueField { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets open value field.
+    /// Gets or sets the open value field value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The open value field value exposed by <see cref="DataVisualElement"/>.</value>
     public string OpenValueField { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets close value field.
+    /// Gets or sets the close value field value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The close value field value exposed by <see cref="DataVisualElement"/>.</value>
     public string CloseValueField { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets size field.
+    /// Gets or sets the size field value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The size field value exposed by <see cref="DataVisualElement"/>.</value>
     public string SizeField { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets target field.
+    /// Gets or sets the target field value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The target field value exposed by <see cref="DataVisualElement"/>.</value>
     public string TargetField { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets parent field.
+    /// Gets or sets the parent field value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The parent field value exposed by <see cref="DataVisualElement"/>.</value>
     public string ParentField { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets show legend.
+    /// Gets or sets a value indicating whether show legend applies to the data visual element state.
     /// </summary>
+    /// <value>The show legend value exposed by <see cref="DataVisualElement"/>.</value>
     public bool ShowLegend { get; set; } = true;
     /// <summary>
-    /// Gets or sets show labels.
+    /// Gets or sets a value indicating whether show labels applies to the data visual element state.
     /// </summary>
+    /// <value>The show labels value exposed by <see cref="DataVisualElement"/>.</value>
     public bool ShowLabels { get; set; }
     /// <summary>
-    /// Gets or sets show title.
+    /// Gets or sets a value indicating whether show title applies to the data visual element state.
     /// </summary>
+    /// <value>The show title value exposed by <see cref="DataVisualElement"/>.</value>
     public bool ShowTitle { get; set; } = true;
     /// <summary>
-    /// Gets or sets table show header.
+    /// Gets or sets a value indicating whether table show header applies to the data visual element state.
     /// </summary>
+    /// <value>The table show header value exposed by <see cref="DataVisualElement"/>.</value>
     public bool TableShowHeader { get; set; } = true;
     /// <summary>
-    /// Gets or sets table show filter row.
+    /// Gets or sets a value indicating whether table show filter row applies to the data visual element state.
     /// </summary>
+    /// <value>The table show filter row value exposed by <see cref="DataVisualElement"/>.</value>
     public bool TableShowFilterRow { get; set; }
     /// <summary>
-    /// Gets or sets row limit.
+    /// Gets or sets the row limit value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The row limit value exposed by <see cref="DataVisualElement"/>.</value>
     public int RowLimit { get; set; } = 12;
     /// <summary>
-    /// Gets or sets minimum value.
+    /// Gets or sets the minimum value value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The minimum value value exposed by <see cref="DataVisualElement"/>.</value>
     public double MinimumValue { get; set; }
     /// <summary>
-    /// Gets or sets maximum value.
+    /// Gets or sets the maximum value value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The maximum value value exposed by <see cref="DataVisualElement"/>.</value>
     public double MaximumValue { get; set; } = 100;
     /// <summary>
-    /// Gets or sets background.
+    /// Gets or sets the background value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The background value exposed by <see cref="DataVisualElement"/>.</value>
     public string Background { get; set; } = "#ffffff";
     /// <summary>
-    /// Gets or sets border color.
+    /// Gets or sets the border color value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The border color value exposed by <see cref="DataVisualElement"/>.</value>
     public string BorderColor { get; set; } = "#cbd5e1";
     /// <summary>
-    /// Gets or sets border width millimetres.
+    /// Gets or sets the border width mm value that forms part of the data visual element state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The border width mm value exposed by <see cref="DataVisualElement"/>.</value>
     public double BorderWidthMm { get; set; } = .25;
 }
 
 /// <summary>
-/// Represents a data chart point.
+/// Represents a data chart point application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="Argument">Argument value supplied to the data chart point operation and used when producing its result.</param>
+/// <param name="Series">Series value supplied to the data chart point operation and used when producing its result.</param>
+/// <param name="Value">Value value supplied to the data chart point operation and used when producing its result.</param>
 public sealed record DataChartPoint(string Argument, string Series, double Value);
 /// <summary>
-/// Represents a data pie point.
+/// Represents a data pie point application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="Argument">Argument value supplied to the data pie point operation and used when producing its result.</param>
+/// <param name="Value">Value value supplied to the data pie point operation and used when producing its result.</param>
 public sealed record DataPiePoint(string Argument, double Value);
 /// <summary>
-/// Represents a data spark point.
+/// Represents a data spark point application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="Argument">Argument value supplied to the data spark point operation and used when producing its result.</param>
+/// <param name="Value">Value value supplied to the data spark point operation and used when producing its result.</param>
 public sealed record DataSparkPoint(string Argument, double Value);
 /// <summary>
-/// Represents a data range point.
+/// Represents a data range point application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="Argument">Argument value supplied to the data range point operation and used when producing its result.</param>
+/// <param name="Series">Series value supplied to the data range point operation and used when producing its result.</param>
+/// <param name="Low">Low value supplied to the data range point operation and used when producing its result.</param>
+/// <param name="High">High value supplied to the data range point operation and used when producing its result.</param>
 public sealed record DataRangePoint(string Argument, string Series, double Low, double High);
 /// <summary>
-/// Represents a data bubble point.
+/// Represents a data bubble point application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="Argument">Argument value supplied to the data bubble point operation and used when producing its result.</param>
+/// <param name="Series">Series value supplied to the data bubble point operation and used when producing its result.</param>
+/// <param name="Value">Value value supplied to the data bubble point operation and used when producing its result.</param>
+/// <param name="Size">Size value supplied to the data bubble point operation and used when producing its result.</param>
 public sealed record DataBubblePoint(string Argument, string Series, double Value, double Size);
 /// <summary>
-/// Represents a data financial point.
+/// Represents a data financial point application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="Argument">Argument value supplied to the data financial point operation and used when producing its result.</param>
+/// <param name="Open">Open value supplied to the data financial point operation and used when producing its result.</param>
+/// <param name="High">High value supplied to the data financial point operation and used when producing its result.</param>
+/// <param name="Low">Low value supplied to the data financial point operation and used when producing its result.</param>
+/// <param name="Close">Close value supplied to the data financial point operation and used when producing its result.</param>
 public sealed record DataFinancialPoint(string Argument, double Open, double High, double Low, double Close);
 /// <summary>
-/// Represents a data sankey point.
+/// Represents a data sankey point application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="Source">Source value supplied to the data sankey point operation and used when producing its result.</param>
+/// <param name="Target">Target value supplied to the data sankey point operation and used when producing its result.</param>
+/// <param name="Weight">Weight value supplied to the data sankey point operation and used when producing its result.</param>
 public sealed record DataSankeyPoint(string Source, string Target, double Weight);
 /// <summary>
-/// Represents a data tree map point.
+/// Represents a data tree map point application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="Label">Label value supplied to the data tree map point operation and used when producing its result.</param>
+/// <param name="Parent">Parent value supplied to the data tree map point operation and used when producing its result.</param>
+/// <param name="Value">Value value supplied to the data tree map point operation and used when producing its result.</param>
 public sealed record DataTreeMapPoint(string Label, string Parent, double Value);
 
 /// <summary>
-/// Represents a publication grid row.
+/// Represents a publication grid row application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public sealed class PublicationGridRow
 {
     /// <summary>
-    /// Gets or sets c1.
+    /// Gets or sets the c1 value that forms part of the publication grid row state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The c1 value exposed by <see cref="PublicationGridRow"/>.</value>
     public string C1 { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets c2.
+    /// Gets or sets the c2 value that forms part of the publication grid row state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The c2 value exposed by <see cref="PublicationGridRow"/>.</value>
     public string C2 { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets c3.
+    /// Gets or sets the c3 value that forms part of the publication grid row state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The c3 value exposed by <see cref="PublicationGridRow"/>.</value>
     public string C3 { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets c4.
+    /// Gets or sets the c4 value that forms part of the publication grid row state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The c4 value exposed by <see cref="PublicationGridRow"/>.</value>
     public string C4 { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets c5.
+    /// Gets or sets the c5 value that forms part of the publication grid row state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The c5 value exposed by <see cref="PublicationGridRow"/>.</value>
     public string C5 { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets c6.
+    /// Gets or sets the c6 value that forms part of the publication grid row state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The c6 value exposed by <see cref="PublicationGridRow"/>.</value>
     public string C6 { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets c7.
+    /// Gets or sets the c7 value that forms part of the publication grid row state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The c7 value exposed by <see cref="PublicationGridRow"/>.</value>
     public string C7 { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets c8.
+    /// Gets or sets the c8 value that forms part of the publication grid row state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The c8 value exposed by <see cref="PublicationGridRow"/>.</value>
     public string C8 { get; set; } = string.Empty;
 
 

@@ -1,19 +1,26 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.OpenScad;
 
 namespace PublisherStudio.Controllers;
 
 /// <summary>
-/// Provides open scad controller operations.
+/// Exposes the open OpenSCAD application operations through PublisherStudio's web/API boundary and delegates domain work to the corresponding services.
 /// </summary>
+/// <param name="catalog">Open openscad catalog service dependency used by the open OpenSCAD workflow to provide the corresponding application capability.</param>
+/// <param name="documents">Open openscad document service dependency used by the open OpenSCAD workflow to provide the corresponding application capability.</param>
+/// <param name="videoLayers">Open openscad video layer adapter dependency used by the open OpenSCAD workflow to provide the corresponding application capability.</param>
+/// <param name="values">Open openscad value formatter dependency used by the open OpenSCAD workflow to provide the corresponding application capability.</param>
+/// <param name="nodes">Open openscad node factory service dependency used by the open OpenSCAD workflow to provide the corresponding application capability.</param>
 [ApiController]
 [Route("api/openscad")]
 public sealed class OpenScadController(IOpenScadCatalogService catalog, IOpenScadDocumentService documents, IOpenScadVideoLayerAdapter videoLayers, IOpenScadValueFormatter values, IOpenScadNodeFactoryService nodes) : ControllerBase
 {
     /// <summary>
-    /// Runs the default node operation.
+    /// Returns the default node projection for the open OpenSCAD API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <param name="kind">Kind value supplied to the open OpenSCAD operation and used when producing its result.</param>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpGet("nodes/{kind}/default")]
     public ActionResult<OpenScadNode> DefaultNode(string kind)
     {
@@ -22,45 +29,53 @@ public sealed class OpenScadController(IOpenScadCatalogService catalog, IOpenSca
     }
 
     /// <summary>
-    /// Runs the catalog operation.
+    /// Returns the catalog projection for the open OpenSCAD API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpGet("catalog")]
     public ActionResult<IReadOnlyList<OpenScadNodeDefinition>> Catalog() => Ok(catalog.GetDefinitions());
 
 
     /// <summary>
-    /// Runs the format value operation.
+    /// Returns the format value projection for the open OpenSCAD API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <param name="value">Value value supplied to the open OpenSCAD operation and used when producing its result.</param>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpPost("format-value")]
     public ActionResult<string> FormatValue([FromBody] OpenScadValue value) => Ok(values.Format(value));
 
     /// <summary>
-    /// Runs the identifier operation.
+    /// Returns the identifier projection for the open OpenSCAD API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpGet("identifier")]
     public ActionResult<string> Identifier([FromQuery] string value, [FromQuery] string fallback = "part") => Ok(values.Identifier(value, fallback));
 
     /// <summary>
-    /// Runs the quote operation.
+    /// Returns the quote projection for the open OpenSCAD API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpGet("quote")]
     public ActionResult<string> Quote([FromQuery] string value) => Ok(values.Quote(value));
 
     /// <summary>
-    /// Runs the example operation.
+    /// Returns the example projection for the open OpenSCAD API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpGet("example")]
     public ActionResult<OpenScadDocument> Example() => Ok(documents.CreateExampleDocument());
 
     /// <summary>
-    /// Runs the validate operation.
+    /// Returns the validate projection for the open OpenSCAD API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpPost("validate")]
     public ActionResult<OpenScadValidationResult> Validate([FromBody] OpenScadDocument document) => Ok(documents.Validate(document));
 
     /// <summary>
-    /// Runs the generate operation.
+    /// Returns the generate projection for the open OpenSCAD API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpPost("generate")]
     public ActionResult<OpenScadGenerationResult> Generate([FromBody] OpenScadDocument document) => Ok(documents.Generate(document));
 

@@ -9,27 +9,48 @@ public interface IPublisherDocumentationViewerService
     event Action? StateChanged;
 
     /// <summary>Gets the current viewer state.</summary>
+    /// <value>The state value exposed by <see cref="IPublisherDocumentationViewerService"/>.</value>
     PublisherDocumentationViewerState State { get; }
 
-    /// <summary>Opens one approved application-relative documentation route.</summary>
+    /// <summary>
+    /// Performs open as part of the publisher documentation viewer service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
     void Open(PublisherDocumentationViewerRequest request);
 
-    /// <summary>Closes the current documentation view.</summary>
+    /// <summary>
+    /// Performs close as part of the publisher documentation viewer service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
     void Close();
 }
 
 /// <summary>Scoped implementation of the PublisherStudio documentation viewer coordinator.</summary>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class PublisherDocumentationViewerService(ILogger<PublisherDocumentationViewerService> logger) : IPublisherDocumentationViewerService
 {
+    /// <summary>
+    /// Stores the internal revision state used by <see cref="PublisherDocumentationViewerService"/> while executing its surrounding workflow.
+    /// </summary>
     private long revision;
 
+    /// <summary>
+    /// Occurs when state changed changes or completes in <see cref="PublisherDocumentationViewerService"/>, allowing interested callers to react without polling internal state.
+    /// </summary>
     /// <inheritdoc />
     public event Action? StateChanged;
 
+    /// <summary>
+    /// Gets or sets the state value that forms part of the publisher documentation viewer state consumed or produced by the surrounding workflow.
+    /// </summary>
     /// <inheritdoc />
+    /// <value>The state value exposed by <see cref="PublisherDocumentationViewerService"/>.</value>
     public PublisherDocumentationViewerState State { get; private set; } = new();
 
+    /// <summary>
+    /// Performs open as part of the publisher documentation viewer service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
     /// <inheritdoc />
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
     public void Open(PublisherDocumentationViewerRequest request)
     {
         try
@@ -58,6 +79,9 @@ public sealed class PublisherDocumentationViewerService(ILogger<PublisherDocumen
         }
     }
 
+    /// <summary>
+    /// Performs close as part of the publisher documentation viewer service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
     /// <inheritdoc />
     public void Close()
     {
@@ -83,8 +107,10 @@ public sealed class PublisherDocumentationViewerService(ILogger<PublisherDocumen
     }
 
     /// <summary>
-    /// Normalizes URL.
+    /// Normalizes URL as part of the publisher documentation viewer service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="url">Url value supplied to the publisher documentation viewer operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeUrl(string url)
     {
     try

@@ -6,24 +6,35 @@ using System.Text.Json;
 namespace PublisherStudio.Services.Configuration;
 
 /// <summary>
-/// Provides file localization service operations.
+/// Coordinates file localization behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
+/// <param name="environment">Web host environment dependency used by the file localization workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class FileLocalizationService(IWebHostEnvironment environment, ILogger<FileLocalizationService> logger) : IFileLocalizationService
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal JSON options state used by <see cref="FileLocalizationService"/> while executing its surrounding workflow.
     /// </summary>
     private readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory cache collection maintained internally by <see cref="FileLocalizationService"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<string, IReadOnlyDictionary<string, string>> _cache = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>
+    /// Gets the localization path used by this file localization instance to locate the associated file-system resource.
+    /// </summary>
+    /// <value>The localization path value exposed by <see cref="FileLocalizationService"/>.</value>
     private string LocalizationPath => Path.Combine(environment.ContentRootPath, "Localization");
+    /// <summary>
+    /// Gets the override path used by this file localization instance to locate the associated file-system resource.
+    /// </summary>
+    /// <value>The override path value exposed by <see cref="FileLocalizationService"/>.</value>
     private string OverridePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PublisherStudio", "LocalizationOverrides");
 
     /// <summary>
-    /// Gets available cultures.
+    /// Retrieves available cultures as part of the file localization service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<string> GetAvailableCultures()
     {
         try
@@ -51,8 +62,10 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
     }
 
     /// <summary>
-    /// Gets strings.
+    /// Retrieves strings as part of the file localization service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="culture">Culture value supplied to the file localization operation and used when producing its result.</param>
+    /// <returns>The i read only dictionary string string produced by the operation.</returns>
     public IReadOnlyDictionary<string, string> GetStrings(string? culture = null)
     {
         try
@@ -70,8 +83,12 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
     }
 
     /// <summary>
-    /// Runs the get operation.
+    /// Performs get as part of the file localization service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="key">Key value supplied to the file localization operation and used when producing its result.</param>
+    /// <param name="culture">Culture value supplied to the file localization operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the file localization operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string Get(string key, string? culture = null, string? fallback = null)
     {
         try
@@ -96,8 +113,10 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
 
 
     /// <summary>
-    /// Resolves a requested culture to one complete PublisherStudio localization catalog.
+    /// Resolves available culture as part of the file localization service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="culture">Culture value supplied to the file localization operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string ResolveAvailableCulture(string? culture)
     {
         try
@@ -117,6 +136,8 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
     /// <summary>
     /// Gets the native display name and normalized culture name for one available catalog.
     /// </summary>
+    /// <param name="culture">Culture value supplied to the file localization operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string GetCultureDisplayName(string culture)
     {
         try
@@ -136,6 +157,8 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
     /// <summary>
     /// Builds a local return URL while removing stale culture query values.
     /// </summary>
+    /// <param name="absoluteUri">Absolute uri value supplied to the file localization operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string BuildCultureReturnUrl(string absoluteUri)
     {
         try
@@ -154,6 +177,9 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
     /// <summary>
     /// Adds an explicit request culture to one validated local return URL.
     /// </summary>
+    /// <param name="returnUrl">Return url value supplied to the file localization operation and used when producing its result.</param>
+    /// <param name="culture">Culture value supplied to the file localization operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string BuildCultureRedirectUrl(string? returnUrl, string culture)
     {
         try
@@ -179,6 +205,9 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
     /// <summary>
     /// Builds the application endpoint used to persist and select one culture.
     /// </summary>
+    /// <param name="absoluteUri">Absolute uri value supplied to the file localization operation and used when producing its result.</param>
+    /// <param name="culture">Culture value supplied to the file localization operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string BuildCultureSelectionUrl(string absoluteUri, string culture)
     {
         try
@@ -197,8 +226,12 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
     }
 
     /// <summary>
-    /// Saves overrides async.
+    /// Persists overrides as part of the file localization service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="culture">Culture value supplied to the file localization operation and used when producing its result.</param>
+    /// <param name="strings">String dependency used by the file localization workflow to provide the corresponding application capability.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task SaveOverridesAsync(string culture, IReadOnlyDictionary<string, string> strings, CancellationToken cancellationToken = default)
     {
         try
@@ -223,8 +256,10 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
     }
 
     /// <summary>
-    /// Runs the load operation.
+    /// Performs load as part of the file localization service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="culture">Culture value supplied to the file localization operation and used when producing its result.</param>
+    /// <returns>The i read only dictionary string string produced by the operation.</returns>
     private IReadOnlyDictionary<string, string> Load(string culture)
     {
         try
@@ -247,8 +282,10 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
 
 
     /// <summary>
-    /// Loads file.
+    /// Loads file as part of the file localization service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="path">Path value supplied to the file localization operation and used when producing its result.</param>
+    /// <returns>The dictionary string string produced by the operation.</returns>
     private Dictionary<string, string> LoadFile(string path)
     {
         try
@@ -279,8 +316,10 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
     }
 
     /// <summary>
-    /// Runs the merge file operation.
+    /// Performs merge file as part of the file localization service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="path">Path value supplied to the file localization operation and used when producing its result.</param>
+    /// <param name="result">String dependency used by the file localization workflow to provide the corresponding application capability.</param>
     private void MergeFile(string path, IDictionary<string, string> result)
     {
         try
@@ -301,8 +340,10 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
     }
 
     /// <summary>
-    /// Adds cultures.
+    /// Adds cultures as part of the file localization service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="path">Path value supplied to the file localization operation and used when producing its result.</param>
+    /// <param name="values">String dependency used by the file localization workflow to provide the corresponding application capability.</param>
     private void AddCultures(string path, ISet<string> values)
     {
         try
@@ -327,6 +368,10 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
     /// <summary>
     /// Builds one local route while preserving query values unrelated to localization.
     /// </summary>
+    /// <param name="absolutePath">Absolute path value supplied to the file localization operation and used when producing its result.</param>
+    /// <param name="query">Query value supplied to the file localization operation and used when producing its result.</param>
+    /// <param name="culture">Culture value supplied to the file localization operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string BuildCultureUrl(string absolutePath, string query, string? culture)
     {
         try
@@ -362,8 +407,10 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
     }
 
     /// <summary>
-    /// Normalizes culture.
+    /// Normalizes culture as part of the file localization service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="culture">Culture value supplied to the file localization operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeCulture(string? culture)
     {
         try

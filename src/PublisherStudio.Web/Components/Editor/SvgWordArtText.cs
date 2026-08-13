@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 
 namespace PublisherStudio.Components.Editor;
@@ -10,94 +10,116 @@ namespace PublisherStudio.Components.Editor;
 public sealed class SvgWordArtText : ComponentBase
 {
     /// <summary>
-    /// Gets or sets CSS class.
+    /// Gets or sets the CSS class value that forms part of the SVG word art text state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The CSS class value exposed by <see cref="SvgWordArtText"/>.</value>
     [Parameter] public string? CssClass { get; set; }
     /// <summary>
-    /// Gets or sets horizontal position.
+    /// Gets or sets the x value that forms part of the SVG word art text state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The x value exposed by <see cref="SvgWordArtText"/>.</value>
     [Parameter] public string? X { get; set; }
     /// <summary>
-    /// Gets or sets vertical position.
+    /// Gets or sets the y value that forms part of the SVG word art text state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The y value exposed by <see cref="SvgWordArtText"/>.</value>
     [Parameter] public string? Y { get; set; }
     /// <summary>
-    /// Gets or sets DevExpress.
+    /// Gets or sets the DevExpress value that forms part of the SVG word art text state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The DevExpress value exposed by <see cref="SvgWordArtText"/>.</value>
     [Parameter] public string? Dx { get; set; }
     /// <summary>
-    /// Gets or sets dy.
+    /// Gets or sets the dy value that forms part of the SVG word art text state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The dy value exposed by <see cref="SvgWordArtText"/>.</value>
     [Parameter] public string? Dy { get; set; }
     /// <summary>
-    /// Gets or sets text anchor.
+    /// Gets or sets the text anchor value that forms part of the SVG word art text state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The text anchor value exposed by <see cref="SvgWordArtText"/>.</value>
     [Parameter] public string? TextAnchor { get; set; }
     /// <summary>
-    /// Gets or sets dominant baseline.
+    /// Gets or sets the dominant baseline value that forms part of the SVG word art text state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The dominant baseline value exposed by <see cref="SvgWordArtText"/>.</value>
     [Parameter] public string? DominantBaseline { get; set; }
     /// <summary>
-    /// Gets or sets font family.
+    /// Gets or sets the font family value that forms part of the SVG word art text state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The font family value exposed by <see cref="SvgWordArtText"/>.</value>
     [Parameter] public string? FontFamily { get; set; }
     /// <summary>
-    /// Gets or sets font size.
+    /// Gets or sets the font size that quantifies the associated SVG word art text data.
     /// </summary>
+    /// <value>The font size value exposed by <see cref="SvgWordArtText"/>.</value>
     [Parameter] public string? FontSize { get; set; }
     /// <summary>
-    /// Gets or sets font weight.
+    /// Gets or sets the font weight value that forms part of the SVG word art text state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The font weight value exposed by <see cref="SvgWordArtText"/>.</value>
     [Parameter] public string? FontWeight { get; set; }
     /// <summary>
-    /// Gets or sets font style.
+    /// Gets or sets the font style value that forms part of the SVG word art text state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The font style value exposed by <see cref="SvgWordArtText"/>.</value>
     [Parameter] public string? FontStyle { get; set; }
     /// <summary>
-    /// Gets or sets letter spacing.
+    /// Gets or sets the letter spacing value that forms part of the SVG word art text state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The letter spacing value exposed by <see cref="SvgWordArtText"/>.</value>
     [Parameter] public string? LetterSpacing { get; set; }
     /// <summary>
-    /// Gets or sets fill.
+    /// Gets or sets the fill value that forms part of the SVG word art text state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The fill value exposed by <see cref="SvgWordArtText"/>.</value>
     [Parameter] public string? Fill { get; set; }
     /// <summary>
-    /// Gets or sets fill opacity.
+    /// Gets or sets the fill opacity value that forms part of the SVG word art text state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The fill opacity value exposed by <see cref="SvgWordArtText"/>.</value>
     [Parameter] public string? FillOpacity { get; set; }
     /// <summary>
-    /// Gets or sets stroke.
+    /// Gets or sets the stroke value that forms part of the SVG word art text state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The stroke value exposed by <see cref="SvgWordArtText"/>.</value>
     [Parameter] public string? Stroke { get; set; }
     /// <summary>
-    /// Gets or sets stroke width.
+    /// Gets or sets the stroke width value that forms part of the SVG word art text state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The stroke width value exposed by <see cref="SvgWordArtText"/>.</value>
     [Parameter] public string? StrokeWidth { get; set; }
     /// <summary>
-    /// Gets or sets paint order.
+    /// Gets or sets the paint order value that forms part of the SVG word art text state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The paint order value exposed by <see cref="SvgWordArtText"/>.</value>
     [Parameter] public string? PaintOrder { get; set; }
     /// <summary>
-    /// Gets or sets text.
+    /// Gets or sets the text value that forms part of the SVG word art text state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The text value exposed by <see cref="SvgWordArtText"/>.</value>
     [Parameter, EditorRequired] public string Text { get; set; } = string.Empty;
 
     /// <summary>
-    /// Builds render tree.
+    /// Gets or sets the path href used by this SVG word art text instance to locate the associated file-system resource.
     /// </summary>
+    /// <value>The path href value exposed by <see cref="SvgWordArtText"/>.</value>
     [Parameter] public string? PathHref { get; set; }
     /// <summary>
-    /// Gets or sets path start offset.
+    /// Gets or sets the path start offset used by this SVG word art text instance to locate the associated file-system resource.
     /// </summary>
+    /// <value>The path start offset value exposed by <see cref="SvgWordArtText"/>.</value>
     [Parameter] public string? PathStartOffset { get; set; }
     /// <summary>
-    /// Gets or sets path text anchor.
+    /// Gets or sets the path text anchor used by this SVG word art text instance to locate the associated file-system resource.
     /// </summary>
+    /// <value>The path text anchor value exposed by <see cref="SvgWordArtText"/>.</value>
     [Parameter] public string? PathTextAnchor { get; set; }
 
     /// <summary>
-    /// Builds render tree.
+    /// Builds render tree for <see cref="SvgWordArtText"/>, keeping the operation consistent with the state and invariants of the surrounding SVG word art text workflow.
     /// </summary>
+    /// <param name="builder">Builder value supplied to the SVG word art text operation and used when producing its result.</param>
     protected override void BuildRenderTree(RenderTreeBuilder builder)
     {
         builder.OpenElement(0, "text");

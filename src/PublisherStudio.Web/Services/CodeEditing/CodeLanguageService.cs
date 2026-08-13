@@ -3,15 +3,21 @@ using PublisherStudio.BusinessObjects;
 namespace PublisherStudio.Services.CodeEditing;
 
 /// <summary>
-/// Provides code language service operations.
+/// Coordinates code language behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
 public sealed class CodeLanguageService : ICodeLanguageService
 {
+    /// <summary>
+    /// Stores the in-memory profiles collection maintained internally by <see cref="CodeLanguageService"/> for its current workflow state.
+    /// </summary>
     private readonly IReadOnlyList<CodeLanguageProfile> _profiles;
+    /// <summary>
+    /// Stores the in-memory by identifier collection maintained internally by <see cref="CodeLanguageService"/> for its current workflow state.
+    /// </summary>
     private readonly IReadOnlyDictionary<string, CodeLanguageProfile> _byId;
 
     /// <summary>
-    /// Runs the code language service operation.
+    /// Initializes a new <see cref="CodeLanguageService"/> instance and captures the dependencies or initial state required by its code language workflow.
     /// </summary>
     public CodeLanguageService()
     {
@@ -20,8 +26,9 @@ public sealed class CodeLanguageService : ICodeLanguageService
     }
 
     /// <summary>
-    /// Gets profiles.
+    /// Retrieves profiles as part of the code language service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<CodeLanguageProfile> GetProfiles() {
     try
     {
@@ -34,8 +41,10 @@ public sealed class CodeLanguageService : ICodeLanguageService
     }
 }
     /// <summary>
-    /// Runs the get operation.
+    /// Performs get as part of the code language service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="languageId">Identifier of the language to use for this operation.</param>
+    /// <returns>The code language profile produced by the operation.</returns>
     public CodeLanguageProfile Get(string languageId) {
     try
     {
@@ -49,8 +58,11 @@ public sealed class CodeLanguageService : ICodeLanguageService
 }
 
     /// <summary>
-    /// Runs the detect operation.
+    /// Performs detect as part of the code language service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="fileNameOrExtension">File name or extension value supplied to the code language operation and used when producing its result.</param>
+    /// <param name="content">Content value supplied to the code language operation and used when producing its result.</param>
+    /// <returns>The code language profile produced by the operation.</returns>
     public CodeLanguageProfile Detect(string fileNameOrExtension, string? content = null)
     {
     try
@@ -74,8 +86,9 @@ public sealed class CodeLanguageService : ICodeLanguageService
 }
 
     /// <summary>
-    /// Builds profiles.
+    /// Builds profiles as part of the code language service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     private IReadOnlyList<CodeLanguageProfile> BuildProfiles() {
     try
     {
@@ -113,8 +126,18 @@ public sealed class CodeLanguageService : ICodeLanguageService
 }
 
     /// <summary>
-    /// Runs the profile operation.
+    /// Performs profile as part of the code language service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="name">Name value supplied to the code language operation and used when producing its result.</param>
+    /// <param name="extensions">Extensions value supplied to the code language operation and used when producing its result.</param>
+    /// <param name="line">Line value supplied to the code language operation and used when producing its result.</param>
+    /// <param name="blockStart">Block start value supplied to the code language operation and used when producing its result.</param>
+    /// <param name="blockEnd">Block end value supplied to the code language operation and used when producing its result.</param>
+    /// <param name="keywords">Keywords value supplied to the code language operation and used when producing its result.</param>
+    /// <param name="braces">Value indicating whether braces should apply to this operation.</param>
+    /// <param name="indentation">Value indicating whether indentation should apply to this operation.</param>
+    /// <returns>The code language profile produced by the operation.</returns>
     private CodeLanguageProfile Profile(string id, string name, List<string> extensions, string line, string blockStart, string blockEnd, List<string> keywords, bool braces, bool indentation) {
     try
     {

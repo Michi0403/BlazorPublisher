@@ -7,13 +7,18 @@ using PublisherStudio.BusinessObjects;
 namespace PublisherStudio.Services;
 
 /// <summary>
-/// Provides publication data service operations.
+/// Coordinates publication behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
+/// <param name="gridRows">Publication grid row factory dependency used by the publication workflow to provide the corresponding application capability.</param>
+/// <param name="mediaData">Media data value supplied to the publication operation and used when producing its result.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, PublicationMediaData mediaData, ILogger<PublicationDataService> logger)
 {
     /// <summary>
-    /// Creates sample.
+    /// Creates sample as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="name">Name value supplied to the publication operation and used when producing its result.</param>
+    /// <returns>The publication data object produced by the operation.</returns>
     public PublicationDataObject CreateSample(string name = "Quarterly Sales")
     {
         try
@@ -38,8 +43,10 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Runs the clone operation.
+    /// Performs clone as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the publication operation and used when producing its result.</param>
+    /// <returns>The publication data object produced by the operation.</returns>
     public PublicationDataObject Clone(PublicationDataObject source)
     {
         try
@@ -57,8 +64,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Runs the normalize operation.
+    /// Performs normalize as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication operation and used when producing its result.</param>
     public void Normalize(PublicationDocument document)
     {
         try
@@ -113,8 +121,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Parses into.
+    /// Parses into as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="data">Data value supplied to the publication operation and used when producing its result.</param>
     public void ParseInto(PublicationDataObject data)
     {
         try
@@ -164,8 +173,12 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Resolves rows.
+    /// Resolves rows as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="data">Data value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="currentPageId">Identifier of the current page to use for this operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<PublicationDataRow> ResolveRows(PublicationDocument document, PublicationDataObject? data, Guid currentPageId)
     {
         try
@@ -190,8 +203,10 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Resolves columns.
+    /// Resolves columns as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="data">Data value supplied to the publication operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<PublicationDataColumn> ResolveColumns(PublicationDataObject? data)
         {
             try
@@ -214,8 +229,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
 
     /// <summary>
-    /// Ensures built in objects.
+    /// Ensures built in objects as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication operation and used when producing its result.</param>
     public void EnsureBuiltInObjects(PublicationDocument document)
     {
         try
@@ -236,8 +252,11 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Ensures built in.
+    /// Ensures built in as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="kind">Kind value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the publication operation and used when producing its result.</param>
     private void EnsureBuiltIn(PublicationDocument document, PublicationDataSourceKind kind, string name)
     {
         try
@@ -268,8 +287,12 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Builds chart points.
+    /// Builds chart points as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="item">Item value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="currentPageId">Identifier of the current page to use for this operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<DataChartPoint> BuildChartPoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
     {
         try
@@ -305,8 +328,12 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Builds pie points.
+    /// Builds pie points as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="item">Item value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="currentPageId">Identifier of the current page to use for this operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<DataPiePoint> BuildPiePoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
     {
         try
@@ -330,8 +357,12 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Builds spark points.
+    /// Builds spark points as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="item">Item value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="currentPageId">Identifier of the current page to use for this operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<DataSparkPoint> BuildSparkPoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
     {
         try
@@ -356,8 +387,12 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
 
 
     /// <summary>
-    /// Builds range points.
+    /// Builds range points as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="item">Item value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="currentPageId">Identifier of the current page to use for this operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<DataRangePoint> BuildRangePoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
     {
         try
@@ -383,8 +418,12 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Builds bubble points.
+    /// Builds bubble points as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="item">Item value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="currentPageId">Identifier of the current page to use for this operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<DataBubblePoint> BuildBubblePoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
     {
         try
@@ -410,8 +449,12 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Builds financial points.
+    /// Builds financial points as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="item">Item value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="currentPageId">Identifier of the current page to use for this operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<DataFinancialPoint> BuildFinancialPoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
     {
         try
@@ -436,8 +479,12 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Builds sankey points.
+    /// Builds sankey points as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="item">Item value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="currentPageId">Identifier of the current page to use for this operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<DataSankeyPoint> BuildSankeyPoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
     {
         try
@@ -460,8 +507,12 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Builds tree map points.
+    /// Builds tree map points as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="item">Item value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="currentPageId">Identifier of the current page to use for this operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<DataTreeMapPoint> BuildTreeMapPoints(PublicationDocument document, DataVisualElement item, Guid currentPageId)
     {
         try
@@ -483,8 +534,12 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Builds client visual configuration.
+    /// Builds client visual configuration as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="item">Item value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="currentPageId">Identifier of the current page to use for this operation.</param>
+    /// <returns>The object produced by the operation.</returns>
     public object BuildClientVisualConfiguration(PublicationDocument document, DataVisualElement item, Guid currentPageId)
     {
         try
@@ -556,8 +611,10 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Runs the grid columns operation.
+    /// Performs grid columns as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="data">Data value supplied to the publication operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<string> GridColumns(PublicationDataObject? data)
         {
             try
@@ -573,8 +630,12 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
 
     /// <summary>
-    /// Builds grid rows.
+    /// Builds grid rows as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="item">Item value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="currentPageId">Identifier of the current page to use for this operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<PublicationGridRow> BuildGridRows(PublicationDocument document, DataVisualElement item, Guid currentPageId)
     {
         try
@@ -596,8 +657,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Parses web snapshot.
+    /// Parses web snapshot as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="data">Data value supplied to the publication operation and used when producing its result.</param>
     private void ParseWebSnapshot(PublicationDataObject data)
     {
         try
@@ -651,8 +713,10 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Runs the detect web response format operation.
+    /// Performs detect web response format as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="data">Data value supplied to the publication operation and used when producing its result.</param>
+    /// <returns>The publication web response format produced by the operation.</returns>
     private PublicationWebResponseFormat DetectWebResponseFormat(PublicationDataObject data)
     {
         try
@@ -692,8 +756,11 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Runs the select JSON path operation.
+    /// Performs select JSON path as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="path">Path value supplied to the publication operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string SelectJsonPath(string source, string path)
     {
         try
@@ -736,8 +803,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Parses JSON.
+    /// Parses JSON as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="data">Data value supplied to the publication operation and used when producing its result.</param>
     private void ParseJson(PublicationDataObject data)
     {
         try
@@ -801,8 +869,10 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Runs the select JSON rows operation.
+    /// Performs select JSON rows as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="root">Root value supplied to the publication operation and used when producing its result.</param>
+    /// <returns>The JSON element produced by the operation.</returns>
     private JsonElement[] SelectJsonRows(JsonElement root)
     {
         try
@@ -822,8 +892,12 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Attempts to find JSON row array.
+    /// Attempts to find JSON row array as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="root">Root value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="depth">Depth value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="rows">Rows value supplied to the publication operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool TryFindJsonRowArray(JsonElement root, int depth, out JsonElement[] rows)
     {
         try
@@ -864,8 +938,12 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Runs the flatten JSON object operation.
+    /// Performs flatten JSON object as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="prefix">Prefix value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="values">Values value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="names">Names value supplied to the publication operation and used when producing its result.</param>
     private void FlattenJsonObject(JsonElement source, string prefix, Dictionary<string, string> values, List<string> names)
     {
         try
@@ -893,8 +971,10 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Runs the JSON text operation.
+    /// Performs JSON text as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the publication operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string JsonText(JsonElement value) {
         try
         {
@@ -917,8 +997,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Parses XML.
+    /// Parses XML as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="data">Data value supplied to the publication operation and used when producing its result.</param>
     private void ParseXml(PublicationDataObject data)
     {
         try
@@ -991,8 +1072,13 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Adds XML value.
+    /// Adds XML value as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="values">Values value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="names">Names value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="value">Value value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="attribute">Value indicating whether attribute should apply to this operation.</param>
     private void AddXmlValue(Dictionary<string, string> values, List<string> names, string name, string value, bool attribute)
     {
         try
@@ -1015,8 +1101,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Parses delimited.
+    /// Parses delimited as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="data">Data value supplied to the publication operation and used when producing its result.</param>
     private void ParseDelimited(PublicationDataObject data)
     {
         try
@@ -1055,8 +1142,11 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Parses delimited rows.
+    /// Parses delimited rows as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="delimiter">Delimiter value supplied to the publication operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private List<List<string>> ParseDelimitedRows(string source, char delimiter)
     {
         try
@@ -1096,8 +1186,10 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Runs the make unique operation.
+    /// Performs make unique as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="names">Names value supplied to the publication operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private List<string> MakeUnique(List<string> names)
     {
         try
@@ -1123,8 +1215,10 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Runs the infer kind operation.
+    /// Performs infer kind as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="values">String dependency used by the publication workflow to provide the corresponding application capability.</param>
+    /// <returns>The publication data value kind produced by the operation.</returns>
     private PublicationDataValueKind InferKind(IEnumerable<string> values)
     {
         try
@@ -1146,8 +1240,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Runs the document object columns operation.
+    /// Performs document object columns as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     private List<PublicationDataColumn> DocumentObjectColumns() {
         try
         {
@@ -1181,8 +1276,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Runs the publication page columns operation.
+    /// Performs publication page columns as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     private List<PublicationDataColumn> PublicationPageColumns() {
         try
         {
@@ -1209,8 +1305,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Runs the publication document columns operation.
+    /// Performs publication document columns as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     private List<PublicationDataColumn> PublicationDocumentColumns() {
         try
         {
@@ -1237,8 +1334,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Runs the publication media columns operation.
+    /// Performs publication media columns as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     private List<PublicationDataColumn> PublicationMediaColumns() {
         try
         {
@@ -1270,8 +1368,11 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Runs the mime from data URL operation.
+    /// Performs MIME from data URL as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="dataUrl">Data url value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the publication operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string MimeFromDataUrl(string dataUrl, string fallback)
     {
         try
@@ -1293,8 +1394,12 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Builds publication media rows.
+    /// Builds publication media rows as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="scope">Scope value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="currentPageId">Identifier of the current page to use for this operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IReadOnlyList<PublicationDataRow> BuildPublicationMediaRows(PublicationDocument document, DocumentObjectDataScope scope, Guid currentPageId)
     {
         try
@@ -1373,8 +1478,12 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Builds document rows.
+    /// Builds document rows as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="scope">Scope value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="currentPageId">Identifier of the current page to use for this operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IReadOnlyList<PublicationDataRow> BuildDocumentRows(PublicationDocument document, DocumentObjectDataScope scope, Guid currentPageId)
     {
         try
@@ -1415,8 +1524,10 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Builds publication page rows.
+    /// Builds publication page rows as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IReadOnlyList<PublicationDataRow> BuildPublicationPageRows(PublicationDocument document)
         {
             try
@@ -1448,8 +1559,11 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
 
     /// <summary>
-    /// Builds publication document rows.
+    /// Builds publication document rows as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="currentPageId">Identifier of the current page to use for this operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IReadOnlyList<PublicationDataRow> BuildPublicationDocumentRows(PublicationDocument document, Guid currentPageId)
     {
         try
@@ -1487,8 +1601,11 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     }
 
     /// <summary>
-    /// Runs the slug operation.
+    /// Performs slug as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the publication operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Slug(string value, int fallback)
     {
         try

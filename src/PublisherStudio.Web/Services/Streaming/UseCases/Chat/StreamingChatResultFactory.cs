@@ -4,36 +4,43 @@ using PublisherStudio.BusinessObjects;
 namespace PublisherStudio.Services.Streaming.UseCases.Chat;
 
 /// <summary>
-/// Defines the streaming chat result factory contract.
+/// Defines the contract for streaming chat result behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
 public interface IStreamingChatResultFactory
 {
     /// <summary>
-    /// Creates not found.
+    /// Creates not found using the configuration and dependencies owned by <see cref="IStreamingChatResultFactory"/>.
     /// </summary>
+    /// <returns>The streaming chat send result produced by the operation.</returns>
     StreamingChatSendResult CreateNotFound();
     /// <summary>
-    /// Creates accepted.
+    /// Creates accepted using the configuration and dependencies owned by <see cref="IStreamingChatResultFactory"/>.
     /// </summary>
+    /// <returns>The streaming chat send result produced by the operation.</returns>
     StreamingChatSendResult CreateAccepted();
     /// <summary>
-    /// Creates not configured.
+    /// Creates not configured using the configuration and dependencies owned by <see cref="IStreamingChatResultFactory"/>.
     /// </summary>
+    /// <returns>The streaming chat send result produced by the operation.</returns>
     StreamingChatSendResult CreateNotConfigured();
     /// <summary>
-    /// Creates failure.
+    /// Creates failure using the configuration and dependencies owned by <see cref="IStreamingChatResultFactory"/>.
     /// </summary>
+    /// <param name="error">Error value supplied to the streaming chat result operation and used when producing its result.</param>
+    /// <returns>The streaming chat send result produced by the operation.</returns>
     StreamingChatSendResult CreateFailure(string error);
 }
 
 /// <summary>
-/// Provides streaming chat result factory operations.
+/// Creates configured streaming chat result instances from the application's current dependencies and runtime settings.
 /// </summary>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class StreamingChatResultFactory(ILogger<StreamingChatResultFactory> logger) : IStreamingChatResultFactory
 {
     /// <summary>
-    /// Creates not found.
+    /// Creates not found using the configuration and dependencies owned by <see cref="StreamingChatResultFactory"/>.
     /// </summary>
+    /// <returns>The streaming chat send result produced by the operation.</returns>
     public StreamingChatSendResult CreateNotFound()
     {
     try
@@ -53,8 +60,9 @@ public sealed class StreamingChatResultFactory(ILogger<StreamingChatResultFactor
 }
 
     /// <summary>
-    /// Creates accepted.
+    /// Creates accepted using the configuration and dependencies owned by <see cref="StreamingChatResultFactory"/>.
     /// </summary>
+    /// <returns>The streaming chat send result produced by the operation.</returns>
     public StreamingChatSendResult CreateAccepted()
     {
     try
@@ -74,8 +82,9 @@ public sealed class StreamingChatResultFactory(ILogger<StreamingChatResultFactor
 }
 
     /// <summary>
-    /// Creates not configured.
+    /// Creates not configured using the configuration and dependencies owned by <see cref="StreamingChatResultFactory"/>.
     /// </summary>
+    /// <returns>The streaming chat send result produced by the operation.</returns>
     public StreamingChatSendResult CreateNotConfigured()
     {
     try
@@ -95,8 +104,10 @@ public sealed class StreamingChatResultFactory(ILogger<StreamingChatResultFactor
 }
 
     /// <summary>
-    /// Creates failure.
+    /// Creates failure using the configuration and dependencies owned by <see cref="StreamingChatResultFactory"/>.
     /// </summary>
+    /// <param name="error">Error value supplied to the streaming chat result operation and used when producing its result.</param>
+    /// <returns>The streaming chat send result produced by the operation.</returns>
     public StreamingChatSendResult CreateFailure(string error)
     {
     try

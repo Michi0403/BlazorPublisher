@@ -5,11 +5,14 @@ using PublisherStudio.BusinessObjects;
 namespace PublisherStudio.Services.OpenScad;
 
 /// <summary>Creates catalog-backed nodes with typed defaults for property panels and future visual builders.</summary>
+/// <param name="catalog">Open openscad catalog service dependency used by the open OpenSCAD node factory workflow to provide the corresponding application capability.</param>
 public sealed class OpenScadNodeFactoryService(IOpenScadCatalogService catalog) : IOpenScadNodeFactoryService
 {
     /// <summary>
-    /// Runs the create operation.
+    /// Performs create as part of the open OpenSCAD node factory service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="kind">Kind value supplied to the open OpenSCAD node factory operation and used when producing its result.</param>
+    /// <returns>The open OpenSCAD node produced by the operation.</returns>
     public OpenScadNode Create(string kind)
     {
     try
@@ -32,8 +35,10 @@ public sealed class OpenScadNodeFactoryService(IOpenScadCatalogService catalog) 
 }
 
     /// <summary>
-    /// Parses default.
+    /// Parses default as part of the open OpenSCAD node factory service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="parameter">Parameter value supplied to the open OpenSCAD node factory operation and used when producing its result.</param>
+    /// <returns>The open OpenSCAD value produced by the operation.</returns>
     private OpenScadValue? ParseDefault(OpenScadParameterDefinition parameter)
     {
     try
@@ -62,8 +67,10 @@ public sealed class OpenScadNodeFactoryService(IOpenScadCatalogService catalog) 
 }
 
     /// <summary>
-    /// Runs the unquote operation.
+    /// Performs unquote as part of the open OpenSCAD node factory service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="expression">Expression value supplied to the open OpenSCAD node factory operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Unquote(string expression)
     {
     try
@@ -84,8 +91,10 @@ public sealed class OpenScadNodeFactoryService(IOpenScadCatalogService catalog) 
 }
 
     /// <summary>
-    /// Parses double rows.
+    /// Parses double rows as part of the open OpenSCAD node factory service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="expression">Expression value supplied to the open OpenSCAD node factory operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private List<List<double>> ParseDoubleRows(string expression)
     {
     try
@@ -106,8 +115,10 @@ public sealed class OpenScadNodeFactoryService(IOpenScadCatalogService catalog) 
 }
 
     /// <summary>
-    /// Parses integer rows.
+    /// Parses integer rows as part of the open OpenSCAD node factory service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="expression">Expression value supplied to the open OpenSCAD node factory operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private List<List<int>> ParseIntegerRows(string expression)
     {
     try

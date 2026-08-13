@@ -5,17 +5,32 @@ using PublisherStudio.BusinessObjects;
 namespace PublisherStudio.Services.Panels;
 
 /// <summary>
-/// Provides panel document service operations.
+/// Coordinates panel document behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
+/// <param name="data">Publication data service dependency used by the panel document workflow to provide the corresponding application capability.</param>
+/// <param name="components">Publication component service dependency used by the panel document workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class PanelDocumentService(
     PublicationDataService data,
     PublicationComponentService components,
     ILogger<PanelDocumentService>? logger = null)
 {
+    /// <summary>
+    /// Stores the publication data service dependency used by <see cref="PanelDocumentService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly PublicationDataService _data = data;
+    /// <summary>
+    /// Stores the publication component service dependency used by <see cref="PanelDocumentService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly PublicationComponentService _components = components;
+    /// <summary>
+    /// Stores the logger used by <see cref="PanelDocumentService"/> to record operational diagnostics without coupling callers to logging details.
+    /// </summary>
     private readonly ILogger<PanelDocumentService> logger = logger ?? NullLogger<PanelDocumentService>.Instance;
 
+    /// <summary>
+    /// Stores the internal presets state used by <see cref="PanelDocumentService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly PublicationPanelPresetDescriptor[] Presets =
     [
         new("blank", "Blank panel", "An empty reusable view with local navigation ready for nested PublisherStudio components.", "Base", false, "pub-icon pub-icon-panel"),
@@ -26,8 +41,9 @@ public sealed class PanelDocumentService(
     ];
 
     /// <summary>
-    /// Gets presets.
+    /// Retrieves presets as part of the panel document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<PublicationPanelPresetDescriptor> GetPresets()
     {
         try
@@ -42,6 +58,9 @@ public sealed class PanelDocumentService(
         }
     }
 
+    /// <summary>
+    /// Stores the internal component tools state used by <see cref="PanelDocumentService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly PanelComponentToolDescriptor[] ComponentTools =
     [
         new("text", "Text", "Rich text frame shared with the Mainframe.", "Content", "pub-icon pub-icon-text", "text"),
@@ -64,8 +83,10 @@ public sealed class PanelDocumentService(
     ];
 
     /// <summary>
-    /// Gets component tools.
+    /// Retrieves component tools as part of the panel document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the panel document operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<PanelComponentToolDescriptor> GetComponentTools(PublicationDocument document)
     {
         try
@@ -93,8 +114,11 @@ public sealed class PanelDocumentService(
     }
 
     /// <summary>
-    /// Creates component tool.
+    /// Creates component tool as part of the panel document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="toolId">Identifier of the tool to use for this operation.</param>
+    /// <returns>The publication element produced by the operation.</returns>
     public PublicationElement CreateComponentTool(PublicationDocument document, string toolId)
     {
         try
@@ -139,8 +163,14 @@ public sealed class PanelDocumentService(
     }
 
     /// <summary>
-    /// Creates visual.
+    /// Creates visual as part of the panel document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="kind">Kind value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="width">Width value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="height">Height value supplied to the panel document operation and used when producing its result.</param>
+    /// <returns>The data visual element produced by the operation.</returns>
     private DataVisualElement CreateVisual(PublicationDocument document, DataVisualKind kind, string name, double width, double height)
     {
     try
@@ -170,8 +200,14 @@ public sealed class PanelDocumentService(
 }
 
     /// <summary>
-    /// Creates component.
+    /// Creates component as part of the panel document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="kind">Kind value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="width">Width value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="height">Height value supplied to the panel document operation and used when producing its result.</param>
+    /// <returns>The dev extreme component element produced by the operation.</returns>
     private DevExtremeComponentElement CreateComponent(PublicationDocument document, PublicationComponentKind kind, string name, double width, double height)
     {
     try
@@ -195,8 +231,11 @@ public sealed class PanelDocumentService(
 }
 
     /// <summary>
-    /// Creates preset.
+    /// Creates preset as part of the panel document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="presetId">Identifier of the preset to use for this operation.</param>
+    /// <returns>The panel element produced by the operation.</returns>
     public PanelElement CreatePreset(PublicationDocument document, string? presetId)
     {
         try
@@ -222,8 +261,10 @@ public sealed class PanelDocumentService(
     }
 
     /// <summary>
-    /// Creates blank.
+    /// Creates blank as part of the panel document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="name">Name value supplied to the panel document operation and used when producing its result.</param>
+    /// <returns>The panel element produced by the operation.</returns>
     public PanelElement CreateBlank(string name = "Panel")
     {
         try
@@ -248,8 +289,10 @@ public sealed class PanelDocumentService(
     }
 
     /// <summary>
-    /// Runs the normalize operation.
+    /// Performs normalize as part of the panel document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="panel">Panel value supplied to the panel document operation and used when producing its result.</param>
     public void Normalize(PublicationDocument document, PanelElement panel)
     {
         try
@@ -265,8 +308,10 @@ public sealed class PanelDocumentService(
     }
 
     /// <summary>
-    /// Normalizes template.
+    /// Normalizes template as part of the panel document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="template">Template value supplied to the panel document operation and used when producing its result.</param>
     public void NormalizeTemplate(PublicationDocument document, PublicationElementTemplate template)
     {
         try
@@ -293,8 +338,13 @@ public sealed class PanelDocumentService(
     }
 
     /// <summary>
-    /// Normalizes panel.
+    /// Normalizes panel as part of the panel document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="panel">Panel value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="depth">Depth value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="usedElementIds">Used element identifiers value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="panelIdRegistered">Value indicating whether panel identifier registered should apply to this operation.</param>
     private void NormalizePanel(PublicationDocument document, PanelElement panel, int depth, HashSet<Guid> usedElementIds, bool panelIdRegistered)
     {
     try
@@ -346,8 +396,13 @@ public sealed class PanelDocumentService(
 }
 
     /// <summary>
-    /// Normalizes elements.
+    /// Normalizes elements as part of the panel document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="owner">Owner value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="elements">Elements value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="depth">Depth value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="usedElementIds">Used element identifiers value supplied to the panel document operation and used when producing its result.</param>
     private void NormalizeElements(PublicationDocument document, PanelElement owner, List<PublicationElement> elements, int depth, HashSet<Guid> usedElementIds)
     {
     try
@@ -407,8 +462,11 @@ public sealed class PanelDocumentService(
 }
 
     /// <summary>
-    /// Ensures unique identifier.
+    /// Ensures unique identifier as part of the panel document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="candidate">Candidate value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="usedIds">Used identifiers value supplied to the panel document operation and used when producing its result.</param>
+    /// <returns>The GUID produced by the operation.</returns>
     private Guid EnsureUniqueId(Guid candidate, HashSet<Guid> usedIds)
     {
     try
@@ -430,8 +488,10 @@ public sealed class PanelDocumentService(
 }
 
     /// <summary>
-    /// Creates kpi dashboard.
+    /// Creates kpi dashboard as part of the panel document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the panel document operation and used when producing its result.</param>
+    /// <returns>The panel element produced by the operation.</returns>
     private PanelElement CreateKpiDashboard(PublicationDocument document)
     {
     try
@@ -474,8 +534,10 @@ public sealed class PanelDocumentService(
 }
 
     /// <summary>
-    /// Creates operations board.
+    /// Creates operations board as part of the panel document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the panel document operation and used when producing its result.</param>
+    /// <returns>The panel element produced by the operation.</returns>
     private PanelElement CreateOperationsBoard(PublicationDocument document)
     {
     try
@@ -516,8 +578,10 @@ public sealed class PanelDocumentService(
 }
 
     /// <summary>
-    /// Creates creator hub.
+    /// Creates creator hub as part of the panel document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the panel document operation and used when producing its result.</param>
+    /// <returns>The panel element produced by the operation.</returns>
     private PanelElement CreateCreatorHub(PublicationDocument document)
     {
     try
@@ -570,8 +634,9 @@ public sealed class PanelDocumentService(
 }
 
     /// <summary>
-    /// Creates web experience.
+    /// Creates web experience as part of the panel document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The panel element produced by the operation.</returns>
     private PanelElement CreateWebExperience()
     {
     try
@@ -596,8 +661,14 @@ public sealed class PanelDocumentService(
 }
 
     /// <summary>
-    /// Runs the web view operation.
+    /// Performs web view as part of the panel document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="name">Name value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="slug">Slug value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="background">Background value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="heading">Heading value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="copy">Copy value supplied to the panel document operation and used when producing its result.</param>
+    /// <returns>The publication panel view produced by the operation.</returns>
     private PublicationPanelView WebView(string name, string slug, string background, string heading, string copy)
     {
     try
@@ -625,8 +696,10 @@ public sealed class PanelDocumentService(
 }
 
     /// <summary>
-    /// Ensures data.
+    /// Ensures data as part of the panel document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the panel document operation and used when producing its result.</param>
+    /// <returns>The publication data object produced by the operation.</returns>
     private PublicationDataObject EnsureData(PublicationDocument document)
     {
     try
@@ -648,8 +721,19 @@ public sealed class PanelDocumentService(
 }
 
     /// <summary>
-    /// Runs the visual operation.
+    /// Performs visual as part of the panel document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="dataObjectId">Identifier of the data object to use for this operation.</param>
+    /// <param name="kind">Kind value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="title">Title value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="argument">Argument value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="value">Value value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="target">Target value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="x">X value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="y">Y value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="width">Width value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="height">Height value supplied to the panel document operation and used when producing its result.</param>
+    /// <returns>The data visual element produced by the operation.</returns>
     private DataVisualElement Visual(Guid dataObjectId, DataVisualKind kind, string title, string argument, string value, string target, double x, double y, double width, double height) {
     try
     {
@@ -682,8 +766,11 @@ public sealed class PanelDocumentService(
 }
 
     /// <summary>
-    /// Runs the slug operation.
+    /// Performs slug as part of the panel document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the panel document operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the panel document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Slug(string? value, string fallback)
     {
     try

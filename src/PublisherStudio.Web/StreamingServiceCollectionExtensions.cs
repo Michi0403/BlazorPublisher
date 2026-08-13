@@ -1,4 +1,4 @@
-﻿using PublisherStudio.HostedServices.Streaming;
+using PublisherStudio.HostedServices.Streaming;
 using PublisherStudio.Hubs.Streaming.Chat;
 using PublisherStudio.Hubs.Streaming.Lan;
 
@@ -12,8 +12,11 @@ namespace PublisherStudio;
 public static class StreamingServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds publisher streaming.
+    /// Adds publisher streaming for <see cref="StreamingServiceCollectionExtensions"/>, keeping the operation consistent with the state and invariants of the surrounding streaming service collection extensions workflow.
     /// </summary>
+    /// <param name="services">Service collection dependency used by the streaming service collection extensions workflow to provide the corresponding application capability.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>The i service collection produced by the operation.</returns>
     public static IServiceCollection AddPublisherStreaming(this IServiceCollection services, ILogger logger)
     {
         try

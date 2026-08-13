@@ -5,8 +5,9 @@ using PublisherStudio.Services;
 namespace PublisherStudio.Controllers;
 
 /// <summary>
-/// Provides asset controller operations.
+/// Exposes the asset application operations through PublisherStudio's web/API boundary and delegates domain work to the corresponding services.
 /// </summary>
+/// <param name="mediaAssets">Publication media asset store dependency used by the asset workflow to provide the corresponding application capability.</param>
 [ApiController]
 [Route("api/assets")]
 public sealed class AssetController(PublicationMediaAssetStore mediaAssets) : ControllerBase
@@ -20,8 +21,10 @@ public sealed class AssetController(PublicationMediaAssetStore mediaAssets) : Co
     };
 
     /// <summary>
-    /// Gets media.
+    /// Retrieves media for the asset API operation, delegating application logic to the controller's services and returning the resulting HTTP-facing value.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpGet("media/{id:guid}")]
     public IActionResult GetMedia(Guid id)
     {
@@ -34,8 +37,11 @@ public sealed class AssetController(PublicationMediaAssetStore mediaAssets) : Co
     }
 
     /// <summary>
-    /// Runs the upload image operation.
+    /// Returns the upload image projection for the asset API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <param name="file">Form file dependency used by the asset workflow to provide the corresponding application capability.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpPost("image")]
     [DisableRequestSizeLimit]
     public async Task<IActionResult> UploadImage(IFormFile file, CancellationToken cancellationToken)
@@ -54,8 +60,11 @@ public sealed class AssetController(PublicationMediaAssetStore mediaAssets) : Co
     }
 
     /// <summary>
-    /// Runs the upload dropped asset operation.
+    /// Returns the upload dropped asset projection for the asset API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpPost("drop/{id:guid}")]
     [DisableRequestSizeLimit]
     public async Task<IActionResult> UploadDroppedAsset(Guid id, CancellationToken cancellationToken)

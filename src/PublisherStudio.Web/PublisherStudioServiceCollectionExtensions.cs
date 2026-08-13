@@ -26,13 +26,17 @@ using PublisherStudio.Services.Streaming.Metadata;
 namespace PublisherStudio.Services;
 
 /// <summary>
-/// Represents a publisher studio service collection extensions.
+/// Represents a PublisherStudio service collection extensions application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public static class PublisherStudioServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds publisher studio application.
+    /// Adds PublisherStudio application for <see cref="PublisherStudioServiceCollectionExtensions"/>, keeping the operation consistent with the state and invariants of the surrounding PublisherStudio service collection extensions workflow.
     /// </summary>
+    /// <param name="services">Service collection dependency used by the PublisherStudio service collection extensions workflow to provide the corresponding application capability.</param>
+    /// <param name="configuration">Configuration containing the caller-supplied values that control this operation.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>The i service collection produced by the operation.</returns>
     public static IServiceCollection AddPublisherStudioApplication(this IServiceCollection services, IConfiguration configuration, ILogger logger)
     {
         try

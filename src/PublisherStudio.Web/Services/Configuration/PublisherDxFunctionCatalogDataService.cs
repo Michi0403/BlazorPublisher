@@ -4,7 +4,7 @@ using System.Text.Json;
 namespace PublisherStudio.Services.Configuration;
 
 /// <summary>
-/// Defines the publisher DevExpress function catalog data service contract.
+/// Defines the contract for publisher DevExpress function catalog behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
 public interface IPublisherDxFunctionCatalogDataService
 {
@@ -13,23 +13,27 @@ public interface IPublisherDxFunctionCatalogDataService
     /// </summary>
     event Action? Changed;
     /// <summary>
-    /// Gets functions async.
+    /// Retrieves functions as part of the publisher DevExpress function catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     Task<IReadOnlyList<OrganicCapabilityDescriptor>> GetFunctionsAsync(CancellationToken cancellationToken = default);
 }
 
 /// <summary>
-/// Represents a publisher DevExpress function catalog document.
+/// Represents publisher DevExpress function catalog state exchanged or persisted by the surrounding application workflow, with each member describing one part of that state.
 /// </summary>
 public sealed class PublisherDxFunctionCatalogDocument
 {
     /// <summary>
-    /// Gets or sets schema version.
+    /// Gets or sets the schema version value that forms part of the publisher DevExpress function catalog state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The schema version value exposed by <see cref="PublisherDxFunctionCatalogDocument"/>.</value>
     public int SchemaVersion { get; set; }
     /// <summary>
-    /// Gets or sets functions.
+    /// Gets or sets the functions collection maintained or exposed by this publisher DevExpress function catalog instance for downstream processing.
     /// </summary>
+    /// <value>The functions value exposed by <see cref="PublisherDxFunctionCatalogDocument"/>.</value>
     public List<OrganicCapabilityDescriptor> Functions { get; set; } = [];
 }
 
@@ -37,18 +41,29 @@ public sealed class PublisherDxFunctionCatalogDocument
 /// Loads the deployed PublisherStudio function catalog and merges optional user-local overrides.
 /// A malformed user override is ignored with a warning so the shipped catalog remains usable.
 /// </summary>
+/// <param name="environment">Web host environment dependency used by the publisher DevExpress function catalog workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class PublisherDxFunctionCatalogDataService(
     IWebHostEnvironment environment,
     ILogger<PublisherDxFunctionCatalogDataService> logger) : IPublisherDxFunctionCatalogDataService, IDisposable
 {
     /// <summary>Serializes initialization and disposal of exact-catalog file watchers.</summary>
     private readonly object watcherGate = new();
+    /// <summary>
+    /// Stores the internal deployed watcher state used by <see cref="PublisherDxFunctionCatalogDataService"/> while executing its surrounding workflow.
+    /// </summary>
     private FileSystemWatcher? deployedWatcher;
+    /// <summary>
+    /// Stores the internal user watcher state used by <see cref="PublisherDxFunctionCatalogDataService"/> while executing its surrounding workflow.
+    /// </summary>
     private FileSystemWatcher? userWatcher;
+    /// <summary>
+    /// Stores the internal watchers initialized state used by <see cref="PublisherDxFunctionCatalogDataService"/> while executing its surrounding workflow.
+    /// </summary>
     private bool watchersInitialized;
 
     /// <summary>
-    /// Occurs when either serializable function catalog changes.
+    /// Occurs when changed changes or completes in <see cref="PublisherDxFunctionCatalogDataService"/>, allowing interested callers to react without polling internal state.
     /// </summary>
     public event Action? Changed;
 
@@ -62,8 +77,10 @@ public sealed class PublisherDxFunctionCatalogDataService(
     };
 
     /// <summary>
-    /// Gets functions async.
+    /// Retrieves functions as part of the publisher DevExpress function catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public async Task<IReadOnlyList<OrganicCapabilityDescriptor>> GetFunctionsAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -150,6 +167,8 @@ public sealed class PublisherDxFunctionCatalogDataService(
     /// <summary>
     /// Creates a watcher for one exact serializable catalog file.
     /// </summary>
+    /// <param name="filePath">File path value supplied to the publisher DevExpress function catalog operation and used when producing its result.</param>
+    /// <returns>The file system watcher produced by the operation.</returns>
     private FileSystemWatcher CreateWatcher(string filePath)
     {
         try
@@ -179,6 +198,8 @@ public sealed class PublisherDxFunctionCatalogDataService(
     /// <summary>
     /// Signals a live capability-directory refresh after an exact catalog file change.
     /// </summary>
+    /// <param name="sender">Sender value supplied to the publisher DevExpress function catalog operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the publisher DevExpress function catalog operation and used when producing its result.</param>
     private void OnCatalogFileChanged(object sender, FileSystemEventArgs args)
     {
         try
@@ -195,6 +216,8 @@ public sealed class PublisherDxFunctionCatalogDataService(
     /// <summary>
     /// Signals a live capability-directory refresh after an exact catalog file rename or replacement.
     /// </summary>
+    /// <param name="sender">Sender value supplied to the publisher DevExpress function catalog operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the publisher DevExpress function catalog operation and used when producing its result.</param>
     private void OnCatalogFileRenamed(object sender, RenamedEventArgs args)
     {
         try
@@ -232,8 +255,12 @@ public sealed class PublisherDxFunctionCatalogDataService(
     }
 
     /// <summary>
-    /// Reads required document async.
+    /// Reads required document as part of the publisher DevExpress function catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="path">Path value supplied to the publisher DevExpress function catalog operation and used when producing its result.</param>
+    /// <param name="source">Source value supplied to the publisher DevExpress function catalog operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The publisher DevExpress function catalog document produced by the operation.</returns>
     private async Task<PublisherDxFunctionCatalogDocument> ReadRequiredDocumentAsync(
         string path,
         string source,
@@ -260,8 +287,11 @@ public sealed class PublisherDxFunctionCatalogDataService(
     }
 
     /// <summary>
-    /// Reads optional document async.
+    /// Reads optional document as part of the publisher DevExpress function catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="path">Path value supplied to the publisher DevExpress function catalog operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The publisher DevExpress function catalog document produced by the operation.</returns>
     private async Task<PublisherDxFunctionCatalogDocument?> ReadOptionalDocumentAsync(
         string path,
         CancellationToken cancellationToken)
@@ -285,8 +315,10 @@ public sealed class PublisherDxFunctionCatalogDataService(
     }
 
     /// <summary>
-    /// Validates document.
+    /// Validates document as part of the publisher DevExpress function catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publisher DevExpress function catalog operation and used when producing its result.</param>
+    /// <param name="source">Source value supplied to the publisher DevExpress function catalog operation and used when producing its result.</param>
     private void ValidateDocument(PublisherDxFunctionCatalogDocument document, string source)
     {
         try
@@ -306,8 +338,10 @@ public sealed class PublisherDxFunctionCatalogDataService(
     }
 
     /// <summary>
-    /// Validates functions.
+    /// Validates functions as part of the publisher DevExpress function catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="functions">Organic capability descriptor dependency used by the publisher DevExpress function catalog workflow to provide the corresponding application capability.</param>
+    /// <param name="source">Source value supplied to the publisher DevExpress function catalog operation and used when producing its result.</param>
     private void ValidateFunctions(IEnumerable<OrganicCapabilityDescriptor> functions, string source)
     {
         try
@@ -336,8 +370,10 @@ public sealed class PublisherDxFunctionCatalogDataService(
     }
 
     /// <summary>
-    /// Gets storage key.
+    /// Retrieves storage key as part of the publisher DevExpress function catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="item">Item value supplied to the publisher DevExpress function catalog operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string GetStorageKey(OrganicCapabilityDescriptor item)
     {
         try
@@ -356,8 +392,9 @@ public sealed class PublisherDxFunctionCatalogDataService(
     }
 
     /// <summary>
-    /// Gets user catalog path.
+    /// Retrieves user catalog path as part of the publisher DevExpress function catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The string produced by the operation.</returns>
     private string GetUserCatalogPath()
     {
         try
@@ -378,8 +415,12 @@ public sealed class PublisherDxFunctionCatalogDataService(
     }
 
     /// <summary>
-    /// Writes initial user catalog async.
+    /// Writes initial user catalog as part of the publisher DevExpress function catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="userPath">User path value supplied to the publisher DevExpress function catalog operation and used when producing its result.</param>
+    /// <param name="seed">Seed value supplied to the publisher DevExpress function catalog operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task WriteInitialUserCatalogAsync(
         string userPath,
         PublisherDxFunctionCatalogDocument seed,

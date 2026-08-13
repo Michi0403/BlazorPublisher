@@ -4,30 +4,36 @@ using PublisherStudio.Services.Configuration;
 namespace PublisherStudio.Services;
 
 /// <summary>
-/// Defines the page preset catalog contract.
+/// Defines the contract for page preset behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
 public interface IPagePresetCatalog
 {
     /// <summary>
-    /// Gets all.
+    /// Retrieves all in the page preset directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     IReadOnlyList<PagePreset> GetAll();
     /// <summary>
-    /// Runs the find operation.
+    /// Performs find in the page preset directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="key">Key value supplied to the page preset operation and used when producing its result.</param>
+    /// <returns>The page preset produced by the operation.</returns>
     PagePreset? Find(string? key);
 }
 
 /// <summary>
-/// Provides page preset catalog operations.
+/// Maintains the authoritative directory of page preset entries used for discovery, validation, and runtime lookup.
 /// </summary>
+/// <param name="runtimePolicy">Publisher runtime policy data service dependency used by the page preset workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class PagePresetCatalog(
     IPublisherRuntimePolicyDataService runtimePolicy,
     ILogger<PagePresetCatalog> logger) : IPagePresetCatalog
 {
     /// <summary>
-    /// Gets all.
+    /// Retrieves all in the page preset directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<PagePreset> GetAll()
     {
         try
@@ -44,8 +50,10 @@ public sealed class PagePresetCatalog(
     }
 
     /// <summary>
-    /// Runs the find operation.
+    /// Performs find in the page preset directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="key">Key value supplied to the page preset operation and used when producing its result.</param>
+    /// <returns>The page preset produced by the operation.</returns>
     public PagePreset? Find(string? key)
     {
         try
@@ -62,17 +70,25 @@ public sealed class PagePresetCatalog(
 }
 
 /// <summary>
-/// Defines the story page layout service contract.
+/// Defines the contract for story page layout behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
 public interface IStoryPageLayoutService
 {
     /// <summary>
-    /// Gets default.
+    /// Retrieves default as part of the story page layout service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The story page layout produced by the operation.</returns>
     StoryPageLayout GetDefault();
     /// <summary>
-    /// Runs the normalize operation.
+    /// Performs normalize as part of the story page layout service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="pageWidthMm">Page width mm value supplied to the story page layout operation and used when producing its result.</param>
+    /// <param name="pageHeightMm">Page height mm value supplied to the story page layout operation and used when producing its result.</param>
+    /// <param name="marginTopMm">Margin top mm value supplied to the story page layout operation and used when producing its result.</param>
+    /// <param name="marginRightMm">Margin right mm value supplied to the story page layout operation and used when producing its result.</param>
+    /// <param name="marginBottomMm">Margin bottom mm value supplied to the story page layout operation and used when producing its result.</param>
+    /// <param name="marginLeftMm">Margin left mm value supplied to the story page layout operation and used when producing its result.</param>
+    /// <returns>The story page layout produced by the operation.</returns>
     StoryPageLayout Normalize(
         double pageWidthMm,
         double pageHeightMm,
@@ -83,15 +99,18 @@ public interface IStoryPageLayoutService
 }
 
 /// <summary>
-/// Provides story page layout service operations.
+/// Coordinates story page layout behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
+/// <param name="runtimePolicy">Publisher runtime policy data service dependency used by the story page layout workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class StoryPageLayoutService(
     IPublisherRuntimePolicyDataService runtimePolicy,
     ILogger<StoryPageLayoutService> logger) : IStoryPageLayoutService
 {
     /// <summary>
-    /// Gets default.
+    /// Retrieves default as part of the story page layout service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The story page layout produced by the operation.</returns>
     public StoryPageLayout GetDefault()
     {
         try
@@ -113,8 +132,15 @@ public sealed class StoryPageLayoutService(
     }
 
     /// <summary>
-    /// Runs the normalize operation.
+    /// Performs normalize as part of the story page layout service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="pageWidthMm">Page width mm value supplied to the story page layout operation and used when producing its result.</param>
+    /// <param name="pageHeightMm">Page height mm value supplied to the story page layout operation and used when producing its result.</param>
+    /// <param name="marginTopMm">Margin top mm value supplied to the story page layout operation and used when producing its result.</param>
+    /// <param name="marginRightMm">Margin right mm value supplied to the story page layout operation and used when producing its result.</param>
+    /// <param name="marginBottomMm">Margin bottom mm value supplied to the story page layout operation and used when producing its result.</param>
+    /// <param name="marginLeftMm">Margin left mm value supplied to the story page layout operation and used when producing its result.</param>
+    /// <returns>The story page layout produced by the operation.</returns>
     public StoryPageLayout Normalize(
         double pageWidthMm,
         double pageHeightMm,
@@ -144,8 +170,11 @@ public sealed class StoryPageLayoutService(
     }
 
     /// <summary>
-    /// Normalizes margin.
+    /// Normalizes margin as part of the story page layout service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the story page layout operation and used when producing its result.</param>
+    /// <param name="pageSize">Page size value supplied to the story page layout operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double NormalizeMargin(double value, double pageSize) {
     try
     {
@@ -162,8 +191,11 @@ public sealed class StoryPageLayoutService(
 }
 
     /// <summary>
-    /// Normalizes pair.
+    /// Normalizes pair as part of the story page layout service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="first">First value supplied to the story page layout operation and used when producing its result.</param>
+    /// <param name="second">Second value supplied to the story page layout operation and used when producing its result.</param>
+    /// <param name="pageSize">Page size value supplied to the story page layout operation and used when producing its result.</param>
     private void NormalizePair(ref double first, ref double second, double pageSize)
     {
     try

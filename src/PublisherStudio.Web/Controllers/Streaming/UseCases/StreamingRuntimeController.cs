@@ -1,25 +1,33 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace PublisherStudio.Controllers.Streaming.UseCases;
 
 /// <summary>
-/// Provides streaming runtime controller operations.
+/// Exposes the streaming runtime application operations through PublisherStudio's web/API boundary and delegates domain work to the corresponding services.
 /// </summary>
+/// <param name="useCases">Use cases value supplied to the streaming runtime operation and used when producing its result.</param>
 [ApiController]
 [Route("api/mediahost")]
 public sealed class StreamingRuntimeController(StreamingRuntimeUseCases useCases) : ControllerBase
 {
+    /// <summary>
+    /// Stores the internal use cases state used by <see cref="StreamingRuntimeController"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly StreamingRuntimeUseCases _useCases = useCases;
 
     /// <summary>
-    /// Gets capabilities.
+    /// Retrieves capabilities for the streaming runtime API operation, delegating application logic to the controller's services and returning the resulting HTTP-facing value.
     /// </summary>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpGet("capabilities")]
     public IActionResult GetCapabilities() => Ok(_useCases.GetCapabilities());
 
     /// <summary>
-    /// Runs the discover devices operation.
+    /// Discovers devices for the streaming runtime API operation, delegating application logic to the controller's services and returning the resulting HTTP-facing value.
     /// </summary>
+    /// <param name="ffmpegPath">Ffmpeg path value supplied to the streaming runtime operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpGet("devices")]
     public async Task<IActionResult> DiscoverDevices(
         [FromQuery] string? ffmpegPath,
@@ -27,8 +35,10 @@ public sealed class StreamingRuntimeController(StreamingRuntimeUseCases useCases
         Ok(await _useCases.DiscoverDevicesAsync(ffmpegPath, cancellationToken));
 
     /// <summary>
-    /// Gets now playing.
+    /// Retrieves now playing for the streaming runtime API operation, delegating application logic to the controller's services and returning the resulting HTTP-facing value.
     /// </summary>
+    /// <param name="directory">Directory value supplied to the streaming runtime operation and used when producing its result.</param>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpGet("now-playing")]
     public IActionResult GetNowPlaying([FromQuery] string? directory)
     {

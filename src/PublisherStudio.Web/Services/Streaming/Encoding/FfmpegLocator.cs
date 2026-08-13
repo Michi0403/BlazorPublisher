@@ -5,15 +5,19 @@ using PublisherStudio.Services.Configuration;
 namespace PublisherStudio.Services.Streaming.Encoding;
 
 /// <summary>
-/// Represents a FFmpeg locator.
+/// Represents a FFmpeg locator application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="runtimePolicy">Publisher runtime policy data service dependency used by the FFmpeg locator workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class FfmpegLocator(
     IPublisherRuntimePolicyDataService runtimePolicy,
     ILogger<FfmpegLocator> logger)
 {
     /// <summary>
-    /// Runs the resolve operation.
+    /// Performs resolve for <see cref="FfmpegLocator"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg locator workflow.
     /// </summary>
+    /// <param name="configuredPath">Configured path value supplied to the FFmpeg locator operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string? Resolve(string? configuredPath = null)
     {
         try
@@ -59,8 +63,10 @@ public sealed class FfmpegLocator(
     }
 
     /// <summary>
-    /// Determines whether available.
+    /// Determines whether available for <see cref="FfmpegLocator"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg locator workflow.
     /// </summary>
+    /// <param name="configuredPath">Configured path value supplied to the FFmpeg locator operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool IsAvailable(string? configuredPath = null)
     {
         try
@@ -77,8 +83,11 @@ public sealed class FfmpegLocator(
     }
 
     /// <summary>
-    /// Reads version async.
+    /// Reads version for <see cref="FfmpegLocator"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg locator workflow.
     /// </summary>
+    /// <param name="configuredPath">Configured path value supplied to the FFmpeg locator operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     public async Task<string?> ReadVersionAsync(string? configuredPath = null, CancellationToken cancellationToken = default)
     {
         try
@@ -109,8 +118,9 @@ public sealed class FfmpegLocator(
     }
 
     /// <summary>
-    /// Runs the known install locations operation.
+    /// Performs known install locations for <see cref="FfmpegLocator"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg locator workflow.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     private IEnumerable<string> KnownInstallLocations()
     {
         logger.LogTrace($"Enumerating known FFmpeg installation locations.");
@@ -144,8 +154,10 @@ public sealed class FfmpegLocator(
     }
 
     /// <summary>
-    /// Finds win get package executables.
+    /// Finds win get package executables for <see cref="FfmpegLocator"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg locator workflow.
     /// </summary>
+    /// <param name="localAppData">Local app data value supplied to the FFmpeg locator operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IEnumerable<string> FindWinGetPackageExecutables(string localAppData)
     {
         try
@@ -196,8 +208,11 @@ public sealed class FfmpegLocator(
     }
 
     /// <summary>
-    /// Attempts to resolve command.
+    /// Attempts to resolve command for <see cref="FfmpegLocator"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg locator workflow.
     /// </summary>
+    /// <param name="command">Command value supplied to the FFmpeg locator operation and used when producing its result.</param>
+    /// <param name="path">Path value supplied to the FFmpeg locator operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool TryResolveCommand(string command, out string path)
     {
         try

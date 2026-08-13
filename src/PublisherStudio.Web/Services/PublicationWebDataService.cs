@@ -12,19 +12,39 @@ namespace PublisherStudio.Services;
 /// </summary>
 public sealed class PublicationWebDataService
 {
+    /// <summary>
+    /// Stores the HTTP client factory dependency used by <see cref="PublicationWebDataService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly IHttpClientFactory _httpClientFactory;
+    /// <summary>
+    /// Stores the publication webhook store dependency used by <see cref="PublicationWebDataService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly PublicationWebhookStore _webhooks;
+    /// <summary>
+    /// Stores the publication data service dependency used by <see cref="PublicationWebDataService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly PublicationDataService _data;
+    /// <summary>
+    /// Stores the runtime endpoint state dependency used by <see cref="PublicationWebDataService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly IRuntimeEndpointState _runtimeEndpointState;
+    /// <summary>
+    /// Stores the logger used by <see cref="PublicationWebDataService"/> to record operational diagnostics without coupling callers to logging details.
+    /// </summary>
     private readonly ILogger<PublicationWebDataService> logger;
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the synchronization primitive that protects concurrent access to binding locks state owned by <see cref="PublicationWebDataService"/>.
     /// </summary>
     private readonly ConcurrentDictionary<Guid, SemaphoreSlim> _bindingLocks = new();
 
     /// <summary>
-    /// Runs the publication web data service operation.
+    /// Initializes a new <see cref="PublicationWebDataService"/> instance and captures the dependencies or initial state required by its publication web workflow.
     /// </summary>
+    /// <param name="httpClientFactory">Http client factory dependency used by the publication web workflow to provide the corresponding application capability.</param>
+    /// <param name="webhooks">Publication webhook store dependency used by the publication web workflow to provide the corresponding application capability.</param>
+    /// <param name="data">Publication data service dependency used by the publication web workflow to provide the corresponding application capability.</param>
+    /// <param name="runtimeEndpointState">Runtime endpoint state dependency used by the publication web workflow to provide the corresponding application capability.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     public PublicationWebDataService(
         IHttpClientFactory httpClientFactory,
         PublicationWebhookStore webhooks,
@@ -49,8 +69,11 @@ public sealed class PublicationWebDataService
     }
 
     /// <summary>
-    /// Runs the refresh async operation.
+    /// Performs refresh as part of the publication web service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="dataObject">Data object value supplied to the publication web operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task RefreshAsync(PublicationDataObject dataObject, CancellationToken cancellationToken = default)
     {
         try
@@ -135,8 +158,11 @@ public sealed class PublicationWebDataService
     }
 
     /// <summary>
-    /// Determines whether due.
+    /// Determines whether due as part of the publication web service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="dataObject">Data object value supplied to the publication web operation and used when producing its result.</param>
+    /// <param name="now">Now value supplied to the publication web operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool IsDue(PublicationDataObject dataObject, DateTimeOffset now)
     {
         try
@@ -155,8 +181,11 @@ public sealed class PublicationWebDataService
     }
 
     /// <summary>
-    /// Resolves URI.
+    /// Resolves URI as part of the publication web service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the publication web operation and used when producing its result.</param>
+    /// <param name="transport">Transport value supplied to the publication web operation and used when producing its result.</param>
+    /// <returns>The URI produced by the operation.</returns>
     private Uri ResolveUri(string value, PublicationWebTransportKind transport)
     {
         try
@@ -178,8 +207,10 @@ public sealed class PublicationWebDataService
     }
 
     /// <summary>
-    /// Runs the to HTTP method operation.
+    /// Performs to HTTP method as part of the publication web service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="method">Method value supplied to the publication web operation and used when producing its result.</param>
+    /// <returns>The HTTP method produced by the operation.</returns>
     private HttpMethod ToHttpMethod(PublicationWebHttpMethod method) {
         try
         {
@@ -201,8 +232,10 @@ public sealed class PublicationWebDataService
     }
 
     /// <summary>
-    /// Runs the trim for error operation.
+    /// Performs trim for error as part of the publication web service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the publication web operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string TrimForError(string value)
     {
         try

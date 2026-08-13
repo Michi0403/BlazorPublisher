@@ -5,13 +5,17 @@ using System.Text;
 namespace PublisherStudio.Services;
 
 /// <summary>
-/// Provides rich text document factory operations.
+/// Creates configured rich text document instances from the application's current dependencies and runtime settings.
 /// </summary>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> logger)
 {
     /// <summary>
-    /// Creates open XML.
+    /// Creates open XML using the configuration and dependencies owned by <see cref="RichTextDocumentFactory"/>.
     /// </summary>
+    /// <param name="title">Title value supplied to the rich text document operation and used when producing its result.</param>
+    /// <param name="subtitle">Subtitle value supplied to the rich text document operation and used when producing its result.</param>
+    /// <returns>The byte produced by the operation.</returns>
     public byte[] CreateOpenXml(string title, string? subtitle = null)
     {
     try
@@ -46,6 +50,8 @@ public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> log
     /// <summary>
     /// Creates open XML from plain text.
     /// </summary>
+    /// <param name="text">Text value supplied to the rich text document operation and used when producing its result.</param>
+    /// <returns>The byte produced by the operation.</returns>
     public byte[] CreateOpenXmlFromPlainText(string text)
     {
     try
@@ -73,6 +79,8 @@ public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> log
     /// <summary>
     /// Creates open XML from markdown.
     /// </summary>
+    /// <param name="markdown">Markdown value supplied to the rich text document operation and used when producing its result.</param>
+    /// <returns>The byte produced by the operation.</returns>
     public byte[] CreateOpenXmlFromMarkdown(string markdown)
     {
     try
@@ -132,8 +140,10 @@ public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> log
 }
 
     /// <summary>
-    /// Creates open XML package.
+    /// Creates open XML package using the configuration and dependencies owned by <see cref="RichTextDocumentFactory"/>.
     /// </summary>
+    /// <param name="bodyElements">String dependency used by the rich text document workflow to provide the corresponding application capability.</param>
+    /// <returns>The byte produced by the operation.</returns>
     private byte[] CreateOpenXmlPackage(IEnumerable<string> bodyElements)
     {
     try
@@ -201,8 +211,11 @@ public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> log
 }
 
     /// <summary>
-    /// Builds paragraph.
+    /// Builds paragraph using the configuration and dependencies owned by <see cref="RichTextDocumentFactory"/>.
     /// </summary>
+    /// <param name="runs">Runs value supplied to the rich text document operation and used when producing its result.</param>
+    /// <param name="paragraphProperties">Paragraph properties value supplied to the rich text document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string BuildParagraph(string runs, string? paragraphProperties = null) {
     try
     {
@@ -221,8 +234,11 @@ public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> log
 }
 
     /// <summary>
-    /// Builds markdown runs.
+    /// Builds markdown runs using the configuration and dependencies owned by <see cref="RichTextDocumentFactory"/>.
     /// </summary>
+    /// <param name="value">Value value supplied to the rich text document operation and used when producing its result.</param>
+    /// <param name="baseProperties">Base properties value supplied to the rich text document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string BuildMarkdownRuns(string value, string? baseProperties = null)
     {
     try
@@ -290,8 +306,11 @@ public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> log
 }
 
     /// <summary>
-    /// Builds run.
+    /// Builds run using the configuration and dependencies owned by <see cref="RichTextDocumentFactory"/>.
     /// </summary>
+    /// <param name="value">Value value supplied to the rich text document operation and used when producing its result.</param>
+    /// <param name="runProperties">Run properties value supplied to the rich text document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string BuildRun(string value, string? runProperties = null)
     {
     try
@@ -314,8 +333,10 @@ public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> log
 }
 
     /// <summary>
-    /// Normalizes lines.
+    /// Normalizes lines using the configuration and dependencies owned by <see cref="RichTextDocumentFactory"/>.
     /// </summary>
+    /// <param name="value">Value value supplied to the rich text document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeLines(string? value) {
     try
     {
@@ -332,8 +353,11 @@ public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> log
 }
 
     /// <summary>
-    /// Runs the write operation.
+    /// Performs write using the configuration and dependencies owned by <see cref="RichTextDocumentFactory"/>.
     /// </summary>
+    /// <param name="archive">Archive value supplied to the rich text document operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the rich text document operation and used when producing its result.</param>
+    /// <param name="content">Content value supplied to the rich text document operation and used when producing its result.</param>
     private void Write(ZipArchive archive, string name, string content)
     {
     try

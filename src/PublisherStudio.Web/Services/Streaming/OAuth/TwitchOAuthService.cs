@@ -10,34 +10,71 @@ using PublisherStudio.Services.Configuration;
 namespace PublisherStudio.Services.Streaming.OAuth;
 
 /// <summary>
-/// Provides twitch OAuth service operations.
+/// Coordinates twitch o auth behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
 public sealed class TwitchOAuthService
 {
+    /// <summary>
+    /// Defines the device authorization URL constant used by <see cref="TwitchOAuthService"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const string DeviceAuthorizationUrl = "https://id.twitch.tv/oauth2/device";
+    /// <summary>
+    /// Defines the token URL constant used by <see cref="TwitchOAuthService"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const string TokenUrl = "https://id.twitch.tv/oauth2/token";
+    /// <summary>
+    /// Defines the validate URL constant used by <see cref="TwitchOAuthService"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const string ValidateUrl = "https://id.twitch.tv/oauth2/validate";
+    /// <summary>
+    /// Defines the revoke URL constant used by <see cref="TwitchOAuthService"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const string RevokeUrl = "https://id.twitch.tv/oauth2/revoke";
+    /// <summary>
+    /// Defines the stream key URL constant used by <see cref="TwitchOAuthService"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const string StreamKeyUrl = "https://api.twitch.tv/helix/streams/key";
+    /// <summary>
+    /// Defines the ingest URL constant used by <see cref="TwitchOAuthService"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const string IngestUrl = "https://ingest.twitch.tv/ingests";
+    /// <summary>
+    /// Defines the global endpoint constant used by <see cref="TwitchOAuthService"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const string GlobalEndpoint = "rtmp://ingest.global-contribute.live-video.net/app/{streamKey}";
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal JSON options state used by <see cref="TwitchOAuthService"/> while executing its surrounding workflow.
     /// </summary>
     private readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
+    /// <summary>
+    /// Stores the publisher runtime policy data service dependency used by <see cref="TwitchOAuthService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly IPublisherRuntimePolicyDataService _runtimePolicy;
+    /// <summary>
+    /// Stores the HTTP client factory dependency used by <see cref="TwitchOAuthService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly IHttpClientFactory _httpClientFactory;
+    /// <summary>
+    /// Stores the streaming profile store dependency used by <see cref="TwitchOAuthService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly StreamingProfileStore _profiles;
+    /// <summary>
+    /// Stores the configuration dependency used by <see cref="TwitchOAuthService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly IConfiguration _configuration;
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the synchronization primitive that protects concurrent access to token gate state owned by <see cref="TwitchOAuthService"/>.
     /// </summary>
     private readonly SemaphoreSlim _tokenGate = new(1, 1);
 
     /// <summary>
-    /// Runs the twitch OAuth service operation.
+    /// Initializes a new <see cref="TwitchOAuthService"/> instance and captures the dependencies or initial state required by its twitch o auth workflow.
     /// </summary>
+    /// <param name="httpClientFactory">Http client factory dependency used by the twitch o auth workflow to provide the corresponding application capability.</param>
+    /// <param name="profiles">Streaming profile store dependency used by the twitch o auth workflow to provide the corresponding application capability.</param>
+    /// <param name="configuration">Configuration containing the caller-supplied values that control this operation.</param>
+    /// <param name="runtimePolicy">Publisher runtime policy data service dependency used by the twitch o auth workflow to provide the corresponding application capability.</param>
     public TwitchOAuthService(
         IHttpClientFactory httpClientFactory,
         StreamingProfileStore profiles,
@@ -51,16 +88,19 @@ public sealed class TwitchOAuthService
     }
 
     /// <summary>
-    /// Gets default client identifier.
+    /// Gets the stable default client identifier used to identify or correlate this twitch o auth instance with related application state.
     /// </summary>
+    /// <value>The default client identifier value exposed by <see cref="TwitchOAuthService"/>.</value>
     public string DefaultClientId =>
         (_configuration["Twitch:ClientId"]
             ?? Environment.GetEnvironmentVariable("PUBLISHERSTUDIO_TWITCH_CLIENT_ID")
             ?? string.Empty).Trim();
 
     /// <summary>
-    /// Resolves client identifier.
+    /// Resolves client identifier as part of the twitch o auth service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="profileClientId">Identifier of the profile client to use for this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string ResolveClientId(string? profileClientId) {
     try
     {
@@ -74,8 +114,12 @@ public sealed class TwitchOAuthService
 }
 
     /// <summary>
-    /// Starts device authorization async.
+    /// Starts device authorization as part of the twitch o auth service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="clientId">Identifier of the client to use for this operation.</param>
+    /// <param name="includeChat">Value indicating whether include chat should apply to this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The twitch device authorization produced by the operation.</returns>
     public async Task<TwitchDeviceAuthorization> StartDeviceAuthorizationAsync(
         string clientId,
         bool includeChat,
@@ -123,8 +167,14 @@ public sealed class TwitchOAuthService
 }
 
     /// <summary>
-    /// Runs the complete device authorization async operation.
+    /// Completes device authorization as part of the twitch o auth service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="profileId">Identifier of the profile to use for this operation.</param>
+    /// <param name="authorization">Authorization value supplied to the twitch o auth operation and used when producing its result.</param>
+    /// <param name="autoSelectIngest">Value indicating whether auto select ingest should apply to this operation.</param>
+    /// <param name="currentEndpoint">Current endpoint value supplied to the twitch o auth operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The twitch o auth connection result produced by the operation.</returns>
     public async Task<TwitchOAuthConnectionResult> CompleteDeviceAuthorizationAsync(
         Guid profileId,
         TwitchDeviceAuthorization authorization,
@@ -208,8 +258,10 @@ public sealed class TwitchOAuthService
 }
 
     /// <summary>
-    /// Runs the test ingest endpoints async operation.
+    /// Performs test ingest endpoints as part of the twitch o auth service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public async Task<List<TwitchIngestCandidate>> TestIngestEndpointsAsync(CancellationToken cancellationToken = default)
     {
     try
@@ -254,8 +306,12 @@ public sealed class TwitchOAuthService
 }
 
     /// <summary>
-    /// Applies ingest candidate async.
+    /// Applies ingest candidate as part of the twitch o auth service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="profileId">Identifier of the profile to use for this operation.</param>
+    /// <param name="candidate">Candidate value supplied to the twitch o auth operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The streaming provider profile produced by the operation.</returns>
     public async Task<StreamingProviderProfile?> ApplyIngestCandidateAsync(
         Guid profileId,
         TwitchIngestCandidate candidate,
@@ -276,8 +332,11 @@ public sealed class TwitchOAuthService
 }
 
     /// <summary>
-    /// Ensures valid access token async.
+    /// Ensures valid access token as part of the twitch o auth service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="profileId">Identifier of the profile to use for this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     public Task<string?> EnsureValidAccessTokenAsync(Guid profileId, CancellationToken cancellationToken = default) {
     try
     {
@@ -291,8 +350,11 @@ public sealed class TwitchOAuthService
 }
 
     /// <summary>
-    /// Validates profile async.
+    /// Validates profile as part of the twitch o auth service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="profileId">Identifier of the profile to use for this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public async Task<bool> ValidateProfileAsync(Guid profileId, CancellationToken cancellationToken = default) {
     try
     {
@@ -306,8 +368,11 @@ public sealed class TwitchOAuthService
 }
 
     /// <summary>
-    /// Runs the disconnect async operation.
+    /// Performs disconnect as part of the twitch o auth service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="profileId">Identifier of the profile to use for this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task DisconnectAsync(Guid profileId, CancellationToken cancellationToken = default)
     {
     try
@@ -343,8 +408,12 @@ public sealed class TwitchOAuthService
 }
 
     /// <summary>
-    /// Ensures valid access token core async.
+    /// Ensures valid access token core as part of the twitch o auth service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="profileId">Identifier of the profile to use for this operation.</param>
+    /// <param name="forceValidation">Value indicating whether force validation should apply to this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private async Task<string?> EnsureValidAccessTokenCoreAsync(
         Guid profileId,
         bool forceValidation,
@@ -409,8 +478,11 @@ public sealed class TwitchOAuthService
 }
 
     /// <summary>
-    /// Runs the poll for token async operation.
+    /// Performs poll for token as part of the twitch o auth service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="authorization">Authorization value supplied to the twitch o auth operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The twitch token response produced by the operation.</returns>
     private async Task<TwitchTokenResponse> PollForTokenAsync(
         TwitchDeviceAuthorization authorization,
         CancellationToken cancellationToken)
@@ -455,8 +527,11 @@ public sealed class TwitchOAuthService
 }
 
     /// <summary>
-    /// Runs the refresh token async operation.
+    /// Refreshes token as part of the twitch o auth service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="credentials">Credentials value supplied to the twitch o auth operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The twitch token response produced by the operation.</returns>
     private async Task<TwitchTokenResponse> RefreshTokenAsync(
         StreamingOAuthCredentials credentials,
         CancellationToken cancellationToken)
@@ -489,8 +564,11 @@ public sealed class TwitchOAuthService
 }
 
     /// <summary>
-    /// Validates token async.
+    /// Validates token as part of the twitch o auth service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="accessToken">Access token value supplied to the twitch o auth operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The twitch validation response produced by the operation.</returns>
     private async Task<TwitchValidationResponse?> ValidateTokenAsync(string accessToken, CancellationToken cancellationToken)
     {
     try
@@ -512,8 +590,13 @@ public sealed class TwitchOAuthService
 }
 
     /// <summary>
-    /// Gets stream key async.
+    /// Retrieves stream key as part of the twitch o auth service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="clientId">Identifier of the client to use for this operation.</param>
+    /// <param name="accessToken">Access token value supplied to the twitch o auth operation and used when producing its result.</param>
+    /// <param name="broadcasterId">Identifier of the broadcaster to use for this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private async Task<string> GetStreamKeyAsync(
         string clientId,
         string accessToken,
@@ -541,8 +624,10 @@ public sealed class TwitchOAuthService
 }
 
     /// <summary>
-    /// Gets ingest candidates async.
+    /// Retrieves ingest candidates as part of the twitch o auth service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private async Task<List<TwitchIngestCandidate>> GetIngestCandidatesAsync(CancellationToken cancellationToken)
     {
     try
@@ -598,8 +683,12 @@ public sealed class TwitchOAuthService
 }
 
     /// <summary>
-    /// Runs the measure TCP latency async operation.
+    /// Performs measure TCP latency as part of the twitch o auth service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="host">Host value supplied to the twitch o auth operation and used when producing its result.</param>
+    /// <param name="port">Port value supplied to the twitch o auth operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The double produced by the operation.</returns>
     private async Task<double?> MeasureTcpLatencyAsync(string host, int port, CancellationToken cancellationToken)
     {
     try
@@ -633,8 +722,11 @@ public sealed class TwitchOAuthService
 }
 
     /// <summary>
-    /// Runs the send async operation.
+    /// Performs send as part of the twitch o auth service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The HTTP response message produced by the operation.</returns>
     private async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
     try
@@ -651,8 +743,12 @@ public sealed class TwitchOAuthService
 }
 
     /// <summary>
-    /// Reads JSON async.
+    /// Reads JSON as part of the twitch o auth service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <typeparam name="T">Type used for t values handled by <see cref="TwitchOAuthService"/>.</typeparam>
+    /// <param name="response">Response value supplied to the twitch o auth operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The t produced by the operation.</returns>
     private async Task<T?> ReadJsonAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken)
     {
         try
@@ -667,8 +763,12 @@ public sealed class TwitchOAuthService
     }
 
     /// <summary>
-    /// Reads twitch error async.
+    /// Reads twitch error as part of the twitch o auth service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="response">Response value supplied to the twitch o auth operation and used when producing its result.</param>
+    /// <param name="parsedMessage">Parsed message value supplied to the twitch o auth operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private async Task<string> ReadTwitchErrorAsync(
         HttpResponseMessage response,
         string? parsedMessage,
@@ -690,8 +790,11 @@ public sealed class TwitchOAuthService
 }
 
     /// <summary>
-    /// Reads response text async.
+    /// Reads response text as part of the twitch o auth service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="response">Response value supplied to the twitch o auth operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private async Task<string> ReadResponseTextAsync(HttpResponseMessage response, CancellationToken cancellationToken)
     {
     try
@@ -708,8 +811,10 @@ public sealed class TwitchOAuthService
 }
 
     /// <summary>
-    /// Normalizes twitch error.
+    /// Normalizes twitch error as part of the twitch o auth service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="message">Message value supplied to the twitch o auth operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeTwitchError(string message)
     {
     try
@@ -735,8 +840,10 @@ public sealed class TwitchOAuthService
 }
 
     /// <summary>
-    /// Builds scopes.
+    /// Builds scopes as part of the twitch o auth service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="includeChat">Value indicating whether include chat should apply to this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string BuildScopes(bool includeChat) {
     try
     {
@@ -752,8 +859,9 @@ public sealed class TwitchOAuthService
 }
 
     /// <summary>
-    /// Creates global candidate.
+    /// Creates global candidate as part of the twitch o auth service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The twitch ingest candidate produced by the operation.</returns>
     private TwitchIngestCandidate CreateGlobalCandidate() {
     try
     {
@@ -773,8 +881,10 @@ public sealed class TwitchOAuthService
 }
 
     /// <summary>
-    /// Normalizes endpoint.
+    /// Normalizes endpoint as part of the twitch o auth service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="endpoint">Endpoint value supplied to the twitch o auth operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeEndpoint(string? endpoint)
     {
     try
@@ -795,8 +905,10 @@ public sealed class TwitchOAuthService
 }
 
     /// <summary>
-    /// Attempts to read host.
+    /// Attempts to read host as part of the twitch o auth service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="endpoint">Endpoint value supplied to the twitch o auth operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string TryReadHost(string? endpoint)
     {
     try
@@ -813,143 +925,166 @@ public sealed class TwitchOAuthService
 }
 
     /// <summary>
-    /// Represents a twitch device authorization response.
+    /// Represents the outcome of twitch device authorization, carrying the data and status produced by the corresponding application operation.
     /// </summary>
     private sealed class TwitchDeviceAuthorizationResponse
     {
         /// <summary>
-        /// Gets or sets device code.
+        /// Gets or sets the device code value that forms part of the twitch device authorization state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The device code value exposed by <see cref="TwitchDeviceAuthorizationResponse"/>.</value>
         [JsonPropertyName("device_code")] public string DeviceCode { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets user code.
+        /// Gets or sets the user code value that forms part of the twitch device authorization state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The user code value exposed by <see cref="TwitchDeviceAuthorizationResponse"/>.</value>
         [JsonPropertyName("user_code")] public string UserCode { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets verification URI.
+        /// Gets or sets the verification URI that identifies the network or application endpoint associated with this twitch device authorization state.
         /// </summary>
+        /// <value>The verification URI value exposed by <see cref="TwitchDeviceAuthorizationResponse"/>.</value>
         [JsonPropertyName("verification_uri")] public string VerificationUri { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets expires in.
+        /// Gets or sets the expires in value that forms part of the twitch device authorization state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The expires in value exposed by <see cref="TwitchDeviceAuthorizationResponse"/>.</value>
         [JsonPropertyName("expires_in")] public int ExpiresIn { get; set; }
         /// <summary>
-        /// Gets or sets interval.
+        /// Gets or sets the interval duration used to control timing in the twitch device authorization workflow.
         /// </summary>
+        /// <value>The interval value exposed by <see cref="TwitchDeviceAuthorizationResponse"/>.</value>
         [JsonPropertyName("interval")] public int Interval { get; set; }
         /// <summary>
-        /// Gets or sets message.
+        /// Gets or sets the message value that forms part of the twitch device authorization state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The message value exposed by <see cref="TwitchDeviceAuthorizationResponse"/>.</value>
         [JsonPropertyName("message")] public string Message { get; set; } = string.Empty;
     }
 
     /// <summary>
-    /// Represents a twitch token response.
+    /// Represents the outcome of twitch token, carrying the data and status produced by the corresponding application operation.
     /// </summary>
     private sealed class TwitchTokenResponse
     {
         /// <summary>
-        /// Gets or sets access token.
+        /// Gets or sets the access token value that forms part of the twitch token state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The access token value exposed by <see cref="TwitchTokenResponse"/>.</value>
         [JsonPropertyName("access_token")] public string AccessToken { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets refresh token.
+        /// Gets or sets the refresh token value that forms part of the twitch token state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The refresh token value exposed by <see cref="TwitchTokenResponse"/>.</value>
         [JsonPropertyName("refresh_token")] public string RefreshToken { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets expires in.
+        /// Gets or sets the expires in value that forms part of the twitch token state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The expires in value exposed by <see cref="TwitchTokenResponse"/>.</value>
         [JsonPropertyName("expires_in")] public int ExpiresIn { get; set; }
         /// <summary>
-        /// Gets or sets scope.
+        /// Gets or sets the scope value that forms part of the twitch token state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The scope value exposed by <see cref="TwitchTokenResponse"/>.</value>
         [JsonPropertyName("scope")] public string[] Scope { get; set; } = [];
         /// <summary>
-        /// Gets or sets token type.
+        /// Gets or sets the token type value that forms part of the twitch token state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The token type value exposed by <see cref="TwitchTokenResponse"/>.</value>
         [JsonPropertyName("token_type")] public string TokenType { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets message.
+        /// Gets or sets the message value that forms part of the twitch token state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The message value exposed by <see cref="TwitchTokenResponse"/>.</value>
         [JsonPropertyName("message")] public string Message { get; set; } = string.Empty;
     }
 
     /// <summary>
-    /// Represents a twitch validation response.
+    /// Represents the outcome of twitch validation, carrying the data and status produced by the corresponding application operation.
     /// </summary>
     private sealed class TwitchValidationResponse
     {
         /// <summary>
-        /// Gets or sets client identifier.
+        /// Gets or sets the stable client identifier used to identify or correlate this twitch validation instance with related application state.
         /// </summary>
+        /// <value>The client identifier value exposed by <see cref="TwitchValidationResponse"/>.</value>
         [JsonPropertyName("client_id")] public string ClientId { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets login.
+        /// Gets or sets the login value that forms part of the twitch validation state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The login value exposed by <see cref="TwitchValidationResponse"/>.</value>
         [JsonPropertyName("login")] public string Login { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets scopes.
+        /// Gets or sets the scopes value that forms part of the twitch validation state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The scopes value exposed by <see cref="TwitchValidationResponse"/>.</value>
         [JsonPropertyName("scopes")] public string[] Scopes { get; set; } = [];
         /// <summary>
-        /// Gets or sets user identifier.
+        /// Gets or sets the stable user identifier used to identify or correlate this twitch validation instance with related application state.
         /// </summary>
+        /// <value>The user identifier value exposed by <see cref="TwitchValidationResponse"/>.</value>
         [JsonPropertyName("user_id")] public string UserId { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets expires in.
+        /// Gets or sets the expires in value that forms part of the twitch validation state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The expires in value exposed by <see cref="TwitchValidationResponse"/>.</value>
         [JsonPropertyName("expires_in")] public int ExpiresIn { get; set; }
     }
 
     /// <summary>
-    /// Represents a twitch stream key response.
+    /// Represents the outcome of twitch stream key, carrying the data and status produced by the corresponding application operation.
     /// </summary>
     private sealed class TwitchStreamKeyResponse
     {
         /// <summary>
-        /// Gets or sets data.
+        /// Gets or sets the data collection maintained or exposed by this twitch stream key instance for downstream processing.
         /// </summary>
+        /// <value>The data value exposed by <see cref="TwitchStreamKeyResponse"/>.</value>
         [JsonPropertyName("data")] public List<TwitchStreamKeyItem> Data { get; set; } = [];
         /// <summary>
-        /// Gets or sets message.
+        /// Gets or sets the message value that forms part of the twitch stream key state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The message value exposed by <see cref="TwitchStreamKeyResponse"/>.</value>
         [JsonPropertyName("message")] public string Message { get; set; } = string.Empty;
     }
 
     /// <summary>
-    /// Represents a twitch stream key item.
+    /// Represents a twitch stream key item helper type nested within <see cref="TwitchOAuthService"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
     private sealed class TwitchStreamKeyItem
     {
         /// <summary>
-        /// Gets or sets stream key.
+        /// Gets or sets the stable stream key used to identify or correlate this twitch stream key item instance with related application state.
         /// </summary>
+        /// <value>The stream key value exposed by <see cref="TwitchStreamKeyItem"/>.</value>
         [JsonPropertyName("stream_key")] public string StreamKey { get; set; } = string.Empty;
     }
 
     /// <summary>
-    /// Represents a twitch ingest response.
+    /// Represents the outcome of twitch ingest, carrying the data and status produced by the corresponding application operation.
     /// </summary>
     private sealed class TwitchIngestResponse
     {
         /// <summary>
-        /// Gets or sets ingests.
+        /// Gets or sets the ingests collection maintained or exposed by this twitch ingest instance for downstream processing.
         /// </summary>
+        /// <value>The ingests value exposed by <see cref="TwitchIngestResponse"/>.</value>
         [JsonPropertyName("ingests")] public List<TwitchIngestItem> Ingests { get; set; } = [];
     }
 
     /// <summary>
-    /// Represents a twitch ingest item.
+    /// Represents a twitch ingest item helper type nested within <see cref="TwitchOAuthService"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
     private sealed class TwitchIngestItem
     {
         /// <summary>
-        /// Gets or sets the display name.
+        /// Gets or sets the name value that forms part of the twitch ingest item state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The name value exposed by <see cref="TwitchIngestItem"/>.</value>
         [JsonPropertyName("name")] public string Name { get; set; } = string.Empty;
         /// <summary>
-        /// Gets or sets URL template.
+        /// Gets or sets the URL template value that forms part of the twitch ingest item state consumed or produced by the surrounding workflow.
         /// </summary>
+        /// <value>The URL template value exposed by <see cref="TwitchIngestItem"/>.</value>
         [JsonPropertyName("url_template")] public string UrlTemplate { get; set; } = string.Empty;
     }
 }

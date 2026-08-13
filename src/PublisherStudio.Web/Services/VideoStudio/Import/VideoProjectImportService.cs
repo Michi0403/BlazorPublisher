@@ -14,19 +14,27 @@ namespace PublisherStudio.Services.VideoStudio.Import;
 /// Imports openly documented timeline/project formats into PublisherStudio's canonical video-project model.
 /// The adapter never mutates an active publication and reports every known approximation or loss.
 /// </summary>
+/// <param name="runtimePolicy">Publisher runtime policy data service dependency used by the video project import workflow to provide the corresponding application capability.</param>
+/// <param name="runtimePatterns">Publisher runtime pattern service dependency used by the video project import workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class VideoProjectImportService(
     IPublisherRuntimePolicyDataService runtimePolicy,
     IPublisherRuntimePatternService runtimePatterns,
     ILogger<VideoProjectImportService> logger)
 {
     /// <summary>
-    /// Gets supported extensions.
+    /// Gets the supported extensions collection maintained or exposed by this video project import instance for downstream processing.
     /// </summary>
+    /// <value>The supported extensions value exposed by <see cref="VideoProjectImportService"/>.</value>
     public IReadOnlyList<string> SupportedExtensions => runtimePolicy.GetCollection(PublisherRuntimeCollection.VideoProjectExtensions);
 
     /// <summary>
-    /// Imports async.
+    /// Performs import as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fileName">File name value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The video project import result produced by the operation.</returns>
     public async Task<VideoProjectImportResult> ImportAsync(
         Stream source,
         string fileName,
@@ -65,8 +73,12 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Imports otio bundle async.
+    /// Imports otio bundle as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fileName">File name value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The video project import result produced by the operation.</returns>
     private async Task<VideoProjectImportResult> ImportOtioBundleAsync(
         Stream source,
         string fileName,
@@ -133,8 +145,12 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Imports otio.
+    /// Imports otio as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="bytes">Bytes value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fileName">File name value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="bundledMediaResolver">Bundled media resolver value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The video project import result produced by the operation.</returns>
     private VideoProjectImportResult ImportOtio(
         byte[] bytes,
         string fileName,
@@ -217,8 +233,13 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Imports otio nested stack.
+    /// Imports otio nested stack as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="stack">Stack value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="project">Project value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="issues">Issues value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="trackOrder">Track order value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="bundledMediaResolver">Bundled media resolver value supplied to the video project import operation and used when producing its result.</param>
     private void ImportOtioNestedStack(
         JsonElement stack,
         VideoProjectDocument project,
@@ -258,8 +279,13 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Imports otio track children.
+    /// Imports otio track children as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="trackNode">Track node value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="track">Track value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="project">Project value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="issues">Issues value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="bundledMediaResolver">Bundled media resolver value supplied to the video project import operation and used when producing its result.</param>
     private void ImportOtioTrackChildren(
         JsonElement trackNode,
         MediaTimelineTrack track,
@@ -403,8 +429,11 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the otio linear speed operation.
+    /// Performs otio linear speed as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="clip">Clip value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="issues">Issues value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double OtioLinearSpeed(JsonElement clip, List<InterchangeIssue> issues)
     {
         try
@@ -439,8 +468,12 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Imports otio markers.
+    /// Imports otio markers as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="owner">Owner value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="markers">Markers value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fallbackRate">Fallback rate value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="timelineOffset">Timeline offset value supplied to the video project import operation and used when producing its result.</param>
     private void ImportOtioMarkers(
         JsonElement owner,
         List<MediaProjectMarker> markers,
@@ -474,8 +507,11 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Imports mlt.
+    /// Imports mlt as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="bytes">Bytes value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fileName">File name value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The video project import result produced by the operation.</returns>
     private VideoProjectImportResult ImportMlt(byte[] bytes, string fileName)
     {
         try
@@ -577,8 +613,13 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Imports mlt playlist.
+    /// Imports mlt playlist as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="playlist">Playlist value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="track">Track value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="producers">X element dependency used by the video project import workflow to provide the corresponding application capability.</param>
+    /// <param name="frameRate">Frame rate value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="issues">Issues value supplied to the video project import operation and used when producing its result.</param>
     private void ImportMltPlaylist(
         XElement playlist,
         MediaTimelineTrack track,
@@ -674,8 +715,12 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Imports mlt transitions.
+    /// Imports mlt transitions as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="tractor">Tractor value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="project">Project value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="issues">Issues value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="frameRate">Frame rate value supplied to the video project import operation and used when producing its result.</param>
     private void ImportMltTransitions(
         XElement tractor,
         VideoProjectDocument project,
@@ -719,8 +764,11 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Imports xges.
+    /// Imports xges as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="bytes">Bytes value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fileName">File name value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The video project import result produced by the operation.</returns>
     private VideoProjectImportResult ImportXges(byte[] bytes, string fileName)
     {
         try
@@ -816,8 +864,19 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the xges segment operation.
+    /// Performs xges segment as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="name">Name value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="assetId">Identifier of the asset to use for this operation.</param>
+    /// <param name="asset">Asset value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="start">Start value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="inPoint">In point value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="duration">Duration value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="sourceDuration">Source duration value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="kind">Kind value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="frameRate">Frame rate value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="typeName">Type name value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The publication media segment produced by the operation.</returns>
     private PublicationMediaSegment XgesSegment(
         string name,
         string assetId,
@@ -872,8 +931,11 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Imports open shot.
+    /// Imports open shot as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="bytes">Bytes value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fileName">File name value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The video project import result produced by the operation.</returns>
     private VideoProjectImportResult ImportOpenShot(byte[] bytes, string fileName)
     {
         try
@@ -1007,8 +1069,11 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Imports edl.
+    /// Imports edl as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="bytes">Bytes value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fileName">File name value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The video project import result produced by the operation.</returns>
     private VideoProjectImportResult ImportEdl(byte[] bytes, string fileName)
     {
         try
@@ -1126,8 +1191,11 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the finalize result operation.
+    /// Performs finalize result as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="result">Result value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fileName">File name value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The video project import result produced by the operation.</returns>
     private VideoProjectImportResult FinalizeResult(VideoProjectImportResult result, string fileName)
     {
         try
@@ -1203,8 +1271,10 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Parses safe XML.
+    /// Parses safe XML as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="bytes">Bytes value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The x document produced by the operation.</returns>
     private XDocument ParseSafeXml(byte[] bytes)
     {
         try
@@ -1230,8 +1300,11 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Reads all async.
+    /// Reads all as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The byte produced by the operation.</returns>
     private async Task<byte[]> ReadAllAsync(Stream source, CancellationToken cancellationToken)
     {
         try
@@ -1250,8 +1323,10 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Reads all.
+    /// Reads all as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The byte produced by the operation.</returns>
     private byte[] ReadAll(Stream source)
     {
         try
@@ -1270,8 +1345,10 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Normalizes archive path.
+    /// Normalizes archive path as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="path">Path value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeArchivePath(string path)
     {
         try
@@ -1292,8 +1369,10 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Normalizes otio target.
+    /// Normalizes otio target as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="targetUrl">Target url value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeOtioTarget(string targetUrl)
     {
         try
@@ -1312,8 +1391,11 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the JSON array operation.
+    /// Performs JSON array as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="owner">Owner value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="property">Property value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IEnumerable<JsonElement> JsonArray(JsonElement owner, string property)
     {
         try
@@ -1334,8 +1416,12 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the JSON string operation.
+    /// Performs JSON string as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="owner">Owner value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="property">Property value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string JsonString(JsonElement owner, string property, string fallback = "")
     {
         try
@@ -1360,8 +1446,12 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the JSON double operation.
+    /// Performs JSON double as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="owner">Owner value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="property">Property value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double JsonDouble(JsonElement owner, string property, double fallback = 0)
     {
         try
@@ -1382,8 +1472,12 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the JSON bool operation.
+    /// Performs JSON bool as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="owner">Owner value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="property">Property value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fallback">Value indicating whether fallback should apply to this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool JsonBool(JsonElement owner, string property, bool fallback)
     {
         try
@@ -1403,8 +1497,10 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the schema name operation.
+    /// Performs schema name as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="schema">Schema value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string SchemaName(string schema)
     {
         try
@@ -1422,8 +1518,10 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the schema version operation.
+    /// Performs schema version as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="schema">Schema value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string SchemaVersion(string schema)
     {
         try
@@ -1441,8 +1539,11 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Finds otio rate.
+    /// Finds otio rate as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="root">Root value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double FindOtioRate(JsonElement root, double fallback)
     {
         try
@@ -1477,8 +1578,11 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the otio time range start operation.
+    /// Performs otio time range start as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="owner">Owner value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fallbackRate">Fallback rate value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double OtioTimeRangeStart(JsonElement owner, double fallbackRate)
     {
         try
@@ -1497,8 +1601,11 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the otio time range duration operation.
+    /// Performs otio time range duration as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="owner">Owner value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fallbackRate">Fallback rate value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double OtioTimeRangeDuration(JsonElement owner, double fallbackRate)
     {
         try
@@ -1517,8 +1624,12 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the otio rational seconds operation.
+    /// Performs otio rational seconds as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="owner">Owner value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="property">Property value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fallbackRate">Fallback rate value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double OtioRationalSeconds(JsonElement owner, string property, double fallbackRate)
     {
         try
@@ -1538,8 +1649,11 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the otio source rate operation.
+    /// Performs otio source rate as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="owner">Owner value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fallbackRate">Fallback rate value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double OtioSourceRate(JsonElement owner, double fallbackRate)
     {
         try
@@ -1560,8 +1674,10 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the otio marker color operation.
+    /// Performs otio marker color as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="color">Color value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string OtioMarkerColor(string color) {
         try
         {
@@ -1588,8 +1704,12 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the attribute operation.
+    /// Performs attribute as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="element">Element value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Attribute(XElement? element, string name, string fallback = "")
         {
             try
@@ -1605,8 +1725,12 @@ public sealed class VideoProjectImportService(
         }
 
     /// <summary>
-    /// Runs the attribute double operation.
+    /// Performs attribute double as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="element">Element value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double AttributeDouble(XElement? element, string name, double fallback)
         {
             try
@@ -1622,8 +1746,12 @@ public sealed class VideoProjectImportService(
         }
 
     /// <summary>
-    /// Runs the property operation.
+    /// Performs property as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="element">Element value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Property(XElement? element, string name, string fallback = "")
     {
         try
@@ -1642,8 +1770,12 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the property double operation.
+    /// Performs property double as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="element">Element value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double PropertyDouble(XElement? element, string name, double fallback)
         {
             try
@@ -1659,8 +1791,12 @@ public sealed class VideoProjectImportService(
         }
 
     /// <summary>
-    /// Runs the ratio operation.
+    /// Performs ratio as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="numerator">Numerator value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="denominator">Denominator value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double Ratio(double numerator, double denominator, double fallback)
         {
             try
@@ -1676,8 +1812,11 @@ public sealed class VideoProjectImportService(
         }
 
     /// <summary>
-    /// Runs the mlt position operation.
+    /// Performs mlt position as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="frameRate">Frame rate value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double MltPosition(string value, double frameRate)
     {
         try
@@ -1696,8 +1835,11 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the mlt duration operation.
+    /// Performs mlt duration as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="frameRate">Frame rate value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double MltDuration(string value, double frameRate)
     {
         try
@@ -1716,8 +1858,11 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Parses mlt speed.
+    /// Parses mlt speed as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="resource">Resource value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="producer">Producer value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double ParseMltSpeed(string resource, XElement? producer)
     {
         try
@@ -1743,8 +1888,11 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Parses caps frame rate.
+    /// Parses caps frame rate as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="serialized">Serialized value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double ParseCapsFrameRate(string serialized, double fallback)
     {
         try
@@ -1763,8 +1911,12 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the property from serialized operation.
+    /// Performs property from serialized as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="serialized">Serialized value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="property">Property value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string PropertyFromSerialized(string serialized, string property, string fallback)
     {
         try
@@ -1783,8 +1935,10 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the nanoseconds operation.
+    /// Performs nanoseconds as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double Nanoseconds(double value) {
         try
         {
@@ -1799,8 +1953,10 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Opens shot frame rate.
+    /// Opens shot frame rate as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="root">Root value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double OpenShotFrameRate(JsonElement root)
     {
         try
@@ -1828,8 +1984,12 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Opens shot profile int.
+    /// Opens shot profile int as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="root">Root value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="property">Property value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     private int OpenShotProfileInt(JsonElement root, string property, int fallback)
     {
         try
@@ -1848,8 +2008,11 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Parses edl rate.
+    /// Parses edl rate as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="text">Text value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double ParseEdlRate(string text, double fallback)
     {
         try
@@ -1867,8 +2030,11 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the edl title operation.
+    /// Performs edl title as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="text">Text value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string EdlTitle(string text, string fallback)
     {
         try
@@ -1886,8 +2052,11 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Parses timecode.
+    /// Parses timecode as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="frameRate">Frame rate value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double ParseTimecode(string value, double frameRate)
     {
         try
@@ -1910,8 +2079,11 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Parses clock.
+    /// Parses clock as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="frameRate">Frame rate value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double ParseClock(string value, double frameRate)
     {
         try
@@ -1930,8 +2102,11 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Parses double.
+    /// Parses double as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double ParseDouble(string? value, double fallback)
         {
             try
@@ -1949,8 +2124,11 @@ public sealed class VideoProjectImportService(
         }
 
     /// <summary>
-    /// Runs the finite operation.
+    /// Performs finite as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double Finite(double value, double fallback = 0) {
         try
         {
@@ -1965,8 +2143,10 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the URI path operation.
+    /// Performs URI path as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="uri">Uri value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string UriPath(string? uri)
     {
         try
@@ -1987,8 +2167,11 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the mime from path operation.
+    /// Performs MIME from path as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="path">Path value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string MimeFromPath(string? path, string fallback)
     {
         try
@@ -2024,8 +2207,11 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the data URL operation.
+    /// Performs data URL as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="mimeType">Mime type value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="bytes">Bytes value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string DataUrl(string mimeType, byte[] bytes)
         {
             try
@@ -2041,8 +2227,12 @@ public sealed class VideoProjectImportService(
         }
 
     /// <summary>
-    /// Runs the default video layer operation.
+    /// Performs default video layer as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="name">Name value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="start">Start value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="end">End value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The video effect layer produced by the operation.</returns>
     private VideoEffectLayer DefaultVideoLayer(string name, double start, double end) {
         try
         {
@@ -2064,8 +2254,10 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the decode text operation.
+    /// Performs decode text as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="bytes">Bytes value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string DecodeText(byte[] bytes)
     {
         try
@@ -2084,8 +2276,10 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Runs the format bytes operation.
+    /// Performs format bytes as part of the video project import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="bytes">Bytes value supplied to the video project import operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string FormatBytes(long bytes)
     {
         try
@@ -2104,8 +2298,11 @@ public sealed class VideoProjectImportService(
     }
 
     /// <summary>
-    /// Represents an embedded media.
+    /// Represents an embedded media helper type nested within <see cref="VideoProjectImportService"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
+    /// <param name="Path">Path value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="MimeType">Mime type value supplied to the video project import operation and used when producing its result.</param>
+    /// <param name="Bytes">Bytes value supplied to the video project import operation and used when producing its result.</param>
     private sealed record EmbeddedMedia(string Path, string MimeType, byte[] Bytes);
 
 

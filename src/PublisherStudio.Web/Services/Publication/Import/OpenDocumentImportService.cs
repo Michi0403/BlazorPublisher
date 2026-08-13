@@ -17,6 +17,12 @@ namespace PublisherStudio.Services.Publication.Import;
 /// The adapter intentionally uses only BCL ZIP/XML APIs and reports every unsupported construct instead
 /// of silently changing the native publication model to resemble ODF.
 /// </summary>
+/// <param name="documentFactory">Publisher document factory dependency used by the open document import workflow to provide the corresponding application capability.</param>
+/// <param name="richTextFactory">Rich text document factory dependency used by the open document import workflow to provide the corresponding application capability.</param>
+/// <param name="svgSanitizer">Svg sanitizer value supplied to the open document import operation and used when producing its result.</param>
+/// <param name="runtimePatterns">Publisher runtime pattern service dependency used by the open document import workflow to provide the corresponding application capability.</param>
+/// <param name="loggerFactory">Logger factory dependency used by the open document import workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed partial class OpenDocumentImportService(
     IPublisherDocumentFactory documentFactory,
     RichTextDocumentFactory richTextFactory,
@@ -25,17 +31,42 @@ public sealed partial class OpenDocumentImportService(
     ILoggerFactory loggerFactory,
     ILogger<OpenDocumentImportService> logger)
 {
+    /// <summary>
+    /// Stores the internal office state used by <see cref="OpenDocumentImportService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly XNamespace Office = "urn:oasis:names:tc:opendocument:xmlns:office:1.0";
+    /// <summary>
+    /// Stores the internal draw state used by <see cref="OpenDocumentImportService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly XNamespace Draw = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0";
+    /// <summary>
+    /// Stores the internal style state used by <see cref="OpenDocumentImportService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly XNamespace Style = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
+    /// <summary>
+    /// Stores the internal text state used by <see cref="OpenDocumentImportService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly XNamespace Text = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
+    /// <summary>
+    /// Stores the internal SVG state used by <see cref="OpenDocumentImportService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly XNamespace Svg = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0";
+    /// <summary>
+    /// Stores the internal x link state used by <see cref="OpenDocumentImportService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly XNamespace XLink = "http://www.w3.org/1999/xlink";
+    /// <summary>
+    /// Stores the internal presentation state used by <see cref="OpenDocumentImportService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly XNamespace Presentation = "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0";
 
     /// <summary>
-    /// Imports async.
+    /// Performs import as part of the open document import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="fileName">File name value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The publication import result produced by the operation.</returns>
     public async Task<PublicationImportResult> ImportAsync(Stream source, string fileName, CancellationToken cancellationToken = default)
     {
         try
@@ -56,8 +87,12 @@ public sealed partial class OpenDocumentImportService(
     }
 
     /// <summary>
-    /// Imports package async.
+    /// Imports package as part of the open document import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="fileName">File name value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The publication import result produced by the operation.</returns>
     private async Task<PublicationImportResult> ImportPackageAsync(Stream source, string fileName, CancellationToken cancellationToken)
     {
         try
@@ -91,8 +126,12 @@ public sealed partial class OpenDocumentImportService(
     }
 
     /// <summary>
-    /// Imports flat async.
+    /// Imports flat as part of the open document import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="fileName">File name value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The publication import result produced by the operation.</returns>
     private async Task<PublicationImportResult> ImportFlatAsync(Stream source, string fileName, CancellationToken cancellationToken)
     {
         try
@@ -110,8 +149,13 @@ public sealed partial class OpenDocumentImportService(
     }
 
     /// <summary>
-    /// Imports documents.
+    /// Imports documents as part of the open document import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="content">Content value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="styles">Styles value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="fileName">File name value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="readAsset">Read asset value supplied to the open document import operation and used when producing its result.</param>
+    /// <returns>The publication import result produced by the operation.</returns>
     private PublicationImportResult ImportDocuments(
         XDocument content,
         XDocument? styles,
@@ -170,8 +214,15 @@ public sealed partial class OpenDocumentImportService(
     }
 
     /// <summary>
-    /// Imports element.
+    /// Imports element as part of the open document import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="element">Element value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="page">Page value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="styles">Style catalog dependency used by the open document import workflow to provide the corresponding application capability.</param>
+    /// <param name="readAsset">Read asset value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="issues">Issues value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="zIndex">Z index value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="groupPath">Group path value supplied to the open document import operation and used when producing its result.</param>
     private void ImportElement(
         XElement element,
         PublicationPage page,
@@ -376,8 +427,17 @@ public sealed partial class OpenDocumentImportService(
     }
 
     /// <summary>
-    /// Adds text frame.
+    /// Adds text frame as part of the open document import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="textBox">Text box value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="page">Page value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="style">Style value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="bounds">Bounds value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="groupPath">Group path value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="visible">Value indicating whether visible should apply to this operation.</param>
+    /// <param name="rotation">Rotation value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="zIndex">Z index value supplied to the open document import operation and used when producing its result.</param>
     private void AddTextFrame(
         XElement textBox,
         PublicationPage page,
@@ -420,8 +480,10 @@ public sealed partial class OpenDocumentImportService(
     }
 
     /// <summary>
-    /// Runs the extract text lines operation.
+    /// Performs extract text lines as part of the open document import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="textBox">Text box value supplied to the open document import operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private List<string> ExtractTextLines(XElement textBox)
     {
         try
@@ -445,8 +507,10 @@ public sealed partial class OpenDocumentImportService(
     }
 
     /// <summary>
-    /// Runs the append text operation.
+    /// Performs append text as part of the open document import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="node">Node value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="builder">Builder value supplied to the open document import operation and used when producing its result.</param>
     private void AppendText(XNode node, StringBuilder builder)
     {
         try
@@ -473,8 +537,12 @@ public sealed partial class OpenDocumentImportService(
     }
 
     /// <summary>
-    /// Builds shape SVG.
+    /// Builds shape SVG as part of the open document import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="element">Element value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="bounds">Bounds value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="style">Style value supplied to the open document import operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string BuildShapeSvg(XElement element, Bounds bounds, ResolvedStyle style)
     {
         try
@@ -512,8 +580,11 @@ public sealed partial class OpenDocumentImportService(
     }
 
     /// <summary>
-    /// Builds style catalog.
+    /// Builds style catalog as part of the open document import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="content">Content value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="stylesDocument">Styles document value supplied to the open document import operation and used when producing its result.</param>
+    /// <returns>The style catalog produced by the operation.</returns>
     private StyleCatalog BuildStyleCatalog(XDocument content, XDocument? stylesDocument)
     {
         try
@@ -541,8 +612,11 @@ public sealed partial class OpenDocumentImportService(
     }
 
     /// <summary>
-    /// Resolves page size.
+    /// Resolves page size as part of the open document import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="page">Page value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="styles">Style catalog dependency used by the open document import workflow to provide the corresponding application capability.</param>
+    /// <returns>The double width double height produced by the operation.</returns>
     private (double Width, double Height) ResolvePageSize(XElement page, StyleCatalog styles)
     {
         var masterName = (string?)page.Attribute(Draw + "master-page-name");
@@ -559,8 +633,11 @@ public sealed partial class OpenDocumentImportService(
     }
 
     /// <summary>
-    /// Resolves page background.
+    /// Resolves page background as part of the open document import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="page">Page value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="styles">Style catalog dependency used by the open document import workflow to provide the corresponding application capability.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ResolvePageBackground(XElement page, StyleCatalog styles)
     {
         try
@@ -578,8 +655,11 @@ public sealed partial class OpenDocumentImportService(
     }
 
     /// <summary>
-    /// Reads bounds.
+    /// Reads bounds as part of the open document import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="element">Element value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="page">Page value supplied to the open document import operation and used when producing its result.</param>
+    /// <returns>The bounds produced by the operation.</returns>
     private Bounds ReadBounds(XElement element, PublicationPage page)
     {
         try
@@ -615,8 +695,10 @@ public sealed partial class OpenDocumentImportService(
     }
 
     /// <summary>
-    /// Reads rotation.
+    /// Reads rotation as part of the open document import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="element">Element value supplied to the open document import operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double ReadRotation(XElement element)
     {
         try
@@ -637,8 +719,11 @@ public sealed partial class OpenDocumentImportService(
     }
 
     /// <summary>
-    /// Reads length mm.
+    /// Reads length mm as part of the open document import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the open document import operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double ReadLengthMm(string? value, double fallback)
     {
         try
@@ -667,8 +752,11 @@ public sealed partial class OpenDocumentImportService(
     }
 
     /// <summary>
-    /// Reads archive entry.
+    /// Reads archive entry as part of the open document import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="archive">Archive value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="path">Path value supplied to the open document import operation and used when producing its result.</param>
+    /// <returns>The byte produced by the operation.</returns>
     private byte[]? ReadArchiveEntry(ZipArchive archive, string path)
     {
         try
@@ -693,8 +781,10 @@ public sealed partial class OpenDocumentImportService(
 
 
     /// <summary>
-    /// Normalizes package path.
+    /// Normalizes package path as part of the open document import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="path">Path value supplied to the open document import operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizePackagePath(string? path)
     {
         try
@@ -717,8 +807,12 @@ public sealed partial class OpenDocumentImportService(
     }
 
     /// <summary>
-    /// Resolves image mime.
+    /// Resolves image MIME as part of the open document import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="declared">Declared value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="path">Path value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="bytes">Bytes value supplied to the open document import operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ResolveImageMime(string? declared, string path, byte[] bytes)
     {
         try
@@ -754,8 +848,11 @@ public sealed partial class OpenDocumentImportService(
     }
 
     /// <summary>
-    /// Loads XML async.
+    /// Loads XML as part of the open document import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The x document produced by the operation.</returns>
     private async Task<XDocument> LoadXmlAsync(Stream source, CancellationToken cancellationToken)
     {
         try
@@ -781,8 +878,11 @@ public sealed partial class OpenDocumentImportService(
     }
 
     /// <summary>
-    /// Runs the decorate group name operation.
+    /// Performs decorate group name as part of the open document import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="name">Name value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="groupPath">Group path value supplied to the open document import operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string DecorateGroupName(string name, string groupPath) {
         try
         {
@@ -796,8 +896,11 @@ public sealed partial class OpenDocumentImportService(
         }
     }
     /// <summary>
-    /// Runs the clean name operation.
+    /// Performs clean name as part of the open document import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the open document import operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string CleanName(string? value, string fallback) {
         try
         {
@@ -811,8 +914,10 @@ public sealed partial class OpenDocumentImportService(
         }
     }
     /// <summary>
-    /// Runs the fo operation.
+    /// Performs fo as part of the open document import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="localName">Local name value supplied to the open document import operation and used when producing its result.</param>
+    /// <returns>The x name produced by the operation.</returns>
     private XName Fo(string localName) {
         try
         {
@@ -827,16 +932,24 @@ public sealed partial class OpenDocumentImportService(
     }
 
     /// <summary>
-    /// Provides style catalog operations.
+    /// Maintains the authoritative directory of style entries used for discovery, validation, and runtime lookup.
     /// </summary>
     private sealed class StyleCatalog
     {
+        /// <summary>
+        /// Stores the open document import service dependency used by <see cref="StyleCatalog"/> to delegate that application responsibility to its owning collaborator.
+        /// </summary>
         private readonly OpenDocumentImportService owner;
+        /// <summary>
+        /// Stores the logger used by <see cref="StyleCatalog"/> to record operational diagnostics without coupling callers to logging details.
+        /// </summary>
         private readonly ILogger<StyleCatalog> logger;
 
         /// <summary>
-        /// Runs the style catalog operation.
+        /// Initializes a new <see cref="StyleCatalog"/> instance and captures the dependencies or initial state required by its style workflow.
         /// </summary>
+        /// <param name="owner">Open document import service dependency used by the style workflow to provide the corresponding application capability.</param>
+        /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
         public StyleCatalog(OpenDocumentImportService owner, ILogger<StyleCatalog> logger)
         {
             try
@@ -853,21 +966,26 @@ public sealed partial class OpenDocumentImportService(
         }
 
         /// <summary>
-        /// Gets styles.
+        /// Gets the styles collection maintained or exposed by this style instance for downstream processing.
         /// </summary>
+        /// <value>The styles value exposed by <see cref="StyleCatalog"/>.</value>
         public Dictionary<string, XElement> Styles { get; } = new(StringComparer.Ordinal);
         /// <summary>
-        /// Gets page layouts.
+        /// Gets the page layouts collection maintained or exposed by this style instance for downstream processing.
         /// </summary>
+        /// <value>The page layouts value exposed by <see cref="StyleCatalog"/>.</value>
         public Dictionary<string, XElement> PageLayouts { get; } = new(StringComparer.Ordinal);
         /// <summary>
-        /// Gets master pages.
+        /// Gets the master pages collection maintained or exposed by this style instance for downstream processing.
         /// </summary>
+        /// <value>The master pages value exposed by <see cref="StyleCatalog"/>.</value>
         public Dictionary<string, XElement> MasterPages { get; } = new(StringComparer.Ordinal);
 
         /// <summary>
-        /// Runs the resolve operation.
+        /// Performs resolve in the style directory so callers observe a consistent, authoritative runtime view.
         /// </summary>
+        /// <param name="name">Name value supplied to the style operation and used when producing its result.</param>
+        /// <returns>The resolved style produced by the operation.</returns>
         public ResolvedStyle Resolve(string? name)
         {
             try
@@ -913,8 +1031,11 @@ public sealed partial class OpenDocumentImportService(
     }
 
     /// <summary>
-    /// Normalizes color.
+    /// Normalizes color as part of the open document import service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the open document import operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeColor(string? value, string fallback)
     {
         try
@@ -933,12 +1054,19 @@ public sealed partial class OpenDocumentImportService(
     }
 
     /// <summary>
-    /// Represents a bounds.
+    /// Represents a bounds helper type nested within <see cref="OpenDocumentImportService"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
+    /// <param name="X">X value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="Y">Y value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="Width">Width value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="Height">Height value supplied to the open document import operation and used when producing its result.</param>
     private readonly record struct Bounds(double X, double Y, double Width, double Height);
     /// <summary>
-    /// Represents a resolved style.
+    /// Represents a resolved style helper type nested within <see cref="OpenDocumentImportService"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
+    /// <param name="Fill">Fill value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="Stroke">Stroke value supplied to the open document import operation and used when producing its result.</param>
+    /// <param name="StrokeWidth">Stroke width value supplied to the open document import operation and used when producing its result.</param>
     private readonly record struct ResolvedStyle(string Fill, string Stroke, double StrokeWidth);
 
 }

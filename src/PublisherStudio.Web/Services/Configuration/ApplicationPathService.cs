@@ -4,13 +4,16 @@ using PublisherStudio.BusinessObjects;
 namespace PublisherStudio.Services.Configuration;
 
 /// <summary>
-/// Provides application path service operations.
+/// Coordinates application path behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
+/// <param name="options">Options containing the caller-supplied values that control this operation.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class ApplicationPathService(IOptions<PublisherStudioPathOptions> options, ILogger<ApplicationPathService> logger) : IApplicationPathService
 {
     /// <summary>
-    /// Gets defaults.
+    /// Retrieves defaults as part of the application path service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The PublisherStudio path options produced by the operation.</returns>
     public PublisherStudioPathOptions GetDefaults() {
         try
         {
@@ -25,8 +28,10 @@ public sealed class ApplicationPathService(IOptions<PublisherStudioPathOptions> 
     }
 
     /// <summary>
-    /// Runs the resolve operation.
+    /// Performs resolve as part of the application path service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="projectOverrides">Project overrides value supplied to the application path operation and used when producing its result.</param>
+    /// <returns>The PublisherStudio path options produced by the operation.</returns>
     public PublisherStudioPathOptions Resolve(PublisherStudioPathOptions? projectOverrides = null)
     {
         try
@@ -58,8 +63,11 @@ public sealed class ApplicationPathService(IOptions<PublisherStudioPathOptions> 
     }
 
     /// <summary>
-    /// Resolves media path.
+    /// Resolves media path as part of the application path service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="mediaKind">Media kind value supplied to the application path operation and used when producing its result.</param>
+    /// <param name="projectOverrides">Project overrides value supplied to the application path operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string ResolveMediaPath(string mediaKind, PublisherStudioPathOptions? projectOverrides = null)
     {
         try
@@ -86,8 +94,9 @@ public sealed class ApplicationPathService(IOptions<PublisherStudioPathOptions> 
     }
 
     /// <summary>
-    /// Ensures directories.
+    /// Ensures directories as part of the application path service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="projectOverrides">Project overrides value supplied to the application path operation and used when producing its result.</param>
     public void EnsureDirectories(PublisherStudioPathOptions? projectOverrides = null)
     {
         try
@@ -106,8 +115,10 @@ public sealed class ApplicationPathService(IOptions<PublisherStudioPathOptions> 
     }
 
     /// <summary>
-    /// Runs the choose operation.
+    /// Performs choose as part of the application path service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="candidates">Candidates value supplied to the application path operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Choose(params string?[] candidates)
     {
         try

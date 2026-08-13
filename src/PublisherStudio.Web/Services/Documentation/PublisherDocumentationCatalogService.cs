@@ -8,19 +8,34 @@ namespace PublisherStudio.Services.Documentation;
 /// <summary>
 /// Reads build-generated DocFX artifacts and compiler XML comments from the installed application tree.
 /// </summary>
+/// <param name="environment">Web host environment dependency used by the publisher documentation catalog workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class PublisherDocumentationCatalogService(
     IWebHostEnvironment environment,
     ILogger<PublisherDocumentationCatalogService> logger) : IPublisherDocumentationCatalogService
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal synchronization state used by <see cref="PublisherDocumentationCatalogService"/> while executing its surrounding workflow.
     /// </summary>
     private readonly object synchronization = new();
+    /// <summary>
+    /// Stores the in-memory comment cache collection maintained internally by <see cref="PublisherDocumentationCatalogService"/> for its current workflow state.
+    /// </summary>
     private IReadOnlyList<PublisherDocumentationComment>? commentCache;
+    /// <summary>
+    /// Stores the internal comment cache path state used by <see cref="PublisherDocumentationCatalogService"/> while executing its surrounding workflow.
+    /// </summary>
     private string? commentCachePath;
+    /// <summary>
+    /// Stores the internal comment cache write UTC state used by <see cref="PublisherDocumentationCatalogService"/> while executing its surrounding workflow.
+    /// </summary>
     private DateTime commentCacheWriteUtc;
 
+    /// <summary>
+    /// Retrieves status as part of the publisher documentation catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
     /// <inheritdoc />
+    /// <returns>The publisher documentation status produced by the operation.</returns>
     public PublisherDocumentationStatus GetStatus()
     {
     try
@@ -55,7 +70,12 @@ public sealed class PublisherDocumentationCatalogService(
     }
 }
 
+    /// <summary>
+    /// Retrieves HTML file path as part of the publisher documentation catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
     /// <inheritdoc />
+    /// <param name="relativePath">Relative path value supplied to the publisher documentation catalog operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string? GetHtmlFilePath(string? relativePath)
     {
     try
@@ -88,7 +108,11 @@ public sealed class PublisherDocumentationCatalogService(
     }
 }
 
+    /// <summary>
+    /// Retrieves PDF path as part of the publisher documentation catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
     /// <inheritdoc />
+    /// <returns>The string produced by the operation.</returns>
     public string? GetPdfPath()
     {
     try
@@ -113,7 +137,13 @@ public sealed class PublisherDocumentationCatalogService(
     }
 }
 
+    /// <summary>
+    /// Searches comments as part of the publisher documentation catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
     /// <inheritdoc />
+    /// <param name="query">Query value supplied to the publisher documentation catalog operation and used when producing its result.</param>
+    /// <param name="limit">Limit value supplied to the publisher documentation catalog operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<PublisherDocumentationComment> SearchComments(string? query, int limit)
     {
     try
@@ -139,8 +169,10 @@ public sealed class PublisherDocumentationCatalogService(
 }
 
     /// <summary>
-    /// Loads comments.
+    /// Loads comments as part of the publisher documentation catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="documentationRoot">Documentation root value supplied to the publisher documentation catalog operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IReadOnlyList<PublisherDocumentationComment> LoadComments(string? documentationRoot)
     {
         var path = ResolveXmlDocumentationPath(documentationRoot);
@@ -176,8 +208,10 @@ public sealed class PublisherDocumentationCatalogService(
     }
 
     /// <summary>
-    /// Creates comment.
+    /// Creates comment as part of the publisher documentation catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="member">Member value supplied to the publisher documentation catalog operation and used when producing its result.</param>
+    /// <returns>The publisher documentation comment produced by the operation.</returns>
     private PublisherDocumentationComment? CreateComment(XElement member)
     {
     try
@@ -207,8 +241,11 @@ public sealed class PublisherDocumentationCatalogService(
 }
 
     /// <summary>
-    /// Runs the comment matches operation.
+    /// Performs comment matches as part of the publisher documentation catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="comment">Comment value supplied to the publisher documentation catalog operation and used when producing its result.</param>
+    /// <param name="query">Query value supplied to the publisher documentation catalog operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool CommentMatches(PublisherDocumentationComment comment, string query) {
     try
     {
@@ -228,8 +265,9 @@ public sealed class PublisherDocumentationCatalogService(
 }
 
     /// <summary>
-    /// Resolves documentation root.
+    /// Resolves documentation root as part of the publisher documentation catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The string produced by the operation.</returns>
     private string? ResolveDocumentationRoot()
     {
     try
@@ -258,8 +296,10 @@ public sealed class PublisherDocumentationCatalogService(
 }
 
     /// <summary>
-    /// Resolves XML documentation path.
+    /// Resolves XML documentation path as part of the publisher documentation catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="documentationRoot">Documentation root value supplied to the publisher documentation catalog operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string? ResolveXmlDocumentationPath(string? documentationRoot)
     {
     try
@@ -284,8 +324,10 @@ public sealed class PublisherDocumentationCatalogService(
 }
 
     /// <summary>
-    /// Reads manifest.
+    /// Reads manifest as part of the publisher documentation catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="documentationRoot">Documentation root value supplied to the publisher documentation catalog operation and used when producing its result.</param>
+    /// <returns>The publisher documentation manifest produced by the operation.</returns>
     private PublisherDocumentationManifest? ReadManifest(string? documentationRoot)
     {
         if (documentationRoot is null) return null;
@@ -304,8 +346,10 @@ public sealed class PublisherDocumentationCatalogService(
     }
 
     /// <summary>
-    /// Builds display name.
+    /// Builds display name as part of the publisher documentation catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="memberId">Identifier of the member to use for this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string BuildDisplayName(string memberId)
     {
     try
@@ -327,8 +371,10 @@ public sealed class PublisherDocumentationCatalogService(
 }
 
     /// <summary>
-    /// Normalizes comment.
+    /// Normalizes comment as part of the publisher documentation catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the publisher documentation catalog operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeComment(string? value)
     {
     try

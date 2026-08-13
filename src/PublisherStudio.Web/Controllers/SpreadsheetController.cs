@@ -8,18 +8,26 @@ using PublisherStudio.Services;
 namespace PublisherStudio.Controllers;
 
 /// <summary>
-/// Provides spreadsheet controller operations.
+/// Exposes the spreadsheet application operations through PublisherStudio's web/API boundary and delegates domain work to the corresponding services.
 /// </summary>
 [Route("spreadsheet")]
 [AutoValidateAntiforgeryToken]
 public sealed class SpreadsheetController : Controller
 {
+    /// <summary>
+    /// Stores the spreadsheet session store dependency used by <see cref="SpreadsheetController"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly SpreadsheetSessionStore _sessions;
+    /// <summary>
+    /// Stores the spreadsheet document service dependency used by <see cref="SpreadsheetController"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly SpreadsheetDocumentService _documents;
 
     /// <summary>
-    /// Runs the spreadsheet controller operation.
+    /// Initializes a new <see cref="SpreadsheetController"/> instance and captures the dependencies or initial state required by its spreadsheet workflow.
     /// </summary>
+    /// <param name="sessions">Spreadsheet session store dependency used by the spreadsheet workflow to provide the corresponding application capability.</param>
+    /// <param name="documents">Spreadsheet document service dependency used by the spreadsheet workflow to provide the corresponding application capability.</param>
     public SpreadsheetController(SpreadsheetSessionStore sessions, SpreadsheetDocumentService documents)
     {
         _sessions = sessions;
@@ -27,8 +35,10 @@ public sealed class SpreadsheetController : Controller
     }
 
     /// <summary>
-    /// Runs the editor operation.
+    /// Returns the editor projection for the spreadsheet API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpGet("editor/{sessionId:guid}")]
     [IgnoreAntiforgeryToken]
     public IActionResult Editor(Guid sessionId)
@@ -45,15 +55,20 @@ public sealed class SpreadsheetController : Controller
     }
 
     /// <summary>
-    /// Runs the request handler operation.
+    /// Returns the request handler projection for the spreadsheet API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [AcceptVerbs("GET", "POST")]
     [Route("request")]
     public IActionResult RequestHandler() => SpreadsheetRequestProcessor.GetResponse(HttpContext);
 
     /// <summary>
-    /// Runs the open operation.
+    /// Returns the open projection for the spreadsheet API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <param name="workbook">Form file dependency used by the spreadsheet workflow to provide the corresponding application capability.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpPost("open/{sessionId:guid}")]
     [DisableRequestSizeLimit]
     public async Task<IActionResult> Open(Guid sessionId, IFormFile? workbook, CancellationToken cancellationToken)
@@ -93,8 +108,10 @@ public sealed class SpreadsheetController : Controller
     }
 
     /// <summary>
-    /// Runs the new operation.
+    /// Returns the new projection for the spreadsheet API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpPost("new/{sessionId:guid}")]
     public IActionResult New(Guid sessionId)
     {
@@ -127,8 +144,11 @@ public sealed class SpreadsheetController : Controller
     }
 
     /// <summary>
-    /// Runs the save operation.
+    /// Returns the save projection for the spreadsheet API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <param name="spreadsheetState">Spreadsheet state value supplied to the spreadsheet operation and used when producing its result.</param>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpPost("save/{sessionId:guid}")]
     public IActionResult Save(Guid sessionId, SpreadsheetClientState spreadsheetState)
     {
@@ -162,8 +182,10 @@ public sealed class SpreadsheetController : Controller
     }
 
     /// <summary>
-    /// Runs the download operation.
+    /// Returns the download projection for the spreadsheet API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpGet("download/{sessionId:guid}")]
     [IgnoreAntiforgeryToken]
     public IActionResult Download(Guid sessionId)
@@ -185,7 +207,7 @@ public sealed class SpreadsheetController : Controller
     };
 
     /// <summary>
-    /// Runs the to dev express format operation.
+    /// Runs the to DevExpress format operation.
     /// </summary>
     private DocumentFormat ToDevExpressFormat(SpreadsheetStorageFormat format) => format switch
     {

@@ -8,6 +8,8 @@ namespace PublisherStudio.Controllers;
 /// <summary>
 /// Exposes generated PublisherStudio documentation, status information, and searchable XML comments.
 /// </summary>
+/// <param name="documentation">Publisher documentation catalog service dependency used by the documentation workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 [ApiController]
 [Route("api/documentation")]
 public sealed class DocumentationController(
@@ -16,6 +18,7 @@ public sealed class DocumentationController(
 {
 
     /// <summary>Returns availability and generation details for the documentation shipped with the running build.</summary>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpGet("status")]
     public ActionResult<PublisherDocumentationStatus> Status()
     {
@@ -31,6 +34,7 @@ public sealed class DocumentationController(
     }
 
     /// <summary>Returns the documentation routes and accessible viewer features exposed by the running application.</summary>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpGet("profile")]
     public ActionResult<PublisherDocumentationProfile> Profile()
     {
@@ -51,9 +55,12 @@ public sealed class DocumentationController(
         }
     }
 
-    /// <summary>Searches the compiler XML documentation shipped with the running build.</summary>
+    /// <summary>
+    /// Returns the comments projection for the documentation API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
+    /// </summary>
     /// <param name="query">Optional case-insensitive member, summary, or remarks text.</param>
     /// <param name="limit">Maximum number of matching members to return.</param>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpGet("comments")]
     public ActionResult<IReadOnlyList<PublisherDocumentationComment>> Comments(
         [FromQuery] string? query = null,
@@ -72,6 +79,7 @@ public sealed class DocumentationController(
 
     /// <summary>Serves generated DocFX HTML and supporting assets from the installed documentation root.</summary>
     /// <param name="relativePath">Optional path below the generated documentation root.</param>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpGet("/help-docs")]
     [HttpGet("/help-docs/{**relativePath}")]
     [HttpGet("html")]
@@ -102,6 +110,7 @@ public sealed class DocumentationController(
     }
 
     /// <summary>Opens the versioned PublisherStudio PDF generated for the running build.</summary>
+    /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpGet("pdf")]
     public IActionResult Pdf()
     {

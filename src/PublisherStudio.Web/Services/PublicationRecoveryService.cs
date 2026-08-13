@@ -3,8 +3,13 @@ using System.Text.Json;
 namespace PublisherStudio.Services;
 
 /// <summary>
-/// Represents a publication recovery snapshot.
+/// Represents a publication recovery snapshot application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="DocumentId">Identifier of the document to use for this operation.</param>
+/// <param name="DocumentName">Document name value supplied to the publication recovery snapshot operation and used when producing its result.</param>
+/// <param name="ModifiedUtc">Modified utc value supplied to the publication recovery snapshot operation and used when producing its result.</param>
+/// <param name="SavedUtc">Saved utc value supplied to the publication recovery snapshot operation and used when producing its result.</param>
+/// <param name="Json">Json value supplied to the publication recovery snapshot operation and used when producing its result.</param>
 public sealed record PublicationRecoverySnapshot(
     Guid DocumentId,
     string DocumentName,
@@ -19,19 +24,30 @@ public sealed record PublicationRecoverySnapshot(
 public sealed class PublicationRecoveryService
 {
     /// <summary>
-    /// Represents a recovery manifest.
+    /// Represents a recovery manifest helper type nested within <see cref="PublicationRecoveryService"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
+    /// <param name="DocumentId">Identifier of the document to use for this operation.</param>
+    /// <param name="DocumentName">Document name value supplied to the publication recovery operation and used when producing its result.</param>
+    /// <param name="ModifiedUtc">Modified utc value supplied to the publication recovery operation and used when producing its result.</param>
+    /// <param name="SavedUtc">Saved utc value supplied to the publication recovery operation and used when producing its result.</param>
+    /// <param name="FileName">File name value supplied to the publication recovery operation and used when producing its result.</param>
     private sealed record RecoveryManifest(Guid DocumentId, string DocumentName, DateTimeOffset ModifiedUtc, DateTimeOffset SavedUtc, string FileName);
 
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the synchronization primitive that protects concurrent access to gate state owned by <see cref="PublicationRecoveryService"/>.
     /// </summary>
     private readonly SemaphoreSlim _gate = new(1, 1);
+    /// <summary>
+    /// Stores the internal root state used by <see cref="PublicationRecoveryService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _root;
+    /// <summary>
+    /// Stores the internal manifest path state used by <see cref="PublicationRecoveryService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _manifestPath;
 
     /// <summary>
-    /// Runs the publication recovery service operation.
+    /// Initializes a new <see cref="PublicationRecoveryService"/> instance and captures the dependencies or initial state required by its publication recovery workflow.
     /// </summary>
     public PublicationRecoveryService()
     {
@@ -43,8 +59,14 @@ public sealed class PublicationRecoveryService
     }
 
     /// <summary>
-    /// Saves async.
+    /// Performs save as part of the publication recovery service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="documentId">Identifier of the document to use for this operation.</param>
+    /// <param name="documentName">Document name value supplied to the publication recovery operation and used when producing its result.</param>
+    /// <param name="modifiedUtc">Modified utc value supplied to the publication recovery operation and used when producing its result.</param>
+    /// <param name="json">Json value supplied to the publication recovery operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task SaveAsync(Guid documentId, string documentName, DateTimeOffset modifiedUtc, string json, CancellationToken cancellationToken = default)
     {
     try
@@ -82,8 +104,9 @@ public sealed class PublicationRecoveryService
 }
 
     /// <summary>
-    /// Attempts to read latest.
+    /// Attempts to read latest as part of the publication recovery service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The publication recovery snapshot produced by the operation.</returns>
     public PublicationRecoverySnapshot? TryReadLatest()
     {
     try
@@ -114,8 +137,11 @@ public sealed class PublicationRecoveryService
 }
 
     /// <summary>
-    /// Deletes async.
+    /// Performs delete as part of the publication recovery service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="documentId">Identifier of the document to use for this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task DeleteAsync(Guid documentId, CancellationToken cancellationToken = default)
     {
     try

@@ -12,24 +12,69 @@ using PublisherStudio.Services.Configuration;
 namespace PublisherStudio.Services;
 
 /// <summary>
-/// Provides publication file service operations.
+/// Coordinates publication file behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
 public sealed partial class PublicationFileService
 {
+    /// <summary>
+    /// Stores the picture document service dependency used by <see cref="PublicationFileService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly PictureDocumentService _pictures;
+    /// <summary>
+    /// Stores the publication data service dependency used by <see cref="PublicationFileService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly PublicationDataService _data;
+    /// <summary>
+    /// Stores the spreadsheet document service dependency used by <see cref="PublicationFileService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly SpreadsheetDocumentService _spreadsheets;
+    /// <summary>
+    /// Stores the publication component service dependency used by <see cref="PublicationFileService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly PublicationComponentService _components;
+    /// <summary>
+    /// Stores the media timeline edit service dependency used by <see cref="PublicationFileService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly MediaTimelineEditService _mediaTimeline;
+    /// <summary>
+    /// Stores the panel document service dependency used by <see cref="PublicationFileService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly PanelDocumentService _panels;
+    /// <summary>
+    /// Stores the internal word art geometry state used by <see cref="PublicationFileService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly WordArtPathGeometry _wordArtGeometry;
+    /// <summary>
+    /// Stores the internal element traversal state used by <see cref="PublicationFileService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly PublicationElementTraversal _elementTraversal;
+    /// <summary>
+    /// Stores the internal media data state used by <see cref="PublicationFileService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly PublicationMediaData _mediaData;
+    /// <summary>
+    /// Stores the rich text document factory dependency used by <see cref="PublicationFileService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly RichTextDocumentFactory _richTextFactory;
+    /// <summary>
+    /// Stores the publisher runtime pattern service dependency used by <see cref="PublicationFileService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly IPublisherRuntimePatternService _runtimePatterns;
+    /// <summary>
+    /// Stores the publisher document factory dependency used by <see cref="PublicationFileService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly IPublisherDocumentFactory _documentFactory;
+    /// <summary>
+    /// Stores the publication markup service dependency used by <see cref="PublicationFileService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly IPublicationMarkupService _markup;
+    /// <summary>
+    /// Stores the story page layout service dependency used by <see cref="PublicationFileService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly IStoryPageLayoutService _storyPageLayouts;
+    /// <summary>
+    /// Stores the logger used by <see cref="PublicationFileService"/> to record operational diagnostics without coupling callers to logging details.
+    /// </summary>
     private readonly ILogger<PublicationFileService> logger;
     /// <summary>
     /// Runs the new operation.
@@ -43,8 +88,23 @@ public sealed partial class PublicationFileService
     };
 
     /// <summary>
-    /// Runs the publication file service operation.
+    /// Initializes a new <see cref="PublicationFileService"/> instance and captures the dependencies or initial state required by its publication file workflow.
     /// </summary>
+    /// <param name="pictures">Picture document service dependency used by the publication file workflow to provide the corresponding application capability.</param>
+    /// <param name="data">Publication data service dependency used by the publication file workflow to provide the corresponding application capability.</param>
+    /// <param name="spreadsheets">Spreadsheet document service dependency used by the publication file workflow to provide the corresponding application capability.</param>
+    /// <param name="components">Publication component service dependency used by the publication file workflow to provide the corresponding application capability.</param>
+    /// <param name="mediaTimeline">Media timeline edit service dependency used by the publication file workflow to provide the corresponding application capability.</param>
+    /// <param name="panels">Panel document service dependency used by the publication file workflow to provide the corresponding application capability.</param>
+    /// <param name="wordArtGeometry">Word art geometry value supplied to the publication file operation and used when producing its result.</param>
+    /// <param name="elementTraversal">Element traversal value supplied to the publication file operation and used when producing its result.</param>
+    /// <param name="mediaData">Media data value supplied to the publication file operation and used when producing its result.</param>
+    /// <param name="richTextFactory">Rich text document factory dependency used by the publication file workflow to provide the corresponding application capability.</param>
+    /// <param name="runtimePatterns">Publisher runtime pattern service dependency used by the publication file workflow to provide the corresponding application capability.</param>
+    /// <param name="documentFactory">Publisher document factory dependency used by the publication file workflow to provide the corresponding application capability.</param>
+    /// <param name="markup">Publication markup service dependency used by the publication file workflow to provide the corresponding application capability.</param>
+    /// <param name="storyPageLayouts">Story page layout service dependency used by the publication file workflow to provide the corresponding application capability.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     public PublicationFileService(
         PictureDocumentService pictures,
         PublicationDataService data,
@@ -80,8 +140,10 @@ public sealed partial class PublicationFileService
     }
 
     /// <summary>
-    /// Runs the serialize operation.
+    /// Performs serialize as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication file operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string Serialize(PublicationDocument document)
     {
         try
@@ -104,8 +166,10 @@ public sealed partial class PublicationFileService
     }
 
     /// <summary>
-    /// Determines whether embedded streaming settings.
+    /// Determines whether embedded streaming settings as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="json">Json value supplied to the publication file operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool HasEmbeddedStreamingSettings(string json)
     {
         try
@@ -133,8 +197,9 @@ public sealed partial class PublicationFileService
     }
 
     /// <summary>
-    /// Normalizes streaming settings.
+    /// Normalizes streaming settings as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication file operation and used when producing its result.</param>
     public void NormalizeStreamingSettings(PublicationDocument document) {
         try
         {
@@ -149,8 +214,10 @@ public sealed partial class PublicationFileService
     }
 
     /// <summary>
-    /// Runs the clone element operation.
+    /// Performs clone element as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="element">Element value supplied to the publication file operation and used when producing its result.</param>
+    /// <returns>The publication element produced by the operation.</returns>
     public PublicationElement CloneElement(PublicationElement element) {
         try
         {
@@ -167,8 +234,10 @@ public sealed partial class PublicationFileService
 
 
     /// <summary>
-    /// Runs the serialize element operation.
+    /// Performs serialize element as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="element">Element value supplied to the publication file operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string SerializeElement(PublicationElement element) {
         try
         {
@@ -183,8 +252,10 @@ public sealed partial class PublicationFileService
     }
 
     /// <summary>
-    /// Runs the deserialize element operation.
+    /// Performs deserialize element as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="json">Json value supplied to the publication file operation and used when producing its result.</param>
+    /// <returns>The publication element produced by the operation.</returns>
     public PublicationElement DeserializeElement(string json) {
         try
         {
@@ -200,8 +271,10 @@ public sealed partial class PublicationFileService
     }
 
     /// <summary>
-    /// Runs the clone page operation.
+    /// Performs clone page as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="publicationPage">Publication page value supplied to the publication file operation and used when producing its result.</param>
+    /// <returns>The publication page produced by the operation.</returns>
     public PublicationPage ClonePage(PublicationPage publicationPage) {
         try
         {
@@ -217,8 +290,10 @@ public sealed partial class PublicationFileService
     }
 
     /// <summary>
-    /// Runs the deserialize operation.
+    /// Performs deserialize as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="json">Json value supplied to the publication file operation and used when producing its result.</param>
+    /// <returns>The publication document produced by the operation.</returns>
     public PublicationDocument Deserialize(string json)
     {
         try
@@ -615,8 +690,10 @@ public sealed partial class PublicationFileService
     }
 
     /// <summary>
-    /// Runs the looks like HTML operation.
+    /// Performs looks like HTML as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="content">Content value supplied to the publication file operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool LooksLikeHtml(byte[] content)
     {
         try
@@ -638,8 +715,10 @@ public sealed partial class PublicationFileService
     }
 
     /// <summary>
-    /// Runs the sanitize spreadsheet preview operation.
+    /// Performs sanitize spreadsheet preview as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="html">Html value supplied to the publication file operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string SanitizeSpreadsheetPreview(string? html)
     {
         try
@@ -662,8 +741,10 @@ public sealed partial class PublicationFileService
     }
 
     /// <summary>
-    /// Runs the safe file name operation.
+    /// Performs safe file name as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the publication file operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string SafeFileName(string value)
     {
         try
@@ -679,8 +760,10 @@ public sealed partial class PublicationFileService
     }
 
     /// <summary>
-    /// Runs the extract HTML body operation.
+    /// Performs extract HTML body as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="htmlBytes">Html bytes value supplied to the publication file operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string ExtractHtmlBody(byte[] htmlBytes)
     {
         try
@@ -701,8 +784,10 @@ public sealed partial class PublicationFileService
     }
 
     /// <summary>
-    /// Runs the extract open XML page layout operation.
+    /// Performs extract open XML page layout as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="openXml">Open xml value supplied to the publication file operation and used when producing its result.</param>
+    /// <returns>The story page layout produced by the operation.</returns>
     public StoryPageLayout ExtractOpenXmlPageLayout(byte[] openXml)
     {
         try
@@ -789,8 +874,12 @@ public sealed partial class PublicationFileService
     }
 
     /// <summary>
-    /// Reads open XML twips.
+    /// Reads open XML twips as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="element">Element value supplied to the publication file operation and used when producing its result.</param>
+    /// <param name="attributeName">Attribute name value supplied to the publication file operation and used when producing its result.</param>
+    /// <param name="fallbackMillimeters">Fallback millimeters value supplied to the publication file operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double ReadOpenXmlTwips(XElement? element, XName attributeName, double fallbackMillimeters)
     {
         try
@@ -810,8 +899,10 @@ public sealed partial class PublicationFileService
     }
 
     /// <summary>
-    /// Runs the extract open XML document background operation.
+    /// Performs extract open XML document background as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="openXml">Open xml value supplied to the publication file operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string ExtractOpenXmlDocumentBackground(byte[] openXml)
     {
         try
@@ -867,8 +958,10 @@ public sealed partial class PublicationFileService
 
 
     /// <summary>
-    /// Determines whether open XML document.
+    /// Determines whether open XML document as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="content">Content value supplied to the publication file operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool IsOpenXmlDocument(byte[] content)
     {
         try
@@ -895,8 +988,11 @@ public sealed partial class PublicationFileService
     }
 
     /// <summary>
-    /// Creates open XML preview HTML.
+    /// Creates open XML preview HTML as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="openXml">Open xml value supplied to the publication file operation and used when producing its result.</param>
+    /// <param name="fallbackTitle">Fallback title value supplied to the publication file operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string CreateOpenXmlPreviewHtml(byte[] openXml, string? fallbackTitle = null)
     {
         try
@@ -959,8 +1055,11 @@ public sealed partial class PublicationFileService
     }
 
     /// <summary>
-    /// Runs the render open XML table operation.
+    /// Performs render open XML table as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="table">Table value supplied to the publication file operation and used when producing its result.</param>
+    /// <param name="word">Word value supplied to the publication file operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string RenderOpenXmlTable(XElement table, XNamespace word)
     {
         try
@@ -991,8 +1090,11 @@ public sealed partial class PublicationFileService
     }
 
     /// <summary>
-    /// Runs the render open XML paragraph operation.
+    /// Performs render open XML paragraph as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="paragraph">Paragraph value supplied to the publication file operation and used when producing its result.</param>
+    /// <param name="word">Word value supplied to the publication file operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string RenderOpenXmlParagraph(XElement paragraph, XNamespace word)
     {
         try
@@ -1038,8 +1140,11 @@ public sealed partial class PublicationFileService
     }
 
     /// <summary>
-    /// Runs the render open XML run operation.
+    /// Performs render open XML run as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="run">Run value supplied to the publication file operation and used when producing its result.</param>
+    /// <param name="word">Word value supplied to the publication file operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string RenderOpenXmlRun(XElement run, XNamespace word)
     {
         try
@@ -1099,8 +1204,10 @@ public sealed partial class PublicationFileService
     }
 
     /// <summary>
-    /// Normalizes open XML color.
+    /// Normalizes open XML color as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the publication file operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string? NormalizeOpenXmlColor(string? value)
     {
         try
@@ -1119,8 +1226,10 @@ public sealed partial class PublicationFileService
     }
 
     /// <summary>
-    /// Opens XML highlight color.
+    /// Opens XML highlight color as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the publication file operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string? OpenXmlHighlightColor(string? value) {
         try
         {
@@ -1142,8 +1251,10 @@ public sealed partial class PublicationFileService
     }
 
     /// <summary>
-    /// Determines whether visible CSS background.
+    /// Determines whether visible CSS background as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the publication file operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool IsVisibleCssBackground(string? value) {
         try
         {
@@ -1160,8 +1271,10 @@ public sealed partial class PublicationFileService
     }
 
     /// <summary>
-    /// Normalizes CSS background.
+    /// Normalizes CSS background as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the publication file operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string NormalizeCssBackground(string? value)
     {
         try
@@ -1177,8 +1290,10 @@ public sealed partial class PublicationFileService
     }
 
     /// <summary>
-    /// Runs the sanitize preview HTML operation.
+    /// Performs sanitize preview HTML as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="html">Html value supplied to the publication file operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string SanitizePreviewHtml(string html)
     {
         try
@@ -1194,8 +1309,9 @@ public sealed partial class PublicationFileService
     }
 
     /// <summary>
-    /// Normalizes streaming.
+    /// Normalizes streaming as part of the publication file service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication file operation and used when producing its result.</param>
     private void NormalizeStreaming(PublicationDocument document)
     {
         try

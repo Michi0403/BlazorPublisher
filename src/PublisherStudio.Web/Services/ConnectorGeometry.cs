@@ -5,13 +5,19 @@ using System.Globalization;
 namespace PublisherStudio.Services;
 
 /// <summary>
-/// Represents a connector geometry.
+/// Represents a connector geometry application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
 {
     /// <summary>
-    /// Attempts to resolve.
+    /// Attempts to resolve for <see cref="ConnectorGeometry"/>, keeping the operation consistent with the state and invariants of the surrounding connector geometry workflow.
     /// </summary>
+    /// <param name="page">Page value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <param name="connector">Connector value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <param name="source">Source value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <param name="target">Target value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool TryResolve(PublicationPage page, ConnectorElement connector, out PublicationPoint source, out PublicationPoint target)
     {
     try
@@ -37,8 +43,12 @@ public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
 }
 
     /// <summary>
-    /// Attempts to resolve endpoint.
+    /// Attempts to resolve endpoint for <see cref="ConnectorGeometry"/>, keeping the operation consistent with the state and invariants of the surrounding connector geometry workflow.
     /// </summary>
+    /// <param name="page">Page value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <param name="endpoint">Endpoint value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <param name="point">Point value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool TryResolveEndpoint(PublicationPage page, ConnectorEndpoint endpoint, out PublicationPoint point)
     {
     try
@@ -86,8 +96,11 @@ public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
 }
 
     /// <summary>
-    /// Runs the resolve operation.
+    /// Performs resolve for <see cref="ConnectorGeometry"/>, keeping the operation consistent with the state and invariants of the surrounding connector geometry workflow.
     /// </summary>
+    /// <param name="element">Element value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <param name="anchor">Anchor value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <returns>The publication point produced by the operation.</returns>
     public PublicationPoint Resolve(PublicationElement element, ConnectorAnchor anchor)
     {
     try
@@ -118,8 +131,12 @@ public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
 }
 
     /// <summary>
-    /// Runs the resolve operation.
+    /// Performs resolve for <see cref="ConnectorGeometry"/>, keeping the operation consistent with the state and invariants of the surrounding connector geometry workflow.
     /// </summary>
+    /// <param name="element">Element value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <param name="xPercent">X percent value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <param name="yPercent">Y percent value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <returns>The publication point produced by the operation.</returns>
     public PublicationPoint Resolve(PublicationElement element, double xPercent, double yPercent)
     {
     try
@@ -149,8 +166,12 @@ public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
 }
 
     /// <summary>
-    /// Runs the path operation.
+    /// Performs path for <see cref="ConnectorGeometry"/>, keeping the operation consistent with the state and invariants of the surrounding connector geometry workflow.
     /// </summary>
+    /// <param name="connector">Connector value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <param name="source">Source value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <param name="target">Target value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string Path(ConnectorElement connector, PublicationPoint source, PublicationPoint target)
     {
     try
@@ -174,8 +195,12 @@ public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
 }
 
     /// <summary>
-    /// Runs the control points operation.
+    /// Performs control points for <see cref="ConnectorGeometry"/>, keeping the operation consistent with the state and invariants of the surrounding connector geometry workflow.
     /// </summary>
+    /// <param name="connector">Connector value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <param name="source">Source value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <param name="target">Target value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <returns>The publication point first publication point second produced by the operation.</returns>
     public (PublicationPoint First, PublicationPoint Second) ControlPoints(
         ConnectorElement connector,
         PublicationPoint source,
@@ -193,8 +218,11 @@ public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
     }
 
     /// <summary>
-    /// Runs the elbow path operation.
+    /// Performs elbow path for <see cref="ConnectorGeometry"/>, keeping the operation consistent with the state and invariants of the surrounding connector geometry workflow.
     /// </summary>
+    /// <param name="source">Source value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <param name="target">Target value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ElbowPath(PublicationPoint source, PublicationPoint target)
     {
     try
@@ -222,8 +250,12 @@ public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
 }
 
     /// <summary>
-    /// Runs the curved path operation.
+    /// Performs curved path for <see cref="ConnectorGeometry"/>, keeping the operation consistent with the state and invariants of the surrounding connector geometry workflow.
     /// </summary>
+    /// <param name="connector">Connector value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <param name="source">Source value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <param name="target">Target value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string CurvedPath(ConnectorElement connector, PublicationPoint source, PublicationPoint target)
     {
     try
@@ -243,8 +275,12 @@ public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
 }
 
     /// <summary>
-    /// Runs the control point operation.
+    /// Performs control point for <see cref="ConnectorGeometry"/>, keeping the operation consistent with the state and invariants of the surrounding connector geometry workflow.
     /// </summary>
+    /// <param name="point">Point value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <param name="anchor">Anchor value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <param name="distance">Distance value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <returns>The publication point produced by the operation.</returns>
     private PublicationPoint ControlPoint(PublicationPoint point, ConnectorAnchor anchor, double distance) {
     try
     {
@@ -268,8 +304,10 @@ public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
 }
 
     /// <summary>
-    /// Runs the dash array operation.
+    /// Performs dash array for <see cref="ConnectorGeometry"/>, keeping the operation consistent with the state and invariants of the surrounding connector geometry workflow.
     /// </summary>
+    /// <param name="connector">Connector value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string DashArray(ConnectorElement connector) {
     try
     {
@@ -291,8 +329,10 @@ public sealed class ConnectorGeometry(ILogger<ConnectorGeometry> logger)
 }
 
     /// <summary>
-    /// Runs the inv operation.
+    /// Performs inv for <see cref="ConnectorGeometry"/>, keeping the operation consistent with the state and invariants of the surrounding connector geometry workflow.
     /// </summary>
+    /// <param name="value">Value value supplied to the connector geometry operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Inv(double value) {
     try
     {

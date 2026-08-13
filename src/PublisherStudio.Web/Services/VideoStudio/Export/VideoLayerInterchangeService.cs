@@ -5,21 +5,27 @@ using PublisherStudio.Services.OpenScad;
 namespace PublisherStudio.Services.VideoStudio.Export;
 
 /// <summary>
-/// Defines the video layer interchange service contract.
+/// Defines the contract for video layer interchange behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
 public interface IVideoLayerInterchangeService
 {
     /// <summary>
-    /// Creates default blob layer.
+    /// Creates default blob layer as part of the video layer interchange service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="name">Name value supplied to the video layer interchange operation and used when producing its result.</param>
+    /// <returns>The video effect layer produced by the operation.</returns>
     VideoEffectLayer CreateDefaultBlobLayer(string? name = null);
     /// <summary>
-    /// Creates open scad.
+    /// Creates open OpenSCAD as part of the video layer interchange service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="layer">Layer value supplied to the video layer interchange operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     string CreateOpenScad(VideoEffectLayer layer);
     /// <summary>
-    /// Creates mainframe insert.
+    /// Creates mainframe insert as part of the video layer interchange service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="layer">Layer value supplied to the video layer interchange operation and used when producing its result.</param>
+    /// <returns>The video layer mainframe insert request produced by the operation.</returns>
     VideoLayerMainframeInsertRequest CreateMainframeInsert(VideoEffectLayer layer);
 }
 
@@ -28,14 +34,19 @@ public interface IVideoLayerInterchangeService
 /// Geometry, OpenSCAD generation and browser-runtime templating are separate DI services so Mainframe,
 /// controllers, plugins and future visual builders can reuse them without static coupling.
 /// </summary>
+/// <param name="geometry">Polygon geometry service dependency used by the video layer interchange workflow to provide the corresponding application capability.</param>
+/// <param name="openScad">Open openscad video layer adapter dependency used by the video layer interchange workflow to provide the corresponding application capability.</param>
+/// <param name="browserRuntime">Browser runtime template service dependency used by the video layer interchange workflow to provide the corresponding application capability.</param>
 public sealed class VideoLayerInterchangeService(
     IPolygonGeometryService geometry,
     IOpenScadVideoLayerAdapter openScad,
     IBrowserRuntimeTemplateService browserRuntime) : IVideoLayerInterchangeService
 {
     /// <summary>
-    /// Creates default blob layer.
+    /// Creates default blob layer as part of the video layer interchange service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="name">Name value supplied to the video layer interchange operation and used when producing its result.</param>
+    /// <returns>The video effect layer produced by the operation.</returns>
     public VideoEffectLayer CreateDefaultBlobLayer(string? name = null)
     {
     try
@@ -83,8 +94,10 @@ public sealed class VideoLayerInterchangeService(
 }
 
     /// <summary>
-    /// Creates open scad.
+    /// Creates open OpenSCAD as part of the video layer interchange service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="layer">Layer value supplied to the video layer interchange operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string CreateOpenScad(VideoEffectLayer layer) {
     try
     {
@@ -98,8 +111,10 @@ public sealed class VideoLayerInterchangeService(
 }
 
     /// <summary>
-    /// Creates mainframe insert.
+    /// Creates mainframe insert as part of the video layer interchange service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="layer">Layer value supplied to the video layer interchange operation and used when producing its result.</param>
+    /// <returns>The video layer mainframe insert request produced by the operation.</returns>
     public VideoLayerMainframeInsertRequest CreateMainframeInsert(VideoEffectLayer layer)
     {
     try

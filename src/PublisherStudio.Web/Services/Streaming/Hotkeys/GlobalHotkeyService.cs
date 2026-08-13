@@ -3,41 +3,81 @@ using System.Collections.Concurrent;
 namespace PublisherStudio.Services.Streaming.Hotkeys;
 
 /// <summary>
-/// Provides global hotkey service operations.
+/// Coordinates global hotkey behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
+/// <param name="nativeService">Windows hotkey native service dependency used by the global hotkey workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class GlobalHotkeyService(
     IWindowsHotkeyNativeService nativeService,
     ILogger<GlobalHotkeyService> logger) : IDisposable
 {
+    /// <summary>
+    /// Defines the wm hotkey constant used by <see cref="GlobalHotkeyService"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const uint WmHotkey = 0x0312;
+    /// <summary>
+    /// Defines the wm command constant used by <see cref="GlobalHotkeyService"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const uint WmCommand = 0x8000 + 47;
+    /// <summary>
+    /// Defines the wm quit constant used by <see cref="GlobalHotkeyService"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const uint WmQuit = 0x0012;
+    /// <summary>
+    /// Defines the mod alt constant used by <see cref="GlobalHotkeyService"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const uint ModAlt = 0x0001;
+    /// <summary>
+    /// Defines the mod control constant used by <see cref="GlobalHotkeyService"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const uint ModControl = 0x0002;
+    /// <summary>
+    /// Defines the mod shift constant used by <see cref="GlobalHotkeyService"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const uint ModShift = 0x0004;
+    /// <summary>
+    /// Defines the mod win constant used by <see cref="GlobalHotkeyService"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const uint ModWin = 0x0008;
+    /// <summary>
+    /// Defines the mod no repeat constant used by <see cref="GlobalHotkeyService"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const uint ModNoRepeat = 0x4000;
 
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal commands state used by <see cref="GlobalHotkeyService"/> while executing its surrounding workflow.
     /// </summary>
     private readonly ConcurrentQueue<Action> _commands = new();
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory events collection maintained internally by <see cref="GlobalHotkeyService"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<Guid, ConcurrentQueue<MediaHostHotkeyEvent>> _events = new();
+    /// <summary>
+    /// Stores the in-memory registered collection maintained internally by <see cref="GlobalHotkeyService"/> for its current workflow state.
+    /// </summary>
     private readonly Dictionary<int, RegisteredHotkey> _registered = [];
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal started state used by <see cref="GlobalHotkeyService"/> while executing its surrounding workflow.
     /// </summary>
     private readonly ManualResetEventSlim _started = new(false);
+    /// <summary>
+    /// Stores the internal thread state used by <see cref="GlobalHotkeyService"/> while executing its surrounding workflow.
+    /// </summary>
     private Thread? _thread;
+    /// <summary>
+    /// Stores the internal thread identifier state used by <see cref="GlobalHotkeyService"/> while executing its surrounding workflow.
+    /// </summary>
     private uint _threadId;
+    /// <summary>
+    /// Stores the internal next native identifier state used by <see cref="GlobalHotkeyService"/> while executing its surrounding workflow.
+    /// </summary>
     private int _nextNativeId = 100;
 
     /// <summary>
-    /// Starts async.
+    /// Performs start as part of the global hotkey service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public Task StartAsync(CancellationToken cancellationToken)
     {
     try
@@ -60,8 +100,10 @@ public sealed class GlobalHotkeyService(
 }
 
     /// <summary>
-    /// Stops async.
+    /// Performs stop as part of the global hotkey service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public Task StopAsync(CancellationToken cancellationToken)
     {
     try
@@ -83,8 +125,10 @@ public sealed class GlobalHotkeyService(
 }
 
     /// <summary>
-    /// Runs the configure operation.
+    /// Performs configure as part of the global hotkey service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <param name="hotkeys">Media hotkey dependency used by the global hotkey workflow to provide the corresponding application capability.</param>
     public void Configure(Guid sessionId, IEnumerable<MediaHotkey> hotkeys)
     {
     try
@@ -115,8 +159,9 @@ public sealed class GlobalHotkeyService(
 }
 
     /// <summary>
-    /// Runs the remove operation.
+    /// Performs remove as part of the global hotkey service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
     public void Remove(Guid sessionId)
     {
     try
@@ -137,8 +182,10 @@ public sealed class GlobalHotkeyService(
 }
 
     /// <summary>
-    /// Runs the drain operation.
+    /// Performs drain as part of the global hotkey service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<MediaHostHotkeyEvent> Drain(Guid sessionId)
     {
     try
@@ -160,8 +207,9 @@ public sealed class GlobalHotkeyService(
 }
 
     /// <summary>
-    /// Runs the enqueue operation.
+    /// Performs enqueue as part of the global hotkey service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="command">Command value supplied to the global hotkey operation and used when producing its result.</param>
     private void Enqueue(Action command)
     {
     try
@@ -181,7 +229,7 @@ public sealed class GlobalHotkeyService(
 }
 
     /// <summary>
-    /// Runs the message loop operation.
+    /// Performs message loop as part of the global hotkey service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     private void MessageLoop()
     {
@@ -222,8 +270,9 @@ public sealed class GlobalHotkeyService(
 }
 
     /// <summary>
-    /// Removes core.
+    /// Removes core as part of the global hotkey service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
     private void RemoveCore(Guid sessionId)
     {
     try
@@ -246,8 +295,12 @@ public sealed class GlobalHotkeyService(
 }
 
     /// <summary>
-    /// Attempts to parse gesture.
+    /// Attempts to parse gesture as part of the global hotkey service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="gesture">Gesture value supplied to the global hotkey operation and used when producing its result.</param>
+    /// <param name="modifiers">Modifiers value supplied to the global hotkey operation and used when producing its result.</param>
+    /// <param name="virtualKey">Virtual key value supplied to the global hotkey operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool TryParseGesture(string gesture, out uint modifiers, out uint virtualKey)
     {
     try
@@ -304,7 +357,7 @@ public sealed class GlobalHotkeyService(
 }
 
     /// <summary>
-    /// Runs the dispose operation.
+    /// Releases resources owned by <see cref="GlobalHotkeyService"/> and leaves the global hotkey workflow in a safely disposed state.
     /// </summary>
     public void Dispose()
     {
@@ -325,8 +378,11 @@ public sealed class GlobalHotkeyService(
 }
 
     /// <summary>
-    /// Represents a registered hotkey.
+    /// Represents a registered hotkey helper type nested within <see cref="GlobalHotkeyService"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
+    /// <param name="SessionId">Identifier of the session to use for this operation.</param>
+    /// <param name="Command">Command value supplied to the global hotkey operation and used when producing its result.</param>
+    /// <param name="TargetId">Identifier of the target to use for this operation.</param>
     private sealed record RegisteredHotkey(Guid SessionId, string Command, Guid? TargetId);
 
 }

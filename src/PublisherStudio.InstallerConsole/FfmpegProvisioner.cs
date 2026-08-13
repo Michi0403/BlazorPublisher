@@ -11,18 +11,19 @@ using Microsoft.Extensions.Logging;
 
 namespace PublisherStudio.InstallerConsole;
 /// <summary>
-/// Represents a FFmpeg provisioner.
+/// Represents a FFmpeg provisioner application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 internal static class FfmpegProvisioner
 {
     /// <summary>
-    /// Runs the from seconds operation.
+    /// Stores the shared read-only progress heartbeat value used by <see cref="FfmpegProvisioner"/> across instances of the containing type.
     /// </summary>
     private static readonly TimeSpan ProgressHeartbeat = TimeSpan.FromSeconds(30);
 
     /// <summary>
-    /// Finds executable.
+    /// Finds executable for <see cref="FfmpegProvisioner"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg provisioner workflow.
     /// </summary>
+    /// <returns>The string produced by the operation.</returns>
     public static string? FindExecutable()
     {
         var executable = OperatingSystem.IsWindows() ? "ffmpeg.exe" : "ffmpeg";
@@ -40,8 +41,9 @@ internal static class FfmpegProvisioner
     }
 
     /// <summary>
-    /// Runs the known install locations operation.
+    /// Performs known install locations for <see cref="FfmpegProvisioner"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg provisioner workflow.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     private static IEnumerable<string> KnownInstallLocations()
     {
         if (OperatingSystem.IsWindows())
@@ -70,8 +72,10 @@ internal static class FfmpegProvisioner
     }
 
     /// <summary>
-    /// Finds win get package executables.
+    /// Finds win get package executables for <see cref="FfmpegProvisioner"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg provisioner workflow.
     /// </summary>
+    /// <param name="localAppData">Local app data value supplied to the FFmpeg provisioner operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private static IEnumerable<string> FindWinGetPackageExecutables(string localAppData)
     {
         var packagesRoot = Path.Combine(localAppData, "Microsoft", "WinGet", "Packages");
@@ -108,8 +112,11 @@ internal static class FfmpegProvisioner
     }
 
     /// <summary>
-    /// Ensures installed async.
+    /// Ensures installed for <see cref="FfmpegProvisioner"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg provisioner workflow.
     /// </summary>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public static async Task<bool> EnsureInstalledAsync(ILogger logger, CancellationToken cancellationToken = default)
     {
         var existing = FindExecutable();
@@ -182,8 +189,10 @@ ProvisioningFinished:
     }
 
     /// <summary>
-    /// Runs the report status operation.
+    /// Performs report status for <see cref="FfmpegProvisioner"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg provisioner workflow.
     /// </summary>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public static bool ReportStatus(ILogger logger)
     {
         var executable = FindExecutable();
@@ -197,8 +206,9 @@ ProvisioningFinished:
     }
 
     /// <summary>
-    /// Runs the installation commands operation.
+    /// Performs installation commands for <see cref="FfmpegProvisioner"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg provisioner workflow.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     private static IEnumerable<InstallCommand> InstallationCommands()
     {
         if (OperatingSystem.IsWindows())
@@ -262,8 +272,10 @@ ProvisioningFinished:
     }
 
     /// <summary>
-    /// Runs the command exists operation.
+    /// Performs command exists for <see cref="FfmpegProvisioner"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg provisioner workflow.
     /// </summary>
+    /// <param name="command">Command value supplied to the FFmpeg provisioner operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private static bool CommandExists(string command)
     {
         if (Path.IsPathRooted(command)) return File.Exists(command);
@@ -278,8 +290,11 @@ ProvisioningFinished:
     }
 
     /// <summary>
-    /// Determines whether runnable async.
+    /// Determines whether runnable for <see cref="FfmpegProvisioner"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg provisioner workflow.
     /// </summary>
+    /// <param name="executable">Executable value supplied to the FFmpeg provisioner operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private static async Task<bool> IsRunnableAsync(string executable, CancellationToken cancellationToken)
     {
         try
@@ -310,8 +325,12 @@ ProvisioningFinished:
     }
 
     /// <summary>
-    /// Runs the run async operation.
+    /// Performs run for <see cref="FfmpegProvisioner"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg provisioner workflow.
     /// </summary>
+    /// <param name="command">Install command dependency used by the FFmpeg provisioner workflow to provide the corresponding application capability.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The process run result produced by the operation.</returns>
     private static async Task<ProcessRunResult> RunAsync(InstallCommand command, ILogger logger, CancellationToken cancellationToken)
     {
         try
@@ -390,8 +409,13 @@ ProvisioningFinished:
     }
 
     /// <summary>
-    /// Runs the pump output async operation.
+    /// Performs pump output for <see cref="FfmpegProvisioner"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg provisioner workflow.
     /// </summary>
+    /// <param name="reader">Reader value supplied to the FFmpeg provisioner operation and used when producing its result.</param>
+    /// <param name="writeLine">Write line value supplied to the FFmpeg provisioner operation and used when producing its result.</param>
+    /// <param name="markActivity">Mark activity value supplied to the FFmpeg provisioner operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private static async Task PumpOutputAsync(
         StreamReader reader,
         Action<string> writeLine,
@@ -430,8 +454,10 @@ ProvisioningFinished:
     }
 
     /// <summary>
-    /// Runs the flush pending operation.
+    /// Performs flush pending for <see cref="FfmpegProvisioner"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg provisioner workflow.
     /// </summary>
+    /// <param name="pending">Pending value supplied to the FFmpeg provisioner operation and used when producing its result.</param>
+    /// <param name="writeLine">Write line value supplied to the FFmpeg provisioner operation and used when producing its result.</param>
     private static void FlushPending(StringBuilder pending, Action<string> writeLine)
     {
         if (pending.Length == 0) return;
@@ -441,8 +467,13 @@ ProvisioningFinished:
     }
 
     /// <summary>
-    /// Represents an install command.
+    /// Represents an install command helper type nested within <see cref="FfmpegProvisioner"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
+    /// <param name="FileName">File name value supplied to the FFmpeg provisioner operation and used when producing its result.</param>
+    /// <param name="Arguments">Arguments value supplied to the FFmpeg provisioner operation and used when producing its result.</param>
+    /// <param name="DisplayName">Display name value supplied to the FFmpeg provisioner operation and used when producing its result.</param>
+    /// <param name="Timeout">Timeout value supplied to the FFmpeg provisioner operation and used when producing its result.</param>
+    /// <param name="MaxAttempts">Max attempts value supplied to the FFmpeg provisioner operation and used when producing its result.</param>
     private sealed record InstallCommand(
         string FileName,
         string[] Arguments,
@@ -451,7 +482,9 @@ ProvisioningFinished:
         int MaxAttempts);
 
     /// <summary>
-    /// Represents a process run result.
+    /// Represents the outcome of process run, carrying the data and status produced by the corresponding application operation.
     /// </summary>
+    /// <param name="ExitCode">Exit code value supplied to the FFmpeg provisioner operation and used when producing its result.</param>
+    /// <param name="TimedOut">Value indicating whether timed out should apply to this operation.</param>
     private sealed record ProcessRunResult(int ExitCode, bool TimedOut);
 }

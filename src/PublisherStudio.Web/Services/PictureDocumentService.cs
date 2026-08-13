@@ -5,7 +5,7 @@ using PublisherStudio.BusinessObjects;
 namespace PublisherStudio.Services;
 
 /// <summary>
-/// Provides picture document service operations.
+/// Coordinates picture document behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
 public sealed class PictureDocumentService
 {
@@ -21,8 +21,10 @@ public sealed class PictureDocumentService
     };
 
     /// <summary>
-    /// Runs the serialize operation.
+    /// Performs serialize as part of the picture document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the picture document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string Serialize(PictureDocument document) {
     try
     {
@@ -36,8 +38,10 @@ public sealed class PictureDocumentService
 }
 
     /// <summary>
-    /// Runs the deserialize operation.
+    /// Performs deserialize as part of the picture document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="json">Json value supplied to the picture document operation and used when producing its result.</param>
+    /// <returns>The picture document produced by the operation.</returns>
     public PictureDocument Deserialize(string json)
     {
     try
@@ -56,8 +60,10 @@ public sealed class PictureDocumentService
 }
 
     /// <summary>
-    /// Runs the clone operation.
+    /// Performs clone as part of the picture document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the picture document operation and used when producing its result.</param>
+    /// <returns>The picture document produced by the operation.</returns>
     public PictureDocument Clone(PictureDocument document) {
     try
     {
@@ -71,8 +77,16 @@ public sealed class PictureDocumentService
 }
 
     /// <summary>
-    /// Adds raster layer.
+    /// Adds raster layer as part of the picture document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the picture document operation and used when producing its result.</param>
+    /// <param name="dataUrl">Data url value supplied to the picture document operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the picture document operation and used when producing its result.</param>
+    /// <param name="naturalWidth">Natural width value supplied to the picture document operation and used when producing its result.</param>
+    /// <param name="naturalHeight">Natural height value supplied to the picture document operation and used when producing its result.</param>
+    /// <param name="centerX">Center x value supplied to the picture document operation and used when producing its result.</param>
+    /// <param name="centerY">Center y value supplied to the picture document operation and used when producing its result.</param>
+    /// <returns>The raster picture layer produced by the operation.</returns>
     public RasterPictureLayer AddRasterLayer(
         PictureDocument document,
         string dataUrl,
@@ -113,8 +127,9 @@ public sealed class PictureDocumentService
 }
 
     /// <summary>
-    /// Runs the normalize operation.
+    /// Performs normalize as part of the picture document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the picture document operation and used when producing its result.</param>
     public void Normalize(PictureDocument document)
     {
     try
@@ -216,8 +231,10 @@ public sealed class PictureDocumentService
 }
 
     /// <summary>
-    /// Normalizes SVG markup.
+    /// Normalizes SVG markup as part of the picture document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="markup">Markup value supplied to the picture document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeSvgMarkup(string? markup)
     {
     try
@@ -240,8 +257,13 @@ public sealed class PictureDocumentService
 }
 
     /// <summary>
-    /// Runs the fit size operation.
+    /// Performs fit size as part of the picture document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="width">Width value supplied to the picture document operation and used when producing its result.</param>
+    /// <param name="height">Height value supplied to the picture document operation and used when producing its result.</param>
+    /// <param name="maxWidth">Max width value supplied to the picture document operation and used when producing its result.</param>
+    /// <param name="maxHeight">Max height value supplied to the picture document operation and used when producing its result.</param>
+    /// <returns>The double width double height produced by the operation.</returns>
     private (double Width, double Height) FitSize(double width, double height, double maxWidth, double maxHeight)
     {
         width = Math.Max(1, width);
@@ -252,8 +274,11 @@ public sealed class PictureDocumentService
     }
 
     /// <summary>
-    /// Runs the next layer name operation.
+    /// Performs next layer name as part of the picture document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the picture document operation and used when producing its result.</param>
+    /// <param name="requested">Requested value supplied to the picture document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NextLayerName(PictureDocument document, string requested)
     {
     try
@@ -278,8 +303,10 @@ public sealed class PictureDocumentService
 }
 
     /// <summary>
-    /// Normalizes angle.
+    /// Normalizes angle as part of the picture document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the picture document operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double NormalizeAngle(double value) {
     try
     {

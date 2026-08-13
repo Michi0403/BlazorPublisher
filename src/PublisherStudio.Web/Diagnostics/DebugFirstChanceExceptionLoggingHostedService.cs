@@ -10,22 +10,36 @@ namespace PublisherStudio.Diagnostics;
 /// <summary>
 /// Adds bounded, contextual application logging for first-chance exceptions during development.
 /// </summary>
+/// <param name="environment">Host environment dependency used by the debug first chance exception logging workflow to provide the corresponding application capability.</param>
+/// <param name="configuredOptions">Debug exception diagnostics options dependency used by the debug first chance exception logging workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class DebugFirstChanceExceptionLoggingHostedService(
     IHostEnvironment environment,
     IOptions<DebugExceptionDiagnosticsOptions> configuredOptions,
     ILogger<DebugFirstChanceExceptionLoggingHostedService> logger) : IHostedService, IDisposable
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory occurrences collection maintained internally by <see cref="DebugFirstChanceExceptionLoggingHostedService"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<string, ExceptionOccurrence> occurrences = new(StringComparer.Ordinal);
+    /// <summary>
+    /// Stores the internal options state used by <see cref="DebugFirstChanceExceptionLoggingHostedService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly DebugExceptionDiagnosticsOptions options = configuredOptions.Value;
+    /// <summary>
+    /// Stores the internal handling exception state used by <see cref="DebugFirstChanceExceptionLoggingHostedService"/> while executing its surrounding workflow.
+    /// </summary>
     private int handlingException;
+    /// <summary>
+    /// Stores the internal subscribed state used by <see cref="DebugFirstChanceExceptionLoggingHostedService"/> while executing its surrounding workflow.
+    /// </summary>
     private bool subscribed;
 
     /// <summary>
-    /// Starts development exception observation when configured.
+    /// Performs start as part of the debug first chance exception logging service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="_">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public Task StartAsync(CancellationToken _)
     {
         if (!environment.IsDevelopment() || !options.Enabled)
@@ -45,8 +59,10 @@ public sealed class DebugFirstChanceExceptionLoggingHostedService(
     }
 
     /// <summary>
-    /// Stops development exception observation and records bounded repetition summaries.
+    /// Performs stop as part of the debug first chance exception logging service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="_">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public Task StopAsync(CancellationToken _)
     {
         Unsubscribe();
@@ -63,8 +79,10 @@ public sealed class DebugFirstChanceExceptionLoggingHostedService(
     }
 
     /// <summary>
-    /// Handles first chance exception.
+    /// Handles first chance exception as part of the debug first chance exception logging service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="_">_ value supplied to the debug first chance exception logging operation and used when producing its result.</param>
+    /// <param name="eventArgs">Event args value supplied to the debug first chance exception logging operation and used when producing its result.</param>
     private void HandleFirstChanceException(object? _, FirstChanceExceptionEventArgs eventArgs)
     {
         if (Interlocked.CompareExchange(ref handlingException, 1, 0) != 0)
@@ -116,8 +134,11 @@ public sealed class DebugFirstChanceExceptionLoggingHostedService(
     }
 
     /// <summary>
-    /// Resolves log level.
+    /// Resolves log level as part of the debug first chance exception logging service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="exception">Exception value supplied to the debug first chance exception logging operation and used when producing its result.</param>
+    /// <param name="applicationOwned">Value indicating whether application owned should apply to this operation.</param>
+    /// <returns>The log level produced by the operation.</returns>
     private LogLevel? ResolveLogLevel(Exception exception, bool applicationOwned)
     {
         if (applicationOwned)
@@ -138,8 +159,10 @@ public sealed class DebugFirstChanceExceptionLoggingHostedService(
     }
 
     /// <summary>
-    /// Resolves call site.
+    /// Resolves call site as part of the debug first chance exception logging service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="stackTrace">Stack trace value supplied to the debug first chance exception logging operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ResolveCallSite(string stackTrace)
     {
         if (string.IsNullOrWhiteSpace(stackTrace))
@@ -152,7 +175,7 @@ public sealed class DebugFirstChanceExceptionLoggingHostedService(
     }
 
     /// <summary>
-    /// Validates options.
+    /// Validates options as part of the debug first chance exception logging service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     private void ValidateOptions()
     {
@@ -163,7 +186,7 @@ public sealed class DebugFirstChanceExceptionLoggingHostedService(
     }
 
     /// <summary>
-    /// Runs the log final summaries operation.
+    /// Performs log final summaries as part of the debug first chance exception logging service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     private void LogFinalSummaries()
     {
@@ -178,7 +201,7 @@ public sealed class DebugFirstChanceExceptionLoggingHostedService(
     }
 
     /// <summary>
-    /// Runs the unsubscribe operation.
+    /// Performs unsubscribe as part of the debug first chance exception logging service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     private void Unsubscribe()
     {
@@ -190,12 +213,25 @@ public sealed class DebugFirstChanceExceptionLoggingHostedService(
     }
 
     /// <summary>
-    /// Represents an exception occurrence.
+    /// Represents an exception occurrence helper type nested within <see cref="DebugFirstChanceExceptionLoggingHostedService"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
+    /// <param name="exceptionType">Exception type value supplied to the debug first chance exception logging operation and used when producing its result.</param>
+    /// <param name="callSite">Call site value supplied to the debug first chance exception logging operation and used when producing its result.</param>
     private sealed class ExceptionOccurrence(string exceptionType, string callSite)
     {
+        /// <summary>
+        /// Gets the exception type value that forms part of the exception occurrence state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The exception type value exposed by <see cref="ExceptionOccurrence"/>.</value>
         internal string ExceptionType { get; } = exceptionType;
+        /// <summary>
+        /// Gets the call site value that forms part of the exception occurrence state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The call site value exposed by <see cref="ExceptionOccurrence"/>.</value>
         internal string CallSite { get; } = callSite;
+        /// <summary>
+        /// Stores the internal count state used by <see cref="ExceptionOccurrence"/> while executing its surrounding workflow.
+        /// </summary>
         internal int Count;
     }
 }

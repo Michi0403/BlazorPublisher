@@ -5,22 +5,24 @@ using System.Text.Json;
 namespace PublisherStudio.Services.OrganicPlugins;
 
 /// <summary>
-/// Provides local gpt discovery registry operations.
+/// Maintains the authoritative directory of LocalGPT discovery entries used for discovery, validation, and runtime lookup.
 /// </summary>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class LocalGptDiscoveryRegistry(ILogger<LocalGptDiscoveryRegistry> logger) : ILocalGptDiscoveryRegistry
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory peers collection maintained internally by <see cref="LocalGptDiscoveryRegistry"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<string, OrganicPeerAdvertisement> peers = new(StringComparer.OrdinalIgnoreCase);
     /// <summary>
-    /// Occurs when changed.
+    /// Occurs when changed changes or completes in <see cref="LocalGptDiscoveryRegistry"/>, allowing interested callers to react without polling internal state.
     /// </summary>
     public event Action? Changed;
 
     /// <summary>
-    /// Gets peers.
+    /// Retrieves peers in the LocalGPT discovery directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<OrganicPeerAdvertisement> GetPeers() {
     try
     {
@@ -37,8 +39,10 @@ public sealed class LocalGptDiscoveryRegistry(ILogger<LocalGptDiscoveryRegistry>
     }
 }
     /// <summary>
-    /// Gets peer.
+    /// Retrieves peer in the LocalGPT discovery directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="peerId">Identifier of the peer to use for this operation.</param>
+    /// <returns>The organic peer advertisement produced by the operation.</returns>
     public OrganicPeerAdvertisement? GetPeer(string peerId) {
     try
     {
@@ -55,8 +59,9 @@ public sealed class LocalGptDiscoveryRegistry(ILogger<LocalGptDiscoveryRegistry>
 }
 
     /// <summary>
-    /// Runs the upsert operation.
+    /// Performs upsert in the LocalGPT discovery directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="peer">Peer value supplied to the LocalGPT discovery operation and used when producing its result.</param>
     public void Upsert(OrganicPeerAdvertisement peer)
     {
     try
@@ -85,8 +90,10 @@ public sealed class LocalGptDiscoveryRegistry(ILogger<LocalGptDiscoveryRegistry>
 }
 
     /// <summary>
-    /// Sets connected.
+    /// Sets connected in the LocalGPT discovery directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="peerId">Identifier of the peer to use for this operation.</param>
+    /// <param name="connected">Value indicating whether connected should apply to this operation.</param>
     public void SetConnected(string peerId, bool connected)
     {
     try
@@ -110,8 +117,9 @@ public sealed class LocalGptDiscoveryRegistry(ILogger<LocalGptDiscoveryRegistry>
 }
 
     /// <summary>
-    /// Removes expired.
+    /// Removes expired in the LocalGPT discovery directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="maximumAge">Maximum age value supplied to the LocalGPT discovery operation and used when producing its result.</param>
     public void RemoveExpired(TimeSpan maximumAge)
     {
     try
@@ -134,8 +142,10 @@ public sealed class LocalGptDiscoveryRegistry(ILogger<LocalGptDiscoveryRegistry>
 }
 
     /// <summary>
-    /// Runs the clone operation.
+    /// Performs clone in the LocalGPT discovery directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="peer">Peer value supplied to the LocalGPT discovery operation and used when producing its result.</param>
+    /// <returns>The organic peer advertisement produced by the operation.</returns>
     private OrganicPeerAdvertisement Clone(OrganicPeerAdvertisement peer) {
     try
     {
@@ -174,27 +184,41 @@ public sealed class LocalGptDiscoveryRegistry(ILogger<LocalGptDiscoveryRegistry>
 }
 
 /// <summary>
-/// Provides organic permission store operations.
+/// Owns persistence and retrieval of organic permission state, keeping storage-specific behavior behind a focused application abstraction.
 /// </summary>
 public sealed class OrganicPermissionStore : IOrganicPermissionStore
 {
     /// <summary>
-    /// Occurs when organic permission exposure or invocation rules change.
+    /// Occurs when changed changes or completes in <see cref="OrganicPermissionStore"/>, allowing interested callers to react without polling internal state.
     /// </summary>
     public event Action? Changed;
 
+    /// <summary>
+    /// Stores the logger used by <see cref="OrganicPermissionStore"/> to record operational diagnostics without coupling callers to logging details.
+    /// </summary>
     private readonly ILogger<OrganicPermissionStore> logger;
+    /// <summary>
+    /// Stores the organic plugin protocol codec dependency used by <see cref="OrganicPermissionStore"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly IOrganicPluginProtocolCodec codec;
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal gate state used by <see cref="OrganicPermissionStore"/> while executing its surrounding workflow.
     /// </summary>
     private readonly object gate = new();
+    /// <summary>
+    /// Stores the internal file path state used by <see cref="OrganicPermissionStore"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string filePath;
+    /// <summary>
+    /// Stores the in-memory rules collection maintained internally by <see cref="OrganicPermissionStore"/> for its current workflow state.
+    /// </summary>
     private List<OrganicPermissionRule>? rules;
 
     /// <summary>
-    /// Runs the organic permission store operation.
+    /// Initializes a new <see cref="OrganicPermissionStore"/> instance and captures the dependencies or initial state required by its organic permission workflow.
     /// </summary>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <param name="codec">Organic plugin protocol codec dependency used by the organic permission workflow to provide the corresponding application capability.</param>
     public OrganicPermissionStore(ILogger<OrganicPermissionStore> logger, IOrganicPluginProtocolCodec codec)
     {
         this.logger = logger;
@@ -204,11 +228,16 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
             "PublisherStudio", "OrganicPlugins", "permissions.json");
     }
 
+    /// <summary>
+    /// Gets the rules collection maintained or exposed by this organic permission instance for downstream processing.
+    /// </summary>
+    /// <value>The rules value exposed by <see cref="OrganicPermissionStore"/>.</value>
     private List<OrganicPermissionRule> Rules => rules ??= Load();
 
     /// <summary>
-    /// Gets rules.
+    /// Retrieves rules in the organic permission persistence workflow while keeping storage-specific behavior contained within <see cref="OrganicPermissionStore"/>.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<OrganicPermissionRule> GetRules()
     {
     try
@@ -228,8 +257,10 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
 }
 
     /// <summary>
-    /// Runs the save operation.
+    /// Performs save in the organic permission persistence workflow while keeping storage-specific behavior contained within <see cref="OrganicPermissionStore"/>.
     /// </summary>
+    /// <param name="rule">Rule value supplied to the organic permission operation and used when producing its result.</param>
+    /// <returns>The organic permission rule produced by the operation.</returns>
     public OrganicPermissionRule Save(OrganicPermissionRule rule)
     {
     try
@@ -262,8 +293,12 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
 }
 
     /// <summary>
-    /// Runs the delete operation.
+    /// Performs delete in the organic permission persistence workflow while keeping storage-specific behavior contained within <see cref="OrganicPermissionStore"/>.
     /// </summary>
+    /// <param name="peerId">Identifier of the peer to use for this operation.</param>
+    /// <param name="capabilityKey">Capability key value supplied to the organic permission operation and used when producing its result.</param>
+    /// <param name="organ">Organ value supplied to the organic permission operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool Delete(string peerId, string capabilityKey, string organ)
     {
     try
@@ -293,8 +328,10 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
 }
 
     /// <summary>
-    /// Determines whether allowed.
+    /// Determines whether allowed in the organic permission persistence workflow while keeping storage-specific behavior contained within <see cref="OrganicPermissionStore"/>.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the organic permission operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool IsAllowed(OrganicWireEnvelope envelope)
     {
     try
@@ -329,8 +366,10 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
 }
 
     /// <summary>
-    /// Determines whether denied.
+    /// Determines whether denied in the organic permission persistence workflow while keeping storage-specific behavior contained within <see cref="OrganicPermissionStore"/>.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the organic permission operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool IsDenied(OrganicWireEnvelope envelope)
     {
     try
@@ -356,8 +395,11 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
 
 
     /// <summary>
-    /// Determines whether capability exposed.
+    /// Determines whether capability exposed in the organic permission persistence workflow while keeping storage-specific behavior contained within <see cref="OrganicPermissionStore"/>.
     /// </summary>
+    /// <param name="peerId">Identifier of the peer to use for this operation.</param>
+    /// <param name="capability">Capability value supplied to the organic permission operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool IsCapabilityExposed(string peerId, OrganicCapabilityDescriptor capability)
     {
     try
@@ -385,8 +427,12 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
 }
 
     /// <summary>
-    /// Runs the resolve operation.
+    /// Performs resolve in the organic permission persistence workflow while keeping storage-specific behavior contained within <see cref="OrganicPermissionStore"/>.
     /// </summary>
+    /// <param name="peerId">Identifier of the peer to use for this operation.</param>
+    /// <param name="capabilityKey">Capability key value supplied to the organic permission operation and used when producing its result.</param>
+    /// <param name="organ">Organ value supplied to the organic permission operation and used when producing its result.</param>
+    /// <returns>The organic permission rule produced by the operation.</returns>
     public OrganicPermissionRule? Resolve(string peerId, string capabilityKey, string organ = "")
     {
     try
@@ -411,8 +457,10 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
 }
 
     /// <summary>
-    /// Runs the matching rules operation.
+    /// Performs matching rules in the organic permission persistence workflow while keeping storage-specific behavior contained within <see cref="OrganicPermissionStore"/>.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the organic permission operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private List<OrganicPermissionRule> MatchingRules(OrganicWireEnvelope envelope) {
     try
     {
@@ -431,8 +479,11 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
 }
 
     /// <summary>
-    /// Resolves rule.
+    /// Resolves rule in the organic permission persistence workflow while keeping storage-specific behavior contained within <see cref="OrganicPermissionStore"/>.
     /// </summary>
+    /// <param name="candidates">Organic permission rule dependency used by the organic permission workflow to provide the corresponding application capability.</param>
+    /// <param name="organ">Organ value supplied to the organic permission operation and used when producing its result.</param>
+    /// <returns>The organic permission rule produced by the operation.</returns>
     private OrganicPermissionRule? ResolveRule(IReadOnlyList<OrganicPermissionRule> candidates, string organ) {
     try
     {
@@ -450,8 +501,9 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
 }
 
     /// <summary>
-    /// Runs the load operation.
+    /// Performs load in the organic permission persistence workflow while keeping storage-specific behavior contained within <see cref="OrganicPermissionStore"/>.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     private List<OrganicPermissionRule> Load()
     {
         try
@@ -467,7 +519,7 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
     }
 
     /// <summary>
-    /// Runs the persist operation.
+    /// Performs persist in the organic permission persistence workflow while keeping storage-specific behavior contained within <see cref="OrganicPermissionStore"/>.
     /// </summary>
     private void Persist()
     {
@@ -491,8 +543,11 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
 }
 
     /// <summary>
-    /// Runs the same key operation.
+    /// Performs same key in the organic permission persistence workflow while keeping storage-specific behavior contained within <see cref="OrganicPermissionStore"/>.
     /// </summary>
+    /// <param name="left">Left value supplied to the organic permission operation and used when producing its result.</param>
+    /// <param name="right">Right value supplied to the organic permission operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool SameKey(OrganicPermissionRule left, OrganicPermissionRule right) {
     try
     {
@@ -511,8 +566,10 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
 }
 
     /// <summary>
-    /// Runs the clone operation.
+    /// Performs clone in the organic permission persistence workflow while keeping storage-specific behavior contained within <see cref="OrganicPermissionStore"/>.
     /// </summary>
+    /// <param name="rule">Rule value supplied to the organic permission operation and used when producing its result.</param>
+    /// <returns>The organic permission rule produced by the operation.</returns>
     private OrganicPermissionRule Clone(OrganicPermissionRule rule) {
     try
     {
@@ -544,21 +601,30 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
 }
 
 /// <summary>
-/// Represents an organic replay guard.
+/// Represents an organic replay guard application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="policyData">Organic replay policy data service dependency used by the organic replay guard workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class OrganicReplayGuard(
     IOrganicReplayPolicyDataService policyData,
     ILogger<OrganicReplayGuard> logger) : IOrganicReplayGuard
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory accepted collection maintained internally by <see cref="OrganicReplayGuard"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<string, DateTimeOffset> accepted = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>
+    /// Stores the internal cleanup counter state used by <see cref="OrganicReplayGuard"/> while executing its surrounding workflow.
+    /// </summary>
     private int cleanupCounter;
 
     /// <summary>
-    /// Attempts to accept.
+    /// Attempts to accept for <see cref="OrganicReplayGuard"/>, keeping the operation consistent with the state and invariants of the surrounding organic replay guard workflow.
     /// </summary>
+    /// <param name="peerId">Identifier of the peer to use for this operation.</param>
+    /// <param name="messageId">Identifier of the message to use for this operation.</param>
+    /// <param name="createdUtc">Created utc value supplied to the organic replay guard operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool TryAccept(string peerId, Guid messageId, DateTimeOffset createdUtc)
     {
         try
@@ -599,26 +665,28 @@ public sealed class OrganicReplayGuard(
 }
 
 /// <summary>
-/// Provides organic result store operations.
+/// Owns persistence and retrieval of organic result state, keeping storage-specific behavior behind a focused application abstraction.
 /// </summary>
+/// <param name="codec">Organic plugin protocol codec dependency used by the organic result workflow to provide the corresponding application capability.</param>
 public sealed class OrganicResultStore(IOrganicPluginProtocolCodec codec) : IOrganicResultStore
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal results state used by <see cref="OrganicResultStore"/> while executing its surrounding workflow.
     /// </summary>
     private readonly ConcurrentQueue<OrganicPluginWorkItem> results = new();
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory text proposals collection maintained internally by <see cref="OrganicResultStore"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<Guid, OrganicTextInsertionProposal> textProposals = new();
 
     /// <summary>
-    /// Occurs when changed.
+    /// Occurs when changed changes or completes in <see cref="OrganicResultStore"/>, allowing interested callers to react without polling internal state.
     /// </summary>
     public event Action? Changed;
     /// <summary>
-    /// Gets results.
+    /// Retrieves results in the organic result persistence workflow while keeping storage-specific behavior contained within <see cref="OrganicResultStore"/>.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<OrganicPluginWorkItem> GetResults() {
     try
     {
@@ -631,8 +699,9 @@ public sealed class OrganicResultStore(IOrganicPluginProtocolCodec codec) : IOrg
     }
 }
     /// <summary>
-    /// Runs the record envelope operation.
+    /// Performs record envelope in the organic result persistence workflow while keeping storage-specific behavior contained within <see cref="OrganicResultStore"/>.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the organic result operation and used when producing its result.</param>
     public void RecordEnvelope(OrganicWireEnvelope envelope)
     {
     try
@@ -654,8 +723,9 @@ public sealed class OrganicResultStore(IOrganicPluginProtocolCodec codec) : IOrg
     }
 }
     /// <summary>
-    /// Adds text proposal.
+    /// Adds text proposal in the organic result persistence workflow while keeping storage-specific behavior contained within <see cref="OrganicResultStore"/>.
     /// </summary>
+    /// <param name="proposal">Proposal value supplied to the organic result operation and used when producing its result.</param>
     public void AddTextProposal(OrganicTextInsertionProposal proposal)
     {
     try
@@ -671,8 +741,9 @@ public sealed class OrganicResultStore(IOrganicPluginProtocolCodec codec) : IOrg
     }
 }
     /// <summary>
-    /// Gets text proposals.
+    /// Retrieves text proposals in the organic result persistence workflow while keeping storage-specific behavior contained within <see cref="OrganicResultStore"/>.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<OrganicTextInsertionProposal> GetTextProposals() {
     try
     {
@@ -685,8 +756,10 @@ public sealed class OrganicResultStore(IOrganicPluginProtocolCodec codec) : IOrg
     }
 }
     /// <summary>
-    /// Removes text proposal.
+    /// Removes text proposal in the organic result persistence workflow while keeping storage-specific behavior contained within <see cref="OrganicResultStore"/>.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool RemoveTextProposal(Guid id)
     {
     try
@@ -704,8 +777,10 @@ public sealed class OrganicResultStore(IOrganicPluginProtocolCodec codec) : IOrg
 }
 
     /// <summary>
-    /// Resolves status.
+    /// Resolves status in the organic result persistence workflow while keeping storage-specific behavior contained within <see cref="OrganicResultStore"/>.
     /// </summary>
+    /// <param name="envelope">Envelope value supplied to the organic result operation and used when producing its result.</param>
+    /// <returns>The organic work status produced by the operation.</returns>
     private OrganicWorkStatus ResolveStatus(OrganicWireEnvelope envelope)
     {
     try

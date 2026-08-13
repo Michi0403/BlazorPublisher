@@ -5,13 +5,19 @@ namespace PublisherStudio.Services.Streaming.UseCases.Ingest;
 /// <summary>
 /// Coordinates renderer ingest and WebRTC publication through reusable streaming services.
 /// </summary>
+/// <param name="sessions">Media session registry dependency used by the streaming ingest use cases workflow to provide the corresponding application capability.</param>
 public sealed class StreamingIngestUseCases(MediaSessionRegistry sessions)
 {
+    /// <summary>
+    /// Stores the media session registry dependency used by <see cref="StreamingIngestUseCases"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly MediaSessionRegistry _sessions = sessions;
 
     /// <summary>
-    /// Runs the exists operation.
+    /// Performs exists for <see cref="StreamingIngestUseCases"/>, keeping the operation consistent with the state and invariants of the surrounding streaming ingest use cases workflow.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool Exists(Guid sessionId) {
     try
     {
@@ -25,8 +31,12 @@ public sealed class StreamingIngestUseCases(MediaSessionRegistry sessions)
 }
 
     /// <summary>
-    /// Runs the announce operation.
+    /// Performs announce for <see cref="StreamingIngestUseCases"/>, keeping the operation consistent with the state and invariants of the surrounding streaming ingest use cases workflow.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <param name="outputId">Identifier of the output to use for this operation.</param>
+    /// <param name="announcement">Ingest announcement dependency used by the streaming ingest use cases workflow to provide the corresponding application capability.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool Announce(Guid sessionId, Guid? outputId, IngestAnnouncement announcement) {
     try
     {
@@ -40,8 +50,12 @@ public sealed class StreamingIngestUseCases(MediaSessionRegistry sessions)
 }
 
     /// <summary>
-    /// Runs the push operation.
+    /// Performs push for <see cref="StreamingIngestUseCases"/>, keeping the operation consistent with the state and invariants of the surrounding streaming ingest use cases workflow.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <param name="outputId">Identifier of the output to use for this operation.</param>
+    /// <param name="payload">Payload value supplied to the streaming ingest use cases operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool Push(Guid sessionId, Guid? outputId, byte[] payload) {
     try
     {
@@ -55,8 +69,10 @@ public sealed class StreamingIngestUseCases(MediaSessionRegistry sessions)
 }
 
     /// <summary>
-    /// Determines whether publish web rtc.
+    /// Determines whether publish web rtc for <see cref="StreamingIngestUseCases"/>, keeping the operation consistent with the state and invariants of the surrounding streaming ingest use cases workflow.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool CanPublishWebRtc(Guid sessionId) {
     try
     {
@@ -70,8 +86,12 @@ public sealed class StreamingIngestUseCases(MediaSessionRegistry sessions)
 }
 
     /// <summary>
-    /// Runs the run web rtc publisher async operation.
+    /// Performs run web rtc publisher for <see cref="StreamingIngestUseCases"/>, keeping the operation consistent with the state and invariants of the surrounding streaming ingest use cases workflow.
     /// </summary>
+    /// <param name="sessionId">Identifier of the session to use for this operation.</param>
+    /// <param name="socket">Socket value supplied to the streaming ingest use cases operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public async Task<bool> RunWebRtcPublisherAsync(
         Guid sessionId,
         WebSocket socket,

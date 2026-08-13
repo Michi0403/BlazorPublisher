@@ -17,13 +17,15 @@ using PublisherStudio.Services.Configuration;
 namespace PublisherStudio;
 
 /// <summary>
-/// Represents a program.
+/// Represents a program application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public static class Program
 {
     /// <summary>
-    /// Runs the main operation.
+    /// Performs main for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="args">Args value supplied to the program operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public static async Task Main(string[] args)
     {
         await using var app = BuildWebApp(args);
@@ -58,8 +60,10 @@ public static class Program
     }
 
     /// <summary>
-    /// Builds web app.
+    /// Builds web app for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
+    /// <param name="args">Args value supplied to the program operation and used when producing its result.</param>
+    /// <returns>The web application produced by the operation.</returns>
     public static WebApplication BuildWebApp(string[]? args = null)
     {
         var effectiveArgs = args ?? [];

@@ -9,19 +9,30 @@ namespace PublisherStudio.Services;
 /// The application is offline-first, so the catalog never contacts a remote service.
 /// Users may still type a font family that is not in this catalog.
 /// </summary>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
 {
+    /// <summary>
+    /// Stores the internal emergency fallback fonts state used by <see cref="SystemFontCatalog"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string[] EmergencyFallbackFonts =
     [
         "Arial", "Calibri", "Cambria", "Courier New", "Georgia", "Segoe UI", "Tahoma", "Times New Roman", "Verdana"
     ];
 
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal sync state used by <see cref="SystemFontCatalog"/> while executing its surrounding workflow.
     /// </summary>
     private readonly object _sync = new();
+    /// <summary>
+    /// Stores the in-memory font families collection maintained internally by <see cref="SystemFontCatalog"/> for its current workflow state.
+    /// </summary>
     private IReadOnlyList<string>? _fontFamilies;
 
+    /// <summary>
+    /// Gets the font families collection maintained or exposed by this system font instance for downstream processing.
+    /// </summary>
+    /// <value>The font families value exposed by <see cref="SystemFontCatalog"/>.</value>
     public IReadOnlyList<string> FontFamilies
     {
         get
@@ -32,8 +43,9 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
     }
 
     /// <summary>
-    /// Runs the refresh operation.
+    /// Performs refresh in the system font directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<string> Refresh()
     {
         try
@@ -51,8 +63,9 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
     }
 
     /// <summary>
-    /// Runs the discover font families operation.
+    /// Discovers font families in the system font directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     internal IReadOnlyList<string> DiscoverFontFamilies()
     {
         try
@@ -83,8 +96,9 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
     }
 
     /// <summary>
-    /// Runs the enumerate font directories operation.
+    /// Performs enumerate font directories in the system font directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     private IEnumerable<string> EnumerateFontDirectories()
     {
         try
@@ -135,8 +149,9 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
     }
 
     /// <summary>
-    /// Reads font config families.
+    /// Reads font config families in the system font directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="families">String dependency used by the system font workflow to provide the corresponding application capability.</param>
     private void ReadFontConfigFamilies(ISet<string> families)
     {
         try
@@ -186,8 +201,10 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
     }
 
     /// <summary>
-    /// Reads font directory.
+    /// Reads font directory in the system font directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="directory">Directory value supplied to the system font operation and used when producing its result.</param>
+    /// <param name="families">String dependency used by the system font workflow to provide the corresponding application capability.</param>
     private void ReadFontDirectory(string directory, ISet<string> families)
     {
         try
@@ -224,8 +241,10 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
     }
 
     /// <summary>
-    /// Reads open type families.
+    /// Reads open type families in the system font directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="path">Path value supplied to the system font operation and used when producing its result.</param>
+    /// <param name="families">String dependency used by the system font workflow to provide the corresponding application capability.</param>
     private void ReadOpenTypeFamilies(string path, ISet<string> families)
     {
         try
@@ -265,8 +284,11 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
     }
 
     /// <summary>
-    /// Reads open type face.
+    /// Reads open type face in the system font directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="reader">Reader value supplied to the system font operation and used when producing its result.</param>
+    /// <param name="faceOffset">Face offset value supplied to the system font operation and used when producing its result.</param>
+    /// <param name="families">String dependency used by the system font workflow to provide the corresponding application capability.</param>
     private void ReadOpenTypeFace(BinaryReader reader, long faceOffset, ISet<string> families)
     {
         try
@@ -318,16 +340,46 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
                         .Where(record => record.NameId is 1 or 16 && record.Length > 0)
                         .OrderByDescending(ScoreNameRecord)
                         .ToArray();
+                    /// <summary>
+                    /// Represents an in helper type nested within <see cref="SystemFontCatalog"/>, grouping the state or behavior used only by that containing workflow.
+                    /// </summary>
                     foreach (var record in candidates)
                     {
+                        /// <summary>
+                        /// Stores the internal absolute offset state used by <see cref="in"/> while executing its surrounding workflow.
+                        /// </summary>
                         var absoluteOffset = (long)nameTableOffset + stringOffset + record.Offset;
+                        /// <summary>
+                        /// Stores the internal continue state used by <see cref="in"/> while executing its surrounding workflow.
+                        /// </summary>
                         if (absoluteOffset < 0 || absoluteOffset + record.Length > nameTableEnd) continue;
+                        /// <summary>
+                        /// Stores the internal position state used by <see cref="in"/> while executing its surrounding workflow.
+                        /// </summary>
                         stream.Position = absoluteOffset;
+                        /// <summary>
+                        /// Stores the internal bytes state used by <see cref="in"/> while executing its surrounding workflow.
+                        /// </summary>
                         var bytes = reader.ReadBytes(record.Length);
+                        /// <summary>
+                        /// Stores the internal length state used by <see cref="in"/> while executing its surrounding workflow.
+                        /// </summary>
                         if (bytes.Length != record.Length) continue;
+                        /// <summary>
+                        /// Stores the internal value state used by <see cref="in"/> while executing its surrounding workflow.
+                        /// </summary>
                         var value = DecodeName(record.PlatformId, record.EncodingId, bytes);
+                        /// <summary>
+                        /// Stores the internal continue state used by <see cref="in"/> while executing its surrounding workflow.
+                        /// </summary>
                         if (!IsUsableFamilyName(value)) continue;
+                        /// <summary>
+                        /// Adds family for <see cref="in"/>, keeping the operation consistent with the state and invariants of the surrounding in workflow.
+                        /// </summary>
                         AddFamily(families, value);
+                        /// <summary>
+                        /// Stores the internal return state used by <see cref="in"/> while executing its surrounding workflow.
+                        /// </summary>
                         return;
                     }
     
@@ -340,8 +392,10 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
     }
 
     /// <summary>
-    /// Runs the score name record operation.
+    /// Performs score name record in the system font directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="record">Record value supplied to the system font operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     private int ScoreNameRecord(NameRecord record)
     {
         try
@@ -364,8 +418,12 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
     }
 
     /// <summary>
-    /// Runs the decode name operation.
+    /// Performs decode name in the system font directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="platformId">Identifier of the platform to use for this operation.</param>
+    /// <param name="encodingId">Identifier of the encoding to use for this operation.</param>
+    /// <param name="bytes">Bytes value supplied to the system font operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string DecodeName(ushort platformId, ushort encodingId, byte[] bytes)
     {
         try
@@ -396,8 +454,10 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
     }
 
     /// <summary>
-    /// Adds family.
+    /// Adds family in the system font directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="families">String dependency used by the system font workflow to provide the corresponding application capability.</param>
+    /// <param name="value">Value value supplied to the system font operation and used when producing its result.</param>
     private void AddFamily(ISet<string> families, string? value)
     {
         try
@@ -415,8 +475,10 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
     }
 
     /// <summary>
-    /// Determines whether usable family name.
+    /// Determines whether usable family name in the system font directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="value">Value value supplied to the system font operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool IsUsableFamilyName(string? value)
     {
         try
@@ -434,8 +496,10 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
     }
 
     /// <summary>
-    /// Reads uint16 big endian.
+    /// Reads u int16 big endian in the system font directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="reader">Reader value supplied to the system font operation and used when producing its result.</param>
+    /// <returns>The ushort produced by the operation.</returns>
     private ushort ReadUInt16BigEndian(BinaryReader reader)
     {
         try
@@ -454,8 +518,10 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
     }
 
     /// <summary>
-    /// Reads uint32 big endian.
+    /// Reads u int32 big endian in the system font directory so callers observe a consistent, authoritative runtime view.
     /// </summary>
+    /// <param name="reader">Reader value supplied to the system font operation and used when producing its result.</param>
+    /// <returns>The uint produced by the operation.</returns>
     private uint ReadUInt32BigEndian(BinaryReader reader)
     {
         try
@@ -474,8 +540,14 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
     }
 
     /// <summary>
-    /// Represents a name record.
+    /// Represents name state exchanged or persisted by the surrounding application workflow, with each member describing one part of that state.
     /// </summary>
+    /// <param name="PlatformId">Identifier of the platform to use for this operation.</param>
+    /// <param name="EncodingId">Identifier of the encoding to use for this operation.</param>
+    /// <param name="LanguageId">Identifier of the language to use for this operation.</param>
+    /// <param name="NameId">Identifier of the name to use for this operation.</param>
+    /// <param name="Length">Length value supplied to the system font operation and used when producing its result.</param>
+    /// <param name="Offset">Offset value supplied to the system font operation and used when producing its result.</param>
     private sealed record NameRecord(
         ushort PlatformId,
         ushort EncodingId,

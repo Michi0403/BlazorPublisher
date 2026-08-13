@@ -4,34 +4,44 @@ using PublisherStudio.Services.Configuration;
 namespace PublisherStudio.Services;
 
 /// <summary>
-/// Defines the publication markup service contract.
+/// Defines the contract for publication markup behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
 public interface IPublicationMarkupService
 {
     /// <summary>
-    /// Runs the safe file name operation.
+    /// Performs safe file name as part of the publication markup service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the publication markup operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     string SafeFileName(string value);
     /// <summary>
-    /// Normalizes CSS background.
+    /// Normalizes CSS background as part of the publication markup service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the publication markup operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     string NormalizeCssBackground(string? value);
     /// <summary>
-    /// Runs the sanitize preview HTML operation.
+    /// Performs sanitize preview HTML as part of the publication markup service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="html">Html value supplied to the publication markup operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     string SanitizePreviewHtml(string html);
 }
 
 /// <summary>
-/// Provides publication markup service operations.
+/// Coordinates publication markup behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
+/// <param name="runtimePatterns">Publisher runtime pattern service dependency used by the publication markup workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class PublicationMarkupService(
     IPublisherRuntimePatternService runtimePatterns,
     ILogger<PublicationMarkupService> logger) : IPublicationMarkupService
 {
     /// <summary>
-    /// Runs the safe file name operation.
+    /// Performs safe file name as part of the publication markup service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the publication markup operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string SafeFileName(string value)
     {
         try
@@ -49,8 +59,10 @@ public sealed class PublicationMarkupService(
     }
 
     /// <summary>
-    /// Normalizes CSS background.
+    /// Normalizes CSS background as part of the publication markup service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the publication markup operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string NormalizeCssBackground(string? value)
     {
         try
@@ -76,8 +88,10 @@ public sealed class PublicationMarkupService(
     }
 
     /// <summary>
-    /// Runs the sanitize preview HTML operation.
+    /// Performs sanitize preview HTML as part of the publication markup service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="html">Html value supplied to the publication markup operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string SanitizePreviewHtml(string html)
     {
         try

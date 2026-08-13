@@ -9,24 +9,34 @@ namespace PublisherStudio.Services;
 /// This prevents multi-megabyte data URLs from being copied into every Blazor render batch.
 /// The original data URL remains in the document model so saved projects stay self-contained.
 /// </summary>
+/// <param name="mediaData">Media data value supplied to the publication media asset operation and used when producing its result.</param>
+/// <param name="elementTraversal">Element traversal value supplied to the publication media asset operation and used when producing its result.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class PublicationMediaAssetStore(
     PublicationMediaData mediaData,
     PublicationElementTraversal elementTraversal,
     ILogger<PublicationMediaAssetStore> logger)
 {
     /// <summary>
-    /// Represents a media asset.
+    /// Represents a media asset helper type nested within <see cref="PublicationMediaAssetStore"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
+    /// <param name="Bytes">Bytes value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <param name="MimeType">Mime type value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <param name="Version">Version value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <param name="SourceKey">Source key value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <param name="LastAccessUtc">Last access utc value supplied to the publication media asset operation and used when producing its result.</param>
     private sealed record MediaAsset(byte[] Bytes, string MimeType, string Version, string SourceKey, DateTimeOffset LastAccessUtc);
 
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory assets collection maintained internally by <see cref="PublicationMediaAssetStore"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<Guid, MediaAsset> _assets = new();
 
     /// <summary>
-    /// Gets or register.
+    /// Retrieves or register in the publication media asset persistence workflow while keeping storage-specific behavior contained within <see cref="PublicationMediaAssetStore"/>.
     /// </summary>
+    /// <param name="media">Media value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string GetOrRegister(PublicationMediaElement media)
     {
         try
@@ -46,8 +56,10 @@ public sealed class PublicationMediaAssetStore(
     }
 
     /// <summary>
-    /// Gets or register.
+    /// Retrieves or register in the publication media asset persistence workflow while keeping storage-specific behavior contained within <see cref="PublicationMediaAssetStore"/>.
     /// </summary>
+    /// <param name="segment">Segment value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string GetOrRegister(PublicationMediaSegment segment)
         {
             try
@@ -63,8 +75,12 @@ public sealed class PublicationMediaAssetStore(
         }
 
     /// <summary>
-    /// Runs the register operation.
+    /// Performs register in the publication media asset persistence workflow while keeping storage-specific behavior contained within <see cref="PublicationMediaAssetStore"/>.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="source">Source value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <param name="declaredMimeType">Declared mime type value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string Register(Guid id, string? source, string? declaredMimeType)
     {
         try
@@ -92,8 +108,12 @@ public sealed class PublicationMediaAssetStore(
     }
 
     /// <summary>
-    /// Registers bytes.
+    /// Registers bytes in the publication media asset persistence workflow while keeping storage-specific behavior contained within <see cref="PublicationMediaAssetStore"/>.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="bytes">Bytes value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <param name="mimeType">Mime type value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string RegisterBytes(Guid id, byte[] bytes, string? mimeType)
         {
             try
@@ -109,8 +129,13 @@ public sealed class PublicationMediaAssetStore(
         }
 
     /// <summary>
-    /// Registers bytes.
+    /// Registers bytes in the publication media asset persistence workflow while keeping storage-specific behavior contained within <see cref="PublicationMediaAssetStore"/>.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="bytes">Bytes value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <param name="mimeType">Mime type value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <param name="sourceKey">Source key value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string RegisterBytes(Guid id, byte[] bytes, string? mimeType, string? sourceKey)
     {
         try
@@ -133,8 +158,13 @@ public sealed class PublicationMediaAssetStore(
     }
 
     /// <summary>
-    /// Attempts to get.
+    /// Attempts to get in the publication media asset persistence workflow while keeping storage-specific behavior contained within <see cref="PublicationMediaAssetStore"/>.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="bytes">Bytes value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <param name="mimeType">Mime type value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <param name="version">Version value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool TryGet(Guid id, out byte[] bytes, out string mimeType, out string version)
     {
         try
@@ -163,8 +193,11 @@ public sealed class PublicationMediaAssetStore(
     }
 
     /// <summary>
-    /// Runs the copy operation.
+    /// Performs copy in the publication media asset persistence workflow while keeping storage-specific behavior contained within <see cref="PublicationMediaAssetStore"/>.
     /// </summary>
+    /// <param name="sourceId">Identifier of the source to use for this operation.</param>
+    /// <param name="targetId">Identifier of the target to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool Copy(Guid sourceId, Guid targetId)
     {
         try
@@ -183,8 +216,9 @@ public sealed class PublicationMediaAssetStore(
     }
 
     /// <summary>
-    /// Registers document.
+    /// Registers document in the publication media asset persistence workflow while keeping storage-specific behavior contained within <see cref="PublicationMediaAssetStore"/>.
     /// </summary>
+    /// <param name="document">Document value supplied to the publication media asset operation and used when producing its result.</param>
     public void RegisterDocument(PublicationDocument document)
     {
         try
@@ -205,8 +239,9 @@ public sealed class PublicationMediaAssetStore(
     }
 
     /// <summary>
-    /// Runs the remove operation.
+    /// Performs remove in the publication media asset persistence workflow while keeping storage-specific behavior contained within <see cref="PublicationMediaAssetStore"/>.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     public void Remove(Guid id) {
         try
         {
@@ -221,8 +256,11 @@ public sealed class PublicationMediaAssetStore(
     }
 
     /// <summary>
-    /// Builds URL.
+    /// Builds URL in the publication media asset persistence workflow while keeping storage-specific behavior contained within <see cref="PublicationMediaAssetStore"/>.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="version">Version value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string BuildUrl(Guid id, string version)
         {
             try
@@ -238,8 +276,11 @@ public sealed class PublicationMediaAssetStore(
         }
 
     /// <summary>
-    /// Creates source key.
+    /// Creates source key in the publication media asset persistence workflow while keeping storage-specific behavior contained within <see cref="PublicationMediaAssetStore"/>.
     /// </summary>
+    /// <param name="source">Source value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <param name="mimeType">Mime type value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string CreateSourceKey(string source, string? mimeType)
     {
         try
@@ -261,8 +302,11 @@ public sealed class PublicationMediaAssetStore(
     }
 
     /// <summary>
-    /// Creates version.
+    /// Creates version in the publication media asset persistence workflow while keeping storage-specific behavior contained within <see cref="PublicationMediaAssetStore"/>.
     /// </summary>
+    /// <param name="bytes">Bytes value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <param name="mimeType">Mime type value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string CreateVersion(byte[] bytes, string mimeType)
     {
         try
@@ -284,8 +328,13 @@ public sealed class PublicationMediaAssetStore(
     }
 
     /// <summary>
-    /// Attempts to decode data URL.
+    /// Attempts to decode data URL in the publication media asset persistence workflow while keeping storage-specific behavior contained within <see cref="PublicationMediaAssetStore"/>.
     /// </summary>
+    /// <param name="source">Source value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <param name="declaredMimeType">Declared mime type value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <param name="bytes">Bytes value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <param name="mimeType">Mime type value supplied to the publication media asset operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool TryDecodeDataUrl(string source, string? declaredMimeType, out byte[] bytes, out string mimeType)
     {
         try

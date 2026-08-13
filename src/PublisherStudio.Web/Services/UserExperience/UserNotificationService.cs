@@ -7,23 +7,33 @@ namespace PublisherStudio.Services.UserExperience;
 /// It deliberately contains no UI dependency so the same messages can be surfaced by Blazor,
 /// automation clients, diagnostics, or a future native shell.
 /// </summary>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class UserNotificationService(ILogger<UserNotificationService> logger) : IUserNotificationService
 {
+    /// <summary>
+    /// Defines the maximum messages constant used by <see cref="UserNotificationService"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const int MaximumMessages = 12;
+    /// <summary>
+    /// Stores the in-memory messages collection maintained internally by <see cref="UserNotificationService"/> for its current workflow state.
+    /// </summary>
     private readonly List<UserNotificationMessage> _messages = [];
 
     /// <summary>
-    /// Occurs when changed.
+    /// Occurs when changed changes or completes in <see cref="UserNotificationService"/>, allowing interested callers to react without polling internal state.
     /// </summary>
     public event Action? Changed;
     /// <summary>
-    /// Gets messages.
+    /// Gets the messages collection maintained or exposed by this user notification instance for downstream processing.
     /// </summary>
+    /// <value>The messages value exposed by <see cref="UserNotificationService"/>.</value>
     public IReadOnlyList<UserNotificationMessage> Messages => _messages.AsReadOnly();
 
     /// <summary>
-    /// Runs the publish operation.
+    /// Performs publish as part of the user notification service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="message">Message value supplied to the user notification operation and used when producing its result.</param>
+    /// <returns>The user notification message produced by the operation.</returns>
     public UserNotificationMessage Publish(UserNotificationMessage message)
     {
     try
@@ -56,8 +66,12 @@ public sealed class UserNotificationService(ILogger<UserNotificationService> log
 }
 
     /// <summary>
-    /// Runs the information operation.
+    /// Performs information as part of the user notification service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="message">Message value supplied to the user notification operation and used when producing its result.</param>
+    /// <param name="title">Title value supplied to the user notification operation and used when producing its result.</param>
+    /// <param name="source">Source value supplied to the user notification operation and used when producing its result.</param>
+    /// <returns>The user notification message produced by the operation.</returns>
     public UserNotificationMessage Information(string message, string title = "PublisherStudio", string source = "") {
     try
     {
@@ -74,8 +88,12 @@ public sealed class UserNotificationService(ILogger<UserNotificationService> log
 }
 
     /// <summary>
-    /// Runs the success operation.
+    /// Performs success as part of the user notification service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="message">Message value supplied to the user notification operation and used when producing its result.</param>
+    /// <param name="title">Title value supplied to the user notification operation and used when producing its result.</param>
+    /// <param name="source">Source value supplied to the user notification operation and used when producing its result.</param>
+    /// <returns>The user notification message produced by the operation.</returns>
     public UserNotificationMessage Success(string message, string title = "Completed", string source = "") {
     try
     {
@@ -92,8 +110,12 @@ public sealed class UserNotificationService(ILogger<UserNotificationService> log
 }
 
     /// <summary>
-    /// Runs the warning operation.
+    /// Performs warning as part of the user notification service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="message">Message value supplied to the user notification operation and used when producing its result.</param>
+    /// <param name="title">Title value supplied to the user notification operation and used when producing its result.</param>
+    /// <param name="source">Source value supplied to the user notification operation and used when producing its result.</param>
+    /// <returns>The user notification message produced by the operation.</returns>
     public UserNotificationMessage Warning(string message, string title = "Attention", string source = "") {
     try
     {
@@ -110,8 +132,13 @@ public sealed class UserNotificationService(ILogger<UserNotificationService> log
 }
 
     /// <summary>
-    /// Runs the error operation.
+    /// Performs error as part of the user notification service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="message">Message value supplied to the user notification operation and used when producing its result.</param>
+    /// <param name="title">Title value supplied to the user notification operation and used when producing its result.</param>
+    /// <param name="source">Source value supplied to the user notification operation and used when producing its result.</param>
+    /// <param name="persistent">Value indicating whether persistent should apply to this operation.</param>
+    /// <returns>The user notification message produced by the operation.</returns>
     public UserNotificationMessage Error(string message, string title = "Something went wrong", string source = "", bool persistent = false)
     {
     try
@@ -133,8 +160,10 @@ public sealed class UserNotificationService(ILogger<UserNotificationService> log
 }
 
     /// <summary>
-    /// Runs the dismiss operation.
+    /// Performs dismiss as part of the user notification service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool Dismiss(Guid id)
     {
     try
@@ -157,7 +186,7 @@ public sealed class UserNotificationService(ILogger<UserNotificationService> log
 }
 
     /// <summary>
-    /// Runs the clear operation.
+    /// Performs clear as part of the user notification service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void Clear()
     {
@@ -179,8 +208,13 @@ public sealed class UserNotificationService(ILogger<UserNotificationService> log
 }
 
     /// <summary>
-    /// Runs the create operation.
+    /// Performs create as part of the user notification service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="severity">Severity value supplied to the user notification operation and used when producing its result.</param>
+    /// <param name="title">Title value supplied to the user notification operation and used when producing its result.</param>
+    /// <param name="message">Message value supplied to the user notification operation and used when producing its result.</param>
+    /// <param name="source">Source value supplied to the user notification operation and used when producing its result.</param>
+    /// <returns>The user notification message produced by the operation.</returns>
     private UserNotificationMessage Create(UserNotificationSeverity severity, string title, string message, string source) {
     try
     {
@@ -203,8 +237,9 @@ public sealed class UserNotificationService(ILogger<UserNotificationService> log
 }
 
     /// <summary>
-    /// Runs the log operation.
+    /// Performs log as part of the user notification service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="message">Message value supplied to the user notification operation and used when producing its result.</param>
     private void Log(UserNotificationMessage message)
     {
     try

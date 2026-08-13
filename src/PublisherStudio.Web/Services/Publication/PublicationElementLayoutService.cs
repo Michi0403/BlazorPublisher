@@ -3,37 +3,61 @@ using PublisherStudio.BusinessObjects;
 namespace PublisherStudio.Services.Publication;
 
 /// <summary>
-/// Defines the publication element layout service contract.
+/// Defines the contract for publication element layout behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
 public interface IPublicationElementLayoutService
 {
     /// <summary>
-    /// Runs the constrain operation.
+    /// Performs constrain as part of the publication element layout service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="bounds">Bounds value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <param name="canvasWidth">Canvas width value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <param name="canvasHeight">Canvas height value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <returns>The publication canvas bounds produced by the operation.</returns>
     PublicationCanvasBounds Constrain(PublicationCanvasBounds bounds, double canvasWidth, double canvasHeight);
     /// <summary>
-    /// Applies bounds.
+    /// Applies bounds as part of the publication element layout service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="element">Element value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <param name="bounds">Bounds value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <param name="canvasWidth">Canvas width value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <param name="canvasHeight">Canvas height value supplied to the publication element layout operation and used when producing its result.</param>
     void ApplyBounds(PublicationElement element, PublicationCanvasBounds bounds, double canvasWidth, double canvasHeight);
     /// <summary>
-    /// Runs the nudge operation.
+    /// Performs nudge as part of the publication element layout service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="element">Element value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <param name="deltaX">Delta x value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <param name="deltaY">Delta y value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <param name="canvasWidth">Canvas width value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <param name="canvasHeight">Canvas height value supplied to the publication element layout operation and used when producing its result.</param>
     void Nudge(PublicationElement element, double deltaX, double deltaY, double canvasWidth, double canvasHeight);
     /// <summary>
-    /// Runs the next z operation.
+    /// Performs next z as part of the publication element layout service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="elements">Publication element dependency used by the publication element layout workflow to provide the corresponding application capability.</param>
+    /// <returns>The int produced by the operation.</returns>
     int NextZ(IEnumerable<PublicationElement> elements);
     /// <summary>
-    /// Normalizes zorder.
+    /// Normalizes z order as part of the publication element layout service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="elements">Publication element dependency used by the publication element layout workflow to provide the corresponding application capability.</param>
     void NormalizeZOrder(IList<PublicationElement> elements);
     /// <summary>
-    /// Runs the move layer operation.
+    /// Performs move layer as part of the publication element layout service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="elements">Publication element dependency used by the publication element layout workflow to provide the corresponding application capability.</param>
+    /// <param name="elementId">Identifier of the element to use for this operation.</param>
+    /// <param name="move">Move value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     bool MoveLayer(IList<PublicationElement> elements, Guid elementId, PublicationLayerMove move);
     /// <summary>
-    /// Runs the reorder operation.
+    /// Performs reorder as part of the publication element layout service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="elements">Publication layer item dependency used by the publication element layout workflow to provide the corresponding application capability.</param>
+    /// <param name="elementId">Identifier of the element to use for this operation.</param>
+    /// <param name="move">Move value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     IReadOnlyList<PublicationLayerItem> Reorder(IReadOnlyList<PublicationLayerItem> elements, Guid elementId, PublicationLayerMove move);
 }
 
@@ -42,11 +66,16 @@ public interface IPublicationElementLayoutService
 /// It keeps geometry and z-order rules out of UI components so pointer, keyboard, touch, controller
 /// and automation inputs all commit through the same deterministic behavior.
 /// </summary>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class PublicationElementLayoutService(ILogger<PublicationElementLayoutService> logger) : IPublicationElementLayoutService
 {
     /// <summary>
-    /// Runs the constrain operation.
+    /// Performs constrain as part of the publication element layout service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="bounds">Bounds value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <param name="canvasWidth">Canvas width value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <param name="canvasHeight">Canvas height value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <returns>The publication canvas bounds produced by the operation.</returns>
     public PublicationCanvasBounds Constrain(PublicationCanvasBounds bounds, double canvasWidth, double canvasHeight)
     {
     try
@@ -76,8 +105,12 @@ public sealed class PublicationElementLayoutService(ILogger<PublicationElementLa
 }
 
     /// <summary>
-    /// Applies bounds.
+    /// Applies bounds as part of the publication element layout service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="element">Element value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <param name="bounds">Bounds value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <param name="canvasWidth">Canvas width value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <param name="canvasHeight">Canvas height value supplied to the publication element layout operation and used when producing its result.</param>
     public void ApplyBounds(PublicationElement element, PublicationCanvasBounds bounds, double canvasWidth, double canvasHeight)
     {
     try
@@ -101,8 +134,13 @@ public sealed class PublicationElementLayoutService(ILogger<PublicationElementLa
 }
 
     /// <summary>
-    /// Runs the nudge operation.
+    /// Performs nudge as part of the publication element layout service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="element">Element value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <param name="deltaX">Delta x value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <param name="deltaY">Delta y value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <param name="canvasWidth">Canvas width value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <param name="canvasHeight">Canvas height value supplied to the publication element layout operation and used when producing its result.</param>
     public void Nudge(PublicationElement element, double deltaX, double deltaY, double canvasWidth, double canvasHeight)
     {
     try
@@ -128,8 +166,10 @@ public sealed class PublicationElementLayoutService(ILogger<PublicationElementLa
 }
 
     /// <summary>
-    /// Runs the next z operation.
+    /// Performs next z as part of the publication element layout service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="elements">Publication element dependency used by the publication element layout workflow to provide the corresponding application capability.</param>
+    /// <returns>The int produced by the operation.</returns>
     public int NextZ(IEnumerable<PublicationElement> elements)
     {
     try
@@ -149,8 +189,9 @@ public sealed class PublicationElementLayoutService(ILogger<PublicationElementLa
 }
 
     /// <summary>
-    /// Normalizes zorder.
+    /// Normalizes z order as part of the publication element layout service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="elements">Publication element dependency used by the publication element layout workflow to provide the corresponding application capability.</param>
     public void NormalizeZOrder(IList<PublicationElement> elements)
     {
     try
@@ -185,8 +226,12 @@ public sealed class PublicationElementLayoutService(ILogger<PublicationElementLa
 }
 
     /// <summary>
-    /// Runs the move layer operation.
+    /// Performs move layer as part of the publication element layout service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="elements">Publication element dependency used by the publication element layout workflow to provide the corresponding application capability.</param>
+    /// <param name="elementId">Identifier of the element to use for this operation.</param>
+    /// <param name="move">Move value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool MoveLayer(IList<PublicationElement> elements, Guid elementId, PublicationLayerMove move)
     {
     try
@@ -234,8 +279,12 @@ public sealed class PublicationElementLayoutService(ILogger<PublicationElementLa
 }
 
     /// <summary>
-    /// Runs the reorder operation.
+    /// Performs reorder as part of the publication element layout service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="elements">Publication layer item dependency used by the publication element layout workflow to provide the corresponding application capability.</param>
+    /// <param name="elementId">Identifier of the element to use for this operation.</param>
+    /// <param name="move">Move value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<PublicationLayerItem> Reorder(IReadOnlyList<PublicationLayerItem> elements, Guid elementId, PublicationLayerMove move)
     {
     try
@@ -275,8 +324,11 @@ public sealed class PublicationElementLayoutService(ILogger<PublicationElementLa
 }
 
     /// <summary>
-    /// Runs the safe operation.
+    /// Performs safe as part of the publication element layout service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the publication element layout operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double Safe(double value, double fallback = 0) {
     try
     {

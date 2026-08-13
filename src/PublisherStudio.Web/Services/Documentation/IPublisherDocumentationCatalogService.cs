@@ -3,11 +3,12 @@ using PublisherStudio.BusinessObjects;
 namespace PublisherStudio.Services.Documentation;
 
 /// <summary>
-/// Resolves generated PublisherStudio documentation without exposing arbitrary filesystem paths.
+/// Defines the contract for publisher documentation catalog behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
 public interface IPublisherDocumentationCatalogService
 {
     /// <summary>Returns availability information for the generated HTML, PDF, and XML documentation.</summary>
+    /// <returns>The publisher documentation status produced by the operation.</returns>
     PublisherDocumentationStatus GetStatus();
 
     /// <summary>Resolves a safe generated documentation file path for an application-relative request.</summary>
@@ -22,5 +23,6 @@ public interface IPublisherDocumentationCatalogService
     /// <summary>Searches compiler-generated XML comments by identifier, display name, summary, or remarks.</summary>
     /// <param name="query">Optional case-insensitive search text.</param>
     /// <param name="limit">Maximum number of comments to return.</param>
+    /// <returns>The collection produced by the operation.</returns>
     IReadOnlyList<PublisherDocumentationComment> SearchComments(string? query, int limit);
 }

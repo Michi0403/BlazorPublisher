@@ -4,38 +4,53 @@ using PublisherStudio.Services.Configuration;
 namespace PublisherStudio.Services;
 
 /// <summary>
-/// Defines the publisher document factory contract.
+/// Defines the contract for publisher document behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
 public interface IPublisherDocumentFactory
 {
     /// <summary>
-    /// Creates publication.
+    /// Creates publication using the configuration and dependencies owned by <see cref="IPublisherDocumentFactory"/>.
     /// </summary>
+    /// <returns>The publication document produced by the operation.</returns>
     PublicationDocument CreatePublication();
     /// <summary>
-    /// Creates page.
+    /// Creates page using the configuration and dependencies owned by <see cref="IPublisherDocumentFactory"/>.
     /// </summary>
+    /// <param name="name">Name value supplied to the publisher document operation and used when producing its result.</param>
+    /// <returns>The publication page produced by the operation.</returns>
     PublicationPage CreatePage(string? name = null);
     /// <summary>
-    /// Creates picture.
+    /// Creates picture using the configuration and dependencies owned by <see cref="IPublisherDocumentFactory"/>.
     /// </summary>
+    /// <param name="widthPixels">Width pixels value supplied to the publisher document operation and used when producing its result.</param>
+    /// <param name="heightPixels">Height pixels value supplied to the publisher document operation and used when producing its result.</param>
+    /// <param name="transparent">Value indicating whether transparent should apply to this operation.</param>
+    /// <returns>The picture document produced by the operation.</returns>
     PictureDocument CreatePicture(int? widthPixels = null, int? heightPixels = null, bool transparent = true);
     /// <summary>
     /// Creates picture from raster.
     /// </summary>
+    /// <param name="dataUrl">Data url value supplied to the publisher document operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the publisher document operation and used when producing its result.</param>
+    /// <param name="widthPixels">Width pixels value supplied to the publisher document operation and used when producing its result.</param>
+    /// <param name="heightPixels">Height pixels value supplied to the publisher document operation and used when producing its result.</param>
+    /// <returns>The picture document produced by the operation.</returns>
     PictureDocument CreatePictureFromRaster(string dataUrl, string name, int? widthPixels = null, int? heightPixels = null);
 }
 
 /// <summary>
-/// Provides publisher document factory operations.
+/// Creates configured publisher document instances from the application's current dependencies and runtime settings.
 /// </summary>
+/// <param name="runtimePolicy">Publisher runtime policy data service dependency used by the publisher document workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class PublisherDocumentFactory(
     IPublisherRuntimePolicyDataService runtimePolicy,
     ILogger<PublisherDocumentFactory> logger) : IPublisherDocumentFactory
 {
     /// <summary>
-    /// Creates publication.
+    /// Creates publication using the configuration and dependencies owned by <see cref="PublisherDocumentFactory"/>.
     /// </summary>
+    /// <returns>The publication document produced by the operation.</returns>
     public PublicationDocument CreatePublication()
     {
         try
@@ -84,8 +99,10 @@ public sealed class PublisherDocumentFactory(
     }
 
     /// <summary>
-    /// Creates page.
+    /// Creates page using the configuration and dependencies owned by <see cref="PublisherDocumentFactory"/>.
     /// </summary>
+    /// <param name="name">Name value supplied to the publisher document operation and used when producing its result.</param>
+    /// <returns>The publication page produced by the operation.</returns>
     public PublicationPage CreatePage(string? name = null)
     {
         try
@@ -108,8 +125,12 @@ public sealed class PublisherDocumentFactory(
     }
 
     /// <summary>
-    /// Creates picture.
+    /// Creates picture using the configuration and dependencies owned by <see cref="PublisherDocumentFactory"/>.
     /// </summary>
+    /// <param name="widthPixels">Width pixels value supplied to the publisher document operation and used when producing its result.</param>
+    /// <param name="heightPixels">Height pixels value supplied to the publisher document operation and used when producing its result.</param>
+    /// <param name="transparent">Value indicating whether transparent should apply to this operation.</param>
+    /// <returns>The picture document produced by the operation.</returns>
     public PictureDocument CreatePicture(int? widthPixels = null, int? heightPixels = null, bool transparent = true)
     {
         try
@@ -139,6 +160,11 @@ public sealed class PublisherDocumentFactory(
     /// <summary>
     /// Creates picture from raster.
     /// </summary>
+    /// <param name="dataUrl">Data url value supplied to the publisher document operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the publisher document operation and used when producing its result.</param>
+    /// <param name="widthPixels">Width pixels value supplied to the publisher document operation and used when producing its result.</param>
+    /// <param name="heightPixels">Height pixels value supplied to the publisher document operation and used when producing its result.</param>
+    /// <returns>The picture document produced by the operation.</returns>
     public PictureDocument CreatePictureFromRaster(string dataUrl, string name, int? widthPixels = null, int? heightPixels = null)
     {
         try
@@ -167,24 +193,31 @@ public sealed class PublisherDocumentFactory(
 }
 
 /// <summary>
-/// Defines the publication grid row factory contract.
+/// Defines the contract for publication grid row behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
 public interface IPublicationGridRowFactory
 {
     /// <summary>
-    /// Runs the create operation.
+    /// Performs create using the configuration and dependencies owned by <see cref="IPublicationGridRowFactory"/>.
     /// </summary>
+    /// <param name="row">Row value supplied to the publication grid row operation and used when producing its result.</param>
+    /// <param name="columns">String dependency used by the publication grid row workflow to provide the corresponding application capability.</param>
+    /// <returns>The publication grid row produced by the operation.</returns>
     PublicationGridRow Create(PublicationDataRow row, IReadOnlyList<string> columns);
 }
 
 /// <summary>
-/// Provides publication grid row factory operations.
+/// Creates configured publication grid row instances from the application's current dependencies and runtime settings.
 /// </summary>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class PublicationGridRowFactory(ILogger<PublicationGridRowFactory> logger) : IPublicationGridRowFactory
 {
     /// <summary>
-    /// Runs the create operation.
+    /// Performs create using the configuration and dependencies owned by <see cref="PublicationGridRowFactory"/>.
     /// </summary>
+    /// <param name="row">Row value supplied to the publication grid row operation and used when producing its result.</param>
+    /// <param name="columns">String dependency used by the publication grid row workflow to provide the corresponding application capability.</param>
+    /// <returns>The publication grid row produced by the operation.</returns>
     public PublicationGridRow Create(PublicationDataRow row, IReadOnlyList<string> columns)
     {
         try

@@ -3,15 +3,21 @@ using PublisherStudio.BusinessObjects;
 namespace PublisherStudio.Services.OpenScad;
 
 /// <summary>
-/// Provides open scad catalog service operations.
+/// Coordinates open OpenSCAD catalog behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
 public sealed class OpenScadCatalogService : IOpenScadCatalogService
 {
+    /// <summary>
+    /// Stores the in-memory definitions collection maintained internally by <see cref="OpenScadCatalogService"/> for its current workflow state.
+    /// </summary>
     private readonly IReadOnlyList<OpenScadNodeDefinition> _definitions;
+    /// <summary>
+    /// Stores the in-memory by kind collection maintained internally by <see cref="OpenScadCatalogService"/> for its current workflow state.
+    /// </summary>
     private readonly IReadOnlyDictionary<string, OpenScadNodeDefinition> _byKind;
 
     /// <summary>
-    /// Opens scad catalog service.
+    /// Initializes a new <see cref="OpenScadCatalogService"/> instance and captures the dependencies or initial state required by its open OpenSCAD catalog workflow.
     /// </summary>
     public OpenScadCatalogService()
     {
@@ -20,8 +26,9 @@ public sealed class OpenScadCatalogService : IOpenScadCatalogService
     }
 
     /// <summary>
-    /// Gets definitions.
+    /// Retrieves definitions as part of the open OpenSCAD catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<OpenScadNodeDefinition> GetDefinitions() {
     try
     {
@@ -34,8 +41,10 @@ public sealed class OpenScadCatalogService : IOpenScadCatalogService
     }
 }
     /// <summary>
-    /// Runs the find operation.
+    /// Performs find as part of the open OpenSCAD catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="kind">Kind value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <returns>The open OpenSCAD node definition produced by the operation.</returns>
     public OpenScadNodeDefinition? Find(string kind) {
     try
     {
@@ -49,8 +58,9 @@ public sealed class OpenScadCatalogService : IOpenScadCatalogService
 }
 
     /// <summary>
-    /// Builds definitions.
+    /// Builds definitions as part of the open OpenSCAD catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     private IReadOnlyList<OpenScadNodeDefinition> BuildDefinitions()
     {
     try
@@ -160,8 +170,13 @@ public sealed class OpenScadCatalogService : IOpenScadCatalogService
 }
 
     /// <summary>
-    /// Runs the primitive operation.
+    /// Performs primitive as part of the open OpenSCAD catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="kind">Kind value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="displayName">Display name value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="category">Category value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="parameters">Parameters value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <returns>The open OpenSCAD node definition produced by the operation.</returns>
     private OpenScadNodeDefinition Primitive(string kind, string displayName, OpenScadNodeCategory category, params OpenScadParameterDefinition[] parameters) {
     try
     {
@@ -175,8 +190,13 @@ public sealed class OpenScadCatalogService : IOpenScadCatalogService
 }
 
     /// <summary>
-    /// Runs the wrapper operation.
+    /// Performs wrapper as part of the open OpenSCAD catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="kind">Kind value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="displayName">Display name value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="category">Category value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="parameters">Parameters value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <returns>The open OpenSCAD node definition produced by the operation.</returns>
     private OpenScadNodeDefinition Wrapper(string kind, string displayName, OpenScadNodeCategory category, params OpenScadParameterDefinition[] parameters) {
     try
     {
@@ -190,8 +210,14 @@ public sealed class OpenScadCatalogService : IOpenScadCatalogService
 }
 
     /// <summary>
-    /// Runs the wrapper operation.
+    /// Performs wrapper as part of the open OpenSCAD catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="kind">Kind value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="displayName">Display name value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="category">Category value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="minimumChildren">Minimum children value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="parameters">Parameters value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <returns>The open OpenSCAD node definition produced by the operation.</returns>
     private OpenScadNodeDefinition Wrapper(string kind, string displayName, OpenScadNodeCategory category, int minimumChildren, params OpenScadParameterDefinition[] parameters) {
     try
     {
@@ -205,8 +231,14 @@ public sealed class OpenScadCatalogService : IOpenScadCatalogService
 }
 
     /// <summary>
-    /// Runs the wrapper operation.
+    /// Performs wrapper as part of the open OpenSCAD catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="kind">Kind value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="displayName">Display name value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="category">Category value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="minimumChildren">Minimum children value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="exportNote">Export note value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <returns>The open OpenSCAD node definition produced by the operation.</returns>
     private OpenScadNodeDefinition Wrapper(string kind, string displayName, OpenScadNodeCategory category, int minimumChildren, string exportNote) {
     try
     {
@@ -220,8 +252,16 @@ public sealed class OpenScadCatalogService : IOpenScadCatalogService
 }
 
     /// <summary>
-    /// Runs the wrapper operation.
+    /// Performs wrapper as part of the open OpenSCAD catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="kind">Kind value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="displayName">Display name value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="category">Category value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="minimumChildren">Minimum children value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="maximumChildren">Maximum children value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="exportNote">Export note value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="parameters">Parameters value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <returns>The open OpenSCAD node definition produced by the operation.</returns>
     private OpenScadNodeDefinition Wrapper(string kind, string displayName, OpenScadNodeCategory category, int minimumChildren, int? maximumChildren, string exportNote, params OpenScadParameterDefinition[] parameters) {
     try
     {
@@ -239,8 +279,16 @@ public sealed class OpenScadCatalogService : IOpenScadCatalogService
 }
 
     /// <summary>
-    /// Runs the parameter operation.
+    /// Performs parameter as part of the open OpenSCAD catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="name">Name value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="displayName">Display name value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="type">Type value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="defaultExpression">Default expression value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="required">Value indicating whether required should apply to this operation.</param>
+    /// <param name="minimum">Minimum value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <param name="maximum">Maximum value supplied to the open OpenSCAD catalog operation and used when producing its result.</param>
+    /// <returns>The open OpenSCAD parameter definition produced by the operation.</returns>
     private OpenScadParameterDefinition Parameter(string name, string displayName, OpenScadParameterType type, string defaultExpression, bool required = false, double? minimum = null, double? maximum = null) {
     try
     {

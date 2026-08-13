@@ -6,24 +6,44 @@ using System.Security.Cryptography;
 namespace PublisherStudio.Services.Streaming.Lan;
 
 /// <summary>
-/// Represents a LAN streaming server.
+/// Represents a LAN streaming server application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public sealed class LanStreamingServer : IAsyncDisposable
 {
+    /// <summary>
+    /// Stores the internal session state used by <see cref="LanStreamingServer"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly MediaSession _session;
+    /// <summary>
+    /// Stores the logger used by <see cref="LanStreamingServer"/> to record operational diagnostics without coupling callers to logging details.
+    /// </summary>
     private readonly ILogger<LanStreamingServer> _logger;
+    /// <summary>
+    /// Stores the synchronization primitive that protects concurrent access to viewer gate state owned by <see cref="LanStreamingServer"/>.
+    /// </summary>
     private readonly SemaphoreSlim _viewerGate;
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the cancellation source used by <see cref="LanStreamingServer"/> to stop its current background or asynchronous operation.
     /// </summary>
     private readonly CancellationTokenSource _cancellation = new();
+    /// <summary>
+    /// Stores the internal app state used by <see cref="LanStreamingServer"/> while executing its surrounding workflow.
+    /// </summary>
     private WebApplication? _app;
+    /// <summary>
+    /// Stores the internal run task state used by <see cref="LanStreamingServer"/> while executing its surrounding workflow.
+    /// </summary>
     private Task? _runTask;
+    /// <summary>
+    /// Stores the internal rtsp server state used by <see cref="LanStreamingServer"/> while executing its surrounding workflow.
+    /// </summary>
     private RtspLanServer? _rtspServer;
 
     /// <summary>
-    /// Runs the LAN streaming server operation.
+    /// Initializes a new <see cref="LanStreamingServer"/> instance and captures the dependencies or initial state required by its LAN streaming server workflow.
     /// </summary>
+    /// <param name="session">Session value supplied to the LAN streaming server operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     public LanStreamingServer(MediaSession session, ILogger<LanStreamingServer> logger)
     {
         _session = session;
@@ -35,18 +55,25 @@ public sealed class LanStreamingServer : IAsyncDisposable
     }
 
     /// <summary>
-    /// Gets access token.
+    /// Gets the access token value that forms part of the LAN streaming server state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The access token value exposed by <see cref="LanStreamingServer"/>.</value>
     public string AccessToken { get; }
     /// <summary>
-    /// Gets or sets status.
+    /// Gets or sets the status value that forms part of the LAN streaming server state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The status value exposed by <see cref="LanStreamingServer"/>.</value>
     public string Status { get; private set; } = "stopped";
     /// <summary>
-    /// Gets or sets last error.
+    /// Gets or sets the last error value that forms part of the LAN streaming server state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The last error value exposed by <see cref="LanStreamingServer"/>.</value>
     public string LastError { get; private set; } = string.Empty;
 
+    /// <summary>
+    /// Gets the advertised host value that forms part of the LAN streaming server state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The advertised host value exposed by <see cref="LanStreamingServer"/>.</value>
     public string AdvertisedHost
     {
         get
@@ -69,30 +96,34 @@ public sealed class LanStreamingServer : IAsyncDisposable
     }
 
     /// <summary>
-    /// Gets token query.
+    /// Gets the token query value that forms part of the LAN streaming server state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The token query value exposed by <see cref="LanStreamingServer"/>.</value>
     public string TokenQuery => string.IsNullOrWhiteSpace(AccessToken) ? string.Empty : $"?token={Uri.EscapeDataString(AccessToken)}";
     /// <summary>
-    /// Gets browser URL.
+    /// Gets the browser URL that identifies the network or application endpoint associated with this LAN streaming server state.
     /// </summary>
+    /// <value>The browser URL value exposed by <see cref="LanStreamingServer"/>.</value>
     public string? BrowserUrl => _session.LanDefinition.EnableBrowserWebRtc
         ? $"http://{AdvertisedHost}:{_session.LanDefinition.Port}/watch/{_session.Id:D}{TokenQuery}"
         : null;
     /// <summary>
-    /// Gets hls URL.
+    /// Gets the hls URL that identifies the network or application endpoint associated with this LAN streaming server state.
     /// </summary>
+    /// <value>The hls URL value exposed by <see cref="LanStreamingServer"/>.</value>
     public string? HlsUrl => _session.LanDefinition.EnableHls
         ? $"http://{AdvertisedHost}:{_session.LanDefinition.Port}/stream/{_session.Id:D}/index.m3u8{TokenQuery}"
         : null;
     /// <summary>
-    /// Gets rtsp URL.
+    /// Gets the rtsp URL that identifies the network or application endpoint associated with this LAN streaming server state.
     /// </summary>
+    /// <value>The rtsp URL value exposed by <see cref="LanStreamingServer"/>.</value>
     public string? RtspUrl => _session.LanDefinition.EnableRtsp
         ? $"rtsp://{AdvertisedHost}:{_session.LanDefinition.RtspPort}/publisherstudio{TokenQuery}"
         : null;
 
     /// <summary>
-    /// Runs the start operation.
+    /// Performs start for <see cref="LanStreamingServer"/>, keeping the operation consistent with the state and invariants of the surrounding LAN streaming server workflow.
     /// </summary>
     public void Start()
     {
@@ -121,8 +152,9 @@ public sealed class LanStreamingServer : IAsyncDisposable
 }
 
     /// <summary>
-    /// Starts core async.
+    /// Starts core for <see cref="LanStreamingServer"/>, keeping the operation consistent with the state and invariants of the surrounding LAN streaming server workflow.
     /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task StartCoreAsync()
     {
         try
@@ -265,8 +297,9 @@ public sealed class LanStreamingServer : IAsyncDisposable
     }
 
     /// <summary>
-    /// Builds watch page.
+    /// Builds watch page for <see cref="LanStreamingServer"/>, keeping the operation consistent with the state and invariants of the surrounding LAN streaming server workflow.
     /// </summary>
+    /// <returns>The string produced by the operation.</returns>
     private string BuildWatchPage()
     {
     try
@@ -362,8 +395,10 @@ public sealed class LanStreamingServer : IAsyncDisposable
 }
 
     /// <summary>
-    /// Runs the authorize operation.
+    /// Performs authorize for <see cref="LanStreamingServer"/>, keeping the operation consistent with the state and invariants of the surrounding LAN streaming server workflow.
     /// </summary>
+    /// <param name="context">Context value supplied to the LAN streaming server operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool Authorize(HttpContext context)
     {
     try
@@ -391,8 +426,10 @@ public sealed class LanStreamingServer : IAsyncDisposable
 }
 
     /// <summary>
-    /// Runs the append token operation.
+    /// Performs append token for <see cref="LanStreamingServer"/>, keeping the operation consistent with the state and invariants of the surrounding LAN streaming server workflow.
     /// </summary>
+    /// <param name="uri">Uri value supplied to the LAN streaming server operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string AppendToken(string uri)
     {
     try
@@ -412,8 +449,10 @@ public sealed class LanStreamingServer : IAsyncDisposable
 }
 
     /// <summary>
-    /// Resolves address.
+    /// Resolves address for <see cref="LanStreamingServer"/>, keeping the operation consistent with the state and invariants of the surrounding LAN streaming server workflow.
     /// </summary>
+    /// <param name="value">Value value supplied to the LAN streaming server operation and used when producing its result.</param>
+    /// <returns>The IP address produced by the operation.</returns>
     private IPAddress ResolveAddress(string value)
     {
     try
@@ -434,8 +473,11 @@ public sealed class LanStreamingServer : IAsyncDisposable
 }
 
     /// <summary>
-    /// Runs the safe asset path operation.
+    /// Performs safe asset path for <see cref="LanStreamingServer"/>, keeping the operation consistent with the state and invariants of the surrounding LAN streaming server workflow.
     /// </summary>
+    /// <param name="rootDirectory">Root directory value supplied to the LAN streaming server operation and used when producing its result.</param>
+    /// <param name="asset">Asset value supplied to the LAN streaming server operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string? SafeAssetPath(string rootDirectory, string? asset)
     {
     try
@@ -458,8 +500,9 @@ public sealed class LanStreamingServer : IAsyncDisposable
 }
 
     /// <summary>
-    /// Runs the dispose async operation.
+    /// Releases resources owned by <see cref="LanStreamingServer"/> and leaves the LAN streaming server workflow in a safely disposed state.
     /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async ValueTask DisposeAsync()
     {
     try
@@ -497,60 +540,73 @@ public sealed class LanStreamingServer : IAsyncDisposable
 }
 
 /// <summary>
-/// Represents a media LAN definition.
+/// Represents a media LAN definition application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public sealed class MediaLanDefinition
 {
     /// <summary>
-    /// Gets or sets whether the feature is enabled.
+    /// Gets or sets a value indicating whether the option is enabled applies to the media LAN definition state.
     /// </summary>
+    /// <value>The enabled value exposed by <see cref="MediaLanDefinition"/>.</value>
     public bool Enabled { get; set; }
     /// <summary>
-    /// Gets or sets bind address.
+    /// Gets or sets the bind address that identifies the network or application endpoint associated with this media LAN definition state.
     /// </summary>
+    /// <value>The bind address value exposed by <see cref="MediaLanDefinition"/>.</value>
     public string BindAddress { get; set; } = "127.0.0.1";
     /// <summary>
-    /// Gets or sets port.
+    /// Gets or sets the port value that forms part of the media LAN definition state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The port value exposed by <see cref="MediaLanDefinition"/>.</value>
     public int Port { get; set; } = 17848;
     /// <summary>
-    /// Gets or sets width.
+    /// Gets or sets the width value that forms part of the media LAN definition state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The width value exposed by <see cref="MediaLanDefinition"/>.</value>
     public int Width { get; set; } = 1920;
     /// <summary>
-    /// Gets or sets height.
+    /// Gets or sets the height value that forms part of the media LAN definition state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The height value exposed by <see cref="MediaLanDefinition"/>.</value>
     public int Height { get; set; } = 1080;
     /// <summary>
-    /// Gets or sets frame rate.
+    /// Gets or sets the frame rate value that forms part of the media LAN definition state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The frame rate value exposed by <see cref="MediaLanDefinition"/>.</value>
     public int FrameRate { get; set; } = 60;
     /// <summary>
-    /// Gets or sets video bitrate kbps.
+    /// Gets or sets the video bitrate kbps value that forms part of the media LAN definition state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The video bitrate kbps value exposed by <see cref="MediaLanDefinition"/>.</value>
     public int VideoBitrateKbps { get; set; } = 8000;
     /// <summary>
-    /// Gets or sets enable browser web rtc.
+    /// Gets or sets a value indicating whether browser web rtc applies to the media LAN definition state.
     /// </summary>
+    /// <value>The enable browser web rtc value exposed by <see cref="MediaLanDefinition"/>.</value>
     public bool EnableBrowserWebRtc { get; set; } = true;
     /// <summary>
-    /// Gets or sets enable hls.
+    /// Gets or sets a value indicating whether hls applies to the media LAN definition state.
     /// </summary>
+    /// <value>The enable hls value exposed by <see cref="MediaLanDefinition"/>.</value>
     public bool EnableHls { get; set; } = true;
     /// <summary>
-    /// Gets or sets enable rtsp.
+    /// Gets or sets a value indicating whether rtsp applies to the media LAN definition state.
     /// </summary>
+    /// <value>The enable rtsp value exposed by <see cref="MediaLanDefinition"/>.</value>
     public bool EnableRtsp { get; set; }
     /// <summary>
-    /// Gets or sets rtsp port.
+    /// Gets or sets the rtsp port value that forms part of the media LAN definition state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The rtsp port value exposed by <see cref="MediaLanDefinition"/>.</value>
     public int RtspPort { get; set; } = 8554;
     /// <summary>
-    /// Gets or sets require access token.
+    /// Gets or sets a value indicating whether access token applies to the media LAN definition state.
     /// </summary>
+    /// <value>The require access token value exposed by <see cref="MediaLanDefinition"/>.</value>
     public bool RequireAccessToken { get; set; } = true;
     /// <summary>
-    /// Gets or sets viewer limit.
+    /// Gets or sets the viewer limit value that forms part of the media LAN definition state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The viewer limit value exposed by <see cref="MediaLanDefinition"/>.</value>
     public int ViewerLimit { get; set; } = 50;
 }

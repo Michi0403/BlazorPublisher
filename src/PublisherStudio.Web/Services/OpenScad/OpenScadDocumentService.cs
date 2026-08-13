@@ -4,21 +4,26 @@ using PublisherStudio.BusinessObjects;
 namespace PublisherStudio.Services.OpenScad;
 
 /// <summary>
-/// Provides open scad document service operations.
+/// Coordinates open OpenSCAD document behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
+/// <param name="catalog">Open openscad catalog service dependency used by the open OpenSCAD document workflow to provide the corresponding application capability.</param>
+/// <param name="values">Open openscad value formatter dependency used by the open OpenSCAD document workflow to provide the corresponding application capability.</param>
+/// <param name="renderers">Open openscad node renderer dependency used by the open OpenSCAD document workflow to provide the corresponding application capability.</param>
 public sealed class OpenScadDocumentService(
     IOpenScadCatalogService catalog,
     IOpenScadValueFormatter values,
     IEnumerable<IOpenScadNodeRenderer> renderers) : IOpenScadDocumentService
 {
     /// <summary>
-    /// Runs the to list operation.
+    /// Stores the in-memory renderers collection maintained internally by <see cref="OpenScadDocumentService"/> for its current workflow state.
     /// </summary>
     private readonly IReadOnlyList<IOpenScadNodeRenderer> _renderers = renderers.ToList().AsReadOnly();
 
     /// <summary>
-    /// Runs the validate operation.
+    /// Performs validate as part of the open OpenSCAD document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the open OpenSCAD document operation and used when producing its result.</param>
+    /// <returns>The open OpenSCAD validation result produced by the operation.</returns>
     public OpenScadValidationResult Validate(OpenScadDocument document)
     {
     try
@@ -82,8 +87,10 @@ public sealed class OpenScadDocumentService(
 }
 
     /// <summary>
-    /// Runs the generate operation.
+    /// Performs generate as part of the open OpenSCAD document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the open OpenSCAD document operation and used when producing its result.</param>
+    /// <returns>The open OpenSCAD generation result produced by the operation.</returns>
     public OpenScadGenerationResult Generate(OpenScadDocument document)
     {
     try
@@ -136,8 +143,9 @@ public sealed class OpenScadDocumentService(
 }
 
     /// <summary>
-    /// Creates example document.
+    /// Creates example document as part of the open OpenSCAD document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The open OpenSCAD document produced by the operation.</returns>
     public OpenScadDocument CreateExampleDocument()
     {
     try
@@ -202,8 +210,12 @@ public sealed class OpenScadDocumentService(
 }
 
     /// <summary>
-    /// Runs the render node operation.
+    /// Performs render node as part of the open OpenSCAD document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="document">Document value supplied to the open OpenSCAD document operation and used when producing its result.</param>
+    /// <param name="node">Node value supplied to the open OpenSCAD document operation and used when producing its result.</param>
+    /// <param name="depth">Depth value supplied to the open OpenSCAD document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string RenderNode(OpenScadDocument document, OpenScadNode node, int depth)
     {
     try
@@ -252,8 +264,13 @@ public sealed class OpenScadDocumentService(
 }
 
     /// <summary>
-    /// Validates parameter.
+    /// Validates parameter as part of the open OpenSCAD document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="result">Result value supplied to the open OpenSCAD document operation and used when producing its result.</param>
+    /// <param name="nodeId">Identifier of the node to use for this operation.</param>
+    /// <param name="definition">Definition value supplied to the open OpenSCAD document operation and used when producing its result.</param>
+    /// <param name="parameter">Parameter value supplied to the open OpenSCAD document operation and used when producing its result.</param>
+    /// <param name="value">Value value supplied to the open OpenSCAD document operation and used when producing its result.</param>
     private void ValidateParameter(OpenScadValidationResult result, Guid nodeId, OpenScadNodeDefinition definition, OpenScadParameterDefinition parameter, OpenScadValue value)
     {
     try
@@ -290,8 +307,10 @@ public sealed class OpenScadDocumentService(
 }
 
     /// <summary>
-    /// Runs the track expression operation.
+    /// Performs track expression as part of the open OpenSCAD document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="track">Track value supplied to the open OpenSCAD document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string TrackExpression(OpenScadAnimationTrack track)
     {
     try
@@ -316,8 +335,11 @@ public sealed class OpenScadDocumentService(
 }
 
     /// <summary>
-    /// Runs the indent block operation.
+    /// Performs indent block as part of the open OpenSCAD document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="source">Source value supplied to the open OpenSCAD document operation and used when producing its result.</param>
+    /// <param name="levels">Levels value supplied to the open OpenSCAD document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string IndentBlock(string source, int levels)
     {
     try
@@ -334,8 +356,10 @@ public sealed class OpenScadDocumentService(
 }
 
     /// <summary>
-    /// Runs the number operation.
+    /// Performs number as part of the open OpenSCAD document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the open OpenSCAD document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Number(double value) {
     try
     {
@@ -349,8 +373,10 @@ public sealed class OpenScadDocumentService(
 }
 
     /// <summary>
-    /// Runs the enumerate operation.
+    /// Performs enumerate as part of the open OpenSCAD document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="nodes">Open openscad node dependency used by the open OpenSCAD document workflow to provide the corresponding application capability.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IEnumerable<OpenScadNode> Enumerate(IEnumerable<OpenScadNode> nodes)
     {
         foreach (var node in nodes)

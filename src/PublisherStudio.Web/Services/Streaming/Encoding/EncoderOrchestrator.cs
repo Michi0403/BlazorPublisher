@@ -8,8 +8,13 @@ using System.Threading.Channels;
 namespace PublisherStudio.Services.Streaming.Encoding;
 
 /// <summary>
-/// Represents an encoder orchestrator.
+/// Represents an encoder orchestrator application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="ffmpegLocator">Ffmpeg locator value supplied to the encoder orchestrator operation and used when producing its result.</param>
+/// <param name="encoderResolver">Ffmpeg encoder resolver dependency used by the encoder orchestrator workflow to provide the corresponding application capability.</param>
+/// <param name="runtimePolicy">Publisher runtime policy data service dependency used by the encoder orchestrator workflow to provide the corresponding application capability.</param>
+/// <param name="loggerFactory">Logger factory dependency used by the encoder orchestrator workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class EncoderOrchestrator(
     FfmpegLocator ffmpegLocator,
     FfmpegEncoderResolver encoderResolver,
@@ -18,8 +23,10 @@ public sealed class EncoderOrchestrator(
     ILogger<EncoderOrchestrator> logger)
 {
     /// <summary>
-    /// Runs the attach operation.
+    /// Performs attach for <see cref="EncoderOrchestrator"/>, keeping the operation consistent with the state and invariants of the surrounding encoder orchestrator workflow.
     /// </summary>
+    /// <param name="session">Session value supplied to the encoder orchestrator operation and used when producing its result.</param>
+    /// <param name="inputId">Identifier of the input to use for this operation.</param>
     public void Attach(MediaSession session, Guid? inputId)
     {
         try
@@ -42,8 +49,9 @@ public sealed class EncoderOrchestrator(
     }
 
     /// <summary>
-    /// Runs the stop operation.
+    /// Performs stop for <see cref="EncoderOrchestrator"/>, keeping the operation consistent with the state and invariants of the surrounding encoder orchestrator workflow.
     /// </summary>
+    /// <param name="session">Session value supplied to the encoder orchestrator operation and used when producing its result.</param>
     public void Stop(MediaSession session)
     {
         try
@@ -62,54 +70,83 @@ public sealed class EncoderOrchestrator(
 }
 
 /// <summary>
-/// Provides encoder session service operations.
+/// Coordinates encoder session behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
 public sealed class EncoderSessionService : IDisposable
 {
+    /// <summary>
+    /// Stores the internal session state used by <see cref="EncoderSessionService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly MediaSession _session;
+    /// <summary>
+    /// Stores the logger used by <see cref="EncoderSessionService"/> to record operational diagnostics without coupling callers to logging details.
+    /// </summary>
     private readonly ILogger<EncoderSessionService> logger;
+    /// <summary>
+    /// Stores the internal FFmpeg locator state used by <see cref="EncoderSessionService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly FfmpegLocator _ffmpegLocator;
+    /// <summary>
+    /// Stores the FFmpeg encoder resolver dependency used by <see cref="EncoderSessionService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly FfmpegEncoderResolver _encoderResolver;
+    /// <summary>
+    /// Stores the internal defaults state used by <see cref="EncoderSessionService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly PublisherMediaSessionDefaultsPolicy _defaults;
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory processes collection maintained internally by <see cref="EncoderSessionService"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<string, Process> _processes = new(StringComparer.OrdinalIgnoreCase);
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory input writers collection maintained internally by <see cref="EncoderSessionService"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<string, PipelineInputWriter> _inputWriters = new(StringComparer.OrdinalIgnoreCase);
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory process arguments collection maintained internally by <see cref="EncoderSessionService"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<string, string[]> _processArguments = new(StringComparer.OrdinalIgnoreCase);
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory process inputs collection maintained internally by <see cref="EncoderSessionService"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<string, string> _processInputs = new(StringComparer.OrdinalIgnoreCase);
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory initialization chunks collection maintained internally by <see cref="EncoderSessionService"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<string, byte[]> _initializationChunks = new(StringComparer.OrdinalIgnoreCase);
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory restart attempts collection maintained internally by <see cref="EncoderSessionService"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<string, int> _restartAttempts = new(StringComparer.OrdinalIgnoreCase);
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory manual stops collection maintained internally by <see cref="EncoderSessionService"/> for its current workflow state.
     /// </summary>
     private readonly HashSet<string> _manualStops = new(StringComparer.OrdinalIgnoreCase);
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the internal sync state used by <see cref="EncoderSessionService"/> while executing its surrounding workflow.
     /// </summary>
     private readonly object _sync = new();
+    /// <summary>
+    /// Stores the internal video encoders state used by <see cref="EncoderSessionService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly FfmpegEncoderSet _videoEncoders;
+    /// <summary>
+    /// Stores the in-memory recording patterns collection maintained internally by <see cref="EncoderSessionService"/> for its current workflow state.
+    /// </summary>
     private readonly List<string> _recordingPatterns = [];
+    /// <summary>
+    /// Stores the internal disposed state used by <see cref="EncoderSessionService"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _disposed;
 
     /// <summary>
-    /// Runs the encoder session service operation.
+    /// Initializes a new <see cref="EncoderSessionService"/> instance and captures the dependencies or initial state required by its encoder session workflow.
     /// </summary>
+    /// <param name="session">Session value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="ffmpegLocator">Ffmpeg locator value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="encoderResolver">Ffmpeg encoder resolver dependency used by the encoder session workflow to provide the corresponding application capability.</param>
+    /// <param name="defaults">Defaults value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     public EncoderSessionService(
         MediaSession session,
         FfmpegLocator ffmpegLocator,
@@ -126,16 +163,18 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Gets or sets status.
+    /// Gets or sets the status value that forms part of the encoder session state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The status value exposed by <see cref="EncoderSessionService"/>.</value>
     public string Status { get; private set; } = "waiting-for-renderer";
     /// <summary>
-    /// Gets or sets last error.
+    /// Gets or sets the last error value that forms part of the encoder session state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The last error value exposed by <see cref="EncoderSessionService"/>.</value>
     public string LastError { get; private set; } = string.Empty;
 
     /// <summary>
-    /// Runs the start operation.
+    /// Performs start as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void Start()
     {
@@ -154,8 +193,9 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Runs the notify ingest operation.
+    /// Performs notify ingest as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="inputId">Identifier of the input to use for this operation.</param>
     public void NotifyIngest(Guid? inputId)
     {
         try
@@ -193,8 +233,10 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Runs the push chunk operation.
+    /// Performs push chunk as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="inputId">Identifier of the input to use for this operation.</param>
+    /// <param name="chunk">Chunk value supplied to the encoder session operation and used when producing its result.</param>
     public void PushChunk(Guid? inputId, ReadOnlySpan<byte> chunk)
     {
         try
@@ -226,8 +268,10 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Sets output.
+    /// Sets output as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="outputId">Identifier of the output to use for this operation.</param>
+    /// <param name="enabled">Value indicating whether enabled should apply to this operation.</param>
     public void SetOutput(Guid outputId, bool enabled)
     {
         try
@@ -251,8 +295,9 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Sets recording.
+    /// Sets recording as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="enabled">Value indicating whether enabled should apply to this operation.</param>
     public void SetRecording(bool enabled)
     {
         try
@@ -282,8 +327,9 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Starts validation.
+    /// Starts validation as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="inputId">Identifier of the input to use for this operation.</param>
     private void StartValidation(Guid? inputId)
     {
         try
@@ -306,8 +352,9 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Starts output.
+    /// Starts output as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="output">Output value supplied to the encoder session operation and used when producing its result.</param>
     private void StartOutput(MediaOutputDefinition output)
     {
         try
@@ -329,6 +376,7 @@ public sealed class EncoderSessionService : IDisposable
     /// <summary>
     /// Starts recording for input.
     /// </summary>
+    /// <param name="inputId">Identifier of the input to use for this operation.</param>
     private void StartRecordingForInput(Guid? inputId)
     {
         try
@@ -346,8 +394,9 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Starts recording variant.
+    /// Starts recording variant as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="variant">Variant value supplied to the encoder session operation and used when producing its result.</param>
     private void StartRecordingVariant(RecordingVariant variant)
     {
         try
@@ -378,8 +427,9 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Resolves recording variants.
+    /// Resolves recording variants as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     private IReadOnlyList<RecordingVariant> ResolveRecordingVariants()
     {
         try
@@ -427,7 +477,7 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Starts LAN hls.
+    /// Starts LAN hls as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     private void StartLanHls()
     {
@@ -456,7 +506,7 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Starts LAN rtsp.
+    /// Starts LAN rtsp as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     private void StartLanRtsp()
     {
@@ -480,8 +530,14 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Builds validation arguments.
+    /// Builds validation arguments as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="inputId">Identifier of the input to use for this operation.</param>
+    /// <param name="width">Width value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="height">Height value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="frameRate">Frame rate value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="bitrateKbps">Bitrate kbps value supplied to the encoder session operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private List<string> BuildValidationArguments(Guid? inputId, int width, int height, int frameRate, int bitrateKbps)
     {
         try
@@ -502,8 +558,11 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Builds output arguments.
+    /// Builds output arguments as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="output">Output value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="destination">Destination value supplied to the encoder session operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private List<string> BuildOutputArguments(MediaOutputDefinition output, string destination)
     {
         try
@@ -529,8 +588,11 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Builds recording arguments.
+    /// Builds recording arguments as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="variant">Variant value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="path">Path value supplied to the encoder session operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private List<string> BuildRecordingArguments(RecordingVariant variant, string path)
     {
         try
@@ -563,8 +625,10 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Runs the base input arguments operation.
+    /// Performs base input arguments as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="inputId">Identifier of the input to use for this operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private List<string> BaseInputArguments(Guid? inputId)
     {
         try
@@ -587,8 +651,15 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Adds video encoding.
+    /// Adds video encoding as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="args">Args value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="width">Width value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="height">Height value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="frameRate">Frame rate value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="bitrateKbps">Bitrate kbps value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="keyframeSeconds">Keyframe seconds value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="codec">Codec value supplied to the encoder session operation and used when producing its result.</param>
     private void AddVideoEncoding(List<string> args, int width, int height, int frameRate, int bitrateKbps, int keyframeSeconds, int codec)
     {
         try
@@ -618,8 +689,14 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Adds webm video encoding.
+    /// Adds webm video encoding as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="args">Args value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="width">Width value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="height">Height value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="frameRate">Frame rate value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="bitrateKbps">Bitrate kbps value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="keyframeSeconds">Keyframe seconds value supplied to the encoder session operation and used when producing its result.</param>
     private void AddWebmVideoEncoding(List<string> args, int width, int height, int frameRate, int bitrateKbps, int keyframeSeconds)
     {
         try
@@ -648,8 +725,12 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Runs the recommended recording bitrate kbps operation.
+    /// Performs recommended recording bitrate kbps as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="width">Width value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="height">Height value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="frameRate">Frame rate value supplied to the encoder session operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     private int RecommendedRecordingBitrateKbps(int width, int height, int frameRate)
     {
         try
@@ -667,8 +748,11 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Adds audio encoding.
+    /// Adds audio encoding as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="args">Args value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="bitrateKbps">Bitrate kbps value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="codec">Codec value supplied to the encoder session operation and used when producing its result.</param>
     private void AddAudioEncoding(List<string> args, int bitrateKbps, int codec) {
         try
         {
@@ -683,8 +767,10 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Builds destination.
+    /// Builds destination as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="output">Output value supplied to the encoder session operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string BuildDestination(MediaOutputDefinition output)
     {
         try
@@ -714,8 +800,12 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Starts process.
+    /// Starts process as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="key">Key value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="inputId">Identifier of the input to use for this operation.</param>
+    /// <param name="arguments">String dependency used by the encoder session workflow to provide the corresponding application capability.</param>
+    /// <param name="restart">Value indicating whether restart should apply to this operation.</param>
     private void StartProcess(string key, Guid? inputId, IReadOnlyList<string> arguments, bool restart = false)
     {
         try
@@ -765,8 +855,12 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Handles process exit.
+    /// Handles process exit as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="key">Key value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="inputId">Identifier of the input to use for this operation.</param>
+    /// <param name="process">Process value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="arguments">Arguments value supplied to the encoder session operation and used when producing its result.</param>
     private void HandleProcessExit(string key, Guid? inputId, Process process, string[] arguments)
     {
         try
@@ -802,8 +896,11 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Runs the schedule restart operation.
+    /// Performs schedule restart as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="key">Key value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="inputId">Identifier of the input to use for this operation.</param>
+    /// <param name="arguments">Arguments value supplied to the encoder session operation and used when producing its result.</param>
     private void ScheduleRestart(string key, Guid? inputId, string[] arguments)
     {
         try
@@ -833,8 +930,11 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Runs the should run operation.
+    /// Performs should run as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="key">Key value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="inputId">Identifier of the input to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool ShouldRun(string key, Guid? inputId)
     {
         try
@@ -858,8 +958,9 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Stops processes with prefix.
+    /// Stops processes with prefix as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="prefix">Prefix value supplied to the encoder session operation and used when producing its result.</param>
     private void StopProcessesWithPrefix(string prefix)
     {
         try
@@ -876,8 +977,9 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Stops process.
+    /// Stops process as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="key">Key value supplied to the encoder session operation and used when producing its result.</param>
     private void StopProcess(string key)
     {
         try
@@ -910,7 +1012,7 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Runs the schedule recording remux operation.
+    /// Performs schedule recording remux as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     private void ScheduleRecordingRemux()
     {
@@ -1000,8 +1102,10 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Resolves recording files.
+    /// Resolves recording files as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="pattern">Pattern value supplied to the encoder session operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IEnumerable<string> ResolveRecordingFiles(string pattern)
     {
         try
@@ -1023,7 +1127,7 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Runs the dispose operation.
+    /// Releases resources owned by <see cref="EncoderSessionService"/> and leaves the encoder session workflow in a safely disposed state.
     /// </summary>
     public void Dispose()
     {
@@ -1048,8 +1152,10 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Determines whether piped input.
+    /// Determines whether piped input as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="inputId">Identifier of the input to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool IsPipedInput(Guid? inputId) {
         try
         {
@@ -1064,8 +1170,10 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Runs the input key operation.
+    /// Performs input key as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string InputKey(Guid? id) {
         try
         {
@@ -1079,8 +1187,10 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
     /// <summary>
-    /// Runs the output key operation.
+    /// Performs output key as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string OutputKey(Guid id) {
         try
         {
@@ -1094,8 +1204,10 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
     /// <summary>
-    /// Normalizes container.
+    /// Normalizes container as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the encoder session operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeContainer(string value) {
         try
         {
@@ -1109,8 +1221,10 @@ public sealed class EncoderSessionService : IDisposable
         }
     }
     /// <summary>
-    /// Runs the safe file name operation.
+    /// Performs safe file name as part of the encoder session service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the encoder session operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string SafeFileName(string value)
     {
         try
@@ -1129,27 +1243,59 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Provides pipeline input writer operations.
+    /// Represents a pipeline input helper type nested within <see cref="EncoderSessionService"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
     private sealed class PipelineInputWriter : IDisposable
     {
+        /// <summary>
+        /// Stores the internal process state used by <see cref="PipelineInputWriter"/> while executing its surrounding workflow.
+        /// </summary>
         private readonly Process process;
+        /// <summary>
+        /// Stores the internal key state used by <see cref="PipelineInputWriter"/> while executing its surrounding workflow.
+        /// </summary>
         private readonly string key;
+        /// <summary>
+        /// Stores the internal report error state used by <see cref="PipelineInputWriter"/> while executing its surrounding workflow.
+        /// </summary>
         private readonly Action<string> reportError;
+        /// <summary>
+        /// Stores the internal queue state used by <see cref="PipelineInputWriter"/> while executing its surrounding workflow.
+        /// </summary>
         private readonly Channel<byte[]> queue;
         /// <summary>
-        /// Runs the new operation.
+        /// Stores the cancellation source used by <see cref="PipelineInputWriter"/> to stop its current background or asynchronous operation.
         /// </summary>
         private readonly CancellationTokenSource cancellation = new();
+        /// <summary>
+        /// Stores the internal pump state used by <see cref="PipelineInputWriter"/> while executing its surrounding workflow.
+        /// </summary>
         private readonly Task pump;
+        /// <summary>
+        /// Stores the internal defaults state used by <see cref="PipelineInputWriter"/> while executing its surrounding workflow.
+        /// </summary>
         private readonly PublisherMediaSessionDefaultsPolicy defaults;
+        /// <summary>
+        /// Stores the logger used by <see cref="PipelineInputWriter"/> to record operational diagnostics without coupling callers to logging details.
+        /// </summary>
         private readonly ILogger logger;
+        /// <summary>
+        /// Stores the internal completed state used by <see cref="PipelineInputWriter"/> while executing its surrounding workflow.
+        /// </summary>
         private int completed;
+        /// <summary>
+        /// Stores the internal aborting state used by <see cref="PipelineInputWriter"/> while executing its surrounding workflow.
+        /// </summary>
         private int aborting;
 
         /// <summary>
-        /// Runs the pipeline input writer operation.
+        /// Initializes a new <see cref="PipelineInputWriter"/> instance and captures the dependencies or initial state required by its pipeline input workflow.
         /// </summary>
+        /// <param name="process">Process value supplied to the pipeline input operation and used when producing its result.</param>
+        /// <param name="key">Key value supplied to the pipeline input operation and used when producing its result.</param>
+        /// <param name="reportError">Report error value supplied to the pipeline input operation and used when producing its result.</param>
+        /// <param name="defaults">Defaults value supplied to the pipeline input operation and used when producing its result.</param>
+        /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
         public PipelineInputWriter(
             Process process,
             string key,
@@ -1181,8 +1327,10 @@ public sealed class EncoderSessionService : IDisposable
         }
 
         /// <summary>
-        /// Attempts to write.
+        /// Attempts to write for <see cref="PipelineInputWriter"/>, keeping the operation consistent with the state and invariants of the surrounding pipeline input workflow.
         /// </summary>
+        /// <param name="payload">Payload value supplied to the pipeline input operation and used when producing its result.</param>
+        /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
         public bool TryWrite(byte[] payload)
         {
             try
@@ -1199,7 +1347,7 @@ public sealed class EncoderSessionService : IDisposable
         }
 
         /// <summary>
-        /// Runs the abort for backpressure operation.
+        /// Performs abort for backpressure for <see cref="PipelineInputWriter"/>, keeping the operation consistent with the state and invariants of the surrounding pipeline input workflow.
         /// </summary>
         public void AbortForBackpressure()
         {
@@ -1234,7 +1382,7 @@ public sealed class EncoderSessionService : IDisposable
         }
 
         /// <summary>
-        /// Runs the complete operation.
+        /// Performs complete for <see cref="PipelineInputWriter"/>, keeping the operation consistent with the state and invariants of the surrounding pipeline input workflow.
         /// </summary>
         public void Complete()
         {
@@ -1255,8 +1403,9 @@ public sealed class EncoderSessionService : IDisposable
         }
 
         /// <summary>
-        /// Runs the wait operation.
+        /// Performs wait for <see cref="PipelineInputWriter"/>, keeping the operation consistent with the state and invariants of the surrounding pipeline input workflow.
         /// </summary>
+        /// <param name="timeout">Timeout value supplied to the pipeline input operation and used when producing its result.</param>
         public void Wait(TimeSpan timeout)
         {
             try
@@ -1272,8 +1421,9 @@ public sealed class EncoderSessionService : IDisposable
         }
 
         /// <summary>
-        /// Runs the pump async operation.
+        /// Performs pump for <see cref="PipelineInputWriter"/>, keeping the operation consistent with the state and invariants of the surrounding pipeline input workflow.
         /// </summary>
+        /// <returns>A task that completes when the operation has finished.</returns>
         private async Task PumpAsync()
         {
             try
@@ -1322,7 +1472,7 @@ public sealed class EncoderSessionService : IDisposable
         }
 
         /// <summary>
-        /// Runs the dispose operation.
+        /// Releases resources owned by <see cref="PipelineInputWriter"/> and leaves the pipeline input workflow in a safely disposed state.
         /// </summary>
         public void Dispose()
         {
@@ -1343,8 +1493,18 @@ public sealed class EncoderSessionService : IDisposable
     }
 
     /// <summary>
-    /// Represents a recording variant.
+    /// Represents a recording variant helper type nested within <see cref="EncoderSessionService"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
+    /// <param name="Id">Identifier of the resource to use for this operation.</param>
+    /// <param name="Name">Name value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="InputOutputId">Identifier of the input output to use for this operation.</param>
+    /// <param name="Width">Width value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="Height">Height value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="FrameRate">Frame rate value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="VideoBitrateKbps">Video bitrate kbps value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="AudioBitrateKbps">Audio bitrate kbps value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="VideoCodec">Video codec value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="AudioCodec">Audio codec value supplied to the encoder session operation and used when producing its result.</param>
     private sealed record RecordingVariant(
         string Id,
         string Name,
@@ -1359,26 +1519,43 @@ public sealed class EncoderSessionService : IDisposable
 }
 
 /// <summary>
-/// Represents a FFmpeg video encoder.
+/// Represents a FFmpeg video encoder application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="Name">Name value supplied to the FFmpeg video encoder operation and used when producing its result.</param>
+/// <param name="Options">Options containing the caller-supplied values that control this operation.</param>
 public sealed record FfmpegVideoEncoder(string Name, IReadOnlyList<string> Options);
 
 /// <summary>
-/// Represents a FFmpeg encoder set.
+/// Represents a FFmpeg encoder set application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="h264">H264 value supplied to the FFmpeg encoder set operation and used when producing its result.</param>
+/// <param name="hevc">Hevc value supplied to the FFmpeg encoder set operation and used when producing its result.</param>
+/// <param name="av1">Av1 value supplied to the FFmpeg encoder set operation and used when producing its result.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class FfmpegEncoderSet(
     FfmpegVideoEncoder h264,
     FfmpegVideoEncoder hevc,
     FfmpegVideoEncoder av1,
     ILogger<FfmpegEncoderResolver> logger)
 {
+    /// <summary>
+    /// Stores the internal h264 encoder state used by <see cref="FfmpegEncoderSet"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly FfmpegVideoEncoder h264Encoder = h264;
+    /// <summary>
+    /// Stores the internal hevc encoder state used by <see cref="FfmpegEncoderSet"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly FfmpegVideoEncoder hevcEncoder = hevc;
+    /// <summary>
+    /// Stores the internal av1 encoder state used by <see cref="FfmpegEncoderSet"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly FfmpegVideoEncoder av1Encoder = av1;
 
     /// <summary>
-    /// Runs the for codec operation.
+    /// Performs for codec for <see cref="FfmpegEncoderSet"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg encoder set workflow.
     /// </summary>
+    /// <param name="codec">Codec value supplied to the FFmpeg encoder set operation and used when producing its result.</param>
+    /// <returns>The FFmpeg video encoder produced by the operation.</returns>
     public FfmpegVideoEncoder ForCodec(int codec)
     {
         try
@@ -1400,24 +1577,29 @@ public sealed class FfmpegEncoderSet(
 }
 
 /// <summary>
-/// Provides FFmpeg encoder resolver operations.
+/// Resolves FFmpeg encoder choices from the available runtime state and returns the application-appropriate result to callers.
 /// </summary>
+/// <param name="ffmpegLocator">Ffmpeg locator value supplied to the FFmpeg encoder operation and used when producing its result.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class FfmpegEncoderResolver(
     FfmpegLocator ffmpegLocator,
     ILogger<FfmpegEncoderResolver> logger)
 {
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory cache collection maintained internally by <see cref="FfmpegEncoderResolver"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<string, HashSet<string>> Cache = new(StringComparer.OrdinalIgnoreCase);
     /// <summary>
-    /// Runs the new operation.
+    /// Stores the in-memory hardware probe cache collection maintained internally by <see cref="FfmpegEncoderResolver"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<string, bool> HardwareProbeCache = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
-    /// Runs the resolve operation.
+    /// Performs resolve for <see cref="FfmpegEncoderResolver"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg encoder workflow.
     /// </summary>
+    /// <param name="configuredPath">Configured path value supplied to the FFmpeg encoder operation and used when producing its result.</param>
+    /// <param name="preference">Preference value supplied to the FFmpeg encoder operation and used when producing its result.</param>
+    /// <returns>The FFmpeg encoder set produced by the operation.</returns>
     public FfmpegEncoderSet Resolve(string configuredPath, int preference)
     {
         try
@@ -1445,8 +1627,13 @@ public sealed class FfmpegEncoderResolver(
     }
 
     /// <summary>
-    /// Runs the choose operation.
+    /// Performs choose for <see cref="FfmpegEncoderResolver"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg encoder workflow.
     /// </summary>
+    /// <param name="codec">Codec value supplied to the FFmpeg encoder operation and used when producing its result.</param>
+    /// <param name="preference">Preference value supplied to the FFmpeg encoder operation and used when producing its result.</param>
+    /// <param name="available">Available value supplied to the FFmpeg encoder operation and used when producing its result.</param>
+    /// <param name="executable">Executable value supplied to the FFmpeg encoder operation and used when producing its result.</param>
+    /// <returns>The FFmpeg video encoder produced by the operation.</returns>
     private FfmpegVideoEncoder Choose(int codec, int preference, HashSet<string> available, string executable)
     {
         try
@@ -1480,8 +1667,13 @@ public sealed class FfmpegEncoderResolver(
     }
 
     /// <summary>
-    /// Determines whether didate.
+    /// Determines whether didate for <see cref="FfmpegEncoderResolver"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg encoder workflow.
     /// </summary>
+    /// <param name="codec">Codec value supplied to the FFmpeg encoder operation and used when producing its result.</param>
+    /// <param name="family">Family value supplied to the FFmpeg encoder operation and used when producing its result.</param>
+    /// <param name="available">Available value supplied to the FFmpeg encoder operation and used when producing its result.</param>
+    /// <param name="executable">Executable value supplied to the FFmpeg encoder operation and used when producing its result.</param>
+    /// <returns>The FFmpeg video encoder produced by the operation.</returns>
     private FfmpegVideoEncoder? Candidate(int codec, string family, HashSet<string> available, string executable)
     {
         try
@@ -1516,8 +1708,11 @@ public sealed class FfmpegEncoderResolver(
     }
 
     /// <summary>
-    /// Runs the software fallback operation.
+    /// Performs software fallback for <see cref="FfmpegEncoderResolver"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg encoder workflow.
     /// </summary>
+    /// <param name="codec">Codec value supplied to the FFmpeg encoder operation and used when producing its result.</param>
+    /// <param name="available">Available value supplied to the FFmpeg encoder operation and used when producing its result.</param>
+    /// <returns>The FFmpeg video encoder produced by the operation.</returns>
     private FfmpegVideoEncoder SoftwareFallback(int codec, HashSet<string> available)
     {
         try
@@ -1541,8 +1736,11 @@ public sealed class FfmpegEncoderResolver(
     }
 
     /// <summary>
-    /// Determines whether initialize hardware encoder.
+    /// Determines whether initialize hardware encoder for <see cref="FfmpegEncoderResolver"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg encoder workflow.
     /// </summary>
+    /// <param name="executable">Executable value supplied to the FFmpeg encoder operation and used when producing its result.</param>
+    /// <param name="encoder">Encoder value supplied to the FFmpeg encoder operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool CanInitializeHardwareEncoder(string executable, string encoder)
     {
         try
@@ -1596,8 +1794,10 @@ public sealed class FfmpegEncoderResolver(
     }
 
     /// <summary>
-    /// Runs the options for operation.
+    /// Performs options for for <see cref="FfmpegEncoderResolver"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg encoder workflow.
     /// </summary>
+    /// <param name="encoder">Encoder value supplied to the FFmpeg encoder operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IReadOnlyList<string> OptionsFor(string encoder) {
         try
         {
@@ -1621,8 +1821,10 @@ public sealed class FfmpegEncoderResolver(
     }
 
     /// <summary>
-    /// Runs the probe operation.
+    /// Performs probe for <see cref="FfmpegEncoderResolver"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg encoder workflow.
     /// </summary>
+    /// <param name="executable">Executable value supplied to the FFmpeg encoder operation and used when producing its result.</param>
+    /// <returns>The hash set string produced by the operation.</returns>
     private HashSet<string> Probe(string executable)
     {
         try
@@ -1675,119 +1877,145 @@ public sealed class FfmpegEncoderResolver(
 }
 
 /// <summary>
-/// Represents a media output definition.
+/// Represents a media output definition application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public sealed class MediaOutputDefinition
 {
     /// <summary>
-    /// Gets or sets output identifier.
+    /// Gets or sets the stable output identifier used to identify or correlate this media output definition instance with related application state.
     /// </summary>
+    /// <value>The output identifier value exposed by <see cref="MediaOutputDefinition"/>.</value>
     public Guid OutputId { get; set; }
     /// <summary>
-    /// Gets or sets the display name.
+    /// Gets or sets the name value that forms part of the media output definition state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The name value exposed by <see cref="MediaOutputDefinition"/>.</value>
     public string Name { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets provider.
+    /// Gets or sets the provider value that forms part of the media output definition state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The provider value exposed by <see cref="MediaOutputDefinition"/>.</value>
     public int Provider { get; set; }
     /// <summary>
-    /// Gets or sets transport.
+    /// Gets or sets the transport value that forms part of the media output definition state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The transport value exposed by <see cref="MediaOutputDefinition"/>.</value>
     public int Transport { get; set; }
     /// <summary>
-    /// Gets or sets endpoint.
+    /// Gets or sets the endpoint that identifies the network or application endpoint associated with this media output definition state.
     /// </summary>
+    /// <value>The endpoint value exposed by <see cref="MediaOutputDefinition"/>.</value>
     public string Endpoint { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets channel identifier.
+    /// Gets or sets the stable channel identifier used to identify or correlate this media output definition instance with related application state.
     /// </summary>
+    /// <value>The channel identifier value exposed by <see cref="MediaOutputDefinition"/>.</value>
     public string ChannelId { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets account name.
+    /// Gets or sets the account name value that forms part of the media output definition state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The account name value exposed by <see cref="MediaOutputDefinition"/>.</value>
     public string AccountName { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets secret.
+    /// Gets or sets the secret value that forms part of the media output definition state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The secret value exposed by <see cref="MediaOutputDefinition"/>.</value>
     public string Secret { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets chat enabled.
+    /// Gets or sets a value indicating whether chat enabled applies to the media output definition state.
     /// </summary>
+    /// <value>The chat enabled value exposed by <see cref="MediaOutputDefinition"/>.</value>
     public bool ChatEnabled { get; set; }
     /// <summary>
-    /// Gets or sets chat secret.
+    /// Gets or sets the chat secret value that forms part of the media output definition state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The chat secret value exposed by <see cref="MediaOutputDefinition"/>.</value>
     public string ChatSecret { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets test mode.
+    /// Gets or sets a value indicating whether test mode applies to the media output definition state.
     /// </summary>
+    /// <value>The test mode value exposed by <see cref="MediaOutputDefinition"/>.</value>
     public bool TestMode { get; set; }
     /// <summary>
-    /// Gets or sets width.
+    /// Gets or sets the width value that forms part of the media output definition state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The width value exposed by <see cref="MediaOutputDefinition"/>.</value>
     public int Width { get; set; }
     /// <summary>
-    /// Gets or sets height.
+    /// Gets or sets the height value that forms part of the media output definition state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The height value exposed by <see cref="MediaOutputDefinition"/>.</value>
     public int Height { get; set; }
     /// <summary>
-    /// Gets or sets frame rate.
+    /// Gets or sets the frame rate value that forms part of the media output definition state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The frame rate value exposed by <see cref="MediaOutputDefinition"/>.</value>
     public int FrameRate { get; set; }
     /// <summary>
-    /// Gets or sets video bitrate kbps.
+    /// Gets or sets the video bitrate kbps value that forms part of the media output definition state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The video bitrate kbps value exposed by <see cref="MediaOutputDefinition"/>.</value>
     public int VideoBitrateKbps { get; set; }
     /// <summary>
-    /// Gets or sets audio bitrate kbps.
+    /// Gets or sets the audio bitrate kbps value that forms part of the media output definition state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The audio bitrate kbps value exposed by <see cref="MediaOutputDefinition"/>.</value>
     public int AudioBitrateKbps { get; set; }
     /// <summary>
-    /// Gets or sets key frame interval seconds.
+    /// Gets or sets the key frame interval seconds value that forms part of the media output definition state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The key frame interval seconds value exposed by <see cref="MediaOutputDefinition"/>.</value>
     public int KeyFrameIntervalSeconds { get; set; }
     /// <summary>
-    /// Gets or sets video codec.
+    /// Gets or sets the video codec value that forms part of the media output definition state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The video codec value exposed by <see cref="MediaOutputDefinition"/>.</value>
     public int VideoCodec { get; set; }
     /// <summary>
-    /// Gets or sets audio codec.
+    /// Gets or sets the audio codec value that forms part of the media output definition state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The audio codec value exposed by <see cref="MediaOutputDefinition"/>.</value>
     public int AudioCodec { get; set; }
 }
 
 /// <summary>
-/// Represents a media recording definition.
+/// Represents a media recording definition application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 public sealed class MediaRecordingDefinition
 {
     /// <summary>
-    /// Gets or sets whether the feature is enabled.
+    /// Gets or sets a value indicating whether the option is enabled applies to the media recording definition state.
     /// </summary>
+    /// <value>The enabled value exposed by <see cref="MediaRecordingDefinition"/>.</value>
     public bool Enabled { get; set; }
     /// <summary>
-    /// Gets or sets destination directory.
+    /// Gets or sets the destination directory used by this media recording definition instance to locate the associated file-system resource.
     /// </summary>
+    /// <value>The destination directory value exposed by <see cref="MediaRecordingDefinition"/>.</value>
     public string DestinationDirectory { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets variant.
+    /// Gets or sets the variant value that forms part of the media recording definition state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The variant value exposed by <see cref="MediaRecordingDefinition"/>.</value>
     public int Variant { get; set; }
     /// <summary>
-    /// Gets or sets selected output identifiers.
+    /// Gets or sets the selected output identifiers collection maintained or exposed by this media recording definition instance for downstream processing.
     /// </summary>
+    /// <value>The selected output identifiers value exposed by <see cref="MediaRecordingDefinition"/>.</value>
     public HashSet<Guid> SelectedOutputIds { get; set; } = [];
     /// <summary>
-    /// Gets or sets container.
+    /// Gets or sets the container value that forms part of the media recording definition state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The container value exposed by <see cref="MediaRecordingDefinition"/>.</value>
     public string Container { get; set; } = string.Empty;
     /// <summary>
-    /// Gets or sets segment seconds.
+    /// Gets or sets the segment seconds value that forms part of the media recording definition state consumed or produced by the surrounding workflow.
     /// </summary>
+    /// <value>The segment seconds value exposed by <see cref="MediaRecordingDefinition"/>.</value>
     public int SegmentSeconds { get; set; }
     /// <summary>
-    /// Gets or sets remux to mp4 after stop.
+    /// Gets or sets a value indicating whether remux to mp4 after stop applies to the media recording definition state.
     /// </summary>
+    /// <value>The remux to mp4 after stop value exposed by <see cref="MediaRecordingDefinition"/>.</value>
     public bool RemuxToMp4AfterStop { get; set; }
 }

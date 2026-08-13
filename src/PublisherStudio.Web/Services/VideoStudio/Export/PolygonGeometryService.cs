@@ -4,48 +4,65 @@ using PublisherStudio.BusinessObjects;
 namespace PublisherStudio.Services.VideoStudio.Export;
 
 /// <summary>
-/// Defines the polygon geometry service contract.
+/// Defines the contract for polygon geometry behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
 public interface IPolygonGeometryService
 {
     /// <summary>
-    /// Runs the normalize operation.
+    /// Performs normalize as part of the polygon geometry service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="points">Media frame point dependency used by the polygon geometry workflow to provide the corresponding application capability.</param>
+    /// <returns>The collection produced by the operation.</returns>
     List<MediaFramePoint> Normalize(IEnumerable<MediaFramePoint>? points);
     /// <summary>
-    /// Runs the full frame operation.
+    /// Performs full frame as part of the polygon geometry service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     List<MediaFramePoint> FullFrame();
     /// <summary>
-    /// Runs the resample operation.
+    /// Performs resample as part of the polygon geometry service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="points">Media frame point dependency used by the polygon geometry workflow to provide the corresponding application capability.</param>
+    /// <param name="count">Count value supplied to the polygon geometry operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     List<MediaFramePoint> Resample(IReadOnlyList<MediaFramePoint> points, int count);
     /// <summary>
-    /// Runs the clone operation.
+    /// Performs clone as part of the polygon geometry service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="point">Point value supplied to the polygon geometry operation and used when producing its result.</param>
+    /// <returns>The media frame point produced by the operation.</returns>
     MediaFramePoint Clone(MediaFramePoint point);
     /// <summary>
-    /// Runs the distance operation.
+    /// Performs distance as part of the polygon geometry service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="deltaX">Delta x value supplied to the polygon geometry operation and used when producing its result.</param>
+    /// <param name="deltaY">Delta y value supplied to the polygon geometry operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     double Distance(double deltaX, double deltaY);
     /// <summary>
-    /// Runs the to open scad points operation.
+    /// Performs to open OpenSCAD points as part of the polygon geometry service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="points">Media frame point dependency used by the polygon geometry workflow to provide the corresponding application capability.</param>
+    /// <returns>The string produced by the operation.</returns>
     string ToOpenScadPoints(IEnumerable<MediaFramePoint> points);
     /// <summary>
-    /// Runs the number operation.
+    /// Performs number as part of the polygon geometry service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the polygon geometry operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     string Number(double value);
 }
 
 /// <summary>
-/// Provides polygon geometry service operations.
+/// Coordinates polygon geometry behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
 public sealed class PolygonGeometryService : IPolygonGeometryService
 {
     /// <summary>
-    /// Runs the normalize operation.
+    /// Performs normalize as part of the polygon geometry service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="points">Media frame point dependency used by the polygon geometry workflow to provide the corresponding application capability.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public List<MediaFramePoint> Normalize(IEnumerable<MediaFramePoint>? points) {
     try
     {
@@ -68,8 +85,9 @@ public sealed class PolygonGeometryService : IPolygonGeometryService
 }
 
     /// <summary>
-    /// Runs the full frame operation.
+    /// Performs full frame as part of the polygon geometry service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public List<MediaFramePoint> FullFrame() {
     try
     {
@@ -86,8 +104,11 @@ public sealed class PolygonGeometryService : IPolygonGeometryService
 }
 
     /// <summary>
-    /// Runs the resample operation.
+    /// Performs resample as part of the polygon geometry service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="points">Media frame point dependency used by the polygon geometry workflow to provide the corresponding application capability.</param>
+    /// <param name="count">Count value supplied to the polygon geometry operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public List<MediaFramePoint> Resample(IReadOnlyList<MediaFramePoint> points, int count)
     {
     try
@@ -129,8 +150,10 @@ public sealed class PolygonGeometryService : IPolygonGeometryService
 }
 
     /// <summary>
-    /// Runs the clone operation.
+    /// Performs clone as part of the polygon geometry service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="point">Point value supplied to the polygon geometry operation and used when producing its result.</param>
+    /// <returns>The media frame point produced by the operation.</returns>
     public MediaFramePoint Clone(MediaFramePoint point) {
     try
     {
@@ -144,8 +167,11 @@ public sealed class PolygonGeometryService : IPolygonGeometryService
 }
 
     /// <summary>
-    /// Runs the distance operation.
+    /// Performs distance as part of the polygon geometry service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="deltaX">Delta x value supplied to the polygon geometry operation and used when producing its result.</param>
+    /// <param name="deltaY">Delta y value supplied to the polygon geometry operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     public double Distance(double deltaX, double deltaY)
     {
     try
@@ -165,8 +191,10 @@ public sealed class PolygonGeometryService : IPolygonGeometryService
 }
 
     /// <summary>
-    /// Runs the to open scad points operation.
+    /// Performs to open OpenSCAD points as part of the polygon geometry service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="points">Media frame point dependency used by the polygon geometry workflow to provide the corresponding application capability.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string ToOpenScadPoints(IEnumerable<MediaFramePoint> points) {
     try
     {
@@ -180,8 +208,10 @@ public sealed class PolygonGeometryService : IPolygonGeometryService
 }
 
     /// <summary>
-    /// Runs the number operation.
+    /// Performs number as part of the polygon geometry service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the polygon geometry operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string Number(double value) {
     try
     {

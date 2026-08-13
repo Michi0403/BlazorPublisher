@@ -6,8 +6,14 @@ using PublisherStudio.Services.Streaming.Encoding;
 namespace PublisherStudio.Services.Streaming.Capture;
 
 /// <summary>
-/// Represents a discovered native media device info.
+/// Represents a discovered native media device info application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="Id">Identifier of the resource to use for this operation.</param>
+/// <param name="Name">Name value supplied to the discovered native media device info operation and used when producing its result.</param>
+/// <param name="Kind">Kind value supplied to the discovered native media device info operation and used when producing its result.</param>
+/// <param name="Backend">Backend value supplied to the discovered native media device info operation and used when producing its result.</param>
+/// <param name="ProcessId">Identifier of the process to use for this operation.</param>
+/// <param name="WindowTitle">Window title value supplied to the discovered native media device info operation and used when producing its result.</param>
 public sealed record DiscoveredNativeMediaDeviceInfo(
     string Id,
     string Name,
@@ -17,16 +23,22 @@ public sealed record DiscoveredNativeMediaDeviceInfo(
     string? WindowTitle = null);
 
 /// <summary>
-/// Represents a native device discovery.
+/// Represents a native device discovery application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="ffmpegLocator">Ffmpeg locator value supplied to the native device discovery operation and used when producing its result.</param>
+/// <param name="runtimePatterns">Publisher runtime pattern service dependency used by the native device discovery workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class NativeDeviceDiscovery(
     FfmpegLocator ffmpegLocator,
     IPublisherRuntimePatternService runtimePatterns,
     ILogger<NativeDeviceDiscovery> logger)
 {
     /// <summary>
-    /// Runs the discover async operation.
+    /// Performs discover for <see cref="NativeDeviceDiscovery"/>, keeping the operation consistent with the state and invariants of the surrounding native device discovery workflow.
     /// </summary>
+    /// <param name="ffmpegPath">Ffmpeg path value supplied to the native device discovery operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public async Task<IReadOnlyList<DiscoveredNativeMediaDeviceInfo>> DiscoverAsync(
         string? ffmpegPath,
         CancellationToken cancellationToken)
@@ -66,8 +78,11 @@ public sealed class NativeDeviceDiscovery(
     }
 
     /// <summary>
-    /// Runs the discover direct show async operation.
+    /// Discovers direct show for <see cref="NativeDeviceDiscovery"/>, keeping the operation consistent with the state and invariants of the surrounding native device discovery workflow.
     /// </summary>
+    /// <param name="ffmpegPath">Ffmpeg path value supplied to the native device discovery operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private async Task<IReadOnlyList<DiscoveredNativeMediaDeviceInfo>> DiscoverDirectShowAsync(
         string? ffmpegPath,
         CancellationToken cancellationToken)
@@ -111,8 +126,11 @@ public sealed class NativeDeviceDiscovery(
     }
 
     /// <summary>
-    /// Runs the discover av foundation async operation.
+    /// Discovers av foundation for <see cref="NativeDeviceDiscovery"/>, keeping the operation consistent with the state and invariants of the surrounding native device discovery workflow.
     /// </summary>
+    /// <param name="ffmpegPath">Ffmpeg path value supplied to the native device discovery operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private async Task<IReadOnlyList<DiscoveredNativeMediaDeviceInfo>> DiscoverAvFoundationAsync(
         string? ffmpegPath,
         CancellationToken cancellationToken)
@@ -158,8 +176,9 @@ public sealed class NativeDeviceDiscovery(
     }
 
     /// <summary>
-    /// Runs the discover windows processes operation.
+    /// Discovers windows processes for <see cref="NativeDeviceDiscovery"/>, keeping the operation consistent with the state and invariants of the surrounding native device discovery workflow.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     private IReadOnlyList<DiscoveredNativeMediaDeviceInfo> DiscoverWindowsProcesses()
     {
         try
@@ -201,8 +220,12 @@ public sealed class NativeDeviceDiscovery(
     }
 
     /// <summary>
-    /// Runs the run FFmpeg async operation.
+    /// Performs run FFmpeg for <see cref="NativeDeviceDiscovery"/>, keeping the operation consistent with the state and invariants of the surrounding native device discovery workflow.
     /// </summary>
+    /// <param name="ffmpegPath">Ffmpeg path value supplied to the native device discovery operation and used when producing its result.</param>
+    /// <param name="arguments">String dependency used by the native device discovery workflow to provide the corresponding application capability.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private async Task<string> RunFfmpegAsync(
         string? ffmpegPath,
         IReadOnlyList<string> arguments,

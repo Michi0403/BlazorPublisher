@@ -1,18 +1,23 @@
-﻿using PublisherStudio.BusinessObjects;
+using PublisherStudio.BusinessObjects;
 using System.Text.Json;
 
 namespace PublisherStudio.Services.OrganicPlugins;
 
 /// <summary>
-/// Provides organic wire envelope factory operations.
+/// Creates configured organic wire envelope instances from the application's current dependencies and runtime settings.
 /// </summary>
+/// <param name="codec">Organic plugin protocol codec dependency used by the organic wire envelope workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class OrganicWireEnvelopeFactory(
     IOrganicPluginProtocolCodec codec,
     ILogger<OrganicWireEnvelopeFactory> logger) : IOrganicWireEnvelopeFactory
 {
     /// <summary>
-    /// Creates work envelope.
+    /// Creates work envelope using the configuration and dependencies owned by <see cref="OrganicWireEnvelopeFactory"/>.
     /// </summary>
+    /// <param name="item">Item value supplied to the organic wire envelope operation and used when producing its result.</param>
+    /// <param name="sourcePeerId">Identifier of the source peer to use for this operation.</param>
+    /// <returns>The organic wire envelope produced by the operation.</returns>
     public OrganicWireEnvelope CreateWorkEnvelope(OrganicPluginWorkItem item, string sourcePeerId)
     {
         try

@@ -1,24 +1,28 @@
 namespace PublisherStudio.Services.VideoStudio.Export;
 
 /// <summary>
-/// Defines the browser runtime template service contract.
+/// Defines the contract for browser runtime template behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
 public interface IBrowserRuntimeTemplateService
 {
     /// <summary>
-    /// Creates blob runtime.
+    /// Creates blob runtime as part of the browser runtime template service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="payload">Payload value supplied to the browser runtime template operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     string CreateBlobRuntime(string payload);
 }
 
 /// <summary>
-/// Provides browser runtime template service operations.
+/// Coordinates browser runtime template behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
 public sealed class BrowserRuntimeTemplateService : IBrowserRuntimeTemplateService
 {
     /// <summary>
-    /// Creates blob runtime.
+    /// Creates blob runtime as part of the browser runtime template service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="payload">Payload value supplied to the browser runtime template operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string CreateBlobRuntime(string payload) {
     try
     {

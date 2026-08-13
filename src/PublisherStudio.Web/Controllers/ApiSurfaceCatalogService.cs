@@ -7,16 +7,18 @@ using PublisherStudio.Services.Automation;
 namespace PublisherStudio.Controllers;
 
 /// <summary>MVC adapter for describing the public HTTP surface without leaking MVC into reusable services.</summary>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class ApiSurfaceCatalogService(ILogger<ApiSurfaceCatalogService> logger) : IApiSurfaceCatalogService
 {
     /// <summary>
-    /// Runs the typeof operation.
+    /// Stores the internal assembly state used by <see cref="ApiSurfaceCatalogService"/> while executing its surrounding workflow.
     /// </summary>
     private readonly Assembly assembly = typeof(ApiSurfaceCatalogService).Assembly;
 
     /// <summary>
-    /// Gets surfaces.
+    /// Retrieves surfaces as part of the API surface catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<ApiSurfaceDescriptor> GetSurfaces()
     {
         try
@@ -38,8 +40,10 @@ public sealed class ApiSurfaceCatalogService(ILogger<ApiSurfaceCatalogService> l
     }
 
     /// <summary>
-    /// Creates descriptor.
+    /// Creates descriptor as part of the API surface catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="controller">Controller value supplied to the API surface catalog operation and used when producing its result.</param>
+    /// <returns>The API surface descriptor produced by the operation.</returns>
     private ApiSurfaceDescriptor CreateDescriptor(Type controller)
     {
         try
@@ -93,8 +97,12 @@ public sealed class ApiSurfaceCatalogService(ILogger<ApiSurfaceCatalogService> l
     }
 
     /// <summary>
-    /// Runs the combine route operation.
+    /// Performs combine route as part of the API surface catalog service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="root">Root value supplied to the API surface catalog operation and used when producing its result.</param>
+    /// <param name="controllerName">Controller name value supplied to the API surface catalog operation and used when producing its result.</param>
+    /// <param name="action">Action value supplied to the API surface catalog operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string CombineRoute(string root, string controllerName, string action)
     {
         var routeName = controllerName.EndsWith("Controller", StringComparison.Ordinal)

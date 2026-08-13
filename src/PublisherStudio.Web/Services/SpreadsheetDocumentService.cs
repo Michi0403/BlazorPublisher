@@ -13,16 +13,35 @@ namespace PublisherStudio.Services;
 /// </summary>
 public sealed class SpreadsheetDocumentService
 {
+    /// <summary>
+    /// Stores the publication markup service dependency used by <see cref="SpreadsheetDocumentService"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private readonly IPublicationMarkupService _markup;
+    /// <summary>
+    /// Stores the internal default font style state used by <see cref="SpreadsheetDocumentService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly FontStyle defaultFontStyle;
+    /// <summary>
+    /// Stores the internal default cell style state used by <see cref="SpreadsheetDocumentService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly CellStyle defaultCellStyle;
+    /// <summary>
+    /// Stores the internal main state used by <see cref="SpreadsheetDocumentService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly XNamespace Main = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
+    /// <summary>
+    /// Stores the internal relationships state used by <see cref="SpreadsheetDocumentService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly XNamespace Relationships = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+    /// <summary>
+    /// Stores the internal package relationships state used by <see cref="SpreadsheetDocumentService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly XNamespace PackageRelationships = "http://schemas.openxmlformats.org/package/2006/relationships";
 
     /// <summary>
-    /// Runs the spreadsheet document service operation.
+    /// Initializes a new <see cref="SpreadsheetDocumentService"/> instance and captures the dependencies or initial state required by its spreadsheet document workflow.
     /// </summary>
+    /// <param name="markup">Publication markup service dependency used by the spreadsheet document workflow to provide the corresponding application capability.</param>
     public SpreadsheetDocumentService(IPublicationMarkupService markup)
     {
         _markup = markup ?? throw new ArgumentNullException(nameof(markup));
@@ -31,8 +50,10 @@ public sealed class SpreadsheetDocumentService
     }
 
     /// <summary>
-    /// Creates blank xlsx.
+    /// Creates blank xlsx as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="sheetName">Sheet name value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The byte produced by the operation.</returns>
     public byte[] CreateBlankXlsx(string sheetName = "Sheet1")
     {
     try
@@ -126,8 +147,11 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Runs the detect format operation.
+    /// Performs detect format as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="fileName">File name value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="contentType">Content type value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The spreadsheet storage format produced by the operation.</returns>
     public SpreadsheetStorageFormat DetectFormat(string? fileName, string? contentType = null)
     {
     try
@@ -153,8 +177,10 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Runs the default extension operation.
+    /// Performs default extension as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="format">Format value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string DefaultExtension(SpreadsheetStorageFormat format) {
     try
     {
@@ -175,8 +201,11 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Normalizes workbook file name.
+    /// Normalizes workbook file name as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="fileName">File name value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="format">Format value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string NormalizeWorkbookFileName(string? fileName, SpreadsheetStorageFormat format)
     {
     try
@@ -193,8 +222,12 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Runs the render preview HTML operation.
+    /// Performs render preview HTML as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="content">Content value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="format">Format value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="activeSheetName">Active sheet name value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string RenderPreviewHtml(byte[]? content, SpreadsheetStorageFormat format, out string activeSheetName)
     {
     try
@@ -229,8 +262,10 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Validates workbook content.
+    /// Validates workbook content as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="content">Content value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="format">Format value supplied to the spreadsheet document operation and used when producing its result.</param>
     public void ValidateWorkbookContent(byte[]? content, SpreadsheetStorageFormat format)
     {
     try
@@ -273,8 +308,10 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Determines whether open XML workbook.
+    /// Determines whether open XML workbook as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="content">Content value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool IsOpenXmlWorkbook(byte[]? content)
     {
     try
@@ -300,8 +337,11 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Runs the render open XML operation.
+    /// Performs render open XML as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="content">Content value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="activeSheetName">Active sheet name value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string RenderOpenXml(byte[] content, out string activeSheetName)
     {
     try
@@ -428,8 +468,13 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Runs the render delimited text operation.
+    /// Performs render delimited text as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="content">Content value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="delimiter">Delimiter value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="sheetName">Sheet name value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="activeSheetName">Active sheet name value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string RenderDelimitedText(byte[] content, char delimiter, string sheetName, out string activeSheetName)
     {
     try
@@ -467,8 +512,11 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Runs the detect delimiter operation.
+    /// Performs detect delimiter as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="content">Content value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The char produced by the operation.</returns>
     private char DetectDelimiter(byte[] content, char fallback)
     {
     try
@@ -490,8 +538,11 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Runs the count delimiter operation.
+    /// Performs count delimiter as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="line">Line value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="delimiter">Delimiter value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     private int CountDelimiter(string line, char delimiter)
     {
     try
@@ -518,8 +569,11 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Parses delimited.
+    /// Parses delimited as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="text">Text value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="delimiter">Delimiter value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private List<List<string>> ParseDelimited(string text, char delimiter)
     {
     try
@@ -558,8 +612,12 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Reads cell value.
+    /// Reads cell value as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="cell">Cell value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="sharedStrings">String dependency used by the spreadsheet document workflow to provide the corresponding application capability.</param>
+    /// <param name="style">Style value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ReadCellValue(XElement cell, IReadOnlyList<string> sharedStrings, CellStyle? style)
     {
     try
@@ -589,8 +647,10 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Reads shared strings.
+    /// Reads shared strings as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="archive">Archive value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IReadOnlyList<string> ReadSharedStrings(ZipArchive archive)
     {
     try
@@ -612,8 +672,10 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Reads styles.
+    /// Reads styles as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="archive">Archive value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IReadOnlyList<CellStyle> ReadStyles(ZipArchive archive)
     {
     try
@@ -656,8 +718,10 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Reads font.
+    /// Reads font as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="font">Font value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The font style produced by the operation.</returns>
     private FontStyle ReadFont(XElement font)
     {
     try
@@ -679,8 +743,10 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Reads fill.
+    /// Reads fill as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="fill">Fill value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ReadFill(XElement fill)
     {
     try
@@ -698,8 +764,10 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Reads border.
+    /// Reads border as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="border">Border value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ReadBorder(XElement border)
     {
     try
@@ -723,8 +791,10 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Reads color.
+    /// Reads color as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="color">Color value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ReadColor(XElement? color)
     {
     try
@@ -747,8 +817,11 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Determines whether date format.
+    /// Determines whether date format as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="numberFormatId">Identifier of the number format to use for this operation.</param>
+    /// <param name="custom">Custom value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool IsDateFormat(int numberFormatId, string? custom)
     {
     try
@@ -768,8 +841,10 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Reads merged ranges.
+    /// Reads merged ranges as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="worksheet">Worksheet value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IReadOnlyList<MergedRange> ReadMergedRanges(XDocument worksheet)
     {
     try
@@ -789,8 +864,10 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Reads column widths.
+    /// Reads column widths as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="worksheet">Worksheet value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The dictionary int double produced by the operation.</returns>
     private Dictionary<int, double> ReadColumnWidths(XDocument worksheet)
     {
     try
@@ -814,8 +891,10 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Parses range.
+    /// Parses range as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The merged range produced by the operation.</returns>
     private MergedRange? ParseRange(string? value)
     {
     try
@@ -835,8 +914,10 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Runs the column name operation.
+    /// Performs column name as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="column">Column value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ColumnName(int column)
     {
     try
@@ -860,8 +941,11 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Parses cell reference.
+    /// Parses cell reference as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="reference">Reference value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="fallbackRow">Fallback row value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The int row int column produced by the operation.</returns>
     private (int Row, int Column) ParseCellReference(string? reference, int fallbackRow)
     {
         if (string.IsNullOrWhiteSpace(reference)) return (fallbackRow, 1);
@@ -877,8 +961,11 @@ public sealed class SpreadsheetDocumentService
     }
 
     /// <summary>
-    /// Loads entry.
+    /// Loads entry as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="archive">Archive value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="path">Path value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The x document produced by the operation.</returns>
     private XDocument LoadEntry(ZipArchive archive, string path)
     {
     try
@@ -896,8 +983,11 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Normalizes archive path.
+    /// Normalizes archive path as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="baseFolder">Base folder value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="target">Target value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeArchivePath(string baseFolder, string target)
     {
     try
@@ -921,8 +1011,10 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Runs the decode text operation.
+    /// Performs decode text as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="content">Content value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string DecodeText(byte[] content)
     {
     try
@@ -942,8 +1034,11 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Runs the empty preview operation.
+    /// Performs empty preview as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="sheetName">Sheet name value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="message">Message value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string EmptyPreview(string sheetName, string message) {
     try
     {
@@ -957,8 +1052,11 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Writes entry.
+    /// Writes entry as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="archive">Archive value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="path">Path value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="content">Content value supplied to the spreadsheet document operation and used when producing its result.</param>
     private void WriteEntry(ZipArchive archive, string path, string content)
     {
     try
@@ -976,8 +1074,10 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Normalizes font family.
+    /// Normalizes font family as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeFontFamily(string? value)
     {
     try
@@ -998,8 +1098,10 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Normalizes sheet name.
+    /// Normalizes sheet name as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeSheetName(string value)
     {
     try
@@ -1017,8 +1119,10 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Runs the security element escape operation.
+    /// Performs security element escape as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string SecurityElementEscape(string value) {
     try
     {
@@ -1031,8 +1135,11 @@ public sealed class SpreadsheetDocumentService
     }
 }
     /// <summary>
-    /// Parses int.
+    /// Parses int as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     private int ParseInt(string? value, int fallback) {
     try
     {
@@ -1045,8 +1152,11 @@ public sealed class SpreadsheetDocumentService
     }
 }
     /// <summary>
-    /// Parses double.
+    /// Parses double as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double ParseDouble(string? value, double fallback) {
     try
     {
@@ -1059,8 +1169,10 @@ public sealed class SpreadsheetDocumentService
     }
 }
     /// <summary>
-    /// Parses bool.
+    /// Parses bool as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool ParseBool(string? value) {
     try
     {
@@ -1074,8 +1186,10 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Runs the CSS text operation.
+    /// Performs CSS text as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="value">Value value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string CssText(string value) {
     try
     {
@@ -1089,25 +1203,46 @@ public sealed class SpreadsheetDocumentService
 }
 
     /// <summary>
-    /// Represents a cell preview.
+    /// Represents a cell preview helper type nested within <see cref="SpreadsheetDocumentService"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
+    /// <param name="Value">Value value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="StyleIndex">Style index value supplied to the spreadsheet document operation and used when producing its result.</param>
     private sealed record CellPreview(string Value, int StyleIndex);
     /// <summary>
-    /// Represents a merged range.
+    /// Represents a merged range helper type nested within <see cref="SpreadsheetDocumentService"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
+    /// <param name="StartRow">Start row value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="StartColumn">Start column value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="EndRow">End row value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="EndColumn">End column value supplied to the spreadsheet document operation and used when producing its result.</param>
     private sealed record MergedRange(int StartRow, int StartColumn, int EndRow, int EndColumn);
     /// <summary>
-    /// Represents a font style.
+    /// Represents a font style helper type nested within <see cref="SpreadsheetDocumentService"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
+    /// <param name="Family">Family value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="SizePt">Size pt value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="Bold">Value indicating whether bold should apply to this operation.</param>
+    /// <param name="Italic">Value indicating whether italic should apply to this operation.</param>
+    /// <param name="Underline">Value indicating whether underline should apply to this operation.</param>
+    /// <param name="Color">Color value supplied to the spreadsheet document operation and used when producing its result.</param>
     private sealed record FontStyle(string Family, double SizePt, bool Bold, bool Italic, bool Underline, string Color);
     /// <summary>
-    /// Represents a cell style.
+    /// Represents a cell style helper type nested within <see cref="SpreadsheetDocumentService"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
+    /// <param name="Font">Font value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="Fill">Fill value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="Border">Border value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="Horizontal">Horizontal value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="Vertical">Vertical value supplied to the spreadsheet document operation and used when producing its result.</param>
+    /// <param name="Wrap">Value indicating whether wrap should apply to this operation.</param>
+    /// <param name="IsDate">Value indicating whether date should apply to this operation.</param>
     private sealed record CellStyle(FontStyle Font, string Fill, string Border, string? Horizontal, string? Vertical, bool Wrap, bool IsDate)
     {
         /// <summary>
-        /// Runs the to CSS operation.
+        /// Performs to CSS for <see cref="CellStyle"/>, keeping the operation consistent with the state and invariants of the surrounding cell style workflow.
         /// </summary>
+        /// <param name="cssText">Css text value supplied to the cell style operation and used when producing its result.</param>
+        /// <returns>The string produced by the operation.</returns>
         public string ToCss(Func<string, string> cssText)
         {
     try

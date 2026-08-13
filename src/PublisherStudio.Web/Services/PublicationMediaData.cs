@@ -3,13 +3,17 @@ using PublisherStudio.BusinessObjects;
 namespace PublisherStudio.Services;
 
 /// <summary>
-/// Represents a publication media data.
+/// Represents a publication media data application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class PublicationMediaData(ILogger<PublicationMediaData> logger)
 {
     /// <summary>
-    /// Normalizes mime type.
+    /// Normalizes MIME type for <see cref="PublicationMediaData"/>, keeping the operation consistent with the state and invariants of the surrounding publication media data workflow.
     /// </summary>
+    /// <param name="mimeType">Mime type value supplied to the publication media data operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the publication media data operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string NormalizeMimeType(string? mimeType, string fallback)
     {
     try
@@ -32,8 +36,11 @@ public sealed class PublicationMediaData(ILogger<PublicationMediaData> logger)
 }
 
     /// <summary>
-    /// Normalizes data URL.
+    /// Normalizes data URL for <see cref="PublicationMediaData"/>, keeping the operation consistent with the state and invariants of the surrounding publication media data workflow.
     /// </summary>
+    /// <param name="dataUrl">Data url value supplied to the publication media data operation and used when producing its result.</param>
+    /// <param name="fallbackMimeType">Fallback mime type value supplied to the publication media data operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     public string NormalizeDataUrl(string? dataUrl, string fallbackMimeType)
     {
     try

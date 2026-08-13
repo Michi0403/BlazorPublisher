@@ -298,6 +298,7 @@
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-page" Text="Transparent page" Click="SetTransparentPage" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-page" Text="White page" Click="SetWhitePage" />
             </DxRibbonItem>
+            <DxRibbonItem IconCssClass="pub-icon pub-icon-effects" Text="Custom color & page effects…" IsPrimary="true" Click="RequestPageEffects" />
         </DxRibbonGroup>
         <DxRibbonGroup Text="Guides">
             <DxRibbonItem IconCssClass="pub-icon pub-icon-guide" Text="Guide commands" DropDownCssClass="publisher-ribbon-menu">
@@ -693,6 +694,7 @@
     [Parameter] public EventCallback OnTogglePanelLibrary { get; set; }
     [Parameter] public EventCallback OnOpenMediaConverter { get; set; }
     [Parameter] public EventCallback OnPreviewPageAnimations { get; set; }
+    [Parameter] public EventCallback OnEditPageEffects { get; set; }
     [Parameter] public EventCallback OnPreviewObjectAnimations { get; set; }
     [Parameter] public EventCallback OnStopAnimations { get; set; }
     [Parameter] public StreamingSessionSnapshot Streaming { get; set; } = new();
@@ -799,6 +801,7 @@
     private void ToggleContentPan() => State.ToggleContentPanMode();
     private void ResetContentViewport() => State.ResetContentViewport();
     private Task RequestPreviewPageAnimations() => OnPreviewPageAnimations.InvokeAsync();
+    private Task RequestPageEffects() => OnEditPageEffects.InvokeAsync();
     private Task RequestPreviewObjectAnimations() => OnPreviewObjectAnimations.InvokeAsync();
     private Task RequestStopAnimations() => OnStopAnimations.InvokeAsync();
 

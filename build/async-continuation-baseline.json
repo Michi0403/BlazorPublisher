@@ -116,7 +116,7 @@
       "minConfigureAwaitFalseCount": 0
     },
     "Components/Pages/Editor.razor": {
-      "maxUnconfiguredAwaitCount": 145,
+      "maxUnconfiguredAwaitCount": 152,
       "maxConfigureAwaitTrueCount": 0,
       "minConfigureAwaitFalseCount": 0
     },

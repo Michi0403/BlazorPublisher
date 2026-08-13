@@ -24,7 +24,7 @@ public sealed class PublicationDocument
     /// Gets or sets the format version value that forms part of the publication state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The format version value exposed by <see cref="PublicationDocument"/>.</value>
-    public string FormatVersion { get; set; } = "1.56";
+    public string FormatVersion { get; set; } = "1.57";
     /// <summary>
     /// Gets or sets the modified UTC associated with this publication state, using the time semantics implied by the member name.
     /// </summary>
@@ -203,8 +203,100 @@ public sealed class PublicationPage
     /// </summary>
     /// <value>The timeline duration seconds value exposed by <see cref="PublicationPage"/>.</value>
     public double TimelineDurationSeconds { get; set; } = 10;
+    /// <summary>Gets or sets non-interactive visual layers that cover the complete page without entering normal object Z-order.</summary>
+    /// <value>The effect layers value exposed by <see cref="PublicationPage"/>.</value>
+    public List<PublicationPageEffectLayer> EffectLayers { get; set; } = [];
 
 }
+
+/// <summary>Represents a full-page visual effect layer with an optional from/to animation.</summary>
+public sealed class PublicationPageEffectLayer
+{
+    /// <summary>
+    /// Gets or sets the stable identifier used to identify or correlate this publication page effect layer instance with related application state.
+    /// </summary>
+    /// <value>The identifier value exposed by <see cref="PublicationPageEffectLayer"/>.</value>
+    public Guid Id { get; set; } = Guid.NewGuid();
+    /// <summary>
+    /// Gets or sets the name value that forms part of the publication page effect layer state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The name value exposed by <see cref="PublicationPageEffectLayer"/>.</value>
+    public string Name { get; set; } = "Page color effect";
+    /// <summary>Gets or sets whether the effect participates in rendering and export.</summary>
+    /// <value>The visible value exposed by <see cref="PublicationPageEffectLayer"/>.</value>
+    public bool Visible { get; set; } = true;
+    /// <summary>Gets or sets whether the layer renders behind or above ordinary page objects.</summary>
+    /// <value>The placement value exposed by <see cref="PublicationPageEffectLayer"/>.</value>
+    public PublicationPageEffectPlacement Placement { get; set; } = PublicationPageEffectPlacement.Background;
+    /// <summary>
+    /// Gets or sets the kind value that forms part of the publication page effect layer state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The kind value exposed by <see cref="PublicationPageEffectLayer"/>.</value>
+    public PublicationPageEffectKind Kind { get; set; } = PublicationPageEffectKind.SolidColor;
+    /// <summary>
+    /// Gets or sets the color value that forms part of the publication page effect layer state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The color value exposed by <see cref="PublicationPageEffectLayer"/>.</value>
+    public string Color { get; set; } = "#ffffff";
+    /// <summary>
+    /// Gets or sets the secondary color value that forms part of the publication page effect layer state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The secondary color value exposed by <see cref="PublicationPageEffectLayer"/>.</value>
+    public string SecondaryColor { get; set; } = "#dbeafe";
+    /// <summary>Gets or sets the final color used when animation is enabled.</summary>
+    /// <value>The to color value exposed by <see cref="PublicationPageEffectLayer"/>.</value>
+    public string ToColor { get; set; } = "#60a5fa";
+    /// <summary>Gets or sets the final secondary gradient color used when animation is enabled.</summary>
+    /// <value>The to secondary color value exposed by <see cref="PublicationPageEffectLayer"/>.</value>
+    public string ToSecondaryColor { get; set; } = "#ede9fe";
+    /// <summary>
+    /// Gets or sets the opacity value that forms part of the publication page effect layer state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The opacity value exposed by <see cref="PublicationPageEffectLayer"/>.</value>
+    public double Opacity { get; set; } = 1;
+    /// <summary>
+    /// Gets or sets the to opacity value that forms part of the publication page effect layer state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The to opacity value exposed by <see cref="PublicationPageEffectLayer"/>.</value>
+    public double ToOpacity { get; set; } = 1;
+    /// <summary>
+    /// Gets or sets the angle degrees value that forms part of the publication page effect layer state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The angle degrees value exposed by <see cref="PublicationPageEffectLayer"/>.</value>
+    public double AngleDegrees { get; set; } = 45;
+    /// <summary>
+    /// Gets or sets the blend mode value that forms part of the publication page effect layer state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The blend mode value exposed by <see cref="PublicationPageEffectLayer"/>.</value>
+    public PublicationPageEffectBlendMode BlendMode { get; set; } = PublicationPageEffectBlendMode.Normal;
+    /// <summary>Gets or sets whether the effect cross-fades from its start fill to its final fill.</summary>
+    /// <value>The animation enabled value exposed by <see cref="PublicationPageEffectLayer"/>.</value>
+    public bool AnimationEnabled { get; set; }
+    /// <summary>
+    /// Gets or sets the duration seconds value that forms part of the publication page effect layer state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The duration seconds value exposed by <see cref="PublicationPageEffectLayer"/>.</value>
+    public double DurationSeconds { get; set; } = 1;
+    /// <summary>
+    /// Gets or sets the delay seconds value that forms part of the publication page effect layer state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The delay seconds value exposed by <see cref="PublicationPageEffectLayer"/>.</value>
+    public double DelaySeconds { get; set; }
+    /// <summary>
+    /// Gets or sets the repeat count that quantifies the associated publication page effect layer data.
+    /// </summary>
+    /// <value>The repeat count value exposed by <see cref="PublicationPageEffectLayer"/>.</value>
+    public int RepeatCount { get; set; } = 1;
+    /// <summary>Gets or sets whether repeated animation alternates back to the start state.</summary>
+    /// <value>The auto reverse value exposed by <see cref="PublicationPageEffectLayer"/>.</value>
+    public bool AutoReverse { get; set; }
+    /// <summary>
+    /// Gets or sets the easing value that forms part of the publication page effect layer state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The easing value exposed by <see cref="PublicationPageEffectLayer"/>.</value>
+    public PublicationAnimationEasing Easing { get; set; } = PublicationAnimationEasing.EaseInOut;
+}
+
 
 /// <summary>
 /// Represents a guide line application type, grouping the state and behavior that belong to that domain concept.
@@ -240,6 +332,12 @@ public enum MeasurementUnit { Millimeter, Centimeter, Inch, Pixel }
 /// Defines the supported publication canvas zoom mode values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PublicationCanvasZoomMode { CssLayout, Transform }
+/// <summary>Defines a page-wide visual effect layer fill.</summary>
+public enum PublicationPageEffectKind { SolidColor, LinearGradient, RadialGradient }
+/// <summary>Defines whether a page effect is below or above ordinary publication objects.</summary>
+public enum PublicationPageEffectPlacement { Background, Overlay }
+/// <summary>Defines the local blend operation used by a page effect layer.</summary>
+public enum PublicationPageEffectBlendMode { Normal, Multiply, Screen, Overlay, Darken, Lighten }
 /// <summary>
 /// Defines the supported publication HTML export support values used to select or describe behavior in the surrounding workflow.
 /// </summary>

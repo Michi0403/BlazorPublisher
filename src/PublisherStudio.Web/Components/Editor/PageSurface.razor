@@ -54,6 +54,7 @@
              data-auto-advance="@State.CurrentPage.Transition.AutoAdvance.ToString().ToLowerInvariant()"
              data-auto-advance-seconds="@Inv(State.CurrentPage.Transition.AutoAdvanceSeconds)"
              data-timeline-duration="@Inv(State.CurrentPage.TimelineDurationSeconds)">
+            <PageEffectLayerRenderer Page="State.CurrentPage" Placement="PublicationPageEffectPlacement.Background" />
             @if (State.Document.View.GuidesVisible)
             {
                 @foreach (var guide in State.CurrentPage.Guides)
@@ -275,6 +276,7 @@
                     }
                 </div>
             }
+            <PageEffectLayerRenderer Page="State.CurrentPage" Placement="PublicationPageEffectPlacement.Overlay" />
             <div class="publisher-selection-visual-frame" data-selection-visual-frame hidden aria-hidden="true">
                 @foreach (var handle in Handles)
                 {

@@ -22,6 +22,7 @@
                  data-auto-advance="@publicationPage.Transition.AutoAdvance.ToString().ToLowerInvariant()"
                  data-auto-advance-seconds="@Inv(publicationPage.Transition.AutoAdvanceSeconds)"
                  data-timeline-duration="@Inv(publicationPage.TimelineDurationSeconds)">
+            <PageEffectLayerRenderer Page="publicationPage" Placement="PublicationPageEffectPlacement.Background" />
             @foreach (var element in publicationPage.Elements.Where(e => e.Visible).OrderBy(e => e.ZIndex))
             {
                 @if (element is ConnectorElement connector && ConnectorGeometryService.TryResolve(publicationPage, connector, out var sourcePoint, out var targetPoint))
@@ -157,6 +158,7 @@
                     </div>
                 }
             }
+            <PageEffectLayerRenderer Page="publicationPage" Placement="PublicationPageEffectPlacement.Overlay" />
         </section>
     }
 </div>

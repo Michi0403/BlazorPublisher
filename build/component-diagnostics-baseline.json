@@ -234,6 +234,11 @@
       "minCatchBlocks": 0,
       "minLogCalls": 0,
       "minNotificationCalls": 0
+    },
+    "Components/Editor/PageEffectLayerRenderer.razor": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
     }
   },
   "schemaVersion": 1,

@@ -44,7 +44,7 @@ try:
     require("src/PublisherStudio.Web/Services/Panels/PanelDocumentService.cs",
             "Width = 120", "Height = 67.5", "CanvasWidth = 160", "CanvasHeight = 90",
             "LayoutMode = PublicationPanelLayoutMode.FixedCanvas")
-    require("src/PublisherStudio.Web/BusinessObjects/PublicationModels.cs", 'FormatVersion { get; set; } = "1.56"', "RasterJpegQuality", "CompressPageArchives")
+    require("src/PublisherStudio.Web/BusinessObjects/PublicationModels.cs", 'FormatVersion { get; set; } = "1.57"', "RasterJpegQuality", "CompressPageArchives")
     print("PublisherStudio 2.6.0 data/panel/media source audit passed: typed data maintenance, validation UI, dispatcher safety, capture/disposal guards, named media drag-out, export compression controls, and aspect-safe previews are wired.")
 except AssertionError as exc:
     print(f"PublisherStudio 2.6.0 data/panel/media source audit failed: {exc}", file=sys.stderr)

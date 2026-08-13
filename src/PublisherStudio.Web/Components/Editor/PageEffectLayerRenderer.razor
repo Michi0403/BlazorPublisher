@@ -1,0 +1,56 @@
+@namespace PublisherStudio.Components.Editor
+
+@foreach (var effect in Page.EffectLayers.Where(item => item.Visible && item.Placement == Placement))
+{
+    <div class="publication-page-effect @(Placement == PublicationPageEffectPlacement.Overlay ? "page-effect-overlay" : "page-effect-background") @(effect.AnimationEnabled ? "page-effect-animated" : null)"
+         data-page-effect-id="@effect.Id"
+         data-page-effect-placement="@effect.Placement"
+         style="@LayerStyle(effect)">
+        <span class="publication-page-effect-fill page-effect-from" style="@FillStyle(effect, false)"></span>
+        @if (effect.AnimationEnabled)
+        {
+            <span class="publication-page-effect-fill page-effect-to" style="@FillStyle(effect, true)"></span>
+        }
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public PublicationPage Page { get; set; } = default!;
+    [Parameter] public PublicationPageEffectPlacement Placement { get; set; }
+
+    private static string LayerStyle(PublicationPageEffectLayer effect)
+    {
+        var duration = Math.Clamp(effect.DurationSeconds, .05, 3600).ToString("0.###", CultureInfo.InvariantCulture);
+        var delay = Math.Clamp(effect.DelaySeconds, 0, 3600).ToString("0.###", CultureInfo.InvariantCulture);
+        var iterations = Math.Clamp(effect.RepeatCount, 1, 1000) * (effect.AutoReverse ? 2 : 1);
+        var direction = effect.AutoReverse ? "alternate" : "normal";
+        var easing = effect.Easing switch
+        {
+            PublicationAnimationEasing.Linear => "linear",
+            PublicationAnimationEasing.EaseIn => "cubic-bezier(.42,0,1,1)",
+            PublicationAnimationEasing.EaseOut => "cubic-bezier(0,0,.2,1)",
+            PublicationAnimationEasing.BackOut => "cubic-bezier(.18,.89,.32,1.28)",
+            PublicationAnimationEasing.BounceOut => "cubic-bezier(.22,1.3,.36,1)",
+            _ => "cubic-bezier(.4,0,.2,1)"
+        };
+        var blend = effect.BlendMode.ToString().ToLowerInvariant();
+        var fromOpacity = Math.Clamp(effect.Opacity, 0, 1).ToString("0.###", CultureInfo.InvariantCulture);
+        var toOpacity = Math.Clamp(effect.ToOpacity, 0, 1).ToString("0.###", CultureInfo.InvariantCulture);
+        return $"--page-effect-duration:{duration}s;--page-effect-delay:{delay}s;--page-effect-iterations:{iterations};--page-effect-direction:{direction};--page-effect-easing:{easing};--page-effect-from-opacity:{fromOpacity};--page-effect-to-opacity:{toOpacity};mix-blend-mode:{blend};";
+    }
+
+    private static string FillStyle(PublicationPageEffectLayer effect, bool final)
+    {
+        var first = final ? effect.ToColor : effect.Color;
+        var second = final ? effect.ToSecondaryColor : effect.SecondaryColor;
+        var opacity = Math.Clamp(final ? effect.ToOpacity : effect.Opacity, 0, 1).ToString("0.###", CultureInfo.InvariantCulture);
+        var angle = double.IsFinite(effect.AngleDegrees) ? effect.AngleDegrees : 45;
+        var fill = effect.Kind switch
+        {
+            PublicationPageEffectKind.LinearGradient => $"linear-gradient({angle.ToString("0.###", CultureInfo.InvariantCulture)}deg,{first},{second})",
+            PublicationPageEffectKind.RadialGradient => $"radial-gradient(circle at center,{first},{second})",
+            _ => first
+        };
+        return $"background:{fill};opacity:{opacity};";
+    }
+}

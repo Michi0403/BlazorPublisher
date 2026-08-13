@@ -340,46 +340,16 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
                         .Where(record => record.NameId is 1 or 16 && record.Length > 0)
                         .OrderByDescending(ScoreNameRecord)
                         .ToArray();
-                    /// <summary>
-                    /// Represents an in helper type nested within <see cref="SystemFontCatalog"/>, grouping the state or behavior used only by that containing workflow.
-                    /// </summary>
                     foreach (var record in candidates)
                     {
-                        /// <summary>
-                        /// Stores the internal absolute offset state used by <see cref="in"/> while executing its surrounding workflow.
-                        /// </summary>
                         var absoluteOffset = (long)nameTableOffset + stringOffset + record.Offset;
-                        /// <summary>
-                        /// Stores the internal continue state used by <see cref="in"/> while executing its surrounding workflow.
-                        /// </summary>
                         if (absoluteOffset < 0 || absoluteOffset + record.Length > nameTableEnd) continue;
-                        /// <summary>
-                        /// Stores the internal position state used by <see cref="in"/> while executing its surrounding workflow.
-                        /// </summary>
                         stream.Position = absoluteOffset;
-                        /// <summary>
-                        /// Stores the internal bytes state used by <see cref="in"/> while executing its surrounding workflow.
-                        /// </summary>
                         var bytes = reader.ReadBytes(record.Length);
-                        /// <summary>
-                        /// Stores the internal length state used by <see cref="in"/> while executing its surrounding workflow.
-                        /// </summary>
                         if (bytes.Length != record.Length) continue;
-                        /// <summary>
-                        /// Stores the internal value state used by <see cref="in"/> while executing its surrounding workflow.
-                        /// </summary>
                         var value = DecodeName(record.PlatformId, record.EncodingId, bytes);
-                        /// <summary>
-                        /// Stores the internal continue state used by <see cref="in"/> while executing its surrounding workflow.
-                        /// </summary>
                         if (!IsUsableFamilyName(value)) continue;
-                        /// <summary>
-                        /// Adds family for <see cref="in"/>, keeping the operation consistent with the state and invariants of the surrounding in workflow.
-                        /// </summary>
                         AddFamily(families, value);
-                        /// <summary>
-                        /// Stores the internal return state used by <see cref="in"/> while executing its surrounding workflow.
-                        /// </summary>
                         return;
                     }
     

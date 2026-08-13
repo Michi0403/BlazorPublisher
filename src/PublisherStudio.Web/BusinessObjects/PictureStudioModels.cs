@@ -21,7 +21,7 @@ public sealed class PictureDocument
     /// Gets or sets the format version value that forms part of the picture state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The format version value exposed by <see cref="PictureDocument"/>.</value>
-    public string FormatVersion { get; set; } = "1.4";
+    public string FormatVersion { get; set; } = "1.5";
     /// <summary>
     /// Gets or sets the width px value that forms part of the picture state consumed or produced by the surrounding workflow.
     /// </summary>
@@ -80,6 +80,8 @@ public enum PictureBlendMode { Normal, Multiply, Screen, Overlay, Darken, Lighte
 /// Defines the supported picture raster fit mode values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PictureRasterFitMode { Stretch, Contain, Cover }
+/// <summary>Defines how a raster layer changes its source colors without destroying the embedded image.</summary>
+public enum PictureRasterColorizeMode { None, ReplaceColor, Luminosity }
 /// <summary>
 /// Defines the supported picture shape kind values used to select or describe behavior in the surrounding workflow.
 /// </summary>
@@ -99,7 +101,7 @@ public enum PictureTextAlignment { Left, Center, Right }
 /// <summary>
 /// Defines the supported picture draw tool values used to select or describe behavior in the surrounding workflow.
 /// </summary>
-public enum PictureDrawTool { Select, Brush, Pencil, Spray, Toothbrush, Square, Rectangle, Ellipse, Arrow, Line, Path, Eraser, Eyedropper, RectangleSelect, EllipseSelect, FreeSelect, MagneticSelect, PolygonSelect, FillSolid, FillGradient }
+public enum PictureDrawTool { Select, Brush, Pencil, Spray, Toothbrush, BrushPath, PencilPath, SprayPath, ToothbrushPath, EraserPath, Square, Rectangle, Ellipse, Arrow, Line, Path, Eraser, Eyedropper, RectangleSelect, EllipseSelect, FreeSelect, MagneticSelect, PolygonSelect, FillSolid, FillGradient }
 /// <summary>
 /// Defines the supported picture stroke kind values used to select or describe behavior in the surrounding workflow.
 /// </summary>
@@ -277,6 +279,25 @@ public sealed class RasterPictureLayer : PictureLayer
     /// </summary>
     /// <value>The tint opacity value exposed by <see cref="RasterPictureLayer"/>.</value>
     public double TintOpacity { get; set; }
+    /// <summary>
+    /// Gets or sets the colorize mode value that forms part of the raster picture layer state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The colorize mode value exposed by <see cref="RasterPictureLayer"/>.</value>
+    public PictureRasterColorizeMode ColorizeMode { get; set; }
+    /// <summary>Gets or sets the source color used by exact/near-color replacement.</summary>
+    /// <value>The colorize source color value exposed by <see cref="RasterPictureLayer"/>.</value>
+    public string ColorizeSourceColor { get; set; } = "#ffffff";
+    /// <summary>
+    /// Gets or sets the colorize target color value that forms part of the raster picture layer state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The colorize target color value exposed by <see cref="RasterPictureLayer"/>.</value>
+    public string ColorizeTargetColor { get; set; } = "#dc2626";
+    /// <summary>Gets or sets the RGB distance tolerance used by near-color replacement.</summary>
+    /// <value>The colorize tolerance value exposed by <see cref="RasterPictureLayer"/>.</value>
+    public int ColorizeTolerance { get; set; } = 48;
+    /// <summary>Gets or sets how strongly the mapped color replaces the source color.</summary>
+    /// <value>The colorize strength value exposed by <see cref="RasterPictureLayer"/>.</value>
+    public double ColorizeStrength { get; set; } = 1;
 }
 
 /// <summary>
@@ -636,4 +657,5 @@ public sealed class PicturePoint
 /// <param name="DataUrl">Data url value supplied to the picture editor operation and used when producing its result.</param>
 /// <param name="SourceDocument">Source document value supplied to the picture editor operation and used when producing its result.</param>
 /// <param name="Name">Name value supplied to the picture editor operation and used when producing its result.</param>
-public sealed record PictureEditorResult(string DataUrl, PictureDocument SourceDocument, string Name);
+/// <param name="PreserveLayers">Whether the editable Picture Studio document remains attached to the Mainframe image after applying the rendered result.</param>
+public sealed record PictureEditorResult(string DataUrl, PictureDocument? SourceDocument, string Name, bool PreserveLayers);

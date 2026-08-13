@@ -100,6 +100,13 @@
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-arrow" Text="@ArrowToolText" Click="ArrowTool" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="@LineToolText" Click="LineTool" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="@PathToolText" Click="PathTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="Paint paths" DropDownCssClass="publisher-ribbon-menu">
+                                <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="Brush path" Click="BrushPathTool" />
+                                <DxRibbonItem IconCssClass="pub-icon pub-icon-pencil" Text="Pencil path" Click="PencilPathTool" />
+                                <DxRibbonItem IconCssClass="pub-icon pub-icon-spray" Text="Spray path" Click="SprayPathTool" />
+                                <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="Toothbrush path" Click="ToothbrushPathTool" />
+                                <DxRibbonItem IconCssClass="pub-icon pub-icon-eraser" Text="Eraser path" Click="EraserPathTool" />
+                            </DxRibbonItem>
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-eraser" Text="@EraserToolText" Click="EraserTool" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-eyedropper" Text="@EyedropperToolText" Click="EyedropperTool" />
                         </DxRibbonItem>
@@ -142,13 +149,14 @@
                 <DxRibbonTab Text="Output">
                     <DxRibbonGroup Text="Export">
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download PNG" Click="DownloadPng" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download JPEG" Click="DownloadJpeg" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download SVG" Click="DownloadSvg" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download merged PNG" Click="DownloadPng" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download merged JPEG" Click="DownloadJpeg" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download layered SVG" Click="DownloadSvg" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Publication">
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-picture" Text="@(EditingExisting ? "Apply to picture" : "Insert into publication")" Enabled="@(!IsPictureExporting)" IsPrimary="true" Click="Apply" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-picture" Text="@(EditingExisting ? "Apply layered" : "Insert layered")" Enabled="@(!IsPictureExporting)" IsPrimary="true" Click="ApplyLayered" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-picture" Text="@(EditingExisting ? "Apply merged" : "Insert merged")" Enabled="@(!IsPictureExporting)" Click="ApplyMerged" />
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-command" Text="Cancel" Click="Cancel" />
                     </DxRibbonGroup>
                 </DxRibbonTab>
@@ -467,9 +475,37 @@
                                         <label>Tint color
                                             <input type="color" value="@SafeColor(raster.TintColor)" @onchange="ChangeRasterTintColor" />
                                         </label>
-                                        <label>Tint / recolor strength
+                                        <label>Tint strength
                                             <input type="range" min="0" max="1" step="0.01" value="@Inv(raster.TintOpacity)" @oninput="ChangeRasterTintOpacity" @onchange="EndLiveEdit" />
                                             <span class="picture-range-value">@Math.Round(raster.TintOpacity * 100)%</span>
+                                        </label>
+                                        <h4>Change colors</h4>
+                                        <label>Mode
+                                            <select value="@raster.ColorizeMode" @onchange="ChangeRasterColorizeMode">
+                                                @foreach (var mode in Enum.GetValues<PictureRasterColorizeMode>())
+                                                {
+                                                    <option value="@mode">@mode</option>
+                                                }
+                                            </select>
+                                        </label>
+                                        @if (raster.ColorizeMode == PictureRasterColorizeMode.ReplaceColor)
+                                        {
+                                            <div class="picture-property-grid">
+                                                <label>Replace color<input type="color" value="@SafeColor(raster.ColorizeSourceColor)" @onchange="ChangeRasterColorizeSource" /></label>
+                                                <label>With color<input type="color" value="@SafeColor(raster.ColorizeTargetColor)" @onchange="ChangeRasterColorizeTarget" /></label>
+                                            </div>
+                                            <label>Match tolerance
+                                                <input type="range" min="0" max="255" step="1" value="@raster.ColorizeTolerance" @oninput="ChangeRasterColorizeTolerance" @onchange="EndLiveEdit" />
+                                                <span class="picture-range-value">@raster.ColorizeTolerance</span>
+                                            </label>
+                                        }
+                                        else if (raster.ColorizeMode == PictureRasterColorizeMode.Luminosity)
+                                        {
+                                            <label>Colorize with<input type="color" value="@SafeColor(raster.ColorizeTargetColor)" @onchange="ChangeRasterColorizeTarget" /></label>
+                                        }
+                                        <label>Color-change strength
+                                            <input type="range" min="0" max="1" step="0.01" value="@Inv(raster.ColorizeStrength)" @oninput="ChangeRasterColorizeStrength" @onchange="EndLiveEdit" />
+                                            <span class="picture-range-value">@Math.Round(raster.ColorizeStrength * 100)%</span>
                                         </label>
                                     </section>
                                     break;
@@ -752,7 +788,8 @@
                 </div>
                 <div>
                     <DxButton Text="Cancel" Click="Cancel" />
-                    <DxButton Text="@(IsPictureExporting ? "Rendering…" : EditingExisting ? "Apply to picture" : "Insert into publication")" Enabled="@(!IsPictureExporting)" RenderStyle="ButtonRenderStyle.Primary" Click="Apply" />
+                    <DxButton Text="@(IsPictureExporting ? "Rendering…" : EditingExisting ? "Apply layered" : "Insert layered")" Enabled="@(!IsPictureExporting)" RenderStyle="ButtonRenderStyle.Primary" Click="ApplyLayered" />
+                    <DxButton Text="@(EditingExisting ? "Apply merged" : "Insert merged")" Enabled="@(!IsPictureExporting)" Click="ApplyMerged" />
                 </div>
             </footer>
         </section>
@@ -789,6 +826,14 @@
                             <DxContextMenuItem Text="No tint" Click="RasterNoTint" />
                             <DxContextMenuItem Text="Blue tint" Click="RasterBlueTint" />
                             <DxContextMenuItem Text="Warm tint" Click="RasterWarmTint" />
+                        </Items>
+                    </DxContextMenuItem>
+                    <DxContextMenuItem Text="Change colors" IconCssClass="pub-icon pub-icon-color">
+                        <Items>
+                            <DxContextMenuItem Text="White / light → red" Click="RasterWhiteToRed" />
+                            <DxContextMenuItem Text="White / light → tint color" Click="RasterWhiteToTint" />
+                            <DxContextMenuItem Text="Colorize by luminosity" Click="RasterLuminosityColorize" />
+                            <DxContextMenuItem Text="Reset color change" BeginGroup="true" Click="RasterResetColorize" />
                         </Items>
                     </DxContextMenuItem>
                 }
@@ -847,6 +892,15 @@
                     <DxContextMenuItem Text="Continue with pencil" Click="PencilTool" />
                     <DxContextMenuItem Text="Continue with spray can" Click="SprayTool" />
                     <DxContextMenuItem Text="Continue with toothbrush" Click="ToothbrushTool" />
+                    <DxContextMenuItem Text="Paint along path">
+                        <Items>
+                            <DxContextMenuItem Text="Brush path" Click="BrushPathTool" />
+                            <DxContextMenuItem Text="Pencil path" Click="PencilPathTool" />
+                            <DxContextMenuItem Text="Spray path" Click="SprayPathTool" />
+                            <DxContextMenuItem Text="Toothbrush path" Click="ToothbrushPathTool" />
+                            <DxContextMenuItem Text="Eraser path" Click="EraserPathTool" />
+                        </Items>
+                    </DxContextMenuItem>
                     <DxContextMenuItem Text="Erase strokes" Click="EraserTool" />
                     <DxContextMenuItem Text="Clear all strokes" Enabled="@(paint.Strokes.Count > 0 && !paint.Locked)" Click="State.ClearSelectedPaint" />
                 }

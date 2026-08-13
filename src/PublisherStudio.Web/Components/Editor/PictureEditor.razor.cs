@@ -206,6 +206,8 @@ public partial class PictureEditor
     /// Stores the internal picture export purpose state used by <see cref="PictureEditor"/> while executing its surrounding workflow.
     /// </summary>
     private string _pictureExportPurpose = "save";
+    /// <summary>Stores whether the current apply operation should preserve the editable Picture Studio source document.</summary>
+    private bool _pictureExportPreserveLayers = true;
     /// <summary>
     /// Stores the internal OCR text state used by <see cref="PictureEditor"/> while executing its surrounding workflow.
     /// </summary>
@@ -1108,7 +1110,16 @@ public partial class PictureEditor
     /// Performs apply for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
     /// </summary>
     /// <returns>A task that completes when the operation has finished.</returns>
-    private async Task Apply()
+    private Task ApplyLayered() => Apply(true);
+
+    /// <summary>Flattens all visible Picture Studio layers into the publication image and discards editable Picture Studio layer ownership.</summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
+    private Task ApplyMerged() => Apply(false);
+
+    /// <summary>Renders the current picture for the Mainframe and optionally preserves the editable Picture Studio document.</summary>
+    /// <param name="preserveLayers">Value indicating whether preserve layers should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
+    private async Task Apply(bool preserveLayers)
     {
         if (_module is null || _self is null || _pictureExportId is not null) return;
 
@@ -1118,6 +1129,7 @@ public partial class PictureEditor
         _pictureExportSourceDocument = sourceDocument;
         _pictureExportName = State.Document.Name;
         _pictureExportPurpose = "save";
+        _pictureExportPreserveLayers = preserveLayers;
         _pictureExportBuffer = null;
         _pictureExportExpectedChunks = 0;
         _pictureExportNextChunk = 0;
@@ -1226,6 +1238,7 @@ public partial class PictureEditor
         var sourceDocument = _pictureExportSourceDocument ?? State.CloneDocument();
         var name = string.IsNullOrWhiteSpace(_pictureExportName) ? State.Document.Name : _pictureExportName!;
         var purpose = _pictureExportPurpose;
+        var preserveLayers = _pictureExportPreserveLayers;
         ResetPictureExport();
         if (string.Equals(purpose, "ocr", StringComparison.Ordinal))
         {
@@ -1233,7 +1246,7 @@ public partial class PictureEditor
             return;
         }
         await DisposePictureRuntimeAsync();
-        await InvokeAsync(() => Saved.InvokeAsync(new PictureEditorResult(dataUrl, sourceDocument, name)));
+        await InvokeAsync(() => Saved.InvokeAsync(new PictureEditorResult(dataUrl, preserveLayers ? sourceDocument : null, name, preserveLayers)));
     }
 
     /// <summary>
@@ -1269,6 +1282,7 @@ public partial class PictureEditor
         _pictureExportSourceDocument = null;
         _pictureExportName = null;
         _pictureExportPurpose = "save";
+        _pictureExportPreserveLayers = true;
         _pictureExportExpectedChunks = 0;
         _pictureExportNextChunk = 0;
         _pictureExportExpectedLength = 0;
@@ -1492,6 +1506,16 @@ public partial class PictureEditor
     /// Performs toothbrush tool for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
     /// </summary>
     private void ToothbrushTool() => SetDrawTool(PictureDrawTool.Toothbrush);
+    /// <summary>Creates an editable node path rendered with the brush stroke engine.</summary>
+    private void BrushPathTool() => SetDrawTool(PictureDrawTool.BrushPath);
+    /// <summary>Creates an editable node path rendered with the pencil stroke engine.</summary>
+    private void PencilPathTool() => SetDrawTool(PictureDrawTool.PencilPath);
+    /// <summary>Creates an editable node path rendered with the spray stroke engine.</summary>
+    private void SprayPathTool() => SetDrawTool(PictureDrawTool.SprayPath);
+    /// <summary>Creates an editable node path rendered with the toothbrush stroke engine.</summary>
+    private void ToothbrushPathTool() => SetDrawTool(PictureDrawTool.ToothbrushPath);
+    /// <summary>Creates an editable node path rendered with the eraser stroke engine.</summary>
+    private void EraserPathTool() => SetDrawTool(PictureDrawTool.EraserPath);
     /// <summary>
     /// Performs square tool for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
     /// </summary>
@@ -1976,6 +2000,62 @@ public partial class PictureEditor
     /// Performs raster warm tint for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
     /// </summary>
     private void RasterWarmTint() => WithRaster(layer => { layer.TintColor = "#f97316"; layer.TintOpacity = .24; });
+    /// <summary>Changes the selected raster's non-destructive color replacement mode.</summary>
+    /// <param name="args">Args value supplied to the picture editor operation and used when producing its result.</param>
+    private void ChangeRasterColorizeMode(ChangeEventArgs args)
+    {
+        if (Enum.TryParse<PictureRasterColorizeMode>(args.Value?.ToString(), true, out var mode))
+            WithRaster(layer => layer.ColorizeMode = mode);
+    }
+    /// <summary>Changes the selected raster source color used by near-color replacement.</summary>
+    /// <param name="args">Args value supplied to the picture editor operation and used when producing its result.</param>
+    private void ChangeRasterColorizeSource(ChangeEventArgs args) => WithRaster(layer => layer.ColorizeSourceColor = SafeColor(args.Value?.ToString()));
+    /// <summary>Changes the selected raster target color.</summary>
+    /// <param name="args">Args value supplied to the picture editor operation and used when producing its result.</param>
+    private void ChangeRasterColorizeTarget(ChangeEventArgs args) => WithRaster(layer => layer.ColorizeTargetColor = SafeColor(args.Value?.ToString()));
+    /// <summary>Changes how close a pixel must be to the selected source color before it is recolored.</summary>
+    /// <param name="args">Args value supplied to the picture editor operation and used when producing its result.</param>
+    private void ChangeRasterColorizeTolerance(ChangeEventArgs args)
+    {
+        if (int.TryParse(args.Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var value))
+            WithRasterLive("raster-colorize-tolerance", layer => layer.ColorizeTolerance = Math.Clamp(value, 0, 255));
+    }
+    /// <summary>Changes the strength of non-destructive raster recoloring.</summary>
+    /// <param name="args">Args value supplied to the picture editor operation and used when producing its result.</param>
+    private void ChangeRasterColorizeStrength(ChangeEventArgs args)
+    {
+        if (double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
+            WithRasterLive("raster-colorize-strength", layer => layer.ColorizeStrength = Math.Clamp(value, 0, 1));
+    }
+    /// <summary>Maps white and near-white pixels to red while preserving source alpha and antialiasing.</summary>
+    private void RasterWhiteToRed() => WithRaster(layer =>
+    {
+        layer.ColorizeMode = PictureRasterColorizeMode.ReplaceColor;
+        layer.ColorizeSourceColor = "#ffffff";
+        layer.ColorizeTargetColor = "#dc2626";
+        layer.ColorizeTolerance = 72;
+        layer.ColorizeStrength = 1;
+    });
+    /// <summary>Maps white and near-white pixels to the selected tint color.</summary>
+    private void RasterWhiteToTint() => WithRaster(layer =>
+    {
+        layer.ColorizeMode = PictureRasterColorizeMode.ReplaceColor;
+        layer.ColorizeSourceColor = "#ffffff";
+        layer.ColorizeTargetColor = SafeColor(layer.TintColor);
+        layer.ColorizeTolerance = 72;
+        layer.ColorizeStrength = 1;
+    });
+    /// <summary>Maps source luminance through the selected target hue while retaining transparency.</summary>
+    private void RasterLuminosityColorize() => WithRaster(layer =>
+    {
+        layer.ColorizeMode = PictureRasterColorizeMode.Luminosity;
+        layer.ColorizeTargetColor = SafeColor(layer.TintColor);
+        layer.ColorizeStrength = 1;
+    });
+    /// <summary>
+    /// Performs raster reset colorize for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
+    /// </summary>
+    private void RasterResetColorize() => WithRaster(layer => layer.ColorizeMode = PictureRasterColorizeMode.None);
     /// <summary>
     /// Performs soften light for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
     /// </summary>
@@ -3260,7 +3340,7 @@ public partial class PictureEditor
     /// </summary>
     /// <param name="value">Value value supplied to the picture editor operation and used when producing its result.</param>
     /// <returns>The string produced by the operation.</returns>
-    private string SafeColor(string value) => value.StartsWith('#') && value.Length is 4 or 7 ? value : "#000000";
+    private string SafeColor(string? value) => !string.IsNullOrWhiteSpace(value) && value.StartsWith('#') && value.Length is 4 or 7 ? value : "#000000";
 
     /// <summary>
     /// Releases resources owned by <see cref="PictureEditor"/> and leaves the picture editor workflow in a safely disposed state.

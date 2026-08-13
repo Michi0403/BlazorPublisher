@@ -3461,6 +3461,16 @@ function canvasLooksBlank(canvas) { try {
     return true;
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:canvasLooksBlank@3380', __javascriptError); throw __javascriptError; }}
 
+function freezePageEffectsForRaster(root) { try {
+    root?.querySelectorAll?.('.publication-page-effect.page-effect-animated').forEach(layer => { try {
+        const from = layer.querySelector('.page-effect-from');
+        const to = layer.querySelector('.page-effect-to');
+        if (from instanceof HTMLElement) { from.style.animation = 'none'; from.style.opacity = '0'; }
+        if (to instanceof HTMLElement) { to.style.animation = 'none'; }
+        layer.classList.remove('page-effect-animated');
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:freezePageEffectsForRaster:item', __javascriptError); throw __javascriptError; }});
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:freezePageEffectsForRaster', __javascriptError); throw __javascriptError; }}
+
 function cappedRasterScale(width, height, requestedScale) { try {
     const scale = Math.max(.1, number(requestedScale, 1));
     const requestedPixels = Math.max(1, width * scale) * Math.max(1, height * scale);
@@ -3480,6 +3490,7 @@ async function rasterizePageElement(page, scale) { try {
         const clone = cleanPageClone(page);
         normalizeObjectFitImages(clone);
         await freezeMediaForRaster(page, clone);
+        freezePageEffectsForRaster(clone);
         sanitizeInlineColorFunctions(clone);
         clone.style.visibility = 'visible';
         clone.style.opacity = '1';
@@ -3569,7 +3580,7 @@ function canvasToEmbeddedSvg(canvas, widthMm = 0, heightMm = 0) { try {
 async function rasterizeIsolatedPublicationElement(page, element, scale) { try {
     const hidden = [];
     const pageStyle = page.getAttribute('style');
-    for (const node of page.querySelectorAll('[data-publication-element]')) {
+    for (const node of page.querySelectorAll('[data-publication-element], .publication-page-effect')) {
         if (node === element) continue;
         hidden.push({
             node,
@@ -3594,24 +3605,48 @@ async function rasterizeIsolatedPublicationElement(page, element, scale) { try {
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:rasterizeIsolatedPublicationElement@3500', __javascriptError); throw __javascriptError; }}
 
 function cropCanvasToElement(canvas, page, element, paddingPixels = 2) { try {
-    const pageRect = page.getBoundingClientRect();
-    const elementRect = element.getBoundingClientRect();
-    if (pageRect.width <= 0 || pageRect.height <= 0 || elementRect.width <= 0 || elementRect.height <= 0)
-        throw new Error('The selected object has no measurable export area.');
-    const scaleX = canvas.width / pageRect.width;
-    const scaleY = canvas.height / pageRect.height;
-    const padding = Math.max(0, Math.round(paddingPixels));
-    const left = Math.max(0, Math.floor((elementRect.left - pageRect.left) * scaleX) - padding);
-    const top = Math.max(0, Math.floor((elementRect.top - pageRect.top) * scaleY) - padding);
-    const right = Math.min(canvas.width, Math.ceil((elementRect.right - pageRect.left) * scaleX) + padding);
-    const bottom = Math.min(canvas.height, Math.ceil((elementRect.bottom - pageRect.top) * scaleY) + padding);
-    if (right <= left || bottom <= top) throw new Error('The selected object is outside the page export area.');
-    const output = document.createElement('canvas');
-    output.width = right - left;
-    output.height = bottom - top;
-    const context = output.getContext('2d');
+    // The selected object is rasterized in isolation, so its painted alpha is a more
+    // reliable export boundary than getBoundingClientRect(). The latter only describes
+    // the CSS frame and used to crop rotated content, shadows, filters, and Picture Studio
+    // pixels extending beyond that frame.
+    const context = canvas.getContext('2d', { willReadFrequently: true });
     if (!context) throw new Error('The browser did not provide an object export canvas.');
-    context.drawImage(canvas, left, top, output.width, output.height, 0, 0, output.width, output.height);
+    const image = context.getImageData(0, 0, canvas.width, canvas.height);
+    let left = canvas.width, top = canvas.height, right = -1, bottom = -1;
+    for (let y = 0; y < canvas.height; y++) {
+        const row = y * canvas.width * 4;
+        for (let x = 0; x < canvas.width; x++) {
+            if (image.data[row + x * 4 + 3] <= 1) continue;
+            if (x < left) left = x;
+            if (x > right) right = x;
+            if (y < top) top = y;
+            if (y > bottom) bottom = y;
+        }
+    }
+    if (right < left || bottom < top) {
+        const pageRect = page.getBoundingClientRect();
+        const elementRect = element.getBoundingClientRect();
+        if (pageRect.width <= 0 || pageRect.height <= 0 || elementRect.width <= 0 || elementRect.height <= 0)
+            throw new Error('The selected object has no measurable export area.');
+        const scaleX = canvas.width / pageRect.width;
+        const scaleY = canvas.height / pageRect.height;
+        left = Math.floor((elementRect.left - pageRect.left) * scaleX);
+        top = Math.floor((elementRect.top - pageRect.top) * scaleY);
+        right = Math.ceil((elementRect.right - pageRect.left) * scaleX) - 1;
+        bottom = Math.ceil((elementRect.bottom - pageRect.top) * scaleY) - 1;
+    }
+    const padding = Math.max(0, Math.round(paddingPixels));
+    left = Math.max(0, left - padding);
+    top = Math.max(0, top - padding);
+    right = Math.min(canvas.width - 1, right + padding);
+    bottom = Math.min(canvas.height - 1, bottom + padding);
+    if (right < left || bottom < top) throw new Error('The selected object is outside the page export area.');
+    const output = document.createElement('canvas');
+    output.width = right - left + 1;
+    output.height = bottom - top + 1;
+    const outputContext = output.getContext('2d');
+    if (!outputContext) throw new Error('The browser did not provide an object export canvas.');
+    outputContext.drawImage(canvas, left, top, output.width, output.height, 0, 0, output.width, output.height);
     return output;
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:cropCanvasToElement@3527', __javascriptError); throw __javascriptError; }}
 

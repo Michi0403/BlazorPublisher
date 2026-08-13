@@ -134,7 +134,7 @@ public sealed class PictureDocumentService
     {
     try
     {
-            document.FormatVersion = "1.4";
+            document.FormatVersion = "1.5";
             document.WidthPx = Math.Clamp(document.WidthPx, 16, 8192);
             document.HeightPx = Math.Clamp(document.HeightPx, 16, 8192);
             document.Zoom = Math.Clamp(document.Zoom <= 0 ? .65 : document.Zoom, .05, 4);
@@ -171,6 +171,10 @@ public sealed class PictureDocumentService
                 {
                     case RasterPictureLayer raster:
                         raster.TintOpacity = Math.Clamp(raster.TintOpacity, 0, 1);
+                        raster.ColorizeTolerance = Math.Clamp(raster.ColorizeTolerance, 0, 255);
+                        raster.ColorizeStrength = Math.Clamp(raster.ColorizeStrength, 0, 1);
+                        raster.ColorizeSourceColor = string.IsNullOrWhiteSpace(raster.ColorizeSourceColor) ? "#ffffff" : raster.ColorizeSourceColor;
+                        raster.ColorizeTargetColor = string.IsNullOrWhiteSpace(raster.ColorizeTargetColor) ? "#dc2626" : raster.ColorizeTargetColor;
                         break;
                     case TextPictureLayer text:
                         text.FontSizePx = Math.Clamp(text.FontSizePx <= 0 ? 48 : text.FontSizePx, 4, 1024);

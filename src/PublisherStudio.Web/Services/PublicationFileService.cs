@@ -634,6 +634,28 @@ public sealed partial class PublicationFileService
                         double? NormalizeControl(double? value, double maximum) =>
                             value is { } coordinate && double.IsFinite(coordinate) ? Math.Clamp(coordinate, 0, maximum) : null;
 
+                        publicationPage.EffectLayers ??= [];
+                        var usedEffectIds = new HashSet<Guid>();
+                        foreach (var effect in publicationPage.EffectLayers)
+                        {
+                            if (effect.Id == Guid.Empty || !usedEffectIds.Add(effect.Id))
+                            {
+                                effect.Id = Guid.NewGuid();
+                                usedEffectIds.Add(effect.Id);
+                            }
+                            effect.Name = string.IsNullOrWhiteSpace(effect.Name) ? "Page color effect" : effect.Name.Trim();
+                            effect.Opacity = Math.Clamp(effect.Opacity, 0, 1);
+                            effect.ToOpacity = Math.Clamp(effect.ToOpacity, 0, 1);
+                            effect.AngleDegrees = double.IsFinite(effect.AngleDegrees) ? effect.AngleDegrees : 45;
+                            effect.DurationSeconds = Math.Clamp(effect.DurationSeconds <= 0 ? 1 : effect.DurationSeconds, .05, 3600);
+                            effect.DelaySeconds = Math.Clamp(effect.DelaySeconds, 0, 3600);
+                            effect.RepeatCount = Math.Clamp(effect.RepeatCount <= 0 ? 1 : effect.RepeatCount, 1, 1000);
+                            effect.Color = string.IsNullOrWhiteSpace(effect.Color) ? "#ffffff" : effect.Color.Trim();
+                            effect.SecondaryColor = string.IsNullOrWhiteSpace(effect.SecondaryColor) ? effect.Color : effect.SecondaryColor.Trim();
+                            effect.ToColor = string.IsNullOrWhiteSpace(effect.ToColor) ? effect.Color : effect.ToColor.Trim();
+                            effect.ToSecondaryColor = string.IsNullOrWhiteSpace(effect.ToSecondaryColor) ? effect.SecondaryColor : effect.ToSecondaryColor.Trim();
+                        }
+
                         foreach (var connector in publicationPage.Elements.OfType<ConnectorElement>())
                         {
                             connector.Source ??= new ConnectorEndpoint();
@@ -678,7 +700,7 @@ public sealed partial class PublicationFileService
                         }
                     }
 
-                    document.FormatVersion = "1.56";
+                    document.FormatVersion = "1.57";
                     return document;
     
         }

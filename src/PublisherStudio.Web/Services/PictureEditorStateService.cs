@@ -1461,7 +1461,14 @@ public sealed class PictureEditorStateService
             layer.Sepia = Math.Clamp(layer.Sepia, 0, 1);
             layer.Invert = Math.Clamp(layer.Invert, 0, 1);
             layer.ClipPolygon = NormalizeClipPolygon(layer.ClipPolygon);
-            if (layer is RasterPictureLayer raster) raster.TintOpacity = Math.Clamp(raster.TintOpacity, 0, 1);
+            if (layer is RasterPictureLayer raster)
+            {
+                raster.TintOpacity = Math.Clamp(raster.TintOpacity, 0, 1);
+                raster.ColorizeTolerance = Math.Clamp(raster.ColorizeTolerance, 0, 255);
+                raster.ColorizeStrength = Math.Clamp(raster.ColorizeStrength, 0, 1);
+                raster.ColorizeSourceColor = string.IsNullOrWhiteSpace(raster.ColorizeSourceColor) ? "#ffffff" : raster.ColorizeSourceColor;
+                raster.ColorizeTargetColor = string.IsNullOrWhiteSpace(raster.ColorizeTargetColor) ? "#dc2626" : raster.ColorizeTargetColor;
+            }
             if (layer is TextPictureLayer text)
             {
                 text.FontSizePx = Math.Clamp(text.FontSizePx, 4, 1024);

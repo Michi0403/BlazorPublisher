@@ -791,6 +791,21 @@ def process_file(path:Path)->tuple[int,int,int]:
 
 def validate_file(path:Path)->tuple[list[str],Counter]:
  orig,decls=scan_file(path); failures=[]; c=Counter()
+ # Compiler-visible XML documentation must be attached to a declaration. The declaration
+ # coverage scan alone cannot catch an accidentally generated /// block inside executable
+ # code (CS1587/CS1584), so reject any documentation block that the declaration scanner
+ # does not own.
+ recognized_docs={(d.doc_start,d.doc_end) for d in decls if d.doc_start is not None}
+ i=0
+ while i<len(orig):
+  if orig[i].lstrip().startswith('///'):
+   j=i
+   while j+1<len(orig) and orig[j+1].lstrip().startswith('///'): j+=1
+   if (i,j) not in recognized_docs:
+    failures.append(f'{path}:{i+1}: orphan XML documentation block is not attached to a recognized C# declaration')
+   i=j+1
+  else:
+   i+=1
  for d in decls:
   c[d.kind]+=1
   if d.doc_start is None:

@@ -86,6 +86,7 @@
                        OnTogglePanelLibrary="TogglePanelLibrary"
                        OnOpenMediaConverter="OpenMediaConverter"
                        OnPreviewPageAnimations="PreviewPageAnimations"
+                       OnEditPageEffects="OpenPageEffectStudio"
                        OnPreviewObjectAnimations="PreviewObjectAnimations"
                        OnStopAnimations="StopAnimations"
                        Streaming="StreamingSession.Snapshot"
@@ -241,6 +242,28 @@
 <StreamingStudio Visible="_streamingStudioVisible" Document="State.Document" Saved="SaveStreamingStudio" Cancelled="CloseStreamingStudio" />
 <PanelStudio Visible="_panelStudioVisible" Document="State.Document" CurrentPageId="State.SelectedPageId" InitialPanel="_panelStudioInitial" Saved="SavePanelStudio" Cancelled="ClosePanelStudio" />
 <MediaConverterStudio Visible="_mediaConverterVisible" InitialSource="_mediaConverterInitialSource" Closed="CloseMediaConverter" Inserted="InsertConvertedMedia" OpenedInStudio="OpenConvertedInStudio" />
+<PageEffectStudio Visible="_pageEffectStudioVisible" State="State" Closed="ClosePageEffectStudio" />
+
+@if (_selectedPictureExportVisible)
+{
+    <div class="publisher-dialog-backdrop" role="presentation" @onclick="CloseSelectedPictureExport">
+        <section class="publisher-dialog selected-picture-export-dialog" role="dialog" aria-modal="true" aria-labelledby="selected-picture-export-title" @onclick:stopPropagation>
+            <header>
+                <div>
+                    <h2 id="selected-picture-export-title">Export Picture Studio object</h2>
+                    <p>This picture still owns editable Picture Studio layers. Choose whether the file should contain the final merged appearance or the editable layer stack.</p>
+                </div>
+                <button type="button" class="publisher-dialog-close" title="Close" @onclick="CloseSelectedPictureExport">×</button>
+            </header>
+            <div class="selected-picture-export-options">
+                <button type="button" class="primary" @onclick="ExportSelectedMergedChoice">Merged @(_selectedPictureExportFormat.ToUpperInvariant())</button>
+                <button type="button" @onclick="ExportSelectedLayeredChoice">Layered Picture Studio SVG</button>
+                <small>Merged export bakes recoloring, paint, effects and all visible layers into the final pixels. Layered SVG preserves the Picture Studio layer document for later editing.</small>
+            </div>
+            <footer><button type="button" @onclick="CloseSelectedPictureExport">Cancel</button></footer>
+        </section>
+    </div>
+}
 
 @if (_structuredWebsiteExportVisible)
 {
@@ -343,7 +366,7 @@
         !_storyEditorVisible && !_spreadsheetEditorVisible && !_pictureEditorVisible &&
         !_dataVisualEditorVisible && !_componentEditorVisible && !_mediaStudioVisible &&
         !_barcodeEditorVisible && !_streamingStudioVisible && !_panelStudioVisible &&
-        !_mediaConverterVisible && !_structuredWebsiteExportVisible;
+        !_mediaConverterVisible && !_structuredWebsiteExportVisible && !_selectedPictureExportVisible && !_pageEffectStudioVisible;
     private bool _storyEditorVisible;
     private bool _spreadsheetEditorVisible;
     private Guid _spreadsheetEditorSessionId;
@@ -360,6 +383,7 @@
     private bool _streamingStudioVisible;
     private bool _panelStudioVisible;
     private bool _mediaConverterVisible;
+    private bool _pageEffectStudioVisible;
     private MediaConversionInsertRequest? _mediaConverterInitialSource;
     private PanelElement? _panelStudioInitial;
     private Guid? _panelStudioTargetId;
@@ -367,6 +391,9 @@
     private bool _videoExporting;
     private bool _structuredWebsiteExportVisible;
     private bool _structuredWebsiteExporting;
+    private bool _selectedPictureExportVisible;
+    private string _selectedPictureExportFormat = "png";
+    private Guid? _selectedPictureExportTargetId;
     private readonly StructuredWebsiteExportOptions _structuredWebsiteOptions = new();
     private Guid? _pendingNewBarcodeId;
     private Guid _mediaStudioSessionId;
@@ -1044,16 +1071,76 @@
 
     private async Task ExportSelectedObject(string format)
     {
+        var selected = State.SelectedElement;
+        if (selected is ImageFrameElement { PictureSource: not null })
+        {
+            _selectedPictureExportTargetId = selected.Id;
+            _selectedPictureExportFormat = format == "svg" ? "svg" : "png";
+            _selectedPictureExportVisible = true;
+            return;
+        }
+        await ExportSelectedObjectCore(selected, format);
+    }
+
+    private Task CloseSelectedPictureExport()
+    {
+        _selectedPictureExportVisible = false;
+        _selectedPictureExportTargetId = null;
+        return Task.CompletedTask;
+    }
+
+    private async Task ExportSelectedMergedChoice()
+    {
+        var selected = _selectedPictureExportTargetId is { } id
+            ? State.CurrentPage.Elements.FirstOrDefault(item => item.Id == id)
+            : State.SelectedElement;
+        var format = _selectedPictureExportFormat;
+        await CloseSelectedPictureExport();
+        await ExportSelectedObjectCore(selected, format);
+    }
+
+    private async Task ExportSelectedLayeredChoice()
+    {
         try
         {
-            var selected = State.SelectedElement;
+            var selected = _selectedPictureExportTargetId is { } id
+                ? State.CurrentPage.Elements.OfType<ImageFrameElement>().FirstOrDefault(item => item.Id == id)
+                : State.SelectedElement as ImageFrameElement;
+            if (selected?.PictureSource is null)
+                throw new InvalidOperationException("The selected picture no longer contains an editable Picture Studio layer document.");
+            var baseName = Files.SafeFileName(State.Document.Name);
+            var objectName = Files.SafeFileName(selected.Name);
+            var fileName = $"{baseName}-{objectName}-layered.svg";
+            await CloseSelectedPictureExport();
+            ShowNotice($"Exporting {selected.Name} with editable Picture Studio layers…");
+            var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/pictureStudioInterop.js");
+            try
+            {
+                await module.InvokeVoidAsync("downloadPictureStudioSvg", selected.PictureSource, fileName);
+            }
+            finally
+            {
+                try { await module.DisposeAsync(); } catch (JSDisconnectedException) { }
+            }
+            ShowNotice($"Exported {selected.Name} as layered Picture Studio SVG.");
+        }
+        catch (Exception ex)
+        {
+            ShowError(ex);
+        }
+    }
+
+    private async Task ExportSelectedObjectCore(PublicationElement? selected, string format)
+    {
+        try
+        {
             if (selected is null) throw new InvalidOperationException("Select an object before exporting it.");
             if (selected is ConnectorElement) throw new InvalidOperationException("Connector-only export is not supported yet.");
             var extension = format == "svg" ? "svg" : "png";
             var baseName = Files.SafeFileName(State.Document.Name);
             var objectName = Files.SafeFileName(selected.Name);
             var fileName = $"{baseName}-{objectName}.{extension}";
-            ShowNotice($"Rendering {selected.Name} as {format.ToUpperInvariant()}…");
+            ShowNotice($"Rendering {selected.Name} as merged {format.ToUpperInvariant()}…");
             await InvokeAsync(StateHasChanged);
             await Task.Yield();
             await JS.InvokeVoidAsync(
@@ -1062,7 +1149,7 @@
                 fileName,
                 format,
                 State.Document.View.ExportDpi);
-            ShowNotice($"Exported {selected.Name} as {format.ToUpperInvariant()}.");
+            ShowNotice($"Exported {selected.Name} as merged {format.ToUpperInvariant()}.");
         }
         catch (Exception ex)
         {
@@ -1148,6 +1235,18 @@
             ShowNotice($"Exported {fileName}");
         }
         catch (Exception ex) { ShowError(ex); }
+    }
+
+    private Task OpenPageEffectStudio()
+    {
+        _pageEffectStudioVisible = true;
+        return Task.CompletedTask;
+    }
+
+    private Task ClosePageEffectStudio()
+    {
+        _pageEffectStudioVisible = false;
+        return Task.CompletedTask;
     }
 
     private Task OpenStructuredWebsiteExport()
@@ -1897,7 +1996,7 @@
                 {
                     image.DataUrl = result.DataUrl;
                     image.OriginalDataUrl = result.DataUrl;
-                    image.PictureSource = result.SourceDocument;
+                    image.PictureSource = result.PreserveLayers ? result.SourceDocument : null;
                     image.Name = result.Name;
                     image.AltText = result.Name;
                 });
@@ -1905,7 +2004,7 @@
         }
         else
         {
-            State.AddImage(result.DataUrl, result.Name, result.SourceDocument);
+            State.AddImage(result.DataUrl, result.Name, result.PreserveLayers ? result.SourceDocument : null);
         }
         _pictureEditorVisible = false;
         _pictureEditorTargetId = null;

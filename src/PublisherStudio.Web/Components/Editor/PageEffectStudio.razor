@@ -1,0 +1,222 @@
+@namespace PublisherStudio.Components.Editor
+@inject ILogger<PageEffectStudio> Logger
+@inject IUserNotificationService Notifications
+
+@if (Visible)
+{
+    <div class="publisher-dialog-backdrop page-effect-studio-backdrop" role="presentation" @onclick="Close">
+        <section class="publisher-dialog page-effect-studio" role="dialog" aria-modal="true" aria-labelledby="page-effect-studio-title" @onclick:stopPropagation>
+            <header>
+                <div>
+                    <h2 id="page-effect-studio-title">Page appearance & effects</h2>
+                    <p>Page-wide color and effect layers are separate from ordinary object Z-order, so existing component layering stays intact.</p>
+                </div>
+                <button type="button" class="publisher-dialog-close" title="Close" @onclick="Close">×</button>
+            </header>
+
+            <div class="page-effect-studio-body">
+                <section class="page-effect-base-color">
+                    <h3>Page color</h3>
+                    <div class="page-effect-row">
+                        <label>Custom page color
+                            <input type="color" value="@SafeColor(State.CurrentPage.Background)" @onchange="ChangePageColor" />
+                        </label>
+                        <button type="button" @onclick="SetTransparent">Transparent</button>
+                        <span class="page-effect-color-value">@State.CurrentPage.Background</span>
+                    </div>
+                </section>
+
+                <section>
+                    <div class="page-effect-section-heading">
+                        <div>
+                            <h3>Effect layers</h3>
+                            <p>Background layers sit below objects; overlay layers sit above objects but never capture the mouse.</p>
+                        </div>
+                        <div>
+                            <button type="button" @onclick="() => AddEffect(PublicationPageEffectKind.SolidColor)">+ Color</button>
+                            <button type="button" @onclick="() => AddEffect(PublicationPageEffectKind.LinearGradient)">+ Linear gradient</button>
+                            <button type="button" @onclick="() => AddEffect(PublicationPageEffectKind.RadialGradient)">+ Radial gradient</button>
+                        </div>
+                    </div>
+
+                    @if (State.CurrentPage.EffectLayers.Count == 0)
+                    {
+                        <div class="page-effect-empty">No page effect layers yet. The ordinary page color remains active.</div>
+                    }
+                    else
+                    {
+                        <div class="page-effect-layer-list">
+                            @foreach (var effect in State.CurrentPage.EffectLayers)
+                            {
+                                <article class="page-effect-card" @key="effect.Id">
+                                    <header>
+                                        <label class="page-effect-name">Name
+                                            <input value="@effect.Name" @onchange="args => UpdateText(effect.Id, args, (item, value) => item.Name = value)" />
+                                        </label>
+                                        <label><input type="checkbox" checked="@effect.Visible" @onchange="args => UpdateBool(effect.Id, args, (item, value) => item.Visible = value)" /> Visible</label>
+                                        <button type="button" class="danger" @onclick="() => RemoveEffect(effect.Id)">Delete</button>
+                                    </header>
+
+                                    <div class="page-effect-grid">
+                                        <label>Placement
+                                            <select value="@effect.Placement" @onchange="args => UpdatePlacement(effect.Id, args)">
+                                                @foreach (var value in Enum.GetValues<PublicationPageEffectPlacement>()) { <option value="@value">@value</option> }
+                                            </select>
+                                        </label>
+                                        <label>Effect
+                                            <select value="@effect.Kind" @onchange="args => UpdateKind(effect.Id, args)">
+                                                @foreach (var value in Enum.GetValues<PublicationPageEffectKind>()) { <option value="@value">@value</option> }
+                                            </select>
+                                        </label>
+                                        <label>Blend
+                                            <select value="@effect.BlendMode" @onchange="args => UpdateBlendMode(effect.Id, args)">
+                                                @foreach (var value in Enum.GetValues<PublicationPageEffectBlendMode>()) { <option value="@value">@value</option> }
+                                            </select>
+                                        </label>
+                                        <label>Start color
+                                            <input type="color" value="@SafeColor(effect.Color)" @onchange="args => UpdateText(effect.Id, args, (item, value) => item.Color = SafeColor(value))" />
+                                        </label>
+                                        @if (effect.Kind != PublicationPageEffectKind.SolidColor)
+                                        {
+                                            <label>Start color 2
+                                                <input type="color" value="@SafeColor(effect.SecondaryColor)" @onchange="args => UpdateText(effect.Id, args, (item, value) => item.SecondaryColor = SafeColor(value))" />
+                                            </label>
+                                            <label>Gradient angle
+                                                <input type="number" min="-360" max="360" step="1" value="@Inv(effect.AngleDegrees)" @onchange="args => UpdateDouble(effect.Id, args, -360, 360, (item, value) => item.AngleDegrees = value)" />
+                                            </label>
+                                        }
+                                        <label>Opacity
+                                            <input type="range" min="0" max="1" step="0.01" value="@Inv(effect.Opacity)" @onchange="args => UpdateDouble(effect.Id, args, 0, 1, (item, value) => item.Opacity = value)" />
+                                            <span>@Math.Round(effect.Opacity * 100)%</span>
+                                        </label>
+                                    </div>
+
+                                    <details open="@effect.AnimationEnabled">
+                                        <summary>Animation / transition</summary>
+                                        <div class="page-effect-grid">
+                                            <label><input type="checkbox" checked="@effect.AnimationEnabled" @onchange="args => UpdateBool(effect.Id, args, (item, value) => item.AnimationEnabled = value)" /> Animate from → to</label>
+                                            <label>End color
+                                                <input type="color" value="@SafeColor(effect.ToColor)" @onchange="args => UpdateText(effect.Id, args, (item, value) => item.ToColor = SafeColor(value))" />
+                                            </label>
+                                            @if (effect.Kind != PublicationPageEffectKind.SolidColor)
+                                            {
+                                                <label>End color 2
+                                                    <input type="color" value="@SafeColor(effect.ToSecondaryColor)" @onchange="args => UpdateText(effect.Id, args, (item, value) => item.ToSecondaryColor = SafeColor(value))" />
+                                                </label>
+                                            }
+                                            <label>End opacity
+                                                <input type="range" min="0" max="1" step="0.01" value="@Inv(effect.ToOpacity)" @onchange="args => UpdateDouble(effect.Id, args, 0, 1, (item, value) => item.ToOpacity = value)" />
+                                            </label>
+                                            <label>Duration (s)
+                                                <input type="number" min="0.05" max="3600" step="0.05" value="@Inv(effect.DurationSeconds)" @onchange="args => UpdateDouble(effect.Id, args, .05, 3600, (item, value) => item.DurationSeconds = value)" />
+                                            </label>
+                                            <label>Delay (s)
+                                                <input type="number" min="0" max="3600" step="0.05" value="@Inv(effect.DelaySeconds)" @onchange="args => UpdateDouble(effect.Id, args, 0, 3600, (item, value) => item.DelaySeconds = value)" />
+                                            </label>
+                                            <label>Repeats
+                                                <input type="number" min="1" max="1000" step="1" value="@effect.RepeatCount" @onchange="args => UpdateInt(effect.Id, args, 1, 1000, (item, value) => item.RepeatCount = value)" />
+                                            </label>
+                                            <label><input type="checkbox" checked="@effect.AutoReverse" @onchange="args => UpdateBool(effect.Id, args, (item, value) => item.AutoReverse = value)" /> Reverse back to start</label>
+                                            <label>Easing
+                                                <select value="@effect.Easing" @onchange="args => UpdateEasing(effect.Id, args)">
+                                                    @foreach (var value in Enum.GetValues<PublicationAnimationEasing>()) { <option value="@value">@value</option> }
+                                                </select>
+                                            </label>
+                                        </div>
+                                    </details>
+                                </article>
+                            }
+                        </div>
+                    }
+                </section>
+            </div>
+
+            <footer>
+                <span>Changes are publication-native and participate in undo/redo, print, raster/SVG and HTML rendering.</span>
+                <button type="button" class="primary" @onclick="Close">Done</button>
+            </footer>
+        </section>
+    </div>
+}
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
+    [Parameter] public EventCallback Closed { get; set; }
+
+    private Task Close() => Closed.InvokeAsync();
+
+    private void ChangePageColor(ChangeEventArgs args) => SafeUpdate("change page color", () => State.UpdatePage(page => page.Background = SafeColor(args.Value?.ToString())));
+    private void SetTransparent() => SafeUpdate("make page transparent", () => State.UpdatePage(page => page.Background = "transparent"));
+
+    private void AddEffect(PublicationPageEffectKind kind) => SafeUpdate("add page effect", () => State.UpdatePage(page => page.EffectLayers.Add(new PublicationPageEffectLayer
+    {
+        Name = kind switch
+        {
+            PublicationPageEffectKind.LinearGradient => "Page linear gradient",
+            PublicationPageEffectKind.RadialGradient => "Page radial gradient",
+            _ => "Page color effect"
+        },
+        Kind = kind,
+        Placement = PublicationPageEffectPlacement.Background,
+        Color = "#dbeafe",
+        SecondaryColor = "#ede9fe",
+        ToColor = "#fef3c7",
+        ToSecondaryColor = "#fee2e2",
+        Opacity = .7,
+        ToOpacity = .7
+    })));
+
+    private void RemoveEffect(Guid id) => SafeUpdate("remove page effect", () => State.UpdatePage(page => page.EffectLayers.RemoveAll(item => item.Id == id)));
+
+    private void Update(Guid id, Action<PublicationPageEffectLayer> action) => SafeUpdate("update page effect", () => State.UpdatePage(page =>
+    {
+        var effect = page.EffectLayers.FirstOrDefault(item => item.Id == id);
+        if (effect is not null) action(effect);
+    }));
+
+    private void UpdateText(Guid id, ChangeEventArgs args, Action<PublicationPageEffectLayer, string> update) =>
+        Update(id, effect => update(effect, args.Value?.ToString()?.Trim() ?? string.Empty));
+
+    private void UpdateBool(Guid id, ChangeEventArgs args, Action<PublicationPageEffectLayer, bool> update) =>
+        Update(id, effect => update(effect, args.Value is bool value ? value : bool.TryParse(args.Value?.ToString(), out var parsed) && parsed));
+
+    private void UpdateDouble(Guid id, ChangeEventArgs args, double minimum, double maximum, Action<PublicationPageEffectLayer, double> update)
+    {
+        if (double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
+            Update(id, effect => update(effect, Math.Clamp(value, minimum, maximum)));
+    }
+
+    private void UpdateInt(Guid id, ChangeEventArgs args, int minimum, int maximum, Action<PublicationPageEffectLayer, int> update)
+    {
+        if (int.TryParse(args.Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var value))
+            Update(id, effect => update(effect, Math.Clamp(value, minimum, maximum)));
+    }
+
+    private void UpdatePlacement(Guid id, ChangeEventArgs args) => UpdateEnum(id, args, (PublicationPageEffectLayer item, PublicationPageEffectPlacement value) => item.Placement = value);
+    private void UpdateKind(Guid id, ChangeEventArgs args) => UpdateEnum(id, args, (PublicationPageEffectLayer item, PublicationPageEffectKind value) => item.Kind = value);
+    private void UpdateBlendMode(Guid id, ChangeEventArgs args) => UpdateEnum(id, args, (PublicationPageEffectLayer item, PublicationPageEffectBlendMode value) => item.BlendMode = value);
+    private void UpdateEasing(Guid id, ChangeEventArgs args) => UpdateEnum(id, args, (PublicationPageEffectLayer item, PublicationAnimationEasing value) => item.Easing = value);
+
+    private void UpdateEnum<T>(Guid id, ChangeEventArgs args, Action<PublicationPageEffectLayer, T> update) where T : struct, Enum
+    {
+        if (Enum.TryParse<T>(args.Value?.ToString(), true, out var value)) Update(id, effect => update(effect, value));
+    }
+
+
+    private void SafeUpdate(string operation, Action update)
+    {
+        try
+        {
+            update();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Page effect operation {Operation} failed.", operation);
+            Notifications.Error(ex.Message, "Page effect update failed", nameof(PageEffectStudio));
+        }
+    }
+
+    private static string SafeColor(string? value) => !string.IsNullOrWhiteSpace(value) && value.StartsWith('#') && value.Length is 4 or 7 ? value : "#ffffff";
+    private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+}

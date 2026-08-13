@@ -12,11 +12,12 @@ const proceduralCache = new Map();
 const layerKinds = ["raster", "text", "shape", "fill", "render", "paint", "vector"];
 const blendModes = ["source-over", "multiply", "screen", "overlay", "darken", "lighten"];
 const rasterFits = ["stretch", "contain", "cover"];
+const rasterColorizeModes = ["none", "replacecolor", "luminosity"];
 const shapeKinds = ["rectangle", "roundedRectangle", "ellipse", "line", "arrow", "freeform", "path"];
 const fillKinds = ["solid", "linearGradient", "radialGradient"];
 const renderKinds = ["clouds", "noise", "stripes", "vignette", "bloom", "neon", "lensflare", "grainnoise", "motionblur", "wind", "oceanwaves"];
 const textAlignments = ["left", "center", "right"];
-const drawTools = ["select", "brush", "pencil", "spray", "toothbrush", "square", "rectangle", "ellipse", "arrow", "line", "path", "eraser", "eyedropper", "rectangleselect", "ellipseselect", "freeselect", "magneticselect", "polygonselect", "fillsolid", "fillgradient"];
+const drawTools = ["select", "brush", "pencil", "spray", "toothbrush", "brushpath", "pencilpath", "spraypath", "toothbrushpath", "eraserpath", "square", "rectangle", "ellipse", "arrow", "line", "path", "eraser", "eyedropper", "rectangleselect", "ellipseselect", "freeselect", "magneticselect", "polygonselect", "fillsolid", "fillgradient"];
 
 function enumName(value, names, fallback) { try {
     if (typeof value === "string") return value;
@@ -352,6 +353,36 @@ function drawImageWithFit(ctx, image, width, height, fit) { try {
     ctx.drawImage(image, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:drawImageWithFit@328', __javascriptError); throw __javascriptError; }}
 
+function applyRasterColorize(canvas, layer) { try {
+    const mode = enumName(layer?.colorizeMode, rasterColorizeModes, "none").toLowerCase();
+    const strength = clamp(layer?.colorizeStrength ?? 1, 0, 1);
+    if (mode === "none" || strength <= .001) return;
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (!context) return;
+    const image = context.getImageData(0, 0, canvas.width, canvas.height);
+    const source = parseColor(layer?.colorizeSourceColor, [255, 255, 255, 255]);
+    const target = parseColor(layer?.colorizeTargetColor, [220, 38, 38, 255]);
+    const tolerance = clamp(layer?.colorizeTolerance ?? 48, 0, 255);
+    for (let offset = 0; offset < image.data.length; offset += 4) {
+        const alpha = image.data[offset + 3];
+        if (alpha === 0) continue;
+        const red = image.data[offset], green = image.data[offset + 1], blue = image.data[offset + 2];
+        let mappedRed = red, mappedGreen = green, mappedBlue = blue, apply = false;
+        if (mode === "replacecolor") {
+            const distance = Math.sqrt((red-source[0])**2 + (green-source[1])**2 + (blue-source[2])**2) / Math.sqrt(3);
+            if (distance <= tolerance) { mappedRed = target[0]; mappedGreen = target[1]; mappedBlue = target[2]; apply = true; }
+        } else if (mode === "luminosity") {
+            const luminance = (red * .2126 + green * .7152 + blue * .0722) / 255;
+            mappedRed = target[0] * luminance; mappedGreen = target[1] * luminance; mappedBlue = target[2] * luminance; apply = true;
+        }
+        if (!apply) continue;
+        image.data[offset] = Math.round(red + (mappedRed - red) * strength);
+        image.data[offset + 1] = Math.round(green + (mappedGreen - green) * strength);
+        image.data[offset + 2] = Math.round(blue + (mappedBlue - blue) * strength);
+    }
+    context.putImageData(image, 0, 0);
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:applyRasterColorize', __javascriptError); throw __javascriptError; }}
+
 async function drawRasterLayer(ctx, layer) { try {
     const { width, height } = beginLayer(ctx, layer);
     let image;
@@ -381,6 +412,7 @@ async function drawRasterLayer(ctx, layer) { try {
     scratchContext.scale(layer.flipHorizontal ? -1 : 1, layer.flipVertical ? -1 : 1);
     drawImageWithFit(scratchContext, image, scratch.width, scratch.height, layer.fitMode);
     scratchContext.restore();
+    applyRasterColorize(scratch, layer);
     const tintOpacity = clamp(layer.tintOpacity ?? 0, 0, 1);
     if (tintOpacity > .001) {
         scratchContext.save();
@@ -1388,7 +1420,7 @@ function drawDrawingPreview(ctx, drawing) { try {
         if (selection) drawAreaSelection(ctx, selection, 1);
         return;
     }
-    if (String(drawing.tool || "").toLowerCase() === "path") {
+    if (["path", "brushpath", "pencilpath", "spraypath", "toothbrushpath", "eraserpath"].includes(String(drawing.tool || "").toLowerCase())) {
         const points = Array.isArray(drawing.points) ? drawing.points : [];
         if (points.length < 2) return;
         ctx.save();
@@ -1646,7 +1678,7 @@ function addPathNode(editor, event) { try {
     }
     if (!editor.pathDraft) {
         editor.pathDraft = {
-            tool: editor.toolSettings?.tool === "polygonselect" ? "polygonselect" : "path",
+            tool: editor.toolSettings?.tool === "polygonselect" ? "polygonselect" : (editor.toolSettings?.tool || "path"),
             color: editor.toolSettings.color,
             widthPx: editor.toolSettings.width,
             opacity: editor.toolSettings.opacity,
@@ -1674,8 +1706,12 @@ function finishPathDraft(editor, closed = false) { try {
     }
     if (draft.points.length < 2) { scheduleEditorRender(editor); return; }
     const coordinates = [];
-    for (const point of draft.points) coordinates.push(Number(point.x) || 0, Number(point.y) || 0);
-    safeInvoke(editor, "PicturePathCommitted", coordinates, closed === true, false);
+    const paintPathKinds = { brushpath: "Brush", pencilpath: "Pencil", spraypath: "Spray", toothbrushpath: "Toothbrush", eraserpath: "Eraser" };
+    const paintKind = paintPathKinds[String(draft.tool || "").toLowerCase()];
+    const points = paintKind ? localizeStrokePoints(editor, draft.points, String(paintKind).toLowerCase()) : draft.points;
+    for (const point of points) coordinates.push(Number(point.x) || 0, Number(point.y) || 0);
+    if (paintKind) safeInvoke(editor, "PictureStrokeCommitted", paintKind, coordinates, draft.color, draft.widthPx, draft.opacity, editor.toolSettings?.hardness ?? .8);
+    else safeInvoke(editor, "PicturePathCommitted", coordinates, closed === true, false);
     scheduleEditorRender(editor);
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:finishPathDraft@1660', __javascriptError); throw __javascriptError; }}
 
@@ -1794,7 +1830,7 @@ function beginDrawing(editor, event) { try {
         commitAreaFill(editor, editor.areaSelection, settings.tool === "fillgradient");
         scheduleEditorRender(editor); event.preventDefault(); return;
     }
-    if (settings.tool === "path" || settings.tool === "polygonselect") {
+    if (["path", "polygonselect", "brushpath", "pencilpath", "spraypath", "toothbrushpath", "eraserpath"].includes(settings.tool)) {
         // The second pointerdown of a double-click must not create a duplicate terminal node.
         if ((Number(event.detail) || 0) < 2) addPathNode(editor, event);
         else event.preventDefault();
@@ -1965,7 +2001,7 @@ function bindEditorCanvas(editor, canvas) { try {
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:canvas.addEventListener@1955', __javascriptError); throw __javascriptError; }});
     canvas.addEventListener("pointermove", event => { try {
         updatePictureGesturePointer(editor, event);
-        if (editor.pathDraft && ["path", "polygonselect"].includes(editor.toolSettings?.tool || "select")) {
+        if (editor.pathDraft && ["path", "polygonselect", "brushpath", "pencilpath", "spraypath", "toothbrushpath", "eraserpath"].includes(editor.toolSettings?.tool || "select")) {
             editor.pathDraft.hover = canvasPoint(canvas, event);
             scheduleEditorRender(editor);
         } else if (editor.drawing) updateDrawing(editor, event);
@@ -1986,7 +2022,7 @@ function bindEditorCanvas(editor, canvas) { try {
         else if (editor.interaction?.pointerId === event.pointerId) finishInteraction(editor, event, true);
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:canvas.addEventListener@1979', __javascriptError); throw __javascriptError; }});
     canvas.addEventListener("dblclick", event => { try {
-        if (["path", "polygonselect"].includes(editor.toolSettings?.tool || "select")) {
+        if (["path", "polygonselect", "brushpath", "pencilpath", "spraypath", "toothbrushpath", "eraserpath"].includes(editor.toolSettings?.tool || "select")) {
             finishPathDraft(editor, event.shiftKey === true);
             event.preventDefault();
             return;
@@ -2131,7 +2167,7 @@ export async function renderPictureStudio(canvasId, documentModel, selectedLayer
     editor.selectedLayerId = selectedLayerId || null;
     editor.zoom = clamp(zoom ?? nextDocument.zoom, .05, 4);
     const nextToolSettings = normalizeToolSettings(toolSettings);
-    if (editor.pathDraft && !["path", "polygonselect"].includes(nextToolSettings.tool)) editor.pathDraft = null;
+    if (editor.pathDraft && !["path", "polygonselect", "brushpath", "pencilpath", "spraypath", "toothbrushpath", "eraserpath"].includes(nextToolSettings.tool)) editor.pathDraft = null;
     editor.toolSettings = nextToolSettings;
     canvas.style.width = `${Math.round(nextDocument.widthPx * editor.zoom)}px`;
     canvas.style.height = `${Math.round(nextDocument.heightPx * editor.zoom)}px`;
@@ -2482,7 +2518,7 @@ export async function createPictureStudioSvg(documentModel) { try {
     const defs = definitions.length ? `<defs>${definitions.join("")}</defs>` : "";
     return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${document.widthPx}" height="${document.heightPx}" viewBox="0 0 ${document.widthPx} ${document.heightPx}">
-<title>${xmlEscape(document.name || "Picture")}</title><metadata data-publisherstudio-picture="1.4">${metadata}</metadata>${defs}${background}${layers.join("")}</svg>`;
+<title>${xmlEscape(document.name || "Picture")}</title><metadata data-publisherstudio-picture="1.5">${metadata}</metadata>${defs}${background}${layers.join("")}</svg>`;
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:createPictureStudioSvg@2447', __javascriptError); throw __javascriptError; }}
 
 
@@ -2805,7 +2841,7 @@ export async function importPictureStudioSvg(dataUrl, fileName) { try {
             document: {
                 id: crypto.randomUUID(),
                 name: String(fileName || "SVG").replace(/\.(?:svg|svgz)$/i, ""),
-                formatVersion: "1.4",
+                formatVersion: "1.5",
                 widthPx: viewport.width,
                 heightPx: viewport.height,
                 background: "transparent",

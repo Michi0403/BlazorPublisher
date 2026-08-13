@@ -100,6 +100,14 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
                         }
                         foreach (var row in data.Rows)
                             row.Values = new Dictionary<string, string>(row.Values ?? new Dictionary<string, string>(), StringComparer.OrdinalIgnoreCase);
+                        // ValueKindExplicit did not exist in older publication files. Re-infer those legacy
+                        // columns from their canonical rows so spreadsheet snapshots that were previously
+                        // frozen as Text immediately become chart-safe without forcing a destructive re-import.
+                        if (data.Rows.Count > 0 && !IsLiveSource(data.SourceKind))
+                        {
+                            foreach (var column in data.Columns.Where(column => !column.ValueKindExplicit && !string.IsNullOrWhiteSpace(column.Name)))
+                                column.ValueKind = InferKind(data.Rows.Select(row => row.Get(column.Name)));
+                        }
                         if (data.SourceKind is not PublicationDataSourceKind.DocumentObjects
                             and not PublicationDataSourceKind.PublicationPages
                             and not PublicationDataSourceKind.PublicationDocument
@@ -129,6 +137,9 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         try
         {
             logger.LogTrace($"Entering PublicationDataService.ParseInto.");
+                    var explicitKinds = data.Columns
+                        .Where(column => column.ValueKindExplicit && !string.IsNullOrWhiteSpace(column.Name))
+                        .ToDictionary(column => column.Name, column => column.ValueKind, StringComparer.OrdinalIgnoreCase);
                     switch (data.SourceKind)
                     {
                         case PublicationDataSourceKind.Json:
@@ -161,6 +172,12 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
                             break;
                         default:
                             throw new InvalidDataException("Unsupported data source type.");
+                    }
+                    foreach (var column in data.Columns)
+                    {
+                        if (!explicitKinds.TryGetValue(column.Name, out var explicitKind)) continue;
+                        column.ValueKind = explicitKind;
+                        column.ValueKindExplicit = true;
                     }
                     data.ModifiedUtc = DateTimeOffset.UtcNow;
     
@@ -314,7 +331,7 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
                                 : valueFields.Length > 1 ? valueField : item.Title;
                             points.Add(new DataChartPoint(string.IsNullOrWhiteSpace(argument) ? "(blank)" : argument,
                                 string.IsNullOrWhiteSpace(series) ? valueField : series,
-                                row.GetNumber(valueField)));
+                                GetNumber(row, valueField)));
                         }
                     }
                     return points;
@@ -345,7 +362,7 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
                     return ResolveRows(document, data, currentPageId)
                         .Select((row, index) => new DataPiePoint(
                             string.IsNullOrWhiteSpace(item.ArgumentField) ? (index + 1).ToString(CultureInfo.InvariantCulture) : row.Get(item.ArgumentField),
-                            row.GetNumber(field)))
+                            GetNumber(row, field)))
                         .ToArray();
     
         }
@@ -374,7 +391,7 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
                     return ResolveRows(document, data, currentPageId)
                         .Select((row, index) => new DataSparkPoint(
                             string.IsNullOrWhiteSpace(item.ArgumentField) ? (index + 1).ToString(CultureInfo.InvariantCulture) : row.Get(item.ArgumentField),
-                            row.GetNumber(field)))
+                            GetNumber(row, field)))
                         .ToArray();
     
         }
@@ -406,7 +423,7 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
                     {
                         var argument = string.IsNullOrWhiteSpace(item.ArgumentField) ? (index + 1).ToString(CultureInfo.InvariantCulture) : row.Get(item.ArgumentField);
                         var series = string.IsNullOrWhiteSpace(item.SeriesField) ? item.Title : row.Get(item.SeriesField);
-                        return new DataRangePoint(string.IsNullOrWhiteSpace(argument) ? "(blank)" : argument, series, row.GetNumber(lowField), row.GetNumber(highField));
+                        return new DataRangePoint(string.IsNullOrWhiteSpace(argument) ? "(blank)" : argument, series, GetNumber(row, lowField), GetNumber(row, highField));
                     }).ToArray();
     
         }
@@ -437,7 +454,7 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
                     {
                         var argument = string.IsNullOrWhiteSpace(item.ArgumentField) ? (index + 1).ToString(CultureInfo.InvariantCulture) : row.Get(item.ArgumentField);
                         var series = string.IsNullOrWhiteSpace(item.SeriesField) ? item.Title : row.Get(item.SeriesField);
-                        return new DataBubblePoint(string.IsNullOrWhiteSpace(argument) ? "(blank)" : argument, series, row.GetNumber(valueField), Math.Abs(row.GetNumber(sizeField)));
+                        return new DataBubblePoint(string.IsNullOrWhiteSpace(argument) ? "(blank)" : argument, series, GetNumber(row, valueField), Math.Abs(GetNumber(row, sizeField)));
                     }).ToArray();
     
         }
@@ -468,7 +485,7 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
                     if (string.IsNullOrWhiteSpace(open)) return [];
                     return ResolveRows(document, data, currentPageId).Select((row, index) => new DataFinancialPoint(
                         string.IsNullOrWhiteSpace(item.ArgumentField) ? (index + 1).ToString(CultureInfo.InvariantCulture) : row.Get(item.ArgumentField),
-                        row.GetNumber(open), row.GetNumber(high), row.GetNumber(low), row.GetNumber(close))).ToArray();
+                        GetNumber(row, open), GetNumber(row, high), GetNumber(row, low), GetNumber(row, close))).ToArray();
     
         }
         catch (Exception exception)
@@ -494,7 +511,7 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
                     var weightField = item.ValueFields.FirstOrDefault() ?? string.Empty;
                     if (string.IsNullOrWhiteSpace(item.ArgumentField) || string.IsNullOrWhiteSpace(item.TargetField) || string.IsNullOrWhiteSpace(weightField)) return [];
                     return ResolveRows(document, data, currentPageId)
-                        .Select(row => new DataSankeyPoint(row.Get(item.ArgumentField), row.Get(item.TargetField), row.GetNumber(weightField)))
+                        .Select(row => new DataSankeyPoint(row.Get(item.ArgumentField), row.Get(item.TargetField), GetNumber(row, weightField)))
                         .Where(point => !string.IsNullOrWhiteSpace(point.Source) && !string.IsNullOrWhiteSpace(point.Target))
                         .ToArray();
     
@@ -522,7 +539,7 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
                     var valueField = item.ValueFields.FirstOrDefault() ?? string.Empty;
                     if (string.IsNullOrWhiteSpace(item.ArgumentField) || string.IsNullOrWhiteSpace(valueField)) return [];
                     return ResolveRows(document, data, currentPageId)
-                        .Select(row => new DataTreeMapPoint(row.Get(item.ArgumentField), string.IsNullOrWhiteSpace(item.ParentField) ? string.Empty : row.Get(item.ParentField), row.GetNumber(valueField)))
+                        .Select(row => new DataTreeMapPoint(row.Get(item.ArgumentField), string.IsNullOrWhiteSpace(item.ParentField) ? string.Empty : row.Get(item.ParentField), GetNumber(row, valueField)))
                         .ToArray();
     
         }
@@ -1219,22 +1236,417 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
     /// </summary>
     /// <param name="values">String dependency used by the publication workflow to provide the corresponding application capability.</param>
     /// <returns>The publication data value kind produced by the operation.</returns>
-    private PublicationDataValueKind InferKind(IEnumerable<string> values)
+    public PublicationDataValueKind InferKind(IEnumerable<string> values)
     {
         try
         {
             logger.LogTrace($"Entering PublicationDataService.InferKind.");
-                    var materialized = values.Where(value => !string.IsNullOrWhiteSpace(value)).Take(100).ToArray();
-                    if (materialized.Length == 0) return PublicationDataValueKind.Text;
-                    if (materialized.All(value => double.TryParse(value, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out _) || double.TryParse(value, out _))) return PublicationDataValueKind.Number;
-                    if (materialized.All(value => bool.TryParse(value, out _))) return PublicationDataValueKind.Boolean;
-                    if (materialized.All(value => DateTimeOffset.TryParse(value, out _))) return PublicationDataValueKind.DateTime;
-                    return PublicationDataValueKind.Text;
-    
+            var materialized = values.Where(value => !string.IsNullOrWhiteSpace(value)).Take(100).ToArray();
+            if (materialized.Length == 0) return PublicationDataValueKind.Text;
+            if (materialized.All(value => TryParseNumber(value, out _))) return PublicationDataValueKind.Number;
+            if (materialized.All(value => bool.TryParse(value, out _))) return PublicationDataValueKind.Boolean;
+            if (materialized.All(value => DateTimeOffset.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.AllowWhiteSpaces, out _)
+                || DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out _))) return PublicationDataValueKind.DateTime;
+            return PublicationDataValueKind.Text;
         }
         catch (Exception exception)
         {
             logger.LogError(exception, $"PublicationDataService.InferKind failed: {exception.Message}");
+            throw;
+        }
+    }
+
+    /// <summary>Parses numeric publication values including localized thousands separators, currency symbols, percentages, and accounting negatives.</summary>
+    /// <param name="value">Value value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="number">Number value supplied to the publication operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    public bool TryParseNumber(string? value, out double number)
+    {
+        number = 0;
+        try
+        {
+            logger.LogTrace("Entering PublicationDataService.TryParseNumber.");
+            if (string.IsNullOrWhiteSpace(value)) return false;
+            var text = value.Trim().Replace("\u00a0", string.Empty).Replace("\u202f", string.Empty);
+            var percent = text.EndsWith('%');
+            if (percent) text = text[..^1].Trim();
+            var styles = NumberStyles.Float | NumberStyles.AllowThousands | NumberStyles.AllowCurrencySymbol | NumberStyles.AllowParentheses;
+
+            // Spreadsheet display text often arrives as already-formatted currency. When there is a single
+            // separator followed by exactly three digits (for example "€858,882"), interpreting that
+            // separator as a decimal merely because the machine culture is de-DE would silently turn
+            // 858,882 into 858.882. Preserve the spreadsheet's visible grouping intent before trying cultures.
+            var hasCurrencySymbol = text.Any(character => CharUnicodeInfo.GetUnicodeCategory(character) == UnicodeCategory.CurrencySymbol);
+            if (hasCurrencySymbol)
+            {
+                var compact = new string(text.Where(character => char.IsDigit(character) || character is '-' or '+' or '.' or ',' or '(' or ')').ToArray());
+                var commaCount = compact.Count(character => character == ',');
+                var dotCount = compact.Count(character => character == '.');
+                var groupingSeparator = commaCount == 1 && dotCount == 0 ? ',' : dotCount == 1 && commaCount == 0 ? '.' : '\0';
+                if (groupingSeparator != '\0')
+                {
+                    var separatorIndex = compact.IndexOf(groupingSeparator);
+                    var digitsAfter = compact[(separatorIndex + 1)..].Count(char.IsDigit);
+                    var digitsBefore = compact[..separatorIndex].Count(char.IsDigit);
+                    if (digitsBefore > 0 && digitsAfter == 3)
+                    {
+                        var accountingNegative = compact.StartsWith('(') && compact.EndsWith(')');
+                        var grouped = compact.Replace(groupingSeparator.ToString(), string.Empty).Trim('(', ')');
+                        if (double.TryParse(grouped, NumberStyles.Float, CultureInfo.InvariantCulture, out number))
+                        {
+                            if (accountingNegative) number = -Math.Abs(number);
+                            if (percent) number /= 100d;
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            var cultures = new[]
+            {
+                CultureInfo.CurrentCulture, CultureInfo.InvariantCulture,
+                CultureInfo.GetCultureInfo("en-US"), CultureInfo.GetCultureInfo("de-DE"),
+                CultureInfo.GetCultureInfo("fr-FR"), CultureInfo.GetCultureInfo("en-GB")
+            };
+            foreach (var culture in cultures.DistinctBy(culture => culture.Name))
+            {
+                if (!double.TryParse(text, styles, culture, out number)) continue;
+                if (percent) number /= 100d;
+                return true;
+            }
+
+            // Spreadsheet display text can combine a currency symbol with separators from a different locale.
+            // Strip only currency/spacing characters, then infer the final decimal/group separator conservatively.
+            var cleaned = new string(text.Where(character => char.IsDigit(character) || character is '-' or '+' or '.' or ',' or '(' or ')').ToArray());
+            var negative = cleaned.StartsWith('(') && cleaned.EndsWith(')');
+            cleaned = cleaned.Trim('(', ')');
+            var comma = cleaned.LastIndexOf(',');
+            var dot = cleaned.LastIndexOf('.');
+            if (comma >= 0 || dot >= 0)
+            {
+                var separator = comma > dot ? ',' : '.';
+                var separatorIndex = Math.Max(comma, dot);
+                var digitsAfter = cleaned.Length - separatorIndex - 1;
+                var sameSeparatorCount = cleaned.Count(character => character == separator);
+                var treatAsGrouping = digitsAfter == 3 && (sameSeparatorCount > 1 || cleaned[..separatorIndex].Count(char.IsDigit) >= 1);
+                cleaned = treatAsGrouping
+                    ? cleaned.Replace(",", string.Empty).Replace(".", string.Empty)
+                    : separator == ','
+                        ? cleaned.Replace(".", string.Empty).Replace(',', '.')
+                        : cleaned.Replace(",", string.Empty);
+            }
+            if (!double.TryParse(cleaned, NumberStyles.Float, CultureInfo.InvariantCulture, out number)) return false;
+            if (negative) number = -Math.Abs(number);
+            if (percent) number /= 100d;
+            return true;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "PublicationDataService.TryParseNumber failed for a publication value.");
+            number = 0;
+            return false;
+        }
+    }
+
+    /// <summary>Returns the numeric interpretation used by charts and components while retaining count semantics for nonnumeric values.</summary>
+    /// <param name="row">Row value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="field">Field value supplied to the publication operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
+    public double GetNumber(PublicationDataRow row, string field)
+    {
+        try
+        {
+            logger.LogTrace("Entering PublicationDataService.GetNumber.");
+            var value = row.Get(field);
+            if (TryParseNumber(value, out var number)) return number;
+            if (bool.TryParse(value, out var boolean)) return boolean ? 1d : 0d;
+            return string.IsNullOrWhiteSpace(value) ? 0d : 1d;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "PublicationDataService.GetNumber failed for field {Field}.", field);
+            throw;
+        }
+    }
+
+    /// <summary>Validates column names, declared data types, and row values for authoring feedback.</summary>
+    /// <param name="data">Data value supplied to the publication operation and used when producing its result.</param>
+    /// <returns>The publication data validation result produced by the operation.</returns>
+    public PublicationDataValidationResult Validate(PublicationDataObject data)
+    {
+        try
+        {
+            logger.LogTrace("Entering PublicationDataService.Validate.");
+            var result = new PublicationDataValidationResult { ColumnCount = data.Columns.Count, RowCount = data.Rows.Count };
+            void Add(PublicationDataValidationSeverity severity, string message, string column = "", int row = 0)
+                => result.Issues.Add(new PublicationDataValidationIssue { Severity = severity, Message = message, ColumnName = column, RowNumber = row });
+
+            var names = data.Columns.Select(column => column.Name?.Trim() ?? string.Empty).ToArray();
+            if (names.Length == 0) Add(PublicationDataValidationSeverity.Error, "No columns were parsed.");
+            if (names.Any(string.IsNullOrWhiteSpace)) Add(PublicationDataValidationSeverity.Error, "Every column needs a name.");
+            if (names.Where(name => !string.IsNullOrWhiteSpace(name)).Distinct(StringComparer.OrdinalIgnoreCase).Count() != names.Count(name => !string.IsNullOrWhiteSpace(name)))
+                Add(PublicationDataValidationSeverity.Error, "Column names must be unique.");
+            if (data.Rows.Count == 0) Add(PublicationDataValidationSeverity.Warning, "The dataset contains no data rows yet.");
+
+            foreach (var column in data.Columns)
+            {
+                var values = data.Rows.Select((row, index) => (Value: row.Get(column.Name), Row: index + 1)).Where(pair => !string.IsNullOrWhiteSpace(pair.Value)).ToArray();
+                foreach (var pair in values)
+                {
+                    var valid = column.ValueKind switch
+                    {
+                        PublicationDataValueKind.Number => TryParseNumber(pair.Value, out _),
+                        PublicationDataValueKind.Boolean => bool.TryParse(pair.Value, out _),
+                        PublicationDataValueKind.DateTime => DateTimeOffset.TryParse(pair.Value, out _),
+                        _ => true
+                    };
+                    if (!valid) Add(PublicationDataValidationSeverity.Error, $"'{pair.Value}' is not a valid {column.ValueKind} value.", column.Name, pair.Row);
+                    if (result.Issues.Count(issue => issue.Severity == PublicationDataValidationSeverity.Error) >= 12) break;
+                }
+                if (column.ValueKind == PublicationDataValueKind.Text && values.Length >= 3)
+                {
+                    var numeric = values.Count(pair => TryParseNumber(pair.Value, out _));
+                    if (numeric > 0 && numeric >= Math.Ceiling(values.Length * .8))
+                        Add(PublicationDataValidationSeverity.Warning, "Most values look numeric; consider Number or Auto for charting.", column.Name);
+                }
+            }
+
+            result.Severity = result.Issues.Any(issue => issue.Severity == PublicationDataValidationSeverity.Error)
+                ? PublicationDataValidationSeverity.Error
+                : result.Issues.Any(issue => issue.Severity == PublicationDataValidationSeverity.Warning)
+                    ? PublicationDataValidationSeverity.Warning
+                    : PublicationDataValidationSeverity.Success;
+            result.Message = result.Severity switch
+            {
+                PublicationDataValidationSeverity.Success => $"Ready · {result.RowCount} rows × {result.ColumnCount} columns validated.",
+                PublicationDataValidationSeverity.Warning => $"Usable with warnings · {result.Issues.Count} item(s) need review.",
+                _ => $"Cannot save cleanly · {result.Issues.Count(issue => issue.Severity == PublicationDataValidationSeverity.Error)} error(s)."
+            };
+            return result;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "PublicationDataService.Validate failed for data object {DataObjectId}.", data.Id);
+            throw;
+        }
+    }
+
+    /// <summary>Updates a column type, using inferred typing when <paramref name="kind"/> is null.</summary>
+    /// <param name="data">Data value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="columnName">Column name value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="kind">Kind value supplied to the publication operation and used when producing its result.</param>
+    public void SetColumnKind(PublicationDataObject data, string columnName, PublicationDataValueKind? kind)
+    {
+        try
+        {
+            logger.LogTrace("Entering PublicationDataService.SetColumnKind.");
+            var column = data.Columns.FirstOrDefault(candidate => string.Equals(candidate.Name, columnName, StringComparison.OrdinalIgnoreCase))
+                ?? throw new InvalidDataException($"Column '{columnName}' was not found.");
+            column.ValueKindExplicit = kind.HasValue;
+            column.ValueKind = kind ?? InferKind(data.Rows.Select(row => row.Get(column.Name)));
+            data.ModifiedUtc = DateTimeOffset.UtcNow;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "PublicationDataService.SetColumnKind failed for column {ColumnName}.", columnName);
+            throw;
+        }
+    }
+
+    /// <summary>Renames a managed snapshot column and moves all row values with it.</summary>
+    /// <param name="data">Data value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="oldName">Old name value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="newName">New name value supplied to the publication operation and used when producing its result.</param>
+    public void RenameColumn(PublicationDataObject data, string oldName, string newName)
+    {
+        try
+        {
+            logger.LogTrace("Entering PublicationDataService.RenameColumn.");
+            newName = newName.Trim();
+            if (string.IsNullOrWhiteSpace(newName)) throw new InvalidDataException("Column names cannot be blank.");
+            if (data.Columns.Any(column => !string.Equals(column.Name, oldName, StringComparison.OrdinalIgnoreCase) && string.Equals(column.Name, newName, StringComparison.OrdinalIgnoreCase)))
+                throw new InvalidDataException($"Column '{newName}' already exists.");
+            var column = data.Columns.First(candidate => string.Equals(candidate.Name, oldName, StringComparison.OrdinalIgnoreCase));
+            foreach (var row in data.Rows)
+            {
+                var value = row.Get(column.Name);
+                row.Values.Remove(column.Name);
+                row.Values[newName] = value;
+            }
+            column.Name = newName;
+            WriteManagedSnapshot(data);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "PublicationDataService.RenameColumn failed from {OldName} to {NewName}.", oldName, newName);
+            throw;
+        }
+    }
+
+    /// <summary>Edits one cell in an embedded JSON snapshot.</summary>
+    /// <param name="data">Data value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="rowIndex">Row index value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="columnName">Column name value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="value">Value value supplied to the publication operation and used when producing its result.</param>
+    public void SetCellValue(PublicationDataObject data, int rowIndex, string columnName, string value)
+    {
+        try
+        {
+            logger.LogTrace("Entering PublicationDataService.SetCellValue.");
+            if (rowIndex < 0 || rowIndex >= data.Rows.Count) throw new ArgumentOutOfRangeException(nameof(rowIndex));
+            data.Rows[rowIndex].Values[columnName] = value ?? string.Empty;
+            var column = data.Columns.FirstOrDefault(candidate => string.Equals(candidate.Name, columnName, StringComparison.OrdinalIgnoreCase));
+            if (column is not null && !column.ValueKindExplicit) column.ValueKind = InferKind(data.Rows.Select(row => row.Get(column.Name)));
+            WriteManagedSnapshot(data);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "PublicationDataService.SetCellValue failed for row {RowIndex}, column {ColumnName}.", rowIndex, columnName);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Adds row as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="data">Data value supplied to the publication operation and used when producing its result.</param>
+    public void AddRow(PublicationDataObject data)
+    {
+        try
+        {
+            logger.LogTrace("Entering PublicationDataService.AddRow.");
+            EnsureManagedSnapshot(data);
+            data.Rows.Add(new PublicationDataRow { Values = data.Columns.ToDictionary(column => column.Name, _ => string.Empty, StringComparer.OrdinalIgnoreCase) });
+            WriteManagedSnapshot(data);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "PublicationDataService.AddRow failed for data object {DataObjectId}.", data.Id);
+            throw;
+        }
+    }
+
+    /// <summary>Removes a row from an embedded JSON snapshot.</summary>
+    /// <param name="data">Data value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="rowIndex">Row index value supplied to the publication operation and used when producing its result.</param>
+    public void RemoveRow(PublicationDataObject data, int rowIndex)
+    {
+        try
+        {
+            logger.LogTrace("Entering PublicationDataService.RemoveRow.");
+            EnsureManagedSnapshot(data);
+            if (rowIndex >= 0 && rowIndex < data.Rows.Count) data.Rows.RemoveAt(rowIndex);
+            WriteManagedSnapshot(data);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "PublicationDataService.RemoveRow failed for row {RowIndex}.", rowIndex);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Adds column as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="data">Data value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="requestedName">Requested name value supplied to the publication operation and used when producing its result.</param>
+    public void AddColumn(PublicationDataObject data, string? requestedName = null)
+    {
+        try
+        {
+            logger.LogTrace("Entering PublicationDataService.AddColumn.");
+            EnsureManagedSnapshot(data);
+            var basis = string.IsNullOrWhiteSpace(requestedName) ? "Column" : requestedName.Trim();
+            var name = basis;
+            var suffix = 2;
+            while (data.Columns.Any(column => string.Equals(column.Name, name, StringComparison.OrdinalIgnoreCase))) name = $"{basis} {suffix++}";
+            data.Columns.Add(new PublicationDataColumn { Name = name, ValueKind = PublicationDataValueKind.Text });
+            foreach (var row in data.Rows) row.Values[name] = string.Empty;
+            WriteManagedSnapshot(data);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "PublicationDataService.AddColumn failed for data object {DataObjectId}.", data.Id);
+            throw;
+        }
+    }
+
+    /// <summary>Removes a column and its row values from an embedded JSON snapshot.</summary>
+    /// <param name="data">Data value supplied to the publication operation and used when producing its result.</param>
+    /// <param name="columnName">Column name value supplied to the publication operation and used when producing its result.</param>
+    public void RemoveColumn(PublicationDataObject data, string columnName)
+    {
+        try
+        {
+            logger.LogTrace("Entering PublicationDataService.RemoveColumn.");
+            EnsureManagedSnapshot(data);
+            data.Columns.RemoveAll(column => string.Equals(column.Name, columnName, StringComparison.OrdinalIgnoreCase));
+            foreach (var row in data.Rows) row.Values.Remove(columnName);
+            WriteManagedSnapshot(data);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "PublicationDataService.RemoveColumn failed for column {ColumnName}.", columnName);
+            throw;
+        }
+    }
+
+    /// <summary>Converts a parsed file/API source to a stable editable JSON snapshot after explicit author action.</summary>
+    /// <param name="data">Data value supplied to the publication operation and used when producing its result.</param>
+    public void EnsureManagedSnapshot(PublicationDataObject data)
+    {
+        try
+        {
+            logger.LogTrace("Entering PublicationDataService.EnsureManagedSnapshot.");
+            if (IsLiveSource(data.SourceKind)) throw new InvalidOperationException("Built-in live publication datasets cannot be detached or edited.");
+            if (data.SourceKind == PublicationDataSourceKind.Json) return;
+            if (data.Rows.Count == 0 && !string.IsNullOrWhiteSpace(data.RawSource)) ParseInto(data);
+            var prior = data.SourceKind;
+            data.SourceKind = PublicationDataSourceKind.Json;
+            if (string.IsNullOrWhiteSpace(data.SourceReference)) data.SourceReference = $"Editable snapshot detached from {prior}";
+            WriteManagedSnapshot(data);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "PublicationDataService.EnsureManagedSnapshot failed for data object {DataObjectId}.", data.Id);
+            throw;
+        }
+    }
+
+    /// <summary>Serializes canonical rows back into the editable JSON snapshot while preserving explicit schema types.</summary>
+    /// <param name="data">Data value supplied to the publication operation and used when producing its result.</param>
+    public void WriteManagedSnapshot(PublicationDataObject data)
+    {
+        try
+        {
+            logger.LogTrace("Entering PublicationDataService.WriteManagedSnapshot.");
+            if (data.SourceKind != PublicationDataSourceKind.Json) throw new InvalidOperationException("Table editing requires an embedded JSON snapshot.");
+            var rows = data.Rows.Select(row => data.Columns.ToDictionary(column => column.Name, column => row.Get(column.Name), StringComparer.OrdinalIgnoreCase)).ToList();
+            data.RawSource = JsonSerializer.Serialize(rows);
+            data.ModifiedUtc = DateTimeOffset.UtcNow;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "PublicationDataService.WriteManagedSnapshot failed for data object {DataObjectId}.", data.Id);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Determines whether live source as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the publication operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool IsLiveSource(PublicationDataSourceKind kind)
+    {
+        try
+        {
+            logger.LogTrace("Entering PublicationDataService.IsLiveSource.");
+            return kind is PublicationDataSourceKind.DocumentObjects or PublicationDataSourceKind.PublicationPages or PublicationDataSourceKind.PublicationDocument or PublicationDataSourceKind.PublicationMedia;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "PublicationDataService.IsLiveSource failed for {SourceKind}.", kind);
             throw;
         }
     }

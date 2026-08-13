@@ -74,6 +74,11 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         return `${command.kind} executed on ${target.tagName.toLowerCase()}${target.id ? '#' + target.id : ''}`;
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/automationInterop.js:execute@43', __javascriptError); throw __javascriptError; }}
 
+    function shouldIgnoreCaptureCloneElement(element) { try {
+        const tag = String(element?.tagName || '').toUpperCase();
+        return tag.startsWith('DXBL-') || !!element?.classList?.contains('dxbl-toast-portal') || !!element?.matches?.('[data-permanent]');
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/automationInterop.js:shouldIgnoreCaptureCloneElement', __javascriptError); return false; }}
+
     async function capture(request) { try {
         const target = resolveTarget(request.selector || 'body');
         if (!(target instanceof Element)) throw new Error('No element matched the screenshot selector.');
@@ -81,7 +86,8 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         const scale = Math.max(.1, Math.min(4, Number(request.scale) || 1));
         const canvas = await window.html2canvas(target, {
             backgroundColor: null, scale, useCORS: true, allowTaint: false,
-            logging: false, imageTimeout: 20000, foreignObjectRendering: false
+            logging: false, imageTimeout: 20000, foreignObjectRendering: false,
+            ignoreElements: shouldIgnoreCaptureCloneElement
         });
         const jpeg = String(request.format || '').toLowerCase().includes('jp');
         const dataUrl = canvas.toDataURL(jpeg ? 'image/jpeg' : 'image/png', Math.max(.1, Math.min(1, Number(request.quality) || .92)));

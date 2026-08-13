@@ -590,7 +590,7 @@
                                     <label>Projection<select @bind="_draft.VectorProjection"><option value="mercator">Mercator</option><option value="miller">Miller</option><option value="lambert">Lambert</option><option value="equirectangular">Equirectangular</option></select></label>
                                     <label>Data label field<select @bind="_draft.VectorLabelField"><option value="">No data label</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
                                     <label>Data value field<select @bind="_draft.VectorValueField"><option value="">No value</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
-                                    <label>Data color field<select @bind="_draft.VectorColorField"><option value="">Default color</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
+                                    <label>Data color / group field<select @bind="_draft.VectorColorField"><option value="">Default color</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
                                     <label><input type="checkbox" @bind="_draft.VectorShowLabels" /> Show labels</label>
                                 </div>
                                 <div class="vector-draw-toolbar">
@@ -601,7 +601,7 @@
                                     <button type="button" @onclick="UndoPoint">Undo point</button>
                                     <button type="button" class="danger" @onclick="ClearFeatures">Clear drawings</button>
                                 </div>
-                                <p class="component-info">Choose a drawing tool, then click directly in the live preview. Coordinates are stored as precise longitude/latitude values and remain editable below.</p>
+                                <p class="component-info">The color/group field accepts CSS colors such as <code>#ef4444</code> directly. Human category names such as Hardware, Software, or North are assigned stable distinct palette colors automatically, so choosing the field has an immediate visible result. Choose a drawing tool, then click directly in the live preview; coordinates remain editable below.</p>
                                 <div class="component-panel-list vector-feature-list">
                                     @foreach (var feature in _draft.VectorFeatures)
                                     {
@@ -738,12 +738,25 @@
                 </main>
 
                 <aside class="component-preview-pane">
-                    <div class="pane-heading"><strong>Live preview</strong><span>@Components.ComponentName(_draft.ComponentKind)</span></div>
-                    <div class="component-preview-frame">
-                        <DevExtremeComponentView Document="State.Document" Item="_draft" CurrentPageId="State.SelectedPageId" IdPrefix="studio"
-                            ElementIdOverride="ps-component-vector-designer" DesignerMode="true" DesignerInteractionMode="content" />
+                    <div class="pane-heading">
+                        <strong>Live preview</strong>
+                        <label class="component-preview-size">Viewport
+                            <select value="@_previewSizeKey" @onchange="ChangePreviewSize">
+                                <option value="auto">Available space</option>
+                                <option value="phone">Phone · 390 × 844</option>
+                                <option value="tablet">Tablet · 768 × 1024</option>
+                                <option value="laptop">Laptop · 1280 × 720</option>
+                                <option value="wide">Wide · 1440 × 900</option>
+                            </select>
+                        </label>
                     </div>
-                    <small>The preview and both HTML exports use the same component JSON and browser runtime.</small>
+                    <div class="component-preview-stage">
+                        <div class="component-preview-frame" style="@ComponentPreviewStyle">
+                            <DevExtremeComponentView Document="State.Document" Item="_draft" CurrentPageId="State.SelectedPageId" IdPrefix="studio"
+                                ElementIdOverride="ps-component-vector-designer" DesignerMode="true" DesignerInteractionMode="content" />
+                        </div>
+                    </div>
+                    <small>@Components.ComponentName(_draft.ComponentKind) · the preview and both HTML exports use the same component JSON and browser runtime.</small>
                 </aside>
             </div>
 
@@ -775,6 +788,7 @@
     private string _geoJsonStatus = string.Empty;
     private DotNetObjectReference<DevExtremeComponentEditor>? _self;
     private bool _designerAttached;
+    private string _previewSizeKey = "auto";
 
     private readonly PublicationComponentKind[] PanelComponentKinds =
     [
@@ -828,8 +842,25 @@
             _headersText = FormatHeaders(_draft.Connection.Headers);
             _section = "general";
             _connectionStatus = string.Empty;
+            _previewSizeKey = "auto";
         }
         _wasVisible = Visible;
+    }
+
+
+    private string ComponentPreviewStyle => _previewSizeKey switch
+    {
+        "phone" => "--component-preview-aspect:0.462085;",
+        "tablet" => "--component-preview-aspect:0.75;",
+        "laptop" => "--component-preview-aspect:1.777778;",
+        "wide" => "--component-preview-aspect:1.6;",
+        _ => "--component-preview-aspect:auto;"
+    };
+
+    private void ChangePreviewSize(ChangeEventArgs args)
+    {
+        var requested = args.Value?.ToString()?.Trim().ToLowerInvariant() ?? "auto";
+        _previewSizeKey = requested is "phone" or "tablet" or "laptop" or "wide" ? requested : "auto";
     }
 
     private string SectionClass(string value) => _section == value ? "active" : string.Empty;

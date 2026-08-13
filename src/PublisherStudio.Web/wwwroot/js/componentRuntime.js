@@ -1462,6 +1462,16 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         return { type: "FeatureCollection", features };
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:vectorGeoJson@1428', __javascriptError); throw __javascriptError; }}
 
+    function dataDrivenColor(value, fallback) { try {
+        const text = value == null ? "" : String(value).trim();
+        if (!text) return fallback;
+        try { if (globalThis.CSS?.supports?.("color", text)) return text; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:suppressed-catch:dataDrivenColor', __caughtJavaScriptError); }
+        const palette = ["#2563eb", "#dc2626", "#16a34a", "#9333ea", "#ea580c", "#0891b2", "#ca8a04", "#db2777", "#4f46e5", "#059669", "#7c3aed", "#0284c7"];
+        let hash = 2166136261;
+        for (let index = 0; index < text.length; index++) { hash ^= text.charCodeAt(index); hash = Math.imul(hash, 16777619); }
+        return palette[Math.abs(hash >>> 0) % palette.length] || fallback;
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:dataDrivenColor', __javascriptError); return fallback; }}
+
     function vectorLayers(config, rows) { try {
         const layers = [];
         const preset = sourceName(config.vectorBaseLayer);
@@ -1473,14 +1483,14 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         });
         const polygons = vectorGeoJson(config, rows, "polygon");
         if (polygons.features.length) layers.push({ name: "drawings", type: "area", dataSource: polygons,
-            customize(elements) { try { elements.forEach(element => { try { const a = element.attribute("properties") || {}; element.applySettings({ color: a.color || "#2563eb", borderColor: a.borderColor || "#1e3a8a", opacity: number(a.opacity, .82) });  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:callback:elements.forEach@1470', __javascriptError); throw __javascriptError; }});  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:customize@1470', __javascriptError); throw __javascriptError; }} });
+            customize(elements) { try { elements.forEach(element => { try { const a = element.attribute("properties") || {}; element.applySettings({ color: dataDrivenColor(a.color, "#2563eb"), borderColor: dataDrivenColor(a.borderColor, "#1e3a8a"), opacity: number(a.opacity, .82) });  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:callback:elements.forEach@1470', __javascriptError); throw __javascriptError; }});  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:customize@1470', __javascriptError); throw __javascriptError; }} });
         const lines = vectorGeoJson(config, rows, "line");
         if (lines.features.length) layers.push({ name: "lines", type: "line", dataSource: lines,
-            customize(elements) { try { elements.forEach(element => { try { const a = element.attribute("properties") || {}; element.applySettings({ color: a.color || "#2563eb", width: number(a.width, 3), opacity: number(a.opacity, .9) });  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:callback:elements.forEach@1473', __javascriptError); throw __javascriptError; }});  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:customize@1473', __javascriptError); throw __javascriptError; }} });
+            customize(elements) { try { elements.forEach(element => { try { const a = element.attribute("properties") || {}; element.applySettings({ color: dataDrivenColor(a.color, "#2563eb"), width: number(a.width, 3), opacity: number(a.opacity, .9) });  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:callback:elements.forEach@1473', __javascriptError); throw __javascriptError; }});  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:customize@1473', __javascriptError); throw __javascriptError; }} });
         const markers = vectorGeoJson(config, rows, "marker");
         if (markers.features.length) layers.push({ name: "markers", type: "marker", dataSource: markers,
             label: { enabled: config.vectorShowLabels !== false, dataField: "name" },
-            customize(elements) { try { elements.forEach(element => { try { const a = element.attribute("properties") || {}; element.applySettings({ color: a.color || "#ef4444", size: number(a.size, 14) });  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:callback:elements.forEach@1477', __javascriptError); throw __javascriptError; }});  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:customize@1477', __javascriptError); throw __javascriptError; }} });
+            customize(elements) { try { elements.forEach(element => { try { const a = element.attribute("properties") || {}; element.applySettings({ color: dataDrivenColor(a.color, "#ef4444"), size: number(a.size, 14) });  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:callback:elements.forEach@1477', __javascriptError); throw __javascriptError; }});  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:customize@1477', __javascriptError); throw __javascriptError; }} });
         return layers;
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:vectorLayers@1459', __javascriptError); throw __javascriptError; }}
 
@@ -2117,7 +2127,7 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
     function setPanelView(panel, viewId) { try {
         const requested = String(viewId || "");
         let activated = false;
-        for (const view of panel.querySelectorAll(":scope > .publication-panel-viewport > [data-panel-view]")) {
+        for (const view of panel.querySelectorAll(":scope > .publication-panel-viewport > [data-panel-canvas-region] > [data-panel-view]")) {
             const active = String(view.dataset.panelView || "") === requested;
             view.hidden = !active;
             view.setAttribute("aria-hidden", active ? "false" : "true");
@@ -2178,7 +2188,7 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
                 setPanelView(panel, button.dataset.panelTarget);
              } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:callback:button.addEventListener@2169', __javascriptError); throw __javascriptError; }}, options);
         }
-        for (const node of panel.querySelectorAll(":scope > .publication-panel-viewport > [data-panel-view] > [data-panel-element]")) {
+        for (const node of panel.querySelectorAll(":scope > .publication-panel-viewport > [data-panel-canvas-region] > [data-panel-view] > [data-panel-element]")) {
             let interaction = {};
             try { interaction = JSON.parse(node.dataset.interaction || "{}"); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:suppressed-catch@2177', __caughtJavaScriptError);  }
             const action = lower(interaction.action || node.dataset.interactionAction);
@@ -2202,7 +2212,7 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
                  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:callback:node.addEventListener@2191', __javascriptError); throw __javascriptError; }}, options);
             }
         }
-        for (const nested of panel.querySelectorAll(":scope > .publication-panel-viewport > [data-panel-view] > [data-panel-element] > [data-panel-root]")) bindPanel(nested);
+        for (const nested of panel.querySelectorAll(":scope > .publication-panel-viewport > [data-panel-canvas-region] > [data-panel-view] > [data-panel-element] > [data-panel-root]")) bindPanel(nested);
         const active = panel.dataset.panelActiveView || panel.querySelector("[data-panel-view]:not([hidden])")?.dataset.panelView;
         if (active) setPanelView(panel, active);
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:bindPanel@2163', __javascriptError); throw __javascriptError; }}

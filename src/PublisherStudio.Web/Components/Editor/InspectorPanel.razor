@@ -170,7 +170,11 @@
                         <option value="600">600 DPI — high resolution</option>
                     </select>
                 </label>
-                <p class="property-note">PNG preserves page and image transparency. JPEG always receives a white background.</p>
+                <label>JPEG quality · @Math.Round(State.Document.View.RasterJpegQuality * 100)%
+                    <input type="range" min="0.35" max="1" step="0.01" value="@Inv(State.Document.View.RasterJpegQuality)" @oninput="ChangeRasterJpegQuality" />
+                </label>
+                <label class="check-row"><input type="checkbox" checked="@State.Document.View.CompressPageArchives" @onchange="ToggleCompressPageArchives" /> Compress multi-page ZIP archives</label>
+                <p class="property-note">PNG preserves page and image transparency. JPEG always receives a white background. Multi-page image archives reuse the structured-website ZIP compressor when enabled.</p>
             </section>
         </div>
     }
@@ -1626,6 +1630,8 @@
     private void ChangeRulerUnit(ChangeEventArgs args) { if (Enum.TryParse<MeasurementUnit>(args.Value?.ToString(), out var unit)) State.SetRulerUnit(unit); }
     private void ChangeGridSpacing(ChangeEventArgs args) { if (TryDouble(args, out var value)) State.SetViewOption(view => view.GridSpacingMm = value); }
     private void ChangeExportDpi(ChangeEventArgs args) { if (int.TryParse(args.Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)) State.SetViewOption(view => view.ExportDpi = value); }
+    private void ChangeRasterJpegQuality(ChangeEventArgs args) { if (TryDouble(args, out var value)) State.SetViewOption(view => view.RasterJpegQuality = Math.Clamp(value, .35, 1)); }
+    private void ToggleCompressPageArchives(ChangeEventArgs args) => State.SetViewOption(view => view.CompressPageArchives = ReadBool(args));
     private void ToggleRulers(ChangeEventArgs args) => State.SetViewOption(view => view.RulersVisible = ReadBool(args));
     private void ToggleGrid(ChangeEventArgs args) => State.SetViewOption(view => view.GridVisible = ReadBool(args));
     private void ToggleGuides(ChangeEventArgs args) => State.SetViewOption(view => view.GuidesVisible = ReadBool(args));

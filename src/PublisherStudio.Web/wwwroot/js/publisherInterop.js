@@ -344,6 +344,60 @@ function resetPointerOperation(state, restoreDom = false) { try {
     }
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:resetPointerOperation@296', __javascriptError); throw __javascriptError; }}
 
+function safeMediaDownloadName(value, fallback = 'media') { try {
+    const cleaned = String(value || fallback).normalize('NFKC').replace(/[<>:"/\\|?*\u0000-\u001f]+/g, '-').replace(/\s+/g, ' ').replace(/[. ]+$/g, '').trim();
+    return cleaned || fallback;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:safeMediaDownloadName', __javascriptError); return fallback; }}
+
+function mediaDownloadDescriptor(media) { try {
+    if (!(media instanceof Element)) return null;
+    const source = String(media.currentSrc || media.getAttribute('src') || media.querySelector?.('source')?.getAttribute?.('src') || '');
+    if (!source) return null;
+    const owner = media.closest?.('[data-element-name], [data-publication-element]');
+    const elementName = owner?.getAttribute?.('data-element-name') || media.getAttribute('alt') || media.getAttribute('title') || media.tagName.toLowerCase();
+    let mime = String(media.getAttribute('type') || media.querySelector?.('source')?.getAttribute?.('type') || '');
+    if (!mime && source.startsWith('data:')) mime = source.slice(5, source.indexOf(';') > 5 ? source.indexOf(';') : source.indexOf(','));
+    if (!mime) mime = media instanceof HTMLImageElement ? 'image/png' : media instanceof HTMLVideoElement ? 'video/webm' : 'audio/webm';
+    const mimeExtensions = { 'image/png':'png','image/jpeg':'jpg','image/webp':'webp','image/avif':'avif','image/gif':'gif','image/svg+xml':'svg','video/webm':'webm','video/mp4':'mp4','video/ogg':'ogv','audio/webm':'webm','audio/mpeg':'mp3','audio/mp4':'m4a','audio/ogg':'ogg','audio/wav':'wav' };
+    let extension = mimeExtensions[mime.toLowerCase()] || '';
+    if (!extension) {
+        try { extension = (new URL(source, location.href).pathname.split('.').pop() || '').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,6); } catch { extension = ''; }
+    }
+    extension ||= media instanceof HTMLImageElement ? 'png' : media instanceof HTMLVideoElement ? 'webm' : 'audio';
+    const safeName = safeMediaDownloadName(elementName);
+    const extensionPattern = new RegExp(`\.${extension.replace(/[^a-z0-9]/gi, '')}$`, 'i');
+    const duplicateSuffixPattern = new RegExp(`^(.*)\.${extension.replace(/[^a-z0-9]/gi, '')}(\s+\d+)$`, 'i');
+    const duplicateMatch = safeName.match(duplicateSuffixPattern);
+    const filename = duplicateMatch
+        ? `${duplicateMatch[1]}${duplicateMatch[2]}.${extension}`
+        : extensionPattern.test(safeName) ? safeName : `${safeName}.${extension}`;
+    let href = source;
+    if (!source.startsWith('data:') && !source.startsWith('blob:')) { try { href = new URL(source, location.href).href; } catch { href = source; } }
+    return { filename, mime, href };
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:mediaDownloadDescriptor', __javascriptError); return null; }}
+
+function namedMediaDragStart(event) { try {
+    const media = event?.target?.closest?.('img,video,audio');
+    const transfer = event?.dataTransfer;
+    if (!media || !transfer) return false;
+    const descriptor = mediaDownloadDescriptor(media);
+    if (!descriptor) return false;
+    transfer.effectAllowed = 'copy';
+    transfer.setData('DownloadURL', `${descriptor.mime}:${descriptor.filename}:${descriptor.href}`);
+    transfer.setData('text/uri-list', descriptor.href);
+    transfer.setData('text/plain', descriptor.filename);
+    return true;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:namedMediaDragStart', __javascriptError); return false; }}
+
+function namedMediaDragRuntime(root = document) { try {
+    root.querySelectorAll?.('img,video,audio').forEach(media => { try {
+        if (media.dataset.publisherNamedDragBound === 'true') return;
+        media.dataset.publisherNamedDragBound = 'true';
+        media.draggable = true;
+        media.addEventListener('dragstart', namedMediaDragStart);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:namedMediaDragRuntime:media', __javascriptError); }});
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:namedMediaDragRuntime', __javascriptError); }}
+
 function insertionKindFromEvent(state, event) { try {
     return event.dataTransfer?.getData('application/x-publisher-insert')
         || event.dataTransfer?.getData('text/x-publisher-insert')
@@ -973,7 +1027,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
                 clearInsertionDrag(state);
             }
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageDragLeave@964', __javascriptError); throw __javascriptError; }};
-        handlers.documentDragStart = event => { try { return (insertionDragStart(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.documentDragStart@971', __javascriptError); throw __javascriptError; } };
+        handlers.documentDragStart = event => { try { namedMediaDragStart(event); return insertionDragStart(state, event); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.documentDragStart@971', __javascriptError); throw __javascriptError; } };
         handlers.documentDragEnd = () => { try { return (insertionDragEnd(state)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.documentDragEnd@972', __javascriptError); throw __javascriptError; } };
         handlers.documentClick = event => { try {
             if (performance.now() < number(state.suppressNextComponentClickUntil) && event.target?.closest?.('.devextreme-component-host')) {
@@ -1026,6 +1080,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
             state.resizeObserver.observe(scroll);
         }
         canvasStates.set(stage, state);
+        namedMediaDragRuntime(page);
         startCanvasGamepad(state);
     }
 
@@ -3232,12 +3287,20 @@ function snapshotCanvasForRaster(canvas) { try {
     }
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:snapshotCanvasForRaster@3221', __javascriptError); throw __javascriptError; }}
 
+function shouldIgnoreHtml2CanvasCloneElement(element) { try {
+    const tag = String(element?.tagName || '').toUpperCase();
+    if (tag.startsWith('DXBL-')) return true;
+    if (element?.classList?.contains('dxbl-toast-portal')) return true;
+    if (element?.matches?.('[data-permanent], .publisher-component-error')) return true;
+    return false;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:shouldIgnoreHtml2CanvasCloneElement', __javascriptError); return false; }}
+
 async function snapshotIframeForRaster(frame) { try {
     if (!(frame instanceof HTMLIFrameElement)) return '';
     try {
         const body = frame.contentDocument?.body;
         if (!body || typeof window.html2canvas !== 'function') return '';
-        const canvas = await window.html2canvas(body, { backgroundColor: null, scale: 1, logging: false, useCORS: true, allowTaint: false });
+        const canvas = await window.html2canvas(body, { backgroundColor: null, scale: 1, logging: false, useCORS: true, allowTaint: false, ignoreElements: shouldIgnoreHtml2CanvasCloneElement });
         return canvas.toDataURL('image/png');
     } catch {
         return '';
@@ -3436,6 +3499,7 @@ async function rasterizePageElement(page, scale) { try {
             await new Promise(resolve => { try { return (requestAnimationFrame(() => { try { return (requestAnimationFrame(resolve)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:requestAnimationFrame@3431', __javascriptError); throw __javascriptError; } })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@3431', __javascriptError); throw __javascriptError; } });
             const options = {
                 backgroundColor: null, scale: effectiveScale, logging: false, useCORS: true, allowTaint: false,
+            ignoreElements: shouldIgnoreHtml2CanvasCloneElement,
                 imageTimeout: 20000, removeContainer: true, width: metrics.width, height: metrics.height,
                 windowWidth: Math.max(document.documentElement.clientWidth, Math.ceil(metrics.width)),
                 windowHeight: Math.max(document.documentElement.clientHeight, Math.ceil(metrics.height)), scrollX: 0, scrollY: 0,
@@ -6643,6 +6707,8 @@ export function cancelCanvasInteraction(stageId = 'publisher-stage') { try {
 function panelStudioCoordinateSurface(element) { try {
     if (!(element instanceof HTMLElement)) return null;
     const viewport = element.querySelector('.publication-panel > .publication-panel-viewport[data-panel-authoring-viewport="true"]');
+    const canvasRegion = viewport?.querySelector?.(':scope > [data-panel-canvas-region]');
+    if (canvasRegion instanceof HTMLElement) return canvasRegion;
     return viewport instanceof HTMLElement ? viewport : element;
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:panelStudioCoordinateSurface@6638', __javascriptError); throw __javascriptError; }}
 
@@ -7443,7 +7509,7 @@ async function buildPublisherSingleHtml(mode, title) { try {
     const isSite = mode === 'site';
     const runtimeFunction = isSite ? websiteSiteRuntime : websitePresentationRuntime;
     const outputContextRuntime = `(()=>{const p=new URLSearchParams(location.search);const platform=p.get('publisherChatPlatform')||p.get('publisherOutputPlatform')||'Preview';const channel=p.get('publisherChatChannel')||'';const mode=p.get('publisherOutputMode')||(platform==='Preview'?'operator':'broadcast');window.PublisherStudioOutputContext={mode,platform,channel,outputId:p.get('publisherOutputId')||''};window.PublisherStudioChatPlatform=platform;window.PublisherStudioChatChannel=channel;})();`;
-    const runtime = `${outputContextRuntime}window.PublisherStudioDataBaseUrl=${JSON.stringify(defaultPublisherApi)};window.__publisherSignalRuntime=(${signalConnectorRuntime.toString()})(document,{autoStart:false,expose:true});(()=>{let booted=false;const boot=()=>{try{if(!booted){booted=true;(${runtimeFunction.toString()})();}window.PublisherStudioLiveDataRuntime?.start(document,{polling:true,fetchNow:true});window.PublisherStudioComponentRuntime?.start(document,{polling:true,fetchNow:true});window.__publisherSignalRuntime?.startPage?.(document.querySelector('.ps-slide:not([hidden]) .print-page,.ps-site-page:not([hidden]),.print-page')||document);window.PublisherStudioTooltips?.refresh(document);}catch(error){console.error('PublisherStudio standalone runtime boot failed.',error);}};const refresh=()=>{window.PublisherStudioTooltips?.refresh(document);window.__publisherSignalRuntime?.refresh?.();};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();requestAnimationFrame(()=>{boot();refresh();requestAnimationFrame(refresh);});setTimeout(refresh,250);setTimeout(refresh,1000);new MutationObserver(()=>requestAnimationFrame(refresh)).observe(document.body,{subtree:true,childList:true,attributes:true});})();`;
+    const runtime = `${outputContextRuntime}${safeMediaDownloadName.toString()}${mediaDownloadDescriptor.toString()}${namedMediaDragStart.toString()}${namedMediaDragRuntime.toString()}window.PublisherStudioDataBaseUrl=${JSON.stringify(defaultPublisherApi)};window.__publisherSignalRuntime=(${signalConnectorRuntime.toString()})(document,{autoStart:false,expose:true});(()=>{let booted=false;const boot=()=>{try{if(!booted){booted=true;(${runtimeFunction.toString()})();}window.PublisherStudioLiveDataRuntime?.start(document,{polling:true,fetchNow:true});window.PublisherStudioComponentRuntime?.start(document,{polling:true,fetchNow:true});(${namedMediaDragRuntime.toString()})(document);window.__publisherSignalRuntime?.startPage?.(document.querySelector('.ps-slide:not([hidden]) .print-page,.ps-site-page:not([hidden]),.print-page')||document);window.PublisherStudioTooltips?.refresh(document);}catch(error){console.error('PublisherStudio standalone runtime boot failed.',error);}};const refresh=()=>{window.PublisherStudioTooltips?.refresh(document);window.__publisherSignalRuntime?.refresh?.();};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();requestAnimationFrame(()=>{boot();refresh();requestAnimationFrame(refresh);});setTimeout(refresh,250);setTimeout(refresh,1000);new MutationObserver(()=>requestAnimationFrame(refresh)).observe(document.body,{subtree:true,childList:true,attributes:true});})();`;
     const modeCss = isSite ? `
 :root{color-scheme:light dark}
 html,body{width:100%;height:100%;overflow:hidden!important;background:#111827!important}
@@ -8004,7 +8070,7 @@ window.publisherStudio = {
         downloadBlob(fileName || 'publisherstudio.txt', new Blob([String(text ?? '')], { type: mimeType }));
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:downloadTextFile@7949', __javascriptError); throw __javascriptError; }},
 
-    async exportPage(pageId, fileName, format, dpi, zoom) { try {
+    async exportPage(pageId, fileName, format, dpi, zoom, jpegQuality = .92) { try {
         const page = document.getElementById(pageId);
         if (!page) throw new Error('The publication page is not available.');
         const pageKey = page.dataset.pageId || '';
@@ -8026,7 +8092,7 @@ window.publisherStudio = {
         const jpeg = normalized === 'jpeg' || normalized === 'jpg';
         if (!jpeg && normalized !== 'png') throw new Error('Only PNG, JPEG, and SVG page export are supported.');
         const output = prepareOutputCanvas(canvas, jpeg);
-        const blob = await canvasBlob(output, jpeg ? 'image/jpeg' : 'image/png', jpeg ? .92 : undefined);
+        const blob = await canvasBlob(output, jpeg ? 'image/jpeg' : 'image/png', jpeg ? clamp(number(jpegQuality, .92), .35, 1) : undefined);
         downloadBlob(fileName, blob);
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:exportPage@7953', __javascriptError); throw __javascriptError; }},
 
@@ -8053,7 +8119,7 @@ window.publisherStudio = {
         downloadBlob(fileName, await canvasBlob(objectCanvas, 'image/png'));
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:exportPublicationElement@7979', __javascriptError); throw __javascriptError; }},
 
-    async exportPublicationPages(containerSelector, baseName, format, dpi) { try {
+    async exportPublicationPages(containerSelector, baseName, format, dpi, compressArchive = true, jpegQuality = .92) { try {
         const container = document.querySelector(containerSelector);
         if (!container) throw new Error('The publication export surface is not available.');
         const pages = [...container.querySelectorAll(':scope > .print-page')];
@@ -8073,7 +8139,7 @@ window.publisherStudio = {
                 if (index > 0) await new Promise(resolve => { try { return (requestAnimationFrame(resolve)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@8019', __javascriptError); throw __javascriptError; } });
                 const canvas = await rasterizePageElement(pages[index], scale);
                 const output = prepareOutputCanvas(canvas, jpeg);
-                const blob = await canvasBlob(output, mimeType, jpeg ? .92 : undefined);
+                const blob = await canvasBlob(output, mimeType, jpeg ? clamp(number(jpegQuality, .92), .35, 1) : undefined);
                 files.push({ name: `${safeBase}-page-${index + 1}.${extension}`, blob });
             } catch (error) {
                 console.error(`Page ${index + 1} raster export failed.`, error);
@@ -8085,7 +8151,7 @@ window.publisherStudio = {
             return { count: 1, fileName: files[0].name };
         }
         const archiveName = `${safeBase}-${extension}-pages.zip`;
-        downloadBlob(archiveName, await createStoredZip(files));
+        downloadBlob(archiveName, await createZip(files, { compress: compressArchive !== false }));
         return { count: files.length, fileName: archiveName };
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:exportPublicationPages@8002', __javascriptError); throw __javascriptError; }},
 

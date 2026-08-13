@@ -273,8 +273,10 @@ public sealed class PanelDocumentService(
             var panel = new PanelElement
             {
                 Name = name,
-                Width = 150,
-                Height = 90,
+                Width = 120,
+                Height = 67.5,
+                CanvasWidth = 160,
+                CanvasHeight = 90,
                 ActiveViewId = view.Id,
                 Views = [view]
             };
@@ -517,9 +519,9 @@ public sealed class PanelDocumentService(
             view.Elements.Add(Visual(dataObject.Id, DataVisualKind.DataTable, "Details", argument, value, target, 56, 42, 100, 44));
             return new PanelElement
             {
-                Name = "Live KPI Dashboard", Width = 160, Height = 96, Background = "#eef2ff",
+                Name = "Live KPI Dashboard", Width = 120, Height = 67.5, CanvasWidth = 160, CanvasHeight = 90, Background = "#eef2ff",
                 ActiveViewId = view.Id, Views = [view], NavigationMode = PublicationPanelNavigationMode.Hidden,
-                LayoutMode = PublicationPanelLayoutMode.Responsive
+                LayoutMode = PublicationPanelLayoutMode.FixedCanvas
             };
     
     }
@@ -618,7 +620,7 @@ public sealed class PanelDocumentService(
             analytics.Id = Guid.NewGuid(); analytics.Name = "Analytics"; analytics.Slug = "analytics";
             return new PanelElement
             {
-                Name = "Creator Hub", Width = 160, Height = 96, Background = "#020617", NavigationMode = PublicationPanelNavigationMode.SideMenu,
+                Name = "Creator Hub", Width = 120, Height = 67.5, CanvasWidth = 160, CanvasHeight = 90, Background = "#020617", NavigationMode = PublicationPanelNavigationMode.SideMenu,
                 ActiveViewId = live.Id, Views = [live, analytics]
             };
     
@@ -645,7 +647,7 @@ public sealed class PanelDocumentService(
             var second = WebView("Experience 2", "experience-2", "#064e3b", "Second experience", "Use the panel menu to combine multiple standalone HTML experiences.");
             return new PanelElement
             {
-                Name = "Web Experience", Width = 160, Height = 96, Background = "#0f172a", NavigationMode = PublicationPanelNavigationMode.OverlayMenu,
+                Name = "Web Experience", Width = 120, Height = 67.5, CanvasWidth = 160, CanvasHeight = 90, Background = "#0f172a", NavigationMode = PublicationPanelNavigationMode.OverlayMenu,
                 ActiveViewId = first.Id, Views = [first, second]
             };
     

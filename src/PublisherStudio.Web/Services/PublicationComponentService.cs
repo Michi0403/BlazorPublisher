@@ -966,7 +966,7 @@ public sealed class PublicationComponentService
         try
         {
             logger.LogTrace($"Entering PublicationComponentService.ConvertValue.");
-                    if (kind == PublicationDataValueKind.Number && double.TryParse(value, System.Globalization.NumberStyles.Float | System.Globalization.NumberStyles.AllowThousands, System.Globalization.CultureInfo.InvariantCulture, out var number)) return number;
+                    if (kind == PublicationDataValueKind.Number && _data.TryParseNumber(value, out var number)) return number;
                     if (kind == PublicationDataValueKind.Boolean && bool.TryParse(value, out var boolean)) return boolean;
                     if (kind == PublicationDataValueKind.DateTime && DateTimeOffset.TryParse(value, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AllowWhiteSpaces, out var date)) return date;
                     return value;

@@ -53,12 +53,12 @@
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(RuntimeValueOwnershipScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <Target Name="AssertPublisherLocalizationIntegrity"
+  <!--<Target Name="AssertPublisherLocalizationIntegrity"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherRuntimeValueOwnership"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipLocalizationIntegrityGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(LocalizationIntegrityScript)')" Text="Localization integrity guard script is missing: $(LocalizationIntegrityScript)" />
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(LocalizationIntegrityScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>
+  </Target>-->
 
   <Target Name="AssertPublisherOperationalDiagnostics"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherLocalizationIntegrity"

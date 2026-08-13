@@ -254,9 +254,59 @@
                         <div class="inline-error">@_error</div>
                     }
 
+                    @{ var validation = CurrentValidation; }
+                    <div class="data-validation-status @ValidationCss(validation.Severity)" role="status">
+                        <strong>@ValidationIcon(validation.Severity) @validation.Message</strong>
+                        @if (validation.Issues.Count > 0)
+                        {
+                            <span>@validation.Issues[0].Message</span>
+                        }
+                    </div>
+
+                    @if (!IsBuiltInDraft && _draft.SourceKind != PublicationDataSourceKind.Json && PreviewColumns.Count > 0)
+                    {
+                        <section class="data-source-help data-maintenance-help">
+                            <strong>Editable table snapshot</strong>
+                            <p>Source-backed data stays read-only until you explicitly detach the current parsed rows. Detaching converts this object to embedded JSON while preserving the source reference for traceability.</p>
+                            <DxButton Text="Detach current rows for editing" Click="DetachSnapshot" />
+                        </section>
+                    }
+
+                    @if (!IsBuiltInDraft && _draft.SourceKind == PublicationDataSourceKind.Json && PreviewColumns.Count > 0)
+                    {
+                        <section class="data-schema-editor">
+                            <div class="pane-heading">
+                                <strong>Schema &amp; row maintenance</strong>
+                                <div><DxButton Text="Add column" Click="AddColumn" /><DxButton Text="Add row" Click="AddRow" /></div>
+                            </div>
+                            <div class="data-preview-scroll data-schema-scroll">
+                                <table>
+                                    <thead><tr><th>Column</th><th>Type</th><th>Mode</th><th></th></tr></thead>
+                                    <tbody>
+                                        @foreach (var column in _draft.Columns.ToArray())
+                                        {
+                                            var columnName = column.Name;
+                                            <tr @key="column">
+                                                <td><input value="@column.Name" @onchange="args => RenameColumn(columnName, args)" /></td>
+                                                <td>
+                                                    <select value="@(column.ValueKindExplicit ? column.ValueKind.ToString() : "Auto")" @onchange="args => ChangeColumnKind(columnName, args)">
+                                                        <option value="Auto">Auto (@DataService.InferKind(_draft.Rows.Select(row => row.Get(columnName))))</option>
+                                                        @foreach (var kind in Enum.GetValues<PublicationDataValueKind>()) { <option value="@kind">@kind</option> }
+                                                    </select>
+                                                </td>
+                                                <td>@(column.ValueKindExplicit ? "Explicit" : "Inferred")</td>
+                                                <td><button type="button" class="danger" @onclick="() => RemoveColumn(columnName)" aria-label="Remove column">×</button></td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    }
+
                     <section class="data-preview">
                         <div class="pane-heading">
-                            <strong>Preview</strong>
+                            <strong>@(_draft.SourceKind == PublicationDataSourceKind.Json && !IsBuiltInDraft ? "Editable rows" : "Preview")</strong>
                             <span>@PreviewRows.Count rows · @PreviewColumns.Count columns</span>
                         </div>
                         @if (PreviewColumns.Count == 0)
@@ -267,11 +317,32 @@
                         {
                             <div class="data-preview-scroll">
                                 <table>
-                                    <thead><tr>@foreach (var column in PreviewColumns) { <th>@column.Name <small>@column.ValueKind</small></th> }</tr></thead>
+                                    <thead><tr>@foreach (var column in PreviewColumns) { <th>@column.Name <small>@column.ValueKind</small></th> }@if (_draft.SourceKind == PublicationDataSourceKind.Json && !IsBuiltInDraft) { <th></th> }</tr></thead>
                                     <tbody>
-                                        @foreach (var row in PreviewRows.Take(25))
+                                        @for (var rowIndex = 0; rowIndex < Math.Min(100, PreviewRows.Count); rowIndex++)
                                         {
-                                            <tr>@foreach (var column in PreviewColumns) { <td>@row.Get(column.Name)</td> }</tr>
+                                            var editRowIndex = rowIndex;
+                                            var row = PreviewRows[rowIndex];
+                                            <tr @key="row">
+                                                @foreach (var column in PreviewColumns)
+                                                {
+                                                    var columnName = column.Name;
+                                                    <td>
+                                                        @if (_draft.SourceKind == PublicationDataSourceKind.Json && !IsBuiltInDraft)
+                                                        {
+                                                            <input class="data-cell-editor" value="@row.Get(columnName)" @onchange="args => ChangeCell(editRowIndex, columnName, args)" />
+                                                        }
+                                                        else
+                                                        {
+                                                            @row.Get(columnName)
+                                                        }
+                                                    </td>
+                                                }
+                                                @if (_draft.SourceKind == PublicationDataSourceKind.Json && !IsBuiltInDraft)
+                                                {
+                                                    <td><button type="button" class="danger" @onclick="() => RemoveRow(editRowIndex)" aria-label="Remove row">×</button></td>
+                                                }
+                                            </tr>
                                         }
                                     </tbody>
                                 </table>
@@ -315,6 +386,15 @@
     };
     private IReadOnlyList<PublicationDataColumn> PreviewColumns => DataService.ResolveColumns(_draft);
     private IReadOnlyList<PublicationDataRow> PreviewRows => DataService.ResolveRows(State.Document, _draft, State.SelectedPageId);
+    private PublicationDataValidationResult CurrentValidation
+    {
+        get
+        {
+            if (!string.IsNullOrWhiteSpace(_error)) return new PublicationDataValidationResult { Severity = PublicationDataValidationSeverity.Error, Message = "Parse or validation failed.", Issues = [new() { Severity = PublicationDataValidationSeverity.Error, Message = _error }] };
+            try { return DataService.Validate(_draft); }
+            catch (Exception exception) { return new PublicationDataValidationResult { Severity = PublicationDataValidationSeverity.Error, Message = exception.Message }; }
+        }
+    }
 
     protected override void OnParametersSet()
     {
@@ -417,6 +497,9 @@
                 else { _draft.Columns = []; _draft.Rows = []; _draft.ModifiedUtc = DateTimeOffset.UtcNow; }
             }
             else DataService.ParseInto(_draft);
+            var validation = DataService.Validate(_draft);
+            if (validation.Severity == PublicationDataValidationSeverity.Error)
+                throw new InvalidDataException(validation.Issues.FirstOrDefault(issue => issue.Severity == PublicationDataValidationSeverity.Error)?.Message ?? validation.Message);
             State.UpsertDataObject(_draft);
             SetDraft(DataService.Clone(State.Document.DataObjects.First(data => data.Id == _draft.Id)));
             _error = null;
@@ -432,6 +515,68 @@
         SetDraft(State.Document.DataObjects.Count > 0 ? DataService.Clone(State.Document.DataObjects[0]) : DataService.CreateSample());
         await DataChanged.InvokeAsync();
     }
+
+    private void DetachSnapshot()
+    {
+        try { DataService.EnsureManagedSnapshot(_draft); _error = null; }
+        catch (Exception exception) { _error = exception.Message; }
+    }
+
+    private void AddColumn()
+    {
+        try { DataService.AddColumn(_draft); _error = null; }
+        catch (Exception exception) { _error = exception.Message; }
+    }
+
+    private void AddRow()
+    {
+        try { DataService.AddRow(_draft); _error = null; }
+        catch (Exception exception) { _error = exception.Message; }
+    }
+
+    private void RemoveColumn(string columnName)
+    {
+        try { DataService.RemoveColumn(_draft, columnName); _error = null; }
+        catch (Exception exception) { _error = exception.Message; }
+    }
+
+    private void RemoveRow(int rowIndex)
+    {
+        try { DataService.RemoveRow(_draft, rowIndex); _error = null; }
+        catch (Exception exception) { _error = exception.Message; }
+    }
+
+    private void RenameColumn(string oldName, ChangeEventArgs args)
+    {
+        try { DataService.RenameColumn(_draft, oldName, args.Value?.ToString() ?? string.Empty); _error = null; }
+        catch (Exception exception) { _error = exception.Message; }
+    }
+
+    private void ChangeColumnKind(string columnName, ChangeEventArgs args)
+    {
+        try
+        {
+            var text = args.Value?.ToString() ?? "Auto";
+            DataService.SetColumnKind(_draft, columnName, Enum.TryParse<PublicationDataValueKind>(text, out var kind) ? kind : null);
+            DataService.WriteManagedSnapshot(_draft);
+            _error = null;
+        }
+        catch (Exception exception) { _error = exception.Message; }
+    }
+
+    private void ChangeCell(int rowIndex, string columnName, ChangeEventArgs args)
+    {
+        try { DataService.SetCellValue(_draft, rowIndex, columnName, args.Value?.ToString() ?? string.Empty); _error = null; }
+        catch (Exception exception) { _error = exception.Message; }
+    }
+
+    private static string ValidationCss(PublicationDataValidationSeverity severity) => severity.ToString().ToLowerInvariant();
+    private static string ValidationIcon(PublicationDataValidationSeverity severity) => severity switch
+    {
+        PublicationDataValidationSeverity.Success => "✓",
+        PublicationDataValidationSeverity.Warning => "⚠",
+        _ => "✕"
+    };
 
     private void ApplyHeaderLines()
     {

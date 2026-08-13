@@ -74,6 +74,9 @@ public sealed class SpreadsheetDataObjectResult
     /// </summary>
     /// <value>The column names value exposed by <see cref="SpreadsheetDataObjectResult"/>.</value>
     public List<string> ColumnNames { get; set; } = [];
+    /// <summary>Gets or sets the typed column schema selected or inferred while creating the data object.</summary>
+    /// <value>The typed publication-data columns.</value>
+    public List<PublicationDataColumn> Columns { get; set; } = [];
     /// <summary>
     /// Gets or sets the rows collection maintained or exposed by this spreadsheet data object instance for downstream processing.
     /// </summary>

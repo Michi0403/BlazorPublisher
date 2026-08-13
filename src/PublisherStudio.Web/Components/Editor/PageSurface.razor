@@ -120,7 +120,7 @@
 
             @foreach (var element in State.CurrentPage.Elements.Where(e => e.Visible && e is not ConnectorElement))
             {
-                <div @key="element.Id" id="element-@element.Id" data-publication-element data-element-id="@element.Id"
+                <div @key="element.Id" id="element-@element.Id" data-publication-element data-element-id="@element.Id" data-element-name="@element.Name"
                      data-element-kind="@element.Kind.ToString().ToLowerInvariant()"
                      data-element-x="@Inv(element.X)"
                      data-element-y="@Inv(element.Y)"

@@ -169,7 +169,7 @@ public sealed partial class OpenDocumentImportService(
                     var document = new PublicationDocument
                     {
                         Name = Path.GetFileNameWithoutExtension(fileName),
-                        FormatVersion = "1.55",
+                        FormatVersion = "1.56",
                         Zoom = .8,
                         View = new PublicationViewSettings(),
                         Playback = new PublicationPlaybackSettings(),

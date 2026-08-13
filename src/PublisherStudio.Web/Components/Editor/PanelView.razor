@@ -17,6 +17,7 @@
         </nav>
     }
     <div class="publication-panel-viewport" data-panel-authoring-viewport="@(AuthoringOverlay is not null ? "true" : null)">
+        <div class="publication-panel-canvas-region" data-panel-canvas-region>
         @foreach (var view in EnabledViews)
         {
             <section @key="view.Id" class="publication-panel-view @(Item.LayoutMode == PublicationPanelLayoutMode.Responsive && !ForceCanvasLayout ? "responsive-panel-view" : null)" data-panel-view="@view.Id" data-panel-slug="@view.Slug" hidden="@(view.Id != ActiveViewId)" style="background:@view.Background">
@@ -24,7 +25,7 @@
                 {
                     <div @key="element.Id" class="publication-panel-element kind-@element.Kind.ToString().ToLowerInvariant() @ResponsiveElementClass(element)"
                          data-panel-element
-                         data-element-id="@element.Id"
+                         data-element-id="@element.Id" data-element-name="@element.Name"
                          data-element-kind="@element.Kind.ToString().ToLowerInvariant()"
                          data-interaction="@AnimationData.Interaction(element)"
                          data-interaction-action="@element.Interaction.Action"
@@ -90,6 +91,7 @@
             </section>
         }
         @AuthoringOverlay
+        </div>
     </div>
 </div>
 
@@ -106,7 +108,7 @@
 
     private IReadOnlyList<PublicationPanelView> EnabledViews => Item.Views.Where(view => view.Enabled).ToArray();
     private Guid ActiveViewId => Item.ActiveView?.Id ?? Item.Views.FirstOrDefault()?.Id ?? Guid.Empty;
-    private string PanelStyle => $"background:{Item.Background};border:{Mm(Item.BorderWidthMm)} solid {Item.BorderColor};border-radius:{Mm(Item.CornerRadiusMm)};overflow:{(Item.ClipContent ? "hidden" : "visible")};--panel-canvas-width:{Inv(Item.CanvasWidth)};--panel-canvas-height:{Inv(Item.CanvasHeight)}";
+    private string PanelStyle => $"background:{Item.Background};border:{Mm(Item.BorderWidthMm)} solid {Item.BorderColor};border-radius:{Mm(Item.CornerRadiusMm)};overflow:{(Item.ClipContent ? "hidden" : "visible")};--panel-canvas-width:{Inv(Item.CanvasWidth)};--panel-canvas-height:{Inv(Item.CanvasHeight)};--panel-canvas-aspect:{Inv(Math.Max(.01, Item.CanvasWidth / Math.Max(.01, Item.CanvasHeight)))}";
     private string ElementStyle(PublicationElement element)
     {
         if (Item.LayoutMode == PublicationPanelLayoutMode.Responsive && !ForceCanvasLayout)

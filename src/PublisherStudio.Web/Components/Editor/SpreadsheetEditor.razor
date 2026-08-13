@@ -2,6 +2,8 @@
 @implements IAsyncDisposable
 @inject IJSRuntime JS
 @inject SpreadsheetSessionStore Sessions
+@inject PublicationDataService DataService
+@inject ILogger<SpreadsheetEditor> Logger
 
 @if (Visible && SessionId != Guid.Empty)
 {
@@ -58,16 +60,36 @@
                         </label>
                         <p class="spreadsheet-data-object-help">Review the column names before creating the object. When the selection has no header row, define the names here; blank or duplicate names are not accepted.</p>
 
-                        <section class="spreadsheet-column-name-editor">
-                            <strong>Column names</strong>
+                        <section class="spreadsheet-column-name-editor spreadsheet-column-schema-editor">
+                            <strong>Column names and data types</strong>
                             <div>
                                 @for (var index = 0; index < _selectionColumnNames.Count; index++)
                                 {
                                     var columnIndex = index;
-                                    <label><span>@(index + 1)</span><input value="@_selectionColumnNames[index]" placeholder="@($"Column {index + 1}")" @oninput="(ChangeEventArgs args) => ChangeSelectionColumnName(columnIndex, args)" /></label>
+                                    <label class="spreadsheet-column-schema-row">
+                                        <span>@(index + 1)</span>
+                                        <input value="@_selectionColumnNames[index]" placeholder="@($"Column {index + 1}")" @oninput="(ChangeEventArgs args) => ChangeSelectionColumnName(columnIndex, args)" />
+                                        <select value="@_selectionColumnTypeKeys[index]" @onchange="(ChangeEventArgs args) => ChangeSelectionColumnType(columnIndex, args)">
+                                            <option value="Auto">Auto (@_selectionInferredKinds[index])</option>
+                                            @foreach (var kind in Enum.GetValues<PublicationDataValueKind>())
+                                            {
+                                                <option value="@kind">@kind</option>
+                                            }
+                                        </select>
+                                    </label>
                                 }
                             </div>
+                            <small>Auto detects the stored values. Choose Number, Boolean, DateTime, or Text to explicitly control how charts and components receive the field.</small>
                         </section>
+
+                        @{ var selectionValidation = SelectionValidation; }
+                        <div class="data-validation-status @ValidationCss(selectionValidation.Severity)" role="status">
+                            <strong>@ValidationIcon(selectionValidation.Severity) @selectionValidation.Message</strong>
+                            @if (selectionValidation.Issues.Count > 0)
+                            {
+                                <span>@selectionValidation.Issues[0].Message</span>
+                            }
+                        </div>
 
                         <section class="spreadsheet-selection-preview">
                             <div><strong>Preview</strong><span>@SelectionDataRowCount data rows</span></div>
@@ -123,6 +145,8 @@
     private string _dataObjectName = "Spreadsheet Data";
     private bool _selectionFirstRowHeaders = true;
     private List<string> _selectionColumnNames = [];
+    private List<PublicationDataValueKind> _selectionInferredKinds = [];
+    private List<string> _selectionColumnTypeKeys = [];
     private string? _selectionError;
     private string FrameId => $"spreadsheet-frame-{SessionId:N}";
     private string EditorUrl => $"/spreadsheet/editor/{SessionId:D}";
@@ -225,27 +249,25 @@
     }
 
     [JSInvokable]
-    public Task SpreadsheetOpening()
+    public Task SpreadsheetOpening() => InvokeAsync(() =>
     {
         _opening = true;
         _error = null;
         StateHasChanged();
-        return Task.CompletedTask;
-    }
+    });
 
     [JSInvokable]
-    public Task SpreadsheetReady(string? fileName)
+    public Task SpreadsheetReady(string? fileName) => InvokeAsync(() =>
     {
         _ready = true;
         _opening = false;
         if (!string.IsNullOrWhiteSpace(fileName)) FileName = fileName;
         _error = null;
         StateHasChanged();
-        return Task.CompletedTask;
-    }
+    });
 
     [JSInvokable]
-    public async Task SpreadsheetSaved(string intent)
+    public Task SpreadsheetSaved(string intent) => InvokeAsync(async () =>
     {
         _saving = false;
         if (!Sessions.TryGet(SessionId, out var session))
@@ -259,16 +281,16 @@
             await Saved.InvokeAsync(new SpreadsheetEditorResult(session.Content, session.FileName, session.SourceFormat, session.PreviewHtml, session.ActiveSheetName));
         else
             StateHasChanged();
-    }
+    });
 
     [JSInvokable]
-    public Task SpreadsheetDataSelectionReceived(SpreadsheetDataSelection selection)
+    public Task SpreadsheetDataSelectionReceived(SpreadsheetDataSelection selection) => InvokeAsync(() =>
     {
         if (selection.Rows.Count == 0 || selection.Rows.All(row => row.All(string.IsNullOrWhiteSpace)))
         {
             _error = "The selected spreadsheet range is empty.";
             StateHasChanged();
-            return Task.CompletedTask;
+            return;
         }
 
         _dataSelection = selection;
@@ -278,8 +300,7 @@
         _selectionError = null;
         RebuildSelectionColumnNames();
         StateHasChanged();
-        return Task.CompletedTask;
-    }
+    });
 
     private void ToggleSelectionHeaders(ChangeEventArgs args)
     {
@@ -297,6 +318,19 @@
         _selectionError = null;
     }
 
+    private void ChangeSelectionColumnType(int index, ChangeEventArgs args)
+    {
+        if (index < 0 || index >= _selectionColumnTypeKeys.Count) return;
+        var value = args.Value?.ToString() ?? "Auto";
+        _selectionColumnTypeKeys[index] = Enum.TryParse<PublicationDataValueKind>(value, out var kind) ? kind.ToString() : "Auto";
+        _selectionError = null;
+    }
+
+    private PublicationDataValueKind EffectiveSelectionKind(int index)
+        => index >= 0 && index < _selectionColumnTypeKeys.Count && Enum.TryParse<PublicationDataValueKind>(_selectionColumnTypeKeys[index], out var explicitKind)
+            ? explicitKind
+            : index >= 0 && index < _selectionInferredKinds.Count ? _selectionInferredKinds[index] : PublicationDataValueKind.Text;
+
     private async Task CreateDataObject()
     {
         if (_dataSelection is null) return;
@@ -312,6 +346,20 @@
             .Select(index => index < row.Count ? row[index] : string.Empty)
             .ToList()).ToList();
 
+        var typedColumns = columns.Select((column, index) => new PublicationDataColumn
+        {
+            Name = column,
+            ValueKind = EffectiveSelectionKind(index),
+            ValueKindExplicit = index < _selectionColumnTypeKeys.Count && !string.Equals(_selectionColumnTypeKeys[index], "Auto", StringComparison.OrdinalIgnoreCase)
+        }).ToList();
+        var candidate = BuildSelectionDataObject(typedColumns, normalizedRows);
+        var validation = DataService.Validate(candidate);
+        if (validation.Severity == PublicationDataValidationSeverity.Error)
+        {
+            _selectionError = validation.Issues.FirstOrDefault(issue => issue.Severity == PublicationDataValidationSeverity.Error)?.Message ?? validation.Message;
+            return;
+        }
+
         await DataObjectCreated.InvokeAsync(new SpreadsheetDataObjectResult
         {
             Name = name,
@@ -320,6 +368,7 @@
             RangeAddress = _dataSelection.RangeAddress,
             FirstRowContainsHeaders = _selectionFirstRowHeaders,
             ColumnNames = columns,
+            Columns = typedColumns,
             Rows = normalizedRows
         });
         ResetDataSelection();
@@ -333,6 +382,8 @@
         _dataObjectName = "Spreadsheet Data";
         _selectionFirstRowHeaders = true;
         _selectionColumnNames = [];
+        _selectionInferredKinds = [];
+        _selectionColumnTypeKeys = [];
         _selectionError = null;
     }
 
@@ -343,7 +394,57 @@
         _selectionColumnNames = Enumerable.Range(0, width)
             .Select(index => index < source.Count ? source[index].Trim() : string.Empty)
             .ToList();
+        var dataRows = (_dataSelection?.Rows ?? []).Skip(_selectionFirstRowHeaders ? 1 : 0).ToList();
+        _selectionInferredKinds = Enumerable.Range(0, width)
+            .Select(index => DataService.InferKind(dataRows.Select(row => index < row.Count ? row[index] : string.Empty)))
+            .ToList();
+        _selectionColumnTypeKeys = Enumerable.Repeat("Auto", width).ToList();
     }
+
+    private PublicationDataObject BuildSelectionDataObject(IReadOnlyList<PublicationDataColumn>? schema = null, IReadOnlyList<List<string>>? normalizedRows = null)
+    {
+        var columns = schema?.ToList() ?? _selectionColumnNames.Select((name, index) => new PublicationDataColumn
+        {
+            Name = name.Trim(),
+            ValueKind = EffectiveSelectionKind(index),
+            ValueKindExplicit = index < _selectionColumnTypeKeys.Count && !string.Equals(_selectionColumnTypeKeys[index], "Auto", StringComparison.OrdinalIgnoreCase)
+        }).ToList();
+        var rows = normalizedRows?.ToList() ?? (_dataSelection?.Rows ?? []).Skip(_selectionFirstRowHeaders ? 1 : 0)
+            .Select(row => Enumerable.Range(0, columns.Count).Select(index => index < row.Count ? row[index] : string.Empty).ToList()).ToList();
+        return new PublicationDataObject
+        {
+            Name = _dataObjectName.Trim(),
+            SourceKind = PublicationDataSourceKind.Json,
+            Columns = columns,
+            Rows = rows.Select(row => new PublicationDataRow
+            {
+                Values = columns.Select((column, index) => (column.Name, Value: index < row.Count ? row[index] : string.Empty))
+                    .ToDictionary(pair => pair.Name, pair => pair.Value, StringComparer.OrdinalIgnoreCase)
+            }).ToList()
+        };
+    }
+
+    private PublicationDataValidationResult SelectionValidation
+    {
+        get
+        {
+            if (_dataSelection is null || _selectionColumnNames.Count == 0) return new PublicationDataValidationResult { Severity = PublicationDataValidationSeverity.Warning, Message = "Select spreadsheet cells to validate them." };
+            try { return DataService.Validate(BuildSelectionDataObject()); }
+            catch (Exception exception)
+            {
+                Logger.LogWarning(exception, "Spreadsheet selection validation failed.");
+                return new PublicationDataValidationResult { Severity = PublicationDataValidationSeverity.Error, Message = exception.Message };
+            }
+        }
+    }
+
+    private static string ValidationCss(PublicationDataValidationSeverity severity) => severity.ToString().ToLowerInvariant();
+    private static string ValidationIcon(PublicationDataValidationSeverity severity) => severity switch
+    {
+        PublicationDataValidationSeverity.Success => "✓",
+        PublicationDataValidationSeverity.Warning => "⚠",
+        _ => "✕"
+    };
 
 
     private string DisplaySelectionColumnName(int index)
@@ -357,20 +458,19 @@
         var first = rows[0].Select(value => value?.Trim() ?? string.Empty).ToArray();
         var nonEmpty = first.Where(value => !string.IsNullOrWhiteSpace(value)).ToArray();
         if (nonEmpty.Length == 0 || nonEmpty.Distinct(StringComparer.OrdinalIgnoreCase).Count() != nonEmpty.Length) return false;
-        return nonEmpty.Any(value => !double.TryParse(value, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out _)
+        return nonEmpty.Any(value => !DataService.TryParseNumber(value, out _)
             && !bool.TryParse(value, out _)
             && !DateTimeOffset.TryParse(value, out _));
     }
 
     [JSInvokable]
-    public Task SpreadsheetFailed(string message)
+    public Task SpreadsheetFailed(string message) => InvokeAsync(() =>
     {
         _saving = false;
         _opening = false;
         _error = message;
         StateHasChanged();
-        return Task.CompletedTask;
-    }
+    });
 
     public async ValueTask DisposeAsync()
     {
@@ -379,7 +479,10 @@
             try { await _module.InvokeVoidAsync("dispose", FrameId); }
             catch (JSDisconnectedException) { }
             catch (TaskCanceledException) { }
-            await _module.DisposeAsync();
+            try { await _module.DisposeAsync(); }
+            catch (JSDisconnectedException exception) { Logger.LogDebug(exception, "Spreadsheet Studio module disposal observed an already disconnected circuit."); }
+            catch (TaskCanceledException exception) { Logger.LogDebug(exception, "Spreadsheet Studio module disposal was cancelled during circuit shutdown."); }
+            catch (ObjectDisposedException exception) { Logger.LogDebug(exception, "Spreadsheet Studio module was already disposed during circuit shutdown."); }
         }
         _self?.Dispose();
     }

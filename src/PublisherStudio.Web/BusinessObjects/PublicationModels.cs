@@ -24,7 +24,7 @@ public sealed class PublicationDocument
     /// Gets or sets the format version value that forms part of the publication state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The format version value exposed by <see cref="PublicationDocument"/>.</value>
-    public string FormatVersion { get; set; } = "1.55";
+    public string FormatVersion { get; set; } = "1.56";
     /// <summary>
     /// Gets or sets the modified UTC associated with this publication state, using the time semantics implied by the member name.
     /// </summary>
@@ -138,6 +138,14 @@ public sealed class PublicationViewSettings
     /// </summary>
     /// <value>The export DPI value exposed by <see cref="PublicationViewSettings"/>.</value>
     public int ExportDpi { get; set; } = 150;
+    /// <summary>
+    /// Gets or sets the raster jpeg quality value that forms part of the publication view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The raster jpeg quality value exposed by <see cref="PublicationViewSettings"/>.</value>
+    public double RasterJpegQuality { get; set; } = .92;
+    /// <summary>Gets or sets whether multi-page raster archives use the same DEFLATE ZIP path as structured website exports.</summary>
+    /// <value>The compress page archives value exposed by <see cref="PublicationViewSettings"/>.</value>
+    public bool CompressPageArchives { get; set; } = true;
     /// <summary>
     /// Gets or sets the canvas zoom mode value that forms part of the publication view state consumed or produced by the surrounding workflow.
     /// </summary>

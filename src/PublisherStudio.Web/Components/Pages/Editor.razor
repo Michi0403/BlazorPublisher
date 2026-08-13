@@ -1083,7 +1083,9 @@
                 ".print-publication",
                 baseName,
                 format,
-                State.Document.View.ExportDpi);
+                State.Document.View.ExportDpi,
+                State.Document.View.CompressPageArchives,
+                State.Document.View.RasterJpegQuality);
             ShowNotice(result.Count == 1
                 ? $"Exported {result.FileName}."
                 : $"Exported {result.Count} page images in {result.FileName}.");
@@ -1102,7 +1104,7 @@
             ShowNotice($"Rendering current page as {format.ToUpperInvariant()}…");
             await InvokeAsync(StateHasChanged);
             await Task.Yield();
-            await JS.InvokeVoidAsync("publisherStudio.exportPage", "publisher-page", fileName, format, State.Document.View.ExportDpi, State.Document.Zoom);
+            await JS.InvokeVoidAsync("publisherStudio.exportPage", "publisher-page", fileName, format, State.Document.View.ExportDpi, State.Document.Zoom, State.Document.View.RasterJpegQuality);
             ShowNotice($"Exported current page as {format.ToUpperInvariant()}.");
         }
         catch (Exception ex)
@@ -1430,11 +1432,14 @@
     {
         try
         {
+            var schema = result.Columns.Count > 0
+                ? result.Columns.Select(column => new PublicationDataColumn { Name = column.Name, ValueKind = column.ValueKind, ValueKindExplicit = column.ValueKindExplicit }).ToList()
+                : result.ColumnNames.Select(name => new PublicationDataColumn { Name = name }).ToList();
             var rows = result.Rows.Select(row =>
             {
                 var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                for (var index = 0; index < result.ColumnNames.Count; index++)
-                    values[result.ColumnNames[index]] = index < row.Count ? row[index] : string.Empty;
+                for (var index = 0; index < schema.Count; index++)
+                    values[schema[index].Name] = index < row.Count ? row[index] : string.Empty;
                 return values;
             }).ToList();
             var data = new PublicationDataObject
@@ -1442,6 +1447,7 @@
                 Name = result.Name,
                 SourceKind = PublicationDataSourceKind.Json,
                 SourceReference = $"{result.WorkbookFileName} · {result.SheetName}!{result.RangeAddress}",
+                Columns = schema,
                 RawSource = System.Text.Json.JsonSerializer.Serialize(rows)
             };
             State.UpsertDataObject(data);

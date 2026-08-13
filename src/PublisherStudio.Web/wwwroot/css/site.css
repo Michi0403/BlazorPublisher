@@ -4711,6 +4711,13 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 .publication-panel.panel-nav-sidemenu>.publication-panel-navigation{flex-direction:column;align-items:stretch}
 .publication-panel.panel-nav-overlaymenu>.publication-panel-navigation{position:absolute;left:10px;top:10px;right:10px;border-radius:8px;background:#020617cc;backdrop-filter:blur(10px)}
 .publication-panel-viewport{position:relative;min-width:0;min-height:0;overflow:hidden}
+.publication-panel-canvas-region{position:relative;width:100%;height:100%;min-width:0;min-height:0}
+/* Fixed-canvas panels are authored in one coordinate system. Preserve that aspect ratio when the
+   Mainframe frame is resized instead of independently stretching X and Y. Responsive panels still
+   own the whole viewport and deliberately reflow. Container units keep nested panels independent. */
+.panel-layout-fixedcanvas>.publication-panel-viewport,.panel-force-canvas>.publication-panel-viewport{display:grid;place-items:center;container-type:size}
+.panel-layout-fixedcanvas>.publication-panel-viewport>.publication-panel-canvas-region,.panel-force-canvas>.publication-panel-viewport>.publication-panel-canvas-region{width:min(100cqw,calc(100cqh * var(--panel-canvas-aspect,1.7777778)));height:auto;max-width:100cqw;max-height:100cqh;aspect-ratio:var(--panel-canvas-aspect,1.7777778)}
+.panel-layout-responsive:not(.panel-force-canvas)>.publication-panel-viewport>.publication-panel-canvas-region{width:100%;height:100%}
 .publication-panel-view{position:absolute;inset:0;overflow:hidden}
 .publication-panel-view[hidden]{display:none!important}
 .publication-panel-element{position:absolute;box-sizing:border-box;transform-origin:center;min-width:0;min-height:0;overflow:visible}
@@ -5133,11 +5140,11 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 .panel-studio-canvas{width:100%;height:100%!important;min-height:0!important;aspect-ratio:auto!important;overflow:hidden;--panel-studio-fit-scale:1}
 .panel-studio-canvas>.publication-panel{inset:auto!important;left:50%;top:50%;width:var(--panel-editor-width,604.724px);height:var(--panel-editor-height,340.157px);transform:translate(-50%,-50%) scale(var(--panel-studio-fit-scale,1));transform-origin:center center}
 .publication-panel-viewport[data-panel-authoring-viewport="true"]{isolation:isolate}
-.publication-panel-viewport[data-panel-authoring-viewport="true"]>.panel-studio-hit-layer,
-.publication-panel-viewport[data-panel-authoring-viewport="true"]>.panel-studio-drop-layer{position:absolute;inset:0}
-.publication-panel-viewport[data-panel-authoring-viewport="true"]>.panel-studio-hit-layer{z-index:60;pointer-events:none}
-.publication-panel-viewport[data-panel-authoring-viewport="true"]>.panel-studio-drop-layer{z-index:70;pointer-events:none}
-.publication-panel-viewport[data-panel-authoring-viewport="true"]>.panel-studio-drop-layer.active{pointer-events:auto}
+.publication-panel-viewport[data-panel-authoring-viewport="true"]>[data-panel-canvas-region]>.panel-studio-hit-layer,
+.publication-panel-viewport[data-panel-authoring-viewport="true"]>[data-panel-canvas-region]>.panel-studio-drop-layer{position:absolute;inset:0}
+.publication-panel-viewport[data-panel-authoring-viewport="true"]>[data-panel-canvas-region]>.panel-studio-hit-layer{z-index:60;pointer-events:none}
+.publication-panel-viewport[data-panel-authoring-viewport="true"]>[data-panel-canvas-region]>.panel-studio-drop-layer{z-index:70;pointer-events:none}
+.publication-panel-viewport[data-panel-authoring-viewport="true"]>[data-panel-canvas-region]>.panel-studio-drop-layer.active{pointer-events:auto}
 .panel-studio-canvas-shell.arrange-preview .publication-panel.panel-force-canvas .publication-panel-view,
 .panel-studio-canvas-shell.arrange-preview .publication-panel.panel-force-canvas .publication-panel-element{position:absolute}
 @media(max-width:720px){.panel-studio-canvas-shell{min-height:360px!important}}
@@ -5175,3 +5182,30 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 /* PublisherStudio 2.5.5: keep the simplified LocalGPT AI Assist context visible without turning the page into an admin console. */
 .organic-ai-context{margin:.15rem 0 .8rem;padding:.55rem .75rem;border:1px solid color-mix(in srgb,var(--publisher-border,#cbd5e1) 78%,transparent);border-radius:.65rem;background:color-mix(in srgb,var(--publisher-surface,#fff) 92%,var(--publisher-accent,#3b82f6) 8%);overflow-wrap:anywhere}
 .organic-ai-context strong{font-weight:700}
+
+/* v2.6.0 Panel Studio viewport simulation and data-maintenance status surfaces. */
+.panel-studio-mode-actions{align-items:center;flex-wrap:wrap}
+.panel-studio-preview-size{display:flex;align-items:center;gap:6px;margin-right:4px;color:#cbd5e1;font:600 10px/1.2 "Segoe UI",system-ui,sans-serif}
+.panel-studio-preview-size select{min-width:138px;min-height:28px;border:1px solid #64748b;border-radius:5px;padding:4px 24px 4px 7px;background:#1e293b;color:#f8fafc;font:600 10px "Segoe UI",system-ui,sans-serif}
+.data-validation-status{display:grid;gap:3px;margin:8px 0;padding:8px 10px;border:1px solid #94a3b8;border-left-width:4px;border-radius:6px;background:#f8fafc;color:#334155}
+.data-validation-status strong{font-size:12px}.data-validation-status span{font-size:11px}
+.data-validation-status.success{border-left-color:#16a34a;background:#f0fdf4;color:#166534}
+.data-validation-status.warning{border-left-color:#d97706;background:#fffbeb;color:#92400e}
+.data-validation-status.error{border-left-color:#dc2626;background:#fef2f2;color:#991b1b}
+.data-schema-editor{display:grid;gap:7px;margin:8px 0;padding:8px;border:1px solid #cbd5e1;border-radius:7px;background:#fff}
+.data-schema-editor .pane-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}.data-schema-editor .pane-heading>div{display:flex;gap:5px}
+.data-schema-scroll{max-height:190px}.data-schema-editor table{width:100%;border-collapse:collapse}.data-schema-editor th,.data-schema-editor td{padding:4px;border-bottom:1px solid #e2e8f0;text-align:left}
+.data-schema-editor input,.data-schema-editor select,.data-cell-editor{box-sizing:border-box;width:100%;min-width:80px;border:1px solid #b8c3cf;border-radius:4px;padding:4px 6px;background:#fff;color:#17202a;font:11px "Segoe UI",system-ui,sans-serif}
+.data-maintenance-help{display:grid;gap:5px}.spreadsheet-column-schema-row{display:grid!important;grid-template-columns:24px minmax(120px,1fr) minmax(130px,.45fr)!important;gap:6px!important;align-items:center}
+@media(max-width:720px){.panel-studio-preview-size{width:100%}.panel-studio-preview-size select{flex:1}.spreadsheet-column-schema-row{grid-template-columns:24px 1fr!important}.spreadsheet-column-schema-row select{grid-column:2}}
+
+/* v2.6.0 Component Studio viewport simulation uses the component's real responsive runtime inside an aspect-fitted stage. */
+.component-preview-pane{grid-template-rows:auto minmax(0,1fr) auto}
+.component-preview-pane .pane-heading{flex-wrap:wrap}
+.component-preview-size{display:flex;align-items:center;gap:5px;font:600 10px/1.2 "Segoe UI",system-ui,sans-serif}
+.component-preview-size select{max-width:155px;font:inherit}
+.component-preview-stage{min-width:0;min-height:0;margin:12px;display:grid;place-items:center;container-type:size;overflow:hidden}
+.component-preview-stage>.component-preview-frame{margin:0;width:100%;height:100%;min-width:0;min-height:0}
+.component-preview-stage>.component-preview-frame[style*="--component-preview-aspect:0."],
+.component-preview-stage>.component-preview-frame[style*="--component-preview-aspect:1."]{width:min(100cqw,calc(100cqh * var(--component-preview-aspect)));height:min(100cqh,calc(100cqw / var(--component-preview-aspect)));aspect-ratio:var(--component-preview-aspect)}
+.component-preview-pane>small{padding:0 12px 10px}

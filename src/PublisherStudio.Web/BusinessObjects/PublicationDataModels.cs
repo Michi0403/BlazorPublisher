@@ -119,7 +119,72 @@ public sealed class PublicationDataColumn
     /// </summary>
     /// <value>The value kind value exposed by <see cref="PublicationDataColumn"/>.</value>
     public PublicationDataValueKind ValueKind { get; set; } = PublicationDataValueKind.Text;
+    /// <summary>Gets or sets whether the value kind was explicitly selected by the user instead of inferred from source values.</summary>
+    /// <value><see langword="true"/> when parsing must preserve <see cref="ValueKind"/>.</value>
+    public bool ValueKindExplicit { get; set; }
 }
+
+/// <summary>Defines the severity of publication-data validation feedback shown to authors.</summary>
+public enum PublicationDataValidationSeverity
+{
+    Success,
+    Warning,
+    Error
+}
+
+/// <summary>Describes one publication-data validation issue.</summary>
+public sealed class PublicationDataValidationIssue
+{
+    /// <summary>
+    /// Gets or sets the severity value that forms part of the publication data validation issue state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The severity value exposed by <see cref="PublicationDataValidationIssue"/>.</value>
+    public PublicationDataValidationSeverity Severity { get; set; }
+    /// <summary>
+    /// Gets or sets the column name value that forms part of the publication data validation issue state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The column name value exposed by <see cref="PublicationDataValidationIssue"/>.</value>
+    public string ColumnName { get; set; } = string.Empty;
+    /// <summary>Gets or sets the one-based affected row number, or zero when the issue is schema-wide.</summary>
+    /// <value>The row number value exposed by <see cref="PublicationDataValidationIssue"/>.</value>
+    public int RowNumber { get; set; }
+    /// <summary>
+    /// Gets or sets the message value that forms part of the publication data validation issue state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The message value exposed by <see cref="PublicationDataValidationIssue"/>.</value>
+    public string Message { get; set; } = string.Empty;
+}
+
+/// <summary>Summarizes validation of a publication data object or spreadsheet selection.</summary>
+public sealed class PublicationDataValidationResult
+{
+    /// <summary>
+    /// Gets or sets the severity value that forms part of the publication data validation state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The severity value exposed by <see cref="PublicationDataValidationResult"/>.</value>
+    public PublicationDataValidationSeverity Severity { get; set; } = PublicationDataValidationSeverity.Success;
+    /// <summary>
+    /// Gets or sets the message value that forms part of the publication data validation state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The message value exposed by <see cref="PublicationDataValidationResult"/>.</value>
+    public string Message { get; set; } = "Data is ready.";
+    /// <summary>
+    /// Gets or sets the column count that quantifies the associated publication data validation data.
+    /// </summary>
+    /// <value>The column count value exposed by <see cref="PublicationDataValidationResult"/>.</value>
+    public int ColumnCount { get; set; }
+    /// <summary>
+    /// Gets or sets the row count that quantifies the associated publication data validation data.
+    /// </summary>
+    /// <value>The row count value exposed by <see cref="PublicationDataValidationResult"/>.</value>
+    public int RowCount { get; set; }
+    /// <summary>
+    /// Gets or sets the issues collection maintained or exposed by this publication data validation instance for downstream processing.
+    /// </summary>
+    /// <value>The issues value exposed by <see cref="PublicationDataValidationResult"/>.</value>
+    public List<PublicationDataValidationIssue> Issues { get; set; } = [];
+}
+
 
 /// <summary>
 /// Represents a publication data row application type, grouping the state and behavior that belong to that domain concept.

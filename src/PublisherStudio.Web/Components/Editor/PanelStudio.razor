@@ -172,6 +172,15 @@
                                 <span>@(_interactionPreview ? "Live content receives mouse, touch and keyboard input." : $"Editing this panel's own {Inv(_draft.CanvasWidth)} × {Inv(_draft.CanvasHeight)} canvas. Mainframe placement stays separate; move or resize components here.")</span>
                             </div>
                             <div class="panel-studio-mode-actions" role="group" aria-label="Panel Studio interaction mode">
+                                <label class="panel-studio-preview-size">Preview size
+                                    <select value="@_previewSizeKey" @onchange="ChangePreviewSize">
+                                        <option value="design">Design canvas</option>
+                                        <option value="phone">Phone · 390 × 844</option>
+                                        <option value="tablet">Tablet · 768 × 1024</option>
+                                        <option value="laptop">Laptop · 1280 × 720</option>
+                                        <option value="wide">Wide · 1440 × 900</option>
+                                    </select>
+                                </label>
                                 <button type="button" class="@(!_interactionPreview ? "active" : null)" @onclick="DisableInteractionPreview">Arrange</button>
                                 <button type="button" class="@(_interactionPreview ? "active" : null)" @onclick="EnableInteractionPreview">Interact</button>
                             </div>
@@ -476,6 +485,7 @@
     private Guid? _loadedId;
     private string _error = string.Empty;
     private bool _interactionPreview;
+    private string _previewSizeKey = "design";
     private string _dragToolId = string.Empty;
     private ElementReference _canvasElement;
     private DotNetObjectReference<PanelStudio>? _self;
@@ -531,6 +541,7 @@
         _error = string.Empty;
         _lastInteractionSurfaceNotification = string.Empty;
         _interactionPreview = false;
+        _previewSizeKey = "design";
         RefreshAdvancedJson();
     }
 
@@ -909,12 +920,39 @@
 
     // Panel Studio edits the panel's local authoring canvas, never the Mainframe frame that contains it.
     // Width/Height are publication-placement dimensions; CanvasWidth/CanvasHeight own descendant coordinates.
-    private double PanelDesignWidthPxValue => Math.Max(1, (_draft?.CanvasWidth ?? 160) * 96d / 25.4d);
-    private double PanelDesignHeightPxValue => Math.Max(1, (_draft?.CanvasHeight ?? 90) * 96d / 25.4d);
+    // Preview sizes change only the simulated containing viewport. Arrange mode keeps authored coordinates
+    // through the canvas-region aspect fit; responsive layout can then be tested at realistic device widths.
+    private (double Width, double Height) PreviewViewportPx => _previewSizeKey switch
+    {
+        "phone" => (390, 844),
+        "tablet" => (768, 1024),
+        "laptop" => (1280, 720),
+        "wide" => (1440, 900),
+        _ => (Math.Max(1, (_draft?.CanvasWidth ?? 160) * 96d / 25.4d), Math.Max(1, (_draft?.CanvasHeight ?? 90) * 96d / 25.4d))
+    };
+    private double PanelDesignWidthPxValue => PreviewViewportPx.Width;
+    private double PanelDesignHeightPxValue => PreviewViewportPx.Height;
     private string PanelDesignWidthPx => Inv(PanelDesignWidthPxValue);
     private string PanelDesignHeightPx => Inv(PanelDesignHeightPxValue);
     private string PanelDesignWidthCss => $"{PanelDesignWidthPx}px";
     private string PanelDesignHeightCss => $"{PanelDesignHeightPx}px";
+
+    private void ChangePreviewSize(ChangeEventArgs args)
+    {
+        try
+        {
+            var requested = args.Value?.ToString()?.Trim().ToLowerInvariant() ?? "design";
+            _previewSizeKey = requested is "phone" or "tablet" or "laptop" or "wide" ? requested : "design";
+            _designSurfaceLayoutKey = null;
+            _previewRevision++;
+            Logger.LogDebug("Panel Studio preview viewport changed to {PreviewSize} ({Width}x{Height}px).", _previewSizeKey, PanelDesignWidthPxValue, PanelDesignHeightPxValue);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Panel Studio preview size could not be changed.");
+            _error = "The preview size could not be changed.";
+        }
+    }
 
     private string DragGhostStyle
     {
@@ -1546,19 +1584,22 @@
             // not mutate the object that was just committed to the Mainframe.
             var committed = (PanelElement)Files.CloneElement(_draft);
             Panels.Normalize(Document, committed);
-            await Saved.InvokeAsync(committed).ConfigureAwait(false);
-            Notifications.Success("The panel was saved and remains reusable in Mainframe and exports.", "Panel saved", nameof(PanelStudio));
+            await InvokeAsync(() => Saved.InvokeAsync(committed)).ConfigureAwait(false);
+            await InvokeAsync(() => Notifications.Success("The panel was saved and remains reusable in Mainframe and exports.", "Panel saved", nameof(PanelStudio))).ConfigureAwait(false);
         }
         catch (OperationCanceledException exception)
         {
             Logger.LogDebug(exception, $"Panel Studio save was cancelled before the Mainframe accepted the project. Binding:{_interactionBindingId} Panel:{_draft?.Id} View:{_selectedViewId} Mode:{(_interactionPreview ? "Interact" : "Arrange")} TokenCancellationRequested:{exception.CancellationToken.IsCancellationRequested}.");
-            _error = "The panel was not saved because the operation was cancelled.";
+            await InvokeAsync(() => _error = "The panel was not saved because the operation was cancelled.").ConfigureAwait(false);
         }
         catch (Exception exception)
         {
             Logger.LogError(exception, "Panel Studio could not commit the panel project to the Mainframe.");
-            _error = exception.Message;
-            Notifications.Error(_error, "Panel save failed", nameof(PanelStudio), persistent: true);
+            await InvokeAsync(() =>
+            {
+                _error = exception.Message;
+                Notifications.Error(_error, "Panel save failed", nameof(PanelStudio), persistent: true);
+            }).ConfigureAwait(false);
         }
     }
 

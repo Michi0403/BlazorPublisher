@@ -1,15 +1,14 @@
-# PublisherStudio 2.6.2 picture and page-effects release
+# PublisherStudio 2.6.3 preview, AI component, and website-export release
 
-PublisherStudio 2.6.2 extends the Mainframe/Picture Studio rendering boundary without changing LocalGPT or the word-processing path.
+PublisherStudio 2.6.3 improves Panel Studio authoring ergonomics and extends the existing PublisherStudio↔LocalGPT integration into authoring and publication components without making normal exported publications dependent on LocalGPT.
 
-- Adds publication-native page-wide effect layers with custom color selection, background/overlay placement, gradients, blend modes, and from/to animation settings including repeat/auto-reverse/easing.
-- Adds non-destructive raster color replacement in Picture Studio, including the reported white/light-to-red workflow with transparency and antialiasing preserved.
-- Adds brush, pencil, spray, toothbrush, and eraser path tools that commit through the existing paint layer model.
-- Separates Picture Studio apply/export semantics into layered/editable and merged/flattened results.
-- Asks for merged versus layered export when a selected Mainframe image still owns a Picture Studio layer document.
-- Repairs selected-object raster bounds by cropping the isolated rendered alpha instead of the CSS frame rectangle.
-- Bumps publication format to 1.57 and Picture Studio format to 1.5 for the new persisted page-effect/recolor state, with English/German localization for the new UI.
-
-No LocalGPT package is part of this release because LocalGPT source did not change. The existing word-processing/RichEdit integration is intentionally untouched.
+- Adds persistent user-defined Panel Studio preview viewport presets and repairs the right-side inspector/tooltip/footer UX.
+- Moves language selection into the publication title/modified-time bar.
+- Adds compression choices to single-file website and interactive presentation website export while reusing the existing structured-site media conversion helpers.
+- Adds LocalGPT-aware **AI Text** and **AI Chat** quick inserts when the paired LocalGPT capability directory advertises Council execution.
+- Adds StoryEditor selection AI actions while preserving review-before-replace semantics.
+- Reuses the existing DevExtreme Chat component/runtime and routes optional AI messages through PublisherStudio's same-origin controller to its established LocalGPT 1-Wire connection.
+- Keeps non-AI publication data/rendering self-contained and gracefully degrades explicitly AI-enabled Chat when the external AI bridge is unavailable.
+- Bumps publication format to 1.58 and application/installer version to 2.6.3.
 
 The owner-side Windows .NET 10 / DevExpress build remains authoritative for compilation and release publishing.

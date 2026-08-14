@@ -60,6 +60,15 @@ public enum PublicationChatDisplayMode
 }
 
 /// <summary>
+/// Defines whether an insertable publication Chat component uses the normal streaming bridge or routes user messages to LocalGPT Council through PublisherStudio.
+/// </summary>
+public enum PublicationChatAiMode
+{
+    None,
+    LocalGptCouncil
+}
+
+/// <summary>
 /// Defines the supported publication vector map base layer values used to select or describe behavior in the surrounding workflow.
 /// </summary>
 public enum PublicationVectorMapBaseLayer
@@ -1014,6 +1023,36 @@ public sealed class DevExtremeComponentElement : PublicationElement
     /// </summary>
     /// <value>The chat channel value exposed by <see cref="DevExtremeComponentElement"/>.</value>
     public string ChatChannel { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets the optional AI behavior used by this chat component.
+    /// </summary>
+    /// <value>The AI behavior selected for the publication chat.</value>
+    public PublicationChatAiMode ChatAiMode { get; set; } = PublicationChatAiMode.None;
+    /// <summary>
+    /// Gets or sets the LocalGPT Council team key used by AI-enabled publication chat.
+    /// </summary>
+    /// <value>The LocalGPT Council team key used for AI chat requests.</value>
+    public string ChatAiTeamKey { get; set; } = "general";
+    /// <summary>
+    /// Gets or sets publication-author instructions prepended to AI-enabled chat requests.
+    /// </summary>
+    /// <value>The author-supplied AI instructions for this chat component.</value>
+    public string ChatAiSystemPrompt { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets a value indicating whether AI-enabled chat requests may read LocalGPT Council memory.
+    /// </summary>
+    /// <value><see langword="true"/> when Council memory can be read.</value>
+    public bool ChatAiIncludeMemory { get; set; } = true;
+    /// <summary>
+    /// Gets or sets a value indicating whether AI-enabled chat results may be saved to LocalGPT Council memory.
+    /// </summary>
+    /// <value><see langword="true"/> when Council results can be saved to memory.</value>
+    public bool ChatAiSaveToMemory { get; set; } = true;
+    /// <summary>
+    /// Gets or sets the answer token budget requested from LocalGPT for AI-enabled chat.
+    /// </summary>
+    /// <value>The requested maximum output-token count.</value>
+    public int ChatAiMaxOutputTokens { get; set; } = 8192;
     /// <summary>
     /// Gets or sets the chat platform field value that forms part of the dev extreme component element state consumed or produced by the surrounding workflow.
     /// </summary>

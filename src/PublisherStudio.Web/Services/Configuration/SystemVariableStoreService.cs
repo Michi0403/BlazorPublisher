@@ -78,6 +78,10 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
     /// Stores the internal default document name state used by <see cref="SystemVariableStoreService"/> while executing its surrounding workflow.
     /// </summary>
     private readonly string _defaultDocumentName = "Editor.DefaultDocumentName";
+    /// <summary>
+    /// Stores the system-variable name used for user-defined Panel Studio preview viewport presets.
+    /// </summary>
+    private readonly string _panelStudioPreviewPresetsName = "PanelStudio.PreviewViewportPresets";
 
     /// <summary>
     /// Initializes a new <see cref="SystemVariableStoreService"/> instance and captures the dependencies or initial state required by its system variable store workflow.
@@ -104,6 +108,7 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
         _values[_runtimeDirectoryName] = "runtime";
         _values[_runtimeEndpointFileName] = "server.json";
         _values[_defaultDocumentName] = "Untitled Publication";
+        _values[_panelStudioPreviewPresetsName] = "[]";
 
         LoadConfiguration(configuration);
         LoadPersisted();
@@ -174,6 +179,11 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
     /// </summary>
     /// <value>The default document name value exposed by <see cref="SystemVariableStoreService"/>.</value>
     public string DefaultDocumentName => GetString(_defaultDocumentName, "Untitled Publication");
+    /// <summary>
+    /// Gets the system-variable key that stores user-defined Panel Studio preview viewport presets.
+    /// </summary>
+    /// <value>The stable system-variable name used for persisted preview viewport presets.</value>
+    public string PanelStudioPreviewPresetsVariableName => _panelStudioPreviewPresetsName;
 
     /// <summary>
     /// Performs attach logger as part of the system variable store service workflow, applying the service's runtime policy, state management, and diagnostics as required.

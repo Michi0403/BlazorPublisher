@@ -505,6 +505,13 @@
                                     <label>Sender avatar URL<input @bind="_draft.ChatCurrentUserAvatar" placeholder="optional" /></label>
                                     <label>Input placeholder<input @bind="_draft.Placeholder" placeholder="Send a message…" /></label>
                                     <label>Display mode<select @bind="_draft.ChatDisplayMode">@foreach (var mode in Enum.GetValues<PublicationChatDisplayMode>()) { <option value="@mode">@mode</option> }</select></label>
+                                    <label>AI assistant<select @bind="_draft.ChatAiMode">@foreach (var mode in Enum.GetValues<PublicationChatAiMode>()) { <option value="@mode">@mode</option> }</select></label>
+                                    @if (_draft.ChatAiMode == PublicationChatAiMode.LocalGptCouncil)
+                                    {
+                                        <label>Council team<input @bind="_draft.ChatAiTeamKey" placeholder="general" /></label>
+                                        <label>Maximum AI output tokens<input type="number" min="256" max="262144" step="256" @bind="_draft.ChatAiMaxOutputTokens" /></label>
+                                        <label class="component-form-wide">AI role / publication instructions<textarea rows="3" @bind="_draft.ChatAiSystemPrompt" placeholder="Optional instructions for this embedded LocalGPT Council chat"></textarea></label>
+                                    }
                                     <label>Maximum visible messages<input type="number" min="1" max="100" @bind="_draft.ChatMaxVisibleMessages" /></label>
                                     <label>Background opacity<input type="range" min="0" max="1" step="0.05" @bind="_draft.ChatBackgroundOpacity" /></label>
                                     <label>Message opacity<input type="range" min="0" max="1" step="0.05" @bind="_draft.ChatMessageOpacity" /></label>
@@ -517,8 +524,13 @@
                                     <label><input type="checkbox" @bind="_draft.ChatCompact" /> Compact stream layout</label>
                                     <label><input type="checkbox" @bind="_draft.ChatFadeOlderMessages" /> Fade older messages</label>
                                     <label><input type="checkbox" @bind="_draft.ChatShowPlatformBadge" /> Platform badge</label>
+                                    @if (_draft.ChatAiMode == PublicationChatAiMode.LocalGptCouncil)
+                                    {
+                                        <label><input type="checkbox" @bind="_draft.ChatAiIncludeMemory" /> Read Council memory</label>
+                                        <label><input type="checkbox" @bind="_draft.ChatAiSaveToMemory" /> Save Council result to memory</label>
+                                    }
                                 </div>
-                                <p class="component-info">Auto uses interactive chat for the operator and a privacy-safe viewer overlay in broadcast output. ViewerOnly and StreamOverlay never render a message input, moderation controls, sender credentials, or private operator metadata. The runtime accepts a platform adapter through <code>window.PublisherStudioChatBridge</code>. It subscribes and sends only for the selected platform and channel. The same publication can therefore be rendered once for Twitch and once for YouTube without exposing the other platform's chat.</p>
+                                <p class="component-info">Auto uses interactive chat for the operator and a privacy-safe viewer overlay in broadcast output. ViewerOnly and StreamOverlay never render a message input, moderation controls, sender credentials, or private operator metadata. Normal stream chat continues to use <code>window.PublisherStudioChatBridge</code>. When LocalGPT Council AI is selected, the same DevExtreme Chat posts through PublisherStudio's same-origin AI bridge, which owns the paired 1-Wire connection. Standalone exports remain fully usable without LocalGPT; only the optional AI reply reports that no compatible bridge endpoint is available.</p>
                             }
                             @if (SupportsGridOptions || _draft.ComponentKind == PublicationComponentKind.TreeList)
                             {

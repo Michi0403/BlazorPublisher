@@ -24,7 +24,7 @@ public sealed class PublicationDocument
     /// Gets or sets the format version value that forms part of the publication state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The format version value exposed by <see cref="PublicationDocument"/>.</value>
-    public string FormatVersion { get; set; } = "1.57";
+    public string FormatVersion { get; set; } = "1.58";
     /// <summary>
     /// Gets or sets the modified UTC associated with this publication state, using the time semantics implied by the member name.
     /// </summary>

@@ -7478,7 +7478,7 @@ function failStoryPrintPreview(id, message) { try {
     } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@7325', __caughtJavaScriptError);  }
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:failStoryPrintPreview@7311', __javascriptError); throw __javascriptError; }}
 
-async function buildPublisherSingleHtml(mode, title) { try {
+async function buildPublisherSingleHtml(mode, title, exportOptions = {}) { try {
     const source = document.querySelector('.print-publication');
     if (!source) throw new Error('The publication export surface is not available.');
     if (window.PublisherStudioLiveDataRuntime) {
@@ -7535,6 +7535,8 @@ async function buildPublisherSingleHtml(mode, title) { try {
     publication.dataset.frameWidthPx = String(websiteFrame.width);
     publication.dataset.frameHeightPx = String(websiteFrame.height);
     await inlineLocalMediaSources(publication);
+    const singleMediaStats = await optimizeSingleFileMedia(publication, exportOptions);
+    window.__publisherSingleExportStats = singleMediaStats;
     publication.querySelectorAll('img').forEach(image => { try {
         image.draggable = true;
         image.removeAttribute('aria-hidden');
@@ -7644,6 +7646,66 @@ function structuredMimeExtension(mimeType) { try {
         'font/woff2': 'woff2', 'font/woff': 'woff', 'application/json': 'json'
     })[mime] || 'bin';
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:structuredMimeExtension@7483', __javascriptError); throw __javascriptError; }}
+
+async function optimizeSingleFileMedia(root, rawOptions = {}) { try {
+    const options = structuredWebsiteOptions({ ...rawOptions, compressArchive: false });
+    const warnings = [];
+    let sourceBytes = 0;
+    let outputBytes = 0;
+    const cache = new Map();
+
+    const convertDataUrl = async dataUrl => { try {
+        if (cache.has(dataUrl)) return cache.get(dataUrl);
+        const task = (async () => { try {
+            let original;
+            try { original = await (await fetch(dataUrl)).blob(); }
+            catch { return { dataUrl, originalSize: 0, outputSize: 0, sourceMime: '', outputMime: '' }; }
+            const mime = String(original.type || '').toLowerCase();
+            let selected = original;
+            if (mime.startsWith('image/') && !['image/svg+xml', 'image/gif'].includes(mime) && options.imageMode !== 'preserve') {
+                try {
+                    let requestedMime = options.imageMode === 'png' ? 'image/png' : options.imageMode === 'avif' ? 'image/avif' : 'image/webp';
+                    let converted = await structuredEncodeImage(original, requestedMime, options.imageQuality);
+                    if (!converted && requestedMime === 'image/avif') {
+                        warnings.push('This browser cannot encode AVIF; WebP was attempted for affected pictures.');
+                        requestedMime = 'image/webp';
+                        converted = await structuredEncodeImage(original, requestedMime, options.imageQuality);
+                    }
+                    if (converted) {
+                        if (options.imageMode === 'png' || converted.size < original.size) selected = converted;
+                        else warnings.push('A picture conversion was skipped because it would have increased the single-file website.');
+                    } else warnings.push('A picture was preserved because this browser could not encode the selected format.');
+                } catch { warnings.push('A picture was preserved because browser-side conversion failed.'); }
+            }
+            if (mime.startsWith('video/') && options.videoMode === 'webm') {
+                try {
+                    const converted = await structuredTranscodeVideo(original, options.videoQuality);
+                    if (converted && converted.size < original.size) selected = converted;
+                    else if (converted) warnings.push('A video was preserved because the WebM result was not smaller than its source.');
+                    else warnings.push('A video was preserved because this browser cannot perform the requested WebM conversion.');
+                } catch { warnings.push('A video was preserved because browser-side WebM conversion failed.'); }
+            }
+            const selectedUrl = selected === original ? dataUrl : await blobAsDataUrl(selected);
+            return { dataUrl: selectedUrl, originalSize: original.size || 0, outputSize: selected.size || 0, sourceMime: original.type || '', outputMime: selected.type || original.type || '' };
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:optimizeSingleFileMedia:convert', __javascriptError); throw __javascriptError; }})();
+        cache.set(dataUrl, task);
+        return task;
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:optimizeSingleFileMedia:cache', __javascriptError); throw __javascriptError; }};
+
+    const nodes = [...root.querySelectorAll('img[src],video[src],source[src]')];
+    for (const node of nodes) {
+        const value = String(node.getAttribute('src') || '');
+        if (!value.startsWith('data:')) continue;
+        const result = await convertDataUrl(value);
+        if (result.originalSize > 0) sourceBytes += result.originalSize;
+        if (result.outputSize > 0) outputBytes += result.outputSize;
+        if (result.dataUrl !== value) {
+            node.setAttribute('src', result.dataUrl);
+            if (node.tagName === 'SOURCE' && result.outputMime) node.setAttribute('type', result.outputMime);
+        }
+    }
+    return { sourceBytes, outputBytes, warnings };
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:optimizeSingleFileMedia', __javascriptError); throw __javascriptError; }}
 
 function structuredAssetFolder(mimeType) { try {
     const mime = String(mimeType || '').toLowerCase();
@@ -8219,14 +8281,20 @@ window.publisherStudio = {
         return canvas.toDataURL('image/png');
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:makeColorTransparent@8045', __javascriptError); throw __javascriptError; }},
 
-    async exportWebsite(fileName, title) { try {
-        const html = await buildPublisherSingleHtml('presentation', title);
-        downloadBlob(fileName, new Blob([html], { type: 'text/html;charset=utf-8' }));
+    async exportWebsite(fileName, title, options = {}) { try {
+        const html = await buildPublisherSingleHtml('presentation', title, options);
+        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+        downloadBlob(fileName, blob);
+        const stats = window.__publisherSingleExportStats || {};
+        return { fileName, sourceBytes: Number(stats.sourceBytes || 0), outputBytes: Number(stats.outputBytes || 0), warnings: Array.isArray(stats.warnings) ? stats.warnings : [] };
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:exportWebsite@8067', __javascriptError); throw __javascriptError; }},
 
-    async exportSite(fileName, title) { try {
-        const html = await buildPublisherSingleHtml('site', title);
-        downloadBlob(fileName, new Blob([html], { type: 'text/html;charset=utf-8' }));
+    async exportSite(fileName, title, options = {}) { try {
+        const html = await buildPublisherSingleHtml('site', title, options);
+        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+        downloadBlob(fileName, blob);
+        const stats = window.__publisherSingleExportStats || {};
+        return { fileName, sourceBytes: Number(stats.sourceBytes || 0), outputBytes: Number(stats.outputBytes || 0), warnings: Array.isArray(stats.warnings) ? stats.warnings : [] };
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:exportSite@8072', __javascriptError); throw __javascriptError; }},
 
     async exportStructuredWebsite(fileName, title, options = {}) { try {

@@ -1,30 +1,8 @@
 @inherits LayoutComponentBase
 @namespace PublisherStudio.Components.Layout
 @inject PublisherStudio.Services.Configuration.IFileLocalizationService Localization
-@inject NavigationManager Navigation
 
 <main class="application-root">
-    <div class="publisher-language-switcher" aria-label="@LanguageLabel">
-        <label for="publisherstudio-language-select">@LanguageLabel</label>
-        <select id="publisherstudio-language-select"
-                name="culture"
-                aria-label="@LanguageLabel"
-                data-enhance-nav="false"
-                onchange="window.location.assign(this.selectedOptions[0].dataset.selectionUrl)">
-            @foreach (var culture in Localization.GetAvailableCultures())
-            {
-                var selectionUrl = Localization.BuildCultureSelectionUrl(Navigation.Uri, culture);
-                if (string.Equals(culture, CurrentCulture, StringComparison.OrdinalIgnoreCase))
-                {
-                    <option value="@culture" data-selection-url="@selectionUrl" selected>@Localization.GetCultureDisplayName(culture)</option>
-                }
-                else
-                {
-                    <option value="@culture" data-selection-url="@selectionUrl">@Localization.GetCultureDisplayName(culture)</option>
-                }
-            }
-        </select>
-    </div>
     <UserNotificationHost />
     <OperationalErrorBoundary @key="Navigation.Uri">
         <ChildContent>
@@ -40,8 +18,3 @@
     <OrganicApprovalBar />
 </main>
 
-
-@code {
-    private string CurrentCulture => Localization.ResolveAvailableCulture(System.Globalization.CultureInfo.CurrentUICulture.Name);
-    private string LanguageLabel => Localization.Get("Text.Language", fallback: "Language");
-}

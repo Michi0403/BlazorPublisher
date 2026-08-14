@@ -230,6 +230,9 @@ public sealed class PublicationComponentService
                     item.MediaPosterField = string.IsNullOrWhiteSpace(item.MediaPosterField) ? "poster" : item.MediaPosterField.Trim();
                     item.MediaAltTextField = string.IsNullOrWhiteSpace(item.MediaAltTextField) ? "altText" : item.MediaAltTextField.Trim();
                     item.ChatChannel ??= string.Empty;
+                    item.ChatAiTeamKey = string.IsNullOrWhiteSpace(item.ChatAiTeamKey) ? "general" : item.ChatAiTeamKey.Trim();
+                    item.ChatAiSystemPrompt ??= string.Empty;
+                    item.ChatAiMaxOutputTokens = Math.Clamp(item.ChatAiMaxOutputTokens, 256, 262144);
                     item.ChatPlatformField = string.IsNullOrWhiteSpace(item.ChatPlatformField) ? "platform" : item.ChatPlatformField.Trim();
                     item.ChatChannelField = string.IsNullOrWhiteSpace(item.ChatChannelField) ? "channel" : item.ChatChannelField.Trim();
                     item.ChatMessageField = string.IsNullOrWhiteSpace(item.ChatMessageField) ? "text" : item.ChatMessageField.Trim();
@@ -493,6 +496,12 @@ public sealed class PublicationComponentService
                         item.ButtonText,
                         chatPlatform = item.ChatPlatform.ToString(),
                         item.ChatChannel,
+                        chatAiMode = item.ChatAiMode.ToString(),
+                        item.ChatAiTeamKey,
+                        item.ChatAiSystemPrompt,
+                        item.ChatAiIncludeMemory,
+                        item.ChatAiSaveToMemory,
+                        item.ChatAiMaxOutputTokens,
                         item.ChatPlatformField,
                         item.ChatChannelField,
                         item.ChatMessageField,

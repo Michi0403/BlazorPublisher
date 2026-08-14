@@ -20,7 +20,7 @@ try:
             'ColorizeSourceColor', 'ColorizeTargetColor', 'BrushPath', 'EraserPath',
             'PictureEditorResult(string DataUrl, PictureDocument? SourceDocument, string Name, bool PreserveLayers)')
     require('src/PublisherStudio.Web/BusinessObjects/PublicationModels.cs',
-            'FormatVersion { get; set; } = "1.57"', 'List<PublicationPageEffectLayer> EffectLayers',
+            'FormatVersion { get; set; } = "1.58"', 'List<PublicationPageEffectLayer> EffectLayers',
             'PublicationPageEffectPlacement', 'PublicationPageEffectBlendMode', 'AnimationEnabled')
     require('src/PublisherStudio.Web/Components/Editor/PictureEditor.razor',
             'White / light → red', 'Apply layered', 'Apply merged', 'Download layered SVG',
@@ -48,12 +48,12 @@ try:
             "querySelectorAll('[data-publication-element], .publication-page-effect')",
             'image.data[row + x * 4 + 3] <= 1', 'freezePageEffectsForRaster')
     require('src/PublisherStudio.Web/appsettings.json',
-            '"PublicationFormatVersion": "1.57"', '"PictureFormatVersion": "1.5"')
+            '"PublicationFormatVersion": "1.58"', '"PictureFormatVersion": "1.5"')
     require('src/PublisherStudio.Web/Localization/de-DE.json',
             '"Text.White␠/␠light␠→␠red": "Weiß / hell → rot"',
             '"Text.Page␠appearance␠&␠effects": "Seitendarstellung & Effekte"')
-    require('src/PublisherStudio.Web/PublisherStudio.Web.csproj','<Version>2.6.2</Version>')
-    require('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj','<Version>2.6.2</Version>')
+    require('src/PublisherStudio.Web/PublisherStudio.Web.csproj','<Version>2.6.3</Version>')
+    require('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj','<Version>2.6.3</Version>')
     print('PublisherStudio 2.6.2 picture/page-effect source audit passed: recolor, paint paths, layered/merged application/export, alpha-safe selected export, page color/effect layers, animation, and format/version wiring are present.')
 except AssertionError as exc:
     print(f'PublisherStudio 2.6.2 picture/page-effect source audit failed: {exc}', file=sys.stderr)

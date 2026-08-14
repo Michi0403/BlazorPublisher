@@ -10,6 +10,7 @@
 @inject IPublicationElementLayoutService Layout
 @inject IUserNotificationService Notifications
 @inject PanelStudioTextService PanelText
+@inject IPanelStudioPreviewPresetService PreviewPresets
 @inject ILogger<PanelStudio> Logger
 
 @if (Visible && _draft is not null)
@@ -174,17 +175,32 @@
                             <div class="panel-studio-mode-actions" role="group" aria-label="Panel Studio interaction mode">
                                 <label class="panel-studio-preview-size">Preview size
                                     <select value="@_previewSizeKey" @onchange="ChangePreviewSize">
-                                        <option value="design">Design canvas</option>
-                                        <option value="phone">Phone · 390 × 844</option>
-                                        <option value="tablet">Tablet · 768 × 1024</option>
-                                        <option value="laptop">Laptop · 1280 × 720</option>
-                                        <option value="wide">Wide · 1440 × 900</option>
+                                        <option value="design">Design canvas · @Math.Round((_draft?.CanvasWidth ?? 160) * 96d / 25.4d) × @Math.Round((_draft?.CanvasHeight ?? 90) * 96d / 25.4d)</option>
+                                        @foreach (var preset in _previewPresets)
+                                        {
+                                            <option value="@preset.Key">@preset.Name · @preset.Width × @preset.Height</option>
+                                        }
                                     </select>
                                 </label>
+                                <DxButton Text="+ Preset" SizeMode="SizeMode.Small" RenderStyle="ButtonRenderStyle.Secondary" RenderStyleMode="ButtonRenderStyleMode.Outline" Click="OpenPreviewPresetEditor" />
+                                @if (SelectedPreviewPreset is { BuiltIn: false })
+                                {
+                                    <DxButton Text="Delete preset" SizeMode="SizeMode.Small" RenderStyle="ButtonRenderStyle.Danger" RenderStyleMode="ButtonRenderStyleMode.Outline" Click="DeleteSelectedPreviewPreset" />
+                                }
                                 <button type="button" class="@(!_interactionPreview ? "active" : null)" @onclick="DisableInteractionPreview">Arrange</button>
                                 <button type="button" class="@(_interactionPreview ? "active" : null)" @onclick="EnableInteractionPreview">Interact</button>
                             </div>
                         </div>
+                        @if (_previewPresetEditorVisible)
+                        {
+                            <div class="panel-studio-preview-preset-editor" role="group" aria-label="Custom preview viewport preset">
+                                <label>Name<input @bind="_previewPresetName" placeholder="e.g. Steam Deck landscape" /></label>
+                                <label>Width<input type="number" min="160" max="16384" @bind="_previewPresetWidth" /></label>
+                                <label>Height<input type="number" min="120" max="16384" @bind="_previewPresetHeight" /></label>
+                                <DxButton Text="Save preset" SizeMode="SizeMode.Small" RenderStyle="ButtonRenderStyle.Primary" Click="SavePreviewPreset" />
+                                <DxButton Text="Cancel" SizeMode="SizeMode.Small" Click="ClosePreviewPresetEditor" />
+                            </div>
+                        }
                         <div class="panel-studio-canvas" @ref="_canvasElement" tabindex="0"
                              style="--panel-editor-width:@PanelDesignWidthCss;--panel-editor-height:@PanelDesignHeightCss"
                              data-panel-studio-design-width="@PanelDesignWidthPx"
@@ -251,6 +267,7 @@
                 </main>
 
                 <aside class="visual-settings panel-studio-inspector">
+                    <div class="panel-studio-inspector-components">
                     <strong>Components in @CurrentView?.Name</strong>
                     <div class="panel-studio-element-list">
                         @foreach (var element in CurrentView?.Elements.OrderByDescending(element => element.ZIndex) ?? Enumerable.Empty<PublicationElement>())
@@ -261,7 +278,9 @@
                             </button>
                         }
                     </div>
+                    </div>
 
+                    <div class="panel-studio-inspector-scroll">
                     @if (SelectedElement is { } selected)
                     {
                         <section class="panel-inspector-section">
@@ -434,11 +453,12 @@
                             </div>
                         </section>
                     }
+                    </div>
                 </aside>
             </div>
-            <footer>
-                <button type="button" @onclick="Cancel">Cancel</button>
-                <button type="button" class="primary" @onclick="Save">Save panel</button>
+            <footer class="panel-studio-footer-actions">
+                <DxButton Text="Cancel" RenderStyle="ButtonRenderStyle.Secondary" RenderStyleMode="ButtonRenderStyleMode.Outline" Click="Cancel" />
+                <DxButton Text="Save panel" RenderStyle="ButtonRenderStyle.Primary" RenderStyleMode="ButtonRenderStyleMode.Contained" Click="Save" />
             </footer>
         </section>
     </div>
@@ -486,6 +506,11 @@
     private string _error = string.Empty;
     private bool _interactionPreview;
     private string _previewSizeKey = "design";
+    private IReadOnlyList<PanelStudioPreviewPreset> _previewPresets = [];
+    private bool _previewPresetEditorVisible;
+    private string _previewPresetName = string.Empty;
+    private int _previewPresetWidth = 1280;
+    private int _previewPresetHeight = 720;
     private string _dragToolId = string.Empty;
     private ElementReference _canvasElement;
     private DotNetObjectReference<PanelStudio>? _self;
@@ -542,6 +567,7 @@
         _lastInteractionSurfaceNotification = string.Empty;
         _interactionPreview = false;
         _previewSizeKey = "design";
+        RefreshPreviewPresets();
         RefreshAdvancedJson();
     }
 
@@ -922,14 +948,19 @@
     // Width/Height are publication-placement dimensions; CanvasWidth/CanvasHeight own descendant coordinates.
     // Preview sizes change only the simulated containing viewport. Arrange mode keeps authored coordinates
     // through the canvas-region aspect fit; responsive layout can then be tested at realistic device widths.
-    private (double Width, double Height) PreviewViewportPx => _previewSizeKey switch
+    private PanelStudioPreviewPreset? SelectedPreviewPreset =>
+        _previewPresets.FirstOrDefault(item => string.Equals(item.Key, _previewSizeKey, StringComparison.OrdinalIgnoreCase));
+
+    private (double Width, double Height) PreviewViewportPx
     {
-        "phone" => (390, 844),
-        "tablet" => (768, 1024),
-        "laptop" => (1280, 720),
-        "wide" => (1440, 900),
-        _ => (Math.Max(1, (_draft?.CanvasWidth ?? 160) * 96d / 25.4d), Math.Max(1, (_draft?.CanvasHeight ?? 90) * 96d / 25.4d))
-    };
+        get
+        {
+            var preset = SelectedPreviewPreset;
+            if (preset is not null)
+                return (preset.Width, preset.Height);
+            return (Math.Max(1, (_draft?.CanvasWidth ?? 160) * 96d / 25.4d), Math.Max(1, (_draft?.CanvasHeight ?? 90) * 96d / 25.4d));
+        }
+    }
     private double PanelDesignWidthPxValue => PreviewViewportPx.Width;
     private double PanelDesignHeightPxValue => PreviewViewportPx.Height;
     private string PanelDesignWidthPx => Inv(PanelDesignWidthPxValue);
@@ -937,12 +968,29 @@
     private string PanelDesignWidthCss => $"{PanelDesignWidthPx}px";
     private string PanelDesignHeightCss => $"{PanelDesignHeightPx}px";
 
+    private void RefreshPreviewPresets()
+    {
+        try
+        {
+            _previewPresets = PreviewPresets.GetPresets();
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Panel Studio custom preview presets could not be refreshed.");
+            _previewPresets = [];
+            _error = "Custom preview presets could not be loaded. Built-in design size remains available.";
+        }
+    }
+
     private void ChangePreviewSize(ChangeEventArgs args)
     {
         try
         {
-            var requested = args.Value?.ToString()?.Trim().ToLowerInvariant() ?? "design";
-            _previewSizeKey = requested is "phone" or "tablet" or "laptop" or "wide" ? requested : "design";
+            var requested = args.Value?.ToString()?.Trim() ?? "design";
+            _previewSizeKey = string.Equals(requested, "design", StringComparison.OrdinalIgnoreCase)
+                || _previewPresets.Any(item => string.Equals(item.Key, requested, StringComparison.OrdinalIgnoreCase))
+                ? requested
+                : "design";
             _designSurfaceLayoutKey = null;
             _previewRevision++;
             Logger.LogDebug("Panel Studio preview viewport changed to {PreviewSize} ({Width}x{Height}px).", _previewSizeKey, PanelDesignWidthPxValue, PanelDesignHeightPxValue);
@@ -951,6 +999,58 @@
         {
             Logger.LogError(exception, "Panel Studio preview size could not be changed.");
             _error = "The preview size could not be changed.";
+        }
+    }
+
+    private void OpenPreviewPresetEditor()
+    {
+        var current = SelectedPreviewPreset;
+        _previewPresetName = current is { BuiltIn: false } ? current.Name : string.Empty;
+        _previewPresetWidth = current?.Width ?? Math.Max(160, (int)Math.Round(PanelDesignWidthPxValue));
+        _previewPresetHeight = current?.Height ?? Math.Max(120, (int)Math.Round(PanelDesignHeightPxValue));
+        _previewPresetEditorVisible = true;
+    }
+
+    private void ClosePreviewPresetEditor() => _previewPresetEditorVisible = false;
+
+    private void SavePreviewPreset()
+    {
+        try
+        {
+            var existingKey = SelectedPreviewPreset is { BuiltIn: false } current ? current.Key : null;
+            var saved = PreviewPresets.Save(existingKey, _previewPresetName, _previewPresetWidth, _previewPresetHeight);
+            RefreshPreviewPresets();
+            _previewSizeKey = saved.Key;
+            _previewPresetEditorVisible = false;
+            _designSurfaceLayoutKey = null;
+            _previewRevision++;
+            Notifications.Success($"Preview preset {saved.Name} was saved.", "Panel Studio preview", nameof(PanelStudio));
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Panel Studio preview preset could not be saved.");
+            _error = exception.Message;
+            Notifications.Error(exception.Message, "Preview preset was not saved", nameof(PanelStudio));
+        }
+    }
+
+    private void DeleteSelectedPreviewPreset()
+    {
+        try
+        {
+            var selected = SelectedPreviewPreset;
+            if (selected is null || selected.BuiltIn) return;
+            if (!PreviewPresets.Delete(selected.Key)) return;
+            _previewSizeKey = "design";
+            RefreshPreviewPresets();
+            _designSurfaceLayoutKey = null;
+            _previewRevision++;
+            Notifications.Success($"Preview preset {selected.Name} was deleted.", "Panel Studio preview", nameof(PanelStudio));
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Panel Studio preview preset could not be deleted.");
+            _error = exception.Message;
         }
     }
 

@@ -71,6 +71,11 @@ public interface ISystemVariableStoreService
     /// <value>The default document name value exposed by <see cref="ISystemVariableStoreService"/>.</value>
     string DefaultDocumentName { get; }
     /// <summary>
+    /// Gets the system-variable key that stores user-defined Panel Studio preview viewport presets.
+    /// </summary>
+    /// <value>The stable system-variable name used for persisted preview viewport presets.</value>
+    string PanelStudioPreviewPresetsVariableName { get; }
+    /// <summary>
     /// Retrieves string as part of the system variable store service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     /// <param name="name">Name value supplied to the system variable store operation and used when producing its result.</param>

@@ -55,6 +55,7 @@ public static class PublisherStudioServiceCollectionExtensions
         AddSingleton<IPanelStudioTextPatternDataService, PanelStudioTextPatternDataService>(services);
         AddSingleton<IPublisherRuntimePolicyDataService, PublisherRuntimePolicyDataService>(services);
         AddSingleton<PanelStudioTextService, PanelStudioTextService>(services);
+        AddSingleton<IPanelStudioPreviewPresetService, PanelStudioPreviewPresetService>(services);
         AddSingleton<IApplicationPortResolver, ApplicationPortResolver>(services);
         AddSingleton<IRuntimeEndpointState, RuntimeEndpointState>(services);
         AddSingleton<IRuntimeEndpointWriter, RuntimeEndpointWriter>(services);
@@ -149,6 +150,7 @@ public static class PublisherStudioServiceCollectionExtensions
         AddSingleton<IOrganicWorkExecutor, OrganicWorkExecutor>(services);
         AddSingleton<IOrganicWorkCoordinator, OrganicWorkCoordinator>(services);
         AddSingleton<ILocalGptConnectionService, LocalGptConnectionService>(services);
+        AddSingleton<IPublisherAiBridgeService, PublisherAiBridgeService>(services);
         AddSingleton<IRecurringScreenReaderService, RecurringScreenReaderService>(services);
 
         services.AddHostedService<LocalGptDiscoveryHostedService>();

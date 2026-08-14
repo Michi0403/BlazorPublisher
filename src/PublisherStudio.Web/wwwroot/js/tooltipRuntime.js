@@ -360,6 +360,7 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
     document.addEventListener('keydown', event => { try {
         if (event.key === 'Escape') hide(true);
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:callback:document.addEventListener@354', __javascriptError); throw __javascriptError; }}, true);
+    document.addEventListener('scroll', () => { try { return (hide(true)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:callback:document.addEventListener:scroll', __javascriptError); throw __javascriptError; } }, true);
     window.addEventListener('scroll', () => { try { return (hide(true)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:callback:window.addEventListener@357', __javascriptError); throw __javascriptError; } }, true);
     window.addEventListener('resize', () => { try {
         if (activeTarget) position(activeTarget);

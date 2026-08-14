@@ -81,7 +81,7 @@
       "minConfigureAwaitFalseCount": 0
     },
     "Components/Editor/StoryEditor.razor": {
-      "maxUnconfiguredAwaitCount": 47,
+      "maxUnconfiguredAwaitCount": 56,
       "maxConfigureAwaitTrueCount": 0,
       "minConfigureAwaitFalseCount": 0
     },

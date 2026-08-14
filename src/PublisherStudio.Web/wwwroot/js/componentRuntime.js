@@ -1131,6 +1131,56 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         if (input && config.placeholder) input.setAttribute("placeholder", String(config.placeholder));
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:applyChatInputState@1123', __javascriptError); throw __javascriptError; }}
 
+    function chatUsesLocalGptAi(config) { try {
+        return lower(config?.chatAiMode) === "localgptcouncil";
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:chatUsesLocalGptAi', __javascriptError); throw __javascriptError; }}
+
+    function refreshChatItems(state) { try {
+        if (!state?.instance) return;
+        const config = state.config || {};
+        const items = mergeChatItems(config, config.rows || [], state.chatTransient || []);
+        state.instance.option?.("items", items);
+        state.instance.repaint?.();
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:refreshChatItems', __javascriptError); throw __javascriptError; }}
+
+    async function publishLocalGptAiMessage(config, message, element) {
+        const state = states.get(element);
+        const timestamp = new Date();
+        const responseMessage = {
+            id: `localgpt-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            text: "LocalGPT Council is thinking…",
+            timestamp,
+            author: { id: "localgpt-council", name: "LocalGPT Council", avatarUrl: "" },
+            platform: activeChatPlatform(config),
+            channel: activeChatChannel(config)
+        };
+        try {
+            if (state) renderChatMessage(state, responseMessage);
+            const endpoint = String(window.PublisherStudioAiEndpoint || "/api/publisher-ai/chat");
+            const response = await fetch(endpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Accept": "application/json" },
+                credentials: "same-origin",
+                body: JSON.stringify({
+                    prompt: String(message?.text || ""),
+                    teamKey: String(config.chatAiTeamKey || "general"),
+                    systemPrompt: String(config.chatAiSystemPrompt || ""),
+                    includeMemory: config.chatAiIncludeMemory !== false,
+                    saveToMemory: config.chatAiSaveToMemory !== false,
+                    maxOutputTokens: Math.max(256, Math.min(262144, number(config.chatAiMaxOutputTokens, 8192)))
+                })
+            });
+            let payload = null;
+            try { payload = await response.json(); } catch { payload = null; }
+            if (!response.ok) throw new Error(payload?.error || `LocalGPT AI bridge returned HTTP ${response.status}.`);
+            responseMessage.text = String(payload?.text || "").trim() || "LocalGPT completed the Council run without a visible answer.";
+        } catch (error) {
+            responseMessage.text = `AI unavailable: ${String(error?.message || error || "LocalGPT could not be reached.")}`;
+        } finally {
+            if (state) refreshChatItems(state);
+        }
+    }
+
     function publishChatMessage(config, instance, message, element) { try {
         const detail = {
             componentId: String(config.id || ""),
@@ -1144,7 +1194,11 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
             if (state) renderChatMessage(state, message);
             else instance?.renderMessage?.(message);
         }
-        try { window.PublisherStudioChatBridge?.send?.(detail); } catch (error) { showError(error?.message || String(error)); }
+        if (chatUsesLocalGptAi(config)) {
+            void publishLocalGptAiMessage(config, message, element);
+        } else {
+            try { window.PublisherStudioChatBridge?.send?.(detail); } catch (error) { showError(error?.message || String(error)); }
+        }
         window.dispatchEvent(new CustomEvent("publisherstudio:chat-send", { detail }));
         element?.dispatchEvent?.(new CustomEvent("publisherstudio:chat-send", { detail, bubbles: true }));
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:publishChatMessage@1128', __javascriptError); throw __javascriptError; }}

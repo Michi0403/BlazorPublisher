@@ -43,6 +43,16 @@
                     <DxRibbonTab Text="LocalGPT AI">
                         <DxRibbonGroup Text="Text generation">
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-text" Text="Generate text" IsPrimary="true" Click="OpenAiStoryPanel" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-command" Text="Edit selection" DropDownCssClass="publisher-ribbon-menu">
+                                <DxRibbonItem Text="Proofread" Click="AiProofreadSelection" />
+                                <DxRibbonItem Text="Shorten" Click="AiShortenSelection" />
+                                <DxRibbonItem Text="Expand" Click="AiExpandSelection" />
+                                <DxRibbonItem Text="Summarize" Click="AiSummarizeSelection" />
+                                <DxRibbonItem Text="Explain" Click="AiExplainSelection" />
+                                <DxRibbonItem Text="Professional tone" Click="AiProfessionalSelection" />
+                                <DxRibbonItem Text="Friendly tone" Click="AiFriendlySelection" />
+                                <DxRibbonItem Text="Translate" Click="AiTranslateSelection" />
+                            </DxRibbonItem>
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-command" Text="Refresh proposals" Click="RefreshAiProposals" />
                         </DxRibbonGroup>
                     </DxRibbonTab>
@@ -111,6 +121,10 @@
                                     <textarea rows="6" readonly>@proposal.Text</textarea>
                                     <div>
                                         <button type="button" @onclick="() => InsertAiProposalAsync(proposal)">Insert at caret</button>
+                                        @if (HasSelectedStoryText)
+                                        {
+                                            <button type="button" @onclick="() => ReplaceSelectionWithAiProposalAsync(proposal)">Replace selection</button>
+                                        }
                                         <button type="button" @onclick="() => DismissAiProposal(proposal.Id)">Dismiss</button>
                                     </div>
                                 </article>
@@ -207,6 +221,7 @@
     [Parameter] public string PageName { get; set; } = "Page";
     [Parameter] public int PageNumber { get; set; } = 1;
     [Parameter] public int PageCount { get; set; } = 1;
+    [Parameter] public bool OpenAiOnShow { get; set; }
     [Parameter] public EventCallback<(byte[] Content, string PreviewHtml, string DocumentBackground, StoryStorageFormat Format)> Saved { get; set; }
     [Parameter] public EventCallback Cancelled { get; set; }
 
@@ -243,6 +258,7 @@
     private string CodeWorkspaceSummary => $"{CodeLanguages.Get(_codeLanguageId).DisplayName} · {_codeTokens.Count} recognized token(s) · {_codeWorkspaceText.Length} character(s)";
     private bool CanUseAiCouncil => LocalGptConnection.State.IsLinked && LocalGptConnection.State.HasCapability("council.run");
     private bool CanSendAiStoryRequest => CanUseAiCouncil && !string.IsNullOrWhiteSpace(_aiStoryPrompt) && TextFrame is not null;
+    private bool HasSelectedStoryText => _selection?.Intervals is { Count: > 0 } && _selection.Intervals[0].Length > 0;
     private IReadOnlyList<(string Key, string Name)> AiCouncilTeams
     {
         get
@@ -313,6 +329,7 @@
             _loadedId = TextFrame.Id;
             _error = null;
             RefreshAiProposals();
+            _aiStoryPanelVisible = OpenAiOnShow && CanUseAiCouncil;
             _fieldData =
             [
                 new PublicationFieldRecord
@@ -501,6 +518,61 @@
         StateHasChanged();
     });
 
+    private Task AiProofreadSelection() => SubmitAiSelectionEditAsync("Proofread the selected text. Correct spelling, grammar, punctuation, and awkward phrasing while preserving meaning and formatting intent.");
+    private Task AiShortenSelection() => SubmitAiSelectionEditAsync("Shorten the selected text while preserving its important facts, meaning, and tone.");
+    private Task AiExpandSelection() => SubmitAiSelectionEditAsync("Expand the selected text with useful detail and clearer transitions without inventing unsupported facts.");
+    private Task AiSummarizeSelection() => SubmitAiSelectionEditAsync("Summarize the selected text into a concise, publication-ready version.");
+    private Task AiExplainSelection() => SubmitAiSelectionEditAsync("Rewrite the selected text as a clearer explanation for a reader who is unfamiliar with the topic.");
+    private Task AiProfessionalSelection() => SubmitAiSelectionEditAsync("Rewrite the selected text in a polished professional tone while preserving its meaning.");
+    private Task AiFriendlySelection() => SubmitAiSelectionEditAsync("Rewrite the selected text in a warm, friendly, natural tone while preserving its meaning.");
+    private Task AiTranslateSelection() => SubmitAiSelectionEditAsync("Translate the selected text into the language implied by the surrounding publication or user request. Preserve names, numbers, and technical terms where appropriate.");
+
+    private async Task SubmitAiSelectionEditAsync(string instruction)
+    {
+        if (!CanUseAiCouncil || TextFrame is null) return;
+        try
+        {
+            if (!HasSelectedStoryText)
+            {
+                _aiStoryPanelVisible = true;
+                _error = "Select text in the story before using an AI text-editing command.";
+                await SafeStateHasChanged();
+                return;
+            }
+
+            var span = await _selection.ActiveSubDocument.GetTextSpanAsync(_selection.Intervals[0]);
+            var selectedText = span.Text?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(selectedText))
+            {
+                _aiStoryPanelVisible = true;
+                _error = "The current selection does not contain editable text.";
+                await SafeStateHasChanged();
+                return;
+            }
+
+            _aiStoryPrompt = $"""{instruction}
+
+Selected story text:
+{selectedText}
+
+Return only the replacement text as the proposal.""";
+            _aiStoryPanelVisible = true;
+            await SafeStateHasChanged();
+            await RequestAiStoryAsync();
+        }
+        catch (OperationCanceledException)
+        {
+            _error = "The AI text-editing request was canceled before the selected text could be read.";
+            await SafeStateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not prepare an AI selection-editing request for story {StoryId}.", TextFrame.Id);
+            _error = ex.Message;
+            await SafeStateHasChanged();
+        }
+    }
+
     private async Task HandleAiPromptKeyDown(KeyboardEventArgs args)
     {
         if (args.CtrlKey && string.Equals(args.Key, "Enter", StringComparison.OrdinalIgnoreCase))
@@ -575,6 +647,28 @@ Required result contract:
             Logger.LogError(ex, "Could not insert AI Council proposal {ProposalId}.", proposal.Id);
             _error = ex.Message;
             Notifications.Error(ex.Message, "Proposal was not inserted", nameof(StoryEditor));
+        }
+    }
+
+    private async Task ReplaceSelectionWithAiProposalAsync(OrganicTextInsertionProposal proposal)
+    {
+        if (!HasSelectedStoryText) return;
+        try
+        {
+            var interval = _selection.Intervals[0];
+            var start = interval.Start;
+            await _selection.ActiveSubDocument.RemoveAsync(interval);
+            await _selection.ActiveSubDocument.AddTextAsync(start, proposal.Text);
+            OrganicResults.RemoveTextProposal(proposal.Id);
+            RefreshAiProposals();
+            Logger.LogInformation("User replaced the selected story text with AI Council proposal {ProposalId} in story {StoryId}.", proposal.Id, TextFrame?.Id);
+            Notifications.Success("The reviewed Council proposal replaced the selected story text.", "Story updated", nameof(StoryEditor));
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not replace the selected story text with AI Council proposal {ProposalId}.", proposal.Id);
+            _error = ex.Message;
+            Notifications.Error(ex.Message, "Selection was not replaced", nameof(StoryEditor));
         }
     }
 

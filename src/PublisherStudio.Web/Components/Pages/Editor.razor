@@ -18,6 +18,9 @@
 @inject IUserNotificationService Notifications
 @inject ILogger<Editor> Logger
 @inject IPublisherRuntimePolicyDataService RuntimePolicy
+@inject IFileLocalizationService Localization
+@inject NavigationManager Navigation
+@inject PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService LocalGptConnection
 
 <PageTitle>BlazorPublisher</PageTitle>
 
@@ -29,6 +32,27 @@
         <div class="brand-mark">P</div>
         <input class="document-name" value="@State.Document.Name" @onchange="RenameDocument" aria-label="Publication name" />
         <span class="modified-label">Modified @State.Document.ModifiedUtc.LocalDateTime.ToString("g")</span>
+        <label class="title-bar-language" for="publisherstudio-language-select">
+            <span>@LanguageLabel</span>
+            <select id="publisherstudio-language-select"
+                    name="culture"
+                    aria-label="@LanguageLabel"
+                    data-enhance-nav="false"
+                    onchange="window.location.assign(this.selectedOptions[0].dataset.selectionUrl)">
+                @foreach (var culture in Localization.GetAvailableCultures())
+                {
+                    var selectionUrl = Localization.BuildCultureSelectionUrl(Navigation.Uri, culture);
+                    if (string.Equals(culture, CurrentCulture, StringComparison.OrdinalIgnoreCase))
+                    {
+                        <option value="@culture" data-selection-url="@selectionUrl" selected>@Localization.GetCultureDisplayName(culture)</option>
+                    }
+                    else
+                    {
+                        <option value="@culture" data-selection-url="@selectionUrl">@Localization.GetCultureDisplayName(culture)</option>
+                    }
+                }
+            </select>
+        </label>
     </header>
 
     @if (_recoveryCandidate is not null)
@@ -106,6 +130,11 @@
         <span>Drag to canvas</span>
         <button type="button" draggable="true" data-publisher-insert="panel" title="Drag a reusable panel or dashboard to the canvas" @onclick="InsertPanel"><i class="pub-icon pub-icon-panel"></i>Panel</button>
         <button type="button" draggable="true" data-publisher-insert="text" title="Drag a text box to an exact position, or click to insert" @onclick="AddTextQuick"><i class="pub-icon pub-icon-text"></i>Text</button>
+        @if (CanUseAiCouncil)
+        {
+            <button type="button" title="Create a text frame and open LocalGPT AI assistance in Story Editor" @onclick="AddAiTextQuick"><i class="pub-icon pub-icon-text"></i>AI Text</button>
+            <button type="button" title="Insert a DevExtreme Chat already wired to the paired LocalGPT Council bridge" @onclick="InsertAiChatQuick"><i class="pub-icon pub-icon-command"></i>AI Chat</button>
+        }
         <button type="button" draggable="true" data-publisher-insert="picture" title="Drag to choose and place a picture, or click to insert" @onclick="OpenPicturePicker"><i class="pub-icon pub-icon-picture"></i>Picture</button>
         <button type="button" draggable="true" data-publisher-insert="spreadsheet" title="Drag to create and place a spreadsheet, or click to open a workbook" @onclick="OpenSpreadsheetPicker"><i class="pub-icon pub-icon-spreadsheet"></i>Sheet</button>
         <button type="button" draggable="true" data-publisher-insert="video" title="Drag to create or import and place a video, or click to insert" @onclick="OpenVideoPicker"><i class="pub-icon pub-icon-video"></i>Video</button>
@@ -205,6 +234,7 @@
              PageName="@State.CurrentPage.Name"
              PageNumber="@CurrentPageNumber"
              PageCount="@State.Document.Pages.Count"
+             OpenAiOnShow="_storyOpenAiOnShow"
              Saved="SaveStory"
              Cancelled="CloseStoryEditor" />
 
@@ -261,6 +291,64 @@
                 <small>Merged export bakes recoloring, paint, effects and all visible layers into the final pixels. Layered SVG preserves the Picture Studio layer document for later editing.</small>
             </div>
             <footer><button type="button" @onclick="CloseSelectedPictureExport">Cancel</button></footer>
+        </section>
+    </div>
+}
+
+@if (_singleWebsiteExportVisible)
+{
+    <div class="publisher-dialog-backdrop" role="presentation" @onclick="CloseSingleWebsiteExport">
+        <section class="publisher-dialog website-export-dialog" role="dialog" aria-modal="true" aria-labelledby="single-website-export-title" @onclick:stopPropagation>
+            <header>
+                <div>
+                    <h2 id="single-website-export-title">@(_singleWebsiteMode == "presentation" ? "Interactive presentation website" : "Single-file website")</h2>
+                    <p>Creates one portable HTML file. Choose whether embedded pictures and videos stay exact or are recompressed before they are embedded.</p>
+                </div>
+                <button type="button" class="publisher-dialog-close" title="Close" @onclick="CloseSingleWebsiteExport">×</button>
+            </header>
+            <div class="website-export-grid">
+                <label>
+                    <span>Pictures</span>
+                    <select @bind="_singleWebsiteOptions.ImageMode">
+                        <option value="preserve">Preserve source — exact/lossless</option>
+                        <option value="png">PNG — lossless pixels</option>
+                        <option value="webp">WebP — smaller, lossy</option>
+                        <option value="avif">AVIF — smallest when browser encoding is available</option>
+                    </select>
+                    <small>SVG and animated images remain untouched. Unsupported conversions automatically retain the source.</small>
+                </label>
+                @if (_singleWebsiteOptions.ImageMode is "webp" or "avif")
+                {
+                    <label>
+                        <span>Picture quality: @Math.Round(_singleWebsiteOptions.ImageQuality * 100)%</span>
+                        <input type="range" min="0.35" max="1" step="0.01" @bind="_singleWebsiteOptions.ImageQuality" @bind:event="oninput" />
+                    </label>
+                }
+                <label>
+                    <span>Videos</span>
+                    <select @bind="_singleWebsiteOptions.VideoMode">
+                        <option value="preserve">Preserve source — exact/lossless</option>
+                        <option value="webm">WebM VP9/VP8 + Opus — browser conversion</option>
+                    </select>
+                    <small>WebM conversion is local and can take approximately the duration of the video.</small>
+                </label>
+                @if (_singleWebsiteOptions.VideoMode == "webm")
+                {
+                    <label>
+                        <span>Video quality: @Math.Round(_singleWebsiteOptions.VideoQuality * 100)%</span>
+                        <input type="range" min="0.35" max="1" step="0.01" @bind="_singleWebsiteOptions.VideoQuality" @bind:event="oninput" />
+                    </label>
+                    <label class="publisher-check-row">
+                        <input type="checkbox" @bind="_singleWebsiteOptions.KeepVideoFallback" />
+                        <span>Keep source video if conversion fails or is not smaller</span>
+                    </label>
+                }
+            </div>
+            <aside class="website-export-doctrine">Preserve is the default and changes nothing. Compression only affects media embedded into this exported file; publication source data stays untouched.</aside>
+            <footer>
+                <DxButton Text="Cancel" Enabled="@(!_singleWebsiteExporting)" Click="CloseSingleWebsiteExport" />
+                <DxButton Text="@(_singleWebsiteExporting ? "Exporting…" : "Export HTML")" RenderStyle="ButtonRenderStyle.Primary" Enabled="@(!_singleWebsiteExporting)" Click="ExportSingleWebsite" />
+            </footer>
         </section>
     </div>
 }
@@ -366,8 +454,9 @@
         !_storyEditorVisible && !_spreadsheetEditorVisible && !_pictureEditorVisible &&
         !_dataVisualEditorVisible && !_componentEditorVisible && !_mediaStudioVisible &&
         !_barcodeEditorVisible && !_streamingStudioVisible && !_panelStudioVisible &&
-        !_mediaConverterVisible && !_structuredWebsiteExportVisible && !_selectedPictureExportVisible && !_pageEffectStudioVisible;
+        !_mediaConverterVisible && !_structuredWebsiteExportVisible && !_singleWebsiteExportVisible && !_selectedPictureExportVisible && !_pageEffectStudioVisible;
     private bool _storyEditorVisible;
+    private bool _storyOpenAiOnShow;
     private bool _spreadsheetEditorVisible;
     private Guid _spreadsheetEditorSessionId;
     private Guid? _spreadsheetEditorTargetId;
@@ -389,12 +478,16 @@
     private Guid? _panelStudioTargetId;
     private bool _panelStudioTargetsHtml;
     private bool _videoExporting;
+    private bool _singleWebsiteExportVisible;
+    private bool _singleWebsiteExporting;
+    private string _singleWebsiteMode = "site";
     private bool _structuredWebsiteExportVisible;
     private bool _structuredWebsiteExporting;
     private bool _selectedPictureExportVisible;
     private string _selectedPictureExportFormat = "png";
     private Guid? _selectedPictureExportTargetId;
     private readonly StructuredWebsiteExportOptions _structuredWebsiteOptions = new();
+    private readonly SingleWebsiteExportOptions _singleWebsiteOptions = new();
     private Guid? _pendingNewBarcodeId;
     private Guid _mediaStudioSessionId;
     private Guid? _mediaStudioTargetId;
@@ -432,6 +525,7 @@
         State.Changed += StateChanged;
         StreamingSession.Changed += StateChanged;
         StreamingSession.HotkeyTriggered += HandleGlobalStreamingHotkey;
+        LocalGptConnection.Changed += LocalGptConnectionChanged;
         _recoveryCandidate = Recovery.TryReadLatest();
     }
 
@@ -470,8 +564,33 @@
         if (State.IsDirty && State.Revision != _scheduledRecoveryRevision)
             ScheduleRecoverySave();
     }
+    private void LocalGptConnectionChanged() => _ = InvokeAsync(StateHasChanged);
+
     private void NewDocument() => State.NewDocument();
     private void AddTextQuick() => State.AddText();
+    private async Task AddAiTextQuick()
+    {
+        if (!CanUseAiCouncil) return;
+        var text = State.AddText();
+        State.SelectElement(text.Id);
+        await CancelPublisherPointerAsync();
+        _storyOpenAiOnShow = true;
+        _storyEditorVisible = true;
+    }
+    private async Task InsertAiChatQuick()
+    {
+        if (!CanUseAiCouncil) return;
+        await CancelPublisherPointerAsync();
+        var component = State.AddDevExtremeComponent(PublicationComponentKind.Chat);
+        component.ChatAiMode = PublicationChatAiMode.LocalGptCouncil;
+        component.ChatAiTeamKey = "general";
+        component.ChatCurrentUserName = "Reader";
+        component.ChatPlatform = PublicationChatPlatform.Preview;
+        component.Title = "Ask LocalGPT";
+        _pendingNewComponentId = component.Id;
+        _componentEditorVisible = true;
+    }
+
     private void InsertPanel()
     {
         State.AddPanel();
@@ -1200,41 +1319,56 @@
         }
     }
 
-    private async Task ExportPresentationHtml()
+    private Task ExportPresentationHtml() => OpenSingleWebsiteExport("presentation");
+
+    private Task ExportSite() => OpenSingleWebsiteExport("site");
+
+    private Task OpenSingleWebsiteExport(string mode)
     {
+        _singleWebsiteMode = string.Equals(mode, "presentation", StringComparison.OrdinalIgnoreCase) ? "presentation" : "site";
+        _singleWebsiteExportVisible = true;
+        _singleWebsiteExporting = false;
+        return Task.CompletedTask;
+    }
+
+    private Task CloseSingleWebsiteExport()
+    {
+        if (!_singleWebsiteExporting) _singleWebsiteExportVisible = false;
+        return Task.CompletedTask;
+    }
+
+    private async Task ExportSingleWebsite()
+    {
+        if (_singleWebsiteExporting) return;
+        _singleWebsiteExporting = true;
         try
         {
             await State.RefreshWebDataAsync(force: true);
             await InvokeAsync(StateHasChanged);
             await SaveRecoveryNow();
-            var fileName = Files.SafeFileName(State.Document.Name) + ".html";
-            ShowNotice("Preparing interactive presentation HTML…");
+            var presentation = string.Equals(_singleWebsiteMode, "presentation", StringComparison.OrdinalIgnoreCase);
+            var fileName = Files.SafeFileName(State.Document.Name) + (presentation ? ".html" : "-site.html");
+            ShowNotice(presentation ? "Preparing interactive presentation HTML…" : "Preparing single-file website export…");
             await InvokeAsync(StateHasChanged);
             await Task.Yield();
-            await JS.InvokeVoidAsync("publisherStudio.exportWebsite", fileName, State.Document.Name);
-            ShowNotice($"Exported {fileName}");
+            var result = presentation
+                ? await JS.InvokeAsync<SingleWebsiteExportResult>("publisherStudio.exportWebsite", fileName, State.Document.Name, _singleWebsiteOptions)
+                : await JS.InvokeAsync<SingleWebsiteExportResult>("publisherStudio.exportSite", fileName, State.Document.Name, _singleWebsiteOptions);
+            _singleWebsiteExportVisible = false;
+            var warningText = result.Warnings.Count > 0 ? $" · {result.Warnings.Count} warning(s)" : string.Empty;
+            var savedText = result.SourceBytes > result.OutputBytes && result.SourceBytes > 0
+                ? $" · {100d - result.OutputBytes * 100d / result.SourceBytes:0.#}% media reduction"
+                : string.Empty;
+            ShowNotice($"Exported {fileName}{savedText}{warningText}");
         }
         catch (Exception ex)
         {
             ShowError(ex);
         }
-    }
-
-    private async Task ExportSite()
-    {
-        try
+        finally
         {
-            await State.RefreshWebDataAsync(force: true);
-            await InvokeAsync(StateHasChanged);
-            await SaveRecoveryNow();
-            var fileName = Files.SafeFileName(State.Document.Name) + "-site.html";
-            ShowNotice("Preparing single-file website export…");
-            await InvokeAsync(StateHasChanged);
-            await Task.Yield();
-            await JS.InvokeVoidAsync("publisherStudio.exportSite", fileName, State.Document.Name);
-            ShowNotice($"Exported {fileName}");
+            _singleWebsiteExporting = false;
         }
-        catch (Exception ex) { ShowError(ex); }
     }
 
     private Task OpenPageEffectStudio()
@@ -2432,6 +2566,7 @@
     private Task CloseStoryEditor()
     {
         _storyEditorVisible = false;
+        _storyOpenAiOnShow = false;
         return Task.CompletedTask;
     }
 
@@ -2439,8 +2574,13 @@
     {
         State.UpdateTextDocument(result.Content, result.PreviewHtml, result.DocumentBackground, result.Format);
         _storyEditorVisible = false;
+        _storyOpenAiOnShow = false;
         return Task.CompletedTask;
     }
+
+    private bool CanUseAiCouncil => LocalGptConnection.State.IsLinked && LocalGptConnection.State.HasCapability("council.run");
+    private string CurrentCulture => Localization.ResolveAvailableCulture(System.Globalization.CultureInfo.CurrentUICulture.Name);
+    private string LanguageLabel => Localization.Get("Text.Language", fallback: "Language");
 
     private void RenameDocument(ChangeEventArgs args)
     {
@@ -2475,6 +2615,23 @@
         _error = null;
         Notifications.Information(message, source: nameof(Editor));
         StateChanged();
+    }
+
+    private sealed class SingleWebsiteExportOptions
+    {
+        public string ImageMode { get; set; } = "preserve";
+        public double ImageQuality { get; set; } = 0.82;
+        public string VideoMode { get; set; } = "preserve";
+        public double VideoQuality { get; set; } = 0.78;
+        public bool KeepVideoFallback { get; set; } = true;
+    }
+
+    private sealed class SingleWebsiteExportResult
+    {
+        public string FileName { get; set; } = string.Empty;
+        public long SourceBytes { get; set; }
+        public long OutputBytes { get; set; }
+        public List<string> Warnings { get; set; } = [];
     }
 
     private sealed class StructuredWebsiteExportOptions
@@ -2522,6 +2679,7 @@
         State.Changed -= StateChanged;
         StreamingSession.Changed -= StateChanged;
         StreamingSession.HotkeyTriggered -= HandleGlobalStreamingHotkey;
+        LocalGptConnection.Changed -= LocalGptConnectionChanged;
         try { _ = JS.InvokeVoidAsync("publisherStreaming.unbindHotkeys"); } catch { }
         _streamingHotkeyReference?.Dispose();
         _recoverySaveCancellation?.Cancel();

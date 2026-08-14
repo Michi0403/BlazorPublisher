@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Static source audit for PublisherStudio 2.6.3 preview/AI/export UX boundary."""
+"""Static source audit for PublisherStudio 2.6.4 preview/AI/export UX compile-repair boundary."""
 from pathlib import Path
 import sys
 root=Path(__file__).resolve().parents[1]
@@ -40,11 +40,12 @@ try:
     require('src/PublisherStudio.Web/wwwroot/js/componentRuntime.js',
             'chatUsesLocalGptAi', 'publishLocalGptAiMessage', 'PublisherStudioAiEndpoint', '/api/publisher-ai/chat')
     require('src/PublisherStudio.Web/Components/Editor/StoryEditor.razor',
-            'Edit selection', 'AiProofreadSelection', 'AiTranslateSelection', 'GetTextSpanAsync', 'ReplaceSelectionWithAiProposalAsync')
+            'Edit selection', 'AiProofreadSelection', 'AiTranslateSelection', 'GetTextSpanAsync', 'ReplaceSelectionWithAiProposalAsync', '_aiStoryPrompt = $"{instruction}\\n\\nSelected story text:')
     require('src/PublisherStudio.Web/BusinessObjects/PublicationModels.cs', 'FormatVersion { get; set; } = "1.58"')
-    require('src/PublisherStudio.Web/PublisherStudio.Web.csproj','<Version>2.6.3</Version>')
-    require('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj','<Version>2.6.3</Version>')
-    print('PublisherStudio 2.6.3 preview/AI/export UX source audit passed: custom preview presets, inspector UX, embedded language selection, compressed single HTML exports, StoryEditor AI editing, and LocalGPT-backed DevExtreme Chat are wired.')
+    require('src/PublisherStudio.Web/Components/Layout/MainLayout.razor', '@inject NavigationManager Navigation', '@key="Navigation.Uri"')
+    require('src/PublisherStudio.Web/PublisherStudio.Web.csproj','<Version>2.6.4</Version>')
+    require('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj','<Version>2.6.4</Version>')
+    print('PublisherStudio 2.6.4 preview/AI/export UX compile-repair source audit passed: custom preview presets, inspector UX, embedded language selection, compressed single HTML exports, StoryEditor AI editing, and LocalGPT-backed DevExtreme Chat are wired.')
 except AssertionError as exc:
-    print(f'PublisherStudio 2.6.3 preview/AI/export UX source audit failed: {exc}', file=sys.stderr)
+    print(f'PublisherStudio 2.6.4 preview/AI/export UX compile-repair source audit failed: {exc}', file=sys.stderr)
     sys.exit(1)

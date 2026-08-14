@@ -550,12 +550,7 @@
                 return;
             }
 
-            _aiStoryPrompt = $"""{instruction}
-
-Selected story text:
-{selectedText}
-
-Return only the replacement text as the proposal.""";
+            _aiStoryPrompt = $"{instruction}\n\nSelected story text:\n{selectedText}\n\nReturn only the replacement text as the proposal.";
             _aiStoryPanelVisible = true;
             await SafeStateHasChanged();
             await RequestAiStoryAsync();

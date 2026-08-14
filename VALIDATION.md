@@ -1,13 +1,23 @@
-# PublisherStudio 2.6.8 source-only validation
+# PublisherStudio 2.6.9 source-only validation
 
-Validation performed without GitHub access and without invoking dotnet, MSBuild, or a .NET compiler:
+Validation is intentionally source-only: no GitHub access, `dotnet`, MSBuild, or .NET compiler was used.
 
-- `node --check` passed for the modified `componentRuntime.js` and `publisherInterop.js` files.
-- PublisherStudio 2.6.8 source regression audit passed, including Panel Studio layout, 10-second notification lifecycle, Audio Studio drag/drop parity, Picture Studio order controls, export button contrast, video export policy, panel pointer ownership, six-culture localization parity, JavaScript manifest hashes, and render-mode count.
-- Strict async continuation audit passed: 75 source files, 1,039 await tokens, 423 `ConfigureAwait(false)`, 562 renderer-affine `ConfigureAwait(true)`, 49 explicitly configured async disposals, and 5 configured async streams.
-- Panel Studio persistence audit passed and confirmed the reviewed JavaScript diagnostics hash.
-- Existing media-studio/drag/effect/localization, picture/page-effect, preview/AI/export UX, data/panel/media, architecture, and service-resilience audits passed.
-- All six PublisherStudio localization JSON files parse and have identical 3,253-key sets.
-- The five `@rendermode` directives are unchanged from the supplied 2.6.7 source ZIP.
+Passed source audits:
 
-The source package is intentionally not compiled. The user's Windows .NET 10 + DevExpress build remains authoritative for compile/runtime confirmation.
+- PublisherStudio 2.6.9 LocalGPT session durability release audit.
+- PublisherStudio 2.6.8 regression audit.
+- Strict async continuation audit: 75 source files, 1,039 await tokens, 423 `ConfigureAwait(false)`, 562 renderer-affine `ConfigureAwait(true)`, 49 configured async disposals, and 5 configured async streams.
+- AI preview/export UX, media-studio drag/effect/localization, picture/page-effect, and Panel Studio persistence audits.
+- Application architecture and service-resilience audits; 1,278 service methods own try/catch plus diagnostics.
+- XML documentation coverage: 5,398 direct C# declarations across 178 maintained source files.
+- Documentation/1-Wire contract audit.
+
+Reviewed release invariants:
+
+- PublisherStudio.Web and PublisherStudio.InstallerConsole versions are 2.6.9;
+- 1-Wire protocol remains 2.1.1;
+- Publisher-started Council requests force durable LocalGPT session saving while retaining the existing bridge/request architecture;
+- no media, Panel Studio, export, localization, publication-format, or installer behavior is reverted;
+- all 5 existing `@rendermode` directives exactly match the supplied 2.6.8 source baseline.
+
+The user's Windows .NET 10 + DevExpress build remains authoritative for compile/runtime confirmation.

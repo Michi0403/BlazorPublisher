@@ -114,7 +114,10 @@ public sealed class PublisherAiBridgeService(
                 MaxOutputTokens = Math.Clamp(request.MaxOutputTokens, 256, 262144),
                 MaxContextTokens = 262144,
                 IncludeMemory = request.IncludeMemory,
-                SaveToMemory = request.SaveToMemory,
+                // Publisher-started Council work is intentionally a normal LocalGPT /chat session.
+                // Keep it durable so provider reasoning, function calls/results and the final answer
+                // remain available after the correlated 1-Wire request itself has completed.
+                SaveToMemory = true,
                 GenerateImplementationArtifact = false,
                 UserConfirmedArtifactBuild = false,
                 ExternalProjectContextJson = JsonSerializer.Serialize(new

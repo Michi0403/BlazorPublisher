@@ -1,14 +1,14 @@
-# PublisherStudio 2.6.8 panel/media/localization interaction repair
+# PublisherStudio 2.6.9 LocalGPT session-durability release
 
-PublisherStudio 2.6.8 repairs the blank Panel Studio authoring layout, restores nested-panel pointer ownership in presentation output, makes notification toasts expire after ten seconds, exposes direct Picture Studio layer-order controls, gives Audio Studio the same shared sequence drag/drop surface as Video Studio, improves export-dialog button contrast, and makes browser WebM export substantially more compression-oriented without duplicating a successfully converted source video.
+PublisherStudio 2.6.9 keeps Publisher-started Council work attached to the normal LocalGPT `/chat` history contract. Council requests sent through the existing 1-Wire bridge are now always marked for durable LocalGPT session persistence, allowing LocalGPT 2.8.6 to retain provider-supplied reasoning, function traces, team/round output, and partial/final Council state consistently with locally started sessions.
 
-The built-in localization set is now `de-DE`, `en-US`, `es-ES`, `fr-FR`, `ja-JP`, and `uk-UA`, with key parity across all six catalogs. Product names, protocol names, format names, command-line literals, units, and other technical identifiers remain canonical where translation would be misleading.
+No other working PublisherStudio editor, media, Panel Studio, export, localization, render-mode, publication-format, or installer behavior is reverted.
 
 No GitHub access or .NET/MSBuild invocation was used to prepare this source release.
 
 ## Compatibility
 
-- PublisherStudio.Web and PublisherStudio.InstallerConsole are 2.6.8.
+- PublisherStudio.Web and PublisherStudio.InstallerConsole are 2.6.9.
 - 1-Wire protocol remains 2.1.1.
 - Publication format remains 1.58.
 - Picture Studio format remains 1.5.

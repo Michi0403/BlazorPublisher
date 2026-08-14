@@ -262,6 +262,8 @@
                                         <small>@LayerDescription(layer)</small>
                                     </span>
                                 </button>
+                                <button type="button" class="picture-layer-order" title='@LT("Move layer backward")' aria-label='@LT("Move layer backward")' @onclick="() => MoveLayerBackward(layer.Id)"><span aria-hidden="true">↓</span></button>
+                                <button type="button" class="picture-layer-order" title='@LT("Move layer forward")' aria-label='@LT("Move layer forward")' @onclick="() => MoveLayerForward(layer.Id)"><span aria-hidden="true">↑</span></button>
                                 <button type="button" class="picture-layer-toggle @(layer.Visible ? "active" : null)" title='@LT("Show or hide")' aria-label='@LT("Show or hide")' @onclick="() => State.ToggleVisibility(layer.Id)"><i class="pub-icon pub-icon-visible" aria-hidden="true"></i></button>
                                 <button type="button" class="picture-layer-toggle @(layer.Locked ? "active" : null)" title='@LT("Lock or unlock")' aria-label='@LT("Lock or unlock")' @onclick="() => State.ToggleLock(layer.Id)"><i class="pub-icon pub-icon-lock" aria-hidden="true"></i></button>
                             </div>

@@ -5667,6 +5667,7 @@ function websitePresentationRuntime() { try {
     const runCurrentPage = shouldRun => { try {
         cancelPlayback();
         const page = pages[current];
+        window.PublisherStudioComponentRuntime?.refreshPanels?.(page);
         resetPageVisibility(page);
         page.dispatchEvent(new CustomEvent('publisher:page-enter', { bubbles: true, detail: { pageId: page.dataset.pageId || '', pageName: page.dataset.pageName || '' } }));
         const timeline = splitTimeline(pageItems(page));
@@ -5748,6 +5749,7 @@ function websitePresentationRuntime() { try {
     pages.forEach((page, pageIndex) => { try {
         page.addEventListener('click', event => { try {
             if (event.defaultPrevented) return;
+            if (event.target?.closest?.('.ps-pointer-owner,[data-panel-root]')) return;
             if (runNextClickGroup()) return;
             if (bool(page.dataset.advanceOnClick)) goNext();
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:page.addEventListener@5562', __javascriptError); throw __javascriptError; }});
@@ -7763,8 +7765,10 @@ async function optimizeSingleFileMedia(root, rawOptions = {}) { try {
             if (mime.startsWith('video/') && options.videoMode === 'webm') {
                 try {
                     const converted = await structuredTranscodeVideo(original, options.videoQuality);
-                    if (converted && converted.size < original.size) selected = converted;
-                    else if (converted) warnings.push('A video was preserved because the WebM result was not smaller than its source.');
+                    if (converted && (converted.size < original.size || !options.keepVideoFallback)) {
+                        selected = converted;
+                        if (converted.size >= original.size) warnings.push('The requested WebM conversion was used even though it was not smaller than its source.');
+                    } else if (converted) warnings.push('A video was preserved because the WebM result was not smaller than its source.');
                     else warnings.push('A video was preserved because this browser cannot perform the requested WebM conversion.');
                 } catch { warnings.push('A video was preserved because browser-side WebM conversion failed.'); }
             }
@@ -7882,10 +7886,12 @@ async function structuredTranscodeVideo(blob, quality) { try {
         stream = capture.call(video);
         if (!stream?.getVideoTracks?.().length) return null;
         const pixels = Math.max(1, video.videoWidth * video.videoHeight);
-        const sizeFactor = Math.max(.5, Math.min(2.5, pixels / (1280 * 720)));
-        const videoBitsPerSecond = Math.round((900_000 + quality * 5_600_000) * sizeFactor);
+        const resolutionScale = Math.max(.55, Math.min(2, Math.sqrt(pixels / (1280 * 720))));
+        const qualityCurve = Math.max(.01, Math.min(1, quality)) ** 2;
+        const videoBitsPerSecond = Math.round((350_000 + qualityCurve * 2_850_000) * resolutionScale);
+        const audioBitsPerSecond = Math.round(80_000 + Math.max(0, Math.min(1, quality)) * 96_000);
         const chunks = [];
-        const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond });
+        const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond, audioBitsPerSecond });
         recorder.addEventListener('dataavailable', event => { try { if (event.data?.size) chunks.push(event.data);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:recorder.addEventListener@7591', __javascriptError); throw __javascriptError; }});
         const stopped = new Promise((resolve, reject) => { try {
             recorder.addEventListener('stop', resolve, { once: true });
@@ -7997,10 +8003,14 @@ async function buildPublisherStructuredSite(title, rawOptions = {}) { try {
             if (mime.startsWith('video/') && options.videoMode === 'webm') {
                 try {
                     const converted = await structuredTranscodeVideo(original, options.videoQuality);
-                    if (converted && converted.size < original.size) {
+                    if (converted && (converted.size < original.size || !options.keepVideoFallback)) {
                         selected = converted;
                         selectedMime = converted.type;
-                        keepOriginalFallback = options.keepVideoFallback;
+                        // The source is not duplicated after a successful conversion. The checkbox means
+                        // "keep the source when conversion fails or is not smaller", not "embed both".
+                        keepOriginalFallback = false;
+                        if (converted.size >= original.size)
+                            warnings.push('The requested WebM conversion was used even though it was not smaller than its source.');
                     } else if (converted) {
                         warnings.push('A video was preserved because the WebM result was not smaller than its source.');
                     } else {

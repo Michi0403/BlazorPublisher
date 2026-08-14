@@ -166,7 +166,7 @@
                 </aside>
 
                 <main class="visual-settings panel-studio-workspace">
-                    <div class="panel-studio-canvas-shell @(_interactionPreview ? "interaction-preview" : "arrange-preview")">
+                    <div class="panel-studio-canvas-shell @(_interactionPreview ? "interaction-preview" : "arrange-preview") @(_previewPresetEditorVisible ? "preview-preset-editing" : null)">
                         <div class="panel-studio-mode-banner">
                             <div>
                                 <b>@(_interactionPreview ? "Interaction mode" : "Arrange mode") · @_draft.Name</b>

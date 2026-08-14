@@ -1119,6 +1119,23 @@ public partial class PictureEditor
     /// Performs move up for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
     /// </summary>
     private void MoveUp() => State.MoveSelectedLayer(1);
+
+    /// <summary>Moves one selected layer one step toward the front of the layer stack.</summary>
+    /// <param name="layerId">Identifier of the layer selected from the visible Layers panel row.</param>
+    private void MoveLayerForward(Guid layerId)
+    {
+        State.SelectLayer(layerId);
+        State.MoveSelectedLayer(1);
+    }
+
+    /// <summary>Moves one selected layer one step toward the back of the layer stack.</summary>
+    /// <param name="layerId">Identifier of the layer selected from the visible Layers panel row.</param>
+    private void MoveLayerBackward(Guid layerId)
+    {
+        State.SelectLayer(layerId);
+        State.MoveSelectedLayer(-1);
+    }
+
     /// <summary>
     /// Performs move down for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
     /// </summary>

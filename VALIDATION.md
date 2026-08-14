@@ -1,18 +1,13 @@
-# PublisherStudio 2.2.5 validation
+# PublisherStudio 2.6.8 source-only validation
 
-This repair keeps the 2.2.4 application feature set and restores the release/documentation behavior that was known-good around 2.1.9/2.1.10.
+Validation performed without GitHub access and without invoking dotnet, MSBuild, or a .NET compiler:
 
-Validation completed in the source-packaging environment:
+- `node --check` passed for the modified `componentRuntime.js` and `publisherInterop.js` files.
+- PublisherStudio 2.6.8 source regression audit passed, including Panel Studio layout, 10-second notification lifecycle, Audio Studio drag/drop parity, Picture Studio order controls, export button contrast, video export policy, panel pointer ownership, six-culture localization parity, JavaScript manifest hashes, and render-mode count.
+- Strict async continuation audit passed: 75 source files, 1,039 await tokens, 423 `ConfigureAwait(false)`, 562 renderer-affine `ConfigureAwait(true)`, 49 explicitly configured async disposals, and 5 configured async streams.
+- Panel Studio persistence audit passed and confirmed the reviewed JavaScript diagnostics hash.
+- Existing media-studio/drag/effect/localization, picture/page-effect, preview/AI/export UX, data/panel/media, architecture, and service-resilience audits passed.
+- All six PublisherStudio localization JSON files parse and have identical 3,253-key sets.
+- The five `@rendermode` directives are unchanged from the supplied 2.6.7 source ZIP.
 
-- Restored Kawaii CSS is byte-identical to the proven 2.1.9 theme source. The Kawaii JavaScript differs only in the corrected current repository link.
-- JavaScript syntax check passed for 25 `.js`/`.mjs` files.
-- JavaScript diagnostics manifest/guard check passed for all 16 maintained browser JavaScript files, including the documentation viewer.
-- Localization release contract passed: all statically identifiable maintained Razor labels/tooltips are catalogued in both `en-US.json` and `de-DE.json`, with matching key sets.
-- Public/protected XML documentation coverage passed for 3,461 C# declarations.
-- PublisherStudio lexical C#/Razor compilation-safety checks passed (composition registrations, namespace collisions, interpolation, Razor control-flow, enum references, and local-scope guards).
-- XML project/target/profile files and JSON configuration files parse successfully.
-- GitHub Pages snapshot validation passed with 607 HTML files, 591 API HTML files, valid local links, required accessibility landmarks/metadata, version 2.2.5, synchronized Kawaii assets, and a tagged PDF.
-- The tracked source handbook is `PublisherStudio-2.2.5.pdf`: 651 pages, 2,179,744 bytes, A4 landscape, tagged PDF. Representative rendered pages (cover, contents, API body, final page) were visually checked for clipping, overlap, or broken glyphs.
-- Owner-side release checks reject tiny PDFs (<1 MiB) and require an HTML-browser PDF source set to cover the generated API page count.
-
-The packaging environment intentionally has no .NET SDK and no PowerShell runtime. No claim of .NET compilation is made here. The normal Windows .NET 10 + licensed DevExpress owner build remains the compilation and full assembly/XML DocFX release authority.
+The source package is intentionally not compiled. The user's Windows .NET 10 + DevExpress build remains authoritative for compile/runtime confirmation.

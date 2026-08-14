@@ -1252,7 +1252,7 @@
     private async Task<IJSObjectReference> EnsureMediaModuleAsync()
     {
         if (_disposed) throw new ObjectDisposedException(nameof(MediaStudio));
-        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.6.5").ConfigureAwait(true);
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.6.8").ConfigureAwait(true);
         _self ??= DotNetObjectReference.Create(this);
         if (SessionId != Guid.Empty)
         {
@@ -1268,7 +1268,7 @@
                 IsVideo ? "media-studio-frame-stage" : string.Empty,
                 IsVideo ? "media-studio-frame-overlay-host" : string.Empty,
                 IsVideo ? "media-studio-video-time-overlay" : string.Empty,
-                IsVideo ? "media-studio-sequence-timeline" : string.Empty,
+                "media-studio-sequence-timeline",
                 "media-studio-file-input",
                 "media-studio-insert-file-input",
                 IsVideo ? "media-studio-project-input" : string.Empty,

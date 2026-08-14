@@ -18,6 +18,10 @@ public sealed class UserNotificationService(ILogger<UserNotificationService> log
     /// Stores the in-memory messages collection maintained internally by <see cref="UserNotificationService"/> for its current workflow state.
     /// </summary>
     private readonly List<UserNotificationMessage> _messages = [];
+    /// <summary>
+    /// Serializes notification collection access because expiry timers can dismiss messages off the renderer thread.
+    /// </summary>
+    private readonly object _messagesGate = new();
 
     /// <summary>
     /// Occurs when changed changes or completes in <see cref="UserNotificationService"/>, allowing interested callers to react without polling internal state.
@@ -27,7 +31,13 @@ public sealed class UserNotificationService(ILogger<UserNotificationService> log
     /// Gets the messages collection maintained or exposed by this user notification instance for downstream processing.
     /// </summary>
     /// <value>The messages value exposed by <see cref="UserNotificationService"/>.</value>
-    public IReadOnlyList<UserNotificationMessage> Messages => _messages.AsReadOnly();
+    public IReadOnlyList<UserNotificationMessage> Messages
+    {
+        get
+        {
+            lock (_messagesGate) return _messages.ToArray();
+        }
+    }
 
     /// <summary>
     /// Performs publish as part of the user notification service workflow, applying the service's runtime policy, state management, and diagnostics as required.
@@ -46,9 +56,12 @@ public sealed class UserNotificationService(ILogger<UserNotificationService> log
             message.Source = message.Source?.Trim() ?? string.Empty;
             message.DurationMilliseconds = Math.Clamp(message.DurationMilliseconds, 1500, 60000);
 
-            _messages.Insert(0, message);
-            if (_messages.Count > MaximumMessages)
-                _messages.RemoveRange(MaximumMessages, _messages.Count - MaximumMessages);
+            lock (_messagesGate)
+            {
+                _messages.Insert(0, message);
+                if (_messages.Count > MaximumMessages)
+                    _messages.RemoveRange(MaximumMessages, _messages.Count - MaximumMessages);
+            }
 
             Log(message);
             Changed?.Invoke();
@@ -168,11 +181,16 @@ public sealed class UserNotificationService(ILogger<UserNotificationService> log
     {
     try
     {
-            var index = _messages.FindIndex(message => message.Id == id);
-            if (index < 0) return false;
-            _messages.RemoveAt(index);
-            Changed?.Invoke();
-            return true;
+            bool removed;
+            lock (_messagesGate)
+            {
+                var index = _messages.FindIndex(message => message.Id == id);
+                if (index < 0) return false;
+                _messages.RemoveAt(index);
+                removed = true;
+            }
+            if (removed) Changed?.Invoke();
+            return removed;
     
     }
     catch (Exception __serviceMethodException)
@@ -192,9 +210,13 @@ public sealed class UserNotificationService(ILogger<UserNotificationService> log
     {
     try
     {
-            if (_messages.Count == 0) return;
-            _messages.Clear();
-            Changed?.Invoke();
+            bool cleared;
+            lock (_messagesGate)
+            {
+                cleared = _messages.Count > 0;
+                if (cleared) _messages.Clear();
+            }
+            if (cleared) Changed?.Invoke();
     
     }
     catch (Exception __serviceMethodException)

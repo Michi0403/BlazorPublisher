@@ -45,7 +45,7 @@ public sealed class UserNotificationMessage
     /// Gets or sets the duration milliseconds value that forms part of the user notification message state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The duration milliseconds value exposed by <see cref="UserNotificationMessage"/>.</value>
-    public int DurationMilliseconds { get; set; } = 7000;
+    public int DurationMilliseconds { get; set; } = 10000;
     /// <summary>
     /// Gets or sets a value indicating whether persistent applies to the user notification message state.
     /// </summary>

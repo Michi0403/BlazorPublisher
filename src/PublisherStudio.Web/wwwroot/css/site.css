@@ -5259,3 +5259,19 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 .media-video-filter-row.media-effect-dragging,
 .media-video-layer-row.media-effect-dragging,
 .picture-layer-row.picture-layer-dragging { opacity: .62; }
+
+
+/* PublisherStudio 2.6.8: targeted interaction, export contrast, and authoring repairs. */
+.panel-studio-canvas-shell.preview-preset-editing{grid-template-rows:auto auto minmax(0,1fr)!important}
+.publisher-dialog footer :is(button,.dxbl-btn){color:#172033!important}
+.publisher-dialog footer :is(button,.dxbl-btn) .dxbl-btn-caption{color:inherit!important}
+.publisher-dialog footer :is(button,.dxbl-btn):disabled{color:#64748b!important;opacity:.78}
+.publisher-dialog footer :is(.dxbl-btn-primary,.primary){color:#fff!important}
+.publisher-dialog footer :is(.dxbl-btn-primary,.primary):disabled{color:#fff!important;opacity:.58}
+.website-publication [data-panel-root],.website-publication [data-panel-element]{pointer-events:auto}
+.website-publication [data-panel-element].ps-interactive:hover{outline:2px solid #48a7e8aa;outline-offset:2px}
+.picture-layer-row{grid-template-columns:minmax(0,1fr) 24px 24px 24px 24px!important}
+.picture-layer-order{display:grid;place-items:center;width:24px;min-width:24px;height:24px;padding:0;border:1px solid transparent;border-radius:4px;background:transparent;color:#334155;cursor:pointer;font:700 13px/1 "Segoe UI",system-ui,sans-serif}
+.picture-layer-order:hover,.picture-layer-order:focus-visible{border-color:#0ea5e9;background:#e0f2fe;color:#0369a1;outline:none}
+.website-publication .publication-panel-element > :is(.data-visual-view,.devextreme-publication-component,.publication-video-renderer,.live-source-view,.publication-panel){pointer-events:auto!important}
+.website-publication .publication-panel-element > .image-frame img{pointer-events:auto}

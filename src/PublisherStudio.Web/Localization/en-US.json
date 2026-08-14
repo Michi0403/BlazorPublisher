@@ -3249,5 +3249,7 @@
   "Word.workspace": "workspace",
   "Word.write": "write",
   "Word.yes": "yes",
-  "Word.zoom": "zoom"
+  "Word.zoom": "zoom",
+  "Phrase.Move␠layer␠backward": "Move layer backward",
+  "Phrase.Move␠layer␠forward": "Move layer forward"
 }

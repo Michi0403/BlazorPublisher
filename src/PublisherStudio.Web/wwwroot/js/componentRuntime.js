@@ -2232,6 +2232,9 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
 
     function bindPanel(panel) { try {
         if (!panel || panelBindings.has(panel)) return;
+        // Panels embedded in a presentation own pointer input. This prevents the surrounding
+        // slide click-to-advance handler from consuming clicks intended for panel content.
+        panel.classList.add("ps-pointer-owner");
         const controller = new AbortController();
         const options = { signal: controller.signal };
         panelBindings.set(panel, controller);
@@ -2247,7 +2250,11 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
             try { interaction = JSON.parse(node.dataset.interaction || "{}"); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:suppressed-catch@2177', __caughtJavaScriptError);  }
             const action = lower(interaction.action || node.dataset.interactionAction);
             const media = panelMedia(node);
-            if (media || (action && action !== "none")) node.classList.add("ps-pointer-owner");
+            const kind = lower(node.dataset.elementKind);
+            const nativeInteractive = Boolean(media)
+                || ["datavisual", "devextremecomponent", "livesource"].includes(kind)
+                || Boolean(node.querySelector("video,audio,[data-ps-visual-config],[data-ps-component-config],button,a[href],input,select,textarea,[contenteditable=true]"));
+            if (nativeInteractive || (action && action !== "none")) node.classList.add("ps-pointer-owner");
             if (media && lower(node.dataset.mediaTrigger) === "onclick" && (!action || action === "none")) {
                 node.addEventListener("click", event => { try {
                     if (event.target?.closest?.("video,audio,button,a,input,select,textarea")) return;

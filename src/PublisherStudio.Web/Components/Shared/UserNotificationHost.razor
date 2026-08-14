@@ -24,14 +24,73 @@
 </div>
 
 @code {
-    protected override void OnInitialized() => Notifications.Changed += OnChanged;
-    private void OnChanged() => _ = InvokeAsync(StateHasChanged);
-    private string Icon(UserNotificationSeverity severity) => severity switch
+    private readonly object _timerGate = new();
+    private readonly Dictionary<Guid, Timer> _expirationTimers = [];
+    private bool _disposed;
+
+    protected override void OnInitialized()
+    {
+        Notifications.Changed += OnChanged;
+        SynchronizeExpirationTimers();
+    }
+
+    private void OnChanged()
+    {
+        SynchronizeExpirationTimers();
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private void SynchronizeExpirationTimers()
+    {
+        if (_disposed) return;
+        lock (_timerGate)
+        {
+            var activeIds = Notifications.Messages.Select(message => message.Id).ToHashSet();
+            foreach (var staleId in _expirationTimers.Keys.Where(id => !activeIds.Contains(id)).ToArray())
+            {
+                _expirationTimers[staleId].Dispose();
+                _expirationTimers.Remove(staleId);
+            }
+
+            foreach (var message in Notifications.Messages.Where(message => !message.Persistent))
+            {
+                if (_expirationTimers.ContainsKey(message.Id)) continue;
+                var elapsed = DateTimeOffset.UtcNow - message.CreatedUtc;
+                var remaining = TimeSpan.FromMilliseconds(Math.Max(1, message.DurationMilliseconds - elapsed.TotalMilliseconds));
+                _expirationTimers[message.Id] = new Timer(ExpireNotification, message.Id, remaining, Timeout.InfiniteTimeSpan);
+            }
+        }
+    }
+
+    private void ExpireNotification(object? state)
+    {
+        if (_disposed || state is not Guid id) return;
+        Timer? timer = null;
+        lock (_timerGate)
+        {
+            if (_expirationTimers.Remove(id, out var ownedTimer)) timer = ownedTimer;
+        }
+        timer?.Dispose();
+        Notifications.Dismiss(id);
+    }
+
+    private static string Icon(UserNotificationSeverity severity) => severity switch
     {
         UserNotificationSeverity.Success => "✓",
         UserNotificationSeverity.Warning => "!",
         UserNotificationSeverity.Error => "×",
         _ => "i"
     };
-    public void Dispose() => Notifications.Changed -= OnChanged;
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        Notifications.Changed -= OnChanged;
+        lock (_timerGate)
+        {
+            foreach (var timer in _expirationTimers.Values) timer.Dispose();
+            _expirationTimers.Clear();
+        }
+    }
 }

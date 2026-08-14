@@ -305,7 +305,8 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
                     Directory.CreateDirectory(directory);
                     var safeSourceName = SafeFileName(fileName, "source.bin");
                     var sourcePath = Path.Combine(directory, safeSourceName);
-                    await using (var output = new FileStream(sourcePath, FileMode.CreateNew, FileAccess.Write, FileShare.None, 1024 * 128, true))
+                    var output = new FileStream(sourcePath, FileMode.CreateNew, FileAccess.Write, FileShare.None, 1024 * 128, true);
+                    await using (output.ConfigureAwait(false))
                         await source.CopyToAsync(output, cancellationToken).ConfigureAwait(false);
 
                     var extension = NormalizeExtension(normalizedOptions.OutputExtension, preset.OutputExtension);
@@ -571,7 +572,7 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
 
             var stdoutTask = Task.Run(async () =>
             {
-                while (await process.StandardOutput.ReadLineAsync(job.Cancellation.Token) is { } line)
+                while (await process.StandardOutput.ReadLineAsync(job.Cancellation.Token).ConfigureAwait(false) is { } line)
                 {
                     if (line.StartsWith("out_time_us=", StringComparison.Ordinal)
                         && long.TryParse(line.AsSpan("out_time_us=".Length), NumberStyles.Integer, CultureInfo.InvariantCulture, out var microseconds)
@@ -593,7 +594,7 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
             var stderr = new StringBuilder();
             var stderrTask = Task.Run(async () =>
             {
-                while (await process.StandardError.ReadLineAsync(job.Cancellation.Token) is { } line)
+                while (await process.StandardError.ReadLineAsync(job.Cancellation.Token).ConfigureAwait(false) is { } line)
                 {
                     if (stderr.Length < 16_384) stderr.AppendLine(line);
                     if (durationSeconds <= 0)

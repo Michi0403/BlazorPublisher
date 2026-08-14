@@ -432,7 +432,7 @@
 
     private async Task ParseOrRefresh()
     {
-        if (_draft.SourceKind == PublicationDataSourceKind.Web) await RefreshWeb(); else ParsePreview();
+        if (_draft.SourceKind == PublicationDataSourceKind.Web) await RefreshWeb().ConfigureAwait(true); else ParsePreview();
     }
 
     private void ParsePreview()
@@ -452,7 +452,7 @@
         try
         {
             ApplyHeaderLines();
-            await WebDataService.RefreshAsync(_draft);
+            await WebDataService.RefreshAsync(_draft).ConfigureAwait(true);
             _error = null;
         }
         catch (Exception ex) { _error = ex.Message; }
@@ -463,9 +463,10 @@
         try
         {
             var file = args.File;
-            await using var stream = file.OpenReadStream(long.MaxValue);
+            var stream = file.OpenReadStream(long.MaxValue);
+            await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
             using var reader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true);
-            _draft.RawSource = await reader.ReadToEndAsync();
+            _draft.RawSource = await reader.ReadToEndAsync().ConfigureAwait(true);
             var extension = Path.GetExtension(file.Name).ToLowerInvariant();
             _draft.SourceKind = extension switch { ".json" => PublicationDataSourceKind.Json, ".xml" => PublicationDataSourceKind.Xml, _ => PublicationDataSourceKind.DelimitedText };
             if (extension == ".tsv") _draft.Delimiter = "\t";
@@ -503,7 +504,7 @@
             State.UpsertDataObject(_draft);
             SetDraft(DataService.Clone(State.Document.DataObjects.First(data => data.Id == _draft.Id)));
             _error = null;
-            await DataChanged.InvokeAsync();
+            await DataChanged.InvokeAsync().ConfigureAwait(true);
         }
         catch (Exception ex) { _error = ex.Message; }
     }
@@ -513,7 +514,7 @@
         if (!ExistingDraft || IsBuiltInDraft) return;
         if (!State.DeleteDataObject(_draft.Id)) { _error = "This data object is still used by a data visual."; return; }
         SetDraft(State.Document.DataObjects.Count > 0 ? DataService.Clone(State.Document.DataObjects[0]) : DataService.CreateSample());
-        await DataChanged.InvokeAsync();
+        await DataChanged.InvokeAsync().ConfigureAwait(true);
     }
 
     private void DetachSnapshot()

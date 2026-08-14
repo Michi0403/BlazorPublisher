@@ -65,8 +65,8 @@ try:
             'v2.6.5 shared studio drag/layer affordances')
     require('src/PublisherStudio.Web/Components/App.razor',
             'videoEffectRuntime.js?v=2.6.5', 'publisherInterop.js?v=2.6.5')
-    require('src/PublisherStudio.Web/PublisherStudio.Web.csproj', '<Version>2.6.5</Version>')
-    require('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj', '<Version>2.6.5</Version>')
+    require('src/PublisherStudio.Web/PublisherStudio.Web.csproj', '<Version>2.6.7</Version>')
+    require('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj', '<Version>2.6.7</Version>')
     require('src/PublisherStudio.Web/BusinessObjects/PublicationModels.cs', 'FormatVersion { get; set; } = "1.58"')
     print('PublisherStudio 2.6.5 media-studio/drag/effect/localization source audit passed.')
 except AssertionError as exc:

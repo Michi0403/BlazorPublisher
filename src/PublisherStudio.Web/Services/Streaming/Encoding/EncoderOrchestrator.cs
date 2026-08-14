@@ -1427,7 +1427,7 @@ public sealed class EncoderSessionService : IDisposable
             {
                 logger.LogTrace($"Started pumping FFmpeg pipeline {key}.");
                 var flushCounter = 0;
-                await foreach (var payload in queue.Reader.ReadAllAsync(cancellation.Token))
+                await foreach (var payload in queue.Reader.ReadAllAsync(cancellation.Token).ConfigureAwait(false))
                 {
                     if (process.HasExited)
                     {

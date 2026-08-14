@@ -1247,6 +1247,25 @@ public sealed class PublicationComponentService
     }
 
     /// <summary>
+    /// Joins user-visible value-field names for component summaries without moving text composition into the Razor presentation layer.
+    /// </summary>
+    /// <param name="values">Value-field names to format.</param>
+    /// <returns>A comma-separated display string.</returns>
+    public string JoinDisplayValues(IEnumerable<string>? values)
+    {
+        try
+        {
+            logger.LogTrace("Entering PublicationComponentService.JoinDisplayValues.");
+            return string.Join(", ", values ?? Array.Empty<string>());
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "PublicationComponentService.JoinDisplayValues failed: {Message}", exception.Message);
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Performs sanitize CSS class as part of the publication component service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     /// <param name="value">Value value supplied to the publication component operation and used when producing its result.</param>

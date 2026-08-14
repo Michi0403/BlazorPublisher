@@ -56,7 +56,7 @@
                 fitMode = FitMode,
                 forceCanvas = segment.VideoLayers.Any(LayerNeedsCanvas),
                 layers = segment.VideoLayers.Select(LayerPayload).ToArray()
-            });
+            }).ConfigureAwait(true);
         }
         catch { }
     }
@@ -109,7 +109,7 @@
 
     public async ValueTask DisposeAsync()
     {
-        try { await JS.InvokeVoidAsync("publisherVideoEffects.dispose", RuntimeKey); }
+        try { await JS.InvokeVoidAsync("publisherVideoEffects.dispose", RuntimeKey).ConfigureAwait(true); }
         catch { }
     }
 

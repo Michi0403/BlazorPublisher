@@ -25,14 +25,14 @@ public sealed class TwitchOAuthMaintenanceService(
                 using var scope = services.CreateScope();
                 var store = scope.ServiceProvider.GetRequiredService<StreamingProfileStore>();
                 var twitch = scope.ServiceProvider.GetRequiredService<TwitchOAuthService>();
-                var profiles = (await store.LoadAsync(stoppingToken)).Providers
+                var profiles = (await store.LoadAsync(stoppingToken).ConfigureAwait(false)).Providers
                     .Where(profile => profile.Provider == PublicationStreamProvider.Twitch
                         && profile.AuthenticationMode == StreamingProviderAuthenticationMode.OAuth
                         && profile.HasStoredOAuthSession)
                     .ToList();
                 foreach (var profile in profiles)
                 {
-                    try { await twitch.ValidateProfileAsync(profile.Id, stoppingToken); }
+                    try { await twitch.ValidateProfileAsync(profile.Id, stoppingToken).ConfigureAwait(false); }
                     catch (Exception exception) { logger.LogWarning(exception, "Twitch OAuth validation failed for profile {ProfileId}.", profile.Id); }
                 }
             }
@@ -45,7 +45,7 @@ public sealed class TwitchOAuthMaintenanceService(
                 logger.LogWarning(exception, "The Twitch OAuth maintenance cycle failed.");
             }
 
-            try { await Task.Delay(TimeSpan.FromHours(1), stoppingToken); }
+            try { await Task.Delay(TimeSpan.FromHours(1), stoppingToken).ConfigureAwait(false); }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { break; }
         }
     }

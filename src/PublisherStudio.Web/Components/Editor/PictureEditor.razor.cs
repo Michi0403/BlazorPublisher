@@ -519,7 +519,7 @@ public partial class PictureEditor
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!Visible) return;
-        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/pictureStudioInterop.js?v=2.6.5");
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/pictureStudioInterop.js?v=2.6.5").ConfigureAwait(true);
         _self ??= DotNetObjectReference.Create(this);
         if (_pendingRasterInitialization && !string.IsNullOrWhiteSpace(InitialRasterDataUrl))
         {
@@ -534,7 +534,7 @@ public partial class PictureEditor
             {
                 try
                 {
-                    var natural = await _module.InvokeAsync<PictureImageSize>("getPictureImageSize", InitialRasterDataUrl);
+                    var natural = await _module.InvokeAsync<PictureImageSize>("getPictureImageSize", InitialRasterDataUrl).ConfigureAwait(true);
                     var fitted = FitRasterCanvasSize(natural.Width, natural.Height);
                     State.StartFromRaster(InitialRasterDataUrl, InitialName, fitted.Width, fitted.Height);
                 }
@@ -554,14 +554,14 @@ public partial class PictureEditor
                 _self,
                 RuntimePolicy.PictureStudio.StudioRootId,
                 RuntimePolicy.PictureStudio.ImageDropInputId,
-                RuntimePolicy.PictureStudio.LayerDropInputId);
+                RuntimePolicy.PictureStudio.LayerDropInputId).ConfigureAwait(true);
             _initialized = true;
             _renderRequested = true;
         }
         if (_renderRequested)
         {
             _renderRequested = false;
-            await RenderCanvasAsync();
+            await RenderCanvasAsync().ConfigureAwait(true);
         }
     }
 
@@ -591,7 +591,7 @@ public partial class PictureEditor
                 Width = _drawWidth,
                 Opacity = _drawOpacity,
                 Hardness = _drawHardness
-            });
+            }).ConfigureAwait(true);
         }
         catch (JSDisconnectedException)
         {
@@ -600,7 +600,7 @@ public partial class PictureEditor
         catch (Exception ex)
         {
             _error = ex.Message;
-            await InvokeAsync(StateHasChanged);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
         }
     }
 
@@ -758,12 +758,12 @@ public partial class PictureEditor
             case "undo": State.Undo(); break;
             case "redo": State.Redo(); break;
             case "copy":
-                if (!await CopyAreaSelectionToClipboardAsync()) State.CopySelected();
+                if (!await CopyAreaSelectionToClipboardAsync().ConfigureAwait(true)) State.CopySelected();
                 break;
             case "paste": State.Paste(); break;
             case "duplicate": State.DuplicateSelected(); break;
             case "delete":
-                if (!await ApplyAreaClipAsync(inverted: true, quietWhenMissing: true)) State.DeleteSelected();
+                if (!await ApplyAreaClipAsync(inverted: true, quietWhenMissing: true).ConfigureAwait(true)) State.DeleteSelected();
                 break;
             case "front": State.BringSelectedToFront(); break;
             case "back": State.SendSelectedToBack(); break;
@@ -804,11 +804,11 @@ public partial class PictureEditor
     {
         if (_module is not null && args.Button == 2)
         {
-            var id = await _module.InvokeAsync<string?>("hitTestPictureStudioLayer", RuntimePolicy.PictureStudio.CanvasId, args.ClientX, args.ClientY);
+            var id = await _module.InvokeAsync<string?>("hitTestPictureStudioLayer", RuntimePolicy.PictureStudio.CanvasId, args.ClientX, args.ClientY).ConfigureAwait(true);
             State.SelectLayer(Guid.TryParse(id, out var parsed) ? parsed : null);
         }
-        await InvokeAsync(StateHasChanged);
-        await _pictureContextMenu.ShowAsync(args);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        await _pictureContextMenu.ShowAsync(args).ConfigureAwait(true);
     }
 
     /// <summary>
@@ -820,8 +820,8 @@ public partial class PictureEditor
     private async Task ShowLayerContextMenu(PictureLayer layer, MouseEventArgs args)
     {
         State.SelectLayer(layer.Id);
-        await InvokeAsync(StateHasChanged);
-        await _pictureContextMenu.ShowAsync(args);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        await _pictureContextMenu.ShowAsync(args).ConfigureAwait(true);
     }
 
     /// <summary>
@@ -832,8 +832,8 @@ public partial class PictureEditor
     private async Task ShowLayerListContextMenu(MouseEventArgs args)
     {
         State.SelectLayer(null);
-        await InvokeAsync(StateHasChanged);
-        await _pictureContextMenu.ShowAsync(args);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        await _pictureContextMenu.ShowAsync(args).ConfigureAwait(true);
     }
 
     /// <summary>
@@ -843,7 +843,7 @@ public partial class PictureEditor
     private async Task RequestImage()
     {
         _replaceRasterLayerId = null;
-        await JS.InvokeVoidAsync("publisherStudio.clickElement", RuntimePolicy.PictureStudio.ImageInputId);
+        await JS.InvokeVoidAsync("publisherStudio.clickElement", RuntimePolicy.PictureStudio.ImageInputId).ConfigureAwait(true);
     }
 
     /// <summary>
@@ -853,7 +853,7 @@ public partial class PictureEditor
     private async Task RequestLayeredImport()
     {
         _replaceRasterLayerId = null;
-        await JS.InvokeVoidAsync("publisherStudio.clickElement", RuntimePolicy.PictureStudio.LayeredInputId);
+        await JS.InvokeVoidAsync("publisherStudio.clickElement", RuntimePolicy.PictureStudio.LayeredInputId).ConfigureAwait(true);
     }
 
     /// <summary>
@@ -864,7 +864,7 @@ public partial class PictureEditor
     {
         if (State.SelectedLayer is not RasterPictureLayer { Locked: false } raster) return;
         _replaceRasterLayerId = raster.Id;
-        await JS.InvokeVoidAsync("publisherStudio.clickElement", RuntimePolicy.PictureStudio.ImageInputId);
+        await JS.InvokeVoidAsync("publisherStudio.clickElement", RuntimePolicy.PictureStudio.ImageInputId).ConfigureAwait(true);
     }
 
     /// <summary>
@@ -896,13 +896,14 @@ public partial class PictureEditor
             if (!allowed.Contains(file.ContentType, StringComparer.OrdinalIgnoreCase))
                 throw new InvalidDataException("Unsupported picture format.");
 
-            await using var stream = file.OpenReadStream(long.MaxValue);
+            var stream = file.OpenReadStream(long.MaxValue);
+            await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
             using var buffer = new MemoryStream();
-            await stream.CopyToAsync(buffer);
+            await stream.CopyToAsync(buffer).ConfigureAwait(true);
             var dataUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer.ToArray())}";
             var size = _module is null
                 ? new PictureImageSize()
-                : await _module.InvokeAsync<PictureImageSize>("getPictureImageSize", dataUrl);
+                : await _module.InvokeAsync<PictureImageSize>("getPictureImageSize", dataUrl).ConfigureAwait(true);
             if (!forceAdd && _replaceRasterLayerId is Guid targetId && State.ReplaceRaster(targetId, dataUrl))
                 State.SelectLayer(targetId);
             else
@@ -949,10 +950,11 @@ public partial class PictureEditor
             var file = args.File;
             var extension = Path.GetExtension(file.Name).ToLowerInvariant();
             PictureImportResult result;
-            await using var stream = file.OpenReadStream(long.MaxValue);
+            var stream = file.OpenReadStream(long.MaxValue);
+            await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
             if (extension == ".ora")
             {
-                result = await OpenRasterImporter.ImportAsync(stream, file.Name);
+                result = await OpenRasterImporter.ImportAsync(stream, file.Name).ConfigureAwait(true);
             }
             else if (extension is ".svg" or ".svgz" || file.ContentType.Equals("image/svg+xml", StringComparison.OrdinalIgnoreCase))
             {
@@ -961,14 +963,14 @@ public partial class PictureEditor
                 if (extension == ".svgz" || file.ContentType.Contains("gzip", StringComparison.OrdinalIgnoreCase))
                 {
                     using var gzip = new GZipStream(stream, CompressionMode.Decompress, leaveOpen: true);
-                    svgText = await ReadSvgTextAsync(gzip);
+                    svgText = await ReadSvgTextAsync(gzip).ConfigureAwait(true);
                 }
                 else
                 {
-                    svgText = await ReadSvgTextAsync(stream);
+                    svgText = await ReadSvgTextAsync(stream).ConfigureAwait(true);
                 }
                 var dataUrl = $"data:image/svg+xml;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes(svgText))}";
-                result = await _module.InvokeAsync<PictureImportResult>("importPictureStudioSvg", dataUrl, file.Name);
+                result = await _module.InvokeAsync<PictureImportResult>("importPictureStudioSvg", dataUrl, file.Name).ConfigureAwait(true);
             }
             else
             {
@@ -1133,7 +1135,7 @@ public partial class PictureEditor
     private async Task FitCanvas()
     {
         if (_module is null) return;
-        var zoom = await _module.InvokeAsync<double>("fitPictureStudio", RuntimePolicy.PictureStudio.CanvasHostId, State.Document.WidthPx, State.Document.HeightPx);
+        var zoom = await _module.InvokeAsync<double>("fitPictureStudio", RuntimePolicy.PictureStudio.CanvasHostId, State.Document.WidthPx, State.Document.HeightPx).ConfigureAwait(true);
         State.SetZoom(zoom);
     }
 
@@ -1180,7 +1182,7 @@ public partial class PictureEditor
                 "image/png",
                 1d,
                 _self,
-                exportId);
+                exportId).ConfigureAwait(true);
         }
         catch (Exception ex)
         {
@@ -1273,11 +1275,11 @@ public partial class PictureEditor
         ResetPictureExport();
         if (string.Equals(purpose, "ocr", StringComparison.Ordinal))
         {
-            await RequestLocalGptOcrAsync(dataUrl);
+            await RequestLocalGptOcrAsync(dataUrl).ConfigureAwait(true);
             return;
         }
-        await DisposePictureRuntimeAsync();
-        await InvokeAsync(() => Saved.InvokeAsync(new PictureEditorResult(dataUrl, preserveLayers ? sourceDocument : null, name, preserveLayers)));
+        await DisposePictureRuntimeAsync().ConfigureAwait(true);
+        await InvokeAsync(() => Saved.InvokeAsync(new PictureEditorResult(dataUrl, preserveLayers ? sourceDocument : null, name, preserveLayers))).ConfigureAwait(true);
     }
 
     /// <summary>
@@ -1339,7 +1341,7 @@ public partial class PictureEditor
         _error = null;
         try
         {
-            await _module.InvokeVoidAsync("startPictureStudioDataUrlExport", _pictureExportSourceDocument, "image/jpeg", .9d, _self, exportId);
+            await _module.InvokeVoidAsync("startPictureStudioDataUrlExport", _pictureExportSourceDocument, "image/jpeg", .9d, _self, exportId).ConfigureAwait(true);
         }
         catch (Exception ex)
         {
@@ -1360,7 +1362,7 @@ public partial class PictureEditor
         try
         {
             _ocrStatus = "Waiting for LocalGPT approval and local OCR…";
-            await InvokeAsync(StateHasChanged);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
             var envelope = new OrganicWireEnvelope
             {
                 MessageType = OrganicWireMessageType.Invoke,
@@ -1385,17 +1387,17 @@ public partial class PictureEditor
                 }
             };
             envelope.NormalizeInteractionKind();
-            var correlationId = await LocalGptConnection.SendEnvelopeAsync(envelope);
+            var correlationId = await LocalGptConnection.SendEnvelopeAsync(envelope).ConfigureAwait(true);
             var deadline = DateTimeOffset.UtcNow.AddMinutes(6);
             while (true)
             {
                 var remaining = deadline - DateTimeOffset.UtcNow;
                 if (remaining <= TimeSpan.Zero) throw new TimeoutException("LocalGPT OCR did not finish within six minutes.");
-                var response = await LocalGptConnection.WaitForResultAsync(correlationId, remaining);
+                var response = await LocalGptConnection.WaitForResultAsync(correlationId, remaining).ConfigureAwait(true);
                 if (response.MessageType == OrganicWireMessageType.ApprovalRequired)
                 {
                     _ocrStatus = "Approve the OCR request in the LocalGPT frontend; PublisherStudio will keep waiting for the same request.";
-                    await InvokeAsync(StateHasChanged);
+                    await InvokeAsync(StateHasChanged).ConfigureAwait(true);
                     continue;
                 }
                 if (response.MessageType == OrganicWireMessageType.Error)
@@ -1426,7 +1428,7 @@ public partial class PictureEditor
         finally
         {
             _ocrBusy = false;
-            await InvokeAsync(StateHasChanged);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
         }
     }
 
@@ -1468,12 +1470,12 @@ public partial class PictureEditor
     /// Performs download png for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
     /// </summary>
     /// <returns>A task that completes when the operation has finished.</returns>
-    private async Task DownloadPng() => await Download("image/png", "png", 1d);
+    private async Task DownloadPng() => await Download("image/png", "png", 1d).ConfigureAwait(true);
     /// <summary>
     /// Performs download jpeg for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
     /// </summary>
     /// <returns>A task that completes when the operation has finished.</returns>
-    private async Task DownloadJpeg() => await Download("image/jpeg", "jpg", .92d);
+    private async Task DownloadJpeg() => await Download("image/jpeg", "jpg", .92d).ConfigureAwait(true);
     /// <summary>
     /// Performs download SVG for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
     /// </summary>
@@ -1482,7 +1484,7 @@ public partial class PictureEditor
     {
         if (_module is null) return;
         var fileName = $"{Files.SafeFileName(State.Document.Name)}.svg";
-        await _module.InvokeVoidAsync("downloadPictureStudioSvg", State.Document, fileName);
+        await _module.InvokeVoidAsync("downloadPictureStudioSvg", State.Document, fileName).ConfigureAwait(true);
     }
 
     /// <summary>
@@ -1498,7 +1500,7 @@ public partial class PictureEditor
         try
         {
             var name = Files.SafeFileName(State.Document.Name) + "." + extension;
-            await _module.InvokeVoidAsync("downloadPictureStudio", State.Document, name, mimeType, quality);
+            await _module.InvokeVoidAsync("downloadPictureStudio", State.Document, name, mimeType, quality).ConfigureAwait(true);
         }
         catch (Exception ex)
         {
@@ -1512,9 +1514,9 @@ public partial class PictureEditor
     /// <returns>A task that completes when the operation has finished.</returns>
     private async Task Cancel()
     {
-        await CancelPictureInteractionAsync();
-        await DisposePictureRuntimeAsync();
-        await Cancelled.InvokeAsync();
+        await CancelPictureInteractionAsync().ConfigureAwait(true);
+        await DisposePictureRuntimeAsync().ConfigureAwait(true);
+        await Cancelled.InvokeAsync().ConfigureAwait(true);
     }
 
     /// <summary>
@@ -1613,7 +1615,7 @@ public partial class PictureEditor
     /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ClearAreaSelection()
     {
-        if (_module is not null) await _module.InvokeVoidAsync("clearPictureStudioAreaSelection", RuntimePolicy.PictureStudio.CanvasId);
+        if (_module is not null) await _module.InvokeVoidAsync("clearPictureStudioAreaSelection", RuntimePolicy.PictureStudio.CanvasId).ConfigureAwait(true);
         _renderRequested = true;
     }
 
@@ -1626,7 +1628,7 @@ public partial class PictureEditor
         if (_module is null || State.SelectedLayer is null) return null;
         try
         {
-            return await _module.InvokeAsync<PictureAreaSelection?>("getPictureStudioAreaSelection", RuntimePolicy.PictureStudio.CanvasId);
+            return await _module.InvokeAsync<PictureAreaSelection?>("getPictureStudioAreaSelection", RuntimePolicy.PictureStudio.CanvasId).ConfigureAwait(true);
         }
         catch (JSDisconnectedException) { return null; }
         catch (TaskCanceledException) { return null; }
@@ -1696,7 +1698,7 @@ public partial class PictureEditor
     /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private async Task<bool> ApplyAreaClipAsync(bool inverted, bool quietWhenMissing = false)
     {
-        var selection = await ReadAreaSelectionAsync();
+        var selection = await ReadAreaSelectionAsync().ConfigureAwait(true);
         var polygon = selection is null ? [] : SelectionPolygon(selection);
         if (polygon.Count < 3)
         {
@@ -1709,7 +1711,7 @@ public partial class PictureEditor
             return false;
         }
         _notice = inverted ? "The selected area was cut from the layer non-destructively." : "The layer now keeps only the selected area.";
-        await ClearAreaSelection();
+        await ClearAreaSelection().ConfigureAwait(true);
         SetDrawTool(PictureDrawTool.Select);
         return true;
     }
@@ -1731,7 +1733,7 @@ public partial class PictureEditor
     /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private async Task<bool> CopyAreaSelectionToClipboardAsync()
     {
-        var selection = await ReadAreaSelectionAsync();
+        var selection = await ReadAreaSelectionAsync().ConfigureAwait(true);
         var polygon = selection is null ? [] : SelectionPolygon(selection);
         if (polygon.Count < 3 || !State.CopySelectedRegion(polygon)) return false;
         _notice = "Selected picture region copied. Paste inserts it as an independently editable clipped layer.";
@@ -1744,7 +1746,7 @@ public partial class PictureEditor
     /// <returns>A task that completes when the operation has finished.</returns>
     private async Task CopySelectedArea()
     {
-        if (!await CopyAreaSelectionToClipboardAsync())
+        if (!await CopyAreaSelectionToClipboardAsync().ConfigureAwait(true))
             _notice = "Create an area selection on a layer before copying a region.";
     }
 
@@ -1754,13 +1756,13 @@ public partial class PictureEditor
     /// <returns>A task that completes when the operation has finished.</returns>
     private async Task CopySelectedAreaAsLayer()
     {
-        if (!await CopyAreaSelectionToClipboardAsync())
+        if (!await CopyAreaSelectionToClipboardAsync().ConfigureAwait(true))
         {
             _notice = "Create an area selection on a layer before copying a region.";
             return;
         }
         State.Paste();
-        await ClearAreaSelection();
+        await ClearAreaSelection().ConfigureAwait(true);
         SetDrawTool(PictureDrawTool.Select);
         _notice = "The selected region was inserted as a new clipped layer.";
     }
@@ -1806,7 +1808,7 @@ public partial class PictureEditor
         if (_module is null) return;
         try
         {
-            await _module.InvokeVoidAsync("cancelPictureStudioInteraction", RuntimePolicy.PictureStudio.CanvasId);
+            await _module.InvokeVoidAsync("cancelPictureStudioInteraction", RuntimePolicy.PictureStudio.CanvasId).ConfigureAwait(true);
         }
         catch (JSDisconnectedException) { }
         catch (TaskCanceledException) { }
@@ -1822,7 +1824,7 @@ public partial class PictureEditor
         if (_module is null || !_initialized) return;
         try
         {
-            await _module.InvokeVoidAsync("disposePictureStudio", RuntimePolicy.PictureStudio.CanvasId);
+            await _module.InvokeVoidAsync("disposePictureStudio", RuntimePolicy.PictureStudio.CanvasId).ConfigureAwait(true);
         }
         catch (JSDisconnectedException) { }
         catch (TaskCanceledException) { }
@@ -3205,7 +3207,7 @@ public partial class PictureEditor
     private async Task<string> ReadSvgTextAsync(Stream input)
     {
         using var buffer = new MemoryStream();
-        await input.CopyToAsync(buffer);
+        await input.CopyToAsync(buffer).ConfigureAwait(true);
         return new UTF8Encoding(false, true).GetString(buffer.ToArray());
     }
 
@@ -3393,8 +3395,8 @@ public partial class PictureEditor
         _self?.Dispose();
         try
         {
-            await DisposePictureRuntimeAsync();
-            if (_module is not null) await _module.DisposeAsync();
+            await DisposePictureRuntimeAsync().ConfigureAwait(true);
+            if (_module is not null) await _module.DisposeAsync().ConfigureAwait(true);
         }
         catch (JSDisconnectedException) { }
         catch (TaskCanceledException) { }

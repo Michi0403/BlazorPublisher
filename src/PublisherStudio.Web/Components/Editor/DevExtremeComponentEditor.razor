@@ -1014,18 +1014,18 @@
         if (shouldAttach && !_designerAttached)
         {
             _self ??= DotNetObjectReference.Create(this);
-            try { _designerAttached = await JS.InvokeAsync<bool>("PublisherStudioComponentRuntime.attachVectorDesigner", "ps-component-vector-designer", _self); } catch { _designerAttached = false; }
+            try { _designerAttached = await JS.InvokeAsync<bool>("PublisherStudioComponentRuntime.attachVectorDesigner", "ps-component-vector-designer", _self).ConfigureAwait(true); } catch { _designerAttached = false; }
         }
         else if (!shouldAttach && _designerAttached)
         {
-            try { await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.detachVectorDesigner", "ps-component-vector-designer"); } catch { }
+            try { await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.detachVectorDesigner", "ps-component-vector-designer").ConfigureAwait(true); } catch { }
             _designerAttached = false;
         }
     }
 
     public async ValueTask DisposeAsync()
     {
-        try { await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.detachVectorDesigner", "ps-component-vector-designer"); } catch { }
+        try { await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.detachVectorDesigner", "ps-component-vector-designer").ConfigureAwait(true); } catch { }
         _self?.Dispose();
     }
 
@@ -1164,7 +1164,7 @@
         _connectionStatus = string.Empty;
         try
         {
-            var text = await JS.InvokeAsync<string>("PublisherStudioComponentRuntime.probeConnection", _draft.Connection);
+            var text = await JS.InvokeAsync<string>("PublisherStudioComponentRuntime.probeConnection", _draft.Connection).ConfigureAwait(true);
             var sample = new PublicationDataObject { Name = "Endpoint preview", SourceKind = PublicationDataSourceKind.Json, RawSource = text };
             DataService.ParseInto(sample);
             _draft.Fields = DataService.ResolveColumns(sample).Select((column, index) => new PublicationComponentField
@@ -1283,7 +1283,7 @@
         if (_draft is null || !CanSave) return;
         _draft.Connection.Headers = ParseHeaders(_headersText);
         Components.Normalize(State.Document, _draft);
-        await Saved.InvokeAsync(_draft);
+        await Saved.InvokeAsync(_draft).ConfigureAwait(true);
     }
     private Task Cancel() => Cancelled.InvokeAsync();
 }

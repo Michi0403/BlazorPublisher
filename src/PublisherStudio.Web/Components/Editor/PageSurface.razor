@@ -779,7 +779,7 @@
         _canvasInitializationInProgress = true;
         try
         {
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js");
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js").ConfigureAwait(true);
             if (initializationKey != _canvasInitializationKey)
             {
                 _self ??= DotNetObjectReference.Create(this);
@@ -804,7 +804,7 @@
                         selectedElementIds,
                         internalClipboardAvailable = State.CanPaste,
                         clipboardRevision = State.ClipboardRevision
-                    });
+                    }).ConfigureAwait(true);
                 if (initialized) _canvasInitializationKey = initializationKey;
             }
 
@@ -812,8 +812,8 @@
             {
                 _dataVisualLayoutKey = dataVisualLayoutKey;
                 if (State.CurrentPage.Elements.Any(element => element is DataVisualElement))
-                    await _module.InvokeVoidAsync("refreshDataVisualLayout", "publisher-page");
-                await _module.InvokeVoidAsync("initializeSignalConnectors", "publisher-page", new { autoStart = false, editor = true });
+                    await _module.InvokeVoidAsync("refreshDataVisualLayout", "publisher-page").ConfigureAwait(true);
+                await _module.InvokeVoidAsync("initializeSignalConnectors", "publisher-page", new { autoStart = false, editor = true }).ConfigureAwait(true);
             }
         }
         catch (JSDisconnectedException) { }
@@ -832,8 +832,8 @@
 
     public async Task FitPageAsync()
     {
-        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js");
-        var zoom = await _module.InvokeAsync<double>("calculateFitZoom", "publisher-stage", State.CurrentPage.WidthMm, State.CurrentPage.HeightMm, State.Document.View.RulersVisible);
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js").ConfigureAwait(true);
+        var zoom = await _module.InvokeAsync<double>("calculateFitZoom", "publisher-stage", State.CurrentPage.WidthMm, State.CurrentPage.HeightMm, State.Document.View.RulersVisible).ConfigureAwait(true);
         State.SetZoom(zoom);
     }
 
@@ -885,7 +885,7 @@
             ScreenX = screenX,
             ScreenY = screenY
         };
-        await ShowElementContextMenu(element, args);
+        await ShowElementContextMenu(element, args).ConfigureAwait(true);
     }
     [JSInvokable]
     public void CommitMove(string id, double x, double y, string[]? movingIds = null)
@@ -1099,8 +1099,8 @@
         {
             try
             {
-                _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js");
-                var point = await _module.InvokeAsync<double[]>("elementRelativePoint", "publisher-page", element.Id.ToString("D"), args.ClientX, args.ClientY);
+                _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js").ConfigureAwait(true);
+                var point = await _module.InvokeAsync<double[]>("elementRelativePoint", "publisher-page", element.Id.ToString("D"), args.ClientX, args.ClientY).ConfigureAwait(true);
                 if (point.Length >= 2)
                 {
                     _contextPortX = Math.Clamp(point[0], 0, 1);
@@ -1109,15 +1109,15 @@
             }
             catch { _contextPortX = _contextPortY = .5; }
         }
-        await InvokeAsync(StateHasChanged);
-        await _contextMenu.ShowAsync(args);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        await _contextMenu.ShowAsync(args).ConfigureAwait(true);
     }
 
     private async Task ShowPageContextMenu(MouseEventArgs args)
     {
         State.SelectElement(null);
-        await InvokeAsync(StateHasChanged);
-        await _contextMenu.ShowAsync(args);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        await _contextMenu.ShowAsync(args).ConfigureAwait(true);
     }
 
     private void AddConnectorPortHere()
@@ -1194,7 +1194,7 @@
         : Task.CompletedTask;
     private async Task ActivateLiveSource(LiveSourceElement liveSource)
     {
-        try { await JS.InvokeVoidAsync("publisherStreaming.activateSource", liveSource.Id.ToString("N")); }
+        try { await JS.InvokeVoidAsync("publisherStreaming.activateSource", liveSource.Id.ToString("N")).ConfigureAwait(true); }
         catch { }
     }
     private void UpdateSelectedLiveSource(Action<LiveSourceElement> update)
@@ -1268,7 +1268,7 @@
             _ => null
         };
 
-        await State.RefreshWebDataAsync(dataObjectId, true);
+        await State.RefreshWebDataAsync(dataObjectId, true).ConfigureAwait(true);
         State.RefreshDataVisuals();
 
         await JS.InvokeVoidAsync(
@@ -1278,7 +1278,7 @@
             {
                 polling = false,
                 fetchNow = true
-            });
+            }).ConfigureAwait(true);
     }
     private void ChangeSelectedDataVisualKind(DataVisualKind kind)
     {
@@ -1688,7 +1688,7 @@
         _disposed = true;
         try
         {
-            if (_module is not null) await _module.InvokeVoidAsync("disposeCanvas", "publisher-stage");
+            if (_module is not null) await _module.InvokeVoidAsync("disposeCanvas", "publisher-stage").ConfigureAwait(true);
         }
         catch (JSDisconnectedException) { }
         catch (TaskCanceledException) { }
@@ -1701,7 +1701,7 @@
 
         try
         {
-            if (_module is not null) await _module.DisposeAsync();
+            if (_module is not null) await _module.DisposeAsync().ConfigureAwait(true);
         }
         catch (JSDisconnectedException) { }
         catch (TaskCanceledException) { }

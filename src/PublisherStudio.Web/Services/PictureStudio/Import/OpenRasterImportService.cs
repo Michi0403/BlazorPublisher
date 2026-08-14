@@ -47,7 +47,8 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
                     var mimetype = archive.GetEntry("mimetype");
                     if (mimetype is not null)
                     {
-                        await using var mimeStream = mimetype.Open();
+                        var mimeStream = mimetype.Open();
+                        await using var configuredMimeStreamAsyncDisposal = mimeStream.ConfigureAwait(false);
                         using var mimeReader = new StreamReader(mimeStream, Encoding.ASCII, false, leaveOpen: false);
                         var value = (await mimeReader.ReadToEndAsync(cancellationToken).ConfigureAwait(false)).Trim();
                         if (!string.Equals(value, "image/openraster", StringComparison.Ordinal))
@@ -61,7 +62,8 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
                     var stackEntry = archive.GetEntry("stack.xml")
                         ?? throw new InvalidDataException("The OpenRaster archive does not contain stack.xml.");
                     XDocument stackDocument;
-                    await using (var stackStream = stackEntry.Open())
+                    var stackStream = stackEntry.Open();
+                    await using (stackStream.ConfigureAwait(false))
                     {
                         var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null, MaxCharactersFromEntities = 0, MaxCharactersInDocument = 0 };
                         using var reader = XmlReader.Create(stackStream, settings);
@@ -168,7 +170,8 @@ public sealed class OpenRasterImportService(IPublisherDocumentFactory documentFa
                             issues.Add(new(InterchangeIssueSeverity.Loss, "ORA_LAYER_EMPTY", $"Layer '{name}' is empty and was skipped.", groupPath));
                             continue;
                         }
-                        await using var layerStream = entry.Open();
+                        var layerStream = entry.Open();
+                        await using var configuredLayerStreamAsyncDisposal = layerStream.ConfigureAwait(false);
                         using var layerBuffer = new MemoryStream();
                         await layerStream.CopyToAsync(layerBuffer, cancellationToken).ConfigureAwait(false);
                         var bytes = layerBuffer.ToArray();

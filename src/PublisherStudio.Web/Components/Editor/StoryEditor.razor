@@ -368,7 +368,7 @@
                 "publisherStudio.initializeStoryEditorLayout",
                 "story-editor-shell",
                 "story-editor-host",
-                _selfReference);
+                _selfReference).ConfigureAwait(true);
         }
         catch (JSDisconnectedException) { }
         catch (TaskCanceledException) { }
@@ -381,11 +381,11 @@
 
         if (_legacyConversionPending)
         {
-            await UpgradeLegacyStoryAfterLoad(generation);
+            await UpgradeLegacyStoryAfterLoad(generation).ConfigureAwait(true);
             return;
         }
 
-        await EnableMailMergeAfterLoad(generation);
+        await EnableMailMergeAfterLoad(generation).ConfigureAwait(true);
     }
 
     private async Task UpgradeLegacyStoryAfterLoad(int generation)
@@ -393,14 +393,14 @@
         if (_richEdit is null || _upgradingLegacyStory || !IsCurrentStoryLoad(generation)) return;
 
         _upgradingLegacyStory = true;
-        await SafeStateHasChanged();
+        await SafeStateHasChanged().ConfigureAwait(true);
         try
         {
             // HTML stories (including older dropped text/Markdown frames) must first be
             // fully loaded by RichEdit. Exporting from OnAfterRender raced the component's
             // JavaScript initialization and could also make mail-merge settings run against
             // a document that did not yet exist.
-            var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml);
+            var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml).ConfigureAwait(true);
             if (!IsCurrentStoryLoad(generation)) return;
 
             _content = openXml.ToArray();
@@ -410,7 +410,7 @@
             _editorRevision++;
             _documentLoadGeneration++;
             _upgradingLegacyStory = false;
-            await SafeStateHasChanged();
+            await SafeStateHasChanged().ConfigureAwait(true);
         }
         catch (OperationCanceledException)
         {
@@ -418,7 +418,7 @@
             {
                 _upgradingLegacyStory = false;
                 _error = "The story editor was closed before the legacy story finished loading.";
-                await SafeStateHasChanged();
+                await SafeStateHasChanged().ConfigureAwait(true);
             }
         }
         catch (JSDisconnectedException)
@@ -435,7 +435,7 @@
             {
                 _upgradingLegacyStory = false;
                 _error = $"Legacy story conversion failed: {ex.Message}";
-                await SafeStateHasChanged();
+                await SafeStateHasChanged().ConfigureAwait(true);
             }
         }
     }
@@ -456,7 +456,7 @@
             builder.AddAttribute(3, nameof(DxMailMergeSettings.ActiveRecord), 0);
             builder.CloseComponent();
         };
-        await SafeStateHasChanged();
+        await SafeStateHasChanged().ConfigureAwait(true);
     }
 
     private bool IsCurrentStoryLoad(int generation) =>
@@ -467,7 +467,7 @@
 
     private async Task SafeStateHasChanged()
     {
-        try { await InvokeAsync(StateHasChanged); }
+        try { await InvokeAsync(StateHasChanged).ConfigureAwait(true); }
         catch (ObjectDisposedException) { }
         catch (InvalidOperationException) when (!Visible) { }
     }
@@ -481,15 +481,15 @@
             // Export the live RichEdit document directly. SaveDocumentAsync can rebind the
             // DocumentContent parameter before the export completes and used to drop direct
             // formatting in the persisted copy even though a manual DOCX download was correct.
-            var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml);
-            var html = await _richEdit.ExportDocumentAsync(DocumentFormat.Html);
+            var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml).ConfigureAwait(true);
+            var html = await _richEdit.ExportDocumentAsync(DocumentFormat.Html).ConfigureAwait(true);
             var openXmlBackground = Files.ExtractOpenXmlDocumentBackground(openXml);
-            var prepared = await PrepareStoryPreview(html, openXmlBackground);
+            var prepared = await PrepareStoryPreview(html, openXmlBackground).ConfigureAwait(true);
             var preview = prepared.Html;
             var documentBackground = prepared.Background;
             _content = openXml.ToArray();
             _documentFormat = DocumentFormat.OpenXml;
-            await Saved.InvokeAsync((openXml, preview, documentBackground, StoryStorageFormat.OpenXml));
+            await Saved.InvokeAsync((openXml, preview, documentBackground, StoryStorageFormat.OpenXml)).ConfigureAwait(true);
         }
         catch (Exception ex)
         {
@@ -536,42 +536,42 @@
             {
                 _aiStoryPanelVisible = true;
                 _error = "Select text in the story before using an AI text-editing command.";
-                await SafeStateHasChanged();
+                await SafeStateHasChanged().ConfigureAwait(true);
                 return;
             }
 
-            var span = await _selection.ActiveSubDocument.GetTextSpanAsync(_selection.Intervals[0]);
+            var span = await _selection.ActiveSubDocument.GetTextSpanAsync(_selection.Intervals[0]).ConfigureAwait(true);
             var selectedText = span.Text?.Trim() ?? string.Empty;
             if (string.IsNullOrWhiteSpace(selectedText))
             {
                 _aiStoryPanelVisible = true;
                 _error = "The current selection does not contain editable text.";
-                await SafeStateHasChanged();
+                await SafeStateHasChanged().ConfigureAwait(true);
                 return;
             }
 
             _aiStoryPrompt = $"{instruction}\n\nSelected story text:\n{selectedText}\n\nReturn only the replacement text as the proposal.";
             _aiStoryPanelVisible = true;
-            await SafeStateHasChanged();
-            await RequestAiStoryAsync();
+            await SafeStateHasChanged().ConfigureAwait(true);
+            await RequestAiStoryAsync().ConfigureAwait(true);
         }
         catch (OperationCanceledException)
         {
             _error = "The AI text-editing request was canceled before the selected text could be read.";
-            await SafeStateHasChanged();
+            await SafeStateHasChanged().ConfigureAwait(true);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Could not prepare an AI selection-editing request for story {StoryId}.", TextFrame.Id);
             _error = ex.Message;
-            await SafeStateHasChanged();
+            await SafeStateHasChanged().ConfigureAwait(true);
         }
     }
 
     private async Task HandleAiPromptKeyDown(KeyboardEventArgs args)
     {
         if (args.CtrlKey && string.Equals(args.Key, "Enter", StringComparison.OrdinalIgnoreCase))
-            await RequestAiStoryAsync();
+            await RequestAiStoryAsync().ConfigureAwait(true);
     }
 
     private async Task RequestAiStoryAsync()
@@ -613,7 +613,7 @@ Required result contract:
 2. Before completing, invoke publisher.text.proposal.request with JSON parameters containing target exactly '{AiProposalTarget}', the final text, and a concise reason.
 3. Never mutate the publication automatically. The user reviews and explicitly inserts the proposal in PublisherStudio.
 """;
-            var correlationId = await LocalGptConnection.SendCouncilRequestAsync(request);
+            var correlationId = await LocalGptConnection.SendCouncilRequestAsync(request).ConfigureAwait(true);
             Logger.LogInformation("Submitted StoryEditor AI Council request {CorrelationId} for story {StoryId}.", correlationId, TextFrame.Id);
             Notifications.Success($"Council request {correlationId} was submitted. You can close this editor; the run remains active.", "Story proposal requested", nameof(StoryEditor));
             _aiStoryPrompt = string.Empty;
@@ -631,7 +631,7 @@ Required result contract:
         if (_selection is null) return;
         try
         {
-            await _selection.ActiveSubDocument.AddTextAsync(_selection.CaretPosition, proposal.Text);
+            await _selection.ActiveSubDocument.AddTextAsync(_selection.CaretPosition, proposal.Text).ConfigureAwait(true);
             OrganicResults.RemoveTextProposal(proposal.Id);
             RefreshAiProposals();
             Logger.LogInformation("User inserted AI Council proposal {ProposalId} into story {StoryId}.", proposal.Id, TextFrame?.Id);
@@ -652,8 +652,8 @@ Required result contract:
         {
             var interval = _selection.Intervals[0];
             var start = interval.Start;
-            await _selection.ActiveSubDocument.RemoveAsync(interval);
-            await _selection.ActiveSubDocument.AddTextAsync(start, proposal.Text);
+            await _selection.ActiveSubDocument.RemoveAsync(interval).ConfigureAwait(true);
+            await _selection.ActiveSubDocument.AddTextAsync(start, proposal.Text).ConfigureAwait(true);
             OrganicResults.RemoveTextProposal(proposal.Id);
             RefreshAiProposals();
             Logger.LogInformation("User replaced the selected story text with AI Council proposal {ProposalId} in story {StoryId}.", proposal.Id, TextFrame?.Id);
@@ -717,7 +717,7 @@ Required result contract:
             _codeWorkspaceText = normalized.Text;
             _codeTokens = normalized.Tokens;
             var block = $"{Environment.NewLine}[{profile.DisplayName}]{Environment.NewLine}{_codeWorkspaceText}{Environment.NewLine}";
-            await _selection.ActiveSubDocument.AddTextAsync(_selection.CaretPosition, block);
+            await _selection.ActiveSubDocument.AddTextAsync(_selection.CaretPosition, block).ConfigureAwait(true);
         }
         catch (Exception ex)
         {
@@ -730,8 +730,8 @@ Required result contract:
         if (_richEdit is null || _selection is null) return;
         try
         {
-            var field = await _selection.ActiveSubDocument.Fields.CreateAsync(_selection.CaretPosition, code);
-            await _selection.ActiveSubDocument.Fields.UpdateAsync(field);
+            var field = await _selection.ActiveSubDocument.Fields.CreateAsync(_selection.CaretPosition, code).ConfigureAwait(true);
+            await _selection.ActiveSubDocument.Fields.UpdateAsync(field).ConfigureAwait(true);
         }
         catch (Exception ex)
         {
@@ -750,21 +750,21 @@ Required result contract:
     private async Task UpdateFields()
     {
         if (_richEdit is null) return;
-        try { await _richEdit.DocumentAPI.Fields.UpdateAllAsync(true); }
+        try { await _richEdit.DocumentAPI.Fields.UpdateAllAsync(true).ConfigureAwait(true); }
         catch (Exception ex) { _error = ex.Message; }
     }
 
     private async Task ShowFieldCodes()
     {
         if (_richEdit is null) return;
-        try { await _richEdit.DocumentAPI.Fields.ShowAllFieldCodesAsync(true); }
+        try { await _richEdit.DocumentAPI.Fields.ShowAllFieldCodesAsync(true).ConfigureAwait(true); }
         catch (Exception ex) { _error = ex.Message; }
     }
 
     private async Task ShowFieldResults()
     {
         if (_richEdit is null) return;
-        try { await _richEdit.DocumentAPI.Fields.ShowAllFieldResultsAsync(true); }
+        try { await _richEdit.DocumentAPI.Fields.ShowAllFieldResultsAsync(true).ConfigureAwait(true); }
         catch (Exception ex) { _error = ex.Message; }
     }
 
@@ -778,13 +778,13 @@ Required result contract:
         if (_richEdit is null || TextFrame is null) return;
         try
         {
-            var content = await _richEdit.ExportDocumentAsync(format);
+            var content = await _richEdit.ExportDocumentAsync(format).ConfigureAwait(true);
             if (format == DocumentFormat.Html)
             {
-                var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml);
+                var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml).ConfigureAwait(true);
                 var prepared = await PrepareStoryPreview(
                     content,
-                    Files.ExtractOpenXmlDocumentBackground(openXml));
+                    Files.ExtractOpenXmlDocumentBackground(openXml)).ConfigureAwait(true);
                 var pageLayout = Files.ExtractOpenXmlPageLayout(openXml);
                 content = System.Text.Encoding.UTF8.GetBytes(StandaloneStoryHtml(
                     prepared,
@@ -792,9 +792,10 @@ Required result contract:
                     pageLayout));
             }
             var baseName = Files.SafeFileName($"{PublicationName}-{TextFrame.Name}");
-            await using var stream = new MemoryStream(content);
+            var stream = new MemoryStream(content);
+            await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
             using var reference = new DotNetStreamReference(stream);
-            await JS.InvokeVoidAsync("publisherStudio.downloadStream", baseName + extension, reference, mimeType);
+            await JS.InvokeVoidAsync("publisherStudio.downloadStream", baseName + extension, reference, mimeType).ConfigureAwait(true);
         }
         catch (Exception ex)
         {
@@ -815,27 +816,27 @@ Required result contract:
         {
             // Open the preview window before the first asynchronous document export so the
             // browser still treats it as a direct user action instead of blocking the popup.
-            previewId = await JS.InvokeAsync<string?>("publisherStudio.claimStoryPrintPreview", title);
+            previewId = await JS.InvokeAsync<string?>("publisherStudio.claimStoryPrintPreview", title).ConfigureAwait(true);
             if (string.IsNullOrWhiteSpace(previewId))
                 throw new InvalidOperationException("The browser blocked the story print-preview window. Allow popups for this local PublisherStudio address and try again.");
 
-            var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml);
-            var html = await _richEdit.ExportDocumentAsync(DocumentFormat.Html);
+            var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml).ConfigureAwait(true);
+            var html = await _richEdit.ExportDocumentAsync(DocumentFormat.Html).ConfigureAwait(true);
             var prepared = await PrepareStoryPreview(
                 html,
-                Files.ExtractOpenXmlDocumentBackground(openXml));
+                Files.ExtractOpenXmlDocumentBackground(openXml)).ConfigureAwait(true);
             var pageLayout = Files.ExtractOpenXmlPageLayout(openXml);
             await JS.InvokeVoidAsync(
                 "publisherStudio.completeStoryPrintPreview",
                 previewId,
-                StandaloneStoryHtml(prepared, title, pageLayout, printPreview: true));
+                StandaloneStoryHtml(prepared, title, pageLayout, printPreview: true)).ConfigureAwait(true);
         }
         catch (Exception ex)
         {
             _error = ex.Message;
             if (!string.IsNullOrWhiteSpace(previewId))
             {
-                try { await JS.InvokeVoidAsync("publisherStudio.failStoryPrintPreview", previewId, ex.Message); }
+                try { await JS.InvokeVoidAsync("publisherStudio.failStoryPrintPreview", previewId, ex.Message).ConfigureAwait(true); }
                 catch (JSDisconnectedException) { }
                 catch (TaskCanceledException) { }
                 catch (JSException) { }
@@ -863,7 +864,7 @@ Required result contract:
                 "publisherStudio.prepareStoryPreviewHtmlInChunks",
                 htmlReference,
                 normalizedPreferredBackground,
-                receiverReference);
+                receiverReference).ConfigureAwait(true);
 
             var prepared = _storyPreviewResult
                 ?? throw new JSException(_storyPreviewTransferError ?? "The formatted story preview transfer did not complete.");

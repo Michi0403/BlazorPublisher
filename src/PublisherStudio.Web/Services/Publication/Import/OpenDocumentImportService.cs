@@ -105,13 +105,15 @@ public sealed partial class OpenDocumentImportService(
                     var contentEntry = archive.GetEntry("content.xml") ?? throw new InvalidDataException("The OpenDocument package does not contain content.xml.");
 
                     XDocument content;
-                    await using (var contentStream = contentEntry.Open())
+                    var contentStream = contentEntry.Open();
+                    await using (contentStream.ConfigureAwait(false))
                         content = await LoadXmlAsync(contentStream, cancellationToken).ConfigureAwait(false);
 
                     XDocument? styles = null;
                     if (archive.GetEntry("styles.xml") is { } stylesEntry)
                     {
-                        await using var styleStream = stylesEntry.Open();
+                        var styleStream = stylesEntry.Open();
+                        await using var configuredStyleStreamAsyncDisposal = styleStream.ConfigureAwait(false);
                         styles = await LoadXmlAsync(styleStream, cancellationToken).ConfigureAwait(false);
                     }
 

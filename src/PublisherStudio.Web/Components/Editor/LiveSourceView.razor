@@ -92,7 +92,7 @@
     {
         try
         {
-            var machine = await ProfileStore.LoadAsync();
+            var machine = await ProfileStore.LoadAsync().ConfigureAwait(true);
             var profile = Item.DeviceProfileId is Guid profileId
                 ? machine.Devices.FirstOrDefault(candidate => candidate.Id == profileId)
                 : null;
@@ -144,7 +144,7 @@
                 chromaSmoothness = Item.ChromaSmoothness,
                 chromaSpill = Item.ChromaSpill,
                 chromaResidualOpacity = Item.ChromaResidualOpacity
-            });
+            }).ConfigureAwait(true);
         }
         catch { _active = false; }
     }
@@ -172,7 +172,7 @@
                 chromaSmoothness = Item.ChromaSmoothness,
                 chromaSpill = Item.ChromaSpill,
                 chromaResidualOpacity = Item.ChromaResidualOpacity
-            });
+            }).ConfigureAwait(true);
         }
         catch { }
     }
@@ -210,7 +210,7 @@
 
     public async ValueTask DisposeAsync()
     {
-        try { await JS.InvokeVoidAsync("publisherStreaming.detachSource", RuntimeSourceId); }
+        try { await JS.InvokeVoidAsync("publisherStreaming.detachSource", RuntimeSourceId).ConfigureAwait(true); }
         catch { }
     }
 

@@ -135,7 +135,7 @@ public sealed class WebDataController : ControllerBase
     public async Task<IActionResult> Webhook(Guid bindingId, string token, CancellationToken cancellationToken)
     {
         using var reader = new StreamReader(Request.Body, detectEncodingFromByteOrderMarks: true);
-        var content = await reader.ReadToEndAsync(cancellationToken);
+        var content = await reader.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
         var contentType = Request.ContentType ?? "application/octet-stream";
         return _webhooks.TryPut(bindingId, token, content, contentType)
             ? Accepted(new { bindingId, receivedUtc = DateTimeOffset.UtcNow })

@@ -125,7 +125,8 @@ public sealed class PublicationWebDataService
                                 ? Timeout.InfiniteTimeSpan
                                 : TimeSpan.FromSeconds(binding.TimeoutSeconds);
                             using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
-                            await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+                            var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+                            await using var configuredResponseStreamAsyncDisposal = responseStream.ConfigureAwait(false);
                             using var responseReader = new StreamReader(responseStream, detectEncodingFromByteOrderMarks: true);
                             content = await responseReader.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
                             contentType = response.Content.Headers.ContentType?.MediaType ?? string.Empty;

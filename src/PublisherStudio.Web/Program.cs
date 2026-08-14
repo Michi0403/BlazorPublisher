@@ -28,14 +28,15 @@ public static class Program
     /// <returns>A task that completes when the operation has finished.</returns>
     public static async Task Main(string[] args)
     {
-        await using var app = BuildWebApp(args);
+        var app = BuildWebApp(args);
+        await using var configuredAppAsyncDisposal = app.ConfigureAwait(false);
         var endpointWriter = app.Services.GetRequiredService<IRuntimeEndpointWriter>();
         var hostLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("PublisherStudio.Host");
         try
         {
-            await app.StartAsync();
+            await app.StartAsync().ConfigureAwait(false);
             endpointWriter.Write(app);
-            await app.WaitForShutdownAsync();
+            await app.WaitForShutdownAsync().ConfigureAwait(false);
         }
         catch (OperationCanceledException exception) when (app.Lifetime.ApplicationStopping.IsCancellationRequested)
         {

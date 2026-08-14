@@ -22,7 +22,11 @@ public sealed class OrganicCapabilityCatalog(
     /// <summary>
     /// Occurs when this reviewed legacy metadata catalog changes. Its current descriptors are runtime-derived and do not own external mutation state.
     /// </summary>
-    public event Action? Changed;
+    public event Action? Changed
+    {
+        add { }
+        remove { }
+    }
 
     /// <summary>
     /// Retrieves capabilities in the organic capability directory so callers observe a consistent, authoritative runtime view.

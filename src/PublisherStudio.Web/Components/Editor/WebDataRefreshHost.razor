@@ -24,10 +24,10 @@
                 if (_observedDocumentId != State.Document.Id)
                 {
                     _observedDocumentId = State.Document.Id;
-                    await RefreshAsync(onOpen: true, cancellationToken);
+                    await RefreshAsync(onOpen: true, cancellationToken).ConfigureAwait(true);
                 }
-                if (!await timer.WaitForNextTickAsync(cancellationToken)) break;
-                if (State.HasDueWebData) await RefreshAsync(onOpen: false, cancellationToken);
+                if (!await timer.WaitForNextTickAsync(cancellationToken).ConfigureAwait(true)) break;
+                if (State.HasDueWebData) await RefreshAsync(onOpen: false, cancellationToken).ConfigureAwait(true);
             }
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
@@ -39,9 +39,9 @@
         try
         {
             if (onOpen)
-                await InvokeAsync(() => State.RefreshWebDataOnOpenAsync(cancellationToken));
+                await InvokeAsync(() => State.RefreshWebDataOnOpenAsync(cancellationToken)).ConfigureAwait(true);
             else
-                await InvokeAsync(() => State.RefreshWebDataAsync(force: false, cancellationToken: cancellationToken));
+                await InvokeAsync(() => State.RefreshWebDataAsync(force: false, cancellationToken: cancellationToken)).ConfigureAwait(true);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
         catch (Exception ex) { Console.Error.WriteLine($"Web data refresh failed: {ex}"); }
@@ -53,7 +53,7 @@
         _cancellation.Cancel();
         if (_loop is not null)
         {
-            try { await _loop; }
+            try { await _loop.ConfigureAwait(true); }
             catch (OperationCanceledException) { }
         }
         _cancellation.Dispose();

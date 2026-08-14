@@ -44,14 +44,14 @@ public sealed class StreamingIngestController(StreamingIngestUseCases useCases, 
             return;
         }
 
-        using var socket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+        using var socket = await HttpContext.WebSockets.AcceptWebSocketAsync().ConfigureAwait(false);
         var buffer = new byte[1024 * 1024];
         using var message = new MemoryStream();
         try
         {
             while (socket.State == WebSocketState.Open)
             {
-                var result = await socket.ReceiveAsync(buffer, HttpContext.RequestAborted);
+                var result = await socket.ReceiveAsync(buffer, HttpContext.RequestAborted).ConfigureAwait(false);
                 if (result.MessageType == WebSocketMessageType.Close) break;
                 message.Write(buffer, 0, result.Count);
                 if (!result.EndOfMessage) continue;
@@ -74,7 +74,7 @@ public sealed class StreamingIngestController(StreamingIngestUseCases useCases, 
         finally
         {
             if (socket.State is WebSocketState.Open or WebSocketState.CloseReceived)
-                try { await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Ingest closed", CancellationToken.None); } catch { }
+                try { await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Ingest closed", CancellationToken.None).ConfigureAwait(false); } catch { }
         }
     }
 
@@ -104,7 +104,7 @@ public sealed class StreamingIngestController(StreamingIngestUseCases useCases, 
             return;
         }
 
-        using var socket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-        await _webRtcHub.RunPublisherAsync(sessionId, socket, HttpContext.RequestAborted);
+        using var socket = await HttpContext.WebSockets.AcceptWebSocketAsync().ConfigureAwait(false);
+        await _webRtcHub.RunPublisherAsync(sessionId, socket, HttpContext.RequestAborted).ConfigureAwait(false);
     }
 }

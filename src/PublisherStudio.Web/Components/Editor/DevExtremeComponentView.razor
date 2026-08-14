@@ -65,7 +65,7 @@
         if (string.Equals(config, _lastRenderedConfig, StringComparison.Ordinal)) return;
         try
         {
-            await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.renderById", ElementId, config);
+            await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.renderById", ElementId, config).ConfigureAwait(true);
             _lastRenderedConfig = config;
         }
         catch (JSDisconnectedException) { }
@@ -74,7 +74,7 @@
 
     public async ValueTask DisposeAsync()
     {
-        try { await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.disposeById", ElementId); }
+        try { await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.disposeById", ElementId).ConfigureAwait(true); }
         catch (JSDisconnectedException) { }
         catch (InvalidOperationException) { }
     }

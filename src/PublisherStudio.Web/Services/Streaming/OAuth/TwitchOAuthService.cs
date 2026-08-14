@@ -140,10 +140,10 @@ public sealed class TwitchOAuthService
                     ["scopes"] = scopes
                 })
             };
-            using var response = await SendAsync(request, cancellationToken);
-            var payload = await ReadJsonAsync<TwitchDeviceAuthorizationResponse>(response, cancellationToken);
+            using var response = await SendAsync(request, cancellationToken).ConfigureAwait(false);
+            var payload = await ReadJsonAsync<TwitchDeviceAuthorizationResponse>(response, cancellationToken).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode || payload is null || string.IsNullOrWhiteSpace(payload.DeviceCode))
-                throw new InvalidOperationException(await ReadTwitchErrorAsync(response, payload?.Message, cancellationToken));
+                throw new InvalidOperationException(await ReadTwitchErrorAsync(response, payload?.Message, cancellationToken).ConfigureAwait(false));
 
             var expiresIn = Math.Clamp(payload.ExpiresIn, 60, 3600);
             return new TwitchDeviceAuthorization
@@ -185,8 +185,8 @@ public sealed class TwitchOAuthService
     try
     {
             ArgumentNullException.ThrowIfNull(authorization);
-            var token = await PollForTokenAsync(authorization, cancellationToken);
-            var validation = await ValidateTokenAsync(token.AccessToken, cancellationToken)
+            var token = await PollForTokenAsync(authorization, cancellationToken).ConfigureAwait(false);
+            var validation = await ValidateTokenAsync(token.AccessToken, cancellationToken).ConfigureAwait(false)
                 ?? throw new InvalidOperationException("Twitch returned an access token that could not be validated.");
             if (!string.Equals(validation.ClientId, authorization.ClientId, StringComparison.Ordinal))
                 throw new InvalidOperationException("Twitch returned a token for a different Client ID.");
@@ -197,13 +197,13 @@ public sealed class TwitchOAuthService
                 authorization.ClientId,
                 token.AccessToken,
                 validation.UserId,
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false);
 
             List<TwitchIngestCandidate> candidates = [];
             TwitchIngestCandidate selected;
             if (autoSelectIngest)
             {
-                candidates = await TestIngestEndpointsAsync(cancellationToken);
+                candidates = await TestIngestEndpointsAsync(cancellationToken).ConfigureAwait(false);
                 selected = candidates.FirstOrDefault(candidate => candidate.Reachable)
                     ?? candidates.FirstOrDefault(candidate => candidate.IsGlobal)
                     ?? CreateGlobalCandidate();
@@ -239,7 +239,7 @@ public sealed class TwitchOAuthService
                 IngestServerName = selected.Name,
                 IngestLatencyMilliseconds = selected.LatencyMilliseconds,
                 IngestLastTestedUtc = autoSelectIngest ? now : null
-            }, cancellationToken);
+            }, cancellationToken).ConfigureAwait(false);
 
             return new TwitchOAuthConnectionResult
             {
@@ -266,17 +266,17 @@ public sealed class TwitchOAuthService
     {
     try
     {
-            var candidates = await GetIngestCandidatesAsync(cancellationToken);
+            var candidates = await GetIngestCandidatesAsync(cancellationToken).ConfigureAwait(false);
             using var concurrency = new SemaphoreSlim(8, 8);
             var tasks = candidates.Select(async candidate =>
             {
-                await concurrency.WaitAsync(cancellationToken);
+                await concurrency.WaitAsync(cancellationToken).ConfigureAwait(false);
                 try
                 {
                     var samples = new List<double>(2);
                     for (var attempt = 0; attempt < 2; attempt++)
                     {
-                        var sample = await MeasureTcpLatencyAsync(candidate.Host, 1935, cancellationToken);
+                        var sample = await MeasureTcpLatencyAsync(candidate.Host, 1935, cancellationToken).ConfigureAwait(false);
                         if (sample is { } milliseconds) samples.Add(milliseconds);
                     }
                     candidate.Reachable = samples.Count > 0;
@@ -288,7 +288,7 @@ public sealed class TwitchOAuthService
                     concurrency.Release();
                 }
             });
-            var tested = await Task.WhenAll(tasks);
+            var tested = await Task.WhenAll(tasks).ConfigureAwait(false);
             return tested
                 .OrderBy(candidate => candidate.Reachable ? 0 : 1)
                 .ThenBy(candidate => candidate.LatencyMilliseconds ?? double.MaxValue)
@@ -320,8 +320,8 @@ public sealed class TwitchOAuthService
     try
     {
             ArgumentNullException.ThrowIfNull(candidate);
-            await _profiles.UpdateTwitchIngestAsync(profileId, candidate, DateTimeOffset.UtcNow, cancellationToken);
-            return (await _profiles.LoadAsync(cancellationToken)).Providers.FirstOrDefault(profile => profile.Id == profileId);
+            await _profiles.UpdateTwitchIngestAsync(profileId, candidate, DateTimeOffset.UtcNow, cancellationToken).ConfigureAwait(false);
+            return (await _profiles.LoadAsync(cancellationToken).ConfigureAwait(false)).Providers.FirstOrDefault(profile => profile.Id == profileId);
     
     }
     catch (Exception __serviceMethodException)
@@ -358,7 +358,7 @@ public sealed class TwitchOAuthService
     public async Task<bool> ValidateProfileAsync(Guid profileId, CancellationToken cancellationToken = default) {
     try
     {
-        return !string.IsNullOrWhiteSpace(await EnsureValidAccessTokenCoreAsync(profileId, forceValidation: true, cancellationToken: cancellationToken));
+        return !string.IsNullOrWhiteSpace(await EnsureValidAccessTokenCoreAsync(profileId, forceValidation: true, cancellationToken: cancellationToken).ConfigureAwait(false));
     }
     catch (Exception __serviceMethodException)
     {
@@ -377,7 +377,7 @@ public sealed class TwitchOAuthService
     {
     try
     {
-            var credentials = await _profiles.ReadOAuthCredentialsAsync(profileId, cancellationToken);
+            var credentials = await _profiles.ReadOAuthCredentialsAsync(profileId, cancellationToken).ConfigureAwait(false);
             if (credentials is not null)
             {
                 try
@@ -390,14 +390,14 @@ public sealed class TwitchOAuthService
                             ["token"] = credentials.AccessToken
                         })
                     };
-                    using var response = await SendAsync(request, cancellationToken);
+                    using var response = await SendAsync(request, cancellationToken).ConfigureAwait(false);
                 }
                 catch when (!cancellationToken.IsCancellationRequested)
                 {
                     // Local disconnect must still work if Twitch is temporarily unreachable.
                 }
             }
-            await _profiles.ClearOAuthSessionAsync(profileId, cancellationToken);
+            await _profiles.ClearOAuthSessionAsync(profileId, cancellationToken).ConfigureAwait(false);
     
     }
     catch (Exception __serviceMethodException)
@@ -421,10 +421,10 @@ public sealed class TwitchOAuthService
     {
     try
     {
-            await _tokenGate.WaitAsync(cancellationToken);
+            await _tokenGate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                var credentials = await _profiles.ReadOAuthCredentialsAsync(profileId, cancellationToken);
+                var credentials = await _profiles.ReadOAuthCredentialsAsync(profileId, cancellationToken).ConfigureAwait(false);
                 if (credentials is null) return null;
                 var now = DateTimeOffset.UtcNow;
                 if (!forceValidation
@@ -434,7 +434,7 @@ public sealed class TwitchOAuthService
                     && expiresUtc - now > _runtimePolicy.TwitchRefreshSafetyWindow)
                     return credentials.AccessToken;
 
-                var validation = await ValidateTokenAsync(credentials.AccessToken, cancellationToken);
+                var validation = await ValidateTokenAsync(credentials.AccessToken, cancellationToken).ConfigureAwait(false);
                 if (validation is not null
                     && string.Equals(validation.ClientId, credentials.ClientId, StringComparison.Ordinal)
                     && validation.ExpiresIn > (int)_runtimePolicy.TwitchRefreshSafetyWindow.TotalSeconds)
@@ -444,13 +444,13 @@ public sealed class TwitchOAuthService
                         now.AddSeconds(validation.ExpiresIn),
                         now,
                         string.Join(' ', validation.Scopes),
-                        cancellationToken);
+                        cancellationToken).ConfigureAwait(false);
                     return credentials.AccessToken;
                 }
 
                 if (string.IsNullOrWhiteSpace(credentials.RefreshToken)) return null;
-                var refreshed = await RefreshTokenAsync(credentials, cancellationToken);
-                var refreshedValidation = await ValidateTokenAsync(refreshed.AccessToken, cancellationToken);
+                var refreshed = await RefreshTokenAsync(credentials, cancellationToken).ConfigureAwait(false);
+                var refreshedValidation = await ValidateTokenAsync(refreshed.AccessToken, cancellationToken).ConfigureAwait(false);
                 if (refreshedValidation is null
                     || !string.Equals(refreshedValidation.ClientId, credentials.ClientId, StringComparison.Ordinal)) return null;
 
@@ -461,7 +461,7 @@ public sealed class TwitchOAuthService
                     now.AddSeconds(Math.Max(60, refreshedValidation.ExpiresIn)),
                     now,
                     string.Join(' ', refreshedValidation.Scopes.Length > 0 ? refreshedValidation.Scopes : refreshed.Scope),
-                    cancellationToken);
+                    cancellationToken).ConfigureAwait(false);
                 return refreshed.AccessToken;
             }
             finally
@@ -492,7 +492,7 @@ public sealed class TwitchOAuthService
             var interval = TimeSpan.FromSeconds(Math.Clamp(authorization.PollIntervalSeconds, 3, 30));
             while (DateTimeOffset.UtcNow < authorization.ExpiresUtc)
             {
-                await Task.Delay(interval, cancellationToken);
+                await Task.Delay(interval, cancellationToken).ConfigureAwait(false);
                 using var request = new HttpRequestMessage(HttpMethod.Post, TokenUrl)
                 {
                     Content = new FormUrlEncodedContent(new Dictionary<string, string>
@@ -503,11 +503,11 @@ public sealed class TwitchOAuthService
                         ["grant_type"] = "urn:ietf:params:oauth:grant-type:device_code"
                     })
                 };
-                using var response = await SendAsync(request, cancellationToken);
-                var payload = await ReadJsonAsync<TwitchTokenResponse>(response, cancellationToken);
+                using var response = await SendAsync(request, cancellationToken).ConfigureAwait(false);
+                var payload = await ReadJsonAsync<TwitchTokenResponse>(response, cancellationToken).ConfigureAwait(false);
                 if (response.IsSuccessStatusCode && payload is not null && !string.IsNullOrWhiteSpace(payload.AccessToken)) return payload;
 
-                var message = payload?.Message ?? await ReadResponseTextAsync(response, cancellationToken);
+                var message = payload?.Message ?? await ReadResponseTextAsync(response, cancellationToken).ConfigureAwait(false);
                 if (message.Contains("authorization_pending", StringComparison.OrdinalIgnoreCase)) continue;
                 if (message.Contains("slow_down", StringComparison.OrdinalIgnoreCase))
                 {
@@ -547,10 +547,10 @@ public sealed class TwitchOAuthService
                     ["client_id"] = credentials.ClientId
                 })
             };
-            using var response = await SendAsync(request, cancellationToken);
-            var payload = await ReadJsonAsync<TwitchTokenResponse>(response, cancellationToken);
+            using var response = await SendAsync(request, cancellationToken).ConfigureAwait(false);
+            var payload = await ReadJsonAsync<TwitchTokenResponse>(response, cancellationToken).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode || payload is null || string.IsNullOrWhiteSpace(payload.AccessToken))
-                throw new InvalidOperationException(await ReadTwitchErrorAsync(response, payload?.Message, cancellationToken));
+                throw new InvalidOperationException(await ReadTwitchErrorAsync(response, payload?.Message, cancellationToken).ConfigureAwait(false));
             if (string.IsNullOrWhiteSpace(payload.RefreshToken))
                 throw new InvalidOperationException("Twitch did not return the required rotated refresh token. Reconnect the account.");
             return payload;
@@ -576,10 +576,10 @@ public sealed class TwitchOAuthService
             if (string.IsNullOrWhiteSpace(accessToken)) return null;
             using var request = new HttpRequestMessage(HttpMethod.Get, ValidateUrl);
             request.Headers.Authorization = new AuthenticationHeaderValue("OAuth", accessToken);
-            using var response = await SendAsync(request, cancellationToken);
+            using var response = await SendAsync(request, cancellationToken).ConfigureAwait(false);
             if (response.StatusCode == HttpStatusCode.Unauthorized) return null;
             if (!response.IsSuccessStatusCode) return null;
-            return await ReadJsonAsync<TwitchValidationResponse>(response, cancellationToken);
+            return await ReadJsonAsync<TwitchValidationResponse>(response, cancellationToken).ConfigureAwait(false);
     
     }
     catch (Exception __serviceMethodException)
@@ -608,11 +608,11 @@ public sealed class TwitchOAuthService
             using var request = new HttpRequestMessage(HttpMethod.Get, $"{StreamKeyUrl}?broadcaster_id={Uri.EscapeDataString(broadcasterId)}");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             request.Headers.Add("Client-Id", clientId);
-            using var response = await SendAsync(request, cancellationToken);
-            var payload = await ReadJsonAsync<TwitchStreamKeyResponse>(response, cancellationToken);
+            using var response = await SendAsync(request, cancellationToken).ConfigureAwait(false);
+            var payload = await ReadJsonAsync<TwitchStreamKeyResponse>(response, cancellationToken).ConfigureAwait(false);
             var streamKey = payload?.Data.FirstOrDefault()?.StreamKey;
             if (!response.IsSuccessStatusCode || string.IsNullOrWhiteSpace(streamKey))
-                throw new InvalidOperationException(await ReadTwitchErrorAsync(response, payload?.Message, cancellationToken));
+                throw new InvalidOperationException(await ReadTwitchErrorAsync(response, payload?.Message, cancellationToken).ConfigureAwait(false));
             return streamKey;
     
     }
@@ -636,8 +636,8 @@ public sealed class TwitchOAuthService
             try
             {
                 using var request = new HttpRequestMessage(HttpMethod.Get, IngestUrl);
-                using var response = await SendAsync(request, cancellationToken);
-                var payload = await ReadJsonAsync<TwitchIngestResponse>(response, cancellationToken);
+                using var response = await SendAsync(request, cancellationToken).ConfigureAwait(false);
+                var payload = await ReadJsonAsync<TwitchIngestResponse>(response, cancellationToken).ConfigureAwait(false);
                 if (response.IsSuccessStatusCode && payload?.Ingests is { Count: > 0 })
                 {
                     candidates.AddRange(payload.Ingests.Select(ingest =>
@@ -700,7 +700,7 @@ public sealed class TwitchOAuthService
             var stopwatch = Stopwatch.StartNew();
             try
             {
-                await client.ConnectAsync(host, port, timeout.Token);
+                await client.ConnectAsync(host, port, timeout.Token).ConfigureAwait(false);
                 stopwatch.Stop();
                 return stopwatch.Elapsed.TotalMilliseconds;
             }
@@ -732,7 +732,7 @@ public sealed class TwitchOAuthService
     try
     {
             var client = _httpClientFactory.CreateClient(nameof(TwitchOAuthService));
-            return await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            return await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
     
     }
     catch (Exception __serviceMethodException)
@@ -753,8 +753,9 @@ public sealed class TwitchOAuthService
     {
         try
         {
-            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            return await JsonSerializer.DeserializeAsync<T>(stream, JsonOptions, cancellationToken);
+            var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+            await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(false);
+            return await JsonSerializer.DeserializeAsync<T>(stream, JsonOptions, cancellationToken).ConfigureAwait(false);
         }
         catch (JsonException)
         {
@@ -777,7 +778,7 @@ public sealed class TwitchOAuthService
     try
     {
             var message = parsedMessage;
-            if (string.IsNullOrWhiteSpace(message)) message = await ReadResponseTextAsync(response, cancellationToken);
+            if (string.IsNullOrWhiteSpace(message)) message = await ReadResponseTextAsync(response, cancellationToken).ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(message)) message = $"Twitch returned HTTP {(int)response.StatusCode} ({response.ReasonPhrase}).";
             return NormalizeTwitchError(message);
     
@@ -799,7 +800,7 @@ public sealed class TwitchOAuthService
     {
     try
     {
-            try { return await response.Content.ReadAsStringAsync(cancellationToken); }
+            try { return await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false); }
             catch { return string.Empty; }
     
     }

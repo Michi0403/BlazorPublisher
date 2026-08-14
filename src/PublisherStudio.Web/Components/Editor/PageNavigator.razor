@@ -94,15 +94,15 @@
     {
         _contextPageId = publicationPage.Id;
         State.SelectPage(publicationPage.Id);
-        await InvokeAsync(StateHasChanged);
-        await _pageContextMenu.ShowAsync(args);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        await _pageContextMenu.ShowAsync(args).ConfigureAwait(true);
     }
 
     private async Task ShowNavigatorMenu(MouseEventArgs args)
     {
         _contextPageId = null;
-        await InvokeAsync(StateHasChanged);
-        await _pageContextMenu.ShowAsync(args);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        await _pageContextMenu.ShowAsync(args).ConfigureAwait(true);
     }
 
     private void SelectContextPage()

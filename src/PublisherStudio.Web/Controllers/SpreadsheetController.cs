@@ -83,11 +83,12 @@ public sealed class SpreadsheetController : Controller
         try
         {
             var format = _documents.DetectFormat(workbook.FileName, workbook.ContentType);
-            await using var input = workbook.OpenReadStream();
+            var input = workbook.OpenReadStream();
+            await using var configuredInputAsyncDisposal = input.ConfigureAwait(false);
             using var output = workbook.Length <= int.MaxValue
                 ? new MemoryStream((int)workbook.Length)
                 : new MemoryStream();
-            await input.CopyToAsync(output, cancellationToken);
+            await input.CopyToAsync(output, cancellationToken).ConfigureAwait(false);
             var replaced = _sessions.Replace(sessionId, workbook.FileName, format, output.ToArray());
             return Ok(new
             {

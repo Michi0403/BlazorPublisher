@@ -122,7 +122,7 @@ public sealed class OrganicPluginController(
     /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpGet("capabilities")]
     public async Task<ActionResult<IReadOnlyList<OrganicCapabilityDescriptor>>> Capabilities(CancellationToken cancellationToken) =>
-        Ok(await capabilities.GetCapabilitiesAsync(cancellationToken));
+        Ok(await capabilities.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false));
 
     /// <summary>
     /// Returns the permissions projection for the organic plugin API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
@@ -180,7 +180,7 @@ public sealed class OrganicPluginController(
     [HttpPost("connect/{peerId}")]
     public async Task<ActionResult<OrganicConnectionState>> Connect(string peerId, CancellationToken cancellationToken)
     {
-        var state = await connection.ConnectAsync(peerId, cancellationToken);
+        var state = await connection.ConnectAsync(peerId, cancellationToken).ConfigureAwait(false);
         return state.IsConnected ? Ok(state) : Problem(state.LastError, statusCode: StatusCodes.Status503ServiceUnavailable);
     }
 
@@ -191,7 +191,7 @@ public sealed class OrganicPluginController(
     [HttpPost("disconnect")]
     public async Task<IActionResult> Disconnect()
     {
-        await connection.DisconnectAsync();
+        await connection.DisconnectAsync().ConfigureAwait(false);
         return NoContent();
     }
 
@@ -205,7 +205,7 @@ public sealed class OrganicPluginController(
     public async Task<IActionResult> Council([FromBody] OrganicCouncilPromptRequest request, CancellationToken cancellationToken)
     {
         if (!connection.State.IsConnected) return Conflict("PublisherStudio is not connected to LocalGPT.");
-        var messageId = await connection.SendCouncilRequestAsync(request, cancellationToken);
+        var messageId = await connection.SendCouncilRequestAsync(request, cancellationToken).ConfigureAwait(false);
         logger.LogInformation("Submitted organic council request {MessageId} for team {TeamKey}.", messageId, request.TeamKey);
         return Accepted(new { MessageId = messageId, request.TeamKey });
     }
@@ -219,9 +219,9 @@ public sealed class OrganicPluginController(
     [HttpPost("work/{id:guid}/approve")]
     public async Task<IActionResult> Approve(Guid id, CancellationToken cancellationToken)
     {
-        var item = await work.ApproveAsync(id, cancellationToken);
+        var item = await work.ApproveAsync(id, cancellationToken).ConfigureAwait(false);
         if (item is null) return NotFound();
-        await connection.SendWorkResultAsync(item, cancellationToken);
+        await connection.SendWorkResultAsync(item, cancellationToken).ConfigureAwait(false);
         return Ok(item);
     }
 
@@ -237,7 +237,7 @@ public sealed class OrganicPluginController(
     {
         if (!work.Decline(id, decision?.Reason ?? string.Empty)) return NotFound();
         var item = work.Get(id)!;
-        await connection.SendWorkResultAsync(item, cancellationToken);
+        await connection.SendWorkResultAsync(item, cancellationToken).ConfigureAwait(false);
         return Ok(item);
     }
 }

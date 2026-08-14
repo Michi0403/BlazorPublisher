@@ -118,15 +118,15 @@
     {
         if (!Visible || !_refresh) return;
         _refresh = false;
-        await Generate();
+        await Generate().ConfigureAwait(true);
     }
     private async Task Generate()
     {
         var request = _generationRequest;
         try
         {
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js");
-            var svg = await _module.InvokeAsync<string>("generateBarcodeSvg", _draft);
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js").ConfigureAwait(true);
+            var svg = await _module.InvokeAsync<string>("generateBarcodeSvg", _draft).ConfigureAwait(true);
             if (request != _generationRequest) return;
             _svg = svg;
             _error = null;
@@ -137,21 +137,22 @@
             _svg = string.Empty;
             _error = ex.Message;
         }
-        await InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
     }
     private void Queue() { _generationRequest++; _refresh = true; StateHasChanged(); }
     private Task RefreshNow() { _generationRequest++; return Generate(); }
     private Task ShowContextMenu(MouseEventArgs args) => _menu.ShowAsync(args);
-    private async Task Save() { _draft.SvgMarkup = _svg; await Saved.InvokeAsync(Clone(_draft)); }
+    private async Task Save() { _draft.SvgMarkup = _svg; await Saved.InvokeAsync(Clone(_draft)).ConfigureAwait(true); }
     private Task Cancel() => Cancelled.InvokeAsync();
     private async Task ImportValueFile(InputFileChangeEventArgs args)
     {
         try
         {
             var file = args.File;
-            await using var stream = file.OpenReadStream(long.MaxValue);
+            var stream = file.OpenReadStream(long.MaxValue);
+            await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
             using var reader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true);
-            var source = await reader.ReadToEndAsync();
+            var source = await reader.ReadToEndAsync().ConfigureAwait(true);
             var extension = Path.GetExtension(file.Name).ToLowerInvariant();
             _draft.Value = extension switch
             {
@@ -171,7 +172,7 @@
         {
             _importInfo = null;
             _error = ex.Message;
-            await InvokeAsync(StateHasChanged);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
         }
     }
 
@@ -339,7 +340,7 @@
     public async ValueTask DisposeAsync()
     {
         if (_module is null) return;
-        try { await _module.DisposeAsync(); }
+        try { await _module.DisposeAsync().ConfigureAwait(true); }
         catch (JSDisconnectedException) { }
         catch (TaskCanceledException) { }
         catch (ObjectDisposedException) { }

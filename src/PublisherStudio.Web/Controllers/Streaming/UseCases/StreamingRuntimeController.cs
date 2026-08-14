@@ -32,7 +32,7 @@ public sealed class StreamingRuntimeController(StreamingRuntimeUseCases useCases
     public async Task<IActionResult> DiscoverDevices(
         [FromQuery] string? ffmpegPath,
         CancellationToken cancellationToken) =>
-        Ok(await _useCases.DiscoverDevicesAsync(ffmpegPath, cancellationToken));
+        Ok(await _useCases.DiscoverDevicesAsync(ffmpegPath, cancellationToken).ConfigureAwait(false));
 
     /// <summary>
     /// Retrieves now playing for the streaming runtime API operation, delegating application logic to the controller's services and returning the resulting HTTP-facing value.

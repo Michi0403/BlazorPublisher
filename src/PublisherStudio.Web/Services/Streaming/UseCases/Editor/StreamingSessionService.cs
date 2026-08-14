@@ -50,7 +50,7 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
     {
     try
     {
-            await _gate.WaitAsync(cancellationToken);
+            await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 if (_snapshot.Mode != PublicationStreamSessionMode.Idle) return;
@@ -64,7 +64,7 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
                     OutputEnabled = document.Streaming.Outputs.ToDictionary(item => item.Id, item => item.Enabled)
                 };
                 Changed?.Invoke();
-                var response = await _mediaHost.StartAsync(document, dryRun, cancellationToken);
+                var response = await _mediaHost.StartAsync(document, dryRun, cancellationToken).ConfigureAwait(false);
                 if (response is null)
                 {
                     _snapshot.Mode = PublicationStreamSessionMode.Idle;
@@ -103,14 +103,14 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
     {
     try
     {
-            await _gate.WaitAsync(cancellationToken);
+            await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 StopEventPolling();
                 try
                 {
                     if (_snapshot.SessionId is { } sessionId)
-                        await _mediaHost.StopAsync(sessionId, cancellationToken);
+                        await _mediaHost.StopAsync(sessionId, cancellationToken).ConfigureAwait(false);
                 }
                 finally
                 {
@@ -140,7 +140,7 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
     {
     try
     {
-            await _gate.WaitAsync(cancellationToken);
+            await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 if (_snapshot.Mode != PublicationStreamSessionMode.Live) return true;
@@ -149,7 +149,7 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
                 foreach (var outputId in enabledOutputs)
                 {
                     if (_snapshot.SessionId is { } sessionId
-                        && !await _mediaHost.SetOutputEnabledAsync(sessionId, outputId, false, cancellationToken))
+                        && !await _mediaHost.SetOutputEnabledAsync(sessionId, outputId, false, cancellationToken).ConfigureAwait(false))
                     {
                         succeeded = false;
                         continue;
@@ -183,12 +183,12 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
     {
     try
     {
-            await _gate.WaitAsync(cancellationToken);
+            await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 var enabled = !_snapshot.OutputEnabled.GetValueOrDefault(outputId);
                 if (_snapshot.SessionId is { } sessionId
-                    && !await _mediaHost.SetOutputEnabledAsync(sessionId, outputId, enabled, cancellationToken)) return;
+                    && !await _mediaHost.SetOutputEnabledAsync(sessionId, outputId, enabled, cancellationToken).ConfigureAwait(false)) return;
                 _snapshot.OutputEnabled[outputId] = enabled;
                 _snapshot.StatusText = DescribeActiveState();
                 Changed?.Invoke();
@@ -215,10 +215,10 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
     {
     try
     {
-            await _gate.WaitAsync(cancellationToken);
+            await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                _ = await SetRecordingCoreAsync(!_snapshot.Recording, cancellationToken);
+                _ = await SetRecordingCoreAsync(!_snapshot.Recording, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -243,10 +243,10 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
     {
     try
     {
-            await _gate.WaitAsync(cancellationToken);
+            await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                return await SetRecordingCoreAsync(enabled, cancellationToken);
+                return await SetRecordingCoreAsync(enabled, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -274,7 +274,7 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
             if (_snapshot.Mode == PublicationStreamSessionMode.Idle) return false;
             if (_snapshot.Recording == enabled) return true;
             if (_snapshot.SessionId is { } sessionId
-                && !await _mediaHost.SetRecordingAsync(sessionId, enabled, cancellationToken)) return false;
+                && !await _mediaHost.SetRecordingAsync(sessionId, enabled, cancellationToken).ConfigureAwait(false)) return false;
             _snapshot.Recording = enabled;
             _snapshot.StatusText = DescribeActiveState();
             Changed?.Invoke();
@@ -373,14 +373,14 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
                 {
                     try
                     {
-                        var events = await _mediaHost.ReadEventsAsync(sessionId, cancellationToken);
+                        var events = await _mediaHost.ReadEventsAsync(sessionId, cancellationToken).ConfigureAwait(false);
                         foreach (var hotkeyEvent in events) HotkeyTriggered?.Invoke(hotkeyEvent);
-                        await Task.Delay(300, cancellationToken);
+                        await Task.Delay(300, cancellationToken).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { break; }
                     catch
                     {
-                        try { await Task.Delay(1000, cancellationToken); }
+                        try { await Task.Delay(1000, cancellationToken).ConfigureAwait(false); }
                         catch (OperationCanceledException) { break; }
                     }
                 }

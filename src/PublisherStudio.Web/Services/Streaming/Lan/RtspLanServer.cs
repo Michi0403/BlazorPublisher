@@ -109,7 +109,7 @@ public sealed class RtspLanServer : IAsyncDisposable
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    var client = await _listener.AcceptTcpClientAsync(cancellationToken);
+                    var client = await _listener.AcceptTcpClientAsync(cancellationToken).ConfigureAwait(false);
                     _ = Task.Run(() => HandleClientAsync(client, cancellationToken), cancellationToken);
                 }
             }
@@ -137,7 +137,7 @@ public sealed class RtspLanServer : IAsyncDisposable
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    var result = await _rtpInput.ReceiveAsync(cancellationToken);
+                    var result = await _rtpInput.ReceiveAsync(cancellationToken).ConfigureAwait(false);
                     RtspClient[] clients;
                     lock (_sync) clients = _clients.Values.Where(item => item.Playing).ToArray();
                     foreach (var client in clients) client.Enqueue(result.Buffer);
@@ -165,7 +165,8 @@ public sealed class RtspLanServer : IAsyncDisposable
     try
     {
             var id = Guid.NewGuid();
-            await using var client = new RtspClient(tcpClient);
+            var client = new RtspClient(tcpClient);
+            await using var configuredClientAsyncDisposal = client.ConfigureAwait(false);
             lock (_sync) _clients[id] = client;
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(serverCancellation, client.Disconnected);
             var sessionId = Convert.ToHexString(Guid.NewGuid().ToByteArray()).ToLowerInvariant()[..16];
@@ -175,19 +176,19 @@ public sealed class RtspLanServer : IAsyncDisposable
                 client.StartSender(linked.Token);
                 while (!linked.IsCancellationRequested)
                 {
-                    var request = await ReadRequestAsync(client.Stream, linked.Token);
+                    var request = await ReadRequestAsync(client.Stream, linked.Token).ConfigureAwait(false);
                     if (request is null) break;
                     var cseq = request.Headers.GetValueOrDefault("CSeq", "1");
                     authenticated = authenticated || Authorize(request.Uri);
                     if (!authenticated)
                     {
-                        await client.SendControlAsync(Response(401, cseq, ["WWW-Authenticate: Bearer realm=PublisherStudio"]), linked.Token);
+                        await client.SendControlAsync(Response(401, cseq, ["WWW-Authenticate: Bearer realm=PublisherStudio"]), linked.Token).ConfigureAwait(false);
                         continue;
                     }
                     switch (request.Method)
                     {
                         case "OPTIONS":
-                            await client.SendControlAsync(Response(200, cseq, ["Public: OPTIONS, DESCRIBE, SETUP, PLAY, PAUSE, GET_PARAMETER, TEARDOWN"]), linked.Token);
+                            await client.SendControlAsync(Response(200, cseq, ["Public: OPTIONS, DESCRIBE, SETUP, PLAY, PAUSE, GET_PARAMETER, TEARDOWN"]), linked.Token).ConfigureAwait(false);
                             break;
                         case "DESCRIBE":
                         {
@@ -206,7 +207,7 @@ public sealed class RtspLanServer : IAsyncDisposable
                                 "Content-Type: application/sdp",
                                 $"Content-Base: {RequestBase(request.Uri)}/",
                                 $"Content-Length: {contentLength}"
-                            ], sdp), linked.Token);
+                            ], sdp), linked.Token).ConfigureAwait(false);
                             break;
                         }
                         case "SETUP":
@@ -214,7 +215,7 @@ public sealed class RtspLanServer : IAsyncDisposable
                             var transport = request.Headers.GetValueOrDefault("Transport", "RTP/AVP/TCP;unicast;interleaved=0-1");
                             if (!transport.Contains("RTP/AVP/TCP", StringComparison.OrdinalIgnoreCase))
                             {
-                                await client.SendControlAsync(Response(461, cseq), linked.Token);
+                                await client.SendControlAsync(Response(461, cseq), linked.Token).ConfigureAwait(false);
                                 break;
                             }
                             client.RtpChannel = ParseInterleavedChannel(transport);
@@ -222,7 +223,7 @@ public sealed class RtspLanServer : IAsyncDisposable
                             [
                                 $"Transport: RTP/AVP/TCP;unicast;interleaved={client.RtpChannel}-{client.RtpChannel + 1}",
                                 $"Session: {sessionId};timeout=60"
-                            ]), linked.Token);
+                            ]), linked.Token).ConfigureAwait(false);
                             break;
                         }
                         case "PLAY":
@@ -231,20 +232,20 @@ public sealed class RtspLanServer : IAsyncDisposable
                             [
                                 $"Session: {sessionId};timeout=60",
                                 $"RTP-Info: url={RequestBase(request.Uri)}/trackID=0"
-                            ]), linked.Token);
+                            ]), linked.Token).ConfigureAwait(false);
                             break;
                         case "PAUSE":
                             client.Playing = false;
-                            await client.SendControlAsync(Response(200, cseq, [$"Session: {sessionId}"]), linked.Token);
+                            await client.SendControlAsync(Response(200, cseq, [$"Session: {sessionId}"]), linked.Token).ConfigureAwait(false);
                             break;
                         case "GET_PARAMETER":
-                            await client.SendControlAsync(Response(200, cseq, [$"Session: {sessionId}"]), linked.Token);
+                            await client.SendControlAsync(Response(200, cseq, [$"Session: {sessionId}"]), linked.Token).ConfigureAwait(false);
                             break;
                         case "TEARDOWN":
-                            await client.SendControlAsync(Response(200, cseq, [$"Session: {sessionId}"]), linked.Token);
+                            await client.SendControlAsync(Response(200, cseq, [$"Session: {sessionId}"]), linked.Token).ConfigureAwait(false);
                             return;
                         default:
-                            await client.SendControlAsync(Response(405, cseq), linked.Token);
+                            await client.SendControlAsync(Response(405, cseq), linked.Token).ConfigureAwait(false);
                             break;
                     }
                 }
@@ -349,7 +350,7 @@ public sealed class RtspLanServer : IAsyncDisposable
             var one = new byte[1];
             while (buffer.Count < 64 * 1024)
             {
-                var read = await stream.ReadAsync(one, cancellationToken);
+                var read = await stream.ReadAsync(one, cancellationToken).ConfigureAwait(false);
                 if (read == 0) return null;
                 buffer.Add(one[0]);
                 var count = buffer.Count;
@@ -415,9 +416,9 @@ public sealed class RtspLanServer : IAsyncDisposable
             _rtpInput.Dispose();
             RtspClient[] clients;
             lock (_sync) { clients = _clients.Values.ToArray(); _clients.Clear(); }
-            foreach (var client in clients) await client.DisposeAsync();
+            foreach (var client in clients) await client.DisposeAsync().ConfigureAwait(false);
             foreach (var task in new[] { _acceptTask, _relayTask }.Where(item => item is not null))
-                try { await task!.WaitAsync(TimeSpan.FromSeconds(2)); } catch { }
+                try { await task!.WaitAsync(TimeSpan.FromSeconds(2)).ConfigureAwait(false); } catch { }
             _cancellation.Dispose();
             Status = "stopped";
     
@@ -509,11 +510,11 @@ public sealed class RtspLanServer : IAsyncDisposable
         {
             try
             {
-                await foreach (var packet in _rtp.Reader.ReadAllAsync(cancellationToken))
+                await foreach (var packet in _rtp.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
                 {
                     var header = new byte[] { 0x24, (byte)RtpChannel, (byte)(packet.Length >> 8), (byte)(packet.Length & 0xff) };
-                    await _controlSend.WaitAsync(cancellationToken);
-                    try { await Stream.WriteAsync(header, cancellationToken); await Stream.WriteAsync(packet, cancellationToken); await Stream.FlushAsync(cancellationToken); }
+                    await _controlSend.WaitAsync(cancellationToken).ConfigureAwait(false);
+                    try { await Stream.WriteAsync(header, cancellationToken).ConfigureAwait(false); await Stream.WriteAsync(packet, cancellationToken).ConfigureAwait(false); await Stream.FlushAsync(cancellationToken).ConfigureAwait(false); }
                     finally { _controlSend.Release(); }
                 }
             }
@@ -555,8 +556,8 @@ public sealed class RtspLanServer : IAsyncDisposable
         {
     try
     {
-                await _controlSend.WaitAsync(cancellationToken);
-                try { await Stream.WriteAsync(payload, cancellationToken); await Stream.FlushAsync(cancellationToken); }
+                await _controlSend.WaitAsync(cancellationToken).ConfigureAwait(false);
+                try { await Stream.WriteAsync(payload, cancellationToken).ConfigureAwait(false); await Stream.FlushAsync(cancellationToken).ConfigureAwait(false); }
                 finally { _controlSend.Release(); }
         
     }
@@ -579,7 +580,7 @@ public sealed class RtspLanServer : IAsyncDisposable
                 _rtp.Writer.TryComplete();
                 _disconnected.Cancel();
                 try { _client.Close(); } catch { }
-                if (_sender is not null) try { await _sender.WaitAsync(TimeSpan.FromSeconds(1)); } catch { }
+                if (_sender is not null) try { await _sender.WaitAsync(TimeSpan.FromSeconds(1)).ConfigureAwait(false); } catch { }
                 Stream.Dispose();
                 _client.Dispose();
                 _controlSend.Dispose();

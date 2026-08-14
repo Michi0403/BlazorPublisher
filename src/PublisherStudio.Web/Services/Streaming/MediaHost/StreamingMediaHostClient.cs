@@ -48,8 +48,8 @@ public sealed class StreamingMediaHostClient(
     {
     try
     {
-            var settings = await _profiles.LoadAsync(cancellationToken);
-            var devices = await _runtime.DiscoverDevicesAsync(settings.FfmpegPath, cancellationToken);
+            var settings = await _profiles.LoadAsync(cancellationToken).ConfigureAwait(false);
+            var devices = await _runtime.DiscoverDevicesAsync(settings.FfmpegPath, cancellationToken).ConfigureAwait(false);
             return devices.ToList();
     
     }
@@ -88,7 +88,7 @@ public sealed class StreamingMediaHostClient(
     {
     try
     {
-            var settings = await _profiles.LoadAsync(cancellationToken);
+            var settings = await _profiles.LoadAsync(cancellationToken).ConfigureAwait(false);
             var providers = new List<MediaHostOutputRequest>();
             foreach (var output in document.Streaming.Outputs)
             {
@@ -102,8 +102,8 @@ public sealed class StreamingMediaHostClient(
                 if (profile?.ChatEnabled == true && (!twitchOAuthChat || twitchOAuthHasChatScopes))
                 {
                     chatSecret = twitchOAuthChat
-                        ? await _twitchOAuth.EnsureValidAccessTokenAsync(profile.Id, cancellationToken) ?? string.Empty
-                        : await _profiles.ResolveChatSecretAsync(profile.Id, cancellationToken) ?? string.Empty;
+                        ? await _twitchOAuth.EnsureValidAccessTokenAsync(profile.Id, cancellationToken).ConfigureAwait(false) ?? string.Empty
+                        : await _profiles.ResolveChatSecretAsync(profile.Id, cancellationToken).ConfigureAwait(false) ?? string.Empty;
                 }
                 providers.Add(new MediaHostOutputRequest
                 {
@@ -115,7 +115,7 @@ public sealed class StreamingMediaHostClient(
                     Endpoint = profile?.Endpoint ?? string.Empty,
                     ChannelId = string.IsNullOrWhiteSpace(output.ChatChannel) ? profile?.ChannelId ?? string.Empty : output.ChatChannel,
                     AccountName = profile?.AccountName ?? string.Empty,
-                    Secret = profile is null ? string.Empty : await _profiles.ResolveSecretAsync(profile.Id, cancellationToken) ?? string.Empty,
+                    Secret = profile is null ? string.Empty : await _profiles.ResolveSecretAsync(profile.Id, cancellationToken).ConfigureAwait(false) ?? string.Empty,
                     ChatEnabled = profile?.ChatEnabled == true && !string.IsNullOrWhiteSpace(chatSecret),
                     ChatSecret = chatSecret,
                     TestMode = dryRun || output.UseProviderTestMode,

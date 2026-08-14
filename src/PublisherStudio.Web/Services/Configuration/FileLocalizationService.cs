@@ -277,7 +277,8 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
                         .Where(pair => !string.IsNullOrWhiteSpace(pair.Key))
                         .ToDictionary(pair => pair.Key.Trim(), pair => pair.Value ?? string.Empty, StringComparer.OrdinalIgnoreCase);
                     var path = Path.Combine(OverridePath, normalized + ".json");
-                    await using var stream = File.Create(path);
+                    var stream = File.Create(path);
+                    await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(false);
                     await JsonSerializer.SerializeAsync(stream, clean, JsonOptions, cancellationToken).ConfigureAwait(false);
                     _cache.TryRemove(normalized, out _);
     

@@ -101,7 +101,7 @@ public sealed class StreamingIngestUseCases(MediaSessionRegistry sessions)
     {
             if (!_sessions.TryGet(sessionId, out var session) || !session.LanDefinition.EnableBrowserWebRtc)
                 return false;
-            await session.WebRtc.RunPublisherAsync(socket, cancellationToken);
+            await session.WebRtc.RunPublisherAsync(socket, cancellationToken).ConfigureAwait(false);
             return true;
     
     }

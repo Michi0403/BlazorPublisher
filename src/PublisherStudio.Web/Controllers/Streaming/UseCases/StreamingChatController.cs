@@ -39,10 +39,10 @@ public sealed class StreamingChatController(StreamingChatUseCases useCases, Plat
             return;
         }
 
-        using var socket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-        await _hub.RunSubscriberAsync(sessionId, outputId, socket, HttpContext.RequestAborted);
+        using var socket = await HttpContext.WebSockets.AcceptWebSocketAsync().ConfigureAwait(false);
+        await _hub.RunSubscriberAsync(sessionId, outputId, socket, HttpContext.RequestAborted).ConfigureAwait(false);
         if (socket.State is WebSocketState.Open or WebSocketState.CloseReceived)
-            try { await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Chat subscription ended", CancellationToken.None); } catch { }
+            try { await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Chat subscription ended", CancellationToken.None).ConfigureAwait(false); } catch { }
     }
 
     /// <summary>
@@ -60,7 +60,7 @@ public sealed class StreamingChatController(StreamingChatUseCases useCases, Plat
         [FromBody] ChatSendRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await _useCases.SendAsync(sessionId, outputId, request.Message, cancellationToken);
+        var result = await _useCases.SendAsync(sessionId, outputId, request.Message, cancellationToken).ConfigureAwait(false);
         if (!result.Exists) return NotFound();
         if (result.Sent) return Accepted();
         return BadRequest(new { error = result.Error });

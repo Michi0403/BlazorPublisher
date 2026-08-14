@@ -50,7 +50,8 @@ public sealed class PublicationController(PublicationFileService files, ILogger<
         {
             logger.LogTrace($"Entering PublicationController.Validate.");
                     if (file.Length == 0) return BadRequest("The uploaded publication is empty.");
-                    await using var stream = file.OpenReadStream();
+                    var stream = file.OpenReadStream();
+                    await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(false);
                     using var reader = new StreamReader(stream);
                     var json = await reader.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
                     return Ok(files.Deserialize(json));

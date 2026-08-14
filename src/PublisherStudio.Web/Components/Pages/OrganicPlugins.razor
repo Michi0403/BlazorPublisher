@@ -444,7 +444,7 @@
         WorkCoordinator.Changed += OnServiceChanged;
         ResultStore.Changed += OnServiceChanged;
         RecurringScreenReader.Changed += OnServiceChanged;
-        _capabilities = await CapabilityCatalog.GetCapabilitiesAsync();
+        _capabilities = await CapabilityCatalog.GetCapabilitiesAsync().ConfigureAwait(true);
         Refresh();
         ApplyCurrentPublisherContext();
     }
@@ -453,9 +453,9 @@
     {
         if (!firstRender || _automationStateLoaded) return;
         _automationStateLoaded = true;
-        try { _browserAutomationEnabled = await JS.InvokeAsync<bool>("publisherAutomation.isEnabled"); }
+        try { _browserAutomationEnabled = await JS.InvokeAsync<bool>("publisherAutomation.isEnabled").ConfigureAwait(true); }
         catch (JSException exception) { Logger.LogDebug(exception, "Browser automation state is not available before JavaScript startup completes."); }
-        await InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
     }
 
     private bool CanRunCouncil => Connection.State.IsLinked && Connection.State.HasCapability("council.run");
@@ -513,7 +513,7 @@
     {
         try
         {
-            var state = await Connection.ConnectAsync(peerId);
+            var state = await Connection.ConnectAsync(peerId).ConfigureAwait(true);
             if (state.IsConnected)
             {
                 _permission.PeerId = peerId;
@@ -542,8 +542,8 @@
                 UserConfirmed = true,
                 ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(10)
             };
-            var correlationId = await Connection.SendEnvelopeAsync(envelope);
-            var result = await Connection.WaitForResultAsync(correlationId, TimeSpan.FromSeconds(10));
+            var correlationId = await Connection.SendEnvelopeAsync(envelope).ConfigureAwait(true);
+            var result = await Connection.WaitForResultAsync(correlationId, TimeSpan.FromSeconds(10)).ConfigureAwait(true);
             if (result.MessageType != OrganicWireMessageType.Pong)
                 throw new InvalidDataException($"Expected a 1-Wire Pong but received {result.MessageType}.");
 
@@ -555,7 +555,7 @@
             _roundTripStatus = $"Round-trip test failed: {exception.Message}";
             Notifications.Error(_roundTripStatus, "Organic connection test", nameof(OrganicPlugins));
         }
-        await InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
     }
 
     private async Task ToggleBrowserAutomationAsync()
@@ -566,8 +566,8 @@
             return;
         }
         _browserAutomationEnabled = _browserAutomationEnabled
-            ? await JS.InvokeAsync<bool>("publisherAutomation.disableForSession")
-            : await JS.InvokeAsync<bool>("publisherAutomation.enableForSession");
+            ? await JS.InvokeAsync<bool>("publisherAutomation.disableForSession").ConfigureAwait(true)
+            : await JS.InvokeAsync<bool>("publisherAutomation.enableForSession").ConfigureAwait(true);
         Notifications.Information(
             _browserAutomationEnabled
                 ? "Browser automation is enabled only for this browser tab and only while the 1-Wire peer remains linked."
@@ -579,9 +579,9 @@
     {
         if (_browserAutomationEnabled)
         {
-            _browserAutomationEnabled = await JS.InvokeAsync<bool>("publisherAutomation.disableForSession");
+            _browserAutomationEnabled = await JS.InvokeAsync<bool>("publisherAutomation.disableForSession").ConfigureAwait(true);
         }
-        await Connection.DisconnectAsync();
+        await Connection.DisconnectAsync().ConfigureAwait(true);
         Notifications.Information("PublisherStudio disconnected from LocalGPT.", source: nameof(OrganicPlugins));
         Refresh();
     }
@@ -597,7 +597,7 @@
                 "learning-round" => ["publisher.business-context"],
                 _ => ["publisher.business-context"]
             };
-            var id = await Connection.SendCouncilRequestAsync(_councilRequest);
+            var id = await Connection.SendCouncilRequestAsync(_councilRequest).ConfigureAwait(true);
             Notifications.Success($"Council request {id} was submitted.", "Council round started", nameof(OrganicPlugins));
             var team = _councilRequest.TeamKey;
             _councilRequest = NewCouncilRequest(team);
@@ -645,7 +645,7 @@ Required result contract:
 3. Before completing the Council run, invoke the LocalGPT DX function publisher.text.proposal.request with JSON parameters containing target, text and a concise reason.
 4. Do not mutate the publication automatically. Once the user inserts the proposal it becomes ordinary PublisherStudio content and is included in normal HTML/export output.
 """;
-            var id = await Connection.SendCouncilRequestAsync(request);
+            var id = await Connection.SendCouncilRequestAsync(request).ConfigureAwait(true);
             Notifications.Success($"Text-generation Council request {id} was submitted.", "Text proposal requested", nameof(OrganicPlugins));
             _textGenerationPrompt = string.Empty;
         }
@@ -753,7 +753,7 @@ Required result contract:
         try
         {
             var session = await RecurringScreenReader.StartAsync(
-                Connection.State.PeerId, _screenReaderSelector, _screenReaderPrompt, _screenReaderIntervalSeconds);
+                Connection.State.PeerId, _screenReaderSelector, _screenReaderPrompt, _screenReaderIntervalSeconds).ConfigureAwait(true);
             Notifications.Success($"Recurring screen-reader session {session.Id} started.", "Screen reader", nameof(OrganicPlugins));
             Refresh();
         }
@@ -766,7 +766,7 @@ Required result contract:
 
     private async Task StopScreenReaderAsync(Guid id)
     {
-        if (await RecurringScreenReader.StopAsync(id))
+        if (await RecurringScreenReader.StopAsync(id).ConfigureAwait(true))
             Notifications.Information("Recurring screen-reader help stopped.", source: nameof(OrganicPlugins));
         Refresh();
     }
@@ -795,9 +795,9 @@ Required result contract:
 
     private async Task ApproveAsync(Guid id)
     {
-        var item = await WorkCoordinator.ApproveAsync(id);
+        var item = await WorkCoordinator.ApproveAsync(id).ConfigureAwait(true);
         if (item is null) return;
-        await Connection.SendWorkResultAsync(item);
+        await Connection.SendWorkResultAsync(item).ConfigureAwait(true);
         Notifications.Success($"{item.CapabilityKey} completed with one-time approval.", "Organic work", nameof(OrganicPlugins));
         Refresh();
     }
@@ -806,7 +806,7 @@ Required result contract:
     {
         if (!WorkCoordinator.Decline(id, "Declined by the PublisherStudio user.")) return;
         var item = WorkCoordinator.Get(id);
-        if (item is not null) await Connection.SendWorkResultAsync(item);
+        if (item is not null) await Connection.SendWorkResultAsync(item).ConfigureAwait(true);
         Notifications.Warning("The requested organ action was declined.", "Organic work", nameof(OrganicPlugins));
         Refresh();
     }

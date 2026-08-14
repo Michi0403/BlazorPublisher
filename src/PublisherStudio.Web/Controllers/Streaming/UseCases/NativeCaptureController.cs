@@ -51,16 +51,16 @@ public sealed class NativeCaptureController(NativeCaptureUseCases useCases) : Co
             return;
         }
 
-        using var socket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+        using var socket = await HttpContext.WebSockets.AcceptWebSocketAsync().ConfigureAwait(false);
         var subscription = capture.Subscribe();
         try
         {
             if (subscription.Initialization.Length > 0)
-                await socket.SendAsync(subscription.Initialization, WebSocketMessageType.Binary, true, HttpContext.RequestAborted);
-            await foreach (var chunk in subscription.Reader.ReadAllAsync(HttpContext.RequestAborted))
+                await socket.SendAsync(subscription.Initialization, WebSocketMessageType.Binary, true, HttpContext.RequestAborted).ConfigureAwait(false);
+            await foreach (var chunk in subscription.Reader.ReadAllAsync(HttpContext.RequestAborted).ConfigureAwait(false))
             {
                 if (socket.State != WebSocketState.Open) break;
-                await socket.SendAsync(chunk, WebSocketMessageType.Binary, true, HttpContext.RequestAborted);
+                await socket.SendAsync(chunk, WebSocketMessageType.Binary, true, HttpContext.RequestAborted).ConfigureAwait(false);
             }
         }
         catch (OperationCanceledException) when (HttpContext.RequestAborted.IsCancellationRequested) { }
@@ -69,7 +69,7 @@ public sealed class NativeCaptureController(NativeCaptureUseCases useCases) : Co
         {
             capture.Unsubscribe(subscription.Id);
             if (socket.State is WebSocketState.Open or WebSocketState.CloseReceived)
-                try { await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Native capture ended", CancellationToken.None); } catch { }
+                try { await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Native capture ended", CancellationToken.None).ConfigureAwait(false); } catch { }
         }
     }
 

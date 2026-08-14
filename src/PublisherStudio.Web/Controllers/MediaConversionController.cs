@@ -29,7 +29,7 @@ public sealed class MediaConversionController(IMediaConversionService conversion
     /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpGet("capabilities")]
     public async Task<ActionResult<MediaConversionCapabilities>> Capabilities(CancellationToken cancellationToken) =>
-        Ok(await _conversions.GetCapabilitiesAsync(cancellationToken));
+        Ok(await _conversions.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false));
 
     /// <summary>
     /// Returns the profiles projection for the media conversion API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
@@ -101,8 +101,9 @@ public sealed class MediaConversionController(IMediaConversionService conversion
             return BadRequest($"The conversion options JSON is invalid: {exception.Message}");
         }
 
-        await using var stream = file.OpenReadStream();
-        var job = await _conversions.QueueAsync(stream, file.FileName, file.ContentType, presetId, options, cancellationToken);
+        var stream = file.OpenReadStream();
+        await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(false);
+        var job = await _conversions.QueueAsync(stream, file.FileName, file.ContentType, presetId, options, cancellationToken).ConfigureAwait(false);
         return AcceptedAtAction(nameof(Job), new { id = job.Id }, job);
     }
 
@@ -118,7 +119,7 @@ public sealed class MediaConversionController(IMediaConversionService conversion
         var job = _conversions.GetJob(id);
         if (job is null) return NotFound();
         if (job.Status != MediaConversionJobStatus.Completed) return Conflict("The conversion is not complete.");
-        var stream = await _conversions.OpenOutputAsync(id, cancellationToken);
+        var stream = await _conversions.OpenOutputAsync(id, cancellationToken).ConfigureAwait(false);
         return stream is null ? NotFound() : File(stream, job.OutputMimeType, job.OutputFileName, enableRangeProcessing: true);
     }
 

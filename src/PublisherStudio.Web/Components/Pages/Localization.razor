@@ -97,7 +97,7 @@
         _saving = true;
         try
         {
-            await LocalizationService.SaveOverridesAsync(_culture, _strings);
+            await LocalizationService.SaveOverridesAsync(_culture, _strings).ConfigureAwait(true);
             _status = $"Saved {_strings.Count} {_culture} string overrides.";
             Logger.LogInformation("Saved {StringCount} localization overrides for culture {Culture}.", _strings.Count, _culture);
             Notifications.Success(_status, "Translations saved", nameof(Localization));

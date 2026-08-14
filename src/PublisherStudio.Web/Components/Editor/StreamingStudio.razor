@@ -798,7 +798,7 @@
         if (Visible && !_wasVisible)
         {
             _draft = Clone(Document.Streaming);
-            _machine = await ProfileStore.LoadAsync();
+            _machine = await ProfileStore.LoadAsync().ConfigureAwait(true);
             _providerDraft = _machine.Providers.FirstOrDefault() is { } first ? Clone(first) : null;
             _selectedOutputId = _draft.Outputs.FirstOrDefault()?.Id;
             _twitchIngestCandidates = [];
@@ -808,7 +808,7 @@
         else if (!Visible && _wasVisible)
         {
             _twitchOAuthCancellation?.Cancel();
-            await CloseTwitchAuthorizationWindowAsync();
+            await CloseTwitchAuthorizationWindowAsync().ConfigureAwait(true);
         }
         _wasVisible = Visible;
     }
@@ -872,36 +872,36 @@
         _twitchAuthorization = null;
         try
         {
-            var popupReserved = await JS.InvokeAsync<bool>("publisherStreaming.reserveExternalAuthorizationWindow", "publisherstudio-twitch-oauth");
+            var popupReserved = await JS.InvokeAsync<bool>("publisherStreaming.reserveExternalAuthorizationWindow", "publisherstudio-twitch-oauth").ConfigureAwait(true);
             if (!popupReserved)
                 throw new InvalidOperationException("The Twitch sign-in window was blocked. Allow pop-ups for PublisherStudio and try again.");
             _providerDraft.AuthenticationMode = StreamingProviderAuthenticationMode.OAuth;
             _providerDraft.Transport = PublicationStreamTransport.Rtmp;
             _providerDraft.OAuthClientId = TwitchOAuth.ResolveClientId(_providerDraft.OAuthClientId);
             if (string.IsNullOrWhiteSpace(_providerDraft.Endpoint)) _providerDraft.Endpoint = DefaultTwitchEndpoint;
-            var saved = await ProfileStore.SaveProviderAsync(_providerDraft, cancellation.Token);
+            var saved = await ProfileStore.SaveProviderAsync(_providerDraft, cancellation.Token).ConfigureAwait(true);
             _providerDraft = Clone(saved);
             var authorization = await TwitchOAuth.StartDeviceAuthorizationAsync(
                 _providerDraft.OAuthClientId,
                 _providerDraft.ChatEnabled,
-                cancellation.Token);
+                cancellation.Token).ConfigureAwait(true);
             _twitchAuthorization = authorization;
             _status = $"Twitch sign-in is waiting in the browser. Activation code: {authorization.UserCode}.";
             var navigated = await JS.InvokeAsync<bool>(
                 "publisherStreaming.navigateExternalAuthorizationWindow",
                 "publisherstudio-twitch-oauth",
-                authorization.VerificationUri);
+                authorization.VerificationUri).ConfigureAwait(true);
             if (!navigated)
                 throw new InvalidOperationException("PublisherStudio could not open the Twitch authorization page. Allow pop-ups and try again.");
-            await InvokeAsync(StateHasChanged);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
 
             var result = await TwitchOAuth.CompleteDeviceAuthorizationAsync(
                 _providerDraft.Id,
                 authorization,
                 _providerDraft.AutoSelectIngest,
                 _providerDraft.Endpoint,
-                cancellation.Token);
-            _machine = await ProfileStore.LoadAsync(cancellation.Token);
+                cancellation.Token).ConfigureAwait(true);
+            _machine = await ProfileStore.LoadAsync(cancellation.Token).ConfigureAwait(true);
             _providerDraft = result.Profile is not null
                 ? Clone(result.Profile)
                 : _machine.Providers.FirstOrDefault(profile => profile.Id == saved.Id) is { } stored
@@ -910,12 +910,12 @@
             _twitchIngestCandidates = result.IngestCandidates;
             _twitchAuthorization = null;
             _status = result.Message;
-            await CloseTwitchAuthorizationWindowAsync();
+            await CloseTwitchAuthorizationWindowAsync().ConfigureAwait(true);
         }
         catch (OperationCanceledException)
         {
             _status = "Twitch sign-in was cancelled.";
-            await CloseTwitchAuthorizationWindowAsync();
+            await CloseTwitchAuthorizationWindowAsync().ConfigureAwait(true);
         }
         catch (Exception exception)
         {
@@ -926,7 +926,7 @@
                     "publisherStreaming.showExternalAuthorizationMessage",
                     "publisherstudio-twitch-oauth",
                     "Twitch connection failed",
-                    exception.Message);
+                    exception.Message).ConfigureAwait(true);
             }
             catch { }
         }
@@ -936,19 +936,19 @@
             _twitchOAuthBusy = false;
             if (ReferenceEquals(_twitchOAuthCancellation, cancellation)) _twitchOAuthCancellation = null;
             cancellation.Dispose();
-            await InvokeAsync(StateHasChanged);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
         }
     }
 
     private async Task CancelTwitchOAuth()
     {
         _twitchOAuthCancellation?.Cancel();
-        await CloseTwitchAuthorizationWindowAsync();
+        await CloseTwitchAuthorizationWindowAsync().ConfigureAwait(true);
     }
 
     private async Task CloseTwitchAuthorizationWindowAsync()
     {
-        try { await JS.InvokeVoidAsync("publisherStreaming.closeExternalAuthorizationWindow", "publisherstudio-twitch-oauth"); }
+        try { await JS.InvokeVoidAsync("publisherStreaming.closeExternalAuthorizationWindow", "publisherstudio-twitch-oauth").ConfigureAwait(true); }
         catch { }
     }
 
@@ -956,8 +956,8 @@
     {
         if (_providerDraft is null) return;
         var profileId = _providerDraft.Id;
-        await TwitchOAuth.DisconnectAsync(profileId);
-        _machine = await ProfileStore.LoadAsync();
+        await TwitchOAuth.DisconnectAsync(profileId).ConfigureAwait(true);
+        _machine = await ProfileStore.LoadAsync().ConfigureAwait(true);
         _providerDraft = _machine.Providers.FirstOrDefault(profile => profile.Id == profileId) is { } stored
             ? Clone(stored)
             : null;
@@ -973,8 +973,8 @@
         try
         {
             _status = "Testing Twitch ingest endpoints from this computer…";
-            await InvokeAsync(StateHasChanged);
-            _twitchIngestCandidates = await TwitchOAuth.TestIngestEndpointsAsync();
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            _twitchIngestCandidates = await TwitchOAuth.TestIngestEndpointsAsync().ConfigureAwait(true);
             var selected = _twitchIngestCandidates.FirstOrDefault(candidate => candidate.Reachable)
                 ?? _twitchIngestCandidates.FirstOrDefault(candidate => candidate.IsGlobal);
             if (selected is not null) ApplyTwitchIngestCandidate(selected);
@@ -1052,8 +1052,8 @@
             if (string.IsNullOrWhiteSpace(_providerDraft.Endpoint)) _providerDraft.Endpoint = DefaultTwitchEndpoint;
         }
 
-        var saved = await ProfileStore.SaveProviderAsync(_providerDraft);
-        _machine = await ProfileStore.LoadAsync();
+        var saved = await ProfileStore.SaveProviderAsync(_providerDraft).ConfigureAwait(true);
+        _machine = await ProfileStore.LoadAsync().ConfigureAwait(true);
         _providerDraft = Clone(saved);
         _status = saved.AuthenticationMode == StreamingProviderAuthenticationMode.OAuth && !saved.HasStoredOAuthSession
             ? $"Saved {saved.Name}. Connect Twitch to complete OAuth authorization."
@@ -1064,8 +1064,8 @@
     {
         if (_providerDraft is null) return;
         var id = _providerDraft.Id;
-        await ProfileStore.DeleteProviderAsync(id);
-        _machine = await ProfileStore.LoadAsync();
+        await ProfileStore.DeleteProviderAsync(id).ConfigureAwait(true);
+        _machine = await ProfileStore.LoadAsync().ConfigureAwait(true);
         _providerDraft = _machine.Providers.FirstOrDefault() is { } first ? Clone(first) : null;
         _draft.Outputs.RemoveAll(output => output.ProfileId == id);
         if (SelectedOutput is null) _selectedOutputId = _draft.Outputs.FirstOrDefault()?.Id;
@@ -1243,7 +1243,8 @@
     {
         try
         {
-            _browserDevices = await JS.InvokeAsync<List<BrowserMediaDeviceInfo>>("publisherStreaming.enumerateDevices") ?? [];
+            var browserDevicesInvocation = JS.InvokeAsync<List<BrowserMediaDeviceInfo>>("publisherStreaming.enumerateDevices");
+            _browserDevices = await browserDevicesInvocation.ConfigureAwait(true) ?? [];
             _status = $"Found {_browserDevices.Count} browser media devices.";
         }
         catch (Exception exception) { _status = exception.Message; }
@@ -1254,7 +1255,7 @@
         try
         {
             var ffmpeg = FfmpegLocatorService.Resolve(_machine.FfmpegPath);
-            _nativeDevices = await MediaHost.DiscoverNativeDevicesAsync();
+            _nativeDevices = await MediaHost.DiscoverNativeDevicesAsync().ConfigureAwait(true);
             if (_nativeDevices.Count > 0)
             {
                 _status = ffmpeg is null
@@ -1384,7 +1385,7 @@
 
     private async Task SaveMachineOptions()
     {
-        await ProfileStore.SaveMachineOptionsAsync(_machine);
+        await ProfileStore.SaveMachineOptionsAsync(_machine).ConfigureAwait(true);
         _status = "Machine options and reusable profiles saved.";
     }
 
@@ -1393,7 +1394,7 @@
         _contextKind = "provider";
         _contextId = profile.Id;
         EditProvider(profile);
-        await ShowContextMenu(args);
+        await ShowContextMenu(args).ConfigureAwait(true);
     }
 
     private async Task ShowOutputContextMenu(PublicationStreamOutput output, MouseEventArgs args)
@@ -1401,34 +1402,34 @@
         _contextKind = "output";
         _contextId = output.Id;
         _selectedOutputId = output.Id;
-        await ShowContextMenu(args);
+        await ShowContextMenu(args).ConfigureAwait(true);
     }
 
     private async Task ShowDeviceContextMenu(StreamingDeviceProfile profile, MouseEventArgs args)
     {
         _contextKind = "device";
         _contextId = profile.Id;
-        await ShowContextMenu(args);
+        await ShowContextMenu(args).ConfigureAwait(true);
     }
 
     private async Task ShowHotkeyContextMenu(PublicationStreamingHotkey hotkey, MouseEventArgs args)
     {
         _contextKind = "hotkey";
         _contextId = hotkey.Id;
-        await ShowContextMenu(args);
+        await ShowContextMenu(args).ConfigureAwait(true);
     }
 
     private async Task ShowWorkspaceContextMenu(MouseEventArgs args)
     {
         _contextKind = "workspace";
         _contextId = null;
-        await ShowContextMenu(args);
+        await ShowContextMenu(args).ConfigureAwait(true);
     }
 
     private async Task ShowContextMenu(MouseEventArgs args)
     {
-        await InvokeAsync(StateHasChanged);
-        await _streamingContextMenu.ShowAsync(args);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        await _streamingContextMenu.ShowAsync(args).ConfigureAwait(true);
     }
 
     private void EditContextProvider()
@@ -1450,7 +1451,7 @@
         var profile = _machine.Providers.FirstOrDefault(item => item.Id == _contextId);
         if (profile is null) return;
         _providerDraft = Clone(profile);
-        await DeleteProvider();
+        await DeleteProvider().ConfigureAwait(true);
     }
 
     private void SelectContextOutput()
@@ -1537,15 +1538,15 @@
     private async Task Apply()
     {
         _twitchOAuthCancellation?.Cancel();
-        await CloseTwitchAuthorizationWindowAsync();
-        await Saved.InvokeAsync(_draft);
+        await CloseTwitchAuthorizationWindowAsync().ConfigureAwait(true);
+        await Saved.InvokeAsync(_draft).ConfigureAwait(true);
     }
 
     private async Task Cancel()
     {
         _twitchOAuthCancellation?.Cancel();
-        await CloseTwitchAuthorizationWindowAsync();
-        await Cancelled.InvokeAsync();
+        await CloseTwitchAuthorizationWindowAsync().ConfigureAwait(true);
+        await Cancelled.InvokeAsync().ConfigureAwait(true);
     }
     private T Clone<T>(T value) => JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(value))!;
     private string ShortId(string value) => string.IsNullOrWhiteSpace(value) ? "default" : value.Length <= 16 ? value : value[..16] + "…";

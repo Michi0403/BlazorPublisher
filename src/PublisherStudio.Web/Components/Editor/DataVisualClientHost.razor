@@ -23,7 +23,7 @@
             return;
 
         _lastClientConfigJson = configJson;
-        try { await JS.InvokeVoidAsync("PublisherStudioLiveDataRuntime.renderVisualById", ElementId, config); }
+        try { await JS.InvokeVoidAsync("PublisherStudioLiveDataRuntime.renderVisualById", ElementId, config).ConfigureAwait(true); }
         catch (JSDisconnectedException) { }
         catch (InvalidOperationException) { }
     }
@@ -32,7 +32,7 @@
     {
         try
         {
-            await JS.InvokeVoidAsync("PublisherStudioLiveDataRuntime.disposeById", ElementId);
+            await JS.InvokeVoidAsync("PublisherStudioLiveDataRuntime.disposeById", ElementId).ConfigureAwait(true);
         }
         catch (JSDisconnectedException) { }
         catch (InvalidOperationException) { }

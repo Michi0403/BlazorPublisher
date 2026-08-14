@@ -534,15 +534,15 @@
         if (!_workspaceInitialized)
         {
             _workspaceInitialized = true;
-            await JS.InvokeVoidAsync("publisherStudio.initializeWorkspace", "publisher-workspace");
-            await JS.InvokeVoidAsync("publisherStudio.setDocumentDirty", State.IsDirty);
+            await JS.InvokeVoidAsync("publisherStudio.initializeWorkspace", "publisher-workspace").ConfigureAwait(true);
+            await JS.InvokeVoidAsync("publisherStudio.setDocumentDirty", State.IsDirty).ConfigureAwait(true);
         }
 
         var hotkeySignature = System.Text.Json.JsonSerializer.Serialize(State.Document.Streaming.Hotkeys);
         if (!string.Equals(hotkeySignature, _boundStreamingHotkeys, StringComparison.Ordinal))
         {
             _streamingHotkeyReference ??= DotNetObjectReference.Create(this);
-            await JS.InvokeVoidAsync("publisherStreaming.bindHotkeys", State.Document.Streaming.Hotkeys, _streamingHotkeyReference);
+            await JS.InvokeVoidAsync("publisherStreaming.bindHotkeys", State.Document.Streaming.Hotkeys, _streamingHotkeyReference).ConfigureAwait(true);
             _boundStreamingHotkeys = hotkeySignature;
         }
     }
@@ -555,7 +555,7 @@
             StreamingSession.SetProgramPage(State.SelectedPageId);
         _ = InvokeAsync(async () =>
         {
-            try { await JS.InvokeVoidAsync("publisherStudio.setDocumentDirty", State.IsDirty); }
+            try { await JS.InvokeVoidAsync("publisherStudio.setDocumentDirty", State.IsDirty).ConfigureAwait(true); }
             catch (InvalidOperationException) { }
             catch (JSDisconnectedException) { }
             catch (TaskCanceledException) { }
@@ -573,14 +573,14 @@
         if (!CanUseAiCouncil) return;
         var text = State.AddText();
         State.SelectElement(text.Id);
-        await CancelPublisherPointerAsync();
+        await CancelPublisherPointerAsync().ConfigureAwait(true);
         _storyOpenAiOnShow = true;
         _storyEditorVisible = true;
     }
     private async Task InsertAiChatQuick()
     {
         if (!CanUseAiCouncil) return;
-        await CancelPublisherPointerAsync();
+        await CancelPublisherPointerAsync().ConfigureAwait(true);
         var component = State.AddDevExtremeComponent(PublicationComponentKind.Chat);
         component.ChatAiMode = PublicationChatAiMode.LocalGptCouncil;
         component.ChatAiTeamKey = "general";
@@ -713,7 +713,7 @@
     {
         var mime = MediaData.NormalizeMimeType(converted.MimeType, "application/octet-stream");
         var dataUrl = $"data:{mime};base64,{Convert.ToBase64String(converted.Content)}";
-        await CancelPublisherPointerAsync();
+        await CancelPublisherPointerAsync().ConfigureAwait(true);
         _mediaConverterVisible = false;
 
         if (mime.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
@@ -797,18 +797,18 @@
         _pendingCanvasInsert = request with { Kind = kind };
         if (kind == "picture")
         {
-            await CancelPublisherPointerAsync();
-            await OpenHiddenFileInput("picture-file-input");
+            await CancelPublisherPointerAsync().ConfigureAwait(true);
+            await OpenHiddenFileInput("picture-file-input").ConfigureAwait(true);
             return;
         }
         if (kind == "spreadsheet")
         {
-            await CreateSpreadsheet();
+            await CreateSpreadsheet().ConfigureAwait(true);
             return;
         }
         if (kind == "video")
         {
-            await OpenMediaStudio(PublicationElementKind.Video, null);
+            await OpenMediaStudio(PublicationElementKind.Video, null).ConfigureAwait(true);
             return;
         }
         _pendingCanvasInsert = null;
@@ -836,7 +836,7 @@
                 if (target is ImageFrameElement image)
                 {
                     await OpenPictureStudioWithInsertedRaster(image, dataUrl, request.Name,
-                        request.PixelWidth, request.PixelHeight, request.TargetX, request.TargetY);
+                        request.PixelWidth, request.PixelHeight, request.TargetX, request.TargetY).ConfigureAwait(true);
                     ShowNotice($"Added {request.Name} as a new Picture Studio layer. Apply the Studio project to update the picture.");
                     return;
                 }
@@ -865,7 +865,7 @@
                         TrimStartSeconds = 0,
                         TrimEndSeconds = duration
                     };
-                    await OpenMediaStudio(media.Kind, media, segment);
+                    await OpenMediaStudio(media.Kind, media, segment).ConfigureAwait(true);
                     ShowNotice($"Added {request.Name} to the {(videoKind ? "Video" : "Audio")} Studio sequence. Apply the Studio project to update the media object.");
                     return;
                 }
@@ -884,7 +884,7 @@
                 var format = Spreadsheets.DetectFormat(request.Name, mimeType);
                 var spreadsheet = State.AddSpreadsheet(bytes, request.Name, format, request.X, request.Y);
                 _pendingNewSpreadsheetId = spreadsheet.Id;
-                await OpenSpreadsheetEditorById(spreadsheet.Id, pendingNew: true);
+                await OpenSpreadsheetEditorById(spreadsheet.Id, pendingNew: true).ConfigureAwait(true);
                 ShowNotice($"Opened {request.Name} in Spreadsheet Studio. Apply it to keep the new frame.");
                 return;
             }
@@ -948,7 +948,7 @@
         double targetX,
         double targetY)
     {
-        await CancelPublisherPointerAsync();
+        await CancelPublisherPointerAsync().ConfigureAwait(true);
         var document = image.PictureSource is not null
             ? PictureDocuments.Clone(image.PictureSource)
             : CreateManagedPictureDocument(image);
@@ -1071,27 +1071,27 @@
     }
     private async Task OpenPublicationPicker()
     {
-        await CancelPublisherPointerAsync();
-        await OpenHiddenFileInput("publication-file-input");
+        await CancelPublisherPointerAsync().ConfigureAwait(true);
+        await OpenHiddenFileInput("publication-file-input").ConfigureAwait(true);
     }
 
     private async Task OpenOpenDocumentPicker()
     {
-        await CancelPublisherPointerAsync();
-        await OpenHiddenFileInput("opendocument-file-input");
+        await CancelPublisherPointerAsync().ConfigureAwait(true);
+        await OpenHiddenFileInput("opendocument-file-input").ConfigureAwait(true);
     }
     private async Task OpenPicturePicker()
     {
         _pendingCanvasInsert = null;
         _replacePictureTargetId = null;
-        await CancelPublisherPointerAsync();
-        await OpenHiddenFileInput("picture-file-input");
+        await CancelPublisherPointerAsync().ConfigureAwait(true);
+        await OpenHiddenFileInput("picture-file-input").ConfigureAwait(true);
     }
     private async Task OpenSpreadsheetPicker()
     {
         _pendingCanvasInsert = null;
-        await CancelPublisherPointerAsync();
-        await OpenHiddenFileInput("spreadsheet-file-input");
+        await CancelPublisherPointerAsync().ConfigureAwait(true);
+        await OpenHiddenFileInput("spreadsheet-file-input").ConfigureAwait(true);
     }
 
     private async Task OpenReplacePicturePicker()
@@ -1099,8 +1099,8 @@
         if (State.SelectedElement is not ImageFrameElement image) return;
         _pendingCanvasInsert = null;
         _replacePictureTargetId = image.Id;
-        await CancelPublisherPointerAsync();
-        await OpenHiddenFileInput("picture-file-input");
+        await CancelPublisherPointerAsync().ConfigureAwait(true);
+        await OpenHiddenFileInput("picture-file-input").ConfigureAwait(true);
     }
     private Task OpenVideoPicker()
     {
@@ -1109,20 +1109,21 @@
     }
     private async Task OpenAudioPicker()
     {
-        await CancelPublisherPointerAsync();
-        await OpenHiddenFileInput("audio-file-input");
+        await CancelPublisherPointerAsync().ConfigureAwait(true);
+        await OpenHiddenFileInput("audio-file-input").ConfigureAwait(true);
     }
 
     private async Task OpenHiddenFileInput(string id)
     {
         try
         {
-            await JS.InvokeVoidAsync("publisherStudio.clickElement", id);
+            await JS.InvokeVoidAsync("publisherStudio.clickElement", id).ConfigureAwait(true);
         }
         catch (JSException)
         {
-            await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js");
-            await module.InvokeVoidAsync("clickElementById", id);
+            var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js").ConfigureAwait(true);
+            await using var configuredModuleAsyncDisposal = module.ConfigureAwait(true);
+            await module.InvokeVoidAsync("clickElementById", id).ConfigureAwait(true);
         }
     }
 
@@ -1130,12 +1131,13 @@
     {
         var json = Files.Serialize(State.Document);
         var name = Files.SafeFileName(State.Document.Name) + ".pubstudio.json";
-        await using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+        var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+        await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
         using var streamReference = new DotNetStreamReference(stream);
-        await JS.InvokeVoidAsync("publisherStudio.downloadStream", name, streamReference, "application/json");
+        await JS.InvokeVoidAsync("publisherStudio.downloadStream", name, streamReference, "application/json").ConfigureAwait(true);
         State.MarkSaved();
-        await Recovery.DeleteAsync(State.Document.Id);
-        await JS.InvokeVoidAsync("publisherStudio.setDocumentDirty", false);
+        await Recovery.DeleteAsync(State.Document.Id).ConfigureAwait(true);
+        await JS.InvokeVoidAsync("publisherStudio.setDocumentDirty", false).ConfigureAwait(true);
         ShowNotice($"Saved {name}");
     }
 
@@ -1152,8 +1154,8 @@
     {
         try
         {
-            await Task.Delay(1800, cancellation.Token);
-            await InvokeAsync(() => SaveRecoveryNow(cancellation.Token));
+            await Task.Delay(1800, cancellation.Token).ConfigureAwait(true);
+            await InvokeAsync(() => SaveRecoveryNow(cancellation.Token)).ConfigureAwait(true);
         }
         catch (OperationCanceledException) { }
         catch (Exception ex) { Console.Error.WriteLine($"Publication recovery save failed: {ex}"); }
@@ -1163,7 +1165,7 @@
     {
         if (!State.IsDirty) return;
         var json = Files.Serialize(State.Document);
-        await Recovery.SaveAsync(State.Document.Id, State.Document.Name, State.Document.ModifiedUtc, json, cancellationToken);
+        await Recovery.SaveAsync(State.Document.Id, State.Document.Name, State.Document.ModifiedUtc, json, cancellationToken).ConfigureAwait(true);
     }
 
     private Task RestoreRecovery()
@@ -1178,15 +1180,15 @@
     private async Task DismissRecovery()
     {
         if (_recoveryCandidate is { } recovery)
-            await Recovery.DeleteAsync(recovery.DocumentId);
+            await Recovery.DeleteAsync(recovery.DocumentId).ConfigureAwait(true);
         _recoveryCandidate = null;
     }
 
-    private async Task ExportPng() => await ExportRasterPages("png");
-    private async Task ExportJpeg() => await ExportRasterPages("jpeg");
-    private async Task ExportSvg() => await ExportPage("svg");
-    private async Task ExportSelectedPng() => await ExportSelectedObject("png");
-    private async Task ExportSelectedSvg() => await ExportSelectedObject("svg");
+    private async Task ExportPng() => await ExportRasterPages("png").ConfigureAwait(true);
+    private async Task ExportJpeg() => await ExportRasterPages("jpeg").ConfigureAwait(true);
+    private async Task ExportSvg() => await ExportPage("svg").ConfigureAwait(true);
+    private async Task ExportSelectedPng() => await ExportSelectedObject("png").ConfigureAwait(true);
+    private async Task ExportSelectedSvg() => await ExportSelectedObject("svg").ConfigureAwait(true);
 
     private async Task ExportSelectedObject(string format)
     {
@@ -1198,7 +1200,7 @@
             _selectedPictureExportVisible = true;
             return;
         }
-        await ExportSelectedObjectCore(selected, format);
+        await ExportSelectedObjectCore(selected, format).ConfigureAwait(true);
     }
 
     private Task CloseSelectedPictureExport()
@@ -1214,13 +1216,13 @@
             ? State.CurrentPage.Elements.FirstOrDefault(item => item.Id == id)
             : State.SelectedElement;
         var format = _selectedPictureExportFormat;
-        await CloseSelectedPictureExport();
+        await CloseSelectedPictureExport().ConfigureAwait(true);
         if (selected is ImageFrameElement { PictureSource: not null } picture)
         {
-            await ExportPictureStudioMergedSelection(picture, format);
+            await ExportPictureStudioMergedSelection(picture, format).ConfigureAwait(true);
             return;
         }
-        await ExportSelectedObjectCore(selected, format);
+        await ExportSelectedObjectCore(selected, format).ConfigureAwait(true);
     }
 
     private async Task ExportPictureStudioMergedSelection(ImageFrameElement selected, string format)
@@ -1234,17 +1236,17 @@
             var objectName = Files.SafeFileName(selected.Name);
             var fileName = $"{baseName}-{objectName}.{normalized}";
             ShowNotice($"Rendering {selected.Name} through Picture Studio as merged {normalized.ToUpperInvariant()}…");
-            var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/pictureStudioInterop.js?v=2.6.5");
+            var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/pictureStudioInterop.js?v=2.6.5").ConfigureAwait(true);
             try
             {
                 if (normalized == "svg")
-                    await module.InvokeVoidAsync("downloadPictureStudioMergedSvg", selected.PictureSource, fileName);
+                    await module.InvokeVoidAsync("downloadPictureStudioMergedSvg", selected.PictureSource, fileName).ConfigureAwait(true);
                 else
-                    await module.InvokeVoidAsync("downloadPictureStudio", selected.PictureSource, fileName, "image/png", 1d);
+                    await module.InvokeVoidAsync("downloadPictureStudio", selected.PictureSource, fileName, "image/png", 1d).ConfigureAwait(true);
             }
             finally
             {
-                try { await module.DisposeAsync(); } catch (JSDisconnectedException) { }
+                try { await module.DisposeAsync().ConfigureAwait(true); } catch (JSDisconnectedException) { }
             }
             ShowNotice($"Exported {selected.Name} from the full Picture Studio canvas without Mainframe cropping.");
         }
@@ -1266,16 +1268,16 @@
             var baseName = Files.SafeFileName(State.Document.Name);
             var objectName = Files.SafeFileName(selected.Name);
             var fileName = $"{baseName}-{objectName}-layered.svg";
-            await CloseSelectedPictureExport();
+            await CloseSelectedPictureExport().ConfigureAwait(true);
             ShowNotice($"Exporting {selected.Name} with editable Picture Studio layers…");
-            var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/pictureStudioInterop.js?v=2.6.5");
+            var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/pictureStudioInterop.js?v=2.6.5").ConfigureAwait(true);
             try
             {
-                await module.InvokeVoidAsync("downloadPictureStudioSvg", selected.PictureSource, fileName);
+                await module.InvokeVoidAsync("downloadPictureStudioSvg", selected.PictureSource, fileName).ConfigureAwait(true);
             }
             finally
             {
-                try { await module.DisposeAsync(); } catch (JSDisconnectedException) { }
+                try { await module.DisposeAsync().ConfigureAwait(true); } catch (JSDisconnectedException) { }
             }
             ShowNotice($"Exported {selected.Name} as layered Picture Studio SVG.");
         }
@@ -1296,14 +1298,14 @@
             var objectName = Files.SafeFileName(selected.Name);
             var fileName = $"{baseName}-{objectName}.{extension}";
             ShowNotice($"Rendering {selected.Name} as merged {format.ToUpperInvariant()}…");
-            await InvokeAsync(StateHasChanged);
-            await Task.Yield();
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            await Task.Delay(1).ConfigureAwait(true);
             await JS.InvokeVoidAsync(
                 "publisherStudio.exportPublicationElement",
                 selected.Id.ToString(),
                 fileName,
                 format,
-                State.Document.View.ExportDpi);
+                State.Document.View.ExportDpi).ConfigureAwait(true);
             ShowNotice($"Exported {selected.Name} as merged {format.ToUpperInvariant()}.");
         }
         catch (Exception ex)
@@ -1318,8 +1320,8 @@
         {
             var baseName = Files.SafeFileName(State.Document.Name);
             ShowNotice($"Rendering {format.ToUpperInvariant()} page export…");
-            await InvokeAsync(StateHasChanged);
-            await Task.Yield();
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            await Task.Delay(1).ConfigureAwait(true);
             var result = await JS.InvokeAsync<PageExportResult>(
                 "publisherStudio.exportPublicationPages",
                 ".print-publication",
@@ -1327,7 +1329,7 @@
                 format,
                 State.Document.View.ExportDpi,
                 State.Document.View.CompressPageArchives,
-                State.Document.View.RasterJpegQuality);
+                State.Document.View.RasterJpegQuality).ConfigureAwait(true);
             ShowNotice(result.Count == 1
                 ? $"Exported {result.FileName}."
                 : $"Exported {result.Count} page images in {result.FileName}.");
@@ -1344,9 +1346,9 @@
         {
             var fileName = $"{Files.SafeFileName(State.Document.Name)}-page-{CurrentPageNumber}.{(format == "jpeg" ? "jpg" : format)}";
             ShowNotice($"Rendering current page as {format.ToUpperInvariant()}…");
-            await InvokeAsync(StateHasChanged);
-            await Task.Yield();
-            await JS.InvokeVoidAsync("publisherStudio.exportPage", "publisher-page", fileName, format, State.Document.View.ExportDpi, State.Document.Zoom, State.Document.View.RasterJpegQuality);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            await Task.Delay(1).ConfigureAwait(true);
+            await JS.InvokeVoidAsync("publisherStudio.exportPage", "publisher-page", fileName, format, State.Document.View.ExportDpi, State.Document.Zoom, State.Document.View.RasterJpegQuality).ConfigureAwait(true);
             ShowNotice($"Exported current page as {format.ToUpperInvariant()}.");
         }
         catch (Exception ex)
@@ -1379,17 +1381,17 @@
         _singleWebsiteExporting = true;
         try
         {
-            await State.RefreshWebDataAsync(force: true);
-            await InvokeAsync(StateHasChanged);
-            await SaveRecoveryNow();
+            await State.RefreshWebDataAsync(force: true).ConfigureAwait(true);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            await SaveRecoveryNow().ConfigureAwait(true);
             var presentation = string.Equals(_singleWebsiteMode, "presentation", StringComparison.OrdinalIgnoreCase);
             var fileName = Files.SafeFileName(State.Document.Name) + (presentation ? ".html" : "-site.html");
             ShowNotice(presentation ? "Preparing interactive presentation HTML…" : "Preparing single-file website export…");
-            await InvokeAsync(StateHasChanged);
-            await Task.Yield();
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            await Task.Delay(1).ConfigureAwait(true);
             var result = presentation
-                ? await JS.InvokeAsync<SingleWebsiteExportResult>("publisherStudio.exportWebsite", fileName, State.Document.Name, _singleWebsiteOptions)
-                : await JS.InvokeAsync<SingleWebsiteExportResult>("publisherStudio.exportSite", fileName, State.Document.Name, _singleWebsiteOptions);
+                ? await JS.InvokeAsync<SingleWebsiteExportResult>("publisherStudio.exportWebsite", fileName, State.Document.Name, _singleWebsiteOptions).ConfigureAwait(true)
+                : await JS.InvokeAsync<SingleWebsiteExportResult>("publisherStudio.exportSite", fileName, State.Document.Name, _singleWebsiteOptions).ConfigureAwait(true);
             _singleWebsiteExportVisible = false;
             var warningText = result.Warnings.Count > 0 ? $" · {result.Warnings.Count} warning(s)" : string.Empty;
             var savedText = result.SourceBytes > result.OutputBytes && result.SourceBytes > 0
@@ -1438,18 +1440,18 @@
         _structuredWebsiteExporting = true;
         try
         {
-            await State.RefreshWebDataAsync(force: true);
-            await InvokeAsync(StateHasChanged);
-            await SaveRecoveryNow();
+            await State.RefreshWebDataAsync(force: true).ConfigureAwait(true);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            await SaveRecoveryNow().ConfigureAwait(true);
             var fileName = Files.SafeFileName(State.Document.Name) + "-website.zip";
             ShowNotice("Preparing structured website and media assets…");
-            await InvokeAsync(StateHasChanged);
-            await Task.Yield();
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            await Task.Delay(1).ConfigureAwait(true);
             var result = await JS.InvokeAsync<StructuredWebsiteExportResult>(
                 "publisherStudio.exportStructuredWebsite",
                 fileName,
                 State.Document.Name,
-                _structuredWebsiteOptions);
+                _structuredWebsiteOptions).ConfigureAwait(true);
             _structuredWebsiteExportVisible = false;
             var reduction = result.SourceBytes > 0
                 ? $" · {Math.Max(0, 100d - result.ArchiveBytes * 100d / result.SourceBytes):0.#}% smaller than embedded source data"
@@ -1473,15 +1475,15 @@
         _videoExporting = true;
         try
         {
-            await State.RefreshWebDataAsync(force: true);
-            await InvokeAsync(StateHasChanged);
-            await SaveRecoveryNow();
+            await State.RefreshWebDataAsync(force: true).ConfigureAwait(true);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            await SaveRecoveryNow().ConfigureAwait(true);
             var fileName = Files.SafeFileName(State.Document.Name) + ".webm";
             ShowNotice("Choose this browser tab in the capture dialog and enable tab audio when media sound should be included.");
             var result = await JS.InvokeAsync<VideoExportResult>(
                 "publisherStudio.exportPresentationVideo",
                 System.Threading.CancellationToken.None,
-                [".print-publication", fileName, State.Document.Name]);
+                [".print-publication", fileName, State.Document.Name]).ConfigureAwait(true);
             var frame = result.PageSizedCapture && result.Width > 0 && result.Height > 0
                 ? $" · page frame {result.Width} × {result.Height}"
                 : " · full-tab fallback";
@@ -1509,13 +1511,13 @@
         finally
         {
             _videoExporting = false;
-            try { await JS.InvokeVoidAsync("publisherStudio.restorePublisherWorkspaceAfterExport", "publisher-stage"); }
+            try { await JS.InvokeVoidAsync("publisherStudio.restorePublisherWorkspaceAfterExport", "publisher-stage").ConfigureAwait(true); }
             catch (JSDisconnectedException) { }
             catch (TaskCanceledException) { }
         }
     }
 
-    private async Task Print() => await JS.InvokeVoidAsync("publisherStudio.printPublication");
+    private async Task Print() => await JS.InvokeVoidAsync("publisherStudio.printPublication").ConfigureAwait(true);
 
     private Task PreviewPageAnimations() => JS.InvokeVoidAsync("publisherStudio.previewPageAnimations", "publisher-page").AsTask();
     private Task PreviewObjectAnimations() => State.SelectedElementId is { } id
@@ -1526,7 +1528,7 @@
     private async Task FitPage()
     {
         if (_pageSurface is not null)
-            await _pageSurface.FitPageAsync();
+            await _pageSurface.FitPageAsync().ConfigureAwait(true);
     }
 
     private Task TogglePagesPane() => JS.InvokeVoidAsync("publisherStudio.toggleWorkspacePane", "publisher-workspace", "left").AsTask();
@@ -1534,7 +1536,7 @@
     private async Task ResetWorkspace()
     {
         _timelineVisible = false;
-        await JS.InvokeVoidAsync("publisherStudio.resetWorkspaceLayout", "publisher-workspace");
+        await JS.InvokeVoidAsync("publisherStudio.resetWorkspaceLayout", "publisher-workspace").ConfigureAwait(true);
     }
 
     private int CurrentPageNumber => Math.Max(1, State.Document.Pages.FindIndex(publicationPage => publicationPage.Id == State.SelectedPageId) + 1);
@@ -1543,9 +1545,10 @@
     {
         try
         {
-            await using var stream = args.File.OpenReadStream(long.MaxValue);
+            var stream = args.File.OpenReadStream(long.MaxValue);
+            await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
             using var reader = new StreamReader(stream);
-            State.Load(await reader.ReadToEndAsync());
+            State.Load(await reader.ReadToEndAsync().ConfigureAwait(true));
         }
         catch (Exception ex)
         {
@@ -1557,13 +1560,14 @@
     {
         try
         {
-            await using var stream = args.File.OpenReadStream(long.MaxValue);
-            var result = await OpenDocumentImporter.ImportAsync(stream, args.File.Name);
+            var stream = args.File.OpenReadStream(long.MaxValue);
+            await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
+            var result = await OpenDocumentImporter.ImportAsync(stream, args.File.Name).ConfigureAwait(true);
             State.Load(Files.Serialize(result.Document));
             var warningCount = result.Issues.Count(item => item.Severity == InterchangeIssueSeverity.Warning);
             var lossCount = result.Issues.Count(item => item.Severity == InterchangeIssueSeverity.Loss);
             ShowNotice($"Imported {State.Document.Pages.Count} OpenDocument page(s). {warningCount} warning(s), {lossCount} compatibility loss(es). The publication is now in PublisherStudio's native format.");
-            if (_pageSurface is not null) await _pageSurface.FitPageAsync();
+            if (_pageSurface is not null) await _pageSurface.FitPageAsync().ConfigureAwait(true);
         }
         catch (Exception ex)
         {
@@ -1580,14 +1584,15 @@
             if (!allowed.Contains(file.ContentType, StringComparer.OrdinalIgnoreCase))
                 throw new InvalidDataException("Unsupported picture format.");
 
-            await using var stream = file.OpenReadStream(long.MaxValue);
+            var stream = file.OpenReadStream(long.MaxValue);
+            await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
             using var buffer = new MemoryStream();
-            await stream.CopyToAsync(buffer);
+            await stream.CopyToAsync(buffer).ConfigureAwait(true);
             var dataUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer.ToArray())}";
             double[]? dropPlacement = null;
             try
             {
-                dropPlacement = await JS.InvokeAsync<double[]?>("publisherStudio.consumeCanvasInsertPlacement", "picture-file-input");
+                dropPlacement = await JS.InvokeAsync<double[]?>("publisherStudio.consumeCanvasInsertPlacement", "picture-file-input").ConfigureAwait(true);
             }
             catch (JSException)
             {
@@ -1639,9 +1644,10 @@
         {
             var file = args.File;
             var format = Spreadsheets.DetectFormat(file.Name, file.ContentType);
-            await using var stream = file.OpenReadStream(long.MaxValue);
+            var stream = file.OpenReadStream(long.MaxValue);
+            await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
             using var buffer = new MemoryStream();
-            await stream.CopyToAsync(buffer);
+            await stream.CopyToAsync(buffer).ConfigureAwait(true);
             var bytes = buffer.ToArray();
             if (bytes.Length == 0) throw new InvalidDataException("The selected spreadsheet is empty.");
 
@@ -1652,7 +1658,7 @@
                 item = State.AddSpreadsheet(bytes, file.Name, format);
             _pendingCanvasInsert = null;
             _pendingNewSpreadsheetId = item.Id;
-            await OpenSpreadsheetEditorById(item.Id, pendingNew: true);
+            await OpenSpreadsheetEditorById(item.Id, pendingNew: true).ConfigureAwait(true);
         }
         catch (Exception ex)
         {
@@ -1663,7 +1669,7 @@
 
     private async Task CreateSpreadsheet()
     {
-        await CancelPublisherPointerAsync();
+        await CancelPublisherPointerAsync().ConfigureAwait(true);
         var bytes = Spreadsheets.CreateBlankXlsx();
         SpreadsheetElement item;
         if (_pendingCanvasInsert is { Kind: "spreadsheet" } placement)
@@ -1672,7 +1678,7 @@
             item = State.AddSpreadsheet(bytes, "Spreadsheet.xlsx", SpreadsheetStorageFormat.Xlsx);
         _pendingCanvasInsert = null;
         _pendingNewSpreadsheetId = item.Id;
-        await OpenSpreadsheetEditorById(item.Id, pendingNew: true);
+        await OpenSpreadsheetEditorById(item.Id, pendingNew: true).ConfigureAwait(true);
     }
 
     private Task OpenSpreadsheetEditor()
@@ -1686,7 +1692,7 @@
     {
         var spreadsheet = State.CurrentPage.Elements.OfType<SpreadsheetElement>().FirstOrDefault(item => item.Id == elementId);
         if (spreadsheet is null) return;
-        await CancelPublisherPointerAsync();
+        await CancelPublisherPointerAsync().ConfigureAwait(true);
         if (_spreadsheetEditorSessionId != Guid.Empty) SpreadsheetSessions.Remove(_spreadsheetEditorSessionId);
         State.SelectElement(spreadsheet.Id);
         var session = SpreadsheetSessions.Create(spreadsheet.Id, spreadsheet.WorkbookFileName, spreadsheet.StorageFormat, spreadsheet.WorkbookContent);
@@ -1765,9 +1771,10 @@
     private async Task DownloadSelectedSpreadsheet()
     {
         if (State.SelectedElement is not SpreadsheetElement spreadsheet) return;
-        await using var stream = new MemoryStream(spreadsheet.WorkbookContent, writable: false);
+        var stream = new MemoryStream(spreadsheet.WorkbookContent, writable: false);
+        await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
         using var streamReference = new DotNetStreamReference(stream);
-        await JS.InvokeVoidAsync("publisherStudio.downloadStream", spreadsheet.WorkbookFileName, streamReference, SpreadsheetMimeType(spreadsheet.StorageFormat));
+        await JS.InvokeVoidAsync("publisherStudio.downloadStream", spreadsheet.WorkbookFileName, streamReference, SpreadsheetMimeType(spreadsheet.StorageFormat)).ConfigureAwait(true);
         ShowNotice($"Downloaded {spreadsheet.WorkbookFileName}");
     }
 
@@ -1780,8 +1787,8 @@
         _ => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     };
 
-    private async Task InsertVideo(InputFileChangeEventArgs args) => await InsertMediaFile(args, PublicationElementKind.Video);
-    private async Task InsertAudio(InputFileChangeEventArgs args) => await InsertMediaFile(args, PublicationElementKind.Audio);
+    private async Task InsertVideo(InputFileChangeEventArgs args) => await InsertMediaFile(args, PublicationElementKind.Video).ConfigureAwait(true);
+    private async Task InsertAudio(InputFileChangeEventArgs args) => await InsertMediaFile(args, PublicationElementKind.Audio).ConfigureAwait(true);
 
     private async Task InsertMediaFile(InputFileChangeEventArgs args, PublicationElementKind kind)
     {
@@ -1796,13 +1803,14 @@
             if (!mimeType.StartsWith(expected, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidDataException($"Unsupported {kind.ToString().ToLowerInvariant()} format: {Path.GetExtension(file.Name)}.");
 
-            await using var stream = file.OpenReadStream(long.MaxValue);
+            var stream = file.OpenReadStream(long.MaxValue);
+            await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
             using var buffer = new MemoryStream();
-            await stream.CopyToAsync(buffer);
+            await stream.CopyToAsync(buffer).ConfigureAwait(true);
             var bytes = buffer.ToArray();
             if (bytes.Length == 0) throw new InvalidDataException("The selected media file is empty.");
 
-            module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.6.5");
+            module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.6.5").ConfigureAwait(true);
             temporaryAssetId = Guid.NewGuid();
             var inspectionUrl = MediaAssets.RegisterBytes(temporaryAssetId, bytes, mimeType);
             MediaSourceInfo info;
@@ -1811,7 +1819,7 @@
                 info = await module.InvokeAsync<MediaSourceInfo>(
                     "inspectMediaDataUrl",
                     inspectionUrl,
-                    kind == PublicationElementKind.Video ? "video" : "audio");
+                    kind == PublicationElementKind.Video ? "video" : "audio").ConfigureAwait(true);
             }
             catch (Exception metadataError)
             {
@@ -1864,7 +1872,7 @@
             if (temporaryAssetId != Guid.Empty) MediaAssets.Remove(temporaryAssetId);
             if (module is not null)
             {
-                try { await module.DisposeAsync(); }
+                try { await module.DisposeAsync().ConfigureAwait(true); }
                 catch (JSDisconnectedException) { }
                 catch (TaskCanceledException) { }
                 catch (ObjectDisposedException) { }
@@ -1912,7 +1920,7 @@
         PublicationMediaElement? media,
         PublicationMediaSegment? insertedSegment = null)
     {
-        await CancelPublisherPointerAsync();
+        await CancelPublisherPointerAsync().ConfigureAwait(true);
         _mediaStudioTargetId = media?.Id;
         _mediaStudioKind = kind;
         _mediaStudioInitial = media;
@@ -2056,7 +2064,7 @@
         if (State.SelectedElement is not ImageFrameElement image) return;
         try
         {
-            var result = await JS.InvokeAsync<string>("publisherStudio.makeColorTransparent", image.DataUrl, image.TransparentColor, image.TransparentColorTolerance);
+            var result = await JS.InvokeAsync<string>("publisherStudio.makeColorTransparent", image.DataUrl, image.TransparentColor, image.TransparentColorTolerance).ConfigureAwait(true);
             State.UpdateSelected(_ => image.DataUrl = result);
             ShowNotice("The selected color was made transparent. Restore Original remains available.");
         }
@@ -2078,7 +2086,7 @@
 
     private async Task InsertBarcode()
     {
-        await CancelPublisherPointerAsync();
+        await CancelPublisherPointerAsync().ConfigureAwait(true);
         var item = State.AddBarcode();
         _pendingNewBarcodeId = item.Id;
         _barcodeEditorVisible = true;
@@ -2087,7 +2095,7 @@
     private async Task EditBarcode()
     {
         if (State.SelectedElement is not BarcodeElement) return;
-        await CancelPublisherPointerAsync();
+        await CancelPublisherPointerAsync().ConfigureAwait(true);
         _barcodeEditorVisible = true;
     }
 
@@ -2125,7 +2133,7 @@
     {
         try
         {
-            await JS.InvokeVoidAsync("publisherStudio.cancelCanvasInteraction", "publisher-stage");
+            await JS.InvokeVoidAsync("publisherStudio.cancelCanvasInteraction", "publisher-stage").ConfigureAwait(true);
         }
         catch (JSDisconnectedException) { }
         catch (TaskCanceledException) { }
@@ -2134,7 +2142,7 @@
 
     private async Task CreatePicture()
     {
-        await CancelPublisherPointerAsync();
+        await CancelPublisherPointerAsync().ConfigureAwait(true);
         _pictureEditorTargetId = null;
         _pictureEditorInitialDocument = null;
         _pictureEditorInitialRaster = null;
@@ -2146,7 +2154,7 @@
     private async Task EditSelectedPicture()
     {
         if (State.SelectedElement is not ImageFrameElement image) return;
-        await CancelPublisherPointerAsync();
+        await CancelPublisherPointerAsync().ConfigureAwait(true);
         _pictureEditorTargetId = image.Id;
         _pictureEditorInitialDocument = image.PictureSource;
         _pictureEditorInitialRaster = image.PictureSource is null ? image.DataUrl : null;
@@ -2195,7 +2203,7 @@
 
     private async Task InsertDataVisual(DataVisualKind kind)
     {
-        await CancelPublisherPointerAsync();
+        await CancelPublisherPointerAsync().ConfigureAwait(true);
         var visual = State.AddDataVisual(kind);
         _pendingNewDataVisualId = visual.Id;
         _dataVisualEditorVisible = true;
@@ -2204,7 +2212,7 @@
     private async Task OpenDataVisualEditor()
     {
         if (State.SelectedElement is not DataVisualElement) return;
-        await CancelPublisherPointerAsync();
+        await CancelPublisherPointerAsync().ConfigureAwait(true);
         _pendingNewDataVisualId = null;
         _dataVisualEditorVisible = true;
     }
@@ -2232,7 +2240,7 @@
 
     private async Task InsertComponent(PublicationComponentKind kind)
     {
-        await CancelPublisherPointerAsync();
+        await CancelPublisherPointerAsync().ConfigureAwait(true);
         var component = State.AddDevExtremeComponent(kind);
         _pendingNewComponentId = component.Id;
         _componentEditorVisible = true;
@@ -2241,7 +2249,7 @@
     private async Task OpenComponentEditor()
     {
         if (State.SelectedElement is not DevExtremeComponentElement) return;
-        await CancelPublisherPointerAsync();
+        await CancelPublisherPointerAsync().ConfigureAwait(true);
         _pendingNewComponentId = null;
         _componentEditorVisible = true;
     }
@@ -2277,7 +2285,7 @@
 
     private async Task OpenDataManager()
     {
-        await CancelPublisherPointerAsync();
+        await CancelPublisherPointerAsync().ConfigureAwait(true);
         _dataManagerVisible = true;
     }
 
@@ -2318,24 +2326,24 @@
         switch (command?.Trim())
         {
             case "ToggleStreaming":
-                if (StreamingSession.Snapshot.Mode == PublicationStreamSessionMode.Idle) await StartStreaming();
-                else await StopStreamingSession();
+                if (StreamingSession.Snapshot.Mode == PublicationStreamSessionMode.Idle) await StartStreaming().ConfigureAwait(true);
+                else await StopStreamingSession().ConfigureAwait(true);
                 break;
             case "ToggleRecording":
-                if (StreamingSession.Snapshot.Mode != PublicationStreamSessionMode.Idle) await ToggleStreamRecording();
+                if (StreamingSession.Snapshot.Mode != PublicationStreamSessionMode.Idle) await ToggleStreamRecording().ConfigureAwait(true);
                 else ShowNotice("Start a dry run or stream before toggling recording.");
                 break;
             case "NextPage":
-                await SelectAdjacentStreamingPage(1);
+                await SelectAdjacentStreamingPage(1).ConfigureAwait(true);
                 break;
             case "PreviousPage":
-                await SelectAdjacentStreamingPage(-1);
+                await SelectAdjacentStreamingPage(-1).ConfigureAwait(true);
                 break;
             case "SelectPage" when Guid.TryParse(targetId, out var pageId):
-                await SelectProgramPage(pageId);
+                await SelectProgramPage(pageId).ConfigureAwait(true);
                 break;
             case "ToggleOutput" when Guid.TryParse(targetId, out var outputId):
-                await ToggleStreamOutput(outputId);
+                await ToggleStreamOutput(outputId).ConfigureAwait(true);
                 break;
         }
     });
@@ -2347,12 +2355,12 @@
         var currentIndex = State.Document.Pages.FindIndex(page => page.Id == currentId);
         if (currentIndex < 0) currentIndex = 0;
         var nextIndex = (currentIndex + offset + State.Document.Pages.Count) % State.Document.Pages.Count;
-        await SelectProgramPage(State.Document.Pages[nextIndex].Id);
+        await SelectProgramPage(State.Document.Pages[nextIndex].Id).ConfigureAwait(true);
     }
 
     private async Task OpenStreamingStudio()
     {
-        await CancelPublisherPointerAsync();
+        await CancelPublisherPointerAsync().ConfigureAwait(true);
         _streamingStudioVisible = true;
     }
 
@@ -2385,7 +2393,7 @@
         if (StreamingSession.Snapshot.Mode != PublicationStreamSessionMode.Idle) return;
         try
         {
-            var machine = await StreamingProfiles.LoadAsync();
+            var machine = await StreamingProfiles.LoadAsync().ConfigureAwait(true);
             var configuredOutputs = State.Document.Streaming.Outputs
                 .Select(output => new
                 {
@@ -2421,17 +2429,17 @@
                 platform,
                 channel,
                 outputId = firstOutput?.Id.ToString("D") ?? string.Empty
-            });
+            }).ConfigureAwait(true);
             var prepared = await JS.InvokeAsync<bool>("publisherStreaming.prepareProgramCapture", new
             {
                 pageElementId = "publisher-page",
                 width = State.Document.Streaming.MasterWidth,
                 height = State.Document.Streaming.MasterHeight,
                 frameRate = State.Document.Streaming.MasterFrameRate
-            });
+            }).ConfigureAwait(true);
             if (!prepared) throw new InvalidOperationException("The browser did not prepare the Publisher program capture.");
 
-            await StreamingSession.StartAsync(State.Document, dryRun);
+            await StreamingSession.StartAsync(State.Document, dryRun).ConfigureAwait(true);
             if (StreamingSession.Snapshot.SessionId is not { } sessionId)
                 throw new InvalidOperationException(StreamingSession.Snapshot.StatusText);
             var configuredOutputBitrate = State.Document.Streaming.Outputs
@@ -2476,7 +2484,7 @@
                 mediaHostUrl = string.Empty,
                 sessionId = sessionId.ToString("D"),
                 outputs = browserOutputs
-            });
+            }).ConfigureAwait(true);
             await JS.InvokeAsync<object>("publisherStreaming.startProgramIngest", new
             {
                 mediaHostUrl = string.Empty,
@@ -2486,45 +2494,45 @@
                 outputs = browserOutputs,
                 enableWebRtc = State.Document.Streaming.Lan.Enabled
                     && State.Document.Streaming.Lan.EnableBrowserWebRtc
-            });
+            }).ConfigureAwait(true);
             ShowNotice(dryRun ? "Dry run active. The current tab is captured but no public provider receives it." : "Streaming session active.");
         }
         catch (Exception exception)
         {
-            try { await JS.InvokeVoidAsync("publisherStreaming.stopChatBridge"); } catch { }
-            try { await JS.InvokeVoidAsync("publisherStreaming.stopProgramIngest"); } catch { }
-            if (StreamingSession.Snapshot.Mode != PublicationStreamSessionMode.Idle) await StreamingSession.StopAsync();
-            await JS.InvokeVoidAsync("publisherStreaming.setOutputContext", new { mode = "operator", platform = "Preview", channel = "" });
+            try { await JS.InvokeVoidAsync("publisherStreaming.stopChatBridge").ConfigureAwait(true); } catch { }
+            try { await JS.InvokeVoidAsync("publisherStreaming.stopProgramIngest").ConfigureAwait(true); } catch { }
+            if (StreamingSession.Snapshot.Mode != PublicationStreamSessionMode.Idle) await StreamingSession.StopAsync().ConfigureAwait(true);
+            await JS.InvokeVoidAsync("publisherStreaming.setOutputContext", new { mode = "operator", platform = "Preview", channel = "" }).ConfigureAwait(true);
             ShowError(exception);
         }
     }
 
     private async Task StopStreaming()
     {
-        var stopped = await StreamingSession.StopStreamingOutputsAsync();
-        try { await JS.InvokeVoidAsync("publisherStreaming.stopChatBridge"); } catch { }
-        await JS.InvokeVoidAsync("publisherStreaming.setOutputContext", new { mode = "operator", platform = "Preview", channel = "" });
+        var stopped = await StreamingSession.StopStreamingOutputsAsync().ConfigureAwait(true);
+        try { await JS.InvokeVoidAsync("publisherStreaming.stopChatBridge").ConfigureAwait(true); } catch { }
+        await JS.InvokeVoidAsync("publisherStreaming.setOutputContext", new { mode = "operator", platform = "Preview", channel = "" }).ConfigureAwait(true);
         ShowNotice(stopped ? "Provider streaming stopped. Recording and local delivery remain active." : "Some provider outputs could not be stopped. Use Stop session to force a complete shutdown.");
     }
 
     private async Task StopStreamRecording()
     {
-        var stopped = await StreamingSession.SetRecordingAsync(false);
+        var stopped = await StreamingSession.SetRecordingAsync(false).ConfigureAwait(true);
         ShowNotice(stopped ? "Recording stopped and the current files were finalized." : "Recording could not be stopped. Use Stop session to force a complete shutdown.");
     }
 
     private async Task StopStreamingSession()
     {
-        try { await JS.InvokeVoidAsync("publisherStreaming.stopChatBridge"); } catch { }
-        try { await JS.InvokeVoidAsync("publisherStreaming.stopProgramIngest"); } catch { }
-        await StreamingSession.StopAsync();
-        await JS.InvokeVoidAsync("publisherStreaming.setOutputContext", new { mode = "operator", platform = "Preview", channel = "" });
+        try { await JS.InvokeVoidAsync("publisherStreaming.stopChatBridge").ConfigureAwait(true); } catch { }
+        try { await JS.InvokeVoidAsync("publisherStreaming.stopProgramIngest").ConfigureAwait(true); } catch { }
+        await StreamingSession.StopAsync().ConfigureAwait(true);
+        await JS.InvokeVoidAsync("publisherStreaming.setOutputContext", new { mode = "operator", platform = "Preview", channel = "" }).ConfigureAwait(true);
         ShowNotice("Streaming session stopped and recordings were finalized.");
     }
 
     private async Task ToggleStreamRecording()
     {
-        await StreamingSession.ToggleRecordingAsync();
+        await StreamingSession.ToggleRecordingAsync().ConfigureAwait(true);
         ShowNotice(StreamingSession.Snapshot.Recording ? "Recording started." : "Recording stopped and the current files were finalized.");
     }
 
@@ -2532,7 +2540,7 @@
     {
         if (StreamingSession.Snapshot.Mode != PublicationStreamSessionMode.Idle)
         {
-            await StreamingSession.ToggleOutputAsync(outputId);
+            await StreamingSession.ToggleOutputAsync(outputId).ConfigureAwait(true);
             return;
         }
         var settings = CloneStreaming(State.Document.Streaming);
@@ -2546,7 +2554,7 @@
     {
         if (outputId is null)
         {
-            await JS.InvokeVoidAsync("publisherStreaming.setOutputContext", new { mode = "operator", platform = "Preview", channel = "", outputId = "" });
+            await JS.InvokeVoidAsync("publisherStreaming.setOutputContext", new { mode = "operator", platform = "Preview", channel = "", outputId = "" }).ConfigureAwait(true);
             ShowNotice("Chat switched to preview messages.");
             return;
         }
@@ -2555,7 +2563,7 @@
         var channel = output.ChatChannel;
         if (string.IsNullOrWhiteSpace(channel))
         {
-            var machine = await StreamingProfiles.LoadAsync();
+            var machine = await StreamingProfiles.LoadAsync().ConfigureAwait(true);
             channel = machine.Providers.FirstOrDefault(profile => profile.Id == output.ProfileId)?.ChannelId ?? string.Empty;
         }
         await JS.InvokeVoidAsync("publisherStreaming.setOutputContext", new
@@ -2564,7 +2572,7 @@
             platform = output.Provider.ToString(),
             channel,
             outputId = output.Id.ToString("D")
-        });
+        }).ConfigureAwait(true);
         ShowNotice($"Operator Chat: {output.Name}. Broadcast outputs remain isolated.");
     }
 
@@ -2595,7 +2603,7 @@
     private async Task OpenStoryEditor()
     {
         if (State.SelectedElement is not TextFrameElement) return;
-        await CancelPublisherPointerAsync();
+        await CancelPublisherPointerAsync().ConfigureAwait(true);
         _storyEditorVisible = true;
     }
 

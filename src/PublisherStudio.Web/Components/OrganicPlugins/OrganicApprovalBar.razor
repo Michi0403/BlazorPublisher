@@ -98,7 +98,7 @@ else if (!_visible && _pending.Count > 0)
             var pending = _pending[0];
             if (string.Equals(pending.CapabilityKey, "publisher.screen.capture", StringComparison.OrdinalIgnoreCase))
             {
-                var captureJson = await JS.InvokeAsync<string>("publisherSecureCapture.captureScreen");
+                var captureJson = await JS.InvokeAsync<string>("publisherSecureCapture.captureScreen").ConfigureAwait(true);
                 if (!WorkCoordinator.UpdateInteractionValue(pending.Id, captureJson))
                     throw new InvalidOperationException("The approved browser screenshot could not be attached to the current 1-Wire work item.");
             }
@@ -106,15 +106,15 @@ else if (!_visible && _pending.Count > 0)
             {
                 var maximumSeconds = TryReadIntParameter(pending.Request, "maximumSeconds", 10);
                 var includeAudio = TryReadBooleanParameter(pending.Request, "includeAudio", false);
-                var captureJson = await JS.InvokeAsync<string>("publisherSecureCapture.recordScreen", maximumSeconds, includeAudio);
+                var captureJson = await JS.InvokeAsync<string>("publisherSecureCapture.recordScreen", maximumSeconds, includeAudio).ConfigureAwait(true);
                 if (!WorkCoordinator.UpdateInteractionValue(pending.Id, captureJson))
                     throw new InvalidOperationException("The approved browser screen recording could not be attached to the current 1-Wire work item.");
             }
             else if (NeedsEditor(pending.Request) && !WorkCoordinator.UpdateInteractionValue(pending.Id, _interactionValue))
                 throw new InvalidOperationException("The pending interaction value could not be attached to the current 1-Wire work item.");
-            var item = await WorkCoordinator.ApproveAsync(pending.Id);
+            var item = await WorkCoordinator.ApproveAsync(pending.Id).ConfigureAwait(true);
             if (item is not null && Connection.State.IsConnected)
-                await Connection.SendWorkResultAsync(item);
+                await Connection.SendWorkResultAsync(item).ConfigureAwait(true);
             Notifications.Success("The requested AI Council action was approved once.", "Organic approval", nameof(OrganicApprovalBar));
         }
         finally
@@ -135,7 +135,7 @@ else if (!_visible && _pending.Count > 0)
             {
                 var item = WorkCoordinator.Get(id);
                 if (item is not null && Connection.State.IsConnected)
-                    await Connection.SendWorkResultAsync(item);
+                    await Connection.SendWorkResultAsync(item).ConfigureAwait(true);
                 Notifications.Warning("The requested AI Council action was declined.", "Organic approval", nameof(OrganicApprovalBar));
             }
         }

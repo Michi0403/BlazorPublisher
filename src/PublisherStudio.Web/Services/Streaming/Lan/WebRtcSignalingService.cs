@@ -35,12 +35,12 @@ public sealed class WebRtcSignalingService
     {
             var previous = Interlocked.Exchange(ref _publisher, socket);
             if (previous is not null && previous != socket)
-                await CloseQuietlyAsync(previous, "A newer PublisherStudio renderer connected.");
+                await CloseQuietlyAsync(previous, "A newer PublisherStudio renderer connected.").ConfigureAwait(false);
 
             try
             {
                 foreach (var viewerId in _viewers.Keys)
-                    await SendPublisherAsync(new { type = "viewer-ready", viewerId }, cancellationToken);
+                    await SendPublisherAsync(new { type = "viewer-ready", viewerId }, cancellationToken).ConfigureAwait(false);
 
                 await ReceiveJsonAsync(socket, async document =>
                 {
@@ -55,14 +55,14 @@ public sealed class WebRtcSignalingService
                         _ => string.Empty
                     };
                     if (forwardedType.Length == 0) return;
-                    await viewer.SendAsync(CopyWithType(root, forwardedType, includeViewerId: false), cancellationToken);
-                }, cancellationToken);
+                    await viewer.SendAsync(CopyWithType(root, forwardedType, includeViewerId: false), cancellationToken).ConfigureAwait(false);
+                }, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
                 Interlocked.CompareExchange(ref _publisher, null, socket);
                 foreach (var viewer in _viewers.Values)
-                    await viewer.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new { type = "publisher-unavailable" }), CancellationToken.None);
+                    await viewer.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new { type = "publisher-unavailable" }), CancellationToken.None).ConfigureAwait(false);
             }
     
     }
@@ -88,11 +88,11 @@ public sealed class WebRtcSignalingService
             _viewers[viewerId] = viewer;
             try
             {
-                await viewer.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new { type = "viewer-id", viewerId }), cancellationToken);
+                await viewer.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new { type = "viewer-id", viewerId }), cancellationToken).ConfigureAwait(false);
                 if (_publisher is not null)
-                    await SendPublisherAsync(new { type = "viewer-ready", viewerId }, cancellationToken);
+                    await SendPublisherAsync(new { type = "viewer-ready", viewerId }, cancellationToken).ConfigureAwait(false);
                 else
-                    await viewer.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new { type = "publisher-unavailable" }), cancellationToken);
+                    await viewer.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new { type = "publisher-unavailable" }), cancellationToken).ConfigureAwait(false);
 
                 await ReceiveJsonAsync(socket, async document =>
                 {
@@ -105,14 +105,14 @@ public sealed class WebRtcSignalingService
                         _ => string.Empty
                     };
                     if (forwardedType.Length == 0) return;
-                    await SendPublisherBytesAsync(CopyWithViewer(root, forwardedType, viewerId), cancellationToken);
-                }, cancellationToken);
+                    await SendPublisherBytesAsync(CopyWithViewer(root, forwardedType, viewerId), cancellationToken).ConfigureAwait(false);
+                }, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
                 _viewers.TryRemove(viewerId, out _);
-                await SendPublisherAsync(new { type = "viewer-left", viewerId }, CancellationToken.None);
-                await viewer.DisposeAsync();
+                await SendPublisherAsync(new { type = "viewer-left", viewerId }, CancellationToken.None).ConfigureAwait(false);
+                await viewer.DisposeAsync().ConfigureAwait(false);
             }
     
     }
@@ -132,11 +132,11 @@ public sealed class WebRtcSignalingService
     try
     {
             var publisher = Interlocked.Exchange(ref _publisher, null);
-            if (publisher is not null) await CloseQuietlyAsync(publisher, "Session stopped.");
+            if (publisher is not null) await CloseQuietlyAsync(publisher, "Session stopped.").ConfigureAwait(false);
             foreach (var pair in _viewers.ToArray())
             {
                 _viewers.TryRemove(pair.Key, out _);
-                await pair.Value.DisposeAsync();
+                await pair.Value.DisposeAsync().ConfigureAwait(false);
             }
             _publisherSend.Dispose();
     
@@ -157,7 +157,7 @@ public sealed class WebRtcSignalingService
     private async Task SendPublisherAsync(object message, CancellationToken cancellationToken) {
     try
     {
-        await SendPublisherBytesAsync(JsonSerializer.SerializeToUtf8Bytes(message), cancellationToken);
+        await SendPublisherBytesAsync(JsonSerializer.SerializeToUtf8Bytes(message), cancellationToken).ConfigureAwait(false);
     }
     catch (Exception __serviceMethodException)
     {
@@ -178,11 +178,11 @@ public sealed class WebRtcSignalingService
     {
             var publisher = _publisher;
             if (publisher?.State != WebSocketState.Open) return;
-            await _publisherSend.WaitAsync(cancellationToken);
+            await _publisherSend.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 if (publisher.State == WebSocketState.Open)
-                    await publisher.SendAsync(payload, WebSocketMessageType.Text, true, cancellationToken);
+                    await publisher.SendAsync(payload, WebSocketMessageType.Text, true, cancellationToken).ConfigureAwait(false);
             }
             catch (WebSocketException) { }
             finally { _publisherSend.Release(); }
@@ -212,7 +212,7 @@ public sealed class WebRtcSignalingService
             {
                 while (socket.State == WebSocketState.Open)
                 {
-                    var result = await socket.ReceiveAsync(buffer, cancellationToken);
+                    var result = await socket.ReceiveAsync(buffer, cancellationToken).ConfigureAwait(false);
                     if (result.MessageType == WebSocketMessageType.Close) break;
                     if (result.MessageType != WebSocketMessageType.Text) continue;
                     message.Write(buffer, 0, result.Count);
@@ -220,8 +220,8 @@ public sealed class WebRtcSignalingService
                     message.Position = 0;
                     try
                     {
-                        using var document = await JsonDocument.ParseAsync(message, cancellationToken: cancellationToken);
-                        await onMessage(document);
+                        using var document = await JsonDocument.ParseAsync(message, cancellationToken: cancellationToken).ConfigureAwait(false);
+                        await onMessage(document).ConfigureAwait(false);
                     }
                     catch (JsonException) { }
                     finally { message.SetLength(0); }
@@ -359,7 +359,7 @@ public sealed class WebRtcSignalingService
             try
             {
                 if (socket.State is WebSocketState.Open or WebSocketState.CloseReceived)
-                    await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, reason, CancellationToken.None);
+                    await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, reason, CancellationToken.None).ConfigureAwait(false);
             }
             catch { }
             finally { socket.Dispose(); }
@@ -398,11 +398,11 @@ public sealed class WebRtcSignalingService
     try
     {
                 if (_socket.State != WebSocketState.Open) return;
-                await _send.WaitAsync(cancellationToken);
+                await _send.WaitAsync(cancellationToken).ConfigureAwait(false);
                 try
                 {
                     if (_socket.State == WebSocketState.Open)
-                        await _socket.SendAsync(payload, WebSocketMessageType.Text, true, cancellationToken);
+                        await _socket.SendAsync(payload, WebSocketMessageType.Text, true, cancellationToken).ConfigureAwait(false);
                 }
                 catch (WebSocketException) { }
                 finally { _send.Release(); }
@@ -426,7 +426,7 @@ public sealed class WebRtcSignalingService
                 try
                 {
                     if (_socket.State is WebSocketState.Open or WebSocketState.CloseReceived)
-                        await _socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Viewer disconnected.", CancellationToken.None);
+                        await _socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Viewer disconnected.", CancellationToken.None).ConfigureAwait(false);
                 }
                 catch { }
                 _socket.Dispose();

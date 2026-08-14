@@ -701,7 +701,7 @@
                         <span><b>@LT("Component:")</b> @Friendly(dataVisual.VisualKind.ToString())</span>
                         <span><b>@LT("Data:")</b> @DataObjectName(dataVisual.DataObjectId)</span>
                         <span><b>@LT("Category:")</b> @dataVisual.ArgumentField</span>
-                        <span><b>@LT("Values:")</b> @string.Join(", ", dataVisual.ValueFields)</span>
+                        <span><b>@LT("Values:")</b> @Components.JoinDisplayValues(dataVisual.ValueFields)</span>
                     </div>
                     <DxButton Text='@LT("Edit data visual")' Click="RequestEditDataVisual" RenderStyle="ButtonRenderStyle.Primary" CssClass="wide-button" />
                     <DxButton Text='@LT("Manage publication data")' Click="RequestManageData" CssClass="wide-button" />
@@ -1012,7 +1012,7 @@
     protected override async Task OnParametersSetAsync()
     {
         if (State.SelectedElement is LiveSourceElement && !_streamingProfilesLoaded)
-            await RefreshStreamingDeviceProfiles();
+            await RefreshStreamingDeviceProfiles().ConfigureAwait(true);
     }
 
     private string _tab = "properties";
@@ -1083,8 +1083,8 @@
     {
         _contextLayerId = item.Id;
         State.SetPrimarySelection(item.Id);
-        await InvokeAsync(StateHasChanged);
-        await _layerContextMenu.ShowAsync(args);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        await _layerContextMenu.ShowAsync(args).ConfigureAwait(true);
     }
     private void SelectContextLayer() { if (_contextLayerId is Guid id) State.SetPrimarySelection(id); }
     private Task EditContextMedia() { SelectContextLayer(); return OnEditMedia.InvokeAsync(); }
@@ -1150,7 +1150,7 @@
 
     private async Task RefreshStreamingDeviceProfiles()
     {
-        var machine = await StreamingProfiles.LoadAsync();
+        var machine = await StreamingProfiles.LoadAsync().ConfigureAwait(true);
         _streamingDeviceProfiles = machine.Devices
             .OrderBy(profile => profile.Kind)
             .ThenBy(profile => profile.Name, StringComparer.OrdinalIgnoreCase)
@@ -1554,7 +1554,7 @@
     private async Task PreviewSignal()
     {
         if (State.SelectedElement is not ConnectorElement connector) return;
-        await JS.InvokeVoidAsync("publisherStudio.runSignalConnector", $"element-{connector.Id}");
+        await JS.InvokeVoidAsync("publisherStudio.runSignalConnector", $"element-{connector.Id}").ConfigureAwait(true);
     }
 
     private RenderFragment NumberField(string label, double value, string field) => builder =>
@@ -1666,7 +1666,7 @@
             _ => null
         };
 
-        await State.RefreshWebDataAsync(dataObjectId, true);
+        await State.RefreshWebDataAsync(dataObjectId, true).ConfigureAwait(true);
         State.RefreshDataVisuals();
     }
     private Task RequestEditComponent() => OnEditComponent.InvokeAsync();
@@ -1776,9 +1776,10 @@
         var file = args.File;
         var mimeType = PictureMimeType(file.Name, file.ContentType);
         if (string.IsNullOrWhiteSpace(mimeType)) return;
-        await using var input = file.OpenReadStream(long.MaxValue);
+        var input = file.OpenReadStream(long.MaxValue);
+        await using var configuredInputAsyncDisposal = input.ConfigureAwait(true);
         using var buffer = new MemoryStream();
-        await input.CopyToAsync(buffer);
+        await input.CopyToAsync(buffer).ConfigureAwait(true);
         var bytes = buffer.ToArray();
         if (mimeType == "image/svg+xml")
         {
@@ -1801,20 +1802,21 @@
         var file = args.File;
         var mimeType = VideoMimeType(file.Name, file.ContentType);
         if (string.IsNullOrWhiteSpace(mimeType)) return;
-        await using var input = file.OpenReadStream(long.MaxValue);
+        var input = file.OpenReadStream(long.MaxValue);
+        await using var configuredInputAsyncDisposal = input.ConfigureAwait(true);
         using var buffer = new MemoryStream();
-        await input.CopyToAsync(buffer);
+        await input.CopyToAsync(buffer).ConfigureAwait(true);
         var bytes = buffer.ToArray();
         var dataUrl = $"data:{mimeType};base64,{Convert.ToBase64String(bytes)}";
         var inspectionId = Guid.NewGuid();
         var poster = string.Empty;
         try
         {
-            _mediaModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.6.5");
+            _mediaModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.6.5").ConfigureAwait(true);
             var localUrl = MediaAssets.RegisterBytes(inspectionId, bytes, mimeType);
             try
             {
-                var info = await _mediaModule.InvokeAsync<MediaSourceInfo>("inspectMediaDataUrl", localUrl, "video");
+                var info = await _mediaModule.InvokeAsync<MediaSourceInfo>("inspectMediaDataUrl", localUrl, "video").ConfigureAwait(true);
                 poster = info.PosterDataUrl ?? string.Empty;
             }
             catch (JSException)
@@ -2097,7 +2099,7 @@
     {
         if (_mediaModule is not null)
         {
-            try { await _mediaModule.DisposeAsync(); }
+            try { await _mediaModule.DisposeAsync().ConfigureAwait(true); }
             catch (JSDisconnectedException) { }
         }
     }

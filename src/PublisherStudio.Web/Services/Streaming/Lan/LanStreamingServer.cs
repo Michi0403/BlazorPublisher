@@ -174,16 +174,16 @@ public sealed class LanStreamingServer : IAsyncDisposable
                 if (!Authorize(context))
                 {
                     context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    await context.Response.WriteAsJsonAsync(new { error = "A valid PublisherStudio LAN access token is required." }, context.RequestAborted);
+                    await context.Response.WriteAsJsonAsync(new { error = "A valid PublisherStudio LAN access token is required." }, context.RequestAborted).ConfigureAwait(false);
                     return;
                 }
-                if (!await _viewerGate.WaitAsync(TimeSpan.FromSeconds(2), context.RequestAborted))
+                if (!await _viewerGate.WaitAsync(TimeSpan.FromSeconds(2), context.RequestAborted).ConfigureAwait(false))
                 {
                     context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
-                    await context.Response.WriteAsJsonAsync(new { error = "The configured LAN viewer limit has been reached." }, context.RequestAborted);
+                    await context.Response.WriteAsJsonAsync(new { error = "The configured LAN viewer limit has been reached." }, context.RequestAborted).ConfigureAwait(false);
                     return;
                 }
-                try { await next(); }
+                try { await next().ConfigureAwait(false); }
                 finally { _viewerGate.Release(); }
             });
 
@@ -201,8 +201,8 @@ public sealed class LanStreamingServer : IAsyncDisposable
                     context.Response.StatusCode = context.WebSockets.IsWebSocketRequest ? StatusCodes.Status404NotFound : StatusCodes.Status400BadRequest;
                     return;
                 }
-                using var socket = await context.WebSockets.AcceptWebSocketAsync();
-                await _session.WebRtc.RunViewerAsync(socket, context.RequestAborted);
+                using var socket = await context.WebSockets.AcceptWebSocketAsync().ConfigureAwait(false);
+                await _session.WebRtc.RunViewerAsync(socket, context.RequestAborted).ConfigureAwait(false);
             });
             app.MapGet("/live/{sessionId:guid}", async (HttpContext context, Guid sessionId) =>
             {
@@ -211,16 +211,16 @@ public sealed class LanStreamingServer : IAsyncDisposable
                     context.Response.StatusCode = context.WebSockets.IsWebSocketRequest ? StatusCodes.Status404NotFound : StatusCodes.Status400BadRequest;
                     return;
                 }
-                using var socket = await context.WebSockets.AcceptWebSocketAsync();
+                using var socket = await context.WebSockets.AcceptWebSocketAsync().ConfigureAwait(false);
                 var subscription = _session.SubscribeIngest();
                 try
                 {
                     if (subscription.InitializationChunk is { Length: > 0 } initialization)
-                        await socket.SendAsync(initialization, WebSocketMessageType.Binary, true, context.RequestAborted);
-                    await foreach (var chunk in subscription.Reader.ReadAllAsync(context.RequestAborted))
+                        await socket.SendAsync(initialization, WebSocketMessageType.Binary, true, context.RequestAborted).ConfigureAwait(false);
+                    await foreach (var chunk in subscription.Reader.ReadAllAsync(context.RequestAborted).ConfigureAwait(false))
                     {
                         if (socket.State != WebSocketState.Open) break;
-                        await socket.SendAsync(chunk, WebSocketMessageType.Binary, true, context.RequestAborted);
+                        await socket.SendAsync(chunk, WebSocketMessageType.Binary, true, context.RequestAborted).ConfigureAwait(false);
                     }
                 }
                 catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested) { }
@@ -230,7 +230,7 @@ public sealed class LanStreamingServer : IAsyncDisposable
                     _session.UnsubscribeIngest(subscription.Id);
                     if (socket.State is WebSocketState.Open or WebSocketState.CloseReceived)
                     {
-                        try { await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "PublisherStudio stream ended", CancellationToken.None); }
+                        try { await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "PublisherStudio stream ended", CancellationToken.None).ConfigureAwait(false); }
                         catch { }
                     }
                 }
@@ -250,7 +250,7 @@ public sealed class LanStreamingServer : IAsyncDisposable
                 }
                 if (Path.GetExtension(candidate).Equals(".m3u8", StringComparison.OrdinalIgnoreCase))
                 {
-                    var playlist = await File.ReadAllLinesAsync(candidate, context.RequestAborted);
+                    var playlist = await File.ReadAllLinesAsync(candidate, context.RequestAborted).ConfigureAwait(false);
                     if (!string.IsNullOrWhiteSpace(AccessToken))
                     {
                         for (var index = 0; index < playlist.Length; index++)
@@ -262,7 +262,7 @@ public sealed class LanStreamingServer : IAsyncDisposable
                     }
                     context.Response.ContentType = "application/vnd.apple.mpegurl";
                     context.Response.Headers.CacheControl = "no-store";
-                    await context.Response.WriteAsync(string.Join('\n', playlist), context.RequestAborted);
+                    await context.Response.WriteAsync(string.Join('\n', playlist), context.RequestAborted).ConfigureAwait(false);
                     return;
                 }
                 context.Response.ContentType = Path.GetExtension(candidate).ToLowerInvariant() switch
@@ -273,16 +273,17 @@ public sealed class LanStreamingServer : IAsyncDisposable
                     _ => "application/octet-stream"
                 };
                 context.Response.Headers.CacheControl = "no-store";
-                await using var fileStream = File.OpenRead(candidate);
+                var fileStream = File.OpenRead(candidate);
+                await using var configuredFileStreamAsyncDisposal = fileStream.ConfigureAwait(false);
                 context.Response.ContentLength = fileStream.Length;
-                await fileStream.CopyToAsync(context.Response.Body, context.RequestAborted);
+                await fileStream.CopyToAsync(context.Response.Body, context.RequestAborted).ConfigureAwait(false);
             });
 
             _app = app;
             Status = "starting";
-            await app.StartAsync(_cancellation.Token);
+            await app.StartAsync(_cancellation.Token).ConfigureAwait(false);
             Status = "listening";
-            await app.WaitForShutdownAsync(_cancellation.Token);
+            await app.WaitForShutdownAsync(_cancellation.Token).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (_cancellation.IsCancellationRequested)
         {
@@ -511,16 +512,16 @@ public sealed class LanStreamingServer : IAsyncDisposable
             if (_app is not null)
             {
                 using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(2));
-                try { await _app.StopAsync(timeout.Token); } catch { }
-                await _app.DisposeAsync();
+                try { await _app.StopAsync(timeout.Token).ConfigureAwait(false); } catch { }
+                await _app.DisposeAsync().ConfigureAwait(false);
             }
             if (_runTask is not null)
             {
-                try { await _runTask.WaitAsync(TimeSpan.FromSeconds(3)); } catch { }
+                try { await _runTask.WaitAsync(TimeSpan.FromSeconds(3)).ConfigureAwait(false); } catch { }
             }
             if (_rtspServer is not null)
             {
-                try { await _rtspServer.DisposeAsync(); } catch { }
+                try { await _rtspServer.DisposeAsync().ConfigureAwait(false); } catch { }
                 _rtspServer = null;
             }
             _viewerGate.Dispose();

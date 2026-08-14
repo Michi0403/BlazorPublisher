@@ -1236,8 +1236,8 @@
         if (!Visible || _disposed || SessionId == Guid.Empty) return;
         try
         {
-            var module = await EnsureMediaModuleAsync();
-            if (IsVideo && HasSource) await SyncVideoEffectsAsync(module);
+            var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+            if (IsVideo && HasSource) await SyncVideoEffectsAsync(module).ConfigureAwait(true);
         }
         catch (JSDisconnectedException) { }
         catch (TaskCanceledException) { }
@@ -1245,14 +1245,14 @@
         catch (JSException ex)
         {
             _error = $"Media Studio could not initialize: {ex.Message}";
-            try { await InvokeAsync(StateHasChanged); } catch (ObjectDisposedException) { }
+            try { await InvokeAsync(StateHasChanged).ConfigureAwait(true); } catch (ObjectDisposedException) { }
         }
     }
 
     private async Task<IJSObjectReference> EnsureMediaModuleAsync()
     {
         if (_disposed) throw new ObjectDisposedException(nameof(MediaStudio));
-        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.6.5");
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.6.5").ConfigureAwait(true);
         _self ??= DotNetObjectReference.Create(this);
         if (SessionId != Guid.Empty)
         {
@@ -1272,7 +1272,7 @@
                 "media-studio-file-input",
                 "media-studio-insert-file-input",
                 IsVideo ? "media-studio-project-input" : string.Empty,
-                IsVideo ? "video" : "audio");
+                IsVideo ? "video" : "audio").ConfigureAwait(true);
             _initializedSession = SessionId;
         }
         return _module;
@@ -1281,7 +1281,7 @@
     private async Task SyncVideoEffectsAsync(IJSObjectReference? module = null)
     {
         if (!IsVideo || !HasSource || SelectedSegment is null || !IsPlayableSegment(SelectedSegment)) return;
-        module ??= await EnsureMediaModuleAsync();
+        module ??= await EnsureMediaModuleAsync().ConfigureAwait(true);
         await module.InvokeVoidAsync("configureVideoEffects", "media-studio-preview", "media-studio-video-effects", new
         {
             fitMode = _videoFitMode switch
@@ -1292,7 +1292,7 @@
             },
             forceCanvas = true,
             layers = VideoLayerPayload(SelectedSegment.VideoLayers)
-        });
+        }).ConfigureAwait(true);
     }
 
     private object[] VideoLayerPayload(IEnumerable<VideoEffectLayer> layers) => layers
@@ -1431,8 +1431,8 @@
         SelectSegment(id, seek: false);
         if (SelectedSegment is null) return;
         _playhead = TimelineEdits.SegmentTimelineStart(_segments, SelectedSegmentIndex, _playbackRate);
-        await SeekSelectedAtPlayheadAsync();
-        await InvokeAsync(StateHasChanged);
+        await SeekSelectedAtPlayheadAsync().ConfigureAwait(true);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
     }
 
     private void ClearSelectedSegmentFields()
@@ -1572,20 +1572,20 @@
     private async Task TimelinePointerDown(PointerEventArgs args)
     {
         if (args.Button != 0 || !HasSource) return;
-        var module = await EnsureMediaModuleAsync();
-        var ratio = await module.InvokeAsync<double>("horizontalRatio", "media-studio-sequence-timeline", args.ClientX);
-        await ActivateTimelinePosition(ratio, allowCut: true);
+        var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+        var ratio = await module.InvokeAsync<double>("horizontalRatio", "media-studio-sequence-timeline", args.ClientX).ConfigureAwait(true);
+        await ActivateTimelinePosition(ratio, allowCut: true).ConfigureAwait(true);
     }
 
     private async Task ShowTimelineContextMenu(MouseEventArgs args)
     {
         if (HasSource)
         {
-            var module = await EnsureMediaModuleAsync();
-            var ratio = await module.InvokeAsync<double>("horizontalRatio", "media-studio-sequence-timeline", args.ClientX);
-            await ActivateTimelinePosition(ratio, allowCut: false);
+            var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+            var ratio = await module.InvokeAsync<double>("horizontalRatio", "media-studio-sequence-timeline", args.ClientX).ConfigureAwait(true);
+            await ActivateTimelinePosition(ratio, allowCut: false).ConfigureAwait(true);
         }
-        await _mediaContextMenu.ShowAsync(args);
+        await _mediaContextMenu.ShowAsync(args).ConfigureAwait(true);
     }
 
     private async Task ActivateTimelinePosition(double ratio, bool allowCut)
@@ -1600,7 +1600,7 @@
             var rightId = TimelineEdits.SplitAt(_segments, _playbackRate, _playhead);
             if (rightId is Guid id) SelectSegment(id, seek: false);
         }
-        await SeekSelectedAtPlayheadAsync();
+        await SeekSelectedAtPlayheadAsync().ConfigureAwait(true);
     }
 
     private async Task SeekSelectedAtPlayheadAsync()
@@ -1609,7 +1609,7 @@
         try
         {
             var sourcePosition = TimelineEdits.SourcePositionAt(_segments, SelectedSegmentIndex, _playbackRate, _playhead);
-            await _module.InvokeVoidAsync("seekMedia", "media-studio-preview", sourcePosition);
+            await _module.InvokeVoidAsync("seekMedia", "media-studio-preview", sourcePosition).ConfigureAwait(true);
         }
         catch (JSDisconnectedException) { }
         catch (TaskCanceledException) { }
@@ -1727,8 +1727,8 @@
             _pendingDropSourceSeconds = null;
             _pendingDropTimelineSeconds = null;
             _pendingDropIsPoint = _videoSelectionIsPoint;
-            var module = await EnsureMediaModuleAsync();
-            await module.InvokeVoidAsync("clickElement", "media-studio-insert-file-input");
+            var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+            await module.InvokeVoidAsync("clickElement", "media-studio-insert-file-input").ConfigureAwait(true);
         }
         catch (Exception ex) when (ex is JSDisconnectedException or TaskCanceledException or ObjectDisposedException or JSException)
         {
@@ -1760,7 +1760,7 @@
         _warning = placeholderDuration
             ? $"Recovered the browser video duration ({Time(durationSeconds)}) without replacing the committed selection."
             : $"Updated the selected clip duration to {Time(durationSeconds)} from browser metadata.";
-        await InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
     }
 
     [JSInvokable]
@@ -1769,9 +1769,9 @@
         if (!IsVideo || !HasSource) return;
         var source = Math.Clamp(double.IsFinite(sourceSeconds) ? sourceSeconds : _trimStart, _trimStart, _trimEnd);
         _playhead = SourcePositionToTimeline(source);
-        var module = await EnsureMediaModuleAsync();
-        await module.InvokeVoidAsync("seekMedia", "media-studio-preview", source);
-        await InvokeAsync(StateHasChanged);
+        var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+        await module.InvokeVoidAsync("seekMedia", "media-studio-preview", source).ConfigureAwait(true);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
     }
 
     [JSInvokable]
@@ -1781,8 +1781,8 @@
         var source = Math.Clamp(double.IsFinite(sourceSeconds) ? sourceSeconds : _trimStart, _trimStart, _trimEnd);
         _playhead = SourcePositionToTimeline(source);
         AddCutLineAtPlayhead();
-        await SeekSelectedAtPlayheadAsync();
-        await InvokeAsync(StateHasChanged);
+        await SeekSelectedAtPlayheadAsync().ConfigureAwait(true);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
     }
 
     [JSInvokable]
@@ -1824,7 +1824,7 @@
             ? TimelineEdits.SegmentTimelineStart(_segments, movedIndex, _playbackRate)
             : Math.Clamp(timelineSeconds, 0, SequenceDuration);
         _warning = $"Moved {SelectedClipName} to {Time(_playhead)} in the sequence.";
-        await InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
     }
 
     /// <summary>Reorders a Video Studio effect layer from the shared drag-and-drop layer stack.</summary>
@@ -1841,7 +1841,7 @@
         segment.VideoLayers = visual.Where(byId.ContainsKey).Select(id => byId[id]).ToList();
         _selectedVideoLayerId = dragged;
         CommitSelectedSegment(refreshVideoEffects: true);
-        await InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
     }
 
     /// <summary>Reorders one filter inside the selected Video Studio effect layer through drag and drop.</summary>
@@ -1858,7 +1858,7 @@
         layer.Filters = visual.Where(byId.ContainsKey).Select(id => byId[id]).ToList();
         _selectedVideoFilterId = dragged;
         CommitSelectedSegment(refreshVideoEffects: true);
-        await InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
     }
 
     private double SourcePositionToTimeline(double sourceSeconds)
@@ -1979,12 +1979,12 @@
         if (!IsVideo || args.Button != 0 || _mouseMode != MediaStudioMouseMode.FrameRegion) return;
         if (!_frameRegionEditing) BeginActiveFrameRegion(_editingMorphRegion);
         _selectedFramePointIndex = null;
-        var module = await EnsureMediaModuleAsync();
+        var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
         var point = await module.InvokeAsync<MediaFramePoint>(
             "normalizedPoint",
             "media-studio-frame-overlay-host",
             args.ClientX,
-            args.ClientY);
+            args.ClientY).ConfigureAwait(true);
         point.X = Math.Clamp(point.X, 0, 1);
         point.Y = Math.Clamp(point.Y, 0, 1);
         if (_frameDraft.Count == 0 || Distance(_frameDraft[^1], point) > .003)
@@ -2449,7 +2449,7 @@
         CommitFrameRegionToSelectedLayer();
         layer.OpenScadScript = VideoLayerInterchange.CreateOpenScad(layer);
         var request = VideoLayerInterchange.CreateMainframeInsert(layer);
-        await InsertLayerIntoMainframe.InvokeAsync(request);
+        await InsertLayerIntoMainframe.InvokeAsync(request).ConfigureAwait(true);
         _warning = $"Inserted {layer.Name} into Mainframe as an interactive HTML canvas object with embedded OpenSCAD source.";
     }
 
@@ -2764,18 +2764,18 @@
 
     private async Task ShowMediaContextMenu(MouseEventArgs args)
     {
-        await _mediaContextMenu.ShowAsync(args);
+        await _mediaContextMenu.ShowAsync(args).ConfigureAwait(true);
     }
     private async Task SetTrimStartAtPlayhead()
     {
-        var module = await EnsureMediaModuleAsync();
-        var position = await module.InvokeAsync<double>("getMediaPosition", "media-studio-preview");
+        var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+        var position = await module.InvokeAsync<double>("getMediaPosition", "media-studio-preview").ConfigureAwait(true);
         ApplyTrimRange(position, _trimEnd);
     }
     private async Task SetTrimEndAtPlayhead()
     {
-        var module = await EnsureMediaModuleAsync();
-        var position = await module.InvokeAsync<double>("getMediaPosition", "media-studio-preview");
+        var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+        var position = await module.InvokeAsync<double>("getMediaPosition", "media-studio-preview").ConfigureAwait(true);
         ApplyTrimRange(_trimStart, position);
     }
     private void ResetTrim()
@@ -2796,8 +2796,8 @@
         if (!IsVideo) return;
         try
         {
-            var module = await EnsureMediaModuleAsync();
-            await module.InvokeVoidAsync("clickElement", "media-studio-project-input");
+            var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+            await module.InvokeVoidAsync("clickElement", "media-studio-project-input").ConfigureAwait(true);
         }
         catch (JSDisconnectedException) { }
         catch (TaskCanceledException) { }
@@ -2813,8 +2813,8 @@
         if (!HasVideoProject) return;
         try
         {
-            var module = await EnsureMediaModuleAsync();
-            await module.InvokeVoidAsync("clickElement", "media-studio-project-media-input");
+            var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+            await module.InvokeVoidAsync("clickElement", "media-studio-project-media-input").ConfigureAwait(true);
         }
         catch (JSDisconnectedException) { }
         catch (TaskCanceledException) { }
@@ -2831,8 +2831,9 @@
         try
         {
             CommitProjectTrack();
-            await using var stream = args.File.OpenReadStream(long.MaxValue);
-            var imported = await VideoProjectImporter.ImportAsync(stream, args.File.Name);
+            var stream = args.File.OpenReadStream(long.MaxValue);
+            await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
+            var imported = await VideoProjectImporter.ImportAsync(stream, args.File.Name).ConfigureAwait(true);
             _videoProject = TimelineEdits.CloneVideoProject(imported.Project);
             _videoProjectIssues = [.. imported.Issues];
             _activeProjectTrackId = ResolveActiveProjectTrackId(_videoProject);
@@ -2862,9 +2863,10 @@
             var unmatched = new List<string>();
             foreach (var file in files)
             {
-                await using var stream = file.OpenReadStream(long.MaxValue);
+                var stream = file.OpenReadStream(long.MaxValue);
+                await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
                 using var buffer = new MemoryStream();
-                await stream.CopyToAsync(buffer);
+                await stream.CopyToAsync(buffer).ConfigureAwait(true);
                 if (buffer.Length == 0) continue;
                 var mime = ResolveProjectMediaMimeType(file.Name, file.ContentType);
                 var dataUrl = $"data:{mime};base64,{Convert.ToBase64String(buffer.ToArray())}";
@@ -2905,7 +2907,7 @@
         if (!Guid.TryParse(Text(args), out var trackId) || _videoProject is null || trackId == _activeProjectTrackId) return;
         CommitProjectTrack();
         LoadProjectTrack(trackId);
-        await InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
     }
 
     private void LoadProjectTrack(Guid trackId)
@@ -3006,8 +3008,8 @@
     {
         try
         {
-            var module = await EnsureMediaModuleAsync();
-            await module.InvokeVoidAsync("clickElement", "media-studio-file-input");
+            var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+            await module.InvokeVoidAsync("clickElement", "media-studio-file-input").ConfigureAwait(true);
         }
         catch (JSDisconnectedException) { }
         catch (TaskCanceledException) { }
@@ -3022,7 +3024,7 @@
     {
         try
         {
-            var segment = await ReadMediaFileAsync(args.File);
+            var segment = await ReadMediaFileAsync(args.File).ConfigureAwait(true);
             var index = SelectedSegmentIndex;
             if (index >= 0)
             {
@@ -3035,8 +3037,8 @@
             }
             SelectSegment(segment.Id, seek: false, forceReload: true);
             _playhead = TimelineEdits.SegmentTimelineStart(_segments, _segments.IndexOf(segment), _playbackRate);
-            var module = await EnsureMediaModuleAsync();
-            await module.InvokeVoidAsync("clearRetainedRecording", "media-studio-preview");
+            var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+            await module.InvokeVoidAsync("clearRetainedRecording", "media-studio-preview").ConfigureAwait(true);
             ClearRetainedRecordingState();
         }
         catch (Exception ex)
@@ -3050,7 +3052,7 @@
         try
         {
             CommitSelectedSegment();
-            var segment = await ReadMediaFileAsync(args.File);
+            var segment = await ReadMediaFileAsync(args.File).ConfigureAwait(true);
             if (IsVideo && SelectedSegmentIndex >= 0)
             {
                 PreparePendingInsert(segment);
@@ -3092,19 +3094,20 @@
             if (!mimeType.StartsWith(expectedPrefix, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidDataException($"Select a supported {(IsVideo ? "video" : "audio")} file.");
 
-            await using var stream = file.OpenReadStream(long.MaxValue);
+            var stream = file.OpenReadStream(long.MaxValue);
+            await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
             using var buffer = new MemoryStream();
-            await stream.CopyToAsync(buffer);
+            await stream.CopyToAsync(buffer).ConfigureAwait(true);
             var bytes = buffer.ToArray();
             if (bytes.Length == 0) throw new InvalidDataException("The selected media file is empty.");
 
-            var module = await EnsureMediaModuleAsync();
+            var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
             inspectionAssetId = Guid.NewGuid();
             var localUrl = MediaAssets.RegisterBytes(inspectionAssetId, bytes, mimeType);
             MediaSourceInfo info;
             try
             {
-                info = await module.InvokeAsync<MediaSourceInfo>("inspectMediaDataUrl", localUrl, IsVideo ? "video" : "audio");
+                info = await module.InvokeAsync<MediaSourceInfo>("inspectMediaDataUrl", localUrl, IsVideo ? "video" : "audio").ConfigureAwait(true);
                 _warning = null;
             }
             catch (Exception metadataError)
@@ -3145,12 +3148,12 @@
         if (string.IsNullOrWhiteSpace(_dataUrl)) return;
         try
         {
-            var module = await EnsureMediaModuleAsync();
+            var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
             var fallbackMimeType = IsVideo ? "video/webm" : "audio/webm";
             _mimeType = NormalizeMimeType(_mimeType, fallbackMimeType);
             _dataUrl = NormalizeMediaDataUrl(_dataUrl, _mimeType);
             RefreshPreviewSource();
-            var info = await module.InvokeAsync<MediaSourceInfo>("inspectMediaSource", "media-studio-preview", _previewSource, IsVideo ? "video" : "audio");
+            var info = await module.InvokeAsync<MediaSourceInfo>("inspectMediaSource", "media-studio-preview", _previewSource, IsVideo ? "video" : "audio").ConfigureAwait(true);
             _duration = Math.Max(.01, info.DurationSeconds);
             _trimStart = 0;
             _trimEnd = _duration;
@@ -3174,9 +3177,9 @@
         _error = null;
         try
         {
-            var module = await EnsureMediaModuleAsync();
+            var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
             _recording = true;
-            await module.InvokeVoidAsync("startMediaRecording", "media-studio-preview", IsVideo ? "video" : "audio", source, _self);
+            await module.InvokeVoidAsync("startMediaRecording", "media-studio-preview", IsVideo ? "video" : "audio", source, _self).ConfigureAwait(true);
         }
         catch (Exception ex)
         {
@@ -3187,21 +3190,21 @@
 
     private async Task StopRecording()
     {
-        if (_module is not null) await _module.InvokeVoidAsync("stopMediaRecording", "media-studio-preview");
+        if (_module is not null) await _module.InvokeVoidAsync("stopMediaRecording", "media-studio-preview").ConfigureAwait(true);
     }
 
     private async Task GenerateTone()
     {
         try
         {
-            var module = await EnsureMediaModuleAsync();
-            await module.InvokeVoidAsync("clearRetainedRecording", "media-studio-preview");
+            var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+            await module.InvokeVoidAsync("clearRetainedRecording", "media-studio-preview").ConfigureAwait(true);
             ClearRetainedRecordingState();
             _dataUrl = CreateToneDataUrl(3, 440, .32);
             _mimeType = "audio/wav";
             _name = "Generated A4 tone.wav";
             RefreshPreviewSource();
-            await InspectSource();
+            await InspectSource().ConfigureAwait(true);
         }
         catch (Exception ex)
         {
@@ -3261,7 +3264,7 @@
         _warning = string.IsNullOrWhiteSpace(info.MetadataWarning)
             ? "Recording completed. It remains available for download until this studio closes."
             : $"Recording completed and remains downloadable. Browser metadata warning: {info.MetadataWarning}";
-        await InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
     }
 
     [JSInvokable]
@@ -3318,7 +3321,7 @@
         _warning = "Recording embedded. The original browser recording is still available for download until this studio closes.";
         ReplaceOrAddCurrentSegment();
         RefreshPreviewSource();
-        await InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
     }
 
     [JSInvokable]
@@ -3351,10 +3354,10 @@
     {
         try
         {
-            var module = await EnsureMediaModuleAsync();
+            var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
             var start = IsVideo ? VideoSelectionStart : _trimStart;
             var end = IsVideo && !_videoSelectionIsPoint ? VideoSelectionEnd : _trimEnd;
-            await module.InvokeAsync<bool>("playMediaRange", "media-studio-preview", start, end, _volume, _playbackRate, _muted, _loop);
+            await module.InvokeAsync<bool>("playMediaRange", "media-studio-preview", start, end, _volume, _playbackRate, _muted, _loop).ConfigureAwait(true);
             _error = null;
         }
         catch (Exception ex) when (ex is JSDisconnectedException or TaskCanceledException or ObjectDisposedException) { }
@@ -3368,15 +3371,15 @@
     {
         try
         {
-            var module = await EnsureMediaModuleAsync();
-            await module.InvokeAsync<bool>("pauseMedia", "media-studio-preview");
+            var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+            await module.InvokeAsync<bool>("pauseMedia", "media-studio-preview").ConfigureAwait(true);
         }
         catch (Exception ex) when (ex is JSDisconnectedException or TaskCanceledException or ObjectDisposedException or JSException) { }
     }
     private async Task SeekStart()
     {
-        var module = await EnsureMediaModuleAsync();
-        await module.InvokeVoidAsync("seekMedia", "media-studio-preview", _trimStart);
+        var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+        await module.InvokeVoidAsync("seekMedia", "media-studio-preview", _trimStart).ConfigureAwait(true);
     }
 
     private void TrimRangeChanged(RangeSelectorValueChangedEventArgs args)
@@ -3477,8 +3480,8 @@
             try
             {
                 StateHasChanged();
-                await Task.Yield();
-                if (HasSource) await SyncVideoEffectsAsync();
+                await Task.Delay(1).ConfigureAwait(true);
+                if (HasSource) await SyncVideoEffectsAsync().ConfigureAwait(true);
             }
             catch (Exception ex) when (ex is JSDisconnectedException or TaskCanceledException or ObjectDisposedException or JSException) { }
         });
@@ -3515,8 +3518,8 @@
         _playhead = SourcePositionToTimeline(VideoSelectionStart);
         try
         {
-            var module = await EnsureMediaModuleAsync();
-            await module.InvokeVoidAsync("seekMedia", "media-studio-preview", VideoSelectionStart);
+            var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+            await module.InvokeVoidAsync("seekMedia", "media-studio-preview", VideoSelectionStart).ConfigureAwait(true);
         }
         catch (Exception ex) when (ex is JSDisconnectedException or TaskCanceledException or ObjectDisposedException or JSException) { }
     }
@@ -3543,7 +3546,7 @@
         _videoSelectionUserCommitted = true;
         CommitSelectedSegment();
         if (_autoCreateSelectionLayers && !_videoSelectionIsPoint) CreateOrReuseSelectionLayer(forceNew: false, announce: false);
-        await SeekVideoSelectionStartAsync();
+        await SeekVideoSelectionStartAsync().ConfigureAwait(true);
     }
 
     private async Task ChangeVideoSelectionStart(ChangeEventArgs args)
@@ -3553,7 +3556,7 @@
         _videoSelectionUserCommitted = true;
         CommitSelectedSegment();
         if (_autoCreateSelectionLayers && !_videoSelectionIsPoint) CreateOrReuseSelectionLayer(forceNew: false, announce: false);
-        await SeekVideoSelectionStartAsync();
+        await SeekVideoSelectionStartAsync().ConfigureAwait(true);
     }
 
     private async Task ChangeVideoSelectionEnd(ChangeEventArgs args)
@@ -3563,18 +3566,18 @@
         _videoSelectionUserCommitted = true;
         CommitSelectedSegment();
         if (_autoCreateSelectionLayers) CreateOrReuseSelectionLayer(forceNew: false, announce: false);
-        await SeekVideoSelectionStartAsync();
+        await SeekVideoSelectionStartAsync().ConfigureAwait(true);
     }
 
     private async Task SetVideoFitModeAsync(PublicationVideoFitMode mode)
     {
         if (!IsVideo) return;
         _videoFitMode = mode;
-        await InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
         try
         {
-            var module = await EnsureMediaModuleAsync();
-            await module.InvokeVoidAsync("refreshMediaStudioOverlay", "media-studio-preview");
+            var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+            await module.InvokeVoidAsync("refreshMediaStudioOverlay", "media-studio-preview").ConfigureAwait(true);
         }
         catch (Exception ex) when (ex is JSDisconnectedException or TaskCanceledException or ObjectDisposedException or JSException) { }
     }
@@ -3584,7 +3587,7 @@
     private Task VideoFitStretch() => SetVideoFitModeAsync(PublicationVideoFitMode.Stretch);
     private async Task ChangeVideoFitMode(ChangeEventArgs args)
     {
-        if (Enum.TryParse<PublicationVideoFitMode>(Text(args), out var mode)) await SetVideoFitModeAsync(mode);
+        if (Enum.TryParse<PublicationVideoFitMode>(Text(args), out var mode)) await SetVideoFitModeAsync(mode).ConfigureAwait(true);
     }
 
     private string VideoFitModeText(PublicationVideoFitMode mode, string label) { var localized = LT(label); return _videoFitMode == mode ? $"✓ {localized}" : localized; }
@@ -3663,7 +3666,7 @@
                         DisableVideo = true
                     }
             };
-            await SendToMediaConverter.InvokeAsync(request);
+            await SendToMediaConverter.InvokeAsync(request).ConfigureAwait(true);
         }
         catch (Exception exception)
         {
@@ -3676,8 +3679,8 @@
         if (!HasRetainedRecording) return;
         try
         {
-            var module = await EnsureMediaModuleAsync();
-            await module.InvokeVoidAsync("downloadRetainedRecording", "media-studio-preview", _retainedRecordingFileName);
+            var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+            await module.InvokeVoidAsync("downloadRetainedRecording", "media-studio-preview", _retainedRecordingFileName).ConfigureAwait(true);
             _warning = $"Downloaded {_retainedRecordingFileName} ({FormatBytes(_retainedRecordingSizeBytes)}).";
         }
         catch (Exception ex)
@@ -3692,11 +3695,11 @@
         _saving = true;
         _error = null;
         var applied = false;
-        await InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
         try
         {
-            var module = await EnsureMediaModuleAsync();
-            try { await module.InvokeVoidAsync("pauseMedia", "media-studio-preview"); }
+            var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+            try { await module.InvokeVoidAsync("pauseMedia", "media-studio-preview").ConfigureAwait(true); }
             catch (JSException) { }
             catch (TaskCanceledException) { }
 
@@ -3705,10 +3708,10 @@
                 _embedding = true;
                 _embeddingProgress = 0;
                 _warning = $"Embedding {FormatBytes(_retainedRecordingSizeBytes)} in chunks. The original remains downloadable.";
-                await InvokeAsync(StateHasChanged);
+                await InvokeAsync(StateHasChanged).ConfigureAwait(true);
                 try
                 {
-                    await module.InvokeAsync<bool>("embedRetainedRecording", "media-studio-preview");
+                    await module.InvokeAsync<bool>("embedRetainedRecording", "media-studio-preview").ConfigureAwait(true);
                 }
                 catch (Exception embedError)
                 {
@@ -3717,7 +3720,7 @@
                     _recordingId = null;
                     try
                     {
-                        await module.InvokeVoidAsync("downloadRetainedRecording", "media-studio-preview", _retainedRecordingFileName);
+                        await module.InvokeVoidAsync("downloadRetainedRecording", "media-studio-preview", _retainedRecordingFileName).ConfigureAwait(true);
                         _error = $"Embedding failed, so the completed recording was downloaded instead and remains available here. {embedError.Message}";
                     }
                     catch (Exception downloadError)
@@ -3765,12 +3768,12 @@
                     ? TimelineEdits.CloneVideoProject(_videoProject)
                     : null,
                 FrameClipPolygon = CloneFramePoints(normalizedSegments.FirstOrDefault(segment => !segment.IsGap)?.VideoLayers.FirstOrDefault()?.Region?.Points)
-            });
+            }).ConfigureAwait(true);
             applied = true;
             MediaAssets.Remove(_previewAssetId);
             try
             {
-                await module.InvokeVoidAsync("disposeMediaStudio", "media-studio-preview");
+                await module.InvokeVoidAsync("disposeMediaStudio", "media-studio-preview").ConfigureAwait(true);
                 _initializedSession = Guid.Empty;
             }
             catch (JSException) { }
@@ -3794,7 +3797,7 @@
             _saving = false;
             if (!applied)
             {
-                try { await InvokeAsync(StateHasChanged); }
+                try { await InvokeAsync(StateHasChanged).ConfigureAwait(true); }
                 catch (JSDisconnectedException) { }
                 catch (TaskCanceledException) { }
                 catch (ObjectDisposedException) { }
@@ -3813,13 +3816,13 @@
         {
             try
             {
-                await _module.InvokeVoidAsync("disposeMediaStudio", "media-studio-preview");
+                await _module.InvokeVoidAsync("disposeMediaStudio", "media-studio-preview").ConfigureAwait(true);
                 _initializedSession = Guid.Empty;
             }
             catch (JSDisconnectedException) { }
             catch (TaskCanceledException) { }
         }
-        await Cancelled.InvokeAsync();
+        await Cancelled.InvokeAsync().ConfigureAwait(true);
     }
 
     private string CreateToneDataUrl(double durationSeconds, double frequency, double volume)
@@ -3954,7 +3957,7 @@
         MediaAssets.Remove(_previewAssetId);
         try
         {
-            if (_module is not null) await _module.InvokeVoidAsync("disposeMediaStudio", "media-studio-preview");
+            if (_module is not null) await _module.InvokeVoidAsync("disposeMediaStudio", "media-studio-preview").ConfigureAwait(true);
         }
         catch (JSDisconnectedException) { }
         catch (TaskCanceledException) { }
@@ -3967,7 +3970,7 @@
 
         try
         {
-            if (_module is not null) await _module.DisposeAsync();
+            if (_module is not null) await _module.DisposeAsync().ConfigureAwait(true);
         }
         catch (JSDisconnectedException) { }
         catch (TaskCanceledException) { }

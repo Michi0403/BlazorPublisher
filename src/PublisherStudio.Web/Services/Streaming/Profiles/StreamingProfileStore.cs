@@ -50,10 +50,10 @@ public sealed class StreamingProfileStore
     {
     try
     {
-            await _gate.WaitAsync(cancellationToken);
+            await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                return await LoadCoreAsync(cancellationToken);
+                return await LoadCoreAsync(cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -79,10 +79,10 @@ public sealed class StreamingProfileStore
     try
     {
             ArgumentNullException.ThrowIfNull(profile);
-            await _gate.WaitAsync(cancellationToken);
+            await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                var stored = await LoadStoredAsync(cancellationToken);
+                var stored = await LoadStoredAsync(cancellationToken).ConfigureAwait(false);
                 var existing = stored.Providers.FirstOrDefault(item => item.Id == profile.Id);
                 var normalizedClientId = profile.OAuthClientId?.Trim() ?? string.Empty;
                 var oauthClientChanged = existing is not null
@@ -125,7 +125,7 @@ public sealed class StreamingProfileStore
                 };
                 if (existing is null) stored.Providers.Add(replacement);
                 else stored.Providers[stored.Providers.IndexOf(existing)] = replacement;
-                await SaveStoredAsync(stored, cancellationToken);
+                await SaveStoredAsync(stored, cancellationToken).ConfigureAwait(false);
                 return ToPublic(replacement);
             }
             finally
@@ -151,12 +151,12 @@ public sealed class StreamingProfileStore
     {
     try
     {
-            await _gate.WaitAsync(cancellationToken);
+            await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                var stored = await LoadStoredAsync(cancellationToken);
+                var stored = await LoadStoredAsync(cancellationToken).ConfigureAwait(false);
                 stored.Providers.RemoveAll(item => item.Id == id);
-                await SaveStoredAsync(stored, cancellationToken);
+                await SaveStoredAsync(stored, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -181,10 +181,10 @@ public sealed class StreamingProfileStore
     {
     try
     {
-            await _gate.WaitAsync(cancellationToken);
+            await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                var stored = await LoadStoredAsync(cancellationToken);
+                var stored = await LoadStoredAsync(cancellationToken).ConfigureAwait(false);
                 stored.FfmpegPath = settings.FfmpegPath?.Trim() ?? string.Empty;
                 stored.DefaultRecordingDirectory = settings.DefaultRecordingDirectory?.Trim() ?? string.Empty;
                 stored.MediaHostPort = Math.Clamp(settings.MediaHostPort, 1024, 65535);
@@ -206,7 +206,7 @@ public sealed class StreamingProfileStore
                     .GroupBy(profile => profile.Id)
                     .Select(group => group.First())
                     .ToList();
-                await SaveStoredAsync(stored, cancellationToken);
+                await SaveStoredAsync(stored, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -267,10 +267,10 @@ public sealed class StreamingProfileStore
     {
     try
     {
-            await _gate.WaitAsync(cancellationToken);
+            await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                var profile = (await LoadStoredAsync(cancellationToken)).Providers.FirstOrDefault(item => item.Id == profileId);
+                var profile = (await LoadStoredAsync(cancellationToken).ConfigureAwait(false)).Providers.FirstOrDefault(item => item.Id == profileId);
                 if (profile is null
                     || string.IsNullOrWhiteSpace(profile.OAuthClientId)
                     || string.IsNullOrWhiteSpace(profile.ProtectedOAuthAccessToken)) return null;
@@ -322,10 +322,10 @@ public sealed class StreamingProfileStore
     try
     {
             ArgumentNullException.ThrowIfNull(update);
-            await _gate.WaitAsync(cancellationToken);
+            await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                var stored = await LoadStoredAsync(cancellationToken);
+                var stored = await LoadStoredAsync(cancellationToken).ConfigureAwait(false);
                 var profile = stored.Providers.FirstOrDefault(item => item.Id == update.ProfileId)
                     ?? throw new InvalidOperationException("Save the Twitch provider profile before connecting it.");
                 profile.Provider = PublicationStreamProvider.Twitch;
@@ -346,7 +346,7 @@ public sealed class StreamingProfileStore
                 profile.IngestServerName = update.IngestServerName.Trim();
                 profile.IngestLatencyMilliseconds = update.IngestLatencyMilliseconds;
                 profile.IngestLastTestedUtc = update.IngestLastTestedUtc;
-                await SaveStoredAsync(stored, cancellationToken);
+                await SaveStoredAsync(stored, cancellationToken).ConfigureAwait(false);
                 return ToPublic(profile);
             }
             finally
@@ -384,10 +384,10 @@ public sealed class StreamingProfileStore
     {
     try
     {
-            await _gate.WaitAsync(cancellationToken);
+            await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                var stored = await LoadStoredAsync(cancellationToken);
+                var stored = await LoadStoredAsync(cancellationToken).ConfigureAwait(false);
                 var profile = stored.Providers.FirstOrDefault(item => item.Id == profileId);
                 if (profile is null) return;
                 profile.ProtectedOAuthAccessToken = _protector.Protect(accessToken);
@@ -395,7 +395,7 @@ public sealed class StreamingProfileStore
                 profile.OAuthAccessTokenExpiresUtc = accessTokenExpiresUtc;
                 profile.OAuthLastValidatedUtc = lastValidatedUtc;
                 profile.OAuthScopes = scopes.Trim();
-                await SaveStoredAsync(stored, cancellationToken);
+                await SaveStoredAsync(stored, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -428,16 +428,16 @@ public sealed class StreamingProfileStore
     {
     try
     {
-            await _gate.WaitAsync(cancellationToken);
+            await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                var stored = await LoadStoredAsync(cancellationToken);
+                var stored = await LoadStoredAsync(cancellationToken).ConfigureAwait(false);
                 var profile = stored.Providers.FirstOrDefault(item => item.Id == profileId);
                 if (profile is null) return;
                 profile.OAuthAccessTokenExpiresUtc = accessTokenExpiresUtc;
                 profile.OAuthLastValidatedUtc = lastValidatedUtc;
                 profile.OAuthScopes = scopes.Trim();
-                await SaveStoredAsync(stored, cancellationToken);
+                await SaveStoredAsync(stored, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -468,10 +468,10 @@ public sealed class StreamingProfileStore
     {
     try
     {
-            await _gate.WaitAsync(cancellationToken);
+            await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                var stored = await LoadStoredAsync(cancellationToken);
+                var stored = await LoadStoredAsync(cancellationToken).ConfigureAwait(false);
                 var profile = stored.Providers.FirstOrDefault(item => item.Id == profileId);
                 if (profile is null) return;
                 profile.Transport = PublicationStreamTransport.Rtmp;
@@ -479,7 +479,7 @@ public sealed class StreamingProfileStore
                 profile.IngestServerName = candidate.Name.Trim();
                 profile.IngestLatencyMilliseconds = candidate.LatencyMilliseconds;
                 profile.IngestLastTestedUtc = testedUtc;
-                await SaveStoredAsync(stored, cancellationToken);
+                await SaveStoredAsync(stored, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -504,10 +504,10 @@ public sealed class StreamingProfileStore
     {
     try
     {
-            await _gate.WaitAsync(cancellationToken);
+            await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                var stored = await LoadStoredAsync(cancellationToken);
+                var stored = await LoadStoredAsync(cancellationToken).ConfigureAwait(false);
                 var profile = stored.Providers.FirstOrDefault(item => item.Id == profileId);
                 if (profile is null) return;
                 profile.AuthenticationMode = StreamingProviderAuthenticationMode.Manual;
@@ -516,7 +516,7 @@ public sealed class StreamingProfileStore
                 profile.OAuthAccessTokenExpiresUtc = null;
                 profile.OAuthLastValidatedUtc = null;
                 profile.OAuthScopes = string.Empty;
-                await SaveStoredAsync(stored, cancellationToken);
+                await SaveStoredAsync(stored, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -545,10 +545,10 @@ public sealed class StreamingProfileStore
     {
     try
     {
-            await _gate.WaitAsync(cancellationToken);
+            await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                var storedProfile = (await LoadStoredAsync(cancellationToken)).Providers.FirstOrDefault(item => item.Id == profileId);
+                var storedProfile = (await LoadStoredAsync(cancellationToken).ConfigureAwait(false)).Providers.FirstOrDefault(item => item.Id == profileId);
                 var protectedValue = kind switch
                 {
                     ProtectedValueKind.StreamSecret => storedProfile?.ProtectedSecret,
@@ -581,7 +581,7 @@ public sealed class StreamingProfileStore
     {
     try
     {
-            var stored = await LoadStoredAsync(cancellationToken);
+            var stored = await LoadStoredAsync(cancellationToken).ConfigureAwait(false);
             return new StreamingMachineSettings
             {
                 Providers = stored.Providers.Select(ToPublic).ToList(),
@@ -653,8 +653,9 @@ public sealed class StreamingProfileStore
             if (!File.Exists(_filePath)) return new StoredStreamingMachineSettings();
             try
             {
-                await using var stream = File.OpenRead(_filePath);
-                return await JsonSerializer.DeserializeAsync<StoredStreamingMachineSettings>(stream, _json, cancellationToken)
+                var stream = File.OpenRead(_filePath);
+                await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(false);
+                return await JsonSerializer.DeserializeAsync<StoredStreamingMachineSettings>(stream, _json, cancellationToken).ConfigureAwait(false)
                     ?? new StoredStreamingMachineSettings();
             }
             catch
@@ -683,8 +684,9 @@ public sealed class StreamingProfileStore
     try
     {
             var temporary = _filePath + ".tmp";
-            await using (var stream = File.Create(temporary))
-                await JsonSerializer.SerializeAsync(stream, settings, _json, cancellationToken);
+            var stream = File.Create(temporary);
+            await using (stream.ConfigureAwait(false))
+                await JsonSerializer.SerializeAsync(stream, settings, _json, cancellationToken).ConfigureAwait(false);
             File.Move(temporary, _filePath, overwrite: true);
     
     }

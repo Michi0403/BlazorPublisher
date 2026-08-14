@@ -104,7 +104,8 @@ public sealed class VideoProjectImportService(
                         throw new InvalidDataException("The OTIOZ bundle does not contain the required top-level content.otio entry.");
 
                     byte[] content;
-                    await using (var stream = contentEntry.Open())
+                    var stream = contentEntry.Open();
+                    await using (stream.ConfigureAwait(false))
                         content = await ReadAllAsync(stream, cancellationToken).ConfigureAwait(false);
 
                     EmbeddedMedia? Resolver(string targetUrl)

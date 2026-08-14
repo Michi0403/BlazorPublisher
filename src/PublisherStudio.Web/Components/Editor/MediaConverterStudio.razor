@@ -371,7 +371,7 @@
         try
         {
             _error = string.Empty;
-            _capabilities = await Conversions.GetCapabilitiesAsync();
+            _capabilities = await Conversions.GetCapabilitiesAsync().ConfigureAwait(true);
             _profiles.Clear();
             _profiles.AddRange(Conversions.GetProfiles());
             RefreshJobs();
@@ -389,7 +389,7 @@
         _self ??= DotNetObjectReference.Create(this);
         try
         {
-            await JS.InvokeVoidAsync("publisherStudio.bindMediaConverterDrop", _sourceDropZone, _self);
+            await JS.InvokeVoidAsync("publisherStudio.bindMediaConverterDrop", _sourceDropZone, _self).ConfigureAwait(true);
             _dropBound = true;
         }
         catch (JSException exception)
@@ -451,13 +451,15 @@
             MediaConversionJobInfo job;
             if (_file is not null)
             {
-                await using var source = _file.OpenReadStream(long.MaxValue);
-                job = await Conversions.QueueAsync(source, _file.Name, _file.ContentType, _presetId, _options);
+                var source = _file.OpenReadStream(long.MaxValue);
+                await using var configuredSourceAsyncDisposal = source.ConfigureAwait(true);
+                job = await Conversions.QueueAsync(source, _file.Name, _file.ContentType, _presetId, _options).ConfigureAwait(true);
             }
             else if (_memorySource is not null)
             {
-                await using var source = new MemoryStream(_memorySource.Content, writable: false);
-                job = await Conversions.QueueAsync(source, _memorySource.FileName, _memorySource.MimeType, _presetId, _options);
+                var source = new MemoryStream(_memorySource.Content, writable: false);
+                await using var configuredSourceAsyncDisposal = source.ConfigureAwait(true);
+                job = await Conversions.QueueAsync(source, _memorySource.FileName, _memorySource.MimeType, _presetId, _options).ConfigureAwait(true);
             }
             else return;
             _jobs.RemoveAll(existing => existing.Id == job.Id);
@@ -483,9 +485,9 @@
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                await Task.Delay(500, cancellationToken);
+                await Task.Delay(500, cancellationToken).ConfigureAwait(true);
                 RefreshJobs();
-                await InvokeAsync(StateHasChanged);
+                await InvokeAsync(StateHasChanged).ConfigureAwait(true);
                 if (_jobs.All(job => job.Status is not (MediaConversionJobStatus.Queued or MediaConversionJobStatus.Running))) break;
             }
         }
@@ -520,9 +522,10 @@
             }
             else if (_file is not null)
             {
-                await using var source = _file.OpenReadStream(long.MaxValue);
+                var source = _file.OpenReadStream(long.MaxValue);
+                await using var configuredSourceAsyncDisposal = source.ConfigureAwait(true);
                 using var memory = new MemoryStream();
-                await source.CopyToAsync(memory);
+                await source.CopyToAsync(memory).ConfigureAwait(true);
                 var mime = ResolveMimeType(_file.ContentType, _file.Name);
                 request = new MediaConversionInsertRequest(_file.Name, mime, memory.ToArray(), "Media Converter source");
             }
@@ -530,7 +533,7 @@
             {
                 return;
             }
-            await OpenedInStudio.InvokeAsync(request);
+            await OpenedInStudio.InvokeAsync(request).ConfigureAwait(true);
         }
         catch (Exception exception)
         {
@@ -540,11 +543,12 @@
 
     private async Task<MediaConversionInsertRequest> ReadOutput(MediaConversionJobInfo job)
     {
-        var output = await Conversions.OpenOutputAsync(job.Id);
+        var output = await Conversions.OpenOutputAsync(job.Id).ConfigureAwait(true);
         if (output is null) throw new InvalidOperationException("The converted file is no longer available.");
-        await using var stream = output;
+        var stream = output;
+        await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
         using var memory = new MemoryStream();
-        await stream.CopyToAsync(memory);
+        await stream.CopyToAsync(memory).ConfigureAwait(true);
         return new MediaConversionInsertRequest(job.OutputFileName, job.OutputMimeType, memory.ToArray(), "FFmpeg conversion");
     }
     private async Task Download(MediaConversionJobInfo job)
@@ -552,17 +556,18 @@
         try
         {
             _error = string.Empty;
-            var output = await Conversions.OpenOutputAsync(job.Id);
+            var output = await Conversions.OpenOutputAsync(job.Id).ConfigureAwait(true);
             if (output is null) throw new InvalidOperationException("The converted file is no longer available.");
-            await using var stream = output;
+            var stream = output;
+            await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
             using var reference = new DotNetStreamReference(stream, leaveOpen: false);
-            await JS.InvokeVoidAsync("publisherStudio.downloadStream", job.OutputFileName, reference, job.OutputMimeType);
+            await JS.InvokeVoidAsync("publisherStudio.downloadStream", job.OutputFileName, reference, job.OutputMimeType).ConfigureAwait(true);
         }
         catch (Exception exception) { _error = exception.Message; }
     }
     private async Task Insert(MediaConversionJobInfo job)
     {
-        try { await Inserted.InvokeAsync(await ReadOutput(job)); }
+        try { await Inserted.InvokeAsync(await ReadOutput(job).ConfigureAwait(true)).ConfigureAwait(true); }
         catch (Exception exception) { _error = exception.Message; }
     }
     private async Task OpenInStudio(MediaConversionJobInfo job)
@@ -570,7 +575,7 @@
         try
         {
             if (!CanOpenInStudio(job.OutputMimeType)) throw new InvalidOperationException("Only image, audio, or video output can be opened in a Studio.");
-            await OpenedInStudio.InvokeAsync(await ReadOutput(job));
+            await OpenedInStudio.InvokeAsync(await ReadOutput(job).ConfigureAwait(true)).ConfigureAwait(true);
         }
         catch (Exception exception) { _error = exception.Message; }
     }
@@ -583,8 +588,8 @@
     private async Task ShowJobContextMenu(MediaConversionJobInfo job, MouseEventArgs args)
     {
         _selectedJobId = job.Id;
-        await InvokeAsync(StateHasChanged);
-        await _contextMenu.ShowAsync(args);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        await _contextMenu.ShowAsync(args).ConfigureAwait(true);
     }
     private void Cancel(Guid id) { Conversions.Cancel(id); RefreshJobs(); }
     private void Remove(Guid id) { Conversions.Remove(id); _jobs.RemoveAll(job => job.Id == id); if (_selectedJobId == id) _selectedJobId = _jobs.FirstOrDefault()?.Id; }
@@ -723,8 +728,8 @@
     private Task Close() => Closed.InvokeAsync();
     public async ValueTask DisposeAsync()
     {
-        if (_polling is not null) { await _polling.CancelAsync(); _polling.Dispose(); _polling = null; }
-        try { await JS.InvokeVoidAsync("publisherStudio.unbindMediaConverterDrop", _sourceDropZone); } catch { }
+        if (_polling is not null) { await _polling.CancelAsync().ConfigureAwait(true); _polling.Dispose(); _polling = null; }
+        try { await JS.InvokeVoidAsync("publisherStudio.unbindMediaConverterDrop", _sourceDropZone).ConfigureAwait(true); } catch { }
         _self?.Dispose();
         _self = null;
     }

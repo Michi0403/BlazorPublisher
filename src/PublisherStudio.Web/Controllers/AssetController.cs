@@ -48,9 +48,11 @@ public sealed class AssetController(PublicationMediaAssetStore mediaAssets) : Co
     {
         if (file.Length == 0 || !AllowedTypes.Contains(file.ContentType))
             return BadRequest("Select a supported image file.");
-        await using var source = file.OpenReadStream();
-        await using var buffer = new MemoryStream();
-        await source.CopyToAsync(buffer, cancellationToken);
+        var source = file.OpenReadStream();
+        await using var configuredSourceAsyncDisposal = source.ConfigureAwait(false);
+        var buffer = new MemoryStream();
+        await using var configuredBufferAsyncDisposal = buffer.ConfigureAwait(false);
+        await source.CopyToAsync(buffer, cancellationToken).ConfigureAwait(false);
         return Ok(new
         {
             file.FileName,
@@ -74,8 +76,9 @@ public sealed class AssetController(PublicationMediaAssetStore mediaAssets) : Co
             ? "application/octet-stream"
             : Request.ContentType.Split(';', 2)[0].Trim();
 
-        await using var buffer = new MemoryStream();
-        await Request.Body.CopyToAsync(buffer, cancellationToken);
+        var buffer = new MemoryStream();
+        await using var configuredBufferAsyncDisposal = buffer.ConfigureAwait(false);
+        await Request.Body.CopyToAsync(buffer, cancellationToken).ConfigureAwait(false);
         var bytes = buffer.ToArray();
         if (bytes.Length == 0) return BadRequest("The dropped file is empty.");
 

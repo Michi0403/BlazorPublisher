@@ -101,7 +101,7 @@ public sealed class PlatformChatService : IAsyncDisposable
     try
     {
             if (!_adapters.TryGetValue(outputId, out var adapter) || string.IsNullOrWhiteSpace(message)) return false;
-            await adapter.SendAsync(message.Trim(), cancellationToken);
+            await adapter.SendAsync(message.Trim(), cancellationToken).ConfigureAwait(false);
             return true;
     
     }
@@ -126,7 +126,7 @@ public sealed class PlatformChatService : IAsyncDisposable
     {
         if (!_session.OutputDefinitions.Any(item => item.OutputId == outputId))
         {
-            await socket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "Unknown output", cancellationToken);
+            await socket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "Unknown output", cancellationToken).ConfigureAwait(false);
             return;
         }
 
@@ -144,11 +144,11 @@ public sealed class PlatformChatService : IAsyncDisposable
             if (_history.TryGetValue(outputId, out var history))
                 foreach (var item in history.ToArray()) channel.Writer.TryWrite(item);
 
-            await foreach (var item in channel.Reader.ReadAllAsync(cancellationToken))
+            await foreach (var item in channel.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
             {
                 if (socket.State != WebSocketState.Open) break;
                 var payload = JsonSerializer.SerializeToUtf8Bytes(item, JsonOptions);
-                await socket.SendAsync(payload, WebSocketMessageType.Text, true, cancellationToken);
+                await socket.SendAsync(payload, WebSocketMessageType.Text, true, cancellationToken).ConfigureAwait(false);
             }
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
@@ -222,7 +222,7 @@ public sealed class PlatformChatService : IAsyncDisposable
             foreach (var channel in subscribers.Values) channel.Writer.TryComplete();
         _subscribers.Clear();
         foreach (var adapter in _adapters.Values)
-            try { await adapter.DisposeAsync(); }
+            try { await adapter.DisposeAsync().ConfigureAwait(false); }
             catch (Exception exception) { _logger.LogWarning(exception, "Could not dispose a platform-chat adapter."); }
         _adapters.Clear();
         _lifetime.Dispose();
@@ -326,8 +326,8 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
     try
     {
             var writer = _writer ?? throw new InvalidOperationException("Twitch Chat is not connected.");
-            await _sendGate.WaitAsync(cancellationToken);
-            try { await writer.WriteLineAsync($"PRIVMSG #{NormalizeChannel(_output.ChannelId)} :{SanitizeMessage(message)}"); }
+            await _sendGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try { await writer.WriteLineAsync($"PRIVMSG #{NormalizeChannel(_output.ChannelId)} :{SanitizeMessage(message)}").ConfigureAwait(false); }
             finally { _sendGate.Release(); }
     
     }
@@ -353,31 +353,33 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
                 {
                     Status = "connecting";
                     using var client = new TcpClient();
-                    await client.ConnectAsync("irc.chat.twitch.tv", 6697, _lifetime.Token);
-                    await using var ssl = new SslStream(client.GetStream(), false);
+                    await client.ConnectAsync("irc.chat.twitch.tv", 6697, _lifetime.Token).ConfigureAwait(false);
+                    var ssl = new SslStream(client.GetStream(), false);
+                    await using var configuredSslAsyncDisposal = ssl.ConfigureAwait(false);
                     await ssl.AuthenticateAsClientAsync(new SslClientAuthenticationOptions
                     {
                         TargetHost = "irc.chat.twitch.tv",
                         EnabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13
-                    }, _lifetime.Token);
+                    }, _lifetime.Token).ConfigureAwait(false);
                     using var reader = new StreamReader(ssl, TextEncoding.UTF8, false, 1024, leaveOpen: true);
-                    await using var writer = new StreamWriter(ssl, new UTF8Encoding(false), 1024, leaveOpen: true) { AutoFlush = true, NewLine = "\r\n" };
+                    var writer = new StreamWriter(ssl, new UTF8Encoding(false), 1024, leaveOpen: true) { AutoFlush = true, NewLine = "\r\n" };
+                    await using var configuredWriterAsyncDisposal = writer.ConfigureAwait(false);
                     _writer = writer;
                     var token = _output.ChatSecret.StartsWith("oauth:", StringComparison.OrdinalIgnoreCase)
                         ? _output.ChatSecret
                         : "oauth:" + _output.ChatSecret;
-                    await writer.WriteLineAsync("CAP REQ :twitch.tv/tags twitch.tv/commands");
-                    await writer.WriteLineAsync("PASS " + token);
-                    await writer.WriteLineAsync("NICK " + NormalizeAccount(_output.AccountName));
-                    await writer.WriteLineAsync("JOIN #" + NormalizeChannel(_output.ChannelId));
+                    await writer.WriteLineAsync("CAP REQ :twitch.tv/tags twitch.tv/commands").ConfigureAwait(false);
+                    await writer.WriteLineAsync("PASS " + token).ConfigureAwait(false);
+                    await writer.WriteLineAsync("NICK " + NormalizeAccount(_output.AccountName)).ConfigureAwait(false);
+                    await writer.WriteLineAsync("JOIN #" + NormalizeChannel(_output.ChannelId)).ConfigureAwait(false);
                     Status = "connected";
                     attempt = 0;
 
-                    while (!_lifetime.IsCancellationRequested && await reader.ReadLineAsync(_lifetime.Token) is { } line)
+                    while (!_lifetime.IsCancellationRequested && await reader.ReadLineAsync(_lifetime.Token).ConfigureAwait(false) is { } line)
                     {
                         if (line.StartsWith("PING ", StringComparison.OrdinalIgnoreCase))
                         {
-                            await writer.WriteLineAsync("PONG " + line[5..]);
+                            await writer.WriteLineAsync("PONG " + line[5..]).ConfigureAwait(false);
                             continue;
                         }
                         if (TryParsePrivMsg(line, out var message)) _publish(message);
@@ -391,7 +393,7 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
                 finally { _writer = null; }
 
                 attempt = Math.Min(6, attempt + 1);
-                try { await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, attempt)), _lifetime.Token); }
+                try { await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, attempt)), _lifetime.Token).ConfigureAwait(false); }
                 catch (OperationCanceledException) { break; }
             }
             Status = "stopped";
@@ -535,7 +537,7 @@ internal sealed class TwitchIrcChatAdapter : IPlatformChatAdapter
     try
     {
             _lifetime.Cancel();
-            if (_runTask is not null) try { await _runTask; } catch { }
+            if (_runTask is not null) try { await _runTask.ConfigureAwait(false); } catch { }
             _sendGate.Dispose();
             _lifetime.Dispose();
     
@@ -643,7 +645,7 @@ internal sealed class YouTubeLiveChatAdapter : IPlatformChatAdapter
             {
                 Content = new StringContent(body, TextEncoding.UTF8, "application/json")
             };
-            using var response = await _http.SendAsync(request, cancellationToken);
+            using var response = await _http.SendAsync(request, cancellationToken).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
                 throw new InvalidOperationException($"YouTube Chat send failed ({(int)response.StatusCode}): {await response.Content.ReadAsStringAsync(cancellationToken)}");
     
@@ -672,8 +674,8 @@ internal sealed class YouTubeLiveChatAdapter : IPlatformChatAdapter
                     var url = new StringBuilder("https://www.googleapis.com/youtube/v3/liveChat/messages?part=id,snippet,authorDetails&maxResults=200&profileImageSize=64&liveChatId=")
                         .Append(Uri.EscapeDataString(_output.ChannelId));
                     if (!string.IsNullOrWhiteSpace(_pageToken)) url.Append("&pageToken=").Append(Uri.EscapeDataString(_pageToken));
-                    using var response = await _http.GetAsync(url.ToString(), _lifetime.Token);
-                    var json = await response.Content.ReadAsStringAsync(_lifetime.Token);
+                    using var response = await _http.GetAsync(url.ToString(), _lifetime.Token).ConfigureAwait(false);
+                    var json = await response.Content.ReadAsStringAsync(_lifetime.Token).ConfigureAwait(false);
                     if (!response.IsSuccessStatusCode) throw new InvalidOperationException($"YouTube Chat read failed ({(int)response.StatusCode}): {json}");
                     using var document = JsonDocument.Parse(json);
                     var root = document.RootElement;
@@ -692,7 +694,7 @@ internal sealed class YouTubeLiveChatAdapter : IPlatformChatAdapter
                     Status = "error: " + exception.Message;
                     delay = TimeSpan.FromSeconds(Math.Min(30, Math.Max(3, delay.TotalSeconds * 1.5)));
                 }
-                try { await Task.Delay(delay, _lifetime.Token); }
+                try { await Task.Delay(delay, _lifetime.Token).ConfigureAwait(false); }
                 catch (OperationCanceledException) { break; }
             }
             Status = "stopped";
@@ -746,7 +748,7 @@ internal sealed class YouTubeLiveChatAdapter : IPlatformChatAdapter
     try
     {
             _lifetime.Cancel();
-            if (_runTask is not null) try { await _runTask; } catch { }
+            if (_runTask is not null) try { await _runTask.ConfigureAwait(false); } catch { }
             _http.Dispose();
             _lifetime.Dispose();
     

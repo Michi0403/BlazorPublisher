@@ -101,30 +101,30 @@
     private bool _allowDestructiveReset;
     private bool _renderQr;
 
-    protected override async Task OnInitializedAsync() => await RefreshAsync();
+    protected override async Task OnInitializedAsync() => await RefreshAsync().ConfigureAwait(true);
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!_renderQr) return;
         _renderQr = false;
-        await JS.InvokeVoidAsync("publisherOrganicSecurity.renderQr", "organic-security-otp-qr", _otpUri, "PublisherStudio Authenticator enrollment");
-        await JS.InvokeVoidAsync("publisherOrganicSecurity.renderQr", "organic-security-ticket-qr", _pairingTicketJson, "PublisherStudio public 1-Wire pairing ticket");
+        await JS.InvokeVoidAsync("publisherOrganicSecurity.renderQr", "organic-security-otp-qr", _otpUri, "PublisherStudio Authenticator enrollment").ConfigureAwait(true);
+        await JS.InvokeVoidAsync("publisherOrganicSecurity.renderQr", "organic-security-ticket-qr", _pairingTicketJson, "PublisherStudio public 1-Wire pairing ticket").ConfigureAwait(true);
     }
 
     private async Task RefreshAsync()
     {
-        _status = await Security.GetStatusAsync();
-        _trustedPeers = await Security.GetTrustedPeersAsync();
-        await InvokeAsync(StateHasChanged);
+        _status = await Security.GetStatusAsync().ConfigureAwait(true);
+        _trustedPeers = await Security.GetTrustedPeersAsync().ConfigureAwait(true);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
     }
 
     private async Task CreateAsync()
     {
         try
         {
-            await Security.EnsureCreatedAsync();
+            await Security.EnsureCreatedAsync().ConfigureAwait(true);
             Notifications.Success("The runtime-only PublisherStudio 1-Wire identity was created.", "1-Wire Security", nameof(OrganicSecurityPanel));
-            await RefreshAsync();
+            await RefreshAsync().ConfigureAwait(true);
         }
         catch (Exception ex) { Report(ex, "The runtime identity could not be created."); }
     }
@@ -133,11 +133,11 @@
     {
         try
         {
-            await Security.EnsureCreatedAsync();
-            _otpUri = await Security.GetOtpAuthUriAsync();
-            _pairingTicketJson = JsonSerializer.Serialize(await Security.CreatePairingTicketAsync(TimeSpan.FromMinutes(15)), JsonOptions);
+            await Security.EnsureCreatedAsync().ConfigureAwait(true);
+            _otpUri = await Security.GetOtpAuthUriAsync().ConfigureAwait(true);
+            _pairingTicketJson = JsonSerializer.Serialize(await Security.CreatePairingTicketAsync(TimeSpan.FromMinutes(15)).ConfigureAwait(true), JsonOptions);
             _renderQr = true;
-            await RefreshAsync();
+            await RefreshAsync().ConfigureAwait(true);
         }
         catch (Exception ex) { Report(ex, "Pairing material could not be created."); }
     }
@@ -147,10 +147,10 @@
         try
         {
             if (!_allowDestructiveReset) return;
-            await Security.RegenerateAsync();
+            await Security.RegenerateAsync().ConfigureAwait(true);
             ClearMaterial();
             Notifications.Warning("PublisherStudio generated a new identity. Previous encrypted trust is no longer valid.", "1-Wire trust reset", nameof(OrganicSecurityPanel));
-            await RefreshAsync();
+            await RefreshAsync().ConfigureAwait(true);
         }
         catch (Exception ex) { Report(ex, "The runtime identity could not be regenerated."); }
     }
@@ -160,10 +160,10 @@
         try
         {
             if (!_allowDestructiveReset) return;
-            await Security.DeleteAsync();
+            await Security.DeleteAsync().ConfigureAwait(true);
             ClearMaterial();
             Notifications.Warning("The PublisherStudio runtime identity and local trust bindings were deleted.", "1-Wire trust reset", nameof(OrganicSecurityPanel));
-            await RefreshAsync();
+            await RefreshAsync().ConfigureAwait(true);
         }
         catch (Exception ex) { Report(ex, "The runtime identity could not be deleted."); }
     }
@@ -179,7 +179,7 @@
                 Ticket = ticket,
                 MfaCode = _mfaCode.Trim(),
                 ValidForMinutes = _validForMinutes
-            });
+            }).ConfigureAwait(true);
             if (!accepted)
             {
                 Notifications.Warning("The current PublisherStudio MFA code was not accepted.", "1-Wire trust", nameof(OrganicSecurityPanel));
@@ -187,7 +187,7 @@
             }
             _mfaCode = string.Empty;
             Notifications.Success($"Trusted {ticket.DisplayName} for the selected validity period.", "1-Wire trust", nameof(OrganicSecurityPanel));
-            await RefreshAsync();
+            await RefreshAsync().ConfigureAwait(true);
         }
         catch (Exception ex) { Report(ex, "The peer could not be trusted."); }
     }
@@ -196,9 +196,9 @@
     {
         try
         {
-            await Security.RevokeTrustAsync(peerId);
+            await Security.RevokeTrustAsync(peerId).ConfigureAwait(true);
             Notifications.Warning($"Trust for {peerId} was revoked.", "1-Wire trust", nameof(OrganicSecurityPanel));
-            await RefreshAsync();
+            await RefreshAsync().ConfigureAwait(true);
         }
         catch (Exception ex) { Report(ex, "The trust binding could not be revoked."); }
     }

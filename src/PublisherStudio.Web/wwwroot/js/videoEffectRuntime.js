@@ -17,12 +17,27 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         ? String(value).toLowerCase()
         : fallback); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/videoEffectRuntime.js:normalizeColor@10', __javascriptError); throw __javascriptError; } };
 
+    const filterKindNames = ['brightness', 'contrast', 'saturation', 'huerotation', 'blur', 'grayscale', 'sepia', 'invert', 'chromakey', 'vignette', 'grain', 'colorwash'];
+    const layerKindNames = ['basevideo', 'selection2d', 'blob3d'];
+    const blendModeNames = ['normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten'];
+
+    function enumRuntimeName(value, names, fallback) { try {
+        if (typeof value === 'number' && Number.isInteger(value) && value >= 0 && value < names.length) return names[value];
+        const raw = String(value ?? '').trim();
+        if (/^\d+$/.test(raw)) {
+            const index = Number(raw);
+            if (Number.isInteger(index) && index >= 0 && index < names.length) return names[index];
+        }
+        const normalized = raw.replace(/[^a-z0-9]/gi, '').toLowerCase();
+        return normalized || fallback;
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/videoEffectRuntime.js:enumRuntimeName', __javascriptError); throw __javascriptError; }}
+
     function filterKind(filter) { try {
-        return String(filter?.kind || '').replace(/[^a-z]/gi, '').toLowerCase();
+        return enumRuntimeName(filter?.kind, filterKindNames, '');
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/videoEffectRuntime.js:filterKind@14', __javascriptError); throw __javascriptError; }}
 
     function blendMode(value) { try {
-        switch (String(value || '').toLowerCase()) {
+        switch (enumRuntimeName(value, blendModeNames, 'normal')) {
             case 'multiply': return 'multiply';
             case 'screen': return 'screen';
             case 'overlay': return 'overlay';
@@ -33,7 +48,7 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/videoEffectRuntime.js:blendMode@18', __javascriptError); throw __javascriptError; }}
 
     function layerKind(value) { try {
-        const kind = String(value || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+        const kind = enumRuntimeName(value, layerKindNames, 'basevideo');
         if (kind === 'blob3d') return 'blob3d';
         if (kind === 'selection2d') return 'selection2d';
         return 'basevideo';
@@ -220,17 +235,91 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         }
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/videoEffectRuntime.js:regionPath@203', __javascriptError); throw __javascriptError; }}
 
-    function drawBlobDepth(context, region, rect, outputWidth, outputHeight, layer) { try {
+    function regionPixelPoints(region, rect, offsetX = 0, offsetY = 0) { try {
+        return (region?.points || []).map(point => ({
+            x: rect.x + point.x * rect.width + offsetX,
+            y: rect.y + point.y * rect.height + offsetY
+        }));
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/videoEffectRuntime.js:regionPixelPoints', __javascriptError); throw __javascriptError; }}
+
+    function polygonPathFromPixels(context, points) { try {
+        if (!Array.isArray(points) || points.length < 3) return false;
+        context.beginPath();
+        context.moveTo(points[0].x, points[0].y);
+        for (let index = 1; index < points.length; index++) context.lineTo(points[index].x, points[index].y);
+        context.closePath();
+        return true;
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/videoEffectRuntime.js:polygonPathFromPixels', __javascriptError); throw __javascriptError; }}
+
+    function drawBlobDepth(context, region, rect, outputWidth, outputHeight, layer, video, currentTime) { try {
         if (layer.kind !== 'blob3d' || region.points.length < 3 || region.inverted) return;
-        const maximum = Math.max(2, Math.round(Math.min(outputWidth, outputHeight) * layer.depth * .16));
+        const phase = Number.isFinite(currentTime) ? currentTime * Math.max(.15, layer.animationSpeed) : 0;
+        const depthPixels = Math.max(8, Math.round(Math.min(outputWidth, outputHeight) * layer.depth * .48));
+        const angle = .70 + Math.sin(phase * .55) * .20;
+        const offsetX = Math.cos(angle) * depthPixels;
+        const offsetY = Math.sin(angle) * depthPixels;
+        const front = regionPixelPoints(region, rect);
+        const back = regionPixelPoints(region, rect, offsetX, offsetY);
+        if (front.length < 3 || back.length !== front.length) return;
+
         context.save();
-        for (let step = maximum; step >= 1; step--) {
-            const ratio = step / maximum;
-            regionPath(context, region, rect, outputWidth, outputHeight, step * .55, step * .78);
-            context.fillStyle = `rgba(2,12,32,${.14 + (1 - ratio) * .52})`;
+        context.shadowColor = 'rgba(2,6,23,.62)';
+        context.shadowBlur = Math.max(4, depthPixels * .28);
+        context.shadowOffsetX = offsetX * .18;
+        context.shadowOffsetY = offsetY * .18;
+        if (polygonPathFromPixels(context, back)) {
+            const cap = context.createLinearGradient(rect.x, rect.y, rect.x + offsetX + rect.width, rect.y + offsetY + rect.height);
+            cap.addColorStop(0, 'rgba(30,64,175,.76)');
+            cap.addColorStop(1, 'rgba(2,6,23,.94)');
+            context.fillStyle = cap;
             context.fill();
         }
         context.restore();
+
+        for (let index = 0; index < front.length; index++) {
+            const next = (index + 1) % front.length;
+            const a = front[index];
+            const b = front[next];
+            const c = back[next];
+            const d = back[index];
+            const edgeX = b.x - a.x;
+            const edgeY = b.y - a.y;
+            const length = Math.max(1, Math.hypot(edgeX, edgeY));
+            const normalX = edgeY / length;
+            const normalY = -edgeX / length;
+            const depthLength = Math.max(1, Math.hypot(offsetX, offsetY));
+            const light = clamp(.52 + (normalX * -offsetX + normalY * -offsetY) / depthLength * .28, .16, .86, .46);
+            context.save();
+            context.beginPath();
+            context.moveTo(a.x, a.y);
+            context.lineTo(b.x, b.y);
+            context.lineTo(c.x, c.y);
+            context.lineTo(d.x, d.y);
+            context.closePath();
+            const side = context.createLinearGradient(a.x, a.y, d.x, d.y);
+            side.addColorStop(0, `rgba(${Math.round(36 + 70 * light)},${Math.round(82 + 95 * light)},${Math.round(132 + 100 * light)},.94)`);
+            side.addColorStop(1, `rgba(${Math.round(4 + 20 * light)},${Math.round(15 + 35 * light)},${Math.round(40 + 55 * light)},.98)`);
+            context.fillStyle = side;
+            context.fill();
+            context.strokeStyle = 'rgba(186,230,253,.28)';
+            context.lineWidth = Math.max(1, depthPixels * .025);
+            context.stroke();
+            context.restore();
+        }
+
+        // A few progressively displaced texture slices make the extrusion inherit motion and colour
+        // from the live video instead of looking like a detached drop shadow.
+        const textureSteps = Math.max(2, Math.min(8, Math.round(depthPixels / 8)));
+        for (let step = textureSteps; step >= 1; step--) {
+            const ratio = step / (textureSteps + 1);
+            context.save();
+            regionPath(context, region, rect, outputWidth, outputHeight, offsetX * ratio, offsetY * ratio);
+            context.clip();
+            context.globalAlpha = .08 + (1 - ratio) * .08;
+            context.globalCompositeOperation = 'screen';
+            try { context.drawImage(video, rect.x + offsetX * ratio, rect.y + offsetY * ratio, rect.width, rect.height); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/videoEffectRuntime.js:drawBlobDepth:texture', __caughtJavaScriptError); }
+            context.restore();
+        }
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/videoEffectRuntime.js:drawBlobDepth@217', __javascriptError); throw __javascriptError; }}
 
     function finishBlobSurface(context, region, rect, outputWidth, outputHeight, layer) { try {
@@ -354,6 +443,7 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         let currentConfig = config || {};
         let layers = normalizedLayers(currentConfig);
         let frame = 0;
+        let frameKind = '';
         let stopped = false;
         let lastWidth = 0;
         let lastHeight = 0;
@@ -398,7 +488,7 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
                     const region = activeRegion(layer, currentTime);
                     layerContext.setTransform(1, 0, 0, 1, 0, 0);
                     layerContext.clearRect(0, 0, width, height);
-                    drawBlobDepth(layerContext, region, rect, width, height, layer);
+                    drawBlobDepth(layerContext, region, rect, width, height, layer, video, currentTime);
                     layerContext.save();
                     regionPath(layerContext, region, rect, width, height);
                     layerContext.clip(region.inverted && region.points.length >= 3 ? 'evenodd' : 'nonzero');
@@ -420,30 +510,60 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
                     context.restore();
                 }
             }
-            if (typeof video.requestVideoFrameCallback === 'function')
-                frame = video.requestVideoFrameCallback(draw);
-            else
-                frame = requestAnimationFrame(draw);
+            if (!video.paused && !video.ended) {
+                if (typeof video.requestVideoFrameCallback === 'function') {
+                    frameKind = 'video';
+                    frame = video.requestVideoFrameCallback(() => { try { frame = 0; draw(); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/videoEffectRuntime.js:videoFrame', __javascriptError); } });
+                } else {
+                    frameKind = 'animation';
+                    frame = requestAnimationFrame(() => { try { frame = 0; draw(); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/videoEffectRuntime.js:animationFrame', __javascriptError); } });
+                }
+            }
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/videoEffectRuntime.js:draw@377', __javascriptError); throw __javascriptError; }};
+
+        const cancelScheduledFrame = () => { try {
+            if (!frame) return;
+            if (frameKind === 'video' && typeof video.cancelVideoFrameCallback === 'function') video.cancelVideoFrameCallback(frame);
+            else cancelAnimationFrame(frame);
+            frame = 0;
+            frameKind = '';
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/videoEffectRuntime.js:cancelScheduledFrame', __javascriptError); }};
+        const requestRender = () => { try {
+            if (stopped) return;
+            if (frameKind === 'animation') return;
+            if (frameKind === 'video') cancelScheduledFrame();
+            frameKind = 'animation';
+            frame = requestAnimationFrame(() => { try { frame = 0; frameKind = ''; draw(); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/videoEffectRuntime.js:requestRender', __javascriptError); } });
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/videoEffectRuntime.js:requestRender:schedule', __javascriptError); }};
+        const mediaRenderHandler = () => requestRender();
+        video.addEventListener('play', mediaRenderHandler);
+        video.addEventListener('seeked', mediaRenderHandler);
+        video.addEventListener('timeupdate', mediaRenderHandler);
+        video.addEventListener('loadeddata', mediaRenderHandler);
+        video.addEventListener('loadedmetadata', mediaRenderHandler);
 
         const runtime = {
             update(nextConfig) { try {
                 currentConfig = nextConfig || {};
                 layers = normalizedLayers(currentConfig);
+                requestRender();
              } catch (__javascriptError) { publisherStudioDiagnostics.report('js/videoEffectRuntime.js:update@424', __javascriptError); throw __javascriptError; }},
             stop() { try {
                 if (stopped) return;
                 stopped = true;
-                if (typeof video.cancelVideoFrameCallback === 'function') {
-                    try { video.cancelVideoFrameCallback(frame); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/videoEffectRuntime.js:suppressed-catch@432', __caughtJavaScriptError);  }
-                } else cancelAnimationFrame(frame);
+                cancelScheduledFrame();
+                video.removeEventListener('play', mediaRenderHandler);
+                video.removeEventListener('seeked', mediaRenderHandler);
+                video.removeEventListener('timeupdate', mediaRenderHandler);
+                video.removeEventListener('loadeddata', mediaRenderHandler);
+                video.removeEventListener('loadedmetadata', mediaRenderHandler);
                 canvas.classList.remove('active');
                 video.classList.remove('video-effect-source-hidden');
                 context?.clearRect(0, 0, canvas.width, canvas.height);
                 runtimes.delete(key);
              } catch (__javascriptError) { publisherStudioDiagnostics.report('js/videoEffectRuntime.js:stop@428', __javascriptError); throw __javascriptError; }}
         };
-        draw();
+        requestRender();
         return runtime;
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/videoEffectRuntime.js:createRuntime@344', __javascriptError); throw __javascriptError; }}
 

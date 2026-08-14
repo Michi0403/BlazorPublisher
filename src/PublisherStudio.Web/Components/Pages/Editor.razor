@@ -30,8 +30,8 @@
     <WebDataRefreshHost State="State" />
     <header class="title-bar">
         <div class="brand-mark">P</div>
-        <input class="document-name" value="@State.Document.Name" @onchange="RenameDocument" aria-label="Publication name" />
-        <span class="modified-label">Modified @State.Document.ModifiedUtc.LocalDateTime.ToString("g")</span>
+        <input class="document-name" value="@State.Document.Name" @onchange="RenameDocument" aria-label='@LT("Publication name")' />
+        <span class="modified-label">@LT("Modified") @State.Document.ModifiedUtc.LocalDateTime.ToString("g")</span>
         <label class="title-bar-language" for="publisherstudio-language-select">
             <span>@LanguageLabel</span>
             <select id="publisherstudio-language-select"
@@ -58,9 +58,9 @@
     @if (_recoveryCandidate is not null)
     {
         <aside class="publisher-recovery-banner" role="status">
-            <span><b>Recovered work is available:</b> @_recoveryCandidate.DocumentName · @_recoveryCandidate.SavedUtc.LocalDateTime.ToString("g")</span>
-            <button type="button" @onclick="RestoreRecovery">Restore</button>
-            <button type="button" @onclick="DismissRecovery">Dismiss</button>
+            <span><b>@LT("Recovered work is available:")</b> @_recoveryCandidate.DocumentName · @_recoveryCandidate.SavedUtc.LocalDateTime.ToString("g")</span>
+            <button type="button" @onclick="RestoreRecovery">@LT("Restore")</button>
+            <button type="button" @onclick="DismissRecovery">@LT("Dismiss")</button>
         </aside>
     }
 
@@ -126,20 +126,20 @@
                        OnInsertLiveSource="InsertLiveSource"
                        OnSelectChatOutput="SelectChatOutput" />
 
-    <div class="publisher-quick-insert" aria-label="Drag objects onto the publication page">
-        <span>Drag to canvas</span>
-        <button type="button" draggable="true" data-publisher-insert="panel" title="Drag a reusable panel or dashboard to the canvas" @onclick="InsertPanel"><i class="pub-icon pub-icon-panel"></i>Panel</button>
-        <button type="button" draggable="true" data-publisher-insert="text" title="Drag a text box to an exact position, or click to insert" @onclick="AddTextQuick"><i class="pub-icon pub-icon-text"></i>Text</button>
+    <div class="publisher-quick-insert" aria-label='@LT("Drag objects onto the publication page")'>
+        <span>@LT("Drag to canvas")</span>
+        <button type="button" draggable="true" data-publisher-insert="panel" title='@LT("Drag a reusable panel or dashboard to the canvas")' @onclick="InsertPanel"><i class="pub-icon pub-icon-panel"></i>@LT("Panel")</button>
+        <button type="button" draggable="true" data-publisher-insert="text" title='@LT("Drag a text box to an exact position, or click to insert")' @onclick="AddTextQuick"><i class="pub-icon pub-icon-text"></i>@LT("Text")</button>
         @if (CanUseAiCouncil)
         {
-            <button type="button" title="Create a text frame and open LocalGPT AI assistance in Story Editor" @onclick="AddAiTextQuick"><i class="pub-icon pub-icon-text"></i>AI Text</button>
-            <button type="button" title="Insert a DevExtreme Chat already wired to the paired LocalGPT Council bridge" @onclick="InsertAiChatQuick"><i class="pub-icon pub-icon-command"></i>AI Chat</button>
+            <button type="button" title='@LT("Create a text frame and open LocalGPT AI assistance in Story Editor")' @onclick="AddAiTextQuick"><i class="pub-icon pub-icon-text"></i>@LT("AI Text")</button>
+            <button type="button" title='@LT("Insert a DevExtreme Chat already wired to the paired LocalGPT Council bridge")' @onclick="InsertAiChatQuick"><i class="pub-icon pub-icon-command"></i>@LT("AI Chat")</button>
         }
-        <button type="button" draggable="true" data-publisher-insert="picture" title="Drag to choose and place a picture, or click to insert" @onclick="OpenPicturePicker"><i class="pub-icon pub-icon-picture"></i>Picture</button>
-        <button type="button" draggable="true" data-publisher-insert="spreadsheet" title="Drag to create and place a spreadsheet, or click to open a workbook" @onclick="OpenSpreadsheetPicker"><i class="pub-icon pub-icon-spreadsheet"></i>Sheet</button>
-        <button type="button" draggable="true" data-publisher-insert="video" title="Drag to create or import and place a video, or click to insert" @onclick="OpenVideoPicker"><i class="pub-icon pub-icon-video"></i>Video</button>
-        <button type="button" title="Create an animated HTML-compatible 3D blob with embedded OpenSCAD interchange source" @onclick="InsertDefaultVideoBlob"><i class="pub-icon pub-icon-effects"></i>3D Blob</button>
-        <small>Ctrl/Shift-click objects for multi-selection</small>
+        <button type="button" draggable="true" data-publisher-insert="picture" title='@LT("Drag to choose and place a picture, or click to insert")' @onclick="OpenPicturePicker"><i class="pub-icon pub-icon-picture"></i>@LT("Picture")</button>
+        <button type="button" draggable="true" data-publisher-insert="spreadsheet" title='@LT("Drag to create and place a spreadsheet, or click to open a workbook")' @onclick="OpenSpreadsheetPicker"><i class="pub-icon pub-icon-spreadsheet"></i>@LT("Sheet")</button>
+        <button type="button" draggable="true" data-publisher-insert="video" title='@LT("Drag to create or import and place a video, or click to insert")' @onclick="OpenVideoPicker"><i class="pub-icon pub-icon-video"></i>@LT("Video")</button>
+        <button type="button" title='@LT("Create an animated HTML-compatible 3D blob with embedded OpenSCAD interchange source")' @onclick="InsertDefaultVideoBlob"><i class="pub-icon pub-icon-effects"></i>@LT("3D Blob")</button>
+        <small>@LT("Ctrl/Shift-click objects for multi-selection")</small>
     </div>
 
     <div id="publisher-workspace" class="editor-workspace @(_timelineVisible ? "timeline-open" : null)">
@@ -1215,7 +1215,43 @@
             : State.SelectedElement;
         var format = _selectedPictureExportFormat;
         await CloseSelectedPictureExport();
+        if (selected is ImageFrameElement { PictureSource: not null } picture)
+        {
+            await ExportPictureStudioMergedSelection(picture, format);
+            return;
+        }
         await ExportSelectedObjectCore(selected, format);
+    }
+
+    private async Task ExportPictureStudioMergedSelection(ImageFrameElement selected, string format)
+    {
+        try
+        {
+            if (selected.PictureSource is null)
+                throw new InvalidOperationException("The selected picture no longer contains its Picture Studio document.");
+            var normalized = format == "svg" ? "svg" : "png";
+            var baseName = Files.SafeFileName(State.Document.Name);
+            var objectName = Files.SafeFileName(selected.Name);
+            var fileName = $"{baseName}-{objectName}.{normalized}";
+            ShowNotice($"Rendering {selected.Name} through Picture Studio as merged {normalized.ToUpperInvariant()}…");
+            var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/pictureStudioInterop.js?v=2.6.5");
+            try
+            {
+                if (normalized == "svg")
+                    await module.InvokeVoidAsync("downloadPictureStudioMergedSvg", selected.PictureSource, fileName);
+                else
+                    await module.InvokeVoidAsync("downloadPictureStudio", selected.PictureSource, fileName, "image/png", 1d);
+            }
+            finally
+            {
+                try { await module.DisposeAsync(); } catch (JSDisconnectedException) { }
+            }
+            ShowNotice($"Exported {selected.Name} from the full Picture Studio canvas without Mainframe cropping.");
+        }
+        catch (Exception ex)
+        {
+            ShowError(ex);
+        }
     }
 
     private async Task ExportSelectedLayeredChoice()
@@ -1232,7 +1268,7 @@
             var fileName = $"{baseName}-{objectName}-layered.svg";
             await CloseSelectedPictureExport();
             ShowNotice($"Exporting {selected.Name} with editable Picture Studio layers…");
-            var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/pictureStudioInterop.js");
+            var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/pictureStudioInterop.js?v=2.6.5");
             try
             {
                 await module.InvokeVoidAsync("downloadPictureStudioSvg", selected.PictureSource, fileName);
@@ -1766,7 +1802,7 @@
             var bytes = buffer.ToArray();
             if (bytes.Length == 0) throw new InvalidDataException("The selected media file is empty.");
 
-            module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js");
+            module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.6.5");
             temporaryAssetId = Guid.NewGuid();
             var inspectionUrl = MediaAssets.RegisterBytes(temporaryAssetId, bytes, mimeType);
             MediaSourceInfo info;
@@ -2579,6 +2615,7 @@
     }
 
     private bool CanUseAiCouncil => LocalGptConnection.State.IsLinked && LocalGptConnection.State.HasCapability("council.run");
+    private string LT(string text) => Localization.GetText(text);
     private string CurrentCulture => Localization.ResolveAvailableCulture(System.Globalization.CultureInfo.CurrentUICulture.Name);
     private string LanguageLabel => Localization.Get("Text.Language", fallback: "Language");
 

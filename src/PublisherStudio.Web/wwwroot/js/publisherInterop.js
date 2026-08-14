@@ -376,17 +376,100 @@ function mediaDownloadDescriptor(media) { try {
     return { filename, mime, href };
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:mediaDownloadDescriptor', __javascriptError); return null; }}
 
+function configureStudioDragTransfer(transfer, payload = {}) { try {
+    if (!transfer) return false;
+    const effectAllowed = String(payload.effectAllowed || 'copy');
+    transfer.effectAllowed = effectAllowed;
+    const internalKind = String(payload.internalKind || '').trim().toLowerCase();
+    if (internalKind) {
+        const internal = JSON.stringify({ kind: internalKind, id: String(payload.id || ''), name: String(payload.name || '') });
+        transfer.setData('application/x-publisher-studio-drag', internal);
+        transfer.setData(`application/x-publisher-${internalKind}`, String(payload.id || ''));
+    }
+    const href = String(payload.href || '');
+    const mime = String(payload.mime || 'application/octet-stream');
+    const filename = safeMediaDownloadName(payload.filename || payload.name || 'media');
+    if (href) {
+        const mediaPayload = JSON.stringify({ href, mime, filename });
+        transfer.setData('application/x-publisher-media', mediaPayload);
+        transfer.setData('DownloadURL', `${mime}:${filename}:${href}`);
+        transfer.setData('text/uri-list', href);
+        transfer.setData('text/plain', filename);
+    } else if (payload.name) {
+        transfer.setData('text/plain', String(payload.name));
+    }
+    return true;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:configureStudioDragTransfer', __javascriptError); return false; }}
+
+function readStudioDragTransfer(transfer, expectedKind = '') { try {
+    if (!transfer) return null;
+    const expected = String(expectedKind || '').trim().toLowerCase();
+    if (expected) {
+        const direct = transfer.getData(`application/x-publisher-${expected}`);
+        if (direct) return { kind: expected, id: direct };
+    }
+    const raw = transfer.getData('application/x-publisher-studio-drag');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || (expected && String(parsed.kind || '').toLowerCase() !== expected)) return null;
+    return parsed;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:readStudioDragTransfer', __javascriptError); return null; }}
+
+function studioMediaDescriptorFromTransfer(transfer) { try {
+    if (!transfer) return null;
+    const raw = transfer.getData('application/x-publisher-media');
+    if (raw) {
+        try {
+            const parsed = JSON.parse(raw);
+            if (parsed?.href) return { href: String(parsed.href), mime: String(parsed.mime || ''), filename: safeMediaDownloadName(parsed.filename || 'media') };
+        } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:studioMediaDescriptorFromTransfer:json', __caughtJavaScriptError); }
+    }
+    const href = String(transfer.getData('text/uri-list') || '').split(/\r?\n/).find(line => line && !line.startsWith('#')) || '';
+    if (!href) return null;
+    return { href, mime: '', filename: safeMediaDownloadName(transfer.getData('text/plain') || 'media') };
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:studioMediaDescriptorFromTransfer', __javascriptError); return null; }}
+
+async function fileFromStudioDragTransfer(transfer) { try {
+    const direct = transfer?.files?.[0]
+        || [...(transfer?.items || [])].find(candidate => candidate.kind === 'file')?.getAsFile?.();
+    if (direct) return direct;
+    const descriptor = studioMediaDescriptorFromTransfer(transfer);
+    if (!descriptor?.href) return null;
+    const source = String(descriptor.href);
+    if (!/^(?:data:|blob:)/i.test(source)) {
+        try {
+            const resolved = new URL(source, location.href);
+            if (resolved.origin !== location.origin) return null;
+        } catch { return null; }
+    }
+    const response = await fetch(source);
+    if (!response.ok) throw new Error(`Dragged media could not be read (${response.status}).`);
+    const blob = await response.blob();
+    const mime = String(descriptor.mime || blob.type || 'application/octet-stream');
+    let filename = safeMediaDownloadName(descriptor.filename || 'media');
+    if (!/\.[a-z0-9]{2,6}$/i.test(filename)) {
+        const extensions = { 'image/png':'png','image/jpeg':'jpg','image/webp':'webp','image/gif':'gif','image/svg+xml':'svg','video/webm':'webm','video/mp4':'mp4','audio/webm':'webm','audio/mpeg':'mp3','audio/ogg':'ogg','audio/wav':'wav' };
+        const extension = extensions[mime.toLowerCase()] || 'bin';
+        filename += `.${extension}`;
+    }
+    return new File([blob], filename, { type: mime, lastModified: Date.now() });
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:fileFromStudioDragTransfer', __javascriptError); throw __javascriptError; }}
+
 function namedMediaDragStart(event) { try {
     const media = event?.target?.closest?.('img,video,audio');
     const transfer = event?.dataTransfer;
     if (!media || !transfer) return false;
     const descriptor = mediaDownloadDescriptor(media);
     if (!descriptor) return false;
-    transfer.effectAllowed = 'copy';
-    transfer.setData('DownloadURL', `${descriptor.mime}:${descriptor.filename}:${descriptor.href}`);
-    transfer.setData('text/uri-list', descriptor.href);
-    transfer.setData('text/plain', descriptor.filename);
-    return true;
+    return configureStudioDragTransfer(transfer, {
+        effectAllowed: 'copy',
+        internalKind: 'media',
+        id: media.closest?.('[data-element-id]')?.getAttribute?.('data-element-id') || '',
+        name: descriptor.filename,
+        filename: descriptor.filename,
+        mime: descriptor.mime,
+        href: descriptor.href
+    });
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:namedMediaDragStart', __javascriptError); return false; }}
 
 function namedMediaDragRuntime(root = document) { try {
@@ -8326,6 +8409,10 @@ window.publisherStudio = {
 
 window.publisherStudio.bindMediaConverterDrop = bindMediaConverterDrop;
 window.publisherStudio.unbindMediaConverterDrop = unbindMediaConverterDrop;
+window.publisherStudio.configureStudioDragTransfer = configureStudioDragTransfer;
+window.publisherStudio.readStudioDragTransfer = readStudioDragTransfer;
+window.publisherStudio.studioMediaDescriptorFromTransfer = studioMediaDescriptorFromTransfer;
+window.publisherStudio.fileFromStudioDragTransfer = fileFromStudioDragTransfer;
 
 // Guard exported browser namespaces after the file has initialized.
 publisherStudioDiagnostics.guardObject("publisherStudio", window.publisherStudio);

@@ -91,6 +91,10 @@ function releasePictureDropBindings(editor) { try {
         root.removeEventListener("dragover", handlers.dragover);
         root.removeEventListener("dragleave", handlers.dragleave);
         root.removeEventListener("drop", handlers.drop);
+        root.removeEventListener("dragstart", handlers.dragstart);
+        root.removeEventListener("dragend", handlers.dragend);
+        root.removeEventListener("pointerdown", handlers.pointerdown, true);
+        root.removeEventListener("pointerover", handlers.pointerover, true);
         root.classList.remove("picture-file-drag-active");
         root.removeAttribute("data-picture-drop-mode");
     }
@@ -100,6 +104,70 @@ function releasePictureDropBindings(editor) { try {
         editor.dropDepth = 0;
     }
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:releasePictureDropBindings@80', __javascriptError); throw __javascriptError; }}
+
+function sharedStudioDragRead(transfer, kind) { try {
+    return globalThis.publisherStudio?.readStudioDragTransfer?.(transfer, kind) || null;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:sharedStudioDragRead', __javascriptError); return null; }}
+
+function sharedStudioDragConfigure(transfer, payload) { try {
+    if (globalThis.publisherStudio?.configureStudioDragTransfer)
+        return globalThis.publisherStudio.configureStudioDragTransfer(transfer, payload);
+    return false;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:sharedStudioDragConfigure', __javascriptError); return false; }}
+
+function sharedStudioMediaDescriptor(transfer) { try {
+    return globalThis.publisherStudio?.studioMediaDescriptorFromTransfer?.(transfer) || null;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:sharedStudioMediaDescriptor', __javascriptError); return null; }}
+
+async function sharedStudioDraggedFile(transfer) { try {
+    if (globalThis.publisherStudio?.fileFromStudioDragTransfer)
+        return await globalThis.publisherStudio.fileFromStudioDragTransfer(transfer);
+    return transfer?.files?.[0] || null;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:sharedStudioDraggedFile', __javascriptError); throw __javascriptError; }}
+
+function pictureLayerDownloadDescriptor(editor, layerId) { try {
+    const layer = editor?.document?.layers?.find(candidate => String(candidate?.id || '') === String(layerId || ''));
+    if (!layer) return null;
+    const name = String(layer.name || 'Picture layer').replace(/[<>:"/\\|?*\u0000-\u001f]+/g, '-').trim() || 'Picture layer';
+    const cached = editor.layerDragCache?.get?.(String(layerId || ''));
+    if (cached) return { name, filename: `${name}.png`, mime: 'image/png', href: cached };
+    const kind = layerKind(layer);
+    if (kind === 'raster' && String(layer.dataUrl || '').startsWith('data:image/')) {
+        const href = String(layer.dataUrl);
+        const mime = href.slice(5, href.indexOf(';') > 5 ? href.indexOf(';') : href.indexOf(',')) || 'image/png';
+        const extensions = { 'image/png':'png','image/jpeg':'jpg','image/webp':'webp','image/gif':'gif','image/svg+xml':'svg' };
+        return { name, filename: `${name}.${extensions[mime.toLowerCase()] || 'png'}`, mime, href };
+    }
+    if (kind === 'svg' && layer.svgMarkup) {
+        return { name, filename: `${name}.svg`, mime: 'image/svg+xml', href: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(String(layer.svgMarkup))}` };
+    }
+    return null;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:pictureLayerDownloadDescriptor', __javascriptError); return null; }}
+
+async function preparePictureLayerDragCache(editor, layerId) { try {
+    if (!editor?.document || !layerId) return;
+    editor.layerDragCache ||= new Map();
+    if (editor.layerDragCache.has(String(layerId))) return;
+    const layer = editor.document.layers.find(candidate => String(candidate?.id || '') === String(layerId));
+    if (!layer || pictureLayerDownloadDescriptor(editor, layerId)) return;
+    const document = cloneDocument(editor.document);
+    document.background = 'transparent';
+    document.layers = document.layers.filter(candidate => String(candidate?.id || '') === String(layerId));
+    const canvas = await renderExportCanvas(document, 'image/png');
+    editor.layerDragCache.set(String(layerId), canvas.toDataURL('image/png'));
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:preparePictureLayerDragCache', __javascriptError); }}
+
+async function preparePictureMergedDragCache(editor) { try {
+    if (!editor?.document) return;
+    const canvas = await renderExportCanvas(editor.document, 'image/png');
+    editor.mergedDragDataUrl = canvas.toDataURL('image/png');
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:preparePictureMergedDragCache', __javascriptError); }}
+
+function clearPictureLayerDropMarkers(root) { try {
+    root?.querySelectorAll?.('.picture-layer-row.picture-layer-drop-before,.picture-layer-row.picture-layer-drop-after,.picture-layer-row.picture-layer-dragging')?.forEach(row => {
+        row.classList.remove('picture-layer-drop-before', 'picture-layer-drop-after', 'picture-layer-dragging');
+    });
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:clearPictureLayerDropMarkers', __javascriptError); }}
 
 function bindPictureDrop(editor, rootId, imageInputId, layeredInputId) { try {
     releasePictureDropBindings(editor);
@@ -118,7 +186,9 @@ function bindPictureDrop(editor, rootId, imageInputId, layeredInputId) { try {
         const file = event.dataTransfer?.files?.[0];
         if (file) return file;
         const item = [...(event.dataTransfer?.items || [])].find(candidate => { try { return (candidate.kind === "file"); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:[...(event.dataTransfer?.items || [])].find@114', __javascriptError); throw __javascriptError; } });
-        return item ? { name: "", type: item.type || "" } : null;
+        if (item) return { name: "", type: item.type || "" };
+        const media = sharedStudioMediaDescriptor(event.dataTransfer);
+        return media ? { name: media.filename || '', type: media.mime || '' } : null;
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:descriptor@111', __javascriptError); throw __javascriptError; }};
     const dropPoint = event => { try {
         const canvas = editor.canvas;
@@ -129,6 +199,40 @@ function bindPictureDrop(editor, rootId, imageInputId, layeredInputId) { try {
         return canvasPoint(canvas, event);
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:dropPoint@117', __javascriptError); throw __javascriptError; }};
     const handlers = {
+        pointerover: event => { try {
+            const merged = event.target?.closest?.('[data-picture-drag-merged="true"]');
+            if (merged) { void preparePictureMergedDragCache(editor); return; }
+            const row = event.target?.closest?.('.picture-layer-row[data-picture-layer-id]');
+            if (row) void preparePictureLayerDragCache(editor, row.dataset.pictureLayerId || '');
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:pointerover:drag-cache', __javascriptError); }},
+        pointerdown: event => { try {
+            const merged = event.target?.closest?.('[data-picture-drag-merged="true"]');
+            if (merged) { void preparePictureMergedDragCache(editor); return; }
+            const row = event.target?.closest?.('.picture-layer-row[data-picture-layer-id]');
+            if (row) void preparePictureLayerDragCache(editor, row.dataset.pictureLayerId || '');
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:pointerdown:drag-cache', __javascriptError); }},
+        dragstart: event => { try {
+            const merged = event.target?.closest?.('[data-picture-drag-merged="true"]');
+            if (merged && event.dataTransfer) {
+                const href = String(editor.mergedDragDataUrl || '');
+                if (href) sharedStudioDragConfigure(event.dataTransfer, {
+                    effectAllowed: 'copy', internalKind: 'picture-merged', id: String(editor.document?.id || ''),
+                    name: String(editor.document?.name || 'Picture'), filename: `${String(editor.document?.name || 'Picture')}.png`, mime: 'image/png', href
+                });
+                return;
+            }
+            const row = event.target?.closest?.('.picture-layer-row[data-picture-layer-id]');
+            if (!row || !event.dataTransfer) return;
+            const layerId = String(row.dataset.pictureLayerId || '');
+            const descriptor = pictureLayerDownloadDescriptor(editor, layerId);
+            sharedStudioDragConfigure(event.dataTransfer, {
+                effectAllowed: 'copyMove', internalKind: 'picture-layer', id: layerId,
+                name: descriptor?.name || row.querySelector('b')?.textContent || 'Picture layer',
+                filename: descriptor?.filename || '', mime: descriptor?.mime || '', href: descriptor?.href || ''
+            });
+            row.classList.add('picture-layer-dragging');
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:dragstart:layer', __javascriptError); throw __javascriptError; }},
+        dragend: event => { try { clearPictureLayerDropMarkers(root); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:dragend:layer', __javascriptError); }},
         dragenter: event => { try {
             const file = descriptor(event);
             if (!file) return;
@@ -137,6 +241,18 @@ function bindPictureDrop(editor, rootId, imageInputId, layeredInputId) { try {
             show(pictureDropRoute(file));
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:dragenter@126', __javascriptError); throw __javascriptError; }},
         dragover: event => { try {
+            const internal = sharedStudioDragRead(event.dataTransfer, 'picture-layer');
+            if (internal?.id) {
+                const row = event.target?.closest?.('.picture-layer-row[data-picture-layer-id]');
+                if (!row || row.dataset.pictureLayerId === String(internal.id)) return;
+                event.preventDefault();
+                event.stopPropagation();
+                event.dataTransfer.dropEffect = 'move';
+                clearPictureLayerDropMarkers(root);
+                const bounds = row.getBoundingClientRect();
+                row.classList.add(event.clientY >= bounds.top + bounds.height / 2 ? 'picture-layer-drop-after' : 'picture-layer-drop-before');
+                return;
+            }
             const file = descriptor(event);
             if (!file) return;
             event.preventDefault();
@@ -150,8 +266,19 @@ function bindPictureDrop(editor, rootId, imageInputId, layeredInputId) { try {
             if (editor.dropDepth === 0) clear();
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:dragleave@141', __javascriptError); throw __javascriptError; }},
         drop: async event => { try {
-            const file = event.dataTransfer?.files?.[0]
-                || [...(event.dataTransfer?.items || [])].find(candidate => { try { return (candidate.kind === "file"); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:[...(event.dataTransfer?.items || [])].find@148', __javascriptError); throw __javascriptError; } })?.getAsFile?.();
+            const internal = sharedStudioDragRead(event.dataTransfer, 'picture-layer');
+            if (internal?.id) {
+                const row = event.target?.closest?.('.picture-layer-row[data-picture-layer-id]');
+                if (!row || row.dataset.pictureLayerId === String(internal.id)) { clearPictureLayerDropMarkers(root); return; }
+                event.preventDefault();
+                event.stopPropagation();
+                const bounds = row.getBoundingClientRect();
+                const placeAfter = event.clientY >= bounds.top + bounds.height / 2;
+                clearPictureLayerDropMarkers(root);
+                await editor.dotNetRef?.invokeMethodAsync('PictureStudioLayerDropped', String(internal.id), String(row.dataset.pictureLayerId || ''), placeAfter);
+                return;
+            }
+            const file = await sharedStudioDraggedFile(event.dataTransfer);
             if (!file) return;
             event.preventDefault();
             event.stopPropagation();
@@ -176,6 +303,10 @@ function bindPictureDrop(editor, rootId, imageInputId, layeredInputId) { try {
     root.addEventListener("dragover", handlers.dragover);
     root.addEventListener("dragleave", handlers.dragleave);
     root.addEventListener("drop", handlers.drop);
+    root.addEventListener("dragstart", handlers.dragstart);
+    root.addEventListener("dragend", handlers.dragend);
+    root.addEventListener("pointerdown", handlers.pointerdown, true);
+    root.addEventListener("pointerover", handlers.pointerover, true);
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:bindPictureDrop@98', __javascriptError); throw __javascriptError; }}
 
 function normalizeToolSettings(settings) { try {
@@ -2093,7 +2224,9 @@ export function initializePictureStudio(canvasId, dotNetRef, rootId = "", imageI
             lastRenderError: "",
             dropRoot: null,
             dropHandlers: null,
-            dropDepth: 0
+            dropDepth: 0,
+            layerDragCache: new Map(),
+            mergedDragDataUrl: ""
         };
         const globalHandlers = {
             pointerdown: event => { try {
@@ -2164,6 +2297,8 @@ export async function renderPictureStudio(canvasId, documentModel, selectedLayer
     const editor = editors.get(canvasId);
     if (!editor) return;
     const nextDocument = cloneDocument(documentModel);
+    editor.layerDragCache?.clear?.();
+    editor.mergedDragDataUrl = "";
     editor.selectedLayerId = selectedLayerId || null;
     editor.zoom = clamp(zoom ?? nextDocument.zoom, .05, 4);
     const nextToolSettings = normalizeToolSettings(toolSettings);
@@ -2868,6 +3003,26 @@ export async function downloadPictureStudioSvg(documentModel, fileName) { try {
         globalThis.document.body.appendChild(anchor); anchor.click(); anchor.remove();
     } finally { setTimeout(() => { try { return (URL.revokeObjectURL(url)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:setTimeout@2828', __javascriptError); throw __javascriptError; } }, 2000); }
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:downloadPictureStudioSvg@2820', __javascriptError); throw __javascriptError; }}
+
+export async function downloadPictureStudioMergedSvg(documentModel, fileName) { try {
+    const canvas = await renderExportCanvas(documentModel, 'image/png');
+    const dataUrl = canvas.toDataURL('image/png');
+    const width = Math.max(1, canvas.width);
+    const height = Math.max(1, canvas.height);
+    const svg = `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet"><image x="0" y="0" width="${width}" height="${height}" href="${dataUrl}" xlink:href="${dataUrl}"/></svg>`;
+    const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    try {
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = fileName || 'picture.svg';
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+    } finally {
+        setTimeout(() => { try { return URL.revokeObjectURL(url); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:downloadPictureStudioMergedSvg:revoke', __javascriptError); } }, 2000);
+    }
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:downloadPictureStudioMergedSvg', __javascriptError); throw __javascriptError; }}
 
 export async function downloadPictureStudio(documentModel, fileName, mimeType = "image/png", quality = 1) { try {
     const blob = await createPictureStudioBlob(documentModel, mimeType, quality);

@@ -7,99 +7,128 @@
 @inject VideoProjectImportService VideoProjectImporter
 @inject VideoLayerInterchangeService VideoLayerInterchange
 @inject IPublisherRuntimePolicyDataService RuntimePolicy
+@inject IFileLocalizationService Localization
 
 @if (Visible)
 {
     <div class="editor-modal-backdrop media-studio-backdrop">
-        <section id="media-studio-window" class="media-studio-window" tabindex="0" role="dialog" aria-modal="true" aria-label="@(IsVideo ? "Video Studio" : "Audio Studio")">
+        <section id="media-studio-window" class="media-studio-window" tabindex="0" role="dialog" aria-modal="true" aria-label="@(IsVideo ? LT("Video Studio") : LT("Audio Studio"))">
             <header class="media-studio-titlebar">
                 <div>
-                    <strong>@(IsVideo ? "Video Studio" : "Audio Studio")</strong>
-                    <span>@(EditingExisting ? "Edit the selected media object" : IsVideo ? "Import or record a video" : "Import, record, trim, and mix a simple audio clip")</span>
+                    <strong>@(IsVideo ? LT("Video Studio") : LT("Audio Studio"))</strong>
+                    <span>@(EditingExisting ? LT("Edit the selected media object") : IsVideo ? LT("Import or record a video") : LT("Import, record, trim, and mix a simple audio clip"))</span>
                 </div>
-                <button type="button" title="Close" @onclick="Cancel">×</button>
+                <button type="button" title='@LT("Close")' @onclick="Cancel">×</button>
             </header>
 
-            <DxRibbon CssClass="media-studio-ribbon categorized-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
-                <DxRibbonTab Text="Home">
-                    <DxRibbonGroup Text="Source" IconCssClass="pub-icon pub-icon-media">
+            <DxRibbon CssClass="media-studio-ribbon categorized-ribbon" SizeMode="SizeMode.Medium" AdaptivityAutoCollapseItemsToGroups="true">
+                <DxRibbonTab Text='@LT("Home")'>
+                    <DxRibbonGroup Text='@LT("Source")' IconCssClass="pub-icon pub-icon-media">
                         <DxRibbonItem Text="@ImportMenuText" IconCssClass="pub-icon pub-icon-open" IsPrimary="true" Enabled="@(!_recording)" Click="OpenMediaPicker" />
                         @if (IsVideo)
                         {
-                            <DxRibbonItem Text="Import open project…" IconCssClass="pub-icon pub-icon-open" Enabled="@(!_recording)" Click="OpenVideoProjectPicker" />
-                            <DxRibbonItem Text="Relink project media…" IconCssClass="pub-icon pub-icon-refresh" Enabled="@HasVideoProject" Click="OpenVideoProjectMediaPicker" />
-                            <DxRibbonItem Text="Record camera" IconCssClass="pub-icon pub-icon-video" Enabled="@(!_recording)" Click="RecordCamera" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-video" Text="Record screen" Enabled="@(!_recording)" Click="RecordScreen" />
+                            <DxRibbonItem Text='@LT("Import project…")' IconCssClass="pub-icon pub-icon-open" Enabled="@(!_recording)" Click="OpenVideoProjectPicker" />
+                            <DxRibbonItem Text='@LT("Relink media…")' IconCssClass="pub-icon pub-icon-refresh" Enabled="@HasVideoProject" Click="OpenVideoProjectMediaPicker" />
+                            <DxRibbonItem Text='@LT("Record camera")' IconCssClass="pub-icon pub-icon-video" Enabled="@(!_recording)" Click="RecordCamera" />
+                            <DxRibbonItem Text='@LT("Record screen")' IconCssClass="pub-icon pub-icon-video" Enabled="@(!_recording)" Click="RecordScreen" />
                         }
                         else
                         {
-                            <DxRibbonItem Text="Record microphone" IconCssClass="pub-icon pub-icon-audio" Enabled="@(!_recording)" Click="RecordMicrophone" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-audio" Text="Generate tone" Enabled="@(!_recording)" Click="GenerateTone" />
+                            <DxRibbonItem Text='@LT("Record microphone")' IconCssClass="pub-icon pub-icon-audio" Enabled="@(!_recording)" Click="RecordMicrophone" />
+                            <DxRibbonItem Text='@LT("Generate tone")' IconCssClass="pub-icon pub-icon-audio" Enabled="@(!_recording)" Click="GenerateTone" />
                         }
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-stop" Text="Stop recording" Enabled="@_recording" Click="StopRecording" />
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download recording" Enabled="@HasRetainedRecording" Click="DownloadRecording" />
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-media" Text="Send selection to converter" Enabled="@HasSelectedSegment" Click="SendSelectedMediaToConverter" />
+                        <DxRibbonItem Text='@LT("Stop recording")' IconCssClass="pub-icon pub-icon-stop" Enabled="@_recording" Click="StopRecording" />
                     </DxRibbonGroup>
-                    <DxRibbonGroup Text="Pointer mode" IconCssClass="pub-icon pub-icon-select">
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="@MouseModeText(MediaStudioMouseMode.SelectSection, "Select time")" Click="SelectSectionMode" />
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="@MouseModeText(MediaStudioMouseMode.PlacePlayhead, "Place playhead")" Enabled="@HasSource" Click="PlacePlayheadMode" />
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-crop" Text="@MouseModeText(MediaStudioMouseMode.AddCutLine, "Add cutline")" Enabled="@HasSource" Click="AddCutLineMode" />
-                        @if (IsVideo)
-                        {
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="@MouseModeText(MediaStudioMouseMode.FrameRegion, "Frame region")" Enabled="@HasSource" Click="FrameRegionMode" />
-                        }
-                    </DxRibbonGroup>
-                    <DxRibbonGroup Text="Playback">
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-play" Text="Play range" Enabled="@HasSource" Click="PlaySelection" />
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-pause" Text="Pause" Enabled="@HasSource" Click="PausePreview" />
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-crop" Text="To trim start" Enabled="@HasSource" Click="SeekStart" />
-                    </DxRibbonGroup>
-                    <DxRibbonGroup Text="Trim">
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-play" Text="Start at playhead" Enabled="@HasSource" Click="SetTrimStartAtPlayhead" />
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-play" Text="End at playhead" Enabled="@HasSource" Click="SetTrimEndAtPlayhead" />
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-crop" Text="Reset trim" Enabled="@HasSource" Click="ResetTrim" />
+                    <DxRibbonGroup Text='@LT("Playback")' IconCssClass="pub-icon pub-icon-play">
+                        <DxRibbonItem Text='@LT("Play range")' IconCssClass="pub-icon pub-icon-play" Enabled="@HasSource" Click="PlaySelection" />
+                        <DxRibbonItem Text='@LT("Pause")' IconCssClass="pub-icon pub-icon-pause" Enabled="@HasSource" Click="PausePreview" />
+                        <DxRibbonItem Text='@LT("To trim start")' IconCssClass="pub-icon pub-icon-crop" Enabled="@HasSource" Click="SeekStart" />
                     </DxRibbonGroup>
                     @if (IsVideo)
                     {
-                        <DxRibbonGroup Text="Selection">
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="Cut selection" Enabled="@CanCutVideoSelection" Click="CutVideoSelection" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-crop" Text="Trim to selection" Enabled="@CanUseVideoSelectionAsTrim" Click="UseVideoSelectionAsTrim" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-copy" Text="Copy selection" Enabled="@CanCopyVideoSelection" Click="CopyVideoSelection" />
-                        </DxRibbonGroup>
-                        <DxRibbonGroup Text="Cut sections" IconCssClass="pub-icon pub-icon-line">
-                            <DxRibbonItem Text="Save as cut section" Enabled="@CanSaveCutSection" Click="SaveSelectedRangeAsCutSection" />
-                            <DxRibbonItem Text="Use saved section" Enabled="@(SelectedCutSection is not null)" Click="UseSelectedCutSection" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Remove saved section" Enabled="@(SelectedCutSection is not null)" Click="RemoveSelectedCutSection" />
-                        </DxRibbonGroup>
-                        <DxRibbonGroup Text="Video layers" IconCssClass="pub-icon pub-icon-layers">
-                            <DxRibbonItem Text="Add layer" Enabled="@HasSelectedSegment" Click="AddVideoLayer" />
-                            <DxRibbonItem Text="Duplicate layer" Enabled="@(SelectedVideoLayer is not null)" Click="DuplicateVideoLayer" />
-                            <DxRibbonItem Text="Selection → new layer" Enabled="@CanCreateSelectionLayer" Click="CreateSelectionLayer" />
-                            <DxRibbonItem Text="Selection → layer" Enabled="@CanApplySelectionToLayer" Click="ApplySelectionToSelectedVideoLayer" />
-                            <DxRibbonItem Text="3D Blob" Enabled="@(SelectedVideoLayer is not null)" Click="ConvertSelectedLayerToBlob" />
-                            <DxRibbonItem Text="3D → Mainframe" Enabled="@CanInsertLayerIntoMainframe" Click="InsertSelectedLayerIntoMainframe" />
-                            <DxRibbonItem Text="Layer up" Enabled="@CanMoveVideoLayerUp" Click="MoveVideoLayerUp" />
-                            <DxRibbonItem Text="Layer down" Enabled="@CanMoveVideoLayerDown" Click="MoveVideoLayerDown" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Delete layer" Enabled="@CanDeleteVideoLayer" Click="DeleteVideoLayer" />
-                        </DxRibbonGroup>
-                        <DxRibbonGroup Text="Live filters" IconCssClass="pub-icon pub-icon-effects">
-                            <DxRibbonItem Text="Chroma key" Enabled="@(SelectedVideoLayer is not null)" Click="AddChromaKeyFilter" />
-                            <DxRibbonItem Text="Color adjustment" Enabled="@(SelectedVideoLayer is not null)" Click="AddColorAdjustmentFilters" />
-                            <DxRibbonItem Text="Vignette" Enabled="@(SelectedVideoLayer is not null)" Click="AddVignetteFilter" />
-                        </DxRibbonGroup>
-                        <DxRibbonGroup Text="Video canvas" IconCssClass="pub-icon pub-icon-video">
+                        <DxRibbonGroup Text='@LT("Canvas")' IconCssClass="pub-icon pub-icon-video">
                             <DxRibbonItem Text="@VideoFitModeText(PublicationVideoFitMode.Stretch, "Stretch")" Enabled="@HasSource" Click="VideoFitStretch" />
                             <DxRibbonItem Text="@VideoFitModeText(PublicationVideoFitMode.Cover, "Fill canvas")" Enabled="@HasSource" Click="VideoFitCover" />
                             <DxRibbonItem Text="@VideoFitModeText(PublicationVideoFitMode.Contain, "Fit whole")" Enabled="@HasSource" Click="VideoFitContain" />
                         </DxRibbonGroup>
                     }
-                    <DxRibbonGroup Text="Sections">
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="Cut at playhead" Enabled="@CanAddCutLine" Click="AddCutLineAtPlayhead" />
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Remove cutline" Enabled="@CanRemoveCutLine" Click="RemoveCutLine" />
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-copy" Text="Copy" Enabled="@HasSelectedSegment" Click="CopySelectedSection" />
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-paste" Text="Paste" Enabled="@CanPasteSection" Click="PasteSection" />
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Delete" Enabled="@CanDeleteSection" Click="DeleteSelectedSection" />
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-insert" Text="Insert into range…" Enabled="@HasSource" Click="OpenInsertMediaPicker" />
+                </DxRibbonTab>
+                <DxRibbonTab Text='@LT("Edit")'>
+                    <DxRibbonGroup Text='@LT("Pointer")' IconCssClass="pub-icon pub-icon-select">
+                        <DxRibbonItem Text="@MouseModeText(MediaStudioMouseMode.SelectSection, "Select time")" IconCssClass="pub-icon pub-icon-select" Click="SelectSectionMode" />
+                        <DxRibbonItem Text="@MouseModeText(MediaStudioMouseMode.PlacePlayhead, "Place playhead")" IconCssClass="pub-icon pub-icon-line" Enabled="@HasSource" Click="PlacePlayheadMode" />
+                        <DxRibbonItem Text="@MouseModeText(MediaStudioMouseMode.AddCutLine, "Add cutline")" IconCssClass="pub-icon pub-icon-crop" Enabled="@HasSource" Click="AddCutLineMode" />
+                        @if (IsVideo)
+                        {
+                            <DxRibbonItem Text="@MouseModeText(MediaStudioMouseMode.FrameRegion, "Frame region")" IconCssClass="pub-icon pub-icon-select" Enabled="@HasSource" Click="FrameRegionMode" />
+                        }
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text='@LT("Trim")' IconCssClass="pub-icon pub-icon-crop">
+                        <DxRibbonItem Text='@LT("Start at playhead")' Enabled="@HasSource" Click="SetTrimStartAtPlayhead" />
+                        <DxRibbonItem Text='@LT("End at playhead")' Enabled="@HasSource" Click="SetTrimEndAtPlayhead" />
+                        <DxRibbonItem Text='@LT("Reset trim")' Enabled="@HasSource" Click="ResetTrim" />
+                    </DxRibbonGroup>
+                    @if (IsVideo)
+                    {
+                        <DxRibbonGroup Text='@LT("Selection")'>
+                            <DxRibbonItem Text='@LT("Cut selection")' IconCssClass="pub-icon pub-icon-line" Enabled="@CanCutVideoSelection" Click="CutVideoSelection" />
+                            <DxRibbonItem Text='@LT("Trim to selection")' IconCssClass="pub-icon pub-icon-crop" Enabled="@CanUseVideoSelectionAsTrim" Click="UseVideoSelectionAsTrim" />
+                            <DxRibbonItem Text='@LT("Copy selection")' IconCssClass="pub-icon pub-icon-copy" Enabled="@CanCopyVideoSelection" Click="CopyVideoSelection" />
+                        </DxRibbonGroup>
+                        <DxRibbonGroup Text='@LT("Saved sections")' IconCssClass="pub-icon pub-icon-line">
+                            <DxRibbonItem Text='@LT("Save section")' Enabled="@CanSaveCutSection" Click="SaveSelectedRangeAsCutSection" />
+                            <DxRibbonItem Text='@LT("Use section")' Enabled="@(SelectedCutSection is not null)" Click="UseSelectedCutSection" />
+                            <DxRibbonItem Text='@LT("Remove section")' IconCssClass="pub-icon pub-icon-delete" Enabled="@(SelectedCutSection is not null)" Click="RemoveSelectedCutSection" />
+                        </DxRibbonGroup>
+                    }
+                    <DxRibbonGroup Text='@LT("Sequence")' IconCssClass="pub-icon pub-icon-line">
+                        <DxRibbonItem Text='@LT("Cut at playhead")' Enabled="@CanAddCutLine" Click="AddCutLineAtPlayhead" />
+                        <DxRibbonItem Text='@LT("Remove cutline")' Enabled="@CanRemoveCutLine" Click="RemoveCutLine" />
+                        <DxRibbonItem Text='@LT("Copy")' IconCssClass="pub-icon pub-icon-copy" Enabled="@HasSelectedSegment" Click="CopySelectedSection" />
+                        <DxRibbonItem Text='@LT("Paste")' IconCssClass="pub-icon pub-icon-paste" Enabled="@CanPasteSection" Click="PasteSection" />
+                        <DxRibbonItem Text='@LT("Delete")' IconCssClass="pub-icon pub-icon-delete" Enabled="@CanDeleteSection" Click="DeleteSelectedSection" />
+                        <DxRibbonItem Text='@LT("Insert media…")' IconCssClass="pub-icon pub-icon-insert" Enabled="@HasSource" Click="OpenInsertMediaPicker" />
+                    </DxRibbonGroup>
+                </DxRibbonTab>
+                @if (IsVideo)
+                {
+                    <DxRibbonTab Text='@LT("Layers")'>
+                        <DxRibbonGroup Text='@LT("Layer stack")' IconCssClass="pub-icon pub-icon-layers">
+                            <DxRibbonItem Text='@LT("Add layer")' Enabled="@HasSelectedSegment" Click="AddVideoLayer" />
+                            <DxRibbonItem Text='@LT("Duplicate")' Enabled="@(SelectedVideoLayer is not null)" Click="DuplicateVideoLayer" />
+                            <DxRibbonItem Text='@LT("Selection → new layer")' Enabled="@CanCreateSelectionLayer" Click="CreateSelectionLayer" />
+                            <DxRibbonItem Text='@LT("Selection → layer")' Enabled="@CanApplySelectionToLayer" Click="ApplySelectionToSelectedVideoLayer" />
+                            <DxRibbonItem Text='@LT("Layer up")' Enabled="@CanMoveVideoLayerUp" Click="MoveVideoLayerUp" />
+                            <DxRibbonItem Text='@LT("Layer down")' Enabled="@CanMoveVideoLayerDown" Click="MoveVideoLayerDown" />
+                            <DxRibbonItem Text='@LT("Delete layer")' IconCssClass="pub-icon pub-icon-delete" Enabled="@CanDeleteVideoLayer" Click="DeleteVideoLayer" />
+                        </DxRibbonGroup>
+                        <DxRibbonGroup Text='@LT("3D surface")' IconCssClass="pub-icon pub-icon-effects">
+                            <DxRibbonItem Text='@LT("Extrude selected layer")' Enabled="@(SelectedVideoLayer is not null)" Click="ConvertSelectedLayerToBlob" />
+                            <DxRibbonItem Text='@LT("Insert 3D in Mainframe")' Enabled="@CanInsertLayerIntoMainframe" Click="InsertSelectedLayerIntoMainframe" />
+                        </DxRibbonGroup>
+                    </DxRibbonTab>
+                    <DxRibbonTab Text='@LT("Effects")'>
+                        <DxRibbonGroup Text='@LT("Quick effects")' IconCssClass="pub-icon pub-icon-effects">
+                            <DxRibbonItem Text='@LT("Chroma key")' Enabled="@(SelectedVideoLayer is not null)" Click="AddChromaKeyFilter" />
+                            <DxRibbonItem Text='@LT("Vignette")' Enabled="@(SelectedVideoLayer is not null)" Click="AddVignetteFilter" />
+                            <DxRibbonItem Text='@LT("Blur")' Enabled="@(SelectedVideoLayer is not null)" Click="AddBlurFilter" />
+                            <DxRibbonItem Text='@LT("Film grain")' Enabled="@(SelectedVideoLayer is not null)" Click="AddGrainFilter" />
+                            <DxRibbonItem Text='@LT("Color adjustment")' Enabled="@(SelectedVideoLayer is not null)" Click="AddColorAdjustmentFilters" />
+                        </DxRibbonGroup>
+                        <DxRibbonGroup Text='@LT("Effect stack")' IconCssClass="pub-icon pub-icon-layers">
+                            <DxRibbonItem Text='@LT("Add selected effect")' Enabled="@(SelectedVideoLayer is not null)" Click="AddSelectedVideoFilter" />
+                            <DxRibbonItem Text='@LT("Effect up")' Enabled="@CanMoveVideoFilterUp" Click="MoveVideoFilterUp" />
+                            <DxRibbonItem Text='@LT("Effect down")' Enabled="@CanMoveVideoFilterDown" Click="MoveVideoFilterDown" />
+                            <DxRibbonItem Text='@LT("Remove effect")' IconCssClass="pub-icon pub-icon-delete" Enabled="@(SelectedVideoFilter is not null)" Click="RemoveSelectedVideoFilter" />
+                        </DxRibbonGroup>
+                    </DxRibbonTab>
+                }
+                <DxRibbonTab Text='@LT("Output")'>
+                    <DxRibbonGroup Text='@LT("Recording")' IconCssClass="pub-icon pub-icon-download">
+                        <DxRibbonItem Text='@LT("Download recording")' IconCssClass="pub-icon pub-icon-download" Enabled="@HasRetainedRecording" Click="DownloadRecording" />
+                    </DxRibbonGroup>
+                    <DxRibbonGroup Text='@LT("Convert")' IconCssClass="pub-icon pub-icon-media">
+                        <DxRibbonItem Text='@LT("Send selection to converter")' Enabled="@HasSelectedSegment" Click="SendSelectedMediaToConverter" />
                     </DxRibbonGroup>
                 </DxRibbonTab>
             </DxRibbon>
@@ -145,11 +174,11 @@
                                      data-mouse-mode="@_mouseMode"
                                      style="@VideoTimeOverlayStyle"
                                      role="application"
-                                     aria-label="Video timestamp and range selector">
-                                    <div class="media-video-time-track" data-video-time-track aria-label="Selected video timestamp or range">
+                                     aria-label='@LT("Video timestamp and range selector")'>
+                                    <div class="media-video-time-track" data-video-time-track aria-label='@LT("Selected video timestamp or range")'>
                                         <span class="media-video-time-selected" aria-hidden="true"></span>
-                                        <span class="media-video-time-handle start" data-video-time-handle="start" title="Drag selection start"></span>
-                                        <span class="media-video-time-handle end" data-video-time-handle="end" title="Drag selection end"></span>
+                                        <span class="media-video-time-handle start" data-video-time-handle="start" title='@LT("Drag selection start")'></span>
+                                        <span class="media-video-time-handle end" data-video-time-handle="end" title='@LT("Drag selection end")'></span>
                                         <span class="media-video-time-point" aria-hidden="true"></span>
                                         <span class="media-video-time-playhead" aria-hidden="true"></span>
                                         <span class="media-video-time-drop-marker" aria-hidden="true"></span>
@@ -166,16 +195,16 @@
                                     }
                                     <div class="media-video-time-toolbar media-video-transport-dock" data-video-time-control>
                                         <div class="media-video-transport-buttons">
-                                            <button type="button" title="Play selected range" data-video-command="play">▶</button>
-                                            <button type="button" title="Pause video" data-video-command="pause">Ⅱ</button>
+                                            <button type="button" title='@LT("Play selected range")' data-video-command="play"><i class="pub-icon pub-icon-play" aria-hidden="true"></i></button>
+                                            <button type="button" title='@LT("Pause video")' data-video-command="pause"><i class="pub-icon pub-icon-pause" aria-hidden="true"></i></button>
                                         </div>
                                         <label class="media-video-pointer-mode">
-                                            <span>Pointer</span>
+                                            <span>@LT("Pointer")</span>
                                             <select value="@_mouseMode" @onchange="ChangeVideoCanvasMouseMode">
-                                                <option value="@MediaStudioMouseMode.SelectSection">Select time</option>
-                                                <option value="@MediaStudioMouseMode.PlacePlayhead">Place playhead</option>
-                                                <option value="@MediaStudioMouseMode.AddCutLine">Add cutline</option>
-                                                <option value="@MediaStudioMouseMode.FrameRegion">Frame region</option>
+                                                <option value="@MediaStudioMouseMode.SelectSection">@LT("Select time")</option>
+                                                <option value="@MediaStudioMouseMode.PlacePlayhead">@LT("Place playhead")</option>
+                                                <option value="@MediaStudioMouseMode.AddCutLine">@LT("Add cutline")</option>
+                                                <option value="@MediaStudioMouseMode.FrameRegion">@LT("Frame region")</option>
                                             </select>
                                         </label>
                                         <span class="media-video-time-readout">
@@ -190,29 +219,32 @@
                                     {
                                         <div class="media-video-insert-placement" data-video-time-control @onpointerdown:stopPropagation @onclick:stopPropagation>
                                             <div>
-                                                <b>Insert dropped video</b>
+                                                <b>@LT("Insert dropped video")</b>
                                                 <span>@_pendingInsertSegment.Name</span>
                                             </div>
-                                            @if (PendingInsertHasRange)
+                                            @if (_pendingInsertTimelineSeconds.HasValue)
+                                            {
+                                                <span class="media-video-insert-fixed">@LT("Timeline drop position is fixed at") @Time(_pendingInsertTimelineSeconds.Value).</span>
+                                            }
+                                            else if (PendingInsertHasRange)
                                             {
                                                 <label>
-                                                    Position inside selection
+                                                    @LT("Position inside selection")
                                                     <input type="range"
                                                            min="@Inv(_pendingInsertMinimumSourceSeconds)"
                                                            max="@Inv(_pendingInsertMaximumSourceSeconds)"
                                                            step="0.01"
                                                            value="@Inv(_pendingInsertSourceSeconds)"
-                                                           @oninput="ChangePendingInsertPosition" />
-                                                </label>
+                                                           @oninput="ChangePendingInsertPosition" /> </label>
                                             }
                                             else
                                             {
-                                                <span class="media-video-insert-fixed">The selected timestamp is fixed.</span>
+                                                <span class="media-video-insert-fixed">@LT("The selected timestamp is fixed.")</span>
                                             }
                                             <div class="media-video-insert-actions">
-                                                <time>@Time(_pendingInsertSourceSeconds)</time>
-                                                <button type="button" @onclick="ConfirmPendingInsert">Insert here</button>
-                                                <button type="button" @onclick="CancelPendingInsert">Cancel</button>
+                                                <time>@Time(_pendingInsertTimelineSeconds ?? _pendingInsertSourceSeconds)</time>
+                                                <button type="button" @onclick="ConfirmPendingInsert">@LT("Insert here")</button>
+                                                <button type="button" @onclick="CancelPendingInsert">@LT("Cancel")</button>
                                             </div>
                                         </div>
                                     }
@@ -220,7 +252,7 @@
                                 <div id="media-studio-frame-overlay-host"
                                      class="media-studio-frame-overlay-host @(_mouseMode == MediaStudioMouseMode.FrameRegion ? "active" : null)"
                                      role="application"
-                                     aria-label="Video frame region selection"
+                                     aria-label='@LT("Video frame region selection")'
                                      @onpointerdown="FrameOverlayPointerDown"
                                      @onpointerdown:preventDefault
                                      @onpointerdown:stopPropagation
@@ -248,14 +280,14 @@
                                     </svg>
                                     <span class="media-frame-cursor-ring" aria-hidden="true"></span>
                                     <div class="media-frame-mode-help">
-                                        <b>@(_editingMorphRegion ? "Morph target mode" : "Frame region mode")</b>
-                                        <span>Click selects or adds a point · drag moves it · Delete removes the selected point</span>
+                                        <b>@(_editingMorphRegion ? LT("Morph target mode") : LT("Frame region mode"))</b>
+                                        <span>@LT("Click selects or adds a point · drag moves it · Delete removes the selected point")</span>
                                     </div>
                                     <div class="media-frame-overlay-actions" @onpointerdown:stopPropagation>
-                                        <button type="button" disabled="@(!CanFinishFrameRegion)" @onclick="FinishFrameRegion">Apply region</button>
-                                        <button type="button" disabled="@(SelectedFramePoint is null)" @onclick="RemoveSelectedFramePoint">Delete point</button>
-                                        <button type="button" disabled="@(!_frameRegionEditing || _frameDraft.Count == 0)" @onclick="RemoveLastFramePoint">Undo point</button>
-                                        <button type="button" @onclick="CancelFrameRegion">Exit mode</button>
+                                        <button type="button" disabled="@(!CanFinishFrameRegion)" @onclick="FinishFrameRegion">@LT("Apply region")</button>
+                                        <button type="button" disabled="@(SelectedFramePoint is null)" @onclick="RemoveSelectedFramePoint">@LT("Delete point")</button>
+                                        <button type="button" disabled="@(!_frameRegionEditing || _frameDraft.Count == 0)" @onclick="RemoveLastFramePoint">@LT("Undo point")</button>
+                                        <button type="button" @onclick="CancelFrameRegion">@LT("Exit mode")</button>
                                     </div>
                                 </div>
                             </div>
@@ -263,7 +295,7 @@
                         else
                         {
                             <div class="media-studio-audio-card">
-                                <div class="media-studio-waveform" aria-label="Audio waveform">
+                                <div class="media-studio-waveform" aria-label='@LT("Audio waveform")'>
                                     @foreach (var sample in DisplayWaveform)
                                     {
                                         <i style="height:@WaveHeight(sample)"></i>
@@ -282,19 +314,24 @@
                     @if (HasSource)
                     {
                         <div class="media-sequence-editor">
-                            <div class="media-range-caption"><b>Sequence</b><span>@Time(SequenceDuration) · @_segments.Count section@(_segments.Count == 1 ? string.Empty : "s")</span></div>
+                            <div class="media-range-caption"><b>@LT("Sequence")</b><span>@Time(SequenceDuration) · @_segments.Count @(_segments.Count == 1 ? LT("section") : LT("sections"))</span></div>
                             <div id="media-studio-sequence-timeline" class="media-sequence-timeline mode-@_mouseMode.ToString().ToLowerInvariant()" tabindex="0"
                                  data-sequence-duration="@Inv(SequenceDuration)"
                                  data-segment-timeline-start="@Inv(SelectedSegmentTimelineStart)"
                                  data-segment-source-start="@Inv(SelectedSegmentSourceStart)"
                                  data-segment-source-end="@Inv(SelectedSegmentSourceEnd)"
                                  data-segment-effective-rate="@Inv(SelectedSegmentEffectiveRate)"
+                                 data-selected-segment-id="@(_selectedSegmentId?.ToString() ?? string.Empty)"
                                  @onpointerdown="TimelinePointerDown"
                                  @oncontextmenu="ShowTimelineContextMenu" @oncontextmenu:preventDefault>
                                 @foreach (var segment in _segments)
                                 {
                                     <button type="button" class="media-sequence-segment @(segment.Id == _selectedSegmentId ? "selected" : null) @(segment.IsGap ? "gap" : string.IsNullOrWhiteSpace(segment.DataUrl) ? "offline" : null)"
                                             style="@SegmentStyle(segment)" title="@SegmentTitle(segment)"
+                                            data-media-segment-id="@segment.Id"
+                                            data-media-segment-name="@segment.Name"
+                                            data-media-segment-mime="@segment.MimeType"
+                                            draggable="@(!segment.IsGap)"
                                             @onpointerdown:stopPropagation
                                             @onclick="() => SelectTimelineSegment(segment.Id)">
                                         <span>@segment.Name</span>
@@ -314,28 +351,28 @@
                                             class="media-sequence-selection-boundary start"
                                             data-sequence-selection-handle="start"
                                             style="@VideoSequenceSelectionStartStyle"
-                                            title="Drag selection start" aria-label="Drag video selection start"
+                                            title='@LT("Drag selection start")' aria-label='@LT("Drag video selection start")'
                                             hidden="@_videoSelectionIsPoint"></button>
                                     <button id="media-studio-sequence-selection-end" type="button"
                                             class="media-sequence-selection-boundary end"
                                             data-sequence-selection-handle="end"
                                             style="@VideoSequenceSelectionEndStyle"
-                                            title="Drag selection end" aria-label="Drag video selection end"
+                                            title='@LT("Drag selection end")' aria-label='@LT("Drag video selection end")'
                                             hidden="@_videoSelectionIsPoint"></button>
                                 }
                                 <i id="media-studio-sequence-playhead" class="media-playhead" style="left:@Percent(_playhead / Math.Max(.01, SequenceDuration))"></i>
                             </div>
                             <div class="media-sequence-status">
-                                <span><b>Mode:</b> @MouseModeLabel</span>
-                                <span><b>Playhead:</b> @Time(_playhead)</span>
-                                <span><b>Selected:</b> @SelectedSectionSummary</span>
+                                <span><b>@LT("Mode:")</b> @MouseModeLabel</span>
+                                <span><b>@LT("Playhead:")</b> @Time(_playhead)</span>
+                                <span><b>@LT("Selected:")</b> @SelectedSectionSummary</span>
                             </div>
                         </div>
 
                         @if (!IsVideo)
                         {
                             <div class="media-range-selector" @oncontextmenu="ShowMediaContextMenu" @oncontextmenu:preventDefault>
-                                <div class="media-range-caption"><b>Trim range</b><span>@Time(_trimEnd - _trimStart) selected</span></div>
+                                <div class="media-range-caption"><b>@LT("Trim range")</b><span>@Time(_trimEnd - _trimStart) @LT("selected")</span></div>
                                 <DxRangeSelector Height="96px"
                                                  SelectedRangeStartValue="@_trimStart"
                                                  SelectedRangeEndValue="@_trimEnd"
@@ -360,20 +397,18 @@
 
                 <aside class="media-studio-properties">
                     <section>
-                        <h3>Clip</h3>
-                        <label>Name<input value="@_name" @onchange="ChangeName" /></label>
+                        <h3>@LT("Clip")</h3>
+                        <label>@LT("Name")<input value="@_name" @onchange="ChangeName" /></label>
                         <div class="property-grid two">
-                            <label>Trim start<input type="number" min="0" max="@Inv(_duration)" step="0.01" value="@Inv(_trimStart)" @onchange="ChangeTrimStart" /></label>
-                            <label>Trim end<input type="number" min="0" max="@Inv(_duration)" step="0.01" value="@Inv(_trimEnd)" @onchange="ChangeTrimEnd" /></label>
+                            <label>@LT("Trim start")<input type="number" min="0" max="@Inv(_duration)" step="0.01" value="@Inv(_trimStart)" @onchange="ChangeTrimStart" /></label>
+                            <label>@LT("Trim end")<input type="number" min="0" max="@Inv(_duration)" step="0.01" value="@Inv(_trimEnd)" @onchange="ChangeTrimEnd" /></label>
                         </div>
-                        <label>Playback rate <b>@_playbackRate.ToString("0.##", CultureInfo.InvariantCulture)×</b>
-                            <input type="range" min="0.25" max="2" step="0.05" value="@Inv(_playbackRate)" @oninput="ChangePlaybackRate" />
-                        </label>
-                        <label>Volume <b>@Math.Round(_volume * 100)%</b>
-                            <input type="range" min="0" max="1" step="0.01" value="@Inv(_volume)" @oninput="ChangeVolume" />
-                        </label>
-                        <label class="check-row"><input type="checkbox" checked="@_muted" @onchange="ToggleMuted" /> Muted</label>
-                        <label class="check-row"><input type="checkbox" checked="@_loop" @onchange="ToggleLoop" /> Loop selected range</label>
+                        <label>@LT("Playback rate") <b>@_playbackRate.ToString("0.##", CultureInfo.InvariantCulture)×</b>
+                            <input type="range" min="0.25" max="2" step="0.05" value="@Inv(_playbackRate)" @oninput="ChangePlaybackRate" /> </label>
+                        <label>@LT("Volume") <b>@Math.Round(_volume * 100)%</b>
+                            <input type="range" min="0" max="1" step="0.01" value="@Inv(_volume)" @oninput="ChangeVolume" /> </label>
+                        <label class="check-row"><input type="checkbox" checked="@_muted" @onchange="ToggleMuted" /> @LT("Muted")</label>
+                        <label class="check-row"><input type="checkbox" checked="@_loop" @onchange="ToggleLoop" /> @LT("Loop selected range")</label>
                     </section>
 
                     @if (IsVideo)
@@ -381,14 +416,14 @@
                         @if (HasVideoProject)
                         {
                             <section class="media-video-project-properties">
-                                <h3>Imported video project</h3>
+                                <h3>@LT("Imported video project")</h3>
                                 <p class="property-note"><b>@VideoProjectTitle</b> · @VideoProjectFormatSummary</p>
                                 <div class="media-video-project-summary">
                                     <span>@VideoProjectCanvasSummary</span>
                                     <span>@VideoProjectTrackSummary</span>
                                     <span>@VideoProjectMissingSummary</span>
                                 </div>
-                                <label>Editable video track
+                                <label>@LT("Editable video track")
                                     <select value="@_activeProjectTrackId" @onchange="ChangeProjectTrack">
                                         @foreach (var track in ProjectVideoTracks)
                                         {
@@ -397,42 +432,41 @@
                                     </select>
                                 </label>
                                 <div class="property-action-row">
-                                    <DxButton Text="Import another project" Click="OpenVideoProjectPicker" />
-                                    <DxButton Text="Relink media" Enabled="@(VideoProjectMissingMediaCount > 0)" Click="OpenVideoProjectMediaPicker" />
+                                    <DxButton Text='@LT("Import another project")' Click="OpenVideoProjectPicker" />
+                                    <DxButton Text='@LT("Relink media")' Enabled="@(VideoProjectMissingMediaCount > 0)" Click="OpenVideoProjectMediaPicker" />
                                 </div>
                                 @if (_videoProjectIssues.Count > 0)
                                 {
                                     <details class="media-video-project-report">
-                                        <summary>Compatibility report · @_videoProjectIssues.Count item@(_videoProjectIssues.Count == 1 ? string.Empty : "s")</summary>
+                                        <summary>@LT("Compatibility report") · @_videoProjectIssues.Count @(_videoProjectIssues.Count == 1 ? LT("item") : LT("items"))</summary>
                                         @foreach (var issue in _videoProjectIssues.Take(12))
                                         {
                                             <p class="issue-@issue.Severity.ToString().ToLowerInvariant()"><b>@issue.Code</b> · @issue.Message</p>
                                         }
                                     </details>
                                 }
-                                <p class="property-note">All imported tracks, gaps, source references, markers and transitions stay in the canonical project. This editor displays and edits the selected video-track projection; preserved audio and additional video tracks remain available for later orchestration.</p>
+                                <p class="property-note">@LT("All imported tracks, gaps, source references, markers and transitions stay in the canonical project. This editor displays and edits the selected video-track projection; preserved audio and additional video tracks remain available for later orchestration.")</p>
                             </section>
                         }
                         <section class="media-video-selection-properties">
-                            <h3>Selected clip time</h3>
-                            <p class="property-note"><b>@SelectedClipName</b> · source timestamps stay linked to the highlighted clip in the project sequence.</p>
-                            <label>Selection type
+                            <h3>@LT("Selected clip time")</h3>
+                            <p class="property-note"><b>@SelectedClipName</b> · @LT("source timestamps stay linked to the highlighted clip in the project sequence.")</p>
+                            <label>@LT("Selection type")
                                 <select id="media-studio-video-selection-mode" value="@(_videoSelectionIsPoint ? "Point" : "Range")" @onchange="ChangeVideoSelectionMode">
-                                    <option value="Point">Single timestamp</option>
-                                    <option value="Range">Time range</option>
+                                    <option value="Point">@LT("Single timestamp")</option>
+                                    <option value="Range">@LT("Time range")</option>
                                 </select>
                             </label>
                             <div class="property-grid two">
-                                <label>Selection start
+                                <label>@LT("Selection start")
                                     <input id="media-studio-video-selection-start"
                                            type="number"
                                            min="@Inv(_trimStart)"
                                            max="@Inv(_trimEnd)"
                                            step="0.01"
                                            value="@Inv(VideoSelectionStart)"
-                                           @onchange="ChangeVideoSelectionStart" />
-                                </label>
-                                <label>Selection end
+                                           @onchange="ChangeVideoSelectionStart" /> </label>
+                                <label>@LT("Selection end")
                                     <input id="media-studio-video-selection-end"
                                            type="number"
                                            min="@Inv(_trimStart)"
@@ -440,24 +474,23 @@
                                            step="0.01"
                                            value="@Inv(VideoSelectionEnd)"
                                            disabled="@_videoSelectionIsPoint"
-                                           @onchange="ChangeVideoSelectionEnd" />
-                                </label>
+                                           @onchange="ChangeVideoSelectionEnd" /> </label>
                             </div>
                             <div class="media-video-selection-value" id="media-studio-video-selection-value">@VideoSelectionDetailedSummary</div>
                             <div class="property-action-row">
-                                <DxButton Text="Cut selection" Enabled="@CanCutVideoSelection" Click="CutVideoSelection" />
-                                <DxButton Text="Use as trim" Enabled="@CanUseVideoSelectionAsTrim" Click="UseVideoSelectionAsTrim" />
-                                <DxButton Text="Copy area" Enabled="@CanCopyVideoSelection" Click="CopyVideoSelection" />
-                                <DxButton Text="New selection layer" Enabled="@CanCreateSelectionLayer" Click="CreateSelectionLayer" />
-                                <DxButton Text="Apply to layer" Enabled="@CanApplySelectionToLayer" Click="ApplySelectionToSelectedVideoLayer" />
+                                <DxButton Text='@LT("Cut selection")' Enabled="@CanCutVideoSelection" Click="CutVideoSelection" />
+                                <DxButton Text='@LT("Use as trim")' Enabled="@CanUseVideoSelectionAsTrim" Click="UseVideoSelectionAsTrim" />
+                                <DxButton Text='@LT("Copy area")' Enabled="@CanCopyVideoSelection" Click="CopyVideoSelection" />
+                                <DxButton Text='@LT("New selection layer")' Enabled="@CanCreateSelectionLayer" Click="CreateSelectionLayer" />
+                                <DxButton Text='@LT("Apply to layer")' Enabled="@CanApplySelectionToLayer" Click="ApplySelectionToSelectedVideoLayer" />
                             </div>
-                            <label class="check-row"><input type="checkbox" checked="@_autoCreateSelectionLayers" @onchange="ToggleAutoCreateSelectionLayers" /> Create/reuse one effect layer for every committed range</label>
-                            <p class="property-note">A point creates one cutline. A range is persisted on its own selection layer, so filters and frame regions render only inside that time span. Dropped video is inserted only inside this selection.</p>
+                            <label class="check-row"><input type="checkbox" checked="@_autoCreateSelectionLayers" @onchange="ToggleAutoCreateSelectionLayers" /> @LT("Create/reuse one effect layer for every committed range")</label>
+                            <p class="property-note">@LT("A point creates one cutline. A range is persisted on its own selection layer, so filters and frame regions render only inside that time span. Dropped video is inserted only inside this selection.")</p>
                         </section>
 
                         <section class="media-cut-sections-properties">
-                            <h3>Saved cut sections</h3>
-                            <p class="property-note">The current selection stays editable. Save any number of independent ranges as cut sections without replacing the active selection.</p>
+                            <h3>@LT("Saved cut sections")</h3>
+                            <p class="property-note">@LT("The current selection stays editable. Save any number of independent ranges as cut sections without replacing the active selection.")</p>
                             <div class="media-cut-section-list">
                                 @foreach (var section in SelectedCutSections)
                                 {
@@ -468,44 +501,44 @@
                                 }
                                 @if (SelectedCutSections.Count == 0)
                                 {
-                                    <span class="media-empty-list">No saved cut sections yet.</span>
+                                    <span class="media-empty-list">@LT("No saved cut sections yet.")</span>
                                 }
                             </div>
                             <div class="property-action-row">
-                                <DxButton Text="Save as cut section" Enabled="@CanSaveCutSection" Click="SaveSelectedRangeAsCutSection" />
-                                <DxButton Text="Use section" Enabled="@(SelectedCutSection is not null)" Click="UseSelectedCutSection" />
-                                <DxButton Text="Remove" Enabled="@(SelectedCutSection is not null)" Click="RemoveSelectedCutSection" />
+                                <DxButton Text='@LT("Save as cut section")' Enabled="@CanSaveCutSection" Click="SaveSelectedRangeAsCutSection" />
+                                <DxButton Text='@LT("Use section")' Enabled="@(SelectedCutSection is not null)" Click="UseSelectedCutSection" />
+                                <DxButton Text='@LT("Remove")' Enabled="@(SelectedCutSection is not null)" Click="RemoveSelectedCutSection" />
                             </div>
                         </section>
 
                         <section class="media-video-layer-properties">
-                            <h3>Video layers</h3>
-                            <p class="property-note">Each layer owns its frame region, temporal range and live filter stack. Layers are rendered from bottom to top.</p>
+                            <h3>@LT("Video layers")</h3>
+                            <p class="property-note">@LT("Each layer owns its frame region, temporal range and live filter stack. Layers are rendered from bottom to top.")</p>
                             <div class="media-video-layer-list">
                                 @for (var layerIndex = 0; layerIndex < SelectedVideoLayers.Count; layerIndex++)
                                 {
                                     var layer = SelectedVideoLayers[layerIndex];
-                                    <div class="media-video-layer-row @(layer.Id == _selectedVideoLayerId ? "selected" : null)">
+                                    <div class="media-video-layer-row @(layer.Id == _selectedVideoLayerId ? "selected" : null)" data-video-layer-id="@layer.Id" draggable="true">
                                         <button type="button" class="media-video-layer-select" @onclick="() => SelectVideoLayer(layer.Id)">
                                             <span>@layer.Name</span>
-                                            <small>@VideoLayerKindName(layer.Kind) · @(layer.Region.IsFullFrame ? "Full frame" : $"{layer.Region.Points.Count} region points") · @layer.Filters.Count filter@(layer.Filters.Count == 1 ? string.Empty : "s")@(layer.HasTemporalRange ? $" · {Time(layer.TemporalStartSeconds)}—{Time(layer.TemporalEndSeconds)}" : " · full clip")</small>
+                                            <small>@VideoLayerSummary(layer)</small>
                                             <em class="media-html-support @HtmlSupportCss(layer.HtmlExportSupport)">@HtmlSupportLabel(layer.HtmlExportSupport)</em>
                                         </button>
-                                        <button type="button" class="media-video-layer-visibility" title="Toggle layer visibility" @onclick="() => ToggleVideoLayerVisibility(layer.Id)">@(layer.Visible ? "●" : "○")</button>
+                                        <button type="button" class="media-video-layer-visibility" title='@LT("Toggle layer visibility")' @onclick="() => ToggleVideoLayerVisibility(layer.Id)"><i class="pub-icon pub-icon-visible" aria-hidden="true"></i></button>
                                     </div>
                                 }
                             </div>
                             <div class="property-action-row">
-                                <DxButton Text="Add" Click="AddVideoLayer" />
-                                <DxButton Text="Duplicate" Enabled="@(SelectedVideoLayer is not null)" Click="DuplicateVideoLayer" />
-                                <DxButton Text="Up" Enabled="@CanMoveVideoLayerUp" Click="MoveVideoLayerUp" />
-                                <DxButton Text="Down" Enabled="@CanMoveVideoLayerDown" Click="MoveVideoLayerDown" />
-                                <DxButton Text="Delete" Enabled="@CanDeleteVideoLayer" Click="DeleteVideoLayer" />
+                                <DxButton Text='@LT("Add")' Click="AddVideoLayer" />
+                                <DxButton Text='@LT("Duplicate")' Enabled="@(SelectedVideoLayer is not null)" Click="DuplicateVideoLayer" />
+                                <DxButton Text='@LT("Up")' Enabled="@CanMoveVideoLayerUp" Click="MoveVideoLayerUp" />
+                                <DxButton Text='@LT("Down")' Enabled="@CanMoveVideoLayerDown" Click="MoveVideoLayerDown" />
+                                <DxButton Text='@LT("Delete")' Enabled="@CanDeleteVideoLayer" Click="DeleteVideoLayer" />
                             </div>
                             @if (SelectedVideoLayer is { } selectedLayer)
                             {
-                                <label>Layer name<input value="@selectedLayer.Name" @onchange="ChangeVideoLayerName" /></label>
-                                <label>Layer type
+                                <label>@LT("Layer name")<input value="@selectedLayer.Name" @onchange="ChangeVideoLayerName" /></label>
+                                <label>@LT("Layer type")
                                     <select value="@selectedLayer.Kind" @onchange="ChangeVideoLayerKind">
                                         @foreach (var layerKind in Enum.GetValues<VideoEffectLayerKind>())
                                         {
@@ -517,54 +550,54 @@
                                     <b>@HtmlSupportLabel(selectedLayer.HtmlExportSupport)</b>
                                     <span>@selectedLayer.HtmlExportNote</span>
                                 </div>
-                                <label>Opacity <b>@Math.Round(selectedLayer.Opacity * 100)%</b>
-                                    <input type="range" min="0" max="1" step="0.01" value="@Inv(selectedLayer.Opacity)" @oninput="ChangeVideoLayerOpacity" />
-                                </label>
-                                <label>Blend mode
+                                <label>@LT("Opacity") <b>@Math.Round(selectedLayer.Opacity * 100)%</b>
+                                    <input type="range" min="0" max="1" step="0.01" value="@Inv(selectedLayer.Opacity)" @oninput="ChangeVideoLayerOpacity" /> </label>
+                                <label>@LT("Blend mode")
                                     <select value="@selectedLayer.BlendMode" @onchange="ChangeVideoLayerBlendMode">
                                         @foreach (var blend in Enum.GetValues<VideoEffectBlendMode>())
                                         {
-                                            <option value="@blend">@blend</option>
+                                            <option value="@blend">@VideoBlendModeName(blend)</option>
                                         }
                                     </select>
                                 </label>
-                                <label class="check-row"><input type="checkbox" checked="@selectedLayer.HasTemporalRange" @onchange="ToggleVideoLayerTemporalRange" /> Apply only in a time range</label>
+                                <label class="check-row"><input type="checkbox" checked="@selectedLayer.HasTemporalRange" @onchange="ToggleVideoLayerTemporalRange" /> @LT("Apply only in a time range")</label>
                                 @if (selectedLayer.HasTemporalRange)
                                 {
                                     <div class="property-grid two">
-                                        <label>Layer start<input type="number" min="@Inv(_trimStart)" max="@Inv(_trimEnd)" step="0.01" value="@Inv(selectedLayer.TemporalStartSeconds)" @onchange="ChangeVideoLayerTemporalStart" /></label>
-                                        <label>Layer end<input type="number" min="@Inv(_trimStart)" max="@Inv(_trimEnd)" step="0.01" value="@Inv(selectedLayer.TemporalEndSeconds)" @onchange="ChangeVideoLayerTemporalEnd" /></label>
+                                        <label>@LT("Layer start")<input type="number" min="@Inv(_trimStart)" max="@Inv(_trimEnd)" step="0.01" value="@Inv(selectedLayer.TemporalStartSeconds)" @onchange="ChangeVideoLayerTemporalStart" /></label>
+                                        <label>@LT("Layer end")<input type="number" min="@Inv(_trimStart)" max="@Inv(_trimEnd)" step="0.01" value="@Inv(selectedLayer.TemporalEndSeconds)" @onchange="ChangeVideoLayerTemporalEnd" /></label>
                                     </div>
-                                    <DxButton Text="Apply selected range" Enabled="@CanApplySelectionToLayer" Click="ApplySelectionToSelectedVideoLayer" CssClass="wide-button" />
+                                    <DxButton Text='@LT("Apply selected range")' Enabled="@CanApplySelectionToLayer" Click="ApplySelectionToSelectedVideoLayer" CssClass="wide-button" />
                                 }
                                 @if (selectedLayer.Kind == VideoEffectLayerKind.Blob3D)
                                 {
                                     <div class="property-action-row">
-                                        <DxButton Text="Edit source area" Click="BeginFrameRegion" />
-                                        <DxButton Text="Draw morph target" Click="BeginMorphRegion" />
+                                        <DxButton Text='@LT("Edit source area")' Click="BeginFrameRegion" />
+                                        <DxButton Text='@LT("Draw morph target")' Click="BeginMorphRegion" />
                                     </div>
-                                    <label class="check-row"><input type="checkbox" checked="@selectedLayer.MorphEnabled" @onchange="ToggleVideoLayerMorph" /> Morph between both areas</label>
-                                    <label class="check-row"><input type="checkbox" checked="@selectedLayer.AnimateMorph" @onchange="ToggleVideoLayerMorphAnimation" /> Animate morph in preview and HTML</label>
-                                    <label>Morph amount <b>@Inv(selectedLayer.MorphAmount)</b><input type="range" min="0" max="1" step="0.01" value="@Inv(selectedLayer.MorphAmount)" @oninput="ChangeVideoLayerMorphAmount" /></label>
-                                    <label>Animation speed <b>@Inv(selectedLayer.AnimationSpeed)</b><input type="range" min="0" max="8" step="0.05" value="@Inv(selectedLayer.AnimationSpeed)" @oninput="ChangeVideoLayerAnimationSpeed" /></label>
-                                    <label>Depth <b>@Inv(selectedLayer.Depth)</b><input type="range" min="0.02" max="0.5" step="0.01" value="@Inv(selectedLayer.Depth)" @oninput="ChangeVideoLayerDepth" /></label>
-                                    <label>Roundness <b>@Inv(selectedLayer.Roundness)</b><input type="range" min="0" max="0.5" step="0.01" value="@Inv(selectedLayer.Roundness)" @oninput="ChangeVideoLayerRoundness" /></label>
+                                    <label class="check-row"><input type="checkbox" checked="@selectedLayer.MorphEnabled" @onchange="ToggleVideoLayerMorph" /> @LT("Morph between both areas")</label>
+                                    <label class="check-row"><input type="checkbox" checked="@selectedLayer.AnimateMorph" @onchange="ToggleVideoLayerMorphAnimation" /> @LT("Animate morph in preview and HTML")</label>
+                                    <label>@LT("Morph amount") <b>@Inv(selectedLayer.MorphAmount)</b><input type="range" min="0" max="1" step="0.01" value="@Inv(selectedLayer.MorphAmount)" @oninput="ChangeVideoLayerMorphAmount" /></label>
+                                    <label>@LT("Animation speed") <b>@Inv(selectedLayer.AnimationSpeed)</b><input type="range" min="0" max="8" step="0.05" value="@Inv(selectedLayer.AnimationSpeed)" @oninput="ChangeVideoLayerAnimationSpeed" /></label>
+                                    <label>@LT("Depth") <b>@Inv(selectedLayer.Depth)</b><input type="range" min="0.02" max="0.5" step="0.01" value="@Inv(selectedLayer.Depth)" @oninput="ChangeVideoLayerDepth" /></label>
+                                    <label>@LT("Roundness") <b>@Inv(selectedLayer.Roundness)</b><input type="range" min="0" max="0.5" step="0.01" value="@Inv(selectedLayer.Roundness)" @oninput="ChangeVideoLayerRoundness" /></label>
                                     <div class="property-action-row">
-                                        <DxButton Text="Refresh OpenSCAD" Click="RefreshSelectedLayerOpenScad" />
-                                        <DxButton Text="Insert in Mainframe" Enabled="@CanInsertLayerIntoMainframe" Click="InsertSelectedLayerIntoMainframe" />
+                                        <DxButton Text='@LT("Refresh OpenSCAD")' Click="RefreshSelectedLayerOpenScad" />
+                                        <DxButton Text='@LT("Insert in Mainframe")' Enabled="@CanInsertLayerIntoMainframe" Click="InsertSelectedLayerIntoMainframe" />
                                     </div>
-                                    <label>OpenSCAD interchange<textarea rows="7" readonly>@selectedLayer.OpenScadScript</textarea></label>
+                                    <label>@LT("OpenSCAD interchange")<textarea rows="7" readonly>@selectedLayer.OpenScadScript</textarea></label>
                                     <div class="media-export-compatibility render">
                                         <b>@HtmlSupportLabel(PublicationHtmlExportSupport.RenderBeforeExport)</b>
-                                        <span>Native OpenSCAD mesh, Minkowski rounding and boolean-solid output are interchange/render sources. Bake them to image or video before HTML export; the interactive canvas fallback stays available.</span>
+                                        <span>@LT("Native OpenSCAD mesh, Minkowski rounding and boolean-solid output are interchange/render sources. Bake them to image or video before HTML export; the interactive canvas fallback stays available.")</span>
                                     </div>
-                                    <p class="property-note">The canvas blob remains interactive in HTML export. The OpenSCAD solid is an interchange/render source and must be baked for native mesh-quality video output.</p>
+                                    <p class="property-note">@LT("The canvas blob remains interactive in HTML export. The OpenSCAD solid is an interchange/render source and must be baked for native mesh-quality video output.")</p>
                                 }
                             }
                         </section>
 
                         <section class="media-video-filter-properties">
-                            <h3>Layer filters</h3>
+                            <h3>@LT("Effect stack")</h3>
+                            <p class="property-note">@LT("Drag effects to reorder them. Every effect remains non-destructive and belongs to the selected video layer.")</p>
                             <div class="media-video-filter-add">
                                 <select value="@_newVideoFilterKind" @onchange="ChangeNewVideoFilterKind">
                                     @foreach (var filterKind in Enum.GetValues<VideoEffectFilterKind>())
@@ -572,61 +605,60 @@
                                         <option value="@filterKind">@VideoFilterKindName(filterKind)</option>
                                     }
                                 </select>
-                                <DxButton Text="Add filter" Enabled="@(SelectedVideoLayer is not null)" Click="AddSelectedVideoFilter" />
+                                <DxButton Text='@LT("Add filter")' Enabled="@(SelectedVideoLayer is not null)" Click="AddSelectedVideoFilter" />
                             </div>
                             <div class="media-video-filter-list">
                                 @foreach (var filter in SelectedVideoFilters)
                                 {
-                                    <div class="media-video-filter-row @(filter.Id == _selectedVideoFilterId ? "selected" : null)">
+                                    <div class="media-video-filter-row @(filter.Id == _selectedVideoFilterId ? "selected" : null)" data-video-filter-id="@filter.Id" draggable="true">
                                         <button type="button" @onclick="() => SelectVideoFilter(filter.Id)">
-                                            <span>@filter.Name</span><small>@VideoFilterSummary(filter) · @HtmlSupportLabel(filter.HtmlExportSupport)</small>
+                                            <span><i class="pub-icon pub-icon-effects media-effect-drag-handle" aria-hidden="true"></i>@LT(filter.Name)</span><small>@VideoFilterSummary(filter) · @HtmlSupportLabel(filter.HtmlExportSupport)</small>
                                         </button>
-                                        <button type="button" title="Enable or disable filter" @onclick="() => ToggleVideoFilter(filter.Id)">@(filter.Enabled ? "●" : "○")</button>
+                                        <button type="button" title='@LT("Enable or disable filter")' @onclick="() => ToggleVideoFilter(filter.Id)"><i class="pub-icon pub-icon-visible" aria-hidden="true"></i></button>
                                     </div>
                                 }
                                 @if (SelectedVideoFilters.Count == 0)
                                 {
-                                    <span class="media-empty-list">The selected layer has no filters.</span>
+                                    <span class="media-empty-list">@LT("The selected layer has no filters.")</span>
                                 }
                             </div>
                             @if (SelectedVideoFilter is { } selectedFilter)
                             {
-                                <label>Filter name<input value="@selectedFilter.Name" @onchange="ChangeVideoFilterName" /></label>
+                                <label>@LT("Filter name")<input value="@selectedFilter.Name" @onchange="ChangeVideoFilterName" /></label>
                                 <div class="media-export-compatibility @HtmlSupportCss(selectedFilter.HtmlExportSupport)"><b>@HtmlSupportLabel(selectedFilter.HtmlExportSupport)</b><span>@selectedFilter.HtmlExportNote</span></div>
                                 @if (selectedFilter.Kind == VideoEffectFilterKind.ChromaKey)
                                 {
-                                    <label>Key color<input type="color" value="@selectedFilter.Color" @oninput="ChangeVideoFilterColor" /></label>
-                                    <label>Similarity <b>@Inv(selectedFilter.Amount)</b><input type="range" min="0" max="1" step="0.01" value="@Inv(selectedFilter.Amount)" @oninput="ChangeVideoFilterAmount" /></label>
-                                    <label>Smoothness <b>@Inv(selectedFilter.SecondaryAmount)</b><input type="range" min="0.001" max="1" step="0.01" value="@Inv(selectedFilter.SecondaryAmount)" @oninput="ChangeVideoFilterSecondaryAmount" /></label>
-                                    <label>Spill reduction <b>@Inv(selectedFilter.TertiaryAmount)</b><input type="range" min="0" max="1" step="0.01" value="@Inv(selectedFilter.TertiaryAmount)" @oninput="ChangeVideoFilterTertiaryAmount" /></label>
-                                    <label>Residual opacity <b>@Inv(selectedFilter.ResidualOpacity)</b><input type="range" min="0" max="1" step="0.01" value="@Inv(selectedFilter.ResidualOpacity)" @oninput="ChangeVideoFilterResidualOpacity" /></label>
+                                    <label>@LT("Key color")<input type="color" value="@selectedFilter.Color" @oninput="ChangeVideoFilterColor" /></label>
+                                    <label>@LT("Similarity") <b>@Inv(selectedFilter.Amount)</b><input type="range" min="0" max="1" step="0.01" value="@Inv(selectedFilter.Amount)" @oninput="ChangeVideoFilterAmount" /></label>
+                                    <label>@LT("Smoothness") <b>@Inv(selectedFilter.SecondaryAmount)</b><input type="range" min="0.001" max="1" step="0.01" value="@Inv(selectedFilter.SecondaryAmount)" @oninput="ChangeVideoFilterSecondaryAmount" /></label>
+                                    <label>@LT("Spill reduction") <b>@Inv(selectedFilter.TertiaryAmount)</b><input type="range" min="0" max="1" step="0.01" value="@Inv(selectedFilter.TertiaryAmount)" @oninput="ChangeVideoFilterTertiaryAmount" /></label>
+                                    <label>@LT("Residual opacity") <b>@Inv(selectedFilter.ResidualOpacity)</b><input type="range" min="0" max="1" step="0.01" value="@Inv(selectedFilter.ResidualOpacity)" @oninput="ChangeVideoFilterResidualOpacity" /></label>
                                 }
                                 else if (selectedFilter.Kind == VideoEffectFilterKind.Vignette)
                                 {
-                                    <label>Strength <b>@Inv(selectedFilter.Amount)</b><input type="range" min="0" max="1" step="0.01" value="@Inv(selectedFilter.Amount)" @oninput="ChangeVideoFilterAmount" /></label>
-                                    <label>Softness <b>@Inv(selectedFilter.SecondaryAmount)</b><input type="range" min="0" max="1" step="0.01" value="@Inv(selectedFilter.SecondaryAmount)" @oninput="ChangeVideoFilterSecondaryAmount" /></label>
+                                    <label>@LT("Strength") <b>@Inv(selectedFilter.Amount)</b><input type="range" min="0" max="1" step="0.01" value="@Inv(selectedFilter.Amount)" @oninput="ChangeVideoFilterAmount" /></label>
+                                    <label>@LT("Softness") <b>@Inv(selectedFilter.SecondaryAmount)</b><input type="range" min="0" max="1" step="0.01" value="@Inv(selectedFilter.SecondaryAmount)" @oninput="ChangeVideoFilterSecondaryAmount" /></label>
                                 }
                                 else
                                 {
                                     <label>@VideoFilterAmountLabel(selectedFilter.Kind) <b>@Inv(selectedFilter.Amount)</b>
-                                        <input type="range" min="@Inv(VideoFilterMinimum(selectedFilter.Kind))" max="@Inv(VideoFilterMaximum(selectedFilter.Kind))" step="@Inv(VideoFilterStep(selectedFilter.Kind))" value="@Inv(selectedFilter.Amount)" @oninput="ChangeVideoFilterAmount" />
-                                    </label>
+                                        <input type="range" min="@Inv(VideoFilterMinimum(selectedFilter.Kind))" max="@Inv(VideoFilterMaximum(selectedFilter.Kind))" step="@Inv(VideoFilterStep(selectedFilter.Kind))" value="@Inv(selectedFilter.Amount)" @oninput="ChangeVideoFilterAmount" /> </label>
                                     @if (selectedFilter.Kind == VideoEffectFilterKind.ColorWash)
                                     {
-                                        <label>Wash color<input type="color" value="@selectedFilter.Color" @oninput="ChangeVideoFilterColor" /></label>
+                                        <label>@LT("Wash color")<input type="color" value="@selectedFilter.Color" @oninput="ChangeVideoFilterColor" /></label>
                                     }
                                 }
                                 <div class="property-action-row">
-                                    <DxButton Text="Filter up" Enabled="@CanMoveVideoFilterUp" Click="MoveVideoFilterUp" />
-                                    <DxButton Text="Filter down" Enabled="@CanMoveVideoFilterDown" Click="MoveVideoFilterDown" />
-                                    <DxButton Text="Remove filter" Click="RemoveSelectedVideoFilter" />
+                                    <DxButton Text='@LT("Filter up")' Enabled="@CanMoveVideoFilterUp" Click="MoveVideoFilterUp" />
+                                    <DxButton Text='@LT("Filter down")' Enabled="@CanMoveVideoFilterDown" Click="MoveVideoFilterDown" />
+                                    <DxButton Text='@LT("Remove filter")' Click="RemoveSelectedVideoFilter" />
                                 </div>
                             }
                         </section>
 
                         <section>
-                            <h3>Video inside play canvas</h3>
-                            <label>Fit mode
+                            <h3>@LT("Video inside play canvas")</h3>
+                            <label>@LT("Fit mode")
                                 <select value="@_videoFitMode" @onchange="ChangeVideoFitMode">
                                     @foreach (var fitMode in Enum.GetValues<PublicationVideoFitMode>())
                                     {
@@ -635,17 +667,17 @@
                                 </select>
                             </label>
                             <div class="property-action-row">
-                                <DxButton Text="Fit whole" Click="VideoFitContain" />
-                                <DxButton Text="Fill canvas" Click="VideoFitCover" />
-                                <DxButton Text="Stretch" Click="VideoFitStretch" />
+                                <DxButton Text='@LT("Fit whole")' Click="VideoFitContain" />
+                                <DxButton Text='@LT("Fill canvas")' Click="VideoFitCover" />
+                                <DxButton Text='@LT("Stretch")' Click="VideoFitStretch" />
                             </div>
-                            <p class="property-note">Fit whole preserves the full frame, Fill canvas crops overflow, and Stretch fills the play canvas without preserving the source aspect ratio. The selected mode is saved with the publication video.</p>
+                            <p class="property-note">@LT("Fit whole preserves the full frame, Fill canvas crops overflow, and Stretch fills the play canvas without preserving the source aspect ratio. The selected mode is saved with the publication video.")</p>
                         </section>
                     }
 
                     <section>
-                        <h3>Timeline playback</h3>
-                        <label>Start behavior
+                        <h3>@LT("Timeline playback")</h3>
+                        <label>@LT("Start behavior")
                             <select value="@_playbackTrigger" @onchange="ChangePlaybackTrigger">
                                 @foreach (var value in Enum.GetValues<PublicationMediaPlaybackTrigger>())
                                 {
@@ -653,55 +685,55 @@
                                 }
                             </select>
                         </label>
-                        <label class="check-row"><input type="checkbox" checked="@_autoPlay" @onchange="ToggleAutoPlay" /> Play during page preview/export</label>
+                        <label class="check-row"><input type="checkbox" checked="@_autoPlay" @onchange="ToggleAutoPlay" /> @LT("Play during page preview/export")</label>
                     </section>
 
                     @if (!IsVideo)
                     {
                         <section>
-                            <h3>Simple mix</h3>
-                            <label>Fade in <b>@Time(_fadeIn)</b><input type="range" min="0" max="@Inv(MaxFade)" step="0.05" value="@Inv(_fadeIn)" @oninput="ChangeFadeIn" /></label>
-                            <label>Fade out <b>@Time(_fadeOut)</b><input type="range" min="0" max="@Inv(MaxFade)" step="0.05" value="@Inv(_fadeOut)" @oninput="ChangeFadeOut" /></label>
-                            <p class="property-note">Edits are non-destructive. The source stays embedded while the selected range, fades, volume, and playback rate are stored in the publication timeline.</p>
+                            <h3>@LT("Simple mix")</h3>
+                            <label>@LT("Fade in") <b>@Time(_fadeIn)</b><input type="range" min="0" max="@Inv(MaxFade)" step="0.05" value="@Inv(_fadeIn)" @oninput="ChangeFadeIn" /></label>
+                            <label>@LT("Fade out") <b>@Time(_fadeOut)</b><input type="range" min="0" max="@Inv(MaxFade)" step="0.05" value="@Inv(_fadeOut)" @oninput="ChangeFadeOut" /></label>
+                            <p class="property-note">@LT("Edits are non-destructive. The source stays embedded while the selected range, fades, volume, and playback rate are stored in the publication timeline.")</p>
                         </section>
                     }
                     else
                     {
                         <section>
-                            <h3>Video frame region</h3>
-                            <p class="property-note">Editing the <b>@ActiveFrameRegionName</b> on <b>@(SelectedVideoLayer?.Name ?? "the selected video layer")</b>. A grabbed point remains selected until another point or the canvas is selected. Delete/Backspace removes that exact point.</p>
+                            <h3>@LT("Video frame region")</h3>
+                            <p class="property-note">@LT("Editing the") <b>@ActiveFrameRegionName</b> @LT("on") <b>@(SelectedVideoLayer?.Name ?? LT("the selected video layer"))</b>. @LT("A grabbed point remains selected until another point or the canvas is selected. Delete/Backspace removes that exact point.")</p>
                             @if (SelectedVideoLayer is not null)
                             {
-                                <label class="check-row"><input type="checkbox" checked="@ActiveFrameRegionInverted" @onchange="ToggleFrameRegionInverted" /> Invert the active region</label>
+                                <label class="check-row"><input type="checkbox" checked="@ActiveFrameRegionInverted" @onchange="ToggleFrameRegionInverted" /> @LT("Invert the active region")</label>
                             }
                             <div class="property-action-row">
-                                <DxButton Text="Edit source region" Enabled="@HasSource" Click="BeginFrameRegion" />
-                                <DxButton Text="Edit morph target" Enabled="@(SelectedVideoLayer is not null)" Click="BeginMorphRegion" />
-                                <DxButton Text="Apply" Enabled="@CanFinishFrameRegion" Click="FinishFrameRegion" />
-                                <DxButton Text="Clear active" Enabled="@(HasFrameRegion || HasMorphRegion)" Click="ClearFrameRegion" />
+                                <DxButton Text='@LT("Edit source region")' Enabled="@HasSource" Click="BeginFrameRegion" />
+                                <DxButton Text='@LT("Edit morph target")' Enabled="@(SelectedVideoLayer is not null)" Click="BeginMorphRegion" />
+                                <DxButton Text='@LT("Apply")' Enabled="@CanFinishFrameRegion" Click="FinishFrameRegion" />
+                                <DxButton Text='@LT("Clear active")' Enabled="@(HasFrameRegion || HasMorphRegion)" Click="ClearFrameRegion" />
                             </div>
                             <div class="property-action-row">
-                                <DxButton Text="Copy active region" Enabled="@(ActiveFramePoints.Count >= 3)" Click="CopyFrameRegion" />
-                                <DxButton Text="Paste active region" Enabled="@CanPasteFrameRegion" Click="PasteFrameRegion" />
-                                <DxButton Text="Delete selected point" Enabled="@(SelectedFramePoint is not null)" Click="RemoveSelectedFramePoint" />
+                                <DxButton Text='@LT("Copy active region")' Enabled="@(ActiveFramePoints.Count >= 3)" Click="CopyFrameRegion" />
+                                <DxButton Text='@LT("Paste active region")' Enabled="@CanPasteFrameRegion" Click="PasteFrameRegion" />
+                                <DxButton Text='@LT("Delete selected point")' Enabled="@(SelectedFramePoint is not null)" Click="RemoveSelectedFramePoint" />
                             </div>
                             @if (SelectedFramePoint is { } selectedPoint)
                             {
                                 <div class="media-frame-point-properties">
-                                    <h4>Selected point @(_selectedFramePointIndex.GetValueOrDefault() + 1)</h4>
+                                    <h4>@LT("Selected point") @(_selectedFramePointIndex.GetValueOrDefault() + 1)</h4>
                                     <div class="property-grid two">
-                                        <label>X (0–1)<input type="number" min="0" max="1" step="0.001" value="@Inv(selectedPoint.X)" @onchange="ChangeSelectedFramePointX" /></label>
-                                        <label>Y (0–1)<input type="number" min="0" max="1" step="0.001" value="@Inv(selectedPoint.Y)" @onchange="ChangeSelectedFramePointY" /></label>
+                                        <label>@LT("X (0–1)")<input type="number" min="0" max="1" step="0.001" value="@Inv(selectedPoint.X)" @onchange="ChangeSelectedFramePointX" /></label>
+                                        <label>@LT("Y (0–1)")<input type="number" min="0" max="1" step="0.001" value="@Inv(selectedPoint.Y)" @onchange="ChangeSelectedFramePointY" /></label>
                                     </div>
                                 </div>
                             }
                         </section>
                         <section>
-                            <h3>Video</h3>
-                            <p class="property-note">Camera and screen recording use the browser’s MediaRecorder. Completed recordings stay in the browser until this studio closes, remain downloadable at their original size, and are embedded only when you insert or apply them.</p>
+                            <h3>@LT("Video")</h3>
+                            <p class="property-note">@LT("Camera and screen recording use the browser’s MediaRecorder. Completed recordings stay in the browser until this studio closes, remain downloadable at their original size, and are embedded only when you insert or apply them.")</p>
                             @if (HasRetainedRecording)
                             {
-                                <p class="property-note"><b>Completed recording:</b> @FormatBytes(_retainedRecordingSizeBytes). Download remains available even if embedding fails because the browser or computer runs out of memory.</p>
+                                <p class="property-note"><b>@LT("Completed recording:")</b> @FormatBytes(_retainedRecordingSizeBytes). @LT("Download remains available even if embedding fails because the browser or computer runs out of memory.")</p>
                             }
                         </section>
                     }
@@ -713,9 +745,9 @@
                 <div>
                     @if (HasRetainedRecording)
                     {
-                        <DxButton Text="Download recording" Click="DownloadRecording" />
+                        <DxButton Text='@LT("Download recording")' Click="DownloadRecording" />
                     }
-                    <DxButton Text="Cancel" Click="Cancel" />
+                    <DxButton Text='@LT("Cancel")' Click="Cancel" />
                     <DxButton Text="@ApplyButtonText" Enabled="@(HasSource && !_recording && !_saving && !_embedding)" Click="Save" RenderStyle="ButtonRenderStyle.Primary" />
                 </div>
             </footer>
@@ -728,24 +760,24 @@
         <DxContextMenuItem Text="@ImportMenuText" Enabled="@(!_recording)" Click="OpenMediaPicker" />
         @if (IsVideo)
         {
-            <DxContextMenuItem Text="Import open video project…" Enabled="@(!_recording)" Click="OpenVideoProjectPicker" />
-            <DxContextMenuItem Text="Relink project media…" Enabled="@HasVideoProject" Click="OpenVideoProjectMediaPicker" />
-            <DxContextMenuItem Text="Record camera…" Enabled="@(!_recording)" Click="RecordCamera" />
-            <DxContextMenuItem Text="Record screen…" Enabled="@(!_recording)" Click="RecordScreen" />
+            <DxContextMenuItem Text='@LT("Import open video project…")' Enabled="@(!_recording)" Click="OpenVideoProjectPicker" />
+            <DxContextMenuItem Text='@LT("Relink project media…")' Enabled="@HasVideoProject" Click="OpenVideoProjectMediaPicker" />
+            <DxContextMenuItem Text='@LT("Record camera…")' Enabled="@(!_recording)" Click="RecordCamera" />
+            <DxContextMenuItem Text='@LT("Record screen…")' Enabled="@(!_recording)" Click="RecordScreen" />
         }
         else
         {
-            <DxContextMenuItem Text="Record microphone…" Enabled="@(!_recording)" Click="RecordMicrophone" />
-            <DxContextMenuItem Text="Generate example tone" Enabled="@(!_recording)" Click="GenerateTone" />
+            <DxContextMenuItem Text='@LT("Record microphone…")' Enabled="@(!_recording)" Click="RecordMicrophone" />
+            <DxContextMenuItem Text='@LT("Generate example tone")' Enabled="@(!_recording)" Click="GenerateTone" />
         }
-        <DxContextMenuItem Text="Stop recording" Enabled="@_recording" Click="StopRecording" />
-        <DxContextMenuItem Text="Download completed recording" Enabled="@HasRetainedRecording" Click="DownloadRecording" />
-        <DxContextMenuItem Text="Play selected range" Enabled="@HasSource" BeginGroup="true" Click="PlaySelection" />
-        <DxContextMenuItem Text="Pause" Enabled="@HasSource" Click="PausePreview" />
-        <DxContextMenuItem Text="Jump to trim start" Enabled="@HasSource" Click="SeekStart" />
-        <DxContextMenuItem Text="Set trim start at playhead" Enabled="@HasSource" BeginGroup="true" Click="SetTrimStartAtPlayhead" />
-        <DxContextMenuItem Text="Set trim end at playhead" Enabled="@HasSource" Click="SetTrimEndAtPlayhead" />
-        <DxContextMenuItem Text="Reset trim to full clip" Enabled="@HasSource" Click="ResetTrim" />
+        <DxContextMenuItem Text='@LT("Stop recording")' Enabled="@_recording" Click="StopRecording" />
+        <DxContextMenuItem Text='@LT("Download completed recording")' Enabled="@HasRetainedRecording" Click="DownloadRecording" />
+        <DxContextMenuItem Text='@LT("Play selected range")' Enabled="@HasSource" BeginGroup="true" Click="PlaySelection" />
+        <DxContextMenuItem Text='@LT("Pause")' Enabled="@HasSource" Click="PausePreview" />
+        <DxContextMenuItem Text='@LT("Jump to trim start")' Enabled="@HasSource" Click="SeekStart" />
+        <DxContextMenuItem Text='@LT("Set trim start at playhead")' Enabled="@HasSource" BeginGroup="true" Click="SetTrimStartAtPlayhead" />
+        <DxContextMenuItem Text='@LT("Set trim end at playhead")' Enabled="@HasSource" Click="SetTrimEndAtPlayhead" />
+        <DxContextMenuItem Text='@LT("Reset trim to full clip")' Enabled="@HasSource" Click="ResetTrim" />
         <DxContextMenuItem Text="@MouseModeText(MediaStudioMouseMode.SelectSection, "Pointer: select timestamp/range")" BeginGroup="true" Click="SelectSectionMode" />
         <DxContextMenuItem Text="@MouseModeText(MediaStudioMouseMode.PlacePlayhead, "Pointer: place playhead")" Enabled="@HasSource" Click="PlacePlayheadMode" />
         <DxContextMenuItem Text="@MouseModeText(MediaStudioMouseMode.AddCutLine, "Pointer: add cutline")" Enabled="@HasSource" Click="AddCutLineMode" />
@@ -755,43 +787,43 @@
             <DxContextMenuItem Text="@VideoFitModeText(PublicationVideoFitMode.Stretch, "Canvas: stretch")" Enabled="@HasSource" BeginGroup="true" Click="VideoFitStretch" />
             <DxContextMenuItem Text="@VideoFitModeText(PublicationVideoFitMode.Cover, "Canvas: fill and crop")" Enabled="@HasSource" Click="VideoFitCover" />
             <DxContextMenuItem Text="@VideoFitModeText(PublicationVideoFitMode.Contain, "Canvas: fit whole")" Enabled="@HasSource" Click="VideoFitContain" />
-            <DxContextMenuItem Text="Cut selected timestamp/range" Enabled="@CanCutVideoSelection" BeginGroup="true" Click="CutVideoSelection" />
-            <DxContextMenuItem Text="Use selected range as trim" Enabled="@CanUseVideoSelectionAsTrim" Click="UseVideoSelectionAsTrim" />
-            <DxContextMenuItem Text="Copy selected range" Enabled="@CanCopyVideoSelection" Click="CopyVideoSelection" />
-            <DxContextMenuItem Text="Save selection as cut section" Enabled="@CanSaveCutSection" Click="SaveSelectedRangeAsCutSection" />
-            <DxContextMenuItem Text="Use selected saved section" Enabled="@(SelectedCutSection is not null)" Click="UseSelectedCutSection" />
-            <DxContextMenuItem Text="Remove selected saved section" Enabled="@(SelectedCutSection is not null)" Click="RemoveSelectedCutSection" />
-            <DxContextMenuItem Text="Create layer from selected range" Enabled="@CanCreateSelectionLayer" BeginGroup="true" Click="CreateSelectionLayer" />
-            <DxContextMenuItem Text="Add video layer" Enabled="@HasSelectedSegment" Click="AddVideoLayer" />
-            <DxContextMenuItem Text="Duplicate selected layer" Enabled="@(SelectedVideoLayer is not null)" Click="DuplicateVideoLayer" />
-            <DxContextMenuItem Text="Apply selected range to layer" Enabled="@CanApplySelectionToLayer" Click="ApplySelectionToSelectedVideoLayer" />
-            <DxContextMenuItem Text="Move layer up" Enabled="@CanMoveVideoLayerUp" Click="MoveVideoLayerUp" />
-            <DxContextMenuItem Text="Move layer down" Enabled="@CanMoveVideoLayerDown" Click="MoveVideoLayerDown" />
-            <DxContextMenuItem Text="Delete selected layer" Enabled="@CanDeleteVideoLayer" Click="DeleteVideoLayer" />
-            <DxContextMenuItem Text="Convert selected layer to animated 3D blob" Enabled="@(SelectedVideoLayer is not null)" Click="ConvertSelectedLayerToBlob" />
-            <DxContextMenuItem Text="Insert selected 3D blob into Mainframe" Enabled="@CanInsertLayerIntoMainframe" Click="InsertSelectedLayerIntoMainframe" />
-            <DxContextMenuItem Text="Add chroma key filter" Enabled="@(SelectedVideoLayer is not null)" BeginGroup="true" Click="AddChromaKeyFilter" />
-            <DxContextMenuItem Text="Add color adjustment filters" Enabled="@(SelectedVideoLayer is not null)" Click="AddColorAdjustmentFilters" />
-            <DxContextMenuItem Text="Add vignette filter" Enabled="@(SelectedVideoLayer is not null)" Click="AddVignetteFilter" />
+            <DxContextMenuItem Text='@LT("Cut selected timestamp/range")' Enabled="@CanCutVideoSelection" BeginGroup="true" Click="CutVideoSelection" />
+            <DxContextMenuItem Text='@LT("Use selected range as trim")' Enabled="@CanUseVideoSelectionAsTrim" Click="UseVideoSelectionAsTrim" />
+            <DxContextMenuItem Text='@LT("Copy selected range")' Enabled="@CanCopyVideoSelection" Click="CopyVideoSelection" />
+            <DxContextMenuItem Text='@LT("Save selection as cut section")' Enabled="@CanSaveCutSection" Click="SaveSelectedRangeAsCutSection" />
+            <DxContextMenuItem Text='@LT("Use selected saved section")' Enabled="@(SelectedCutSection is not null)" Click="UseSelectedCutSection" />
+            <DxContextMenuItem Text='@LT("Remove selected saved section")' Enabled="@(SelectedCutSection is not null)" Click="RemoveSelectedCutSection" />
+            <DxContextMenuItem Text='@LT("Create layer from selected range")' Enabled="@CanCreateSelectionLayer" BeginGroup="true" Click="CreateSelectionLayer" />
+            <DxContextMenuItem Text='@LT("Add video layer")' Enabled="@HasSelectedSegment" Click="AddVideoLayer" />
+            <DxContextMenuItem Text='@LT("Duplicate selected layer")' Enabled="@(SelectedVideoLayer is not null)" Click="DuplicateVideoLayer" />
+            <DxContextMenuItem Text='@LT("Apply selected range to layer")' Enabled="@CanApplySelectionToLayer" Click="ApplySelectionToSelectedVideoLayer" />
+            <DxContextMenuItem Text='@LT("Move layer up")' Enabled="@CanMoveVideoLayerUp" Click="MoveVideoLayerUp" />
+            <DxContextMenuItem Text='@LT("Move layer down")' Enabled="@CanMoveVideoLayerDown" Click="MoveVideoLayerDown" />
+            <DxContextMenuItem Text='@LT("Delete selected layer")' Enabled="@CanDeleteVideoLayer" Click="DeleteVideoLayer" />
+            <DxContextMenuItem Text='@LT("Convert selected layer to animated 3D blob")' Enabled="@(SelectedVideoLayer is not null)" Click="ConvertSelectedLayerToBlob" />
+            <DxContextMenuItem Text='@LT("Insert selected 3D blob into Mainframe")' Enabled="@CanInsertLayerIntoMainframe" Click="InsertSelectedLayerIntoMainframe" />
+            <DxContextMenuItem Text='@LT("Add chroma key filter")' Enabled="@(SelectedVideoLayer is not null)" BeginGroup="true" Click="AddChromaKeyFilter" />
+            <DxContextMenuItem Text='@LT("Add color adjustment filters")' Enabled="@(SelectedVideoLayer is not null)" Click="AddColorAdjustmentFilters" />
+            <DxContextMenuItem Text='@LT("Add vignette filter")' Enabled="@(SelectedVideoLayer is not null)" Click="AddVignetteFilter" />
         }
-        <DxContextMenuItem Text="Add cutline at playhead" Enabled="@CanAddCutLine" BeginGroup="true" Click="AddCutLineAtPlayhead" />
-        <DxContextMenuItem Text="Remove cutline before selected section" Enabled="@CanRemoveCutLine" Click="RemoveCutLine" />
-        <DxContextMenuItem Text="Copy selected section" Enabled="@HasSelectedSegment" Click="CopySelectedSection" />
-        <DxContextMenuItem Text="Paste section after selection" Enabled="@CanPasteSection" Click="PasteSection" />
-        <DxContextMenuItem Text="Delete selected section" Enabled="@CanDeleteSection" Click="DeleteSelectedSection" />
-        <DxContextMenuItem Text="Insert media into selected range…" Enabled="@HasSource" Click="OpenInsertMediaPicker" />
+        <DxContextMenuItem Text='@LT("Add cutline at playhead")' Enabled="@CanAddCutLine" BeginGroup="true" Click="AddCutLineAtPlayhead" />
+        <DxContextMenuItem Text='@LT("Remove cutline before selected section")' Enabled="@CanRemoveCutLine" Click="RemoveCutLine" />
+        <DxContextMenuItem Text='@LT("Copy selected section")' Enabled="@HasSelectedSegment" Click="CopySelectedSection" />
+        <DxContextMenuItem Text='@LT("Paste section after selection")' Enabled="@CanPasteSection" Click="PasteSection" />
+        <DxContextMenuItem Text='@LT("Delete selected section")' Enabled="@CanDeleteSection" Click="DeleteSelectedSection" />
+        <DxContextMenuItem Text='@LT("Insert media into selected range…")' Enabled="@HasSource" Click="OpenInsertMediaPicker" />
         @if (IsVideo)
         {
-            <DxContextMenuItem Text="Edit frame region" Enabled="@HasSource" BeginGroup="true" Click="BeginFrameRegion" />
-            <DxContextMenuItem Text="Apply frame region" Enabled="@CanFinishFrameRegion" Click="FinishFrameRegion" />
-            <DxContextMenuItem Text="Edit morph target region" Enabled="@(SelectedVideoLayer is not null)" Click="BeginMorphRegion" />
-            <DxContextMenuItem Text="Delete selected region point" Enabled="@(SelectedFramePoint is not null)" Click="RemoveSelectedFramePoint" />
-            <DxContextMenuItem Text="Clear active region" Enabled="@(HasFrameRegion || HasMorphRegion)" Click="ClearFrameRegion" />
+            <DxContextMenuItem Text='@LT("Edit frame region")' Enabled="@HasSource" BeginGroup="true" Click="BeginFrameRegion" />
+            <DxContextMenuItem Text='@LT("Apply frame region")' Enabled="@CanFinishFrameRegion" Click="FinishFrameRegion" />
+            <DxContextMenuItem Text='@LT("Edit morph target region")' Enabled="@(SelectedVideoLayer is not null)" Click="BeginMorphRegion" />
+            <DxContextMenuItem Text='@LT("Delete selected region point")' Enabled="@(SelectedFramePoint is not null)" Click="RemoveSelectedFramePoint" />
+            <DxContextMenuItem Text='@LT("Clear active region")' Enabled="@(HasFrameRegion || HasMorphRegion)" Click="ClearFrameRegion" />
         }
-        <DxContextMenuItem Text="@(_muted ? "Unmute" : "Mute")" BeginGroup="true" Click="ToggleMutedFromMenu" />
-        <DxContextMenuItem Text="@(_loop ? "Disable loop" : "Loop selected range")" Click="ToggleLoopFromMenu" />
+        <DxContextMenuItem Text="@(_muted ? LT("Unmute") : LT("Mute"))" BeginGroup="true" Click="ToggleMutedFromMenu" />
+        <DxContextMenuItem Text="@(_loop ? LT("Disable loop") : LT("Loop selected range"))" Click="ToggleLoopFromMenu" />
         <DxContextMenuItem Text="@SendToConverterMenuText" Enabled="@HasSelectedSegment" BeginGroup="true" Click="SendSelectedMediaToConverter" />
-        <DxContextMenuItem Text="Import replacement…" Enabled="@(!_recording)" BeginGroup="true" Click="OpenMediaPicker" />
+        <DxContextMenuItem Text='@LT("Import replacement…")' Enabled="@(!_recording)" BeginGroup="true" Click="OpenMediaPicker" />
     </Items>
 </DxContextMenu>
 
@@ -878,7 +910,9 @@
     private double _pendingInsertSourceSeconds;
     private double _pendingInsertMinimumSourceSeconds;
     private double _pendingInsertMaximumSourceSeconds;
+    private double? _pendingInsertTimelineSeconds;
     private double? _pendingDropSourceSeconds;
+    private double? _pendingDropTimelineSeconds;
     private bool _pendingDropIsPoint;
     private VideoProjectDocument? _videoProject;
     private Guid _activeProjectTrackId;
@@ -959,7 +993,7 @@
     private bool CanInsertLayerIntoMainframe => SelectedVideoLayer is { Kind: VideoEffectLayerKind.Blob3D };
     private double VideoSelectionStart => _videoSelectionIsPoint ? _videoSelectionPointSeconds : _videoSelectionStartSeconds;
     private double VideoSelectionEnd => _videoSelectionIsPoint ? _videoSelectionPointSeconds : _videoSelectionEndSeconds;
-    private string VideoSelectionLabel => _videoSelectionIsPoint ? "Timestamp" : "Range";
+    private string VideoSelectionLabel => _videoSelectionIsPoint ? LT("Timestamp") : LT("Range");
     private string VideoSelectionReadout => _videoSelectionIsPoint
         ? $"/ {Time(_duration)}"
         : $"— {Time(VideoSelectionEnd)} / {Time(_duration)}";
@@ -968,14 +1002,14 @@
     private string VideoSelectionDetailedSummary => _videoSelectionIsPoint
         ? $"Source timestamp {Time(VideoSelectionStart)} · project timestamp {Time(VideoSelectionTimelineStart)}"
         : $"Source {Time(VideoSelectionStart)} — {Time(VideoSelectionEnd)} · project {Time(VideoSelectionTimelineStart)} — {Time(VideoSelectionTimelineEnd)} · {Time(VideoSelectionEnd - VideoSelectionStart)} selected";
-    private string VideoOrAudioSelectionTitle => IsVideo && _videoSelectionIsPoint ? "Selected timestamp" : "Selected range";
+    private string VideoOrAudioSelectionTitle => IsVideo && _videoSelectionIsPoint ? LT("Selected timestamp") : LT("Selected range");
     private string VideoOrAudioSelectionSummary => IsVideo && _videoSelectionIsPoint
         ? $"{SelectedClipName} · {Time(_videoSelectionPointSeconds)} / {Time(_duration)}"
         : IsVideo
             ? $"{SelectedClipName} · {Time(VideoSelectionStart)} — {Time(VideoSelectionEnd)} / {Time(_duration)}"
             : $"{Time(_trimStart)} — {Time(_trimEnd)} / {Time(_duration)}";
-    private string SelectedClipName => SelectedSegment?.Name ?? (IsVideo ? "No selected video clip" : "No selected audio clip");
-    private string SendToConverterMenuText => IsVideo ? "Send selected clip/range to Media Converter" : "Send selected audio clip to Media Converter";
+    private string SelectedClipName => SelectedSegment?.Name ?? (IsVideo ? LT("No selected video clip") : LT("No selected audio clip"));
+    private string SendToConverterMenuText => IsVideo ? LT("Send selected clip/range to Media Converter") : LT("Send selected audio clip to Media Converter");
     private double SelectedSegmentTimelineStart => SelectedSegmentIndex >= 0
         ? TimelineEdits.SegmentTimelineStart(_segments, SelectedSegmentIndex, _playbackRate)
         : 0;
@@ -1035,39 +1069,41 @@
             return $"object-fit:{fit};";
         }
     }
-    private string MouseModeLabel => _mouseMode switch
+    private string LT(string text) => Localization.GetText(text);
+
+    private string MouseModeLabel => LT(_mouseMode switch
     {
         MediaStudioMouseMode.SelectSection => "Select time",
         MediaStudioMouseMode.PlacePlayhead => "Place playhead",
         MediaStudioMouseMode.AddCutLine => "Add cutline",
         MediaStudioMouseMode.FrameRegion => "Frame region",
         _ => "Select time"
-    };
-    private string VideoCanvasModeHelp => _mouseMode switch
+    });
+    private string VideoCanvasModeHelp => LT(_mouseMode switch
     {
         MediaStudioMouseMode.PlacePlayhead => "Click or drag to scrub the selected clip",
         MediaStudioMouseMode.AddCutLine => "Click the selected clip where the cutline belongs",
         MediaStudioMouseMode.FrameRegion => "Click frame vertices; Enter or double-click applies",
         _ => "Click for one timestamp; drag for a selected range"
-    };
+    });
     private string SelectedSectionSummary => SelectedSegment is { } segment
         ? $"{segment.Name} · {Time(segment.SourceLengthSeconds / Math.Max(.1, _playbackRate))}"
-        : "None";
-    private string ImportMenuText => $"Import {(IsVideo ? "video" : "audio")}…";
+        : LT("None");
+    private string ImportMenuText => IsVideo ? LT("Import video…") : LT("Import audio…");
     private string Accept => IsVideo ? "video/mp4,video/webm,video/ogg,video/quicktime" : "audio/mpeg,audio/wav,audio/ogg,audio/webm,audio/mp4,audio/aac,audio/flac";
-    private string MimeLabel => string.IsNullOrWhiteSpace(_mimeType) ? (IsVideo ? "Video" : "Audio") : _mimeType;
+    private string MimeLabel => string.IsNullOrWhiteSpace(_mimeType) ? (IsVideo ? LT("Video") : LT("Audio")) : _mimeType;
     private string SourceStatus => _recording
-        ? "Recording…"
+        ? LT("Recording…")
         : _embedding
-            ? $"Embedding recording · {_embeddingProgress:0}%"
+            ? $"{LT("Embedding recording")} · {_embeddingProgress:0}%"
             : HasRetainedRecording
-                ? $"Recording ready · {FormatBytes(_retainedRecordingSizeBytes)} · download protected"
-                : HasSource ? $"Ready · {Time(_trimEnd - _trimStart)} selected" : "No source";
-    private string ApplyButtonText => _embedding ? $"Embedding {_embeddingProgress:0}%" : _saving ? "Applying…" : EditingExisting ? "Apply media" : "Insert media";
+                ? $"{LT("Recording ready")} · {FormatBytes(_retainedRecordingSizeBytes)} · {LT("download protected")}"
+                : HasSource ? $"{LT("Ready")} · {Time(_trimEnd - _trimStart)} {LT("selected")}" : LT("No source");
+    private string ApplyButtonText => _embedding ? $"{LT("Embedding")} {_embeddingProgress:0}%" : _saving ? LT("Applying…") : EditingExisting ? LT("Apply media") : LT("Insert media");
     private string FooterStatus => _error ?? _warning ??
         (HasRetainedRecording
-            ? $"{MimeLabel} · {Time(_duration)} · {FormatBytes(_retainedRecordingSizeBytes)} · available to download"
-            : HasSource ? $"{MimeLabel} · {Time(_duration)}" : "Import or record a source to begin.");
+            ? $"{MimeLabel} · {Time(_duration)} · {FormatBytes(_retainedRecordingSizeBytes)} · {LT("available to download")}"
+            : HasSource ? $"{MimeLabel} · {Time(_duration)}" : LT("Import or record a source to begin."));
     private IEnumerable<double> DisplayWaveform => _waveform.Count > 0 ? _waveform : Enumerable.Repeat(.22, 64);
     private double MaxFade => Math.Max(.05, Math.Min(10, (_trimEnd - _trimStart) / Math.Max(.25, _playbackRate) / 2));
     private double RangeSelectorEnd => Math.Max(.01, double.IsFinite(_duration) ? _duration : 0);
@@ -1216,7 +1252,7 @@
     private async Task<IJSObjectReference> EnsureMediaModuleAsync()
     {
         if (_disposed) throw new ObjectDisposedException(nameof(MediaStudio));
-        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.5.0");
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.6.5");
         _self ??= DotNetObjectReference.Create(this);
         if (SessionId != Guid.Empty)
         {
@@ -1514,7 +1550,7 @@
     private bool IsPlayableSegment(PublicationMediaSegment segment) =>
         !segment.IsGap && !string.IsNullOrWhiteSpace(segment.DataUrl);
 
-    private string MouseModeText(MediaStudioMouseMode mode, string label) => _mouseMode == mode ? $"✓ {label}" : label;
+    private string MouseModeText(MediaStudioMouseMode mode, string label) { var localized = LT(label); return _mouseMode == mode ? $"✓ {localized}" : localized; }
     private void SelectSectionMode() => SetMouseMode(MediaStudioMouseMode.SelectSection);
     private void PlacePlayheadMode() => SetMouseMode(MediaStudioMouseMode.PlacePlayhead);
     private void AddCutLineMode() => SetMouseMode(MediaStudioMouseMode.AddCutLine);
@@ -1689,6 +1725,7 @@
         try
         {
             _pendingDropSourceSeconds = null;
+            _pendingDropTimelineSeconds = null;
             _pendingDropIsPoint = _videoSelectionIsPoint;
             var module = await EnsureMediaModuleAsync();
             await module.InvokeVoidAsync("clickElement", "media-studio-insert-file-input");
@@ -1763,6 +1800,67 @@
         return Task.CompletedTask;
     }
 
+    [JSInvokable]
+    public Task MediaStudioDropTimelinePointSelected(double timelineSeconds)
+    {
+        if (!HasSource) return Task.CompletedTask;
+        _pendingDropTimelineSeconds = Math.Clamp(
+            double.IsFinite(timelineSeconds) ? timelineSeconds : _playhead,
+            0,
+            SequenceDuration);
+        _pendingDropSourceSeconds = null;
+        return Task.CompletedTask;
+    }
+
+    [JSInvokable]
+    public async Task MediaStudioTimelineSegmentDropped(string segmentId, double timelineSeconds)
+    {
+        if (!Guid.TryParse(segmentId, out var id) || !_segments.Any(segment => segment.Id == id)) return;
+        CommitSelectedSegment();
+        var movedId = TimelineEdits.MoveAt(_segments, _playbackRate, id, timelineSeconds);
+        SelectSegment(movedId, seek: false);
+        var movedIndex = _segments.FindIndex(segment => segment.Id == movedId);
+        _playhead = movedIndex >= 0
+            ? TimelineEdits.SegmentTimelineStart(_segments, movedIndex, _playbackRate)
+            : Math.Clamp(timelineSeconds, 0, SequenceDuration);
+        _warning = $"Moved {SelectedClipName} to {Time(_playhead)} in the sequence.";
+        await InvokeAsync(StateHasChanged);
+    }
+
+    /// <summary>Reorders a Video Studio effect layer from the shared drag-and-drop layer stack.</summary>
+    [JSInvokable]
+    public async Task MediaStudioVideoLayerDropped(string draggedId, string targetId, bool placeAfter)
+    {
+        if (!Guid.TryParse(draggedId, out var dragged) || !Guid.TryParse(targetId, out var target) || dragged == target || SelectedSegment is not { } segment) return;
+        var visual = segment.VideoLayers.Select(layer => layer.Id).ToList();
+        if (!visual.Remove(dragged)) return;
+        var targetIndex = visual.IndexOf(target);
+        if (targetIndex < 0) return;
+        visual.Insert(Math.Clamp(targetIndex + (placeAfter ? 1 : 0), 0, visual.Count), dragged);
+        var byId = segment.VideoLayers.ToDictionary(layer => layer.Id);
+        segment.VideoLayers = visual.Where(byId.ContainsKey).Select(id => byId[id]).ToList();
+        _selectedVideoLayerId = dragged;
+        CommitSelectedSegment(refreshVideoEffects: true);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    /// <summary>Reorders one filter inside the selected Video Studio effect layer through drag and drop.</summary>
+    [JSInvokable]
+    public async Task MediaStudioVideoFilterDropped(string draggedId, string targetId, bool placeAfter)
+    {
+        if (!Guid.TryParse(draggedId, out var dragged) || !Guid.TryParse(targetId, out var target) || dragged == target || SelectedVideoLayer is not { } layer) return;
+        var visual = layer.Filters.Select(filter => filter.Id).ToList();
+        if (!visual.Remove(dragged)) return;
+        var targetIndex = visual.IndexOf(target);
+        if (targetIndex < 0) return;
+        visual.Insert(Math.Clamp(targetIndex + (placeAfter ? 1 : 0), 0, visual.Count), dragged);
+        var byId = layer.Filters.ToDictionary(filter => filter.Id);
+        layer.Filters = visual.Where(byId.ContainsKey).Select(id => byId[id]).ToList();
+        _selectedVideoFilterId = dragged;
+        CommitSelectedSegment(refreshVideoEffects: true);
+        await InvokeAsync(StateHasChanged);
+    }
+
     private double SourcePositionToTimeline(double sourceSeconds)
     {
         var index = SelectedSegmentIndex;
@@ -1778,6 +1876,21 @@
 
     private void PreparePendingInsert(PublicationMediaSegment segment)
     {
+        if (_pendingDropTimelineSeconds.HasValue)
+        {
+            _pendingInsertSegment = segment;
+            _pendingInsertTimelineSeconds = Math.Clamp(_pendingDropTimelineSeconds.Value, 0, SequenceDuration);
+            _pendingInsertSourceSeconds = 0;
+            _pendingInsertMinimumSourceSeconds = 0;
+            _pendingInsertMaximumSourceSeconds = 0;
+            _pendingDropTimelineSeconds = null;
+            _pendingDropSourceSeconds = null;
+            _pendingDropIsPoint = false;
+            _warning = $"Choose Insert here to place {segment.Name} at sequence time {Time(_pendingInsertTimelineSeconds.Value)}.";
+            return;
+        }
+
+        _pendingInsertTimelineSeconds = null;
         var pointSelection = _pendingDropSourceSeconds.HasValue ? _pendingDropIsPoint : _videoSelectionIsPoint;
         var minimum = pointSelection ? (_pendingDropSourceSeconds ?? _videoSelectionPointSeconds) : _trimStart;
         if (!pointSelection) minimum = VideoSelectionStart;
@@ -1811,7 +1924,7 @@
     {
         if (_pendingInsertSegment is null) return;
         CommitSelectedSegment();
-        var insertionTimeline = SourcePositionToTimeline(_pendingInsertSourceSeconds);
+        var insertionTimeline = _pendingInsertTimelineSeconds ?? SourcePositionToTimeline(_pendingInsertSourceSeconds);
         var inserted = _pendingInsertSegment;
         TimelineEdits.InsertAt(_segments, _playbackRate, insertionTimeline, inserted);
         var insertedIndex = _segments.FindIndex(segment => segment.Id == inserted.Id);
@@ -1836,7 +1949,9 @@
         _pendingInsertSourceSeconds = 0;
         _pendingInsertMinimumSourceSeconds = 0;
         _pendingInsertMaximumSourceSeconds = 0;
+        _pendingInsertTimelineSeconds = null;
         _pendingDropSourceSeconds = null;
+        _pendingDropTimelineSeconds = null;
         _pendingDropIsPoint = false;
     }
 
@@ -2390,6 +2505,8 @@
     private void AddSelectedVideoFilter() => AddVideoFilter(_newVideoFilterKind);
     private void AddChromaKeyFilter() => AddVideoFilter(VideoEffectFilterKind.ChromaKey);
     private void AddVignetteFilter() => AddVideoFilter(VideoEffectFilterKind.Vignette);
+    private void AddBlurFilter() => AddVideoFilter(VideoEffectFilterKind.Blur);
+    private void AddGrainFilter() => AddVideoFilter(VideoEffectFilterKind.Grain);
     private void AddColorAdjustmentFilters()
     {
         if (SelectedVideoLayer is not { } layer) return;
@@ -2478,19 +2595,19 @@
         CommitSelectedSegment(refreshVideoEffects: true);
     }
 
-    private string VideoLayerKindName(VideoEffectLayerKind kind) => kind switch
+    private string VideoLayerKindName(VideoEffectLayerKind kind) => LT(kind switch
     {
         VideoEffectLayerKind.Selection2D => "Selection effect layer",
         VideoEffectLayerKind.Blob3D => "Interactive 3D blob",
         _ => "Base video layer"
-    };
+    });
 
-    private string HtmlSupportLabel(PublicationHtmlExportSupport support) => support switch
+    private string HtmlSupportLabel(PublicationHtmlExportSupport support) => LT(support switch
     {
         PublicationHtmlExportSupport.CanvasRuntime => "HTML · canvas runtime",
         PublicationHtmlExportSupport.RenderBeforeExport => "Render before HTML export",
         _ => "HTML native"
-    };
+    });
 
     private string HtmlSupportCss(PublicationHtmlExportSupport support) => support switch
     {
@@ -2499,31 +2616,49 @@
         _ => "native"
     };
 
-    private string VideoFilterKindName(VideoEffectFilterKind kind) => kind switch
+    private string VideoLayerSummary(VideoEffectLayer layer)
+    {
+        var region = layer.Region.IsFullFrame ? LT("Full frame") : $"{layer.Region.Points.Count} {LT("region points")}";
+        var filters = layer.Filters.Count == 1 ? $"1 {LT("filter")}" : $"{layer.Filters.Count} {LT("filters")}";
+        var range = layer.HasTemporalRange ? $"{Time(layer.TemporalStartSeconds)}—{Time(layer.TemporalEndSeconds)}" : LT("full clip");
+        return $"{VideoLayerKindName(layer.Kind)} · {region} · {filters} · {range}";
+    }
+
+    private string VideoBlendModeName(VideoEffectBlendMode mode) => LT(mode switch
+    {
+        VideoEffectBlendMode.Multiply => "Multiply",
+        VideoEffectBlendMode.Screen => "Screen",
+        VideoEffectBlendMode.Overlay => "Overlay",
+        VideoEffectBlendMode.Darken => "Darken",
+        VideoEffectBlendMode.Lighten => "Lighten",
+        _ => "Normal"
+    });
+
+    private string VideoFilterKindName(VideoEffectFilterKind kind) => LT(kind switch
     {
         VideoEffectFilterKind.HueRotation => "Hue rotation",
         VideoEffectFilterKind.ChromaKey => "Chroma key",
         VideoEffectFilterKind.ColorWash => "Color wash",
         _ => kind.ToString()
-    };
+    });
 
     private string VideoFilterSummary(VideoEffectFilter filter) => filter.Kind switch
     {
-        VideoEffectFilterKind.ChromaKey => $"{filter.Color} · similarity {filter.Amount:0.##}",
+        VideoEffectFilterKind.ChromaKey => $"{filter.Color} · {LT("similarity")} {filter.Amount:0.##}",
         VideoEffectFilterKind.ColorWash => $"{filter.Color} · {filter.Amount:P0}",
         VideoEffectFilterKind.HueRotation => $"{filter.Amount:0.#}°",
         VideoEffectFilterKind.Blur => $"{filter.Amount:0.#} px",
         _ => $"{filter.Amount:0.##}"
     };
 
-    private string VideoFilterAmountLabel(VideoEffectFilterKind kind) => kind switch
+    private string VideoFilterAmountLabel(VideoEffectFilterKind kind) => LT(kind switch
     {
         VideoEffectFilterKind.HueRotation => "Rotation",
         VideoEffectFilterKind.Blur => "Radius",
         VideoEffectFilterKind.Grain => "Amount",
         VideoEffectFilterKind.ColorWash => "Opacity",
         _ => "Amount"
-    };
+    });
 
     private double VideoFilterMinimum(VideoEffectFilterKind kind) => kind == VideoEffectFilterKind.HueRotation ? -360 : 0;
     private double VideoFilterMaximum(VideoEffectFilterKind kind) => kind switch
@@ -3452,7 +3587,7 @@
         if (Enum.TryParse<PublicationVideoFitMode>(Text(args), out var mode)) await SetVideoFitModeAsync(mode);
     }
 
-    private string VideoFitModeText(PublicationVideoFitMode mode, string label) => _videoFitMode == mode ? $"✓ {label}" : label;
+    private string VideoFitModeText(PublicationVideoFitMode mode, string label) { var localized = LT(label); return _videoFitMode == mode ? $"✓ {localized}" : localized; }
     private string VideoFitModeName(PublicationVideoFitMode mode) => mode switch
     {
         PublicationVideoFitMode.Cover => "Fill canvas (crop)",
@@ -3774,12 +3909,12 @@
         return $"Recorded {(isVideo ? "Video" : "Audio")}.{extension}";
     }
 
-    private string PlaybackTriggerName(PublicationMediaPlaybackTrigger value) => value switch
+    private string PlaybackTriggerName(PublicationMediaPlaybackTrigger value) => LT(value switch
     {
         PublicationMediaPlaybackTrigger.OnPageEnter => "When the page opens",
         PublicationMediaPlaybackTrigger.OnClick => "When the media object is clicked",
         _ => "With the object animation"
-    };
+    });
     private string WaveHeight(double value) => $"{Math.Clamp(value, .05, 1) * 100:0.#}%";
     private string Time(double value) => TimeSpan.FromSeconds(Math.Max(0, value)).ToString(value >= 3600 ? @"h\:mm\:ss\.f" : @"m\:ss\.f", CultureInfo.InvariantCulture);
     private string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);

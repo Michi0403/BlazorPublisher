@@ -20,6 +20,8 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
     /// Stores the in-memory cache collection maintained internally by <see cref="FileLocalizationService"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<string, IReadOnlyDictionary<string, string>> _cache = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>Stores the canonical English text-to-key index used by media studios and other source-owned UI surfaces.</summary>
+    private IReadOnlyDictionary<string, string>? _englishKeysByText;
     /// <summary>
     /// Gets the localization path used by this file localization instance to locate the associated file-system resource.
     /// </summary>
@@ -107,6 +109,38 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
         catch (Exception exception)
         {
             logger.LogError(exception, $"FileLocalizationService.Get failed: {exception.Message}");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Resolves one canonical English UI literal through the localization catalogs.
+    /// </summary>
+    /// <param name="englishText">Canonical English UI text stored in the source catalog.</param>
+    /// <param name="culture">Optional culture to resolve; the current UI culture is used when omitted.</param>
+    /// <returns>The translated catalog value, or the input text when it is not catalogued.</returns>
+    public string GetText(string englishText, string? culture = null)
+    {
+        try
+        {
+            logger.LogTrace("Resolving localized UI text from its canonical English value.");
+            if (string.IsNullOrEmpty(englishText)) return englishText ?? string.Empty;
+            var index = _englishKeysByText;
+            if (index is null)
+            {
+                var built = new Dictionary<string, string>(StringComparer.Ordinal);
+                foreach (var pair in LoadFile(Path.Combine(LocalizationPath, "en-US.json")).OrderBy(pair => pair.Key, StringComparer.OrdinalIgnoreCase))
+                {
+                    if (!string.IsNullOrEmpty(pair.Value) && !built.ContainsKey(pair.Value)) built[pair.Value] = pair.Key;
+                }
+                _englishKeysByText = built;
+                index = built;
+            }
+            return index.TryGetValue(englishText, out var key) ? Get(key, culture, englishText) : englishText;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "FileLocalizationService.GetText failed while resolving {EnglishText}.", englishText);
             throw;
         }
     }

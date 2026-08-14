@@ -524,6 +524,42 @@ public sealed class MediaTimelineEditService(
     }
 
     /// <summary>
+    /// Moves an existing timeline segment to a new sequence position. Dropping inside another clip splits that clip through the same insert semantics used for imported media.
+    /// </summary>
+    /// <param name="segments">Editable media sequence.</param>
+    /// <param name="playbackRate">Global sequence playback rate.</param>
+    /// <param name="segmentId">Identifier of the segment being moved.</param>
+    /// <param name="timelineSeconds">Requested drop position in sequence seconds.</param>
+    /// <returns>The identifier of the moved segment.</returns>
+    public Guid MoveAt(List<PublicationMediaSegment> segments, double playbackRate, Guid segmentId, double timelineSeconds)
+    {
+        try
+        {
+            logger.LogTrace($"Entering MediaTimelineEditService.MoveAt.");
+            var index = segments.FindIndex(segment => segment.Id == segmentId);
+            if (index < 0) return segmentId;
+            var originalStart = SegmentTimelineStart(segments, index, playbackRate);
+            var originalLength = SegmentTimelineLength(segments[index], playbackRate);
+            var originalEnd = originalStart + originalLength;
+            var position = double.IsFinite(timelineSeconds)
+                ? Math.Clamp(timelineSeconds, 0, Math.Max(0, TimelineLength(segments, playbackRate)))
+                : originalStart;
+            var tolerance = Math.Min(MinimumSourceLength, Math.Max(.001, Math.Max(originalLength, 1) / 10_000));
+            if (position > originalStart + tolerance && position < originalEnd - tolerance) return segmentId;
+
+            var moving = segments[index];
+            segments.RemoveAt(index);
+            if (position >= originalEnd - tolerance) position = Math.Max(0, position - originalLength);
+            return InsertAt(segments, playbackRate, position, moving);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"MediaTimelineEditService.MoveAt failed: {exception.Message}");
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Determines whether merge boundary as part of the media timeline edit service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     /// <param name="segments">Publication media segment dependency used by the media timeline edit workflow to provide the corresponding application capability.</param>
@@ -765,7 +801,7 @@ public sealed class MediaTimelineEditService(
         VideoEffectFilterKind.Contrast => new() { Kind = kind, Name = "Contrast", Amount = 1 },
         VideoEffectFilterKind.Saturation => new() { Kind = kind, Name = "Saturation", Amount = 1 },
         VideoEffectFilterKind.HueRotation => new() { Kind = kind, Name = "Hue rotation", Amount = 0 },
-        VideoEffectFilterKind.Blur => new() { Kind = kind, Name = "Blur", Amount = 0 },
+        VideoEffectFilterKind.Blur => new() { Kind = kind, Name = "Blur", Amount = 6 },
         VideoEffectFilterKind.Grayscale => new() { Kind = kind, Name = "Grayscale", Amount = 1 },
         VideoEffectFilterKind.Sepia => new() { Kind = kind, Name = "Sepia", Amount = 1 },
         VideoEffectFilterKind.Invert => new() { Kind = kind, Name = "Invert", Amount = 1 },

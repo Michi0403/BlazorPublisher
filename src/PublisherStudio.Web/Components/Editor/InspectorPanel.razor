@@ -12,10 +12,10 @@
 
 <aside class="inspector-panel">
     <div class="inspector-tabs four">
-        <button class="@PropertiesTabClass" @onclick="ShowProperties">Properties</button>
-        <button class="@PageTabClass" @onclick="ShowPage">Page</button>
-        <button class="@LayersTabClass" @onclick="ShowLayers">Layers</button>
-        <button class="@AnimationsTabClass" @onclick="ShowAnimations">Animations</button>
+        <button class="@PropertiesTabClass" @onclick="ShowProperties">@LT("Properties")</button>
+        <button class="@PageTabClass" @onclick="ShowPage">@LT("Page")</button>
+        <button class="@LayersTabClass" @onclick="ShowLayers">@LT("Layers")</button>
+        <button class="@AnimationsTabClass" @onclick="ShowAnimations">@LT("Animations")</button>
     </div>
 
     @if (_tab == "animations")
@@ -25,48 +25,48 @@
     else if (_tab == "layers")
     {
         <div class="layers-panel">
-            <div class="layer-help"><strong>Objects are layers</strong><span>Higher rows appear in front. Use the eye and lock buttons per object.</span></div>
+            <div class="layer-help"><strong>@LT("Objects are layers")</strong><span>@LT("Higher rows appear in front. Use the eye and lock buttons per object.")</span></div>
             <div class="layer-create-bar">
-                <button title="Add text box" @onclick="AddText">T</button>
-                <button title="Add WordArt" @onclick="AddWordArt">A★</button>
-                <button title="Add picture" @onclick="RequestInsertPicture">▧</button>
-                <button title="Create picture in Picture Studio" @onclick="RequestCreatePicture">▣</button>
-                <button title="Open spreadsheet" @onclick="RequestInsertSpreadsheet">▦</button>
-                <button title="Create spreadsheet" @onclick="RequestCreateSpreadsheet">▦+</button>
-                <button title="Insert video" @onclick="RequestInsertVideo">▶</button>
-                <button title="Insert audio" @onclick="RequestInsertAudio">♪</button>
-                <button title="Create video" @onclick="RequestCreateVideo">●▶</button>
-                <button title="Create audio" @onclick="RequestCreateAudio">●♪</button>
-                <button title="Add rectangle" @onclick="AddRectangle">◇</button>
-                <button title="Insert chart" @onclick="AddChart">▥</button>
-                <button title="Insert professional Data Grid" @onclick="AddComponentDataGrid">▦</button>
-                <button title="Insert reusable panel or dashboard" @onclick="RequestInsertPanel">▣+</button>
-                <button title="Open Media Converter Studio" @onclick="RequestMediaConverter">⇄</button>
-                <button title="Draw connector: click, then drag between object ports" @onclick="StartConnector">↝</button>
-                <button title="Delete selected layer" disabled="@(State.SelectedElement is null || State.SelectedElement.Locked)" @onclick="State.DeleteSelected">⌫</button>
+                <button title='@LT("Add text box")' @onclick="AddText"><i class="pub-icon pub-icon-text" aria-hidden="true"></i></button>
+                <button title='@LT("Add WordArt")' @onclick="AddWordArt"><i class="pub-icon pub-icon-wordart" aria-hidden="true"></i></button>
+                <button title='@LT("Add picture")' @onclick="RequestInsertPicture"><i class="pub-icon pub-icon-picture" aria-hidden="true"></i></button>
+                <button title='@LT("Create picture in Picture Studio")' @onclick="RequestCreatePicture"><i class="pub-icon pub-icon-create-picture" aria-hidden="true"></i></button>
+                <button title='@LT("Open spreadsheet")' @onclick="RequestInsertSpreadsheet"><i class="pub-icon pub-icon-spreadsheet" aria-hidden="true"></i></button>
+                <button title='@LT("Create spreadsheet")' @onclick="RequestCreateSpreadsheet"><i class="pub-icon pub-icon-spreadsheet" aria-hidden="true"></i></button>
+                <button title='@LT("Insert video")' @onclick="RequestInsertVideo"><i class="pub-icon pub-icon-video" aria-hidden="true"></i></button>
+                <button title='@LT("Insert audio")' @onclick="RequestInsertAudio"><i class="pub-icon pub-icon-audio" aria-hidden="true"></i></button>
+                <button title='@LT("Create video")' @onclick="RequestCreateVideo"><i class="pub-icon pub-icon-video" aria-hidden="true"></i></button>
+                <button title='@LT("Create audio")' @onclick="RequestCreateAudio"><i class="pub-icon pub-icon-audio" aria-hidden="true"></i></button>
+                <button title='@LT("Add rectangle")' @onclick="AddRectangle"><i class="pub-icon pub-icon-rectangle" aria-hidden="true"></i></button>
+                <button title='@LT("Insert chart")' @onclick="AddChart"><i class="pub-icon pub-icon-chart" aria-hidden="true"></i></button>
+                <button title='@LT("Insert professional Data Grid")' @onclick="AddComponentDataGrid"><i class="pub-icon pub-icon-data" aria-hidden="true"></i></button>
+                <button title='@LT("Insert reusable panel or dashboard")' @onclick="RequestInsertPanel"><i class="pub-icon pub-icon-panel" aria-hidden="true"></i></button>
+                <button title='@LT("Open Media Converter Studio")' @onclick="RequestMediaConverter"><i class="pub-icon pub-icon-media" aria-hidden="true"></i></button>
+                <button title='@LT("Draw connector: click, then drag between object ports")' @onclick="StartConnector"><i class="pub-icon pub-icon-connector" aria-hidden="true"></i></button>
+                <button title='@LT("Delete selected layer")' disabled="@(State.SelectedElement is null || State.SelectedElement.Locked)" @onclick="State.DeleteSelected"><i class="pub-icon pub-icon-delete" aria-hidden="true"></i></button>
             </div>
             <div class="layer-arrange-bar">
-                <button title="Bring to front" disabled="@(State.SelectedElement is null)" @onclick="State.BringToFront">Front</button>
-                <button title="Bring forward" disabled="@(State.SelectedElement is null)" @onclick="State.BringForward">Up</button>
-                <button title="Send backward" disabled="@(State.SelectedElement is null)" @onclick="State.SendBackward">Down</button>
-                <button title="Send to back" disabled="@(State.SelectedElement is null)" @onclick="State.SendToBack">Back</button>
+                <button title='@LT("Bring to front")' disabled="@(State.SelectedElement is null)" @onclick="State.BringToFront">@LT("Front")</button>
+                <button title='@LT("Bring forward")' disabled="@(State.SelectedElement is null)" @onclick="State.BringForward">@LT("Up")</button>
+                <button title='@LT("Send backward")' disabled="@(State.SelectedElement is null)" @onclick="State.SendBackward">@LT("Down")</button>
+                <button title='@LT("Send to back")' disabled="@(State.SelectedElement is null)" @onclick="State.SendToBack">@LT("Back")</button>
             </div>
             <div class="layers-list">
                 @foreach (var item in State.CurrentPage.Elements.OrderByDescending(element => element.ZIndex))
                 {
                     <div class="layer-row @(State.IsSelected(item.Id) ? "selected" : null) @(item.Id == State.SelectedElementId ? "selection-primary" : null)"
                          @oncontextmenu="args => ShowLayerContextMenu(item, args)" @oncontextmenu:preventDefault>
-                        <button class="layer-select" title="Select @item.Name" @onclick="args => SelectLayer(item, args)">
-                            <span class="layer-kind">@KindGlyph(item)</span>
+                        <button class="layer-select" title="@($"{LT("Select")} {item.Name}")" @onclick="args => SelectLayer(item, args)">
+                            <span class="layer-kind"><i class="@KindIconCss(item)" aria-hidden="true"></i></span>
                             <span class="layer-name">@item.Name</span>
                         </button>
-                        <button class="layer-toggle" title="@(item.Visible ? "Hide" : "Show")" @onclick="() => ToggleLayerVisibility(item)">@(item.Visible ? "◉" : "○")</button>
-                        <button class="layer-toggle" title="@(item.Locked ? "Unlock" : "Lock")" @onclick="() => ToggleLayerLock(item)">@(item.Locked ? "🔒" : "🔓")</button>
+                        <button class="layer-toggle @(item.Visible ? "active" : null)" title="@(item.Visible ? LT("Hide") : LT("Show"))" @onclick="() => ToggleLayerVisibility(item)"><i class="pub-icon pub-icon-visible" aria-hidden="true"></i></button>
+                        <button class="layer-toggle @(item.Locked ? "active" : null)" title="@(item.Locked ? LT("Unlock") : LT("Lock"))" @onclick="() => ToggleLayerLock(item)"><i class="pub-icon pub-icon-lock" aria-hidden="true"></i></button>
                     </div>
                 }
                 @if (State.CurrentPage.Elements.Count == 0)
                 {
-                    <div class="empty-panel">This page has no objects.</div>
+                    <div class="empty-panel">@LT("This page has no objects.")</div>
                 }
             </div>
         </div>
@@ -75,8 +75,8 @@
     {
         <div class="property-scroll">
             <section class="property-section">
-                <h3>View language</h3>
-                <label>Application language
+                <h3>@LT("View language")</h3>
+                <label>@LT("Application language")
                     <select value="@ApplicationCulture" @onchange="ChangeApplicationCulture">
                         @foreach (var culture in Localization.GetAvailableCultures())
                         {
@@ -84,7 +84,7 @@
                         }
                     </select>
                 </label>
-                <label>Publication language
+                <label>@LT("Publication language")
                     <select value="@PublicationCulture" @onchange="ChangePublicationCulture">
                         @foreach (var culture in Localization.GetAvailableCultures())
                         {
@@ -93,16 +93,16 @@
                     </select>
                 </label>
                 <div class="property-button-row">
-                    <button type="button" @onclick="OpenTranslationEditor">Edit all application strings</button>
+                    <button type="button" @onclick="OpenTranslationEditor">@LT("Edit all application strings")</button>
                 </div>
-                <p class="property-note">The application choice is stored for this browser. The publication choice controls standalone HTML language metadata and remains editable per document.</p>
+                <p class="property-note">@LT("The application choice is stored for this browser. The publication choice controls standalone HTML language metadata and remains editable per document.")</p>
             </section>
 
             <section class="property-section">
-                <h3>Page format</h3>
-                <label>Preset
+                <h3>@LT("Page format")</h3>
+                <label>@LT("Preset")
                     <select value="@CurrentPresetKey" @onchange="ChangePagePreset">
-                        <option value="custom">Custom</option>
+                        <option value="custom">@LT("Custom")</option>
                         @foreach (var preset in PagePresets.GetAll())
                         {
                             <option value="@preset.Key">@preset.Name</option>
@@ -110,71 +110,71 @@
                     </select>
                 </label>
                 <div class="property-grid two">
-                    <label>Width (mm)<input type="number" min="10" max="2000" step="0.1" value="@Inv(State.CurrentPage.WidthMm)" @onchange="ChangePageWidth" /></label>
-                    <label>Height (mm)<input type="number" min="10" max="2000" step="0.1" value="@Inv(State.CurrentPage.HeightMm)" @onchange="ChangePageHeight" /></label>
+                    <label>@LT("Width (mm)")<input type="number" min="10" max="2000" step="0.1" value="@Inv(State.CurrentPage.WidthMm)" @onchange="ChangePageWidth" /></label>
+                    <label>@LT("Height (mm)")<input type="number" min="10" max="2000" step="0.1" value="@Inv(State.CurrentPage.HeightMm)" @onchange="ChangePageHeight" /></label>
                 </div>
-                <DxButton Text="Swap width / height" Click="SwapOrientation" CssClass="wide-button" />
-                <label>Background
+                <DxButton Text='@LT("Swap width / height")' Click="SwapOrientation" CssClass="wide-button" />
+                <label>@LT("Background")
                     <span class="color-field"><input type="color" value="@UsableColor(State.CurrentPage.Background)" @onchange="ChangePageBackground" /><code>@State.CurrentPage.Background</code></span>
                 </label>
                 <div class="property-button-row">
-                    <DxButton Text="Transparent" Click="SetTransparentPage" />
-                    <DxButton Text="White" Click="SetWhitePage" />
+                    <DxButton Text='@LT("Transparent")' Click="SetTransparentPage" />
+                    <DxButton Text='@LT("White")' Click="SetWhitePage" />
                 </div>
             </section>
 
             <section class="property-section">
-                <h3>Presentation timeline</h3>
-                <label>Page duration (seconds)
+                <h3>@LT("Presentation timeline")</h3>
+                <label>@LT("Page duration (seconds)")
                     <input type="number" min="1" max="3600" step="0.1" value="@Inv(State.CurrentPage.TimelineDurationSeconds)" @onchange="ChangePageTimelineDuration" />
                 </label>
                 <div class="property-button-row">
-                    <DxButton Text="Fit to content" Click="FitPageTimelineToContent" />
-                    <DxButton Text="10 seconds" Click="SetTenSecondTimeline" />
+                    <DxButton Text='@LT("Fit to content")' Click="FitPageTimelineToContent" />
+                    <DxButton Text='@LT("10 seconds")' Click="SetTenSecondTimeline" />
                 </div>
-                <p class="property-note">Effective duration: @Time(State.EffectivePageTimelineDuration()). The timeline expands automatically when media or animation clips extend beyond the page duration.</p>
+                <p class="property-note">@LT("Effective duration:") @Time(State.EffectivePageTimelineDuration()). @LT("The timeline expands automatically when media or animation clips extend beyond the page duration.")</p>
             </section>
 
             <section class="property-section">
-                <h3>Canvas and rulers</h3>
-                <label>Ruler unit
+                <h3>@LT("Canvas and rulers")</h3>
+                <label>@LT("Ruler unit")
                     <select value="@State.Document.View.RulerUnit" @onchange="ChangeRulerUnit">
-                        <option value="Millimeter">Millimetres</option>
-                        <option value="Centimeter">Centimetres</option>
-                        <option value="Inch">Inches</option>
-                        <option value="Pixel">Pixels</option>
+                        <option value="Millimeter">@LT("Millimetres")</option>
+                        <option value="Centimeter">@LT("Centimetres")</option>
+                        <option value="Inch">@LT("Inches")</option>
+                        <option value="Pixel">@LT("Pixels")</option>
                     </select>
                 </label>
-                <label>Grid spacing (mm)<input type="number" min="0.5" max="100" step="0.5" value="@Inv(State.Document.View.GridSpacingMm)" @onchange="ChangeGridSpacing" /></label>
-                <label class="check-row"><input type="checkbox" checked="@State.Document.View.RulersVisible" @onchange="ToggleRulers" /> Show rulers</label>
-                <label class="check-row"><input type="checkbox" checked="@State.Document.View.GridVisible" @onchange="ToggleGrid" /> Show grid</label>
-                <label class="check-row"><input type="checkbox" checked="@State.Document.View.GuidesVisible" @onchange="ToggleGuides" /> Show guides</label>
-                <label class="check-row"><input type="checkbox" checked="@State.Document.View.SnapToGrid" @onchange="ToggleSnapGrid" /> Snap to grid</label>
-                <label class="check-row"><input type="checkbox" checked="@State.Document.View.SnapToGuides" @onchange="ToggleSnapGuides" /> Snap to guides</label>
-                <label class="check-row"><input type="checkbox" checked="@State.Document.View.SnapToPage" @onchange="ToggleSnapPage" /> Snap to page edges</label>
-                <label class="check-row"><input type="checkbox" checked="@State.Document.View.SnapToObjects" @onchange="ToggleSnapObjects" /> Snap to other objects</label>
+                <label>@LT("Grid spacing (mm)")<input type="number" min="0.5" max="100" step="0.5" value="@Inv(State.Document.View.GridSpacingMm)" @onchange="ChangeGridSpacing" /></label>
+                <label class="check-row"><input type="checkbox" checked="@State.Document.View.RulersVisible" @onchange="ToggleRulers" /> @LT("Show rulers")</label>
+                <label class="check-row"><input type="checkbox" checked="@State.Document.View.GridVisible" @onchange="ToggleGrid" /> @LT("Show grid")</label>
+                <label class="check-row"><input type="checkbox" checked="@State.Document.View.GuidesVisible" @onchange="ToggleGuides" /> @LT("Show guides")</label>
+                <label class="check-row"><input type="checkbox" checked="@State.Document.View.SnapToGrid" @onchange="ToggleSnapGrid" /> @LT("Snap to grid")</label>
+                <label class="check-row"><input type="checkbox" checked="@State.Document.View.SnapToGuides" @onchange="ToggleSnapGuides" /> @LT("Snap to guides")</label>
+                <label class="check-row"><input type="checkbox" checked="@State.Document.View.SnapToPage" @onchange="ToggleSnapPage" /> @LT("Snap to page edges")</label>
+                <label class="check-row"><input type="checkbox" checked="@State.Document.View.SnapToObjects" @onchange="ToggleSnapObjects" /> @LT("Snap to other objects")</label>
                 <div class="property-button-row">
-                    <DxButton Text="Vertical guide" Click="AddVerticalGuide" />
-                    <DxButton Text="Horizontal guide" Click="AddHorizontalGuide" />
+                    <DxButton Text='@LT("Vertical guide")' Click="AddVerticalGuide" />
+                    <DxButton Text='@LT("Horizontal guide")' Click="AddHorizontalGuide" />
                 </div>
-                <DxButton Text="Clear guides" Enabled="@(State.CurrentPage.Guides.Count > 0)" Click="ClearGuides" CssClass="wide-button" />
+                <DxButton Text='@LT("Clear guides")' Enabled="@(State.CurrentPage.Guides.Count > 0)" Click="ClearGuides" CssClass="wide-button" />
             </section>
 
             <section class="property-section">
-                <h3>Export</h3>
-                <label>Raster export DPI
+                <h3>@LT("Export")</h3>
+                <label>@LT("Raster export DPI")
                     <select value="@State.Document.View.ExportDpi" @onchange="ChangeExportDpi">
-                        <option value="96">96 DPI — screen</option>
-                        <option value="150">150 DPI — draft print</option>
-                        <option value="300">300 DPI — print</option>
-                        <option value="600">600 DPI — high resolution</option>
+                        <option value="96">@LT("96 DPI — screen")</option>
+                        <option value="150">@LT("150 DPI — draft print")</option>
+                        <option value="300">@LT("300 DPI — print")</option>
+                        <option value="600">@LT("600 DPI — high resolution")</option>
                     </select>
                 </label>
                 <label>JPEG quality · @Math.Round(State.Document.View.RasterJpegQuality * 100)%
                     <input type="range" min="0.35" max="1" step="0.01" value="@Inv(State.Document.View.RasterJpegQuality)" @oninput="ChangeRasterJpegQuality" />
                 </label>
-                <label class="check-row"><input type="checkbox" checked="@State.Document.View.CompressPageArchives" @onchange="ToggleCompressPageArchives" /> Compress multi-page ZIP archives</label>
-                <p class="property-note">PNG preserves page and image transparency. JPEG always receives a white background. Multi-page image archives reuse the structured-website ZIP compressor when enabled.</p>
+                <label class="check-row"><input type="checkbox" checked="@State.Document.View.CompressPageArchives" @onchange="ToggleCompressPageArchives" /> @LT("Compress multi-page ZIP archives")</label>
+                <p class="property-note">@LT("PNG preserves page and image transparency. JPEG always receives a white background. Multi-page image archives reuse the structured-website ZIP compressor when enabled.")</p>
             </section>
         </div>
     }
@@ -184,15 +184,15 @@
             @if (element is PanelElement panelElement)
             {
                 <section class="property-section">
-                    <h3>Panel / dashboard</h3>
+                    <h3>@LT("Panel / dashboard")</h3>
                     <p class="property-note">@panelElement.Views.Count authored view(s), rendered with the same components in Mainframe, Panel Studio and HTML exports.</p>
-                    <DxButton Text="Edit in Panel Studio" Click="RequestEditPanel" CssClass="wide-button" />
+                    <DxButton Text='@LT("Edit in Panel Studio")' Click="RequestEditPanel" CssClass="wide-button" />
                 </section>
             }
             @if (element is HtmlEmbedElement htmlEmbed)
             {
                 <section class="property-section">
-                    <h3>Web content</h3>
+                    <h3>@LT("Web content")</h3>
                     <div class="media-export-compatibility @HtmlSupportCss(htmlEmbed.HtmlExportSupport)">
                         <b>@HtmlSupportLabel(htmlEmbed.HtmlExportSupport)</b>
                         <span>@htmlEmbed.HtmlExportNote</span>
@@ -201,16 +201,16 @@
                     {
                         <div class="media-export-compatibility render">
                             <b>@HtmlSupportLabel(PublicationHtmlExportSupport.RenderBeforeExport)</b>
-                            <span>Native OpenSCAD mesh/solid output is embedded as interchange source and must be rendered before HTML export. The canvas object itself remains interactive.</span>
+                            <span>@LT("Native OpenSCAD mesh/solid output is embedded as interchange source and must be rendered before HTML export. The canvas object itself remains interactive.")</span>
                         </div>
                     }
-                    <p class="property-note">Edit isolated HTML, CSS and optional JavaScript inside Panel Studio.</p>
-                    <DxButton Text="Edit in Panel Studio" Click="RequestEditPanel" CssClass="wide-button" />
+                    <p class="property-note">@LT("Edit isolated HTML, CSS and optional JavaScript inside Panel Studio.")</p>
+                    <DxButton Text='@LT("Edit in Panel Studio")' Click="RequestEditPanel" CssClass="wide-button" />
                 </section>
             }
             <section class="property-section">
-                <h3>Object</h3>
-                <label>Name<input value="@element.Name" @onchange="ChangeName" /></label>
+                <h3>@LT("Object")</h3>
+                <label>@LT("Name")<input value="@element.Name" @onchange="ChangeName" /></label>
                 @if (element is not ConnectorElement)
                 {
                     <div class="property-grid two">
@@ -226,23 +226,23 @@
                 {
                     <div class="property-grid two">@NumberField("Layer", element.ZIndex, "z")</div>
                 }
-                <label class="check-row"><input type="checkbox" checked="@element.Visible" @onchange="ToggleVisible" /> Visible</label>
-                <label class="check-row"><input type="checkbox" checked="@element.Locked" @onchange="ToggleLocked" /> Locked</label>
+                <label class="check-row"><input type="checkbox" checked="@element.Visible" @onchange="ToggleVisible" /> @LT("Visible")</label>
+                <label class="check-row"><input type="checkbox" checked="@element.Locked" @onchange="ToggleLocked" /> @LT("Locked")</label>
             </section>
 
             @if (element is ImageFrameElement image)
             {
                 <section class="property-section picture-properties">
-                    <h3>Picture</h3>
-                    <DxButton Text="Edit in Picture Studio" Click="RequestEditPicture" CssClass="wide-button" />
+                    <h3>@LT("Picture")</h3>
+                    <DxButton Text='@LT("Edit in Picture Studio")' Click="RequestEditPicture" CssClass="wide-button" />
                     <div class="property-button-row">
-                        <DxButton Text="Replace…" Click="RequestReplacePicture" />
+                        <DxButton Text='@LT("Replace…")' Click="RequestReplacePicture" />
                         <DxButton Text="@(State.CropMode ? "Finish crop" : "Crop")" Click="ToggleCrop" />
                     </div>
                     <div class="property-button-row">
-                        <DxButton Text="Fit" Click="PictureFit" />
-                        <DxButton Text="Fill" Click="PictureFill" />
-                        <DxButton Text="Reset" Click="ResetPicture" />
+                        <DxButton Text='@LT("Fit")' Click="PictureFit" />
+                        <DxButton Text='@LT("Fill")' Click="PictureFill" />
+                        <DxButton Text='@LT("Reset")' Click="ResetPicture" />
                     </div>
                     @RangeField("Crop zoom", image.CropScale, .2, 8, .02, "cropScale")
                     @RangeField("Picture rotation", image.ImageRotation, -180, 180, 1, "imageRotation")
@@ -258,92 +258,92 @@
                 </section>
 
                 <section class="property-section picture-color-tools">
-                    <h3>Recolor and transparency</h3>
-                    <label>Color treatment
+                    <h3>@LT("Recolor and transparency")</h3>
+                    <label>@LT("Color treatment")
                         <select value="@image.TintMode" @onchange="ChangeTintMode">
-                            <option value="Overlay">Tint overlay</option>
-                            <option value="Recolor">Full recolor</option>
+                            <option value="Overlay">@LT("Tint overlay")</option>
+                            <option value="Recolor">@LT("Full recolor")</option>
                         </select>
                     </label>
-                    <label>Blend mode
+                    <label>@LT("Blend mode")
                         <select value="@image.BlendMode" @onchange="ChangeBlendMode">
-                            <option value="Normal">Normal</option>
-                            <option value="Multiply">Multiply</option>
-                            <option value="Screen">Screen</option>
-                            <option value="Darken">Darken</option>
-                            <option value="Lighten">Lighten</option>
+                            <option value="Normal">@LT("Normal")</option>
+                            <option value="Multiply">@LT("Multiply")</option>
+                            <option value="Screen">@LT("Screen")</option>
+                            <option value="Darken">@LT("Darken")</option>
+                            <option value="Lighten">@LT("Lighten")</option>
                         </select>
                     </label>
                     @ColorField("Tint color", image.TintColor, "tintColor")
                     @RangeField("Tint strength", image.TintOpacity, 0, 1, .01, "tintOpacity")
                     <div class="color-preset-row">
-                        <button @onclick="TintBlue">Blue</button>
-                        <button @onclick="TintWarm">Warm</button>
-                        <button @onclick="TintGreen">Green</button>
-                        <button @onclick="ClearTint">Clear</button>
+                        <button @onclick="TintBlue">@LT("Blue")</button>
+                        <button @onclick="TintWarm">@LT("Warm")</button>
+                        <button @onclick="TintGreen">@LT("Green")</button>
+                        <button @onclick="ClearTint">@LT("Clear")</button>
                     </div>
                     @ColorField("Color to remove", image.TransparentColor, "transparentColor")
                     @RangeField("Color tolerance", image.TransparentColorTolerance, 0, 255, 1, "transparentTolerance")
                     <div class="property-button-row">
-                        <DxButton Text="Make transparent" Click="RequestApplyTransparentColor" />
-                        <DxButton Text="Restore original" Click="RequestRestoreOriginalPicture" />
+                        <DxButton Text='@LT("Make transparent")' Click="RequestApplyTransparentColor" />
+                        <DxButton Text='@LT("Restore original")' Click="RequestRestoreOriginalPicture" />
                     </div>
-                    <p class="property-note">Recolor and tint preserve the picture's alpha channel. “Make transparent” edits a copy; Restore Original keeps the imported source.</p>
+                    <p class="property-note">@LT("Recolor and tint preserve the picture's alpha channel. “Make transparent” edits a copy; Restore Original keeps the imported source.")</p>
                 </section>
 
                 <section class="property-section">
-                    <h3>Picture frame</h3>
-                    <label>Mask
+                    <h3>@LT("Picture frame")</h3>
+                    <label>@LT("Mask")
                         <select value="@image.MaskShape" @onchange="ChangeImageMask">
-                            <option value="Rectangle">Rectangle</option>
-                            <option value="RoundedRectangle">Rounded rectangle</option>
-                            <option value="Ellipse">Ellipse</option>
+                            <option value="Rectangle">@LT("Rectangle")</option>
+                            <option value="RoundedRectangle">@LT("Rounded rectangle")</option>
+                            <option value="Ellipse">@LT("Ellipse")</option>
                         </select>
                     </label>
                     @RangeField("Rounded corners", image.CornerRadiusMm, 0, 30, .1, "corner")
                     @ColorField("Border", image.BorderColor, "imageBorder")
                     @RangeField("Border width", image.BorderWidthMm, 0, 5, .05, "imageBorderWidth")
-                    <label class="check-row"><input type="checkbox" checked="@image.ShadowEnabled" @onchange="ToggleImageShadow" /> Drop shadow</label>
-                    <label class="check-row"><input type="checkbox" checked="@image.FlipHorizontal" @onchange="ToggleFlipHorizontal" /> Flip horizontal</label>
-                    <label class="check-row"><input type="checkbox" checked="@image.FlipVertical" @onchange="ToggleFlipVertical" /> Flip vertical</label>
-                    <label>Alt text<input value="@image.AltText" @onchange="ChangeAltText" /></label>
+                    <label class="check-row"><input type="checkbox" checked="@image.ShadowEnabled" @onchange="ToggleImageShadow" /> @LT("Drop shadow")</label>
+                    <label class="check-row"><input type="checkbox" checked="@image.FlipHorizontal" @onchange="ToggleFlipHorizontal" /> @LT("Flip horizontal")</label>
+                    <label class="check-row"><input type="checkbox" checked="@image.FlipVertical" @onchange="ToggleFlipVertical" /> @LT("Flip vertical")</label>
+                    <label>@LT("Alt text")<input value="@image.AltText" @onchange="ChangeAltText" /></label>
                 </section>
             }
             else if (element is TextFrameElement text)
             {
                 <section class="property-section">
-                    <h3>Text frame</h3>
+                    <h3>@LT("Text frame")</h3>
                     @RangeField("Padding", text.PaddingMm, 0, 20, .1, "padding")
                     @ColorField("Background", text.Background, "textBackground")
                     @ColorField("Border", text.BorderColor, "textBorder")
                     @RangeField("Frame border width (mm)", text.BorderWidth, 0, 5, .05, "textBorderWidth")
-                    <label>Content sizing
+                    <label>@LT("Content sizing")
                         <select value="@text.ContentFit" @onchange="ChangeTextContentFit">
-                            <option value="Clip">Natural / clip fragments</option>
-                            <option value="Fit">Fit whole text</option>
-                            <option value="Fill">Fill and crop</option>
-                            <option value="Stretch">Stretch to frame</option>
+                            <option value="Clip">@LT("Natural / clip fragments")</option>
+                            <option value="Fit">@LT("Fit whole text")</option>
+                            <option value="Fill">@LT("Fill and crop")</option>
+                            <option value="Stretch">@LT("Stretch to frame")</option>
                         </select>
                     </label>
-                    <DxButton Text="Edit story" Click="RequestEditStory" CssClass="wide-button" />
+                    <DxButton Text='@LT("Edit story")' Click="RequestEditStory" CssClass="wide-button" />
                 </section>
             }
             else if (element is WordArtElement wordArt)
             {
                 <section class="property-section wordart-properties">
-                    <h3>WordArt / LogoArt</h3>
-                    <label>Text<textarea rows="3" value="@wordArt.Text" @onchange="ChangeWordArtText"></textarea></label>
-                    <label>Font family
+                    <h3>@LT("WordArt / LogoArt")</h3>
+                    <label>@LT("Text")<textarea rows="3" value="@wordArt.Text" @onchange="ChangeWordArtText"></textarea></label>
+                    <label>@LT("Font family")
                         <SystemFontPicker Value="@wordArt.FontFamily" Changed="ChangeWordArtFont" />
                     </label>
                     @RangeField("Font size", wordArt.FontSizePt, 8, 180, 1, "wordFontSize")
                     @RangeField("Letter spacing", wordArt.LetterSpacing, -5, 30, .5, "wordLetterSpacing")
-                    <label>Fill type
+                    <label>@LT("Fill type")
                         <select value="@wordArt.FillKind" @onchange="ChangeWordArtFillKind">
-                            <option value="Solid">Solid color</option>
-                            <option value="Gradient">Gradient</option>
-                            <option value="Picture">Picture</option>
-                            <option value="Video">Video</option>
+                            <option value="Solid">@LT("Solid color")</option>
+                            <option value="Gradient">@LT("Gradient")</option>
+                            <option value="Picture">@LT("Picture")</option>
+                            <option value="Video">@LT("Video")</option>
                         </select>
                     </label>
                     @ColorField("Fallback / solid fill", wordArt.FillColor, "wordFill")
@@ -356,19 +356,19 @@
                         <div class="property-button-row">
                             @if (wordArt.FillKind == WordArtFillKind.Picture)
                             {
-                                <DxButton Text="Choose picture…" Click="RequestWordArtPicture" />
+                                <DxButton Text='@LT("Choose picture…")' Click="RequestWordArtPicture" />
                             }
                             else
                             {
-                                <DxButton Text="Choose video…" Click="RequestWordArtVideo" />
+                                <DxButton Text='@LT("Choose video…")' Click="RequestWordArtVideo" />
                             }
-                            <DxButton Text="Clear media" Enabled="@(!string.IsNullOrWhiteSpace(wordArt.FillMediaDataUrl))" Click="ClearWordArtMedia" />
+                            <DxButton Text='@LT("Clear media")' Enabled="@(!string.IsNullOrWhiteSpace(wordArt.FillMediaDataUrl))" Click="ClearWordArtMedia" />
                         </div>
-                        <label>Media fit
+                        <label>@LT("Media fit")
                             <select value="@wordArt.FillMediaFitMode" @onchange="ChangeWordArtMediaFit">
-                                <option value="Cover">Cover letters</option>
-                                <option value="Contain">Contain in letters</option>
-                                <option value="Stretch">Stretch</option>
+                                <option value="Cover">@LT("Cover letters")</option>
+                                <option value="Contain">@LT("Contain in letters")</option>
+                                <option value="Stretch">@LT("Stretch")</option>
                             </select>
                         </label>
                         @RangeField("Media scale", wordArt.FillMediaScale, .1, 10, .01, "wordMediaScale")
@@ -376,25 +376,25 @@
                         @RangeField("Vertical offset", wordArt.FillMediaOffsetYPercent, -100, 100, 1, "wordMediaOffsetY")
                         @if (wordArt.FillKind == WordArtFillKind.Video)
                         {
-                            <label class="check-row"><input type="checkbox" checked="@wordArt.FillMediaLoop" @onchange="ToggleWordArtMediaLoop" /> Loop video fill</label>
-                            <p class="property-note">Interactive HTML keeps the video live. Static exports use the generated poster frame so PDF, print, PNG, JPEG and SVG remain deterministic.</p>
+                            <label class="check-row"><input type="checkbox" checked="@wordArt.FillMediaLoop" @onchange="ToggleWordArtMediaLoop" /> @LT("Loop video fill")</label>
+                            <p class="property-note">@LT("Interactive HTML keeps the video live. Static exports use the generated poster frame so PDF, print, PNG, JPEG and SVG remain deterministic.")</p>
                         }
                         else
                         {
-                            <p class="property-note">The original picture remains embedded in the publication and is clipped through the WordArt glyphs in every export.</p>
+                            <p class="property-note">@LT("The original picture remains embedded in the publication and is clipped through the WordArt glyphs in every export.")</p>
                         }
                     }
                     @ColorField("Outline", wordArt.OutlineColor, "wordOutline")
                     @RangeField("Outline width", wordArt.OutlineWidth, 0, 12, .25, "wordOutlineWidth")
                     @ColorField("3D color", wordArt.ExtrudeColor, "wordExtrude")
                     @RangeField("3D depth", wordArt.ExtrudeDepth, 0, 18, .5, "wordExtrudeDepth")
-                    <label>Warp
+                    <label>@LT("Warp")
                         <select value="@wordArt.Warp" @onchange="ChangeWordArtWarp">
-                            <option value="None">Straight</option>
-                            <option value="ArchUp">Arch up</option>
-                            <option value="ArchDown">Arch down</option>
-                            <option value="Wave">Wave</option>
-                            <option value="Custom">Custom drawn path</option>
+                            <option value="None">@LT("Straight")</option>
+                            <option value="ArchUp">@LT("Arch up")</option>
+                            <option value="ArchDown">@LT("Arch down")</option>
+                            <option value="Wave">@LT("Wave")</option>
+                            <option value="Custom">@LT("Custom drawn path")</option>
                         </select>
                     </label>
                     @if (wordArt.Warp == WordArtWarp.Custom)
@@ -406,21 +406,21 @@
                         @RangeField("Text position on path", wordArt.PathStartOffsetPercent, 0, 100, 1, "wordPathStart")
                         @RangeField("Distance from path", wordArt.PathBaselineOffset, -80, 80, 1, "wordPathOffset")
                     }
-                    <label class="check-row"><input type="checkbox" checked="@wordArt.Bold" @onchange="ToggleWordArtBold" /> Bold</label>
-                    <label class="check-row"><input type="checkbox" checked="@wordArt.Italic" @onchange="ToggleWordArtItalic" /> Italic</label>
-                    <label class="check-row"><input type="checkbox" checked="@wordArt.ShadowEnabled" @onchange="ToggleWordArtShadow" /> Shadow</label>
+                    <label class="check-row"><input type="checkbox" checked="@wordArt.Bold" @onchange="ToggleWordArtBold" /> @LT("Bold")</label>
+                    <label class="check-row"><input type="checkbox" checked="@wordArt.Italic" @onchange="ToggleWordArtItalic" /> @LT("Italic")</label>
+                    <label class="check-row"><input type="checkbox" checked="@wordArt.ShadowEnabled" @onchange="ToggleWordArtShadow" /> @LT("Shadow")</label>
                 </section>
             }
             else if (element is PublicationMediaElement media)
             {
                 <section class="property-section media-properties">
                     <h3>@(media is VideoElement ? "Video" : "Audio")</h3>
-                    <DxButton Text="Edit in Media Studio" Click="RequestEditMedia" RenderStyle="ButtonRenderStyle.Primary" CssClass="wide-button" />
+                    <DxButton Text='@LT("Edit in Media Studio")' Click="RequestEditMedia" RenderStyle="ButtonRenderStyle.Primary" CssClass="wide-button" />
                     <div class="property-grid two">
-                        <label>Timeline start<input type="number" min="0" max="3600" step="0.01" value="@Inv(media.TimelineStartSeconds)" @onchange="ChangeMediaTimelineStart" /></label>
-                        <label>Playback rate<input type="number" min="0.25" max="4" step="0.05" value="@Inv(media.PlaybackRate)" @onchange="ChangeMediaPlaybackRate" /></label>
-                        <label>Trim start<input type="number" min="0" max="@Inv(media.DurationSeconds)" step="0.01" value="@Inv(media.TrimStartSeconds)" @onchange="ChangeMediaTrimStart" /></label>
-                        <label>Trim end<input type="number" min="0" max="@Inv(media.DurationSeconds)" step="0.01" value="@Inv(media.EffectiveTrimEndSeconds)" @onchange="ChangeMediaTrimEnd" /></label>
+                        <label>@LT("Timeline start")<input type="number" min="0" max="3600" step="0.01" value="@Inv(media.TimelineStartSeconds)" @onchange="ChangeMediaTimelineStart" /></label>
+                        <label>@LT("Playback rate")<input type="number" min="0.25" max="4" step="0.05" value="@Inv(media.PlaybackRate)" @onchange="ChangeMediaPlaybackRate" /></label>
+                        <label>@LT("Trim start")<input type="number" min="0" max="@Inv(media.DurationSeconds)" step="0.01" value="@Inv(media.TrimStartSeconds)" @onchange="ChangeMediaTrimStart" /></label>
+                        <label>@LT("Trim end")<input type="number" min="0" max="@Inv(media.DurationSeconds)" step="0.01" value="@Inv(media.EffectiveTrimEndSeconds)" @onchange="ChangeMediaTrimEnd" /></label>
                     </div>
                     @RangeField("Volume", media.Volume, 0, 1, .01, "mediaVolume")
                     @if (media is AudioElement)
@@ -428,94 +428,94 @@
                         @RangeField("Fade in", media.FadeInSeconds, 0, Math.Max(.05, media.TimelineLengthSeconds / 2), .05, "mediaFadeIn")
                         @RangeField("Fade out", media.FadeOutSeconds, 0, Math.Max(.05, media.TimelineLengthSeconds / 2), .05, "mediaFadeOut")
                     }
-                    <label>Start behavior
+                    <label>@LT("Start behavior")
                         <select value="@media.PlaybackTrigger" @onchange="ChangeMediaTrigger">
-                            <option value="OnPageEnter">On page entry</option>
-                            <option value="OnClick">On click</option>
-                            <option value="WithAnimation">With animation timeline</option>
+                            <option value="OnPageEnter">@LT("On page entry")</option>
+                            <option value="OnClick">@LT("On click")</option>
+                            <option value="WithAnimation">@LT("With animation timeline")</option>
                         </select>
                     </label>
-                    <label class="check-row"><input type="checkbox" checked="@media.Muted" @onchange="ToggleMediaMuted" /> Muted</label>
-                    <label class="check-row"><input type="checkbox" checked="@media.Loop" @onchange="ToggleMediaLoop" /> Loop selected range</label>
-                    <label class="check-row"><input type="checkbox" checked="@media.AutoPlay" @onchange="ToggleMediaAutoPlay" /> Play during presentation</label>
+                    <label class="check-row"><input type="checkbox" checked="@media.Muted" @onchange="ToggleMediaMuted" /> @LT("Muted")</label>
+                    <label class="check-row"><input type="checkbox" checked="@media.Loop" @onchange="ToggleMediaLoop" /> @LT("Loop selected range")</label>
+                    <label class="check-row"><input type="checkbox" checked="@media.AutoPlay" @onchange="ToggleMediaAutoPlay" /> @LT("Play during presentation")</label>
                     @if (media is VideoElement video)
                     {
-                        <label>Video fit
+                        <label>@LT("Video fit")
                             <select value="@video.FitMode" @onchange="ChangeVideoFit">
-                                <option value="Contain">Fit inside frame</option>
-                                <option value="Cover">Fill frame</option>
-                                <option value="Stretch">Stretch</option>
+                                <option value="Contain">@LT("Fit inside frame")</option>
+                                <option value="Cover">@LT("Fill frame")</option>
+                                <option value="Stretch">@LT("Stretch")</option>
                             </select>
                         </label>
-                        <label class="check-row"><input type="checkbox" checked="@video.ShowControls" @onchange="ToggleVideoControls" /> Show controls</label>
+                        <label class="check-row"><input type="checkbox" checked="@video.ShowControls" @onchange="ToggleVideoControls" /> @LT("Show controls")</label>
                     }
                     else if (media is AudioElement audio)
                     {
-                        <label>Audio appearance
+                        <label>@LT("Audio appearance")
                             <select value="@audio.DisplayKind" @onchange="ChangeAudioDisplay">
-                                <option value="Waveform">Waveform</option>
-                                <option value="Compact">Compact</option>
-                                <option value="Hidden">Hidden during presentation</option>
+                                <option value="Waveform">@LT("Waveform")</option>
+                                <option value="Compact">@LT("Compact")</option>
+                                <option value="Hidden">@LT("Hidden during presentation")</option>
                             </select>
                         </label>
                         @ColorField("Accent", audio.AccentColor, "audioAccent")
-                        <label class="check-row"><input type="checkbox" checked="@audio.ShowControls" @onchange="ToggleAudioControls" /> Show controls</label>
+                        <label class="check-row"><input type="checkbox" checked="@audio.ShowControls" @onchange="ToggleAudioControls" /> @LT("Show controls")</label>
                     }
-                    <p class="property-note">The source remains embedded. Trimming, fades, playback rate, and timeline placement are non-destructive.</p>
+                    <p class="property-note">@LT("The source remains embedded. Trimming, fades, playback rate, and timeline placement are non-destructive.")</p>
                 </section>
             }
             else if (element is LiveSourceElement liveSource)
             {
                 <section class="property-section live-source-properties">
-                    <h3>Live source</h3>
+                    <h3>@LT("Live source")</h3>
                     <div class="data-source-summary">
-                        <span><b>Kind:</b> @liveSource.SourceKind</span>
-                        <span><b>Clock:</b> @(liveSource.UseDeviceTimestamp ? "Device timestamp" : "Session clock")</span>
+                        <span><b>@LT("Kind:")</b> @liveSource.SourceKind</span>
+                        <span><b>@LT("Clock:")</b> @(liveSource.UseDeviceTimestamp ? LT("Device timestamp") : LT("Session clock"))</span>
                     </div>
-                    <label>Saved device profile
+                    <label>@LT("Saved device profile")
                         <select value="@GuidText(liveSource.DeviceProfileId)" @onchange="ChangeLiveDeviceProfile">
-                            <option value="">Custom settings</option>
+                            <option value="">@LT("Custom settings")</option>
                             @foreach (var profile in _streamingDeviceProfiles)
                             {
                                 <option value="@profile.Id">@profile.Name · @profile.Kind</option>
                             }
                         </select>
                     </label>
-                    <button type="button" class="wide-button" @onclick="RefreshStreamingDeviceProfiles">Refresh saved profiles</button>
-                    <label>Capture backend
+                    <button type="button" class="wide-button" @onclick="RefreshStreamingDeviceProfiles">@LT("Refresh saved profiles")</button>
+                    <label>@LT("Capture backend")
                         <select value="@liveSource.CaptureBackend" @onchange="ChangeLiveCaptureBackend">
                             @foreach (var value in Enum.GetValues<PublicationCaptureBackend>()) { <option value="@value">@value</option> }
                         </select>
                     </label>
                     @if (liveSource.CaptureBackend == PublicationCaptureBackend.Native)
                     {
-                        <label>Native backend<input value="@liveSource.NativeBackend" @onchange="ChangeLiveNativeBackend" placeholder="dshow, avfoundation, v4l2, wasapi-process-loopback" /></label>
+                        <label>@LT("Native backend")<input value="@liveSource.NativeBackend" @onchange="ChangeLiveNativeBackend" placeholder="dshow, avfoundation, v4l2, wasapi-process-loopback" /></label>
                     }
-                    <label>Source kind
+                    <label>@LT("Source kind")
                         <select value="@liveSource.SourceKind" @onchange="ChangeLiveSourceKind">
                             @foreach (var value in Enum.GetValues<PublicationLiveSourceKind>()) { <option value="@value">@value</option> }
                         </select>
                     </label>
                     @if (liveSource.SourceKind is PublicationLiveSourceKind.Camera or PublicationLiveSourceKind.CaptureDevice or PublicationLiveSourceKind.Microphone)
                     {
-                        <label>Video / primary device ID<input value="@liveSource.DeviceId" @onchange="ChangeLiveDeviceId" placeholder="Blank uses the default device" /></label>
+                        <label>@LT("Video / primary device ID")<input value="@liveSource.DeviceId" @onchange="ChangeLiveDeviceId" placeholder="Blank uses the default device" /></label>
                     }
                     @if (liveSource.SourceKind is PublicationLiveSourceKind.Camera or PublicationLiveSourceKind.CaptureDevice)
                     {
-                        <label>Audio device ID<input value="@liveSource.AudioDeviceId" @onchange="ChangeLiveAudioDeviceId" placeholder="Optional paired capture-card audio device" /></label>
+                        <label>@LT("Audio device ID")<input value="@liveSource.AudioDeviceId" @onchange="ChangeLiveAudioDeviceId" placeholder="Optional paired capture-card audio device" /></label>
                     }
                     @if (liveSource.SourceKind == PublicationLiveSourceKind.ApplicationAudio)
                     {
-                        <label>Application / process<input value="@liveSource.ApplicationId" @onchange="ChangeLiveApplicationId" placeholder="discord.exe or another process" /></label>
-                        <label>Window-title hint<input value="@liveSource.WindowTitle" @onchange="ChangeLiveWindowTitle" /></label>
+                        <label>@LT("Application / process")<input value="@liveSource.ApplicationId" @onchange="ChangeLiveApplicationId" placeholder="discord.exe or another process" /></label>
+                        <label>@LT("Window-title hint")<input value="@liveSource.WindowTitle" @onchange="ChangeLiveWindowTitle" /></label>
                     }
                     @if (liveSource.SourceKind == PublicationLiveSourceKind.NetworkMedia)
                     {
-                        <label>Network URL<input value="@liveSource.NetworkUrl" @onchange="ChangeLiveNetworkUrl" placeholder="https, rtsp, srt, or provider URL" /></label>
+                        <label>@LT("Network URL")<input value="@liveSource.NetworkUrl" @onchange="ChangeLiveNetworkUrl" placeholder="https, rtsp, srt, or provider URL" /></label>
                     }
                     @if (liveSource.SourceKind == PublicationLiveSourceKind.NowPlaying)
                     {
-                        <label>Watched music directory<input value="@liveSource.NowPlayingDirectory" @onchange="ChangeNowPlayingDirectory" /></label>
+                        <label>@LT("Watched music directory")<input value="@liveSource.NowPlayingDirectory" @onchange="ChangeNowPlayingDirectory" /></label>
                     }
                     @if (liveSource.IsVisual)
                     {
@@ -523,10 +523,10 @@
                         var selectedLiveLayer = SelectedLiveEffectLayer(liveSource);
                         var selectedLiveFilter = SelectedLiveEffectFilter(liveSource);
 
-                        <label>Capture width<input type="number" min="320" max="7680" step="2" value="@liveSource.CaptureWidth" @onchange="ChangeLiveCaptureWidth" /></label>
-                        <label>Capture height<input type="number" min="180" max="4320" step="2" value="@liveSource.CaptureHeight" @onchange="ChangeLiveCaptureHeight" /></label>
-                        <label>Capture FPS<input type="number" min="15" max="120" value="@liveSource.CaptureFrameRate" @onchange="ChangeLiveCaptureFrameRate" /></label>
-                        <label>Fit
+                        <label>@LT("Capture width")<input type="number" min="320" max="7680" step="2" value="@liveSource.CaptureWidth" @onchange="ChangeLiveCaptureWidth" /></label>
+                        <label>@LT("Capture height")<input type="number" min="180" max="4320" step="2" value="@liveSource.CaptureHeight" @onchange="ChangeLiveCaptureHeight" /></label>
+                        <label>@LT("Capture FPS")<input type="number" min="15" max="120" value="@liveSource.CaptureFrameRate" @onchange="ChangeLiveCaptureFrameRate" /></label>
+                        <label>@LT("Fit")
                             <select value="@liveSource.FitMode" @onchange="ChangeLiveFit">
                                 @foreach (var value in Enum.GetValues<PublicationLiveSourceFitMode>()) { <option value="@value">@value</option> }
                             </select>
@@ -536,7 +536,7 @@
                         @RangeField("Saturation", liveSource.Saturation, 0, 4, .01, "liveSaturation")
                         @RangeField("Hue", liveSource.HueRotation, -360, 360, 1, "liveHue")
                         @RangeField("Blur", liveSource.Blur, 0, 64, .1, "liveBlur")
-                        <label class="check-row"><input type="checkbox" checked="@liveSource.ChromaKeyEnabled" @onchange="ToggleLiveChroma" /> Chroma key</label>
+                        <label class="check-row"><input type="checkbox" checked="@liveSource.ChromaKeyEnabled" @onchange="ToggleLiveChroma" /> @LT("Chroma key")</label>
                         @if (liveSource.ChromaKeyEnabled)
                         {
                             @ColorField("Key color", liveSource.ChromaKeyColor, "liveChromaColor")
@@ -547,8 +547,8 @@
                         }
 
                         <div class="live-video-effect-editor">
-                            <h4>Layered streaming effects</h4>
-                            <p class="property-note">These authored layers render live on camera, screen, window, browser-tab, capture-device, and network-video inputs. The compatibility controls above remain in their own protected layer.</p>
+                            <h4>@LT("Layered streaming effects")</h4>
+                            <p class="property-note">@LT("These authored layers render live on camera, screen, window, browser-tab, capture-device, and network-video inputs. The compatibility controls above remain in their own protected layer.")</p>
                             <div class="media-video-layer-stack compact">
                                 @foreach (var layer in authoredLiveLayers)
                                 {
@@ -557,28 +557,28 @@
                                             <span>@layer.Name</span>
                                             <small>@layer.Filters.Count filter@(layer.Filters.Count == 1 ? string.Empty : "s") · @Math.Round(layer.Opacity * 100)%</small>
                                         </button>
-                                        <button type="button" class="media-video-layer-visibility" title="Toggle live layer visibility" @onclick="() => ToggleLiveEffectLayer(layer.Id)">@(layer.Visible ? "●" : "○")</button>
+                                        <button type="button" class="media-video-layer-visibility" title='@LT("Toggle live layer visibility")' @onclick="() => ToggleLiveEffectLayer(layer.Id)"><i class="pub-icon pub-icon-visible" aria-hidden="true"></i></button>
                                     </div>
                                 }
                                 @if (authoredLiveLayers.Count == 0)
                                 {
-                                    <p class="property-note">No authored streaming-effect layer yet.</p>
+                                    <p class="property-note">@LT("No authored streaming-effect layer yet.")</p>
                                 }
                             </div>
                             <div class="property-button-row">
-                                <DxButton Text="Add layer" Click="AddLiveEffectLayer" />
-                                <DxButton Text="Duplicate" Enabled="@(selectedLiveLayer is not null)" Click="DuplicateLiveEffectLayer" />
-                                <DxButton Text="Up" Enabled="@(CanMoveLiveEffectLayer(liveSource, 1))" Click="MoveLiveEffectLayerUp" />
-                                <DxButton Text="Down" Enabled="@(CanMoveLiveEffectLayer(liveSource, -1))" Click="MoveLiveEffectLayerDown" />
-                                <DxButton Text="Remove" Enabled="@(selectedLiveLayer is not null)" Click="RemoveLiveEffectLayer" />
+                                <DxButton Text='@LT("Add layer")' Click="AddLiveEffectLayer" />
+                                <DxButton Text='@LT("Duplicate")' Enabled="@(selectedLiveLayer is not null)" Click="DuplicateLiveEffectLayer" />
+                                <DxButton Text='@LT("Up")' Enabled="@(CanMoveLiveEffectLayer(liveSource, 1))" Click="MoveLiveEffectLayerUp" />
+                                <DxButton Text='@LT("Down")' Enabled="@(CanMoveLiveEffectLayer(liveSource, -1))" Click="MoveLiveEffectLayerDown" />
+                                <DxButton Text='@LT("Remove")' Enabled="@(selectedLiveLayer is not null)" Click="RemoveLiveEffectLayer" />
                             </div>
                             @if (selectedLiveLayer is not null)
                             {
-                                <label>Layer name<input value="@selectedLiveLayer.Name" @onchange="ChangeLiveEffectLayerName" /></label>
-                                <label>Layer opacity <b>@Math.Round(selectedLiveLayer.Opacity * 100)%</b>
+                                <label>@LT("Layer name")<input value="@selectedLiveLayer.Name" @onchange="ChangeLiveEffectLayerName" /></label>
+                                <label>@LT("Layer opacity") <b>@Math.Round(selectedLiveLayer.Opacity * 100)%</b>
                                     <input type="range" min="0" max="1" step="0.01" value="@Inv(selectedLiveLayer.Opacity)" @onchange="ChangeLiveEffectLayerOpacity" />
                                 </label>
-                                <label>Blend mode
+                                <label>@LT("Blend mode")
                                     <select value="@selectedLiveLayer.BlendMode" @onchange="ChangeLiveEffectLayerBlendMode">
                                         @foreach (var blend in Enum.GetValues<VideoEffectBlendMode>())
                                         {
@@ -593,31 +593,31 @@
                                             <option value="@kind">@LiveFilterKindName(kind)</option>
                                         }
                                     </select>
-                                    <DxButton Text="Add filter" Click="AddLiveEffectFilter" />
+                                    <DxButton Text='@LT("Add filter")' Click="AddLiveEffectFilter" />
                                 </div>
                                 <div class="media-video-filter-stack compact">
                                     @foreach (var filter in selectedLiveLayer.Filters)
                                     {
                                         <div class="media-video-filter-row @(selectedLiveFilter?.Id == filter.Id ? "selected" : null)">
                                             <button type="button" @onclick="() => SelectLiveEffectFilter(filter.Id)"><span>@filter.Name</span><small>@LiveFilterSummary(filter)</small></button>
-                                            <button type="button" title="Enable or disable live filter" @onclick="() => ToggleLiveEffectFilter(filter.Id)">@(filter.Enabled ? "●" : "○")</button>
+                                            <button type="button" title='@LT("Enable or disable live filter")' @onclick="() => ToggleLiveEffectFilter(filter.Id)"><i class="pub-icon pub-icon-visible" aria-hidden="true"></i></button>
                                         </div>
                                     }
                                     @if (selectedLiveLayer.Filters.Count == 0)
                                     {
-                                        <p class="property-note">This layer has no filters.</p>
+                                        <p class="property-note">@LT("This layer has no filters.")</p>
                                     }
                                 </div>
                                 @if (selectedLiveFilter is not null)
                                 {
-                                    <label>Filter name<input value="@selectedLiveFilter.Name" @onchange="ChangeLiveEffectFilterName" /></label>
+                                    <label>@LT("Filter name")<input value="@selectedLiveFilter.Name" @onchange="ChangeLiveEffectFilterName" /></label>
                                     @if (selectedLiveFilter.Kind == VideoEffectFilterKind.ChromaKey)
                                     {
-                                        <label>Key color<input type="color" value="@selectedLiveFilter.Color" @onchange="ChangeLiveEffectFilterColor" /></label>
-                                        <label>Similarity<input type="range" min="0" max="1" step="0.01" value="@Inv(selectedLiveFilter.Amount)" @onchange="ChangeLiveEffectFilterAmount" /></label>
-                                        <label>Smoothness<input type="range" min="0.001" max="1" step="0.01" value="@Inv(selectedLiveFilter.SecondaryAmount)" @onchange="ChangeLiveEffectFilterSecondaryAmount" /></label>
-                                        <label>Spill reduction<input type="range" min="0" max="1" step="0.01" value="@Inv(selectedLiveFilter.TertiaryAmount)" @onchange="ChangeLiveEffectFilterTertiaryAmount" /></label>
-                                        <label>Residual opacity<input type="range" min="0" max="1" step="0.01" value="@Inv(selectedLiveFilter.ResidualOpacity)" @onchange="ChangeLiveEffectFilterResidualOpacity" /></label>
+                                        <label>@LT("Key color")<input type="color" value="@selectedLiveFilter.Color" @onchange="ChangeLiveEffectFilterColor" /></label>
+                                        <label>@LT("Similarity")<input type="range" min="0" max="1" step="0.01" value="@Inv(selectedLiveFilter.Amount)" @onchange="ChangeLiveEffectFilterAmount" /></label>
+                                        <label>@LT("Smoothness")<input type="range" min="0.001" max="1" step="0.01" value="@Inv(selectedLiveFilter.SecondaryAmount)" @onchange="ChangeLiveEffectFilterSecondaryAmount" /></label>
+                                        <label>@LT("Spill reduction")<input type="range" min="0" max="1" step="0.01" value="@Inv(selectedLiveFilter.TertiaryAmount)" @onchange="ChangeLiveEffectFilterTertiaryAmount" /></label>
+                                        <label>@LT("Residual opacity")<input type="range" min="0" max="1" step="0.01" value="@Inv(selectedLiveFilter.ResidualOpacity)" @onchange="ChangeLiveEffectFilterResidualOpacity" /></label>
                                     }
                                     else
                                     {
@@ -626,89 +626,89 @@
                                         </label>
                                         @if (selectedLiveFilter.Kind == VideoEffectFilterKind.Vignette)
                                         {
-                                            <label>Softness<input type="range" min="0" max="1" step="0.01" value="@Inv(selectedLiveFilter.SecondaryAmount)" @onchange="ChangeLiveEffectFilterSecondaryAmount" /></label>
+                                            <label>@LT("Softness")<input type="range" min="0" max="1" step="0.01" value="@Inv(selectedLiveFilter.SecondaryAmount)" @onchange="ChangeLiveEffectFilterSecondaryAmount" /></label>
                                         }
                                         @if (selectedLiveFilter.Kind == VideoEffectFilterKind.ColorWash)
                                         {
-                                            <label>Wash color<input type="color" value="@selectedLiveFilter.Color" @onchange="ChangeLiveEffectFilterColor" /></label>
+                                            <label>@LT("Wash color")<input type="color" value="@selectedLiveFilter.Color" @onchange="ChangeLiveEffectFilterColor" /></label>
                                         }
                                     }
                                     <div class="property-button-row">
-                                        <DxButton Text="Filter up" Enabled="@(CanMoveLiveEffectFilter(liveSource, 1))" Click="MoveLiveEffectFilterUp" />
-                                        <DxButton Text="Filter down" Enabled="@(CanMoveLiveEffectFilter(liveSource, -1))" Click="MoveLiveEffectFilterDown" />
-                                        <DxButton Text="Remove filter" Click="RemoveLiveEffectFilter" />
+                                        <DxButton Text='@LT("Filter up")' Enabled="@(CanMoveLiveEffectFilter(liveSource, 1))" Click="MoveLiveEffectFilterUp" />
+                                        <DxButton Text='@LT("Filter down")' Enabled="@(CanMoveLiveEffectFilter(liveSource, -1))" Click="MoveLiveEffectFilterDown" />
+                                        <DxButton Text='@LT("Remove filter")' Click="RemoveLiveEffectFilter" />
                                     </div>
                                 }
                             }
                         </div>
                     }
                     @RangeField("Volume", liveSource.Volume, 0, 1, .01, "liveVolume")
-                    <label>Audio delay (ms)<input type="number" min="-10000" max="10000" step="1" value="@Inv(liveSource.AudioDelayMilliseconds)" @onchange="ChangeLiveAudioDelay" /></label>
-                    <label class="check-row"><input type="checkbox" checked="@liveSource.IncludeAudio" @onchange="ToggleLiveAudio" /> Include source audio</label>
-                    <label class="check-row"><input type="checkbox" checked="@liveSource.Muted" @onchange="ToggleLiveMuted" /> Mute preview / visual source</label>
-                    <label class="check-row"><input type="checkbox" checked="@liveSource.UseDeviceTimestamp" @onchange="ToggleLiveDeviceTimestamp" /> Use device timestamps</label>
-                    <p class="property-note">Camera, screen, window, tab, microphone, and network media can preview through browser APIs. Isolated application/system audio and native devices are resolved by PublisherStudio's integrated streaming runtime.</p>
+                    <label>@LT("Audio delay (ms)")<input type="number" min="-10000" max="10000" step="1" value="@Inv(liveSource.AudioDelayMilliseconds)" @onchange="ChangeLiveAudioDelay" /></label>
+                    <label class="check-row"><input type="checkbox" checked="@liveSource.IncludeAudio" @onchange="ToggleLiveAudio" /> @LT("Include source audio")</label>
+                    <label class="check-row"><input type="checkbox" checked="@liveSource.Muted" @onchange="ToggleLiveMuted" /> @LT("Mute preview / visual source")</label>
+                    <label class="check-row"><input type="checkbox" checked="@liveSource.UseDeviceTimestamp" @onchange="ToggleLiveDeviceTimestamp" /> @LT("Use device timestamps")</label>
+                    <p class="property-note">@LT("Camera, screen, window, tab, microphone, and network media can preview through browser APIs. Isolated application/system audio and native devices are resolved by PublisherStudio's integrated streaming runtime.")</p>
                 </section>
             }
             else if (element is SpreadsheetElement spreadsheet)
             {
                 <section class="property-section spreadsheet-properties">
-                    <h3>Spreadsheet</h3>
+                    <h3>@LT("Spreadsheet")</h3>
                     <div class="data-source-summary">
-                        <span><b>Workbook:</b> @spreadsheet.WorkbookFileName</span>
-                        <span><b>Active sheet:</b> @spreadsheet.ActiveSheetName</span>
-                        <span><b>Stored format:</b> @spreadsheet.StorageFormat</span>
+                        <span><b>@LT("Workbook:")</b> @spreadsheet.WorkbookFileName</span>
+                        <span><b>@LT("Active sheet:")</b> @spreadsheet.ActiveSheetName</span>
+                        <span><b>@LT("Stored format:")</b> @spreadsheet.StorageFormat</span>
                     </div>
-                    <DxButton Text="Edit spreadsheet" Click="RequestEditSpreadsheet" RenderStyle="ButtonRenderStyle.Primary" CssClass="wide-button" />
+                    <DxButton Text='@LT("Edit spreadsheet")' Click="RequestEditSpreadsheet" RenderStyle="ButtonRenderStyle.Primary" CssClass="wide-button" />
                     <div class="property-button-row">
-                        <DxButton Text="Download workbook" Click="RequestDownloadSpreadsheet" />
-                        <DxButton Text="Insert another…" Click="RequestInsertSpreadsheet" />
+                        <DxButton Text='@LT("Download workbook")' Click="RequestDownloadSpreadsheet" />
+                        <DxButton Text='@LT("Insert another…")' Click="RequestInsertSpreadsheet" />
                     </div>
-                    <DxButton Text="Create blank spreadsheet" Click="RequestCreateSpreadsheet" CssClass="wide-button" />
-                    <label class="check-row"><input type="checkbox" checked="@spreadsheet.ShowGridLines" @onchange="ToggleSpreadsheetGridLines" /> Show grid lines on canvas</label>
-                    <label class="check-row"><input type="checkbox" checked="@spreadsheet.ShowSheetName" @onchange="ToggleSpreadsheetSheetName" /> Show worksheet name on canvas</label>
-                    <label>Content sizing
+                    <DxButton Text='@LT("Create blank spreadsheet")' Click="RequestCreateSpreadsheet" CssClass="wide-button" />
+                    <label class="check-row"><input type="checkbox" checked="@spreadsheet.ShowGridLines" @onchange="ToggleSpreadsheetGridLines" /> @LT("Show grid lines on canvas")</label>
+                    <label class="check-row"><input type="checkbox" checked="@spreadsheet.ShowSheetName" @onchange="ToggleSpreadsheetSheetName" /> @LT("Show worksheet name on canvas")</label>
+                    <label>@LT("Content sizing")
                         <select value="@spreadsheet.ContentFit" @onchange="ChangeSpreadsheetContentFit">
-                            <option value="Clip">Natural / crop fragments</option>
-                            <option value="Fit">Fit whole worksheet</option>
-                            <option value="Fill">Fill and crop</option>
-                            <option value="Stretch">Stretch to frame</option>
+                            <option value="Clip">@LT("Natural / crop fragments")</option>
+                            <option value="Fit">@LT("Fit whole worksheet")</option>
+                            <option value="Fill">@LT("Fill and crop")</option>
+                            <option value="Stretch">@LT("Stretch to frame")</option>
                         </select>
                     </label>
                     @ColorField("Background", spreadsheet.Background, "spreadsheetBackground")
                     @ColorField("Border", spreadsheet.BorderColor, "spreadsheetBorder")
                     @RangeField("Border width", spreadsheet.BorderWidthMm, 0, 5, .05, "spreadsheetBorderWidth")
-                    <p class="property-note">Double-click the frame to open the full DevExpress Spreadsheet component. Workbook content stays embedded in the publication.</p>
+                    <p class="property-note">@LT("Double-click the frame to open the full DevExpress Spreadsheet component. Workbook content stays embedded in the publication.")</p>
                 </section>
             }
             else if (element is BarcodeElement barcode)
             {
                 <section class="property-section barcode-properties">
-                    <h3>Barcode / QR</h3>
+                    <h3>@LT("Barcode / QR")</h3>
                     <div class="inspector-barcode-preview"><BarcodeView Item="barcode" /></div>
                     <p class="property-note"><b>@barcode.Format</b> · @barcode.Value</p>
-                    <DxButton Text="Edit barcode" Click="RequestEditBarcode" RenderStyle="ButtonRenderStyle.Primary" CssClass="wide-button" />
-                    <DxButton Text="Insert another barcode" Click="RequestInsertBarcode" CssClass="wide-button" />
+                    <DxButton Text='@LT("Edit barcode")' Click="RequestEditBarcode" RenderStyle="ButtonRenderStyle.Primary" CssClass="wide-button" />
+                    <DxButton Text='@LT("Insert another barcode")' Click="RequestInsertBarcode" CssClass="wide-button" />
                 </section>
             }
             else if (element is DataVisualElement dataVisual)
             {
                 <section class="property-section data-visual-properties">
-                    <h3>Data visual</h3>
+                    <h3>@LT("Data visual")</h3>
                     <p class="property-note">@DataVisualDescription(dataVisual). The source is stored once in the publication and may be reused by several visuals.</p>
-                    <label>Title<input value="@dataVisual.Title" @onchange="ChangeDataVisualTitle" /></label>
+                    <label>@LT("Title")<input value="@dataVisual.Title" @onchange="ChangeDataVisualTitle" /></label>
                     <div class="data-source-summary">
-                        <span><b>Component:</b> @Friendly(dataVisual.VisualKind.ToString())</span>
-                        <span><b>Data:</b> @DataObjectName(dataVisual.DataObjectId)</span>
-                        <span><b>Category:</b> @dataVisual.ArgumentField</span>
-                        <span><b>Values:</b> @string.Join(", ", dataVisual.ValueFields)</span>
+                        <span><b>@LT("Component:")</b> @Friendly(dataVisual.VisualKind.ToString())</span>
+                        <span><b>@LT("Data:")</b> @DataObjectName(dataVisual.DataObjectId)</span>
+                        <span><b>@LT("Category:")</b> @dataVisual.ArgumentField</span>
+                        <span><b>@LT("Values:")</b> @string.Join(", ", dataVisual.ValueFields)</span>
                     </div>
-                    <DxButton Text="Edit data visual" Click="RequestEditDataVisual" RenderStyle="ButtonRenderStyle.Primary" CssClass="wide-button" />
-                    <DxButton Text="Manage publication data" Click="RequestManageData" CssClass="wide-button" />
-                    <DxButton Text="Refresh data" Click="RefreshData" CssClass="wide-button" />
-                    <label class="check-row"><input type="checkbox" checked="@dataVisual.ShowTitle" @onchange="ToggleDataTitle" /> Show title</label>
-                    <label class="check-row"><input type="checkbox" checked="@dataVisual.ShowLegend" @onchange="ToggleDataLegend" /> Show legend</label>
-                    <label class="check-row"><input type="checkbox" checked="@dataVisual.ShowLabels" @onchange="ToggleDataLabels" /> Show point labels</label>
+                    <DxButton Text='@LT("Edit data visual")' Click="RequestEditDataVisual" RenderStyle="ButtonRenderStyle.Primary" CssClass="wide-button" />
+                    <DxButton Text='@LT("Manage publication data")' Click="RequestManageData" CssClass="wide-button" />
+                    <DxButton Text='@LT("Refresh data")' Click="RefreshData" CssClass="wide-button" />
+                    <label class="check-row"><input type="checkbox" checked="@dataVisual.ShowTitle" @onchange="ToggleDataTitle" /> @LT("Show title")</label>
+                    <label class="check-row"><input type="checkbox" checked="@dataVisual.ShowLegend" @onchange="ToggleDataLegend" /> @LT("Show legend")</label>
+                    <label class="check-row"><input type="checkbox" checked="@dataVisual.ShowLabels" @onchange="ToggleDataLabels" /> @LT("Show point labels")</label>
                     @ColorField("Background", dataVisual.Background, "dataBackground")
                     @ColorField("Border", dataVisual.BorderColor, "dataBorder")
                     @RangeField("Border width", dataVisual.BorderWidthMm, 0, 5, .05, "dataBorderWidth")
@@ -717,19 +717,19 @@
             else if (element is DevExtremeComponentElement component)
             {
                 <section class="property-section component-properties">
-                    <h3>Interactive component</h3>
-                    <p class="property-note">Browser-native @Components.ComponentName(component.ComponentKind), exported with the same embedded DevExtreme runtime as the interactive charts.</p>
+                    <h3>@LT("Interactive component")</h3>
+                    <p class="property-note">@LT("Browser-native") @Components.ComponentName(component.ComponentKind), @LT("exported with the same embedded DevExtreme runtime as the interactive charts.")</p>
                     <div class="data-source-summary">
-                        <span><b>Control:</b> @Components.ComponentName(component.ComponentKind)</span>
-                        <span><b>Scope:</b> @(component.Scope == PublicationComponentScope.Document ? "All pages" : "This page")</span>
-                        <span><b>Source:</b> @ComponentSource(component)</span>
-                        <span><b>Fields:</b> @component.Fields.Count</span>
+                        <span><b>@LT("Control:")</b> @Components.ComponentName(component.ComponentKind)</span>
+                        <span><b>@LT("Scope:")</b> @(component.Scope == PublicationComponentScope.Document ? LT("All pages") : LT("This page"))</span>
+                        <span><b>@LT("Source:")</b> @ComponentSource(component)</span>
+                        <span><b>@LT("Fields:")</b> @component.Fields.Count</span>
                     </div>
-                    <DxButton Text="Open Component Studio" Click="RequestEditComponent" RenderStyle="ButtonRenderStyle.Primary" CssClass="wide-button" />
-                    <DxButton Text="Manage publication data" Click="RequestManageData" CssClass="wide-button" />
-                    <DxButton Text="Refresh component data" Click="RefreshData" CssClass="wide-button" />
-                    <label class="check-row"><input type="checkbox" checked="@component.ShowTitle" @onchange="ToggleComponentTitle" /> Show component title</label>
-                    <label class="check-row"><input type="checkbox" checked="@(component.Scope == PublicationComponentScope.Document)" @onchange="ToggleComponentScope" /> Synchronize content on all pages</label>
+                    <DxButton Text='@LT("Open Component Studio")' Click="RequestEditComponent" RenderStyle="ButtonRenderStyle.Primary" CssClass="wide-button" />
+                    <DxButton Text='@LT("Manage publication data")' Click="RequestManageData" CssClass="wide-button" />
+                    <DxButton Text='@LT("Refresh component data")' Click="RefreshData" CssClass="wide-button" />
+                    <label class="check-row"><input type="checkbox" checked="@component.ShowTitle" @onchange="ToggleComponentTitle" /> @LT("Show component title")</label>
+                    <label class="check-row"><input type="checkbox" checked="@(component.Scope == PublicationComponentScope.Document)" @onchange="ToggleComponentScope" /> @LT("Synchronize content on all pages")</label>
                     @ColorField("Background", component.Background, "componentBackground")
                     @ColorField("Border", component.BorderColor, "componentBorder")
                     @RangeField("Border width", component.BorderWidthMm, 0, 5, .05, "componentBorderWidth")
@@ -739,49 +739,49 @@
             {
                 <section class="property-section connector-properties">
                     <h3>@(connector.Signal.Enabled ? "Signal Arrow / Connector" : "Connector")</h3>
-                    <p class="property-note">Normal connectors snap object-to-object. Signal connectors may also end at an exact canvas point and execute offline click, hover, transform, visibility, media, highlight, CSS-class, animation, or chained-signal actions in HTML and video output.</p>
-                    <label>Path
+                    <p class="property-note">@LT("Normal connectors snap object-to-object. Signal connectors may also end at an exact canvas point and execute offline click, hover, transform, visibility, media, highlight, CSS-class, animation, or chained-signal actions in HTML and video output.")</p>
+                    <label>@LT("Path")
                         <select value="@connector.PathKind" @onchange="ChangeConnectorPath">
-                            <option value="Straight">Straight</option>
-                            <option value="Elbow">Elbow</option>
-                            <option value="Curved">Curved</option>
+                            <option value="Straight">@LT("Straight")</option>
+                            <option value="Elbow">@LT("Elbow")</option>
+                            <option value="Curved">@LT("Curved")</option>
                         </select>
                     </label>
-                    <label>Line style
+                    <label>@LT("Line style")
                         <select value="@connector.DashStyle" @onchange="ChangeConnectorDash">
-                            <option value="Solid">Solid</option>
-                            <option value="Dash">Dashed</option>
-                            <option value="Dot">Dotted</option>
+                            <option value="Solid">@LT("Solid")</option>
+                            <option value="Dash">@LT("Dashed")</option>
+                            <option value="Dot">@LT("Dotted")</option>
                         </select>
                     </label>
                     @ColorField("Line color", connector.Stroke, "connectorStroke")
                     @RangeField("Line width", connector.StrokeWidthMm, .15, 6, .05, "connectorWidth")
                     <div class="property-grid two">
-                        <label>Start marker
+                        <label>@LT("Start marker")
                             <select value="@connector.StartMarker" @onchange="ChangeConnectorStartMarker">
-                                <option value="None">None</option>
-                                <option value="Arrow">Arrow</option>
-                                <option value="Triangle">Triangle</option>
-                                <option value="Diamond">Diamond</option>
+                                <option value="None">@LT("None")</option>
+                                <option value="Arrow">@LT("Arrow")</option>
+                                <option value="Triangle">@LT("Triangle")</option>
+                                <option value="Diamond">@LT("Diamond")</option>
                             </select>
                         </label>
-                        <label>End marker
+                        <label>@LT("End marker")
                             <select value="@connector.EndMarker" @onchange="ChangeConnectorEndMarker">
-                                <option value="None">None</option>
-                                <option value="Arrow">Arrow</option>
-                                <option value="Triangle">Triangle</option>
-                                <option value="Diamond">Diamond</option>
+                                <option value="None">@LT("None")</option>
+                                <option value="Arrow">@LT("Arrow")</option>
+                                <option value="Triangle">@LT("Triangle")</option>
+                                <option value="Diamond">@LT("Diamond")</option>
                             </select>
                         </label>
                     </div>
                     <div class="connector-endpoint-summary">
-                        <span><b>From:</b> @EndpointName(connector.Source)</span>
-                        <span><b>To:</b> @EndpointName(connector.Target)</span>
+                        <span><b>@LT("From:")</b> @EndpointName(connector.Source)</span>
+                        <span><b>@LT("To:")</b> @EndpointName(connector.Target)</span>
                     </div>
-                    <label>Start inner selector
+                    <label>@LT("Start inner selector")
                         <input value="@connector.Source.TargetSelector" placeholder="Optional CSS selector, e.g. [data-cell='B4']" @onchange="ChangeSignalStartSelector" />
                     </label>
-                    <label>End inner selector
+                    <label>@LT("End inner selector")
                         <input value="@connector.Target.TargetSelector" placeholder="Optional CSS selector inside the endpoint object" @onchange="ChangeSignalEndSelector" />
                     </label>
                     @if (connector.Source.Kind == ConnectorEndpointKind.Canvas || connector.Target.Kind == ConnectorEndpointKind.Canvas)
@@ -789,24 +789,24 @@
                         <div class="property-grid two">
                             @if (connector.Source.Kind == ConnectorEndpointKind.Canvas)
                             {
-                                <label>Start X (mm)<input type="number" step=".1" value="@Inv(connector.Source.X)" @onchange="ChangeSignalStartX" /></label>
-                                <label>Start Y (mm)<input type="number" step=".1" value="@Inv(connector.Source.Y)" @onchange="ChangeSignalStartY" /></label>
+                                <label>@LT("Start X (mm)")<input type="number" step=".1" value="@Inv(connector.Source.X)" @onchange="ChangeSignalStartX" /></label>
+                                <label>@LT("Start Y (mm)")<input type="number" step=".1" value="@Inv(connector.Source.Y)" @onchange="ChangeSignalStartY" /></label>
                             }
                             @if (connector.Target.Kind == ConnectorEndpointKind.Canvas)
                             {
-                                <label>End X (mm)<input type="number" step=".1" value="@Inv(connector.Target.X)" @onchange="ChangeSignalEndX" /></label>
-                                <label>End Y (mm)<input type="number" step=".1" value="@Inv(connector.Target.Y)" @onchange="ChangeSignalEndY" /></label>
+                                <label>@LT("End X (mm)")<input type="number" step=".1" value="@Inv(connector.Target.X)" @onchange="ChangeSignalEndX" /></label>
+                                <label>@LT("End Y (mm)")<input type="number" step=".1" value="@Inv(connector.Target.Y)" @onchange="ChangeSignalEndY" /></label>
                             }
                         </div>
                     }
                 </section>
 
                 <section class="property-section signal-connector-properties">
-                    <h3>Signal runtime</h3>
-                    <label class="check-row"><input type="checkbox" checked="@connector.Signal.Enabled" @onchange="ToggleSignalEnabled" /> Enable dynamic signal</label>
-                    <label class="check-row"><input type="checkbox" checked="@connector.Signal.LineVisible" @onchange="ToggleSignalLineVisible" /> Draw arrow / connector while it runs</label>
+                    <h3>@LT("Signal runtime")</h3>
+                    <label class="check-row"><input type="checkbox" checked="@connector.Signal.Enabled" @onchange="ToggleSignalEnabled" /> @LT("Enable dynamic signal")</label>
+                    <label class="check-row"><input type="checkbox" checked="@connector.Signal.LineVisible" @onchange="ToggleSignalLineVisible" /> @LT("Draw arrow / connector while it runs")</label>
                     <div class="property-grid two">
-                        <label>Trigger
+                        <label>@LT("Trigger")
                             <select value="@connector.Signal.Trigger" @onchange="ChangeSignalTrigger">
                                 @foreach (var trigger in Enum.GetValues<SignalConnectorTrigger>())
                                 {
@@ -814,7 +814,7 @@
                                 }
                             </select>
                         </label>
-                        <label>Visual
+                        <label>@LT("Visual")
                             <select value="@connector.Signal.Visual" @onchange="ChangeSignalVisual">
                                 @foreach (var visual in Enum.GetValues<SignalConnectorVisual>())
                                 {
@@ -822,7 +822,7 @@
                                 }
                             </select>
                         </label>
-                        <label>Start gesture
+                        <label>@LT("Start gesture")
                             <select value="@connector.Signal.StartGesture" @onchange="ChangeSignalStartGesture">
                                 @foreach (var gesture in Enum.GetValues<SignalGesture>())
                                 {
@@ -830,7 +830,7 @@
                                 }
                             </select>
                         </label>
-                        <label>End gesture
+                        <label>@LT("End gesture")
                             <select value="@connector.Signal.EndGesture" @onchange="ChangeSignalEndGesture">
                                 @foreach (var gesture in Enum.GetValues<SignalGesture>())
                                 {
@@ -838,56 +838,56 @@
                                 }
                             </select>
                         </label>
-                        <label>Delay (s)<input type="number" min="0" max="3600" step=".05" value="@Inv(connector.Signal.DelaySeconds)" @onchange="ChangeSignalDelay" /></label>
-                        <label>Travel time (s)<input type="number" min=".05" max="3600" step=".05" value="@Inv(connector.Signal.DurationSeconds)" @onchange="ChangeSignalDuration" /></label>
-                        <label>Repeats<input type="number" min="1" max="1000" step="1" value="@connector.Signal.RepeatCount" @onchange="ChangeSignalRepeat" /></label>
-                        <label class="check-row"><input type="checkbox" checked="@connector.Signal.Loop" @onchange="ToggleSignalLoop" /> Loop</label>
-                        <label class="check-row"><input type="checkbox" checked="@connector.Signal.AutoReverse" @onchange="ToggleSignalAutoReverse" /> Auto reverse</label>
+                        <label>@LT("Delay (s)")<input type="number" min="0" max="3600" step=".05" value="@Inv(connector.Signal.DelaySeconds)" @onchange="ChangeSignalDelay" /></label>
+                        <label>@LT("Travel time (s)")<input type="number" min=".05" max="3600" step=".05" value="@Inv(connector.Signal.DurationSeconds)" @onchange="ChangeSignalDuration" /></label>
+                        <label>@LT("Repeats")<input type="number" min="1" max="1000" step="1" value="@connector.Signal.RepeatCount" @onchange="ChangeSignalRepeat" /></label>
+                        <label class="check-row"><input type="checkbox" checked="@connector.Signal.Loop" @onchange="ToggleSignalLoop" /> @LT("Loop")</label>
+                        <label class="check-row"><input type="checkbox" checked="@connector.Signal.AutoReverse" @onchange="ToggleSignalAutoReverse" /> @LT("Auto reverse")</label>
                     </div>
-                    <DxButton Text="Preview signal now" Click="PreviewSignal" RenderStyle="ButtonRenderStyle.Primary" CssClass="wide-button" />
+                    <DxButton Text='@LT("Preview signal now")' Click="PreviewSignal" RenderStyle="ButtonRenderStyle.Primary" CssClass="wide-button" />
                 </section>
 
                 <section class="property-section signal-motion-properties">
-                    <h3>Travel morph / transform</h3>
-                    <label>Target object
+                    <h3>@LT("Travel morph / transform")</h3>
+                    <label>@LT("Target object")
                         <select value="@GuidText(connector.Signal.MotionTargetElementId)" @onchange="ChangeSignalMotionTarget">
-                            <option value="">No transform target</option>
+                            <option value="">@LT("No transform target")</option>
                             @foreach (var target in SignalTargetElements(connector))
                             {
                                 <option value="@target.Id">@target.Name</option>
                             }
                         </select>
                     </label>
-                    <label>Inner selector
+                    <label>@LT("Inner selector")
                         <input value="@connector.Signal.MotionTargetSelector" placeholder="Optional: img, [data-content-fit-source], .dx-chart" @onchange="ChangeSignalMotionSelector" />
                     </label>
                     <div class="property-grid two">
-                        <label>Move X (%)<input type="number" step=".1" value="@Inv(connector.Signal.TranslateXPercent)" @onchange="ChangeSignalMoveX" /></label>
-                        <label>Move Y (%)<input type="number" step=".1" value="@Inv(connector.Signal.TranslateYPercent)" @onchange="ChangeSignalMoveY" /></label>
-                        <label>Scale<input type="number" min=".01" max="100" step=".01" value="@Inv(connector.Signal.Scale)" @onchange="ChangeSignalScale" /></label>
-                        <label>Resize width (%)<input type="number" min=".01" max="10000" step=".1" value="@Inv(connector.Signal.ResizeWidthPercent)" @onchange="ChangeSignalResizeWidth" /></label>
-                        <label>Resize height (%)<input type="number" min=".01" max="10000" step=".1" value="@Inv(connector.Signal.ResizeHeightPercent)" @onchange="ChangeSignalResizeHeight" /></label>
-                        <label>Rotation (°)<input type="number" step=".1" value="@Inv(connector.Signal.RotationDegrees)" @onchange="ChangeSignalRotation" /></label>
-                        <label>Opacity<input type="number" min="0" max="1" step=".01" value="@Inv(connector.Signal.Opacity)" @onchange="ChangeSignalOpacity" /></label>
-                        <label class="check-row"><input type="checkbox" checked="@connector.Signal.RestoreMotionAfterRun" @onchange="ToggleSignalRestoreMotion" /> Restore afterwards</label>
+                        <label>@LT("Move X (%)")<input type="number" step=".1" value="@Inv(connector.Signal.TranslateXPercent)" @onchange="ChangeSignalMoveX" /></label>
+                        <label>@LT("Move Y (%)")<input type="number" step=".1" value="@Inv(connector.Signal.TranslateYPercent)" @onchange="ChangeSignalMoveY" /></label>
+                        <label>@LT("Scale")<input type="number" min=".01" max="100" step=".01" value="@Inv(connector.Signal.Scale)" @onchange="ChangeSignalScale" /></label>
+                        <label>@LT("Resize width (%)")<input type="number" min=".01" max="10000" step=".1" value="@Inv(connector.Signal.ResizeWidthPercent)" @onchange="ChangeSignalResizeWidth" /></label>
+                        <label>@LT("Resize height (%)")<input type="number" min=".01" max="10000" step=".1" value="@Inv(connector.Signal.ResizeHeightPercent)" @onchange="ChangeSignalResizeHeight" /></label>
+                        <label>@LT("Rotation (°)")<input type="number" step=".1" value="@Inv(connector.Signal.RotationDegrees)" @onchange="ChangeSignalRotation" /></label>
+                        <label>@LT("Opacity")<input type="number" min="0" max="1" step=".01" value="@Inv(connector.Signal.Opacity)" @onchange="ChangeSignalOpacity" /></label>
+                        <label class="check-row"><input type="checkbox" checked="@connector.Signal.RestoreMotionAfterRun" @onchange="ToggleSignalRestoreMotion" /> @LT("Restore afterwards")</label>
                     </div>
                 </section>
 
                 <section class="property-section signal-completion-properties">
-                    <h3>At destination</h3>
-                    <label>Action target
+                    <h3>@LT("At destination")</h3>
+                    <label>@LT("Action target")
                         <select value="@GuidText(connector.Signal.CompletionTargetElementId)" @onchange="ChangeSignalCompletionTarget">
-                            <option value="">Endpoint / current object</option>
+                            <option value="">@LT("Endpoint / current object")</option>
                             @foreach (var target in SignalTargetElements(connector))
                             {
                                 <option value="@target.Id">@target.Name</option>
                             }
                         </select>
                     </label>
-                    <label>Inner selector
+                    <label>@LT("Inner selector")
                         <input value="@connector.Signal.CompletionTargetSelector" placeholder="Cell, chart point, button, or any exported HTML selector" @onchange="ChangeSignalCompletionSelector" />
                     </label>
-                    <label>Action
+                    <label>@LT("Action")
                         <select value="@connector.Signal.CompletionAction" @onchange="ChangeSignalCompletionAction">
                             @foreach (var action in Enum.GetValues<SignalCompletionAction>())
                             {
@@ -895,28 +895,28 @@
                             }
                         </select>
                     </label>
-                    <label>Action value
+                    <label>@LT("Action value")
                         <input value="@connector.Signal.CompletionValue" placeholder="Opacity, CSS class, or highlight color" @onchange="ChangeSignalCompletionValue" />
                     </label>
-                    <label>Action duration (s)
+                    <label>@LT("Action duration (s)")
                         <input type="number" min=".01" max="3600" step=".05" value="@Inv(connector.Signal.CompletionDurationSeconds)" @onchange="ChangeSignalCompletionDuration" />
                     </label>
-                    <label>Continue with signal
+                    <label>@LT("Continue with signal")
                         <select value="@GuidText(connector.Signal.NextConnectorId)" @onchange="ChangeSignalNextConnector">
-                            <option value="">Stop here</option>
+                            <option value="">@LT("Stop here")</option>
                             @foreach (var next in State.CurrentPage.Elements.OfType<ConnectorElement>().Where(item => item.Id != connector.Id && item.Signal.Enabled))
                             {
                                 <option value="@next.Id">@next.Name</option>
                             }
                         </select>
                     </label>
-                    <p class="property-note">Selectors are evaluated locally inside the exported file. No server or network request is needed. Use one chained signal per cell/chart part when a sequence must highlight several targets in order.</p>
+                    <p class="property-note">@LT("Selectors are evaluated locally inside the exported file. No server or network request is needed. Use one chained signal per cell/chart part when a sequence must highlight several targets in order.")</p>
                 </section>
             }
             else if (element is ShapeElement shape)
             {
                 <section class="property-section">
-                    <h3>Shape</h3>
+                    <h3>@LT("Shape")</h3>
                     @ColorField("Fill", shape.Fill, "shapeFill")
                     @ColorField("Outline", shape.Stroke, "shapeStroke")
                     @RangeField("Outline width", shape.StrokeWidth, 0, 8, .05, "shapeStrokeWidth")
@@ -928,42 +928,42 @@
     else
     {
         <div class="empty-panel selection-help">
-            <strong>No object selected</strong>
-            <span>Select a text box, picture, WordArt, or shape. Page and ruler settings are available on the Page tab.</span>
+            <strong>@LT("No object selected")</strong>
+            <span>@LT("Select a text box, picture, WordArt, or shape. Page and ruler settings are available on the Page tab.")</span>
         </div>
     }
     <DxContextMenu @ref="_layerContextMenu">
         <Items>
-            <DxContextMenuItem Text="Select layer" Click="SelectContextLayer" />
+            <DxContextMenuItem Text='@LT("Select layer")' Click="SelectContextLayer" />
             @if (ContextLayer is BarcodeElement)
             {
-                <DxContextMenuItem Text="Edit barcode" BeginGroup="true" Click="EditContextBarcode" />
+                <DxContextMenuItem Text='@LT("Edit barcode")' BeginGroup="true" Click="EditContextBarcode" />
             }
             @if (ContextLayer is SpreadsheetElement)
             {
-                <DxContextMenuItem Text="Edit spreadsheet" BeginGroup="true" Click="EditContextSpreadsheet" />
-                <DxContextMenuItem Text="Download workbook" Click="DownloadContextSpreadsheet" />
+                <DxContextMenuItem Text='@LT("Edit spreadsheet")' BeginGroup="true" Click="EditContextSpreadsheet" />
+                <DxContextMenuItem Text='@LT("Download workbook")' Click="DownloadContextSpreadsheet" />
             }
             @if (ContextLayer is PublicationMediaElement contextMedia)
             {
-                <DxContextMenuItem Text="Edit in Media Studio" BeginGroup="true" Click="EditContextMedia" />
+                <DxContextMenuItem Text='@LT("Edit in Media Studio")' BeginGroup="true" Click="EditContextMedia" />
                 <DxContextMenuItem Text="@(CheckedText(contextMedia.Muted, "Muted"))" Click="ToggleContextMediaMuted" />
                 <DxContextMenuItem Text="@(CheckedText(contextMedia.Loop, "Loop clip"))" Click="ToggleContextMediaLoop" />
             }
             @if (State.CanGroupSelection)
             {
-                <DxContextMenuItem Text="Group selected objects" BeginGroup="true" Click="State.GroupSelected" />
+                <DxContextMenuItem Text='@LT("Group selected objects")' BeginGroup="true" Click="State.GroupSelected" />
             }
             @if (State.CanUngroupSelection)
             {
-                <DxContextMenuItem Text="Ungroup objects" BeginGroup="true" Click="State.UngroupSelected" />
+                <DxContextMenuItem Text='@LT("Ungroup objects")' BeginGroup="true" Click="State.UngroupSelected" />
             }
-            <DxContextMenuItem Text="Duplicate" BeginGroup="true" Click="DuplicateContextLayer" />
-            <DxContextMenuItem Text="Delete" Enabled="@(ContextLayer is { Locked: false })" Click="DeleteContextLayer" />
-            <DxContextMenuItem Text="Bring to front" BeginGroup="true" Click="ContextBringToFront" />
-            <DxContextMenuItem Text="Bring forward" Click="ContextBringForward" />
-            <DxContextMenuItem Text="Send backward" Click="ContextSendBackward" />
-            <DxContextMenuItem Text="Send to back" Click="ContextSendToBack" />
+            <DxContextMenuItem Text='@LT("Duplicate")' BeginGroup="true" Click="DuplicateContextLayer" />
+            <DxContextMenuItem Text='@LT("Delete")' Enabled="@(ContextLayer is { Locked: false })" Click="DeleteContextLayer" />
+            <DxContextMenuItem Text='@LT("Bring to front")' BeginGroup="true" Click="ContextBringToFront" />
+            <DxContextMenuItem Text='@LT("Bring forward")' Click="ContextBringForward" />
+            <DxContextMenuItem Text='@LT("Send backward")' Click="ContextSendBackward" />
+            <DxContextMenuItem Text='@LT("Send to back")' Click="ContextSendToBack" />
             <DxContextMenuItem Text="@(ContextLayer?.Visible == true ? "Hide" : "Show")" BeginGroup="true" Click="ToggleContextVisibility" />
             <DxContextMenuItem Text="@(ContextLayer?.Locked == true ? "Unlock" : "Lock")" Click="ToggleContextLock" />
         </Items>
@@ -1101,23 +1101,24 @@
     private void ToggleContextLock() { if (ContextLayer is { } item) ToggleLayerLock(item); }
     private void ToggleContextMediaMuted() { if (ContextLayer is PublicationMediaElement media) State.UpdateMedia(media.Id, item => item.Muted = !item.Muted); }
     private void ToggleContextMediaLoop() { if (ContextLayer is PublicationMediaElement media) State.UpdateMedia(media.Id, item => item.Loop = !item.Loop); }
-    private string CheckedText(bool checkedValue, string text) => checkedValue ? $"✓ {text}" : text;
+    private string CheckedText(bool checkedValue, string text) { var localized = LT(text); return checkedValue ? $"✓ {localized}" : localized; }
 
-    private string KindGlyph(PublicationElement item) => item.Kind switch
+    private string KindIconCss(PublicationElement item) => item.Kind switch
     {
-        PublicationElementKind.Text => "T",
-        PublicationElementKind.Image => "▧",
-        PublicationElementKind.Video => "▶",
-        PublicationElementKind.Audio => "♪",
-        PublicationElementKind.WordArt => "A★",
-        PublicationElementKind.Connector => "↝",
-        PublicationElementKind.DataVisual => "▥",
-        PublicationElementKind.Spreadsheet => "▦",
-        PublicationElementKind.Barcode => "▦",
-        PublicationElementKind.LiveSource => "●",
-        PublicationElementKind.Panel => "▣",
-        PublicationElementKind.HtmlEmbed => "⌘",
-        _ => "◇"
+        PublicationElementKind.Text => "pub-icon pub-icon-text",
+        PublicationElementKind.Image => "pub-icon pub-icon-picture",
+        PublicationElementKind.Video => "pub-icon pub-icon-video",
+        PublicationElementKind.Audio => "pub-icon pub-icon-audio",
+        PublicationElementKind.WordArt => "pub-icon pub-icon-wordart",
+        PublicationElementKind.Connector => "pub-icon pub-icon-connector",
+        PublicationElementKind.DataVisual => "pub-icon pub-icon-chart",
+        PublicationElementKind.Spreadsheet => "pub-icon pub-icon-spreadsheet",
+        PublicationElementKind.Barcode => "pub-icon pub-icon-barcode",
+        PublicationElementKind.DevExtremeComponent => "pub-icon pub-icon-data",
+        PublicationElementKind.LiveSource => "pub-icon pub-icon-media",
+        PublicationElementKind.Panel => "pub-icon pub-icon-panel",
+        PublicationElementKind.HtmlEmbed => "pub-icon pub-icon-web",
+        _ => "pub-icon pub-icon-shape"
     };
 
     private void UpdateMedia(Action<PublicationMediaElement> update)
@@ -1809,7 +1810,7 @@
         var poster = string.Empty;
         try
         {
-            _mediaModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js");
+            _mediaModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.6.5");
             var localUrl = MediaAssets.RegisterBytes(inspectionId, bytes, mimeType);
             try
             {
@@ -2039,6 +2040,8 @@
         _ => string.Empty
     };
 
+    private string LT(string text) => Localization.GetText(text);
+
     private string ApplicationCulture => CultureInfo.CurrentUICulture.Name;
     private string PublicationCulture => string.IsNullOrWhiteSpace(State.Document.ProjectSettings.Culture)
         ? ApplicationCulture
@@ -2074,12 +2077,12 @@
     private bool TryDouble(ChangeEventArgs args, out double value) => double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out value);
     private bool ReadBool(ChangeEventArgs args) => args.Value is bool value ? value : bool.TryParse(args.Value?.ToString(), out var parsed) && parsed;
     private bool Nearly(double left, double right) => Math.Abs(left - right) < .05;
-    private string HtmlSupportLabel(PublicationHtmlExportSupport support) => support switch
+    private string HtmlSupportLabel(PublicationHtmlExportSupport support) => LT(support switch
     {
         PublicationHtmlExportSupport.CanvasRuntime => "HTML · canvas runtime",
         PublicationHtmlExportSupport.RenderBeforeExport => "Render before HTML export",
         _ => "HTML · native"
-    };
+    });
     private string HtmlSupportCss(PublicationHtmlExportSupport support) => support switch
     {
         PublicationHtmlExportSupport.CanvasRuntime => "canvas",

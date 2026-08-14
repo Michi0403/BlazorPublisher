@@ -5,90 +5,90 @@
 @if (Visible)
 {
     <div class="modal-backdrop picture-studio-backdrop">
-        <section id="picture-studio-window" class="picture-studio-dialog" role="dialog" aria-modal="true" aria-label="Picture Studio">
+        <section id="picture-studio-window" class="picture-studio-dialog" role="dialog" aria-modal="true" aria-label='@LT("Picture Studio")'>
             <header class="picture-studio-titlebar">
                 <div>
-                    <strong>Picture Studio</strong>
+                    <strong>@LT("Picture Studio")</strong>
                     <span>@State.Document.Name · @State.Document.WidthPx × @State.Document.HeightPx px</span>
                 </div>
-                <button type="button" class="window-close" title="Close" @onclick="Cancel">×</button>
+                <button type="button" class="window-close" title='@LT("Close")' @onclick="Cancel">×</button>
             </header>
 
             <DxRibbon CssClass="picture-studio-ribbon categorized-ribbon" SizeMode="SizeMode.Medium" AdaptivityAutoCollapseItemsToGroups="true">
-                <DxRibbonTab Text="Home">
-                    <DxRibbonGroup Text="History">
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-undo" Text="Undo" Enabled="State.CanUndo" Click="State.Undo" />
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-redo" Text="Redo" Enabled="State.CanRedo" Click="State.Redo" />
+                <DxRibbonTab Text='@LT("Home")'>
+                    <DxRibbonGroup Text='@LT("History")'>
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-undo" Text='@LT("Undo")' Enabled="State.CanUndo" Click="State.Undo" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-redo" Text='@LT("Redo")' Enabled="State.CanRedo" Click="State.Redo" />
                     </DxRibbonGroup>
-                    <DxRibbonGroup Text="Edit">
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-copy" Text="Clipboard & layers" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-copy" Text="Copy" Enabled="HasSelection" Click="State.CopySelected" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-paste" Text="Paste" Enabled="State.CanPaste" Click="State.Paste" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-duplicate" Text="Duplicate" Enabled="HasSelection" Click="State.DuplicateSelected" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-layers" Text="Move layer up" Enabled="HasSelection" Click="MoveUp" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-layers" Text="Move layer down" Enabled="HasSelection" Click="MoveDown" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Delete" Enabled="CanDelete" Click="State.DeleteSelected" />
+                    <DxRibbonGroup Text='@LT("Edit")'>
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-copy" Text='@LT("Clipboard & layers")' DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-copy" Text='@LT("Copy")' Enabled="HasSelection" Click="State.CopySelected" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-paste" Text='@LT("Paste")' Enabled="State.CanPaste" Click="State.Paste" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-duplicate" Text='@LT("Duplicate")' Enabled="HasSelection" Click="State.DuplicateSelected" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-layers" Text='@LT("Move layer up")' Enabled="HasSelection" Click="MoveUp" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-layers" Text='@LT("Move layer down")' Enabled="HasSelection" Click="MoveDown" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text='@LT("Delete")' Enabled="CanDelete" Click="State.DeleteSelected" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
-                    <DxRibbonGroup Text="View">
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-properties" Text="Canvas view" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-fit" Text="Fit canvas" Click="FitCanvas" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-fit" Text="100%" Click="Zoom100" />
+                    <DxRibbonGroup Text='@LT("View")'>
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-properties" Text='@LT("Canvas view")' DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-fit" Text='@LT("Fit canvas")' Click="FitCanvas" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-fit" Text='@LT("100%")' Click="Zoom100" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-grid" Text="@GridText" Click="ToggleGridRibbon" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-snap" Text="@SnapText" Click="ToggleSnapRibbon" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
                 </DxRibbonTab>
-                <DxRibbonTab Text="Insert">
-                    <DxRibbonGroup Text="Content">
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-insert" Text="Add content" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-picture" Text="Image" Click="RequestImage" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-vector" Text="Layered SVG / OpenRaster" Click="RequestLayeredImport" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-text" Text="Text" Click="AddTextLayer" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-layers" Text="Paint layer" Click="AddPaintLayer" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="Solid fill" Click="AddSolidFill" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="Gradient fill" Click="AddGradient" />
+                <DxRibbonTab Text='@LT("Insert")'>
+                    <DxRibbonGroup Text='@LT("Content")'>
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-insert" Text='@LT("Add content")' IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-picture" Text='@LT("Image")' Click="RequestImage" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-vector" Text='@LT("Layered SVG / OpenRaster")' Click="RequestLayeredImport" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-text" Text='@LT("Text")' Click="AddTextLayer" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-layers" Text='@LT("Paint layer")' Click="AddPaintLayer" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text='@LT("Solid fill")' Click="AddSolidFill" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text='@LT("Gradient fill")' Click="AddGradient" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
-                    <DxRibbonGroup Text="Shapes">
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-shape" Text="Basic shapes" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-rectangle" Text="Rectangle" Click="AddRectangle" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-ellipse" Text="Ellipse" Click="AddEllipse" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-arrow" Text="Arrow" Click="AddArrowShape" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="Line" Click="AddLineShape" />
+                    <DxRibbonGroup Text='@LT("Shapes")'>
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-shape" Text='@LT("Basic shapes")' DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-rectangle" Text='@LT("Rectangle")' Click="AddRectangle" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-ellipse" Text='@LT("Ellipse")' Click="AddEllipse" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-arrow" Text='@LT("Arrow")' Click="AddArrowShape" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text='@LT("Line")' Click="AddLineShape" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
-                    <DxRibbonGroup Text="Renderers">
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Texture & light" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Clouds" Click="AddClouds" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Noise" Click="AddNoise" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Grain noise" Click="AddGrainNoise" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Stripes" Click="AddStripes" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Vignette" Click="AddVignette" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Bloom" Click="AddBloom" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Neon" Click="AddNeon" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Lens flare" Click="AddLensFlare" />
+                    <DxRibbonGroup Text='@LT("Renderers")'>
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Texture & light")' DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Clouds")' Click="AddClouds" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Noise")' Click="AddNoise" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Grain noise")' Click="AddGrainNoise" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Stripes")' Click="AddStripes" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Vignette")' Click="AddVignette" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Bloom")' Click="AddBloom" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Neon")' Click="AddNeon" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Lens flare")' Click="AddLensFlare" />
                         </DxRibbonItem>
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-animation" Text="Motion & surfaces" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Motion blur" Click="AddMotionBlur" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Wind" Click="AddWind" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Ocean waves" Click="AddOceanWaves" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-animation" Text='@LT("Motion & surfaces")' DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Motion blur")' Click="AddMotionBlur" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Wind")' Click="AddWind" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Ocean waves")' Click="AddOceanWaves" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
                 </DxRibbonTab>
                 @if (CanUseLocalGptOcr)
                 {
-                    <DxRibbonTab Text="LocalGPT AI">
-                        <DxRibbonGroup Text="Text recognition" IconCssClass="pub-icon pub-icon-text">
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-picture" Text="Recognize text" IsPrimary="true" Enabled="@(!_ocrBusy && !IsPictureExporting)" Click="StartLocalGptOcrAsync" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-text" Text="Insert OCR text layer" Enabled="HasOcrText" Click="InsertOcrTextLayer" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Clear OCR result" Enabled="HasOcrText" Click="ClearOcrText" />
+                    <DxRibbonTab Text='@LT("LocalGPT AI")'>
+                        <DxRibbonGroup Text='@LT("Text recognition")' IconCssClass="pub-icon pub-icon-text">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-picture" Text='@LT("Recognize text")' IsPrimary="true" Enabled="@(!_ocrBusy && !IsPictureExporting)" Click="StartLocalGptOcrAsync" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-text" Text='@LT("Insert OCR text layer")' Enabled="HasOcrText" Click="InsertOcrTextLayer" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text='@LT("Clear OCR result")' Enabled="HasOcrText" Click="ClearOcrText" />
                         </DxRibbonGroup>
                     </DxRibbonTab>
                 }
-                <DxRibbonTab Text="Draw">
-                    <DxRibbonGroup Text="Drawing">
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="Drawing tools" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonTab Text='@LT("Draw")'>
+                    <DxRibbonGroup Text='@LT("Drawing")'>
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text='@LT("Drawing tools")' IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="@SelectToolText" Click="SelectTool" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="@BrushToolText" Click="BrushTool" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-pencil" Text="@PencilToolText" Click="PencilTool" />
@@ -100,44 +100,44 @@
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-arrow" Text="@ArrowToolText" Click="ArrowTool" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="@LineToolText" Click="LineTool" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="@PathToolText" Click="PathTool" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="Paint paths" DropDownCssClass="publisher-ribbon-menu">
-                                <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="Brush path" Click="BrushPathTool" />
-                                <DxRibbonItem IconCssClass="pub-icon pub-icon-pencil" Text="Pencil path" Click="PencilPathTool" />
-                                <DxRibbonItem IconCssClass="pub-icon pub-icon-spray" Text="Spray path" Click="SprayPathTool" />
-                                <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="Toothbrush path" Click="ToothbrushPathTool" />
-                                <DxRibbonItem IconCssClass="pub-icon pub-icon-eraser" Text="Eraser path" Click="EraserPathTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text='@LT("Paint paths")' DropDownCssClass="publisher-ribbon-menu">
+                                <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text='@LT("Brush path")' Click="BrushPathTool" />
+                                <DxRibbonItem IconCssClass="pub-icon pub-icon-pencil" Text='@LT("Pencil path")' Click="PencilPathTool" />
+                                <DxRibbonItem IconCssClass="pub-icon pub-icon-spray" Text='@LT("Spray path")' Click="SprayPathTool" />
+                                <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text='@LT("Toothbrush path")' Click="ToothbrushPathTool" />
+                                <DxRibbonItem IconCssClass="pub-icon pub-icon-eraser" Text='@LT("Eraser path")' Click="EraserPathTool" />
                             </DxRibbonItem>
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-eraser" Text="@EraserToolText" Click="EraserTool" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-eyedropper" Text="@EyedropperToolText" Click="EyedropperTool" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
-                    <DxRibbonGroup Text="Selection & fill">
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="Selection tools" DropDownCssClass="publisher-ribbon-menu">
+                    <DxRibbonGroup Text='@LT("Selection & fill")'>
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text='@LT("Selection tools")' DropDownCssClass="publisher-ribbon-menu">
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="@RectangleSelectToolText" Click="RectangleSelectTool" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="@EllipseSelectToolText" Click="EllipseSelectTool" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="@FreeSelectToolText" Click="FreeSelectTool" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-select" Text="@MagneticSelectToolText" Click="MagneticSelectTool" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text="@PolygonSelectToolText" Click="PolygonSelectTool" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Clear selection" Click="ClearAreaSelection" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text='@LT("Clear selection")' Click="ClearAreaSelection" />
                         </DxRibbonItem>
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-crop" Text="Area edit" Enabled="HasSelection" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-crop" Text="Keep selected area" Click="KeepSelectedArea" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Cut selected area" Click="CutSelectedArea" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-copy" Text="Copy selected area" Click="CopySelectedArea" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-duplicate" Text="Copy area as new layer" Click="CopySelectedAreaAsLayer" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Clear layer cut" Enabled="HasLayerClip" Click="ClearLayerCut" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-crop" Text='@LT("Area edit")' Enabled="HasSelection" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-crop" Text='@LT("Keep selected area")' Click="KeepSelectedArea" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text='@LT("Cut selected area")' Click="CutSelectedArea" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-copy" Text='@LT("Copy selected area")' Click="CopySelectedArea" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-duplicate" Text='@LT("Copy area as new layer")' Click="CopySelectedAreaAsLayer" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text='@LT("Clear layer cut")' Enabled="HasLayerClip" Click="ClearLayerCut" />
                         </DxRibbonItem>
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="Area fill" DropDownCssClass="publisher-ribbon-menu">
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text='@LT("Area fill")' DropDownCssClass="publisher-ribbon-menu">
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-gradient" Text="@FillSolidToolText" Click="FillSolidTool" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-gradient" Text="@FillGradientToolText" Click="FillGradientTool" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
-                    <DxRibbonGroup Text="Color">
-                        <DxRibbonColorPaletteItem Text="Primary" Value="@_drawColor" ValueChanged="ChangeDrawColor"><Groups><DxRibbonColorGroup Header="Drawing" Colors="@PictureColors" /></Groups></DxRibbonColorPaletteItem>
-                        <DxRibbonColorPaletteItem Text="Secondary" Value="@_drawSecondaryColor" ValueChanged="ChangeDrawSecondaryColor"><Groups><DxRibbonColorGroup Header="Drawing" Colors="@PictureColors" /></Groups></DxRibbonColorPaletteItem>
+                    <DxRibbonGroup Text='@LT("Color")'>
+                        <DxRibbonColorPaletteItem Text='@LT("Primary")' Value="@_drawColor" ValueChanged="ChangeDrawColor"><Groups><DxRibbonColorGroup Header="Drawing" Colors="@PictureColors" /></Groups></DxRibbonColorPaletteItem>
+                        <DxRibbonColorPaletteItem Text='@LT("Secondary")' Value="@_drawSecondaryColor" ValueChanged="ChangeDrawSecondaryColor"><Groups><DxRibbonColorGroup Header="Drawing" Colors="@PictureColors" /></Groups></DxRibbonColorPaletteItem>
                     </DxRibbonGroup>
-                    <DxRibbonGroup Text="Width">
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="Brush width" DropDownCssClass="publisher-ribbon-menu">
+                    <DxRibbonGroup Text='@LT("Width")'>
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text='@LT("Brush width")' DropDownCssClass="publisher-ribbon-menu">
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="@DrawWidthText(1)" Click="DrawWidth1" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="@DrawWidthText(3)" Click="DrawWidth3" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="@DrawWidthText(8)" Click="DrawWidth8" />
@@ -146,84 +146,84 @@
                         </DxRibbonItem>
                     </DxRibbonGroup>
                 </DxRibbonTab>
-                <DxRibbonTab Text="Output">
-                    <DxRibbonGroup Text="Export">
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download merged PNG" Click="DownloadPng" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download merged JPEG" Click="DownloadJpeg" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text="Download layered SVG" Click="DownloadSvg" />
+                <DxRibbonTab Text='@LT("Output")'>
+                    <DxRibbonGroup Text='@LT("Export")'>
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text='@LT("Download")' DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text='@LT("Download merged PNG")' Click="DownloadPng" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text='@LT("Download merged JPEG")' Click="DownloadJpeg" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text='@LT("Download layered SVG")' Click="DownloadSvg" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
-                    <DxRibbonGroup Text="Publication">
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-picture" Text="@(EditingExisting ? "Apply layered" : "Insert layered")" Enabled="@(!IsPictureExporting)" IsPrimary="true" Click="ApplyLayered" />
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-picture" Text="@(EditingExisting ? "Apply merged" : "Insert merged")" Enabled="@(!IsPictureExporting)" Click="ApplyMerged" />
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-command" Text="Cancel" Click="Cancel" />
-                    </DxRibbonGroup>
-                </DxRibbonTab>
-                <DxRibbonTab Text="Effects">
-                    <DxRibbonGroup Text="Adjust">
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-audio" Text="Tone" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="Brighten" Enabled="HasSelection" Click="Brighten" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="Darken" Enabled="HasSelection" Click="Darken" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="More contrast" Enabled="HasSelection" Click="MoreContrast" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="More saturation" Enabled="HasSelection" Click="MoreSaturation" />
-                        </DxRibbonItem>
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="Soften" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="Light soften" Enabled="HasSelection" Click="SoftenLight" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="Medium soften" Enabled="HasSelection" Click="SoftenMedium" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Remove soften" Enabled="HasSelection" Click="RemoveSoftening" />
-                        </DxRibbonItem>
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text="Color effects" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-properties" Text="Grayscale" Enabled="HasSelection" Click="ToggleGrayscalePreset" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-properties" Text="Sepia" Enabled="HasSelection" Click="ToggleSepiaPreset" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-properties" Text="Invert" Enabled="HasSelection" Click="ToggleInvertPreset" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-properties" Text="Reset all" Enabled="HasSelection" Click="ResetAdjustments" />
-                        </DxRibbonItem>
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Glow & flare" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-save" Text="Bloom glow" Enabled="HasSelection" Click="ApplyBloomEffect" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-save" Text="Neon glow" Enabled="HasSelection" Click="ApplyNeonEffect" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-save" Text="Lens flare" Enabled="HasSelection" Click="ApplyLensFlareEffect" />
-                        </DxRibbonItem>
+                    <DxRibbonGroup Text='@LT("Publication")'>
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-picture" Text="@(EditingExisting ? LT("Apply layered") : LT("Insert layered"))" Enabled="@(!IsPictureExporting)" IsPrimary="true" Click="ApplyLayered" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-picture" Text="@(EditingExisting ? LT("Apply merged") : LT("Insert merged"))" Enabled="@(!IsPictureExporting)" Click="ApplyMerged" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-command" Text='@LT("Cancel")' Click="Cancel" />
                     </DxRibbonGroup>
                 </DxRibbonTab>
-                <DxRibbonTab Text="Render Tools" Contextual="true" Visible="IsRenderSelected">
-                    <DxRibbonGroup Text="Renderer">
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Change renderer" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Clouds" Click="MakeRenderClouds" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Noise" Click="MakeRenderNoise" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Stripes" Click="MakeRenderStripes" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Vignette" Click="MakeRenderVignette" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Bloom" Click="MakeRenderBloom" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Neon" Click="MakeRenderNeon" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Lens flare" Click="MakeRenderLensFlare" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Grain noise" Click="MakeRenderGrainNoise" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Motion blur" Click="MakeRenderMotionBlur" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Wind" Click="MakeRenderWind" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="Ocean waves" Click="MakeRenderOceanWaves" />
+                <DxRibbonTab Text='@LT("Effects")'>
+                    <DxRibbonGroup Text='@LT("Adjust")'>
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-audio" Text='@LT("Tone")' DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text='@LT("Brighten")' Enabled="HasSelection" Click="Brighten" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text='@LT("Darken")' Enabled="HasSelection" Click="Darken" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text='@LT("More contrast")' Enabled="HasSelection" Click="MoreContrast" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text='@LT("More saturation")' Enabled="HasSelection" Click="MoreSaturation" />
                         </DxRibbonItem>
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text="New seed" IsPrimary="true" Click="RandomizeRender" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text='@LT("Soften")' DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text='@LT("Light soften")' Enabled="HasSelection" Click="SoftenLight" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text='@LT("Medium soften")' Enabled="HasSelection" Click="SoftenMedium" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text='@LT("Remove soften")' Enabled="HasSelection" Click="RemoveSoftening" />
+                        </DxRibbonItem>
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-color" Text='@LT("Color effects")' DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-properties" Text='@LT("Grayscale")' Enabled="HasSelection" Click="ToggleGrayscalePreset" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-properties" Text='@LT("Sepia")' Enabled="HasSelection" Click="ToggleSepiaPreset" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-properties" Text='@LT("Invert")' Enabled="HasSelection" Click="ToggleInvertPreset" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-properties" Text='@LT("Reset all")' Enabled="HasSelection" Click="ResetAdjustments" />
+                        </DxRibbonItem>
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Glow & flare")' DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-save" Text='@LT("Bloom glow")' Enabled="HasSelection" Click="ApplyBloomEffect" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-save" Text='@LT("Neon glow")' Enabled="HasSelection" Click="ApplyNeonEffect" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-save" Text='@LT("Lens flare")' Enabled="HasSelection" Click="ApplyLensFlareEffect" />
+                        </DxRibbonItem>
                     </DxRibbonGroup>
                 </DxRibbonTab>
-                <DxRibbonTab Text="Paint Tools" Contextual="true" Visible="IsPaintSelected">
-                    <DxRibbonGroup Text="Paint layer">
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="Paint tool" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="Brush" Click="BrushTool" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-spray" Text="Spray can" Click="SprayTool" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text="Toothbrush" Click="ToothbrushTool" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-eraser" Text="Eraser" Click="EraserTool" />
+                <DxRibbonTab Text='@LT("Render Tools")' Contextual="true" Visible="IsRenderSelected">
+                    <DxRibbonGroup Text='@LT("Renderer")'>
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Change renderer")' DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Clouds")' Click="MakeRenderClouds" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Noise")' Click="MakeRenderNoise" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Stripes")' Click="MakeRenderStripes" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Vignette")' Click="MakeRenderVignette" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Bloom")' Click="MakeRenderBloom" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Neon")' Click="MakeRenderNeon" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Lens flare")' Click="MakeRenderLensFlare" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Grain noise")' Click="MakeRenderGrainNoise" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Motion blur")' Click="MakeRenderMotionBlur" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Wind")' Click="MakeRenderWind" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("Ocean waves")' Click="MakeRenderOceanWaves" />
                         </DxRibbonItem>
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Clear strokes" Enabled="CanDelete" Click="State.ClearSelectedPaint" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-render" Text='@LT("New seed")' IsPrimary="true" Click="RandomizeRender" />
                     </DxRibbonGroup>
                 </DxRibbonTab>
-                <DxRibbonTab Text="Picture Tools" Contextual="true" Visible="IsRasterSelected">
-                    <DxRibbonGroup Text="Raster">
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Replace" IsPrimary="true" Enabled="CanDelete" Click="RequestRasterReplacement" />
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-rotate" Text="Fit and flip" DropDownCssClass="publisher-ribbon-menu">
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Contain" Enabled="CanDelete" Click="RasterContain" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Cover" Enabled="CanDelete" Click="RasterCover" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Stretch" Enabled="CanDelete" Click="RasterStretch" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Flip horizontal" Enabled="CanDelete" Click="RasterFlipHorizontal" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text="Flip vertical" Enabled="CanDelete" Click="RasterFlipVertical" />
+                <DxRibbonTab Text='@LT("Paint Tools")' Contextual="true" Visible="IsPaintSelected">
+                    <DxRibbonGroup Text='@LT("Paint layer")'>
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text='@LT("Paint tool")' IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text='@LT("Brush")' Click="BrushTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-spray" Text='@LT("Spray can")' Click="SprayTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-brush" Text='@LT("Toothbrush")' Click="ToothbrushTool" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-eraser" Text='@LT("Eraser")' Click="EraserTool" />
+                        </DxRibbonItem>
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text='@LT("Clear strokes")' Enabled="CanDelete" Click="State.ClearSelectedPaint" />
+                    </DxRibbonGroup>
+                </DxRibbonTab>
+                <DxRibbonTab Text='@LT("Picture Tools")' Contextual="true" Visible="IsRasterSelected">
+                    <DxRibbonGroup Text='@LT("Raster")'>
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text='@LT("Replace")' IsPrimary="true" Enabled="CanDelete" Click="RequestRasterReplacement" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-rotate" Text='@LT("Fit and flip")' DropDownCssClass="publisher-ribbon-menu">
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text='@LT("Contain")' Enabled="CanDelete" Click="RasterContain" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text='@LT("Cover")' Enabled="CanDelete" Click="RasterCover" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text='@LT("Stretch")' Enabled="CanDelete" Click="RasterStretch" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text='@LT("Flip horizontal")' Enabled="CanDelete" Click="RasterFlipHorizontal" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-delete" Text='@LT("Flip vertical")' Enabled="CanDelete" Click="RasterFlipVertical" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
                 </DxRibbonTab>
@@ -232,17 +232,17 @@
             <div class="picture-studio-workspace">
                 <aside class="picture-studio-layers">
                     <div class="picture-pane-heading">
-                        <strong>Layers</strong>
+                        <strong>@LT("Layers")</strong>
                         <span>@State.Document.Layers.Count</span>
                     </div>
                     <div class="picture-layer-actions">
-                        <button type="button" title="Add image" @onclick="RequestImage">▧</button>
-                        <button type="button" title="Import layered SVG / SVGZ / OpenRaster" @onclick="RequestLayeredImport">⌘</button>
-                        <button type="button" title="Add text" @onclick="AddTextLayer">T</button>
-                        <button type="button" title="Add shape" @onclick="AddRectangle">◇</button>
-                        <button type="button" title="Add gradient" @onclick="AddGradient">◩</button>
-                        <button type="button" title="Add render layer" @onclick="AddClouds">☁</button>
-                        <button type="button" title="Add paint layer" @onclick="AddPaintLayer">✎</button>
+                        <button type="button" title='@LT("Add image")' aria-label='@LT("Add image")' @onclick="RequestImage"><i class="pub-icon pub-icon-picture" aria-hidden="true"></i></button>
+                        <button type="button" title='@LT("Import layered SVG / SVGZ / OpenRaster")' aria-label='@LT("Import layered SVG / SVGZ / OpenRaster")' @onclick="RequestLayeredImport"><i class="pub-icon pub-icon-vector" aria-hidden="true"></i></button>
+                        <button type="button" title='@LT("Add text")' aria-label='@LT("Add text")' @onclick="AddTextLayer"><i class="pub-icon pub-icon-text" aria-hidden="true"></i></button>
+                        <button type="button" title='@LT("Add shape")' aria-label='@LT("Add shape")' @onclick="AddRectangle"><i class="pub-icon pub-icon-shape" aria-hidden="true"></i></button>
+                        <button type="button" title='@LT("Add gradient")' aria-label='@LT("Add gradient")' @onclick="AddGradient"><i class="pub-icon pub-icon-gradient" aria-hidden="true"></i></button>
+                        <button type="button" title='@LT("Add render layer")' aria-label='@LT("Add render layer")' @onclick="AddClouds"><i class="pub-icon pub-icon-effects" aria-hidden="true"></i></button>
+                        <button type="button" title='@LT("Add paint layer")' aria-label='@LT("Add paint layer")' @onclick="AddPaintLayer"><i class="pub-icon pub-icon-edit" aria-hidden="true"></i></button>
                     </div>
                     <div class="picture-layer-list"
                          @oncontextmenu="ShowLayerListContextMenu"
@@ -250,31 +250,34 @@
                         @foreach (var layer in State.Document.Layers.AsEnumerable().Reverse())
                         {
                             <div class="picture-layer-row @(layer.Id == State.SelectedLayerId ? "selected" : null)"
+                                 data-picture-layer-id="@layer.Id"
+                                 draggable="true"
                                  @oncontextmenu="args => ShowLayerContextMenu(layer, args)"
                                  @oncontextmenu:preventDefault
                                  @oncontextmenu:stopPropagation>
                                 <button type="button" class="picture-layer-select" @onclick="() => State.SelectLayer(layer.Id)">
-                                    <span class="picture-layer-icon">@LayerIcon(layer)</span>
+                                    <span class="picture-layer-icon"><i class="@LayerIconCss(layer)" aria-hidden="true"></i></span>
                                     <span>
                                         <b>@layer.Name</b>
                                         <small>@LayerDescription(layer)</small>
                                     </span>
                                 </button>
-                                <button type="button" class="picture-layer-toggle" title="Show or hide" @onclick="() => State.ToggleVisibility(layer.Id)">@(layer.Visible ? "●" : "○")</button>
-                                <button type="button" class="picture-layer-toggle" title="Lock or unlock" @onclick="() => State.ToggleLock(layer.Id)">@(layer.Locked ? "🔒" : "🔓")</button>
+                                <button type="button" class="picture-layer-toggle @(layer.Visible ? "active" : null)" title='@LT("Show or hide")' aria-label='@LT("Show or hide")' @onclick="() => State.ToggleVisibility(layer.Id)"><i class="pub-icon pub-icon-visible" aria-hidden="true"></i></button>
+                                <button type="button" class="picture-layer-toggle @(layer.Locked ? "active" : null)" title='@LT("Lock or unlock")' aria-label='@LT("Lock or unlock")' @onclick="() => State.ToggleLock(layer.Id)"><i class="pub-icon pub-icon-lock" aria-hidden="true"></i></button>
                             </div>
                         }
                         @if (State.Document.Layers.Count == 0)
                         {
                             <div class="picture-empty-layers">
-                                <strong>Transparent canvas</strong>
-                                <span>Add an image, text, shape, fill, paint, or procedural render layer.</span>
+                                <strong>@LT("Transparent canvas")</strong>
+                                <span>@LT("Add an image, text, shape, fill, paint, or procedural render layer.")</span>
                             </div>
                         }
                     </div>
                     <div class="picture-layer-footer">
-                        <DxButton Text="Back" Enabled="HasSelection" Click="State.SendSelectedToBack" />
-                        <DxButton Text="Front" Enabled="HasSelection" Click="State.BringSelectedToFront" />
+                        <DxButton Text='@LT("Back")' Enabled="HasSelection" Click="State.SendSelectedToBack" />
+                        <DxButton Text='@LT("Front")' Enabled="HasSelection" Click="State.BringSelectedToFront" />
+                        <button type="button" class="picture-drag-merged" draggable="true" data-picture-drag-merged="true" title='@LT("Drag the merged Picture Studio result into another application")'>@LT("Drag merged")</button>
                     </div>
                 </aside>
 
@@ -282,7 +285,7 @@
                     <div class="picture-canvas-scroll">
                         <div class="picture-canvas-mat">
                             <div id="picture-studio-canvas-surface" class="picture-canvas-surface">
-                                <canvas id="picture-studio-canvas" class="picture-studio-canvas" tabindex="0" aria-label="Picture canvas"
+                                <canvas id="picture-studio-canvas" class="picture-studio-canvas" tabindex="0" aria-label='@LT("Picture canvas")'
                                         @oncontextmenu="ShowCanvasContextMenu"
                                         @oncontextmenu:preventDefault
                                         @oncontextmenu:stopPropagation></canvas>
@@ -298,51 +301,46 @@
 
                 <aside class="picture-studio-properties">
                     <div class="picture-pane-heading picture-selection-heading @(State.SelectedLayer is null ? string.Empty : "has-selection")">
-                        <span class="picture-selection-glyph">@(State.SelectedLayer is { } selectedHeadingLayer ? LayerIcon(selectedHeadingLayer) : "▱")</span>
+                        <span class="picture-selection-glyph"><i class="@(State.SelectedLayer is { } selectedHeadingLayer ? LayerIconCss(selectedHeadingLayer) : "pub-icon pub-icon-properties")" aria-hidden="true"></i></span>
                         <span class="picture-selection-copy">
-                            <strong>@(State.SelectedLayer is null ? "Canvas properties" : "Selected layer")</strong>
+                            <strong>@(State.SelectedLayer is null ? LT("Canvas properties") : LT("Selected layer"))</strong>
                             <small>@(State.SelectedLayer is { } selectedHeading ? $"{selectedHeading.Name} · {LayerDescription(selectedHeading)}" : $"{State.Document.WidthPx} × {State.Document.HeightPx} px")</small>
                         </span>
                     </div>
                     <div class="picture-property-scroll">
                         <section class="picture-property-section">
-                            <h3>Canvas</h3>
-                            <label>Name
-                                <input value="@State.Document.Name" @onchange="ChangeDocumentName" />
-                            </label>
+                            <h3>@LT("Canvas")</h3>
+                            <label>@LT("Name")
+                                <input value="@State.Document.Name" @onchange="ChangeDocumentName" /> </label>
                             <div class="picture-property-grid">
-                                <label>Width (px)
-                                    <input type="number" min="16" max="8192" value="@State.Document.WidthPx" @onchange="ChangeCanvasWidth" />
-                                </label>
-                                <label>Height (px)
-                                    <input type="number" min="16" max="8192" value="@State.Document.HeightPx" @onchange="ChangeCanvasHeight" />
-                                </label>
+                                <label>@LT("Width (px)")
+                                    <input type="number" min="16" max="8192" value="@State.Document.WidthPx" @onchange="ChangeCanvasWidth" /> </label>
+                                <label>@LT("Height (px)")
+                                    <input type="number" min="16" max="8192" value="@State.Document.HeightPx" @onchange="ChangeCanvasHeight" /> </label>
                             </div>
-                            <label>Background
+                            <label>@LT("Background")
                                 <select value="@State.Document.Background" @onchange="ChangeBackgroundPreset">
-                                    <option value="transparent">Transparent</option>
-                                    <option value="#ffffff">White</option>
-                                    <option value="#000000">Black</option>
-                                    <option value="#f1f5f9">Light gray</option>
+                                    <option value="transparent">@LT("Transparent")</option>
+                                    <option value="#ffffff">@LT("White")</option>
+                                    <option value="#000000">@LT("Black")</option>
+                                    <option value="#f1f5f9">@LT("Light gray")</option>
                                 </select>
                             </label>
-                            <label>Custom background
-                                <input type="color" value="@CanvasColor" @onchange="ChangeCanvasColor" />
-                            </label>
+                            <label>@LT("Custom background")
+                                <input type="color" value="@CanvasColor" @onchange="ChangeCanvasColor" /> </label>
                             <div class="picture-preset-buttons">
-                                <button type="button" @onclick="PresetSquare">Square</button>
-                                <button type="button" @onclick="PresetLandscape">Landscape</button>
-                                <button type="button" @onclick="PresetFullHd">Full HD</button>
-                                <button type="button" @onclick="PresetA4">A4 300 DPI</button>
+                                <button type="button" @onclick="PresetSquare">@LT("Square")</button>
+                                <button type="button" @onclick="PresetLandscape">@LT("Landscape")</button>
+                                <button type="button" @onclick="PresetFullHd">@LT("Full HD")</button>
+                                <button type="button" @onclick="PresetA4">@LT("A4 300 DPI")</button>
                             </div>
-                            <label>Grid spacing (px)
-                                <input type="number" min="2" max="1000" value="@State.Document.GridSpacingPx" @onchange="ChangeGridSpacing" />
-                            </label>
+                            <label>@LT("Grid spacing (px)")
+                                <input type="number" min="2" max="1000" value="@State.Document.GridSpacingPx" @onchange="ChangeGridSpacing" /> </label>
                         </section>
 
                         <section class="picture-property-section picture-drawing-properties">
-                            <h3>Drawing tools</h3>
-                            <label>Tool
+                            <h3>@LT("Drawing tools")</h3>
+                            <label>@LT("Tool")
                                 <select value="@_drawTool" @onchange="ChangeDrawTool">
                                     @foreach (var tool in Enum.GetValues<PictureDrawTool>())
                                     {
@@ -351,17 +349,14 @@
                                 </select>
                             </label>
                             <div class="picture-property-grid">
-                                <label>Primary color
-                                    <input type="color" value="@SafeColor(_drawColor)" @onchange="ChangeDrawColorInput" />
-                                </label>
-                                <label>Secondary color
-                                    <input type="color" value="@SafeColor(_drawSecondaryColor)" @onchange="ChangeDrawSecondaryColorInput" />
-                                </label>
-                                <label>Exact width (px)
-                                    <input type="number" min="0.25" max="512" step="0.25" value="@Inv(_drawWidth)" @onchange="ChangeDrawWidth" />
-                                </label>
+                                <label>@LT("Primary color")
+                                    <input type="color" value="@SafeColor(_drawColor)" @onchange="ChangeDrawColorInput" /> </label>
+                                <label>@LT("Secondary color")
+                                    <input type="color" value="@SafeColor(_drawSecondaryColor)" @onchange="ChangeDrawSecondaryColorInput" /> </label>
+                                <label>@LT("Exact width (px)")
+                                    <input type="number" min="0.25" max="512" step="0.25" value="@Inv(_drawWidth)" @onchange="ChangeDrawWidth" /> </label>
                             </div>
-                            <label class="picture-brush-size-label">Brush size
+                            <label class="picture-brush-size-label">@LT("Brush size")
                                 <span class="picture-brush-size-row">
                                     <input class="picture-dynamic-range"
                                            type="range"
@@ -370,7 +365,7 @@
                                            step="0.1"
                                            value="@Inv(BrushWidthSliderValue)"
                                            style="@BrushWidthSliderStyle"
-                                           aria-label="Brush size"
+                                           aria-label='@LT("Brush size")'
                                            aria-valuemin="0.25"
                                            aria-valuemax="512"
                                            aria-valuenow="@Inv(_drawWidth)"
@@ -378,54 +373,49 @@
                                     <output>@DrawWidthDisplay</output>
                                 </span>
                             </label>
-                            <div class="picture-brush-presets" role="group" aria-label="Brush size presets">
+                            <div class="picture-brush-presets" role="group" aria-label='@LT("Brush size presets")'>
                                 <button type="button" class="@DrawWidthButtonClass(1)" aria-pressed="@(IsDrawWidth(1) ? "true" : "false")" @onclick="DrawWidth1">1</button>
                                 <button type="button" class="@DrawWidthButtonClass(3)" aria-pressed="@(IsDrawWidth(3) ? "true" : "false")" @onclick="DrawWidth3">3</button>
                                 <button type="button" class="@DrawWidthButtonClass(8)" aria-pressed="@(IsDrawWidth(8) ? "true" : "false")" @onclick="DrawWidth8">8</button>
                                 <button type="button" class="@DrawWidthButtonClass(16)" aria-pressed="@(IsDrawWidth(16) ? "true" : "false")" @onclick="DrawWidth16">16</button>
                                 <button type="button" class="@DrawWidthButtonClass(32)" aria-pressed="@(IsDrawWidth(32) ? "true" : "false")" @onclick="DrawWidth32">32</button>
                             </div>
-                            <label>Opacity
+                            <label>@LT("Opacity")
                                 <input type="range" min="0" max="1" step="0.01" value="@Inv(_drawOpacity)" @oninput="ChangeDrawOpacity" />
                                 <span class="picture-range-value">@Math.Round(_drawOpacity * 100)%</span>
                             </label>
-                            <label>Brush hardness
+                            <label>@LT("Brush hardness")
                                 <input type="range" min="0" max="1" step="0.01" value="@Inv(_drawHardness)" @oninput="ChangeDrawHardness" />
                                 <span class="picture-range-value">@Math.Round(_drawHardness * 100)%</span>
                             </label>
-                            <DxButton Text="New paint layer" Click="AddPaintLayer" CssClass="wide-button" />
+                            <DxButton Text='@LT("New paint layer")' Click="AddPaintLayer" CssClass="wide-button" />
                         </section>
 
                         @if (State.SelectedLayer is PictureLayer selected)
                         {
                             <section class="picture-property-section">
-                                <h3>Layer</h3>
-                                <label>Name
-                                    <input value="@selected.Name" @onchange="ChangeLayerName" />
-                                </label>
+                                <h3>@LT("Layer")</h3>
+                                <label>@LT("Name")
+                                    <input value="@selected.Name" @onchange="ChangeLayerName" /> </label>
                                 <div class="picture-property-grid">
-                                    <label>X
-                                        <input type="number" step="1" value="@Inv(selected.X)" @onchange="ChangeLayerX" />
-                                    </label>
-                                    <label>Y
-                                        <input type="number" step="1" value="@Inv(selected.Y)" @onchange="ChangeLayerY" />
-                                    </label>
-                                    <label>Width
-                                        <input type="number" min="1" step="1" value="@Inv(selected.Width)" @onchange="ChangeLayerWidth" />
-                                    </label>
-                                    <label>Height
-                                        <input type="number" min="1" step="1" value="@Inv(selected.Height)" @onchange="ChangeLayerHeight" />
-                                    </label>
+                                    <label>@LT("X")
+                                        <input type="number" step="1" value="@Inv(selected.X)" @onchange="ChangeLayerX" /> </label>
+                                    <label>@LT("Y")
+                                        <input type="number" step="1" value="@Inv(selected.Y)" @onchange="ChangeLayerY" /> </label>
+                                    <label>@LT("Width")
+                                        <input type="number" min="1" step="1" value="@Inv(selected.Width)" @onchange="ChangeLayerWidth" /> </label>
+                                    <label>@LT("Height")
+                                        <input type="number" min="1" step="1" value="@Inv(selected.Height)" @onchange="ChangeLayerHeight" /> </label>
                                 </div>
-                                <label>Rotation
+                                <label>@LT("Rotation")
                                     <input type="range" min="0" max="359" step="1" value="@Inv(selected.Rotation)" @oninput="ChangeLayerRotation" @onchange="EndLiveEdit" />
                                     <span class="picture-range-value">@Math.Round(selected.Rotation)°</span>
                                 </label>
-                                <label>Opacity
+                                <label>@LT("Opacity")
                                     <input type="range" min="0" max="1" step="0.01" value="@Inv(selected.Opacity)" @oninput="ChangeLayerOpacity" @onchange="EndLiveEdit" />
                                     <span class="picture-range-value">@Math.Round(selected.Opacity * 100)%</span>
                                 </label>
-                                <label>Blend mode
+                                <label>@LT("Blend mode")
                                     <select value="@selected.BlendMode" @onchange="ChangeBlendMode">
                                         @foreach (var mode in Enum.GetValues<PictureBlendMode>())
                                         {
@@ -434,8 +424,8 @@
                                     </select>
                                 </label>
                                 <div class="picture-check-grid">
-                                    <label><input type="checkbox" checked="@selected.Visible" @onchange="ToggleSelectedVisibility" /> Visible</label>
-                                    <label><input type="checkbox" checked="@selected.Locked" @onchange="ToggleSelectedLock" /> Locked</label>
+                                    <label><input type="checkbox" checked="@selected.Visible" @onchange="ToggleSelectedVisibility" /> @LT("Visible")</label>
+                                    <label><input type="checkbox" checked="@selected.Locked" @onchange="ToggleSelectedLock" /> @LT("Locked")</label>
                                 </div>
                             </section>
 
@@ -443,24 +433,24 @@
                             {
                                 case SvgPictureLayer svgLayer:
                                     <section class="picture-property-section">
-                                        <h3>Imported vector</h3>
-                                        <label>Source format<input value="@svgLayer.SourceFormat" readonly /></label>
+                                        <h3>@LT("Imported vector")</h3>
+                                        <label>@LT("Source format")<input value="@svgLayer.SourceFormat" readonly /></label>
                                         @if (!string.IsNullOrWhiteSpace(svgLayer.GroupPath))
                                         {
-                                            <label>Layer group<input value="@svgLayer.GroupPath" readonly /></label>
+                                            <label>@LT("Layer group")<input value="@svgLayer.GroupPath" readonly /></label>
                                         }
                                         @if (!string.IsNullOrWhiteSpace(svgLayer.SourceElementId))
                                         {
-                                            <label>Source element<input value="@svgLayer.SourceElementId" readonly /></label>
+                                            <label>@LT("Source element")<input value="@svgLayer.SourceElementId" readonly /></label>
                                         }
-                                        <label class="check-row"><input type="checkbox" checked="@svgLayer.PreserveAspectRatio" @onchange="ToggleSvgPreserveAspectRatio" /> Preserve aspect ratio</label>
-                                        <p class="picture-property-note">This layer keeps its sanitized SVG paths, paint servers, transforms and clipping definitions as vector markup. Position, size, rotation, opacity and layer order remain editable in Picture Studio.</p>
+                                        <label class="check-row"><input type="checkbox" checked="@svgLayer.PreserveAspectRatio" @onchange="ToggleSvgPreserveAspectRatio" /> @LT("Preserve aspect ratio")</label>
+                                        <p class="picture-property-note">@LT("This layer keeps its sanitized SVG paths, paint servers, transforms and clipping definitions as vector markup. Position, size, rotation, opacity and layer order remain editable in Picture Studio.")</p>
                                     </section>
                                     break;
                                 case RasterPictureLayer raster:
                                     <section class="picture-property-section">
-                                        <h3>Image</h3>
-                                        <label>Fit
+                                        <h3>@LT("Image")</h3>
+                                        <label>@LT("Fit")
                                             <select value="@raster.FitMode" @onchange="ChangeRasterFit">
                                                 @foreach (var fit in Enum.GetValues<PictureRasterFitMode>())
                                                 {
@@ -469,18 +459,17 @@
                                             </select>
                                         </label>
                                         <div class="picture-check-grid">
-                                            <label><input type="checkbox" checked="@raster.FlipHorizontal" @onchange="ToggleRasterFlipHorizontal" /> Flip horizontal</label>
-                                            <label><input type="checkbox" checked="@raster.FlipVertical" @onchange="ToggleRasterFlipVertical" /> Flip vertical</label>
+                                            <label><input type="checkbox" checked="@raster.FlipHorizontal" @onchange="ToggleRasterFlipHorizontal" /> @LT("Flip horizontal")</label>
+                                            <label><input type="checkbox" checked="@raster.FlipVertical" @onchange="ToggleRasterFlipVertical" /> @LT("Flip vertical")</label>
                                         </div>
-                                        <label>Tint color
-                                            <input type="color" value="@SafeColor(raster.TintColor)" @onchange="ChangeRasterTintColor" />
-                                        </label>
-                                        <label>Tint strength
+                                        <label>@LT("Tint color")
+                                            <input type="color" value="@SafeColor(raster.TintColor)" @onchange="ChangeRasterTintColor" /> </label>
+                                        <label>@LT("Tint strength")
                                             <input type="range" min="0" max="1" step="0.01" value="@Inv(raster.TintOpacity)" @oninput="ChangeRasterTintOpacity" @onchange="EndLiveEdit" />
                                             <span class="picture-range-value">@Math.Round(raster.TintOpacity * 100)%</span>
                                         </label>
-                                        <h4>Change colors</h4>
-                                        <label>Mode
+                                        <h4>@LT("Change colors")</h4>
+                                        <label>@LT("Mode")
                                             <select value="@raster.ColorizeMode" @onchange="ChangeRasterColorizeMode">
                                                 @foreach (var mode in Enum.GetValues<PictureRasterColorizeMode>())
                                                 {
@@ -491,19 +480,19 @@
                                         @if (raster.ColorizeMode == PictureRasterColorizeMode.ReplaceColor)
                                         {
                                             <div class="picture-property-grid">
-                                                <label>Replace color<input type="color" value="@SafeColor(raster.ColorizeSourceColor)" @onchange="ChangeRasterColorizeSource" /></label>
-                                                <label>With color<input type="color" value="@SafeColor(raster.ColorizeTargetColor)" @onchange="ChangeRasterColorizeTarget" /></label>
+                                                <label>@LT("Replace color")<input type="color" value="@SafeColor(raster.ColorizeSourceColor)" @onchange="ChangeRasterColorizeSource" /></label>
+                                                <label>@LT("With color")<input type="color" value="@SafeColor(raster.ColorizeTargetColor)" @onchange="ChangeRasterColorizeTarget" /></label>
                                             </div>
-                                            <label>Match tolerance
+                                            <label>@LT("Match tolerance")
                                                 <input type="range" min="0" max="255" step="1" value="@raster.ColorizeTolerance" @oninput="ChangeRasterColorizeTolerance" @onchange="EndLiveEdit" />
                                                 <span class="picture-range-value">@raster.ColorizeTolerance</span>
                                             </label>
                                         }
                                         else if (raster.ColorizeMode == PictureRasterColorizeMode.Luminosity)
                                         {
-                                            <label>Colorize with<input type="color" value="@SafeColor(raster.ColorizeTargetColor)" @onchange="ChangeRasterColorizeTarget" /></label>
+                                            <label>@LT("Colorize with")<input type="color" value="@SafeColor(raster.ColorizeTargetColor)" @onchange="ChangeRasterColorizeTarget" /></label>
                                         }
-                                        <label>Color-change strength
+                                        <label>@LT("Color-change strength")
                                             <input type="range" min="0" max="1" step="0.01" value="@Inv(raster.ColorizeStrength)" @oninput="ChangeRasterColorizeStrength" @onchange="EndLiveEdit" />
                                             <span class="picture-range-value">@Math.Round(raster.ColorizeStrength * 100)%</span>
                                         </label>
@@ -511,18 +500,16 @@
                                     break;
                                 case TextPictureLayer textLayer:
                                     <section class="picture-property-section">
-                                        <h3>Text</h3>
-                                        <label>Content
+                                        <h3>@LT("Text")</h3>
+                                        <label>@LT("Content")
                                             <textarea rows="4" @onchange="ChangeTextContent">@textLayer.Text</textarea>
                                         </label>
-                                        <label>Font
-                                            <SystemFontPicker Value="@textLayer.FontFamily" Changed="ChangeTextFont" />
-                                        </label>
+                                        <label>@LT("Font")
+                                            <SystemFontPicker Value="@textLayer.FontFamily" Changed="ChangeTextFont" /> </label>
                                         <div class="picture-property-grid">
-                                            <label>Size
-                                                <input type="number" min="4" max="1024" value="@Inv(textLayer.FontSizePx)" @onchange="ChangeTextSize" />
-                                            </label>
-                                            <label>Alignment
+                                            <label>@LT("Size")
+                                                <input type="number" min="4" max="1024" value="@Inv(textLayer.FontSizePx)" @onchange="ChangeTextSize" /> </label>
+                                            <label>@LT("Alignment")
                                                 <select value="@textLayer.Alignment" @onchange="ChangeTextAlignment">
                                                     @foreach (var alignment in Enum.GetValues<PictureTextAlignment>())
                                                     {
@@ -532,30 +519,26 @@
                                             </label>
                                         </div>
                                         <div class="picture-check-grid">
-                                            <label><input type="checkbox" checked="@textLayer.Bold" @onchange="ToggleTextBold" /> Bold</label>
-                                            <label><input type="checkbox" checked="@textLayer.Italic" @onchange="ToggleTextItalic" /> Italic</label>
-                                            <label><input type="checkbox" checked="@textLayer.ShadowEnabled" @onchange="ToggleTextShadow" /> Shadow</label>
+                                            <label><input type="checkbox" checked="@textLayer.Bold" @onchange="ToggleTextBold" /> @LT("Bold")</label>
+                                            <label><input type="checkbox" checked="@textLayer.Italic" @onchange="ToggleTextItalic" /> @LT("Italic")</label>
+                                            <label><input type="checkbox" checked="@textLayer.ShadowEnabled" @onchange="ToggleTextShadow" /> @LT("Shadow")</label>
                                         </div>
                                         <div class="picture-property-grid">
-                                            <label>Fill
-                                                <input type="color" value="@SafeColor(textLayer.FillColor)" @onchange="ChangeTextFill" />
-                                            </label>
-                                            <label>Outline
-                                                <input type="color" value="@SafeColor(textLayer.OutlineColor)" @onchange="ChangeTextOutline" />
-                                            </label>
-                                            <label>Outline width
-                                                <input type="number" min="0" max="64" step="1" value="@Inv(textLayer.OutlineWidthPx)" @onchange="ChangeTextOutlineWidth" />
-                                            </label>
-                                            <label>Shadow blur
-                                                <input type="number" min="0" max="200" step="1" value="@Inv(textLayer.ShadowBlurPx)" @onchange="ChangeTextShadowBlur" />
-                                            </label>
+                                            <label>@LT("Fill")
+                                                <input type="color" value="@SafeColor(textLayer.FillColor)" @onchange="ChangeTextFill" /> </label>
+                                            <label>@LT("Outline")
+                                                <input type="color" value="@SafeColor(textLayer.OutlineColor)" @onchange="ChangeTextOutline" /> </label>
+                                            <label>@LT("Outline width")
+                                                <input type="number" min="0" max="64" step="1" value="@Inv(textLayer.OutlineWidthPx)" @onchange="ChangeTextOutlineWidth" /> </label>
+                                            <label>@LT("Shadow blur")
+                                                <input type="number" min="0" max="200" step="1" value="@Inv(textLayer.ShadowBlurPx)" @onchange="ChangeTextShadowBlur" /> </label>
                                         </div>
                                     </section>
                                     break;
                                 case ShapePictureLayer shapeLayer:
                                     <section class="picture-property-section">
-                                        <h3>Shape</h3>
-                                        <label>Shape
+                                        <h3>@LT("Shape")</h3>
+                                        <label>@LT("Shape")
                                             <select value="@shapeLayer.Shape" @onchange="ChangeShapeKind">
                                                 @foreach (var shape in Enum.GetValues<PictureShapeKind>())
                                                 {
@@ -563,7 +546,7 @@
                                                 }
                                             </select>
                                         </label>
-                                        <label>Fill type
+                                        <label>@LT("Fill type")
                                             <select value="@shapeLayer.FillKind" @onchange="ChangeShapeFillKind">
                                                 @foreach (var fillKind in Enum.GetValues<PictureFillKind>())
                                                 {
@@ -572,50 +555,45 @@
                                             </select>
                                         </label>
                                         <div class="picture-property-grid">
-                                            <label>Fill 1
-                                                <input type="color" value="@SafeColor(shapeLayer.FillColor)" @onchange="ChangeShapeFill" />
-                                            </label>
-                                            <label>Fill 2
-                                                <input type="color" value="@SafeColor(shapeLayer.SecondaryFillColor)" @onchange="ChangeShapeSecondaryFill" />
-                                            </label>
-                                            <label>Stroke
-                                                <input type="color" value="@SafeColor(shapeLayer.StrokeColor)" @onchange="ChangeShapeStroke" />
-                                            </label>
-                                            <label>Stroke width
-                                                <input type="number" min="0" max="200" value="@Inv(shapeLayer.StrokeWidthPx)" @onchange="ChangeShapeStrokeWidth" />
-                                            </label>
-                                            <label>Corner radius
-                                                <input type="number" min="0" max="2000" value="@Inv(shapeLayer.CornerRadiusPx)" @onchange="ChangeShapeRadius" />
-                                            </label>
+                                            <label>@LT("Fill 1")
+                                                <input type="color" value="@SafeColor(shapeLayer.FillColor)" @onchange="ChangeShapeFill" /> </label>
+                                            <label>@LT("Fill 2")
+                                                <input type="color" value="@SafeColor(shapeLayer.SecondaryFillColor)" @onchange="ChangeShapeSecondaryFill" /> </label>
+                                            <label>@LT("Stroke")
+                                                <input type="color" value="@SafeColor(shapeLayer.StrokeColor)" @onchange="ChangeShapeStroke" /> </label>
+                                            <label>@LT("Stroke width")
+                                                <input type="number" min="0" max="200" value="@Inv(shapeLayer.StrokeWidthPx)" @onchange="ChangeShapeStrokeWidth" /> </label>
+                                            <label>@LT("Corner radius")
+                                                <input type="number" min="0" max="2000" value="@Inv(shapeLayer.CornerRadiusPx)" @onchange="ChangeShapeRadius" /> </label>
                                         </div>
                                         @if (shapeLayer.Shape is PictureShapeKind.Path or PictureShapeKind.Freeform)
                                         {
                                             <div class="picture-check-grid">
-                                                <label><input type="checkbox" checked="@shapeLayer.PathClosed" @onchange="ToggleShapePathClosed" /> Close path</label>
-                                                <label><input type="checkbox" checked="@shapeLayer.PathSmooth" @onchange="ToggleShapePathSmooth" /> Smooth path</label>
+                                                <label><input type="checkbox" checked="@shapeLayer.PathClosed" @onchange="ToggleShapePathClosed" /> @LT("Close path")</label>
+                                                <label><input type="checkbox" checked="@shapeLayer.PathSmooth" @onchange="ToggleShapePathSmooth" /> @LT("Smooth path")</label>
                                             </div>
                                             <div class="picture-path-toolbar">
-                                                <button type="button" @onclick="AddShapePathPoint">Add point</button>
-                                                <button type="button" @onclick="ReverseShapePath">Reverse</button>
+                                                <button type="button" @onclick="AddShapePathPoint">@LT("Add point")</button>
+                                                <button type="button" @onclick="ReverseShapePath">@LT("Reverse")</button>
                                             </div>
-                                            <div class="picture-path-points" aria-label="Path points">
+                                            <div class="picture-path-points" aria-label='@LT("Path points")'>
                                                 @for (var pointIndex = 0; pointIndex < shapeLayer.PathPoints.Count; pointIndex++)
                                                 {
                                                     var index = pointIndex;
                                                     var point = shapeLayer.PathPoints[index];
                                                     <div class="picture-path-point-row">
                                                         <span>@(index + 1)</span>
-                                                        <label>X <input type="number" step=".1" value="@Inv(point.X)" @onchange="args => ChangeShapePathPointX(index, args)" /></label>
-                                                        <label>Y <input type="number" step=".1" value="@Inv(point.Y)" @onchange="args => ChangeShapePathPointY(index, args)" /></label>
-                                                        <button type="button" class="danger" disabled="@(shapeLayer.PathPoints.Count <= 2)" @onclick="() => RemoveShapePathPoint(index)" title="Remove point">×</button>
+                                                        <label>@LT("X")<input type="number" step=".1" value="@Inv(point.X)" @onchange="args => ChangeShapePathPointX(index, args)" /></label>
+                                                        <label>@LT("Y")<input type="number" step=".1" value="@Inv(point.Y)" @onchange="args => ChangeShapePathPointY(index, args)" /></label>
+                                                        <button type="button" class="danger" disabled="@(shapeLayer.PathPoints.Count <= 2)" @onclick="() => RemoveShapePathPoint(index)" title='@LT("Remove point")'>×</button>
                                                     </div>
                                                 }
                                             </div>
-                                            <p class="picture-property-note">The Path tool creates editable vector points. Edit X/Y for precise nodes, reverse the direction, or add/remove points. Open paths use the stroke only; closed paths can also use the selected fill.</p>
+                                            <p class="picture-property-note">@LT("The Path tool creates editable vector points. Edit X/Y for precise nodes, reverse the direction, or add/remove points. Open paths use the stroke only; closed paths can also use the selected fill.")</p>
                                         }
                                         @if (shapeLayer.FillKind != PictureFillKind.Solid)
                                         {
-                                            <label>Fill angle
+                                            <label>@LT("Fill angle")
                                                 <input type="range" min="0" max="360" step="1" value="@Inv(shapeLayer.FillAngleDegrees)" @oninput="ChangeShapeFillAngle" @onchange="EndLiveEdit" />
                                                 <span class="picture-range-value">@Math.Round(shapeLayer.FillAngleDegrees)°</span>
                                             </label>
@@ -624,8 +602,8 @@
                                     break;
                                 case FillPictureLayer fillLayer:
                                     <section class="picture-property-section">
-                                        <h3>Fill</h3>
-                                        <label>Type
+                                        <h3>@LT("Fill")</h3>
+                                        <label>@LT("Type")
                                             <select value="@fillLayer.FillKind" @onchange="ChangeFillKind">
                                                 @foreach (var kind in Enum.GetValues<PictureFillKind>())
                                                 {
@@ -634,14 +612,12 @@
                                             </select>
                                         </label>
                                         <div class="picture-property-grid">
-                                            <label>Color 1
-                                                <input type="color" value="@SafeColor(fillLayer.PrimaryColor)" @onchange="ChangeFillPrimary" />
-                                            </label>
-                                            <label>Color 2
-                                                <input type="color" value="@SafeColor(fillLayer.SecondaryColor)" @onchange="ChangeFillSecondary" />
-                                            </label>
+                                            <label>@LT("Color 1")
+                                                <input type="color" value="@SafeColor(fillLayer.PrimaryColor)" @onchange="ChangeFillPrimary" /> </label>
+                                            <label>@LT("Color 2")
+                                                <input type="color" value="@SafeColor(fillLayer.SecondaryColor)" @onchange="ChangeFillSecondary" /> </label>
                                         </div>
-                                        <label>Angle
+                                        <label>@LT("Angle")
                                             <input type="range" min="0" max="360" step="1" value="@Inv(fillLayer.AngleDegrees)" @oninput="ChangeFillAngle" @onchange="EndLiveEdit" />
                                             <span class="picture-range-value">@Math.Round(fillLayer.AngleDegrees)°</span>
                                         </label>
@@ -649,20 +625,20 @@
                                     break;
                                 case PaintPictureLayer paintLayer:
                                     <section class="picture-property-section">
-                                        <h3>Paint</h3>
-                                        <p class="picture-property-note">Brush, pencil, line and eraser strokes stay editable as a separate layer.</p>
+                                        <h3>@LT("Paint")</h3>
+                                        <p class="picture-property-note">@LT("Brush, pencil, line and eraser strokes stay editable as a separate layer.")</p>
                                         <div class="picture-paint-summary">
                                             <strong>@paintLayer.Strokes.Count</strong>
-                                            <span>stored strokes</span>
+                                            <span>@LT("stored strokes")</span>
                                         </div>
-                                        <DxButton Text="Continue with brush" Click="BrushTool" CssClass="wide-button" />
-                                        <DxButton Text="Clear all strokes" Enabled="@(paintLayer.Strokes.Count > 0 && !paintLayer.Locked)" Click="State.ClearSelectedPaint" CssClass="wide-button" />
+                                        <DxButton Text='@LT("Continue with brush")' Click="BrushTool" CssClass="wide-button" />
+                                        <DxButton Text='@LT("Clear all strokes")' Enabled="@(paintLayer.Strokes.Count > 0 && !paintLayer.Locked)" Click="State.ClearSelectedPaint" CssClass="wide-button" />
                                     </section>
                                     break;
                                 case RenderPictureLayer renderLayer:
                                     <section id="picture-render-properties" class="picture-property-section picture-selected-property-section">
-                                        <h3><span class="pub-icon pub-icon-render"></span> Procedural render · @renderLayer.Name</h3>
-                                        <label>Renderer
+                                        <h3><span class="pub-icon pub-icon-render"></span> @LT("Procedural render") · @renderLayer.Name</h3>
+                                        <label>@LT("Renderer")
                                             <select value="@renderLayer.RenderKind" @onchange="ChangeRenderKind">
                                                 @foreach (var kind in Enum.GetValues<PictureRenderKind>())
                                                 {
@@ -671,51 +647,43 @@
                                             </select>
                                         </label>
                                         <div class="picture-property-grid">
-                                            <label>Color 1
-                                                <input type="color" value="@SafeColor(renderLayer.PrimaryColor)" @onchange="ChangeRenderPrimary" />
-                                            </label>
-                                            <label>Color 2
-                                                <input type="color" value="@SafeColor(renderLayer.SecondaryColor)" @onchange="ChangeRenderSecondary" />
-                                            </label>
-                                            <label>Seed
-                                                <input type="number" value="@renderLayer.Seed" @onchange="ChangeRenderSeed" />
-                                            </label>
-                                            <label>Scale
-                                                <input type="number" min="4" max="2000" value="@Inv(renderLayer.Scale)" @onchange="ChangeRenderScale" />
-                                            </label>
-                                            <label>Detail
-                                                <input type="number" min="1" max="8" value="@renderLayer.Detail" @onchange="ChangeRenderDetail" />
-                                            </label>
-                                            <label>Softness
-                                                <input type="number" min="0" max="1" step="0.05" value="@Inv(renderLayer.Softness)" @onchange="ChangeRenderSoftness" />
-                                            </label>
-                                            <label>Contrast
-                                                <input type="number" min="0.1" max="5" step="0.1" value="@Inv(renderLayer.RenderContrast)" @onchange="ChangeRenderContrast" />
-                                            </label>
-                                            <label>Stripe width
-                                                <input type="number" min="1" max="1000" value="@Inv(renderLayer.StripeWidthPx)" @onchange="ChangeRenderStripeWidth" />
-                                            </label>
+                                            <label>@LT("Color 1")
+                                                <input type="color" value="@SafeColor(renderLayer.PrimaryColor)" @onchange="ChangeRenderPrimary" /> </label>
+                                            <label>@LT("Color 2")
+                                                <input type="color" value="@SafeColor(renderLayer.SecondaryColor)" @onchange="ChangeRenderSecondary" /> </label>
+                                            <label>@LT("Seed")
+                                                <input type="number" value="@renderLayer.Seed" @onchange="ChangeRenderSeed" /> </label>
+                                            <label>@LT("Scale")
+                                                <input type="number" min="4" max="2000" value="@Inv(renderLayer.Scale)" @onchange="ChangeRenderScale" /> </label>
+                                            <label>@LT("Detail")
+                                                <input type="number" min="1" max="8" value="@renderLayer.Detail" @onchange="ChangeRenderDetail" /> </label>
+                                            <label>@LT("Softness")
+                                                <input type="number" min="0" max="1" step="0.05" value="@Inv(renderLayer.Softness)" @onchange="ChangeRenderSoftness" /> </label>
+                                            <label>@LT("Contrast")
+                                                <input type="number" min="0.1" max="5" step="0.1" value="@Inv(renderLayer.RenderContrast)" @onchange="ChangeRenderContrast" /> </label>
+                                            <label>@LT("Stripe width")
+                                                <input type="number" min="1" max="1000" value="@Inv(renderLayer.StripeWidthPx)" @onchange="ChangeRenderStripeWidth" /> </label>
                                         </div>
-                                        <label>Angle
+                                        <label>@LT("Angle")
                                             <input type="range" min="0" max="360" step="1" value="@Inv(renderLayer.AngleDegrees)" @oninput="ChangeRenderAngle" @onchange="EndLiveEdit" />
                                             <span class="picture-range-value">@Math.Round(renderLayer.AngleDegrees)°</span>
                                         </label>
-                                        <DxButton Text="New random seed" Click="RandomizeRender" CssClass="wide-button" />
+                                        <DxButton Text='@LT("New random seed")' Click="RandomizeRender" CssClass="wide-button" />
                                     </section>
                                     break;
                             }
 
                             <section class="picture-property-section">
-                                <h3>Area cut</h3>
-                                <p class="property-note">Selections use document coordinates, so rectangular, elliptical, freehand, magnetic, and arbitrary polygon cuts stay aligned at every layer angle and canvas size.</p>
+                                <h3>@LT("Area cut")</h3>
+                                <p class="property-note">@LT("Selections use document coordinates, so rectangular, elliptical, freehand, magnetic, and arbitrary polygon cuts stay aligned at every layer angle and canvas size.")</p>
                                 <div class="property-action-row">
-                                    <DxButton Text="Keep selected" Enabled="@(!selected.Locked)" Click="KeepSelectedArea" />
-                                    <DxButton Text="Cut selected" Enabled="@(!selected.Locked)" Click="CutSelectedArea" />
+                                    <DxButton Text='@LT("Keep selected")' Enabled="@(!selected.Locked)" Click="KeepSelectedArea" />
+                                    <DxButton Text='@LT("Cut selected")' Enabled="@(!selected.Locked)" Click="CutSelectedArea" />
                                 </div>
                                 <div class="property-action-row">
-                                    <DxButton Text="Copy region" Click="CopySelectedArea" />
-                                    <DxButton Text="Copy as layer" Click="CopySelectedAreaAsLayer" />
-                                    <DxButton Text="Clear cut" Enabled="@(selected.ClipPolygon.Count >= 3 && !selected.Locked)" Click="ClearLayerCut" />
+                                    <DxButton Text='@LT("Copy region")' Click="CopySelectedArea" />
+                                    <DxButton Text='@LT("Copy as layer")' Click="CopySelectedAreaAsLayer" />
+                                    <DxButton Text='@LT("Clear cut")' Enabled="@(selected.ClipPolygon.Count >= 3 && !selected.Locked)" Click="ClearLayerCut" />
                                 </div>
                                 @if (selected.ClipPolygon.Count >= 3)
                                 {
@@ -724,39 +692,36 @@
                             </section>
 
                             <section class="picture-property-section">
-                                <h3>Adjustments</h3>
-                                <label>Brightness
+                                <h3>@LT("Adjustments")</h3>
+                                <label>@LT("Brightness")
                                     <input type="range" min="0" max="2" step="0.01" value="@Inv(selected.Brightness)" @oninput="ChangeBrightness" @onchange="EndLiveEdit" />
                                     <span class="picture-range-value">@Math.Round(selected.Brightness * 100)%</span>
                                 </label>
-                                <label>Contrast
+                                <label>@LT("Contrast")
                                     <input type="range" min="0" max="2" step="0.01" value="@Inv(selected.Contrast)" @oninput="ChangeContrast" @onchange="EndLiveEdit" />
                                     <span class="picture-range-value">@Math.Round(selected.Contrast * 100)%</span>
                                 </label>
-                                <label>Saturation
+                                <label>@LT("Saturation")
                                     <input type="range" min="0" max="2" step="0.01" value="@Inv(selected.Saturation)" @oninput="ChangeSaturation" @onchange="EndLiveEdit" />
                                     <span class="picture-range-value">@Math.Round(selected.Saturation * 100)%</span>
                                 </label>
-                                <label>Hue
+                                <label>@LT("Hue")
                                     <input type="range" min="-180" max="180" step="1" value="@Inv(selected.HueRotation)" @oninput="ChangeHue" @onchange="EndLiveEdit" />
                                     <span class="picture-range-value">@Math.Round(selected.HueRotation)°</span>
                                 </label>
-                                <label>Soften / blur
+                                <label>@LT("Soften / blur")
                                     <input type="range" min="0" max="50" step="0.25" value="@Inv(selected.Blur)" @oninput="ChangeBlur" @onchange="EndLiveEdit" />
                                     <span class="picture-range-value">@selected.Blur.ToString("0.##", CultureInfo.InvariantCulture) px</span>
                                 </label>
                                 <div class="picture-property-grid">
-                                    <label>Grayscale
-                                        <input type="range" min="0" max="1" step="0.01" value="@Inv(selected.Grayscale)" @oninput="ChangeGrayscale" @onchange="EndLiveEdit" />
-                                    </label>
-                                    <label>Sepia
-                                        <input type="range" min="0" max="1" step="0.01" value="@Inv(selected.Sepia)" @oninput="ChangeSepia" @onchange="EndLiveEdit" />
-                                    </label>
-                                    <label>Invert
-                                        <input type="range" min="0" max="1" step="0.01" value="@Inv(selected.Invert)" @oninput="ChangeInvert" @onchange="EndLiveEdit" />
-                                    </label>
+                                    <label>@LT("Grayscale")
+                                        <input type="range" min="0" max="1" step="0.01" value="@Inv(selected.Grayscale)" @oninput="ChangeGrayscale" @onchange="EndLiveEdit" /> </label>
+                                    <label>@LT("Sepia")
+                                        <input type="range" min="0" max="1" step="0.01" value="@Inv(selected.Sepia)" @oninput="ChangeSepia" @onchange="EndLiveEdit" /> </label>
+                                    <label>@LT("Invert")
+                                        <input type="range" min="0" max="1" step="0.01" value="@Inv(selected.Invert)" @oninput="ChangeInvert" @onchange="EndLiveEdit" /> </label>
                                 </div>
-                                <DxButton Text="Reset adjustments" Click="ResetAdjustments" CssClass="wide-button" />
+                                <DxButton Text='@LT("Reset adjustments")' Click="ResetAdjustments" CssClass="wide-button" />
                             </section>
                         }
                     </div>
@@ -766,13 +731,13 @@
             @if (!string.IsNullOrWhiteSpace(_ocrStatus) || HasOcrText)
             {
                 <section class="picture-ocr-review" aria-live="polite">
-                    <header><strong>LocalGPT OCR</strong><span>@_ocrStatus</span></header>
+                    <header><strong>@LT("LocalGPT OCR")</strong><span>@_ocrStatus</span></header>
                     @if (HasOcrText)
                     {
-                        <textarea rows="6" @bind="_ocrText" @bind:event="oninput" aria-label="Recognized text review"></textarea>
+                        <textarea rows="6" @bind="_ocrText" @bind:event="oninput" aria-label='@LT("Recognized text review")'></textarea>
                         <div>
-                            <button type="button" class="primary-button" @onclick="InsertOcrTextLayer">Insert as editable text layer</button>
-                            <button type="button" @onclick="ClearOcrText">Clear</button>
+                            <button type="button" class="primary-button" @onclick="InsertOcrTextLayer">@LT("Insert as editable text layer")</button>
+                            <button type="button" @onclick="ClearOcrText">@LT("Clear")</button>
                         </div>
                     }
                 </section>
@@ -781,15 +746,15 @@
             <footer class="picture-studio-footer">
                 <div>
                     <span>@StatusText</span>
-                    <label>Zoom
+                    <label>@LT("Zoom")
                         <input type="range" min="0.05" max="2" step="0.05" value="@Inv(State.Document.Zoom)" @oninput="ChangeZoom" />
                         <b>@Math.Round(State.Document.Zoom * 100)%</b>
                     </label>
                 </div>
                 <div>
-                    <DxButton Text="Cancel" Click="Cancel" />
-                    <DxButton Text="@(IsPictureExporting ? "Rendering…" : EditingExisting ? "Apply layered" : "Insert layered")" Enabled="@(!IsPictureExporting)" RenderStyle="ButtonRenderStyle.Primary" Click="ApplyLayered" />
-                    <DxButton Text="@(EditingExisting ? "Apply merged" : "Insert merged")" Enabled="@(!IsPictureExporting)" Click="ApplyMerged" />
+                    <DxButton Text='@LT("Cancel")' Click="Cancel" />
+                    <DxButton Text="@(IsPictureExporting ? LT("Rendering…") : EditingExisting ? LT("Apply layered") : LT("Insert layered"))" Enabled="@(!IsPictureExporting)" RenderStyle="ButtonRenderStyle.Primary" Click="ApplyLayered" />
+                    <DxButton Text="@(EditingExisting ? LT("Apply merged") : LT("Insert merged"))" Enabled="@(!IsPictureExporting)" Click="ApplyMerged" />
                 </div>
             </footer>
         </section>
@@ -797,49 +762,49 @@
 
     <DxContextMenu @ref="_pictureContextMenu">
         <Items>
-            <DxContextMenuItem Text="Undo" IconCssClass="pub-icon pub-icon-undo" Enabled="State.CanUndo" Click="State.Undo" />
-            <DxContextMenuItem Text="Redo" IconCssClass="pub-icon pub-icon-redo" Enabled="State.CanRedo" Click="State.Redo" />
+            <DxContextMenuItem Text='@LT("Undo")' IconCssClass="pub-icon pub-icon-undo" Enabled="State.CanUndo" Click="State.Undo" />
+            <DxContextMenuItem Text='@LT("Redo")' IconCssClass="pub-icon pub-icon-redo" Enabled="State.CanRedo" Click="State.Redo" />
 
             @if (State.SelectedLayer is PictureLayer selectedLayer)
             {
                 @if (selectedLayer is RasterPictureLayer raster)
                 {
-                    <DxContextMenuItem Text="Replace image…" IconCssClass="pub-icon pub-icon-picture" BeginGroup="true" Enabled="@(!raster.Locked)" Click="RequestRasterReplacement" />
-                    <DxContextMenuItem Text="Image fit" Enabled="@(!raster.Locked)">
+                    <DxContextMenuItem Text='@LT("Replace image…")' IconCssClass="pub-icon pub-icon-picture" BeginGroup="true" Enabled="@(!raster.Locked)" Click="RequestRasterReplacement" />
+                    <DxContextMenuItem Text='@LT("Image fit")' Enabled="@(!raster.Locked)">
                         <Items>
                             <DxContextMenuItem Text="@(CheckedText(raster.FitMode == PictureRasterFitMode.Contain, "Contain"))" Click="RasterContain" />
                             <DxContextMenuItem Text="@(CheckedText(raster.FitMode == PictureRasterFitMode.Cover, "Cover"))" Click="RasterCover" />
                             <DxContextMenuItem Text="@(CheckedText(raster.FitMode == PictureRasterFitMode.Stretch, "Stretch"))" Click="RasterStretch" />
                         </Items>
                     </DxContextMenuItem>
-                    <DxContextMenuItem Text="Flip horizontal" Enabled="@(!raster.Locked)" Click="RasterFlipHorizontal" />
-                    <DxContextMenuItem Text="Flip vertical" Enabled="@(!raster.Locked)" Click="RasterFlipVertical" />
-                    <DxContextMenuItem Text="Rotate image">
+                    <DxContextMenuItem Text='@LT("Flip horizontal")' Enabled="@(!raster.Locked)" Click="RasterFlipHorizontal" />
+                    <DxContextMenuItem Text='@LT("Flip vertical")' Enabled="@(!raster.Locked)" Click="RasterFlipVertical" />
+                    <DxContextMenuItem Text='@LT("Rotate image")'>
                         <Items>
-                            <DxContextMenuItem Text="Rotate 90° left" Click="RasterRotateLeft" />
-                            <DxContextMenuItem Text="Rotate 90° right" Click="RasterRotateRight" />
-                            <DxContextMenuItem Text="Reset rotation" Click="RasterResetRotation" />
+                            <DxContextMenuItem Text='@LT("Rotate 90° left")' Click="RasterRotateLeft" />
+                            <DxContextMenuItem Text='@LT("Rotate 90° right")' Click="RasterRotateRight" />
+                            <DxContextMenuItem Text='@LT("Reset rotation")' Click="RasterResetRotation" />
                         </Items>
                     </DxContextMenuItem>
-                    <DxContextMenuItem Text="Tint">
+                    <DxContextMenuItem Text='@LT("Tint")'>
                         <Items>
-                            <DxContextMenuItem Text="No tint" Click="RasterNoTint" />
-                            <DxContextMenuItem Text="Blue tint" Click="RasterBlueTint" />
-                            <DxContextMenuItem Text="Warm tint" Click="RasterWarmTint" />
+                            <DxContextMenuItem Text='@LT("No tint")' Click="RasterNoTint" />
+                            <DxContextMenuItem Text='@LT("Blue tint")' Click="RasterBlueTint" />
+                            <DxContextMenuItem Text='@LT("Warm tint")' Click="RasterWarmTint" />
                         </Items>
                     </DxContextMenuItem>
-                    <DxContextMenuItem Text="Change colors" IconCssClass="pub-icon pub-icon-color">
+                    <DxContextMenuItem Text='@LT("Change colors")' IconCssClass="pub-icon pub-icon-color">
                         <Items>
-                            <DxContextMenuItem Text="White / light → red" Click="RasterWhiteToRed" />
-                            <DxContextMenuItem Text="White / light → tint color" Click="RasterWhiteToTint" />
-                            <DxContextMenuItem Text="Colorize by luminosity" Click="RasterLuminosityColorize" />
-                            <DxContextMenuItem Text="Reset color change" BeginGroup="true" Click="RasterResetColorize" />
+                            <DxContextMenuItem Text='@LT("White / light → red")' Click="RasterWhiteToRed" />
+                            <DxContextMenuItem Text='@LT("White / light → tint color")' Click="RasterWhiteToTint" />
+                            <DxContextMenuItem Text='@LT("Colorize by luminosity")' Click="RasterLuminosityColorize" />
+                            <DxContextMenuItem Text='@LT("Reset color change")' BeginGroup="true" Click="RasterResetColorize" />
                         </Items>
                     </DxContextMenuItem>
                 }
                 else if (selectedLayer is TextPictureLayer pictureText)
                 {
-                    <DxContextMenuItem Text="Font" IconCssClass="pub-icon pub-icon-text" BeginGroup="true">
+                    <DxContextMenuItem Text='@LT("Font")' IconCssClass="pub-icon pub-icon-text" BeginGroup="true">
                         <Items>
                             @if (!PictureFonts.Contains(pictureText.FontFamily, StringComparer.OrdinalIgnoreCase))
                             {
@@ -853,60 +818,60 @@
                     </DxContextMenuItem>
                     <DxContextMenuItem Text="@PictureTextFontSizeMenuText(pictureText)">
                         <Items>
-                            <DxContextMenuItem Text="24 px" Click="TextSize24" />
-                            <DxContextMenuItem Text="48 px" Click="TextSize48" />
-                            <DxContextMenuItem Text="72 px" Click="TextSize72" />
-                            <DxContextMenuItem Text="120 px" Click="TextSize120" />
-                            <DxContextMenuItem Text="180 px" Click="TextSize180" />
+                            <DxContextMenuItem Text='@LT("24 px")' Click="TextSize24" />
+                            <DxContextMenuItem Text='@LT("48 px")' Click="TextSize48" />
+                            <DxContextMenuItem Text='@LT("72 px")' Click="TextSize72" />
+                            <DxContextMenuItem Text='@LT("120 px")' Click="TextSize120" />
+                            <DxContextMenuItem Text='@LT("180 px")' Click="TextSize180" />
                         </Items>
                     </DxContextMenuItem>
                     <DxContextMenuItem Text="@(CheckedText(pictureText.Bold, "Bold"))" Click="TogglePictureTextBold" />
                     <DxContextMenuItem Text="@(CheckedText(pictureText.Italic, "Italic"))" Click="TogglePictureTextItalic" />
                     <DxContextMenuItem Text="@(CheckedText(pictureText.ShadowEnabled, "Shadow"))" Click="TogglePictureTextShadow" />
-                    <DxContextMenuItem Text="Alignment">
+                    <DxContextMenuItem Text='@LT("Alignment")'>
                         <Items>
                             <DxContextMenuItem Text="@(CheckedText(pictureText.Alignment == PictureTextAlignment.Left, "Left"))" Click="TextAlignLeft" />
                             <DxContextMenuItem Text="@(CheckedText(pictureText.Alignment == PictureTextAlignment.Center, "Center"))" Click="TextAlignCenter" />
                             <DxContextMenuItem Text="@(CheckedText(pictureText.Alignment == PictureTextAlignment.Right, "Right"))" Click="TextAlignRight" />
                         </Items>
                     </DxContextMenuItem>
-                    <DxContextMenuItem Text="Text color">
+                    <DxContextMenuItem Text='@LT("Text color")'>
                         <Items>
-                            <DxContextMenuItem Text="Dark blue" Click="TextColorBlue" />
-                            <DxContextMenuItem Text="Black" Click="TextColorBlack" />
-                            <DxContextMenuItem Text="White" Click="TextColorWhite" />
-                            <DxContextMenuItem Text="Red" Click="TextColorRed" />
+                            <DxContextMenuItem Text='@LT("Dark blue")' Click="TextColorBlue" />
+                            <DxContextMenuItem Text='@LT("Black")' Click="TextColorBlack" />
+                            <DxContextMenuItem Text='@LT("White")' Click="TextColorWhite" />
+                            <DxContextMenuItem Text='@LT("Red")' Click="TextColorRed" />
                         </Items>
                     </DxContextMenuItem>
-                    <DxContextMenuItem Text="Outline">
+                    <DxContextMenuItem Text='@LT("Outline")'>
                         <Items>
-                            <DxContextMenuItem Text="No outline" Click="TextOutlineNone" />
-                            <DxContextMenuItem Text="Thin dark outline" Click="TextOutlineThin" />
-                            <DxContextMenuItem Text="Thick white outline" Click="TextOutlineThick" />
+                            <DxContextMenuItem Text='@LT("No outline")' Click="TextOutlineNone" />
+                            <DxContextMenuItem Text='@LT("Thin dark outline")' Click="TextOutlineThin" />
+                            <DxContextMenuItem Text='@LT("Thick white outline")' Click="TextOutlineThick" />
                         </Items>
                     </DxContextMenuItem>
                 }
                 else if (selectedLayer is PaintPictureLayer paint)
                 {
-                    <DxContextMenuItem Text="Continue with brush" IconCssClass="pub-icon pub-icon-edit" BeginGroup="true" Click="BrushTool" />
-                    <DxContextMenuItem Text="Continue with pencil" Click="PencilTool" />
-                    <DxContextMenuItem Text="Continue with spray can" Click="SprayTool" />
-                    <DxContextMenuItem Text="Continue with toothbrush" Click="ToothbrushTool" />
-                    <DxContextMenuItem Text="Paint along path">
+                    <DxContextMenuItem Text='@LT("Continue with brush")' IconCssClass="pub-icon pub-icon-edit" BeginGroup="true" Click="BrushTool" />
+                    <DxContextMenuItem Text='@LT("Continue with pencil")' Click="PencilTool" />
+                    <DxContextMenuItem Text='@LT("Continue with spray can")' Click="SprayTool" />
+                    <DxContextMenuItem Text='@LT("Continue with toothbrush")' Click="ToothbrushTool" />
+                    <DxContextMenuItem Text='@LT("Paint along path")'>
                         <Items>
-                            <DxContextMenuItem Text="Brush path" Click="BrushPathTool" />
-                            <DxContextMenuItem Text="Pencil path" Click="PencilPathTool" />
-                            <DxContextMenuItem Text="Spray path" Click="SprayPathTool" />
-                            <DxContextMenuItem Text="Toothbrush path" Click="ToothbrushPathTool" />
-                            <DxContextMenuItem Text="Eraser path" Click="EraserPathTool" />
+                            <DxContextMenuItem Text='@LT("Brush path")' Click="BrushPathTool" />
+                            <DxContextMenuItem Text='@LT("Pencil path")' Click="PencilPathTool" />
+                            <DxContextMenuItem Text='@LT("Spray path")' Click="SprayPathTool" />
+                            <DxContextMenuItem Text='@LT("Toothbrush path")' Click="ToothbrushPathTool" />
+                            <DxContextMenuItem Text='@LT("Eraser path")' Click="EraserPathTool" />
                         </Items>
                     </DxContextMenuItem>
-                    <DxContextMenuItem Text="Erase strokes" Click="EraserTool" />
-                    <DxContextMenuItem Text="Clear all strokes" Enabled="@(paint.Strokes.Count > 0 && !paint.Locked)" Click="State.ClearSelectedPaint" />
+                    <DxContextMenuItem Text='@LT("Erase strokes")' Click="EraserTool" />
+                    <DxContextMenuItem Text='@LT("Clear all strokes")' Enabled="@(paint.Strokes.Count > 0 && !paint.Locked)" Click="State.ClearSelectedPaint" />
                 }
                 else if (selectedLayer is RenderPictureLayer render)
                 {
-                    <DxContextMenuItem Text="Renderer" BeginGroup="true">
+                    <DxContextMenuItem Text='@LT("Renderer")' BeginGroup="true">
                         <Items>
                             <DxContextMenuItem Text="@(CheckedText(render.RenderKind == PictureRenderKind.Clouds, "Clouds"))" Click="MakeRenderClouds" />
                             <DxContextMenuItem Text="@(CheckedText(render.RenderKind == PictureRenderKind.Noise, "Noise"))" Click="MakeRenderNoise" />
@@ -921,15 +886,15 @@
                             <DxContextMenuItem Text="@(CheckedText(render.RenderKind == PictureRenderKind.OceanWaves, "Ocean waves"))" Click="MakeRenderOceanWaves" />
                         </Items>
                     </DxContextMenuItem>
-                    <DxContextMenuItem Text="Edit all renderer properties…" IconCssClass="pub-icon pub-icon-properties" Click="FocusRenderProperties" />
-                    <DxContextMenuItem Text="Colors">
+                    <DxContextMenuItem Text='@LT("Edit all renderer properties…")' IconCssClass="pub-icon pub-icon-properties" Click="FocusRenderProperties" />
+                    <DxContextMenuItem Text='@LT("Colors")'>
                         <Items>
-                            <DxContextMenuItem Text="Primary: white" Click="RenderPrimaryWhite" />
-                            <DxContextMenuItem Text="Primary: black" Click="RenderPrimaryBlack" />
-                            <DxContextMenuItem Text="Primary: blue" Click="RenderPrimaryBlue" />
-                            <DxContextMenuItem Text="Secondary: white" BeginGroup="true" Click="RenderSecondaryWhite" />
-                            <DxContextMenuItem Text="Secondary: black" Click="RenderSecondaryBlack" />
-                            <DxContextMenuItem Text="Secondary: blue" Click="RenderSecondaryBlue" />
+                            <DxContextMenuItem Text='@LT("Primary: white")' Click="RenderPrimaryWhite" />
+                            <DxContextMenuItem Text='@LT("Primary: black")' Click="RenderPrimaryBlack" />
+                            <DxContextMenuItem Text='@LT("Primary: blue")' Click="RenderPrimaryBlue" />
+                            <DxContextMenuItem Text='@LT("Secondary: white")' BeginGroup="true" Click="RenderSecondaryWhite" />
+                            <DxContextMenuItem Text='@LT("Secondary: black")' Click="RenderSecondaryBlack" />
+                            <DxContextMenuItem Text='@LT("Secondary: blue")' Click="RenderSecondaryBlue" />
                         </Items>
                     </DxContextMenuItem>
                     <DxContextMenuItem Text="@RenderScaleMenuText(render)">
@@ -960,37 +925,37 @@
                     </DxContextMenuItem>
                     <DxContextMenuItem Text="@RenderContrastMenuText(render)">
                         <Items>
-                            <DxContextMenuItem Text="0.5×" Click="RenderContrast05" />
-                            <DxContextMenuItem Text="1.0×" Click="RenderContrast10" />
-                            <DxContextMenuItem Text="1.5×" Click="RenderContrast15" />
-                            <DxContextMenuItem Text="2.0×" Click="RenderContrast20" />
-                            <DxContextMenuItem Text="3.0×" Click="RenderContrast30" />
+                            <DxContextMenuItem Text='@LT("0.5×")' Click="RenderContrast05" />
+                            <DxContextMenuItem Text='@LT("1.0×")' Click="RenderContrast10" />
+                            <DxContextMenuItem Text='@LT("1.5×")' Click="RenderContrast15" />
+                            <DxContextMenuItem Text='@LT("2.0×")' Click="RenderContrast20" />
+                            <DxContextMenuItem Text='@LT("3.0×")' Click="RenderContrast30" />
                         </Items>
                     </DxContextMenuItem>
                     <DxContextMenuItem Text="@RenderAngleMenuText(render)">
                         <Items>
-                            <DxContextMenuItem Text="0°" Click="RenderAngle0" />
-                            <DxContextMenuItem Text="45°" Click="RenderAngle45" />
-                            <DxContextMenuItem Text="90°" Click="RenderAngle90" />
-                            <DxContextMenuItem Text="180°" Click="RenderAngle180" />
-                            <DxContextMenuItem Text="270°" Click="RenderAngle270" />
+                            <DxContextMenuItem Text='@LT("0°")' Click="RenderAngle0" />
+                            <DxContextMenuItem Text='@LT("45°")' Click="RenderAngle45" />
+                            <DxContextMenuItem Text='@LT("90°")' Click="RenderAngle90" />
+                            <DxContextMenuItem Text='@LT("180°")' Click="RenderAngle180" />
+                            <DxContextMenuItem Text='@LT("270°")' Click="RenderAngle270" />
                         </Items>
                     </DxContextMenuItem>
                     <DxContextMenuItem Text="@RenderStripeWidthMenuText(render)" Enabled="@(render.RenderKind == PictureRenderKind.Stripes)">
                         <Items>
-                            <DxContextMenuItem Text="8 px" Click="RenderStripe8" />
-                            <DxContextMenuItem Text="16 px" Click="RenderStripe16" />
-                            <DxContextMenuItem Text="32 px" Click="RenderStripe32" />
-                            <DxContextMenuItem Text="64 px" Click="RenderStripe64" />
-                            <DxContextMenuItem Text="128 px" Click="RenderStripe128" />
+                            <DxContextMenuItem Text='@LT("8 px")' Click="RenderStripe8" />
+                            <DxContextMenuItem Text='@LT("16 px")' Click="RenderStripe16" />
+                            <DxContextMenuItem Text='@LT("32 px")' Click="RenderStripe32" />
+                            <DxContextMenuItem Text='@LT("64 px")' Click="RenderStripe64" />
+                            <DxContextMenuItem Text='@LT("128 px")' Click="RenderStripe128" />
                         </Items>
                     </DxContextMenuItem>
-                    <DxContextMenuItem Text="New random seed" IconCssClass="pub-icon pub-icon-random" Click="RandomizeRender" />
-                    <DxContextMenuItem Text="Reset renderer settings" Click="ResetRenderSettings" />
+                    <DxContextMenuItem Text='@LT("New random seed")' IconCssClass="pub-icon pub-icon-random" Click="RandomizeRender" />
+                    <DxContextMenuItem Text='@LT("Reset renderer settings")' Click="ResetRenderSettings" />
                 }
                 else if (selectedLayer is ShapePictureLayer shape)
                 {
-                    <DxContextMenuItem Text="Shape" BeginGroup="true">
+                    <DxContextMenuItem Text='@LT("Shape")' BeginGroup="true">
                         <Items>
                             <DxContextMenuItem Text="@(CheckedText(shape.Shape == PictureShapeKind.Rectangle, "Rectangle"))" Click="ShapeRectangle" />
                             <DxContextMenuItem Text="@(CheckedText(shape.Shape == PictureShapeKind.RoundedRectangle, "Rounded rectangle"))" Click="ShapeRoundedRectangle" />
@@ -1000,170 +965,170 @@
                             <DxContextMenuItem Text="@(CheckedText(shape.Shape == PictureShapeKind.Path, "Path"))" Click="ShapePath" />
                         </Items>
                     </DxContextMenuItem>
-                    <DxContextMenuItem Text="Fill type">
+                    <DxContextMenuItem Text='@LT("Fill type")'>
                         <Items>
                             <DxContextMenuItem Text="@(CheckedText(shape.FillKind == PictureFillKind.Solid, "Solid"))" Click="ShapeFillSolid" />
                             <DxContextMenuItem Text="@(CheckedText(shape.FillKind == PictureFillKind.LinearGradient, "Linear gradient"))" Click="ShapeFillLinear" />
                             <DxContextMenuItem Text="@(CheckedText(shape.FillKind == PictureFillKind.RadialGradient, "Radial gradient"))" Click="ShapeFillRadial" />
                         </Items>
                     </DxContextMenuItem>
-                    <DxContextMenuItem Text="Fill colors">
+                    <DxContextMenuItem Text='@LT("Fill colors")'>
                         <Items>
-                            <DxContextMenuItem Text="Blue" Click="ShapeColorsBlue" />
-                            <DxContextMenuItem Text="Green" Click="ShapeColorsGreen" />
-                            <DxContextMenuItem Text="Orange" Click="ShapeColorsOrange" />
-                            <DxContextMenuItem Text="Black / white" Click="ShapeColorsMono" />
+                            <DxContextMenuItem Text='@LT("Blue")' Click="ShapeColorsBlue" />
+                            <DxContextMenuItem Text='@LT("Green")' Click="ShapeColorsGreen" />
+                            <DxContextMenuItem Text='@LT("Orange")' Click="ShapeColorsOrange" />
+                            <DxContextMenuItem Text='@LT("Black / white")' Click="ShapeColorsMono" />
                         </Items>
                     </DxContextMenuItem>
-                    <DxContextMenuItem Text="Stroke width">
+                    <DxContextMenuItem Text='@LT("Stroke width")'>
                         <Items>
-                            <DxContextMenuItem Text="None" Click="ShapeStroke0" />
-                            <DxContextMenuItem Text="1 px" Click="ShapeStroke1" />
-                            <DxContextMenuItem Text="3 px" Click="ShapeStroke3" />
-                            <DxContextMenuItem Text="8 px" Click="ShapeStroke8" />
+                            <DxContextMenuItem Text='@LT("None")' Click="ShapeStroke0" />
+                            <DxContextMenuItem Text='@LT("1 px")' Click="ShapeStroke1" />
+                            <DxContextMenuItem Text='@LT("3 px")' Click="ShapeStroke3" />
+                            <DxContextMenuItem Text='@LT("8 px")' Click="ShapeStroke8" />
                         </Items>
                     </DxContextMenuItem>
                 }
                 else if (selectedLayer is FillPictureLayer fill)
                 {
-                    <DxContextMenuItem Text="Fill type" BeginGroup="true">
+                    <DxContextMenuItem Text='@LT("Fill type")' BeginGroup="true">
                         <Items>
                             <DxContextMenuItem Text="@(CheckedText(fill.FillKind == PictureFillKind.Solid, "Solid"))" Click="FillSolid" />
                             <DxContextMenuItem Text="@(CheckedText(fill.FillKind == PictureFillKind.LinearGradient, "Linear gradient"))" Click="FillLinearGradient" />
                             <DxContextMenuItem Text="@(CheckedText(fill.FillKind == PictureFillKind.RadialGradient, "Radial gradient"))" Click="FillRadialGradient" />
                         </Items>
                     </DxContextMenuItem>
-                    <DxContextMenuItem Text="Color preset">
+                    <DxContextMenuItem Text='@LT("Color preset")'>
                         <Items>
-                            <DxContextMenuItem Text="Blue" Click="FillColorsBlue" />
-                            <DxContextMenuItem Text="Green" Click="FillColorsGreen" />
-                            <DxContextMenuItem Text="Sunset" Click="FillColorsSunset" />
-                            <DxContextMenuItem Text="Black / white" Click="FillColorsMono" />
+                            <DxContextMenuItem Text='@LT("Blue")' Click="FillColorsBlue" />
+                            <DxContextMenuItem Text='@LT("Green")' Click="FillColorsGreen" />
+                            <DxContextMenuItem Text='@LT("Sunset")' Click="FillColorsSunset" />
+                            <DxContextMenuItem Text='@LT("Black / white")' Click="FillColorsMono" />
                         </Items>
                     </DxContextMenuItem>
-                    <DxContextMenuItem Text="Angle">
+                    <DxContextMenuItem Text='@LT("Angle")'>
                         <Items>
-                            <DxContextMenuItem Text="0°" Click="FillAngle0" />
-                            <DxContextMenuItem Text="45°" Click="FillAngle45" />
-                            <DxContextMenuItem Text="90°" Click="FillAngle90" />
-                            <DxContextMenuItem Text="180°" Click="FillAngle180" />
-                            <DxContextMenuItem Text="270°" Click="FillAngle270" />
+                            <DxContextMenuItem Text='@LT("0°")' Click="FillAngle0" />
+                            <DxContextMenuItem Text='@LT("45°")' Click="FillAngle45" />
+                            <DxContextMenuItem Text='@LT("90°")' Click="FillAngle90" />
+                            <DxContextMenuItem Text='@LT("180°")' Click="FillAngle180" />
+                            <DxContextMenuItem Text='@LT("270°")' Click="FillAngle270" />
                         </Items>
                     </DxContextMenuItem>
                 }
 
-                <DxContextMenuItem Text="Area selection" IconCssClass="pub-icon pub-icon-crop" BeginGroup="true">
+                <DxContextMenuItem Text='@LT("Area selection")' IconCssClass="pub-icon pub-icon-crop" BeginGroup="true">
                     <Items>
-                        <DxContextMenuItem Text="Polygon selection mode" Click="PolygonSelectTool" />
-                        <DxContextMenuItem Text="Keep selected area" Enabled="@(!selectedLayer.Locked)" Click="KeepSelectedArea" />
-                        <DxContextMenuItem Text="Cut selected area" Enabled="@(!selectedLayer.Locked)" Click="CutSelectedArea" />
-                        <DxContextMenuItem Text="Copy selected area" Click="CopySelectedArea" />
-                        <DxContextMenuItem Text="Copy selected area as layer" Click="CopySelectedAreaAsLayer" />
-                        <DxContextMenuItem Text="Clear layer cut" Enabled="@(selectedLayer.ClipPolygon.Count >= 3 && !selectedLayer.Locked)" Click="ClearLayerCut" />
-                        <DxContextMenuItem Text="Clear area selection overlay" Click="ClearAreaSelection" />
+                        <DxContextMenuItem Text='@LT("Polygon selection mode")' Click="PolygonSelectTool" />
+                        <DxContextMenuItem Text='@LT("Keep selected area")' Enabled="@(!selectedLayer.Locked)" Click="KeepSelectedArea" />
+                        <DxContextMenuItem Text='@LT("Cut selected area")' Enabled="@(!selectedLayer.Locked)" Click="CutSelectedArea" />
+                        <DxContextMenuItem Text='@LT("Copy selected area")' Click="CopySelectedArea" />
+                        <DxContextMenuItem Text='@LT("Copy selected area as layer")' Click="CopySelectedAreaAsLayer" />
+                        <DxContextMenuItem Text='@LT("Clear layer cut")' Enabled="@(selectedLayer.ClipPolygon.Count >= 3 && !selectedLayer.Locked)" Click="ClearLayerCut" />
+                        <DxContextMenuItem Text='@LT("Clear area selection overlay")' Click="ClearAreaSelection" />
                     </Items>
                 </DxContextMenuItem>
 
-                <DxContextMenuItem Text="Adjustments" IconCssClass="pub-icon pub-icon-color" BeginGroup="true">
+                <DxContextMenuItem Text='@LT("Adjustments")' IconCssClass="pub-icon pub-icon-color" BeginGroup="true">
                     <Items>
-                        <DxContextMenuItem Text="Brighten" Click="Brighten" />
-                        <DxContextMenuItem Text="Darken" Click="Darken" />
-                        <DxContextMenuItem Text="More contrast" Click="MoreContrast" />
-                        <DxContextMenuItem Text="More saturation" Click="MoreSaturation" />
+                        <DxContextMenuItem Text='@LT("Brighten")' Click="Brighten" />
+                        <DxContextMenuItem Text='@LT("Darken")' Click="Darken" />
+                        <DxContextMenuItem Text='@LT("More contrast")' Click="MoreContrast" />
+                        <DxContextMenuItem Text='@LT("More saturation")' Click="MoreSaturation" />
                         <DxContextMenuItem Text="@(CheckedText(selectedLayer.Grayscale > .5, "Grayscale"))" Click="ToggleGrayscalePreset" />
                         <DxContextMenuItem Text="@(CheckedText(selectedLayer.Sepia > .5, "Sepia"))" Click="ToggleSepiaPreset" />
                         <DxContextMenuItem Text="@(CheckedText(selectedLayer.Invert > .5, "Invert"))" Click="ToggleInvertPreset" />
-                        <DxContextMenuItem Text="Soften">
+                        <DxContextMenuItem Text='@LT("Soften")'>
                             <Items>
-                                <DxContextMenuItem Text="None" Click="RemoveSoftening" />
-                                <DxContextMenuItem Text="Light" Click="SoftenLight" />
-                                <DxContextMenuItem Text="Medium" Click="SoftenMedium" />
+                                <DxContextMenuItem Text='@LT("None")' Click="RemoveSoftening" />
+                                <DxContextMenuItem Text='@LT("Light")' Click="SoftenLight" />
+                                <DxContextMenuItem Text='@LT("Medium")' Click="SoftenMedium" />
                             </Items>
                         </DxContextMenuItem>
-                        <DxContextMenuItem Text="Reset all adjustments" BeginGroup="true" Click="ResetAdjustments" />
+                        <DxContextMenuItem Text='@LT("Reset all adjustments")' BeginGroup="true" Click="ResetAdjustments" />
                     </Items>
                 </DxContextMenuItem>
-                <DxContextMenuItem Text="Opacity">
+                <DxContextMenuItem Text='@LT("Opacity")'>
                     <Items>
-                        <DxContextMenuItem Text="100%" Click="LayerOpacity100" />
-                        <DxContextMenuItem Text="75%" Click="LayerOpacity75" />
-                        <DxContextMenuItem Text="50%" Click="LayerOpacity50" />
-                        <DxContextMenuItem Text="25%" Click="LayerOpacity25" />
+                        <DxContextMenuItem Text='@LT("100%")' Click="LayerOpacity100" />
+                        <DxContextMenuItem Text='@LT("75%")' Click="LayerOpacity75" />
+                        <DxContextMenuItem Text='@LT("50%")' Click="LayerOpacity50" />
+                        <DxContextMenuItem Text='@LT("25%")' Click="LayerOpacity25" />
                     </Items>
                 </DxContextMenuItem>
 
-                <DxContextMenuItem Text="Copy" IconCssClass="pub-icon pub-icon-copy" BeginGroup="true" Click="State.CopySelected" />
-                <DxContextMenuItem Text="Paste" IconCssClass="pub-icon pub-icon-paste" Enabled="State.CanPaste" Click="State.Paste" />
-                <DxContextMenuItem Text="Duplicate" IconCssClass="pub-icon pub-icon-duplicate" Click="State.DuplicateSelected" />
-                <DxContextMenuItem Text="Delete" IconCssClass="pub-icon pub-icon-delete" Enabled="CanDelete" Click="State.DeleteSelected" />
-                <DxContextMenuItem Text="Arrange" BeginGroup="true">
+                <DxContextMenuItem Text='@LT("Copy")' IconCssClass="pub-icon pub-icon-copy" BeginGroup="true" Click="State.CopySelected" />
+                <DxContextMenuItem Text='@LT("Paste")' IconCssClass="pub-icon pub-icon-paste" Enabled="State.CanPaste" Click="State.Paste" />
+                <DxContextMenuItem Text='@LT("Duplicate")' IconCssClass="pub-icon pub-icon-duplicate" Click="State.DuplicateSelected" />
+                <DxContextMenuItem Text='@LT("Delete")' IconCssClass="pub-icon pub-icon-delete" Enabled="CanDelete" Click="State.DeleteSelected" />
+                <DxContextMenuItem Text='@LT("Arrange")' BeginGroup="true">
                     <Items>
-                        <DxContextMenuItem Text="Bring to front" Click="State.BringSelectedToFront" />
-                        <DxContextMenuItem Text="Bring forward" Click="MoveUp" />
-                        <DxContextMenuItem Text="Send backward" Click="MoveDown" />
-                        <DxContextMenuItem Text="Send to back" Click="State.SendSelectedToBack" />
+                        <DxContextMenuItem Text='@LT("Bring to front")' Click="State.BringSelectedToFront" />
+                        <DxContextMenuItem Text='@LT("Bring forward")' Click="MoveUp" />
+                        <DxContextMenuItem Text='@LT("Send backward")' Click="MoveDown" />
+                        <DxContextMenuItem Text='@LT("Send to back")' Click="State.SendSelectedToBack" />
                     </Items>
                 </DxContextMenuItem>
-                <DxContextMenuItem Text="Place on canvas">
+                <DxContextMenuItem Text='@LT("Place on canvas")'>
                     <Items>
-                        <DxContextMenuItem Text="Center on canvas" Click="State.CenterSelected" />
-                        <DxContextMenuItem Text="Fit to canvas" Click="State.FitSelectedToCanvas" />
+                        <DxContextMenuItem Text='@LT("Center on canvas")' Click="State.CenterSelected" />
+                        <DxContextMenuItem Text='@LT("Fit to canvas")' Click="State.FitSelectedToCanvas" />
                     </Items>
                 </DxContextMenuItem>
-                <DxContextMenuItem Text="@(selectedLayer.Locked ? "Unlock layer" : "Lock layer")" BeginGroup="true" Click="ToggleSelectedLockMenu" />
-                <DxContextMenuItem Text="@(selectedLayer.Visible ? "Hide layer" : "Show layer")" Click="ToggleSelectedVisibilityMenu" />
+                <DxContextMenuItem Text="@(selectedLayer.Locked ? LT("Unlock layer") : LT("Lock layer"))" BeginGroup="true" Click="ToggleSelectedLockMenu" />
+                <DxContextMenuItem Text="@(selectedLayer.Visible ? LT("Hide layer") : LT("Show layer"))" Click="ToggleSelectedVisibilityMenu" />
             }
             else
             {
-                <DxContextMenuItem Text="Paste layer" IconCssClass="pub-icon pub-icon-paste" BeginGroup="true" Enabled="State.CanPaste" Click="State.Paste" />
-                <DxContextMenuItem Text="Insert image…" IconCssClass="pub-icon pub-icon-picture" Click="RequestImage" />
-                <DxContextMenuItem Text="Import layered SVG / OpenRaster…" IconCssClass="pub-icon pub-icon-vector" Click="RequestLayeredImport" />
-                <DxContextMenuItem Text="Insert text" IconCssClass="pub-icon pub-icon-text" Click="AddTextLayer" />
-                <DxContextMenuItem Text="Insert shape">
+                <DxContextMenuItem Text='@LT("Paste layer")' IconCssClass="pub-icon pub-icon-paste" BeginGroup="true" Enabled="State.CanPaste" Click="State.Paste" />
+                <DxContextMenuItem Text='@LT("Insert image…")' IconCssClass="pub-icon pub-icon-picture" Click="RequestImage" />
+                <DxContextMenuItem Text='@LT("Import layered SVG / OpenRaster…")' IconCssClass="pub-icon pub-icon-vector" Click="RequestLayeredImport" />
+                <DxContextMenuItem Text='@LT("Insert text")' IconCssClass="pub-icon pub-icon-text" Click="AddTextLayer" />
+                <DxContextMenuItem Text='@LT("Insert shape")'>
                     <Items>
-                        <DxContextMenuItem Text="Rectangle" Click="AddRectangle" />
-                        <DxContextMenuItem Text="Ellipse" Click="AddEllipse" />
-                        <DxContextMenuItem Text="Arrow" Click="AddArrowShape" />
-                        <DxContextMenuItem Text="Line" Click="AddLineShape" />
+                        <DxContextMenuItem Text='@LT("Rectangle")' Click="AddRectangle" />
+                        <DxContextMenuItem Text='@LT("Ellipse")' Click="AddEllipse" />
+                        <DxContextMenuItem Text='@LT("Arrow")' Click="AddArrowShape" />
+                        <DxContextMenuItem Text='@LT("Line")' Click="AddLineShape" />
                     </Items>
                 </DxContextMenuItem>
-                <DxContextMenuItem Text="Insert fill">
+                <DxContextMenuItem Text='@LT("Insert fill")'>
                     <Items>
-                        <DxContextMenuItem Text="Solid color" Click="AddSolidFill" />
-                        <DxContextMenuItem Text="Gradient" Click="AddGradient" />
+                        <DxContextMenuItem Text='@LT("Solid color")' Click="AddSolidFill" />
+                        <DxContextMenuItem Text='@LT("Gradient")' Click="AddGradient" />
                     </Items>
                 </DxContextMenuItem>
-                <DxContextMenuItem Text="Insert procedural render">
+                <DxContextMenuItem Text='@LT("Insert procedural render")'>
                     <Items>
-                        <DxContextMenuItem Text="Clouds" Click="AddClouds" />
-                        <DxContextMenuItem Text="Noise" Click="AddNoise" />
-                        <DxContextMenuItem Text="Stripes" Click="AddStripes" />
-                        <DxContextMenuItem Text="Vignette" Click="AddVignette" />
-                        <DxContextMenuItem Text="Bloom" Click="AddBloom" />
-                        <DxContextMenuItem Text="Neon" Click="AddNeon" />
-                        <DxContextMenuItem Text="Lens flare" Click="AddLensFlare" />
-                        <DxContextMenuItem Text="Grain noise" Click="AddGrainNoise" />
-                        <DxContextMenuItem Text="Motion blur" Click="AddMotionBlur" />
-                        <DxContextMenuItem Text="Wind" Click="AddWind" />
-                        <DxContextMenuItem Text="Ocean waves" Click="AddOceanWaves" />
+                        <DxContextMenuItem Text='@LT("Clouds")' Click="AddClouds" />
+                        <DxContextMenuItem Text='@LT("Noise")' Click="AddNoise" />
+                        <DxContextMenuItem Text='@LT("Stripes")' Click="AddStripes" />
+                        <DxContextMenuItem Text='@LT("Vignette")' Click="AddVignette" />
+                        <DxContextMenuItem Text='@LT("Bloom")' Click="AddBloom" />
+                        <DxContextMenuItem Text='@LT("Neon")' Click="AddNeon" />
+                        <DxContextMenuItem Text='@LT("Lens flare")' Click="AddLensFlare" />
+                        <DxContextMenuItem Text='@LT("Grain noise")' Click="AddGrainNoise" />
+                        <DxContextMenuItem Text='@LT("Motion blur")' Click="AddMotionBlur" />
+                        <DxContextMenuItem Text='@LT("Wind")' Click="AddWind" />
+                        <DxContextMenuItem Text='@LT("Ocean waves")' Click="AddOceanWaves" />
                     </Items>
                 </DxContextMenuItem>
-                <DxContextMenuItem Text="Insert paint layer" IconCssClass="pub-icon pub-icon-edit" Click="AddPaintLayer" />
-                <DxContextMenuItem Text="Area selection" BeginGroup="true"><Items>
-                    <DxContextMenuItem Text="Rectangle selection" Click="RectangleSelectTool" />
-                    <DxContextMenuItem Text="Ellipse selection" Click="EllipseSelectTool" />
-                    <DxContextMenuItem Text="Freehand lasso" Click="FreeSelectTool" />
-                    <DxContextMenuItem Text="Magnetic lasso" Click="MagneticSelectTool" />
-                    <DxContextMenuItem Text="Clear selection" Click="ClearAreaSelection" />
+                <DxContextMenuItem Text='@LT("Insert paint layer")' IconCssClass="pub-icon pub-icon-edit" Click="AddPaintLayer" />
+                <DxContextMenuItem Text='@LT("Area selection")' BeginGroup="true"><Items>
+                    <DxContextMenuItem Text='@LT("Rectangle selection")' Click="RectangleSelectTool" />
+                    <DxContextMenuItem Text='@LT("Ellipse selection")' Click="EllipseSelectTool" />
+                    <DxContextMenuItem Text='@LT("Freehand lasso")' Click="FreeSelectTool" />
+                    <DxContextMenuItem Text='@LT("Magnetic lasso")' Click="MagneticSelectTool" />
+                    <DxContextMenuItem Text='@LT("Clear selection")' Click="ClearAreaSelection" />
                 </Items></DxContextMenuItem>
-                <DxContextMenuItem Text="Fill selected area"><Items>
-                    <DxContextMenuItem Text="Solid fill" Click="FillSolidTool" />
-                    <DxContextMenuItem Text="Gradient fill" Click="FillGradientTool" />
+                <DxContextMenuItem Text='@LT("Fill selected area")'><Items>
+                    <DxContextMenuItem Text='@LT("Solid fill")' Click="FillSolidTool" />
+                    <DxContextMenuItem Text='@LT("Gradient fill")' Click="FillGradientTool" />
                 </Items></DxContextMenuItem>
-                <DxContextMenuItem Text="View" BeginGroup="true">
+                <DxContextMenuItem Text='@LT("View")' BeginGroup="true">
                     <Items>
-                        <DxContextMenuItem Text="Fit canvas" Click="FitCanvas" />
-                        <DxContextMenuItem Text="100% zoom" Click="Zoom100" />
+                        <DxContextMenuItem Text='@LT("Fit canvas")' Click="FitCanvas" />
+                        <DxContextMenuItem Text='@LT("100% zoom")' Click="Zoom100" />
                         <DxContextMenuItem Text="@GridText" Click="ToggleGridRibbon" />
                         <DxContextMenuItem Text="@SnapText" Click="ToggleSnapRibbon" />
                     </Items>

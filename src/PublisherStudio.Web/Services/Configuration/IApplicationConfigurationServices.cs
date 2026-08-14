@@ -57,6 +57,12 @@ public interface IFileLocalizationService
     /// <returns>The string produced by the operation.</returns>
     string Get(string key, string? culture = null, string? fallback = null);
 
+    /// <summary>Resolves a source-owned English UI literal through the localization catalogs without duplicating localization keys in components.</summary>
+    /// <param name="englishText">Canonical English UI text stored in the source localization catalog.</param>
+    /// <param name="culture">Optional culture to resolve; the current UI culture is used when omitted.</param>
+    /// <returns>The localized text when the English source value is catalogued; otherwise the original text.</returns>
+    string GetText(string englishText, string? culture = null);
+
     /// <summary>
     /// Resolves available culture as part of the file localization service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>

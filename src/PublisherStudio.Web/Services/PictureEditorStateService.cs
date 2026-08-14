@@ -1043,6 +1043,33 @@ public sealed class PictureEditorStateService
 }
 
     /// <summary>
+    /// Moves one picture layer to an explicit back-to-front index while preserving the current editable document and undo history.
+    /// </summary>
+    /// <param name="layerId">Identifier of the picture layer to move.</param>
+    /// <param name="targetIndex">Zero-based destination in the document's back-to-front layer collection.</param>
+    public void MoveLayerToIndex(Guid layerId, int targetIndex)
+    {
+        try
+        {
+            var layer = Document.Layers.FirstOrDefault(item => item.Id == layerId);
+            if (layer is null || Document.Layers.Count <= 1) return;
+            var currentIndex = Document.Layers.IndexOf(layer);
+            var destination = Math.Clamp(targetIndex, 0, Document.Layers.Count - 1);
+            if (destination == currentIndex) return;
+            Capture();
+            Document.Layers.RemoveAt(currentIndex);
+            Document.Layers.Insert(Math.Clamp(destination, 0, Document.Layers.Count), layer);
+            SelectedLayerId = layer.Id;
+            Notify();
+        }
+        catch (Exception __serviceMethodException)
+        {
+            System.Diagnostics.Trace.TraceError($"Service method PictureEditorStateService.MoveLayerToIndex failed: {__serviceMethodException}");
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Performs bring selected to front as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void BringSelectedToFront()

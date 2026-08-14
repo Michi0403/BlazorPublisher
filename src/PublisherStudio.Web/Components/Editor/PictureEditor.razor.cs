@@ -74,6 +74,9 @@ public partial class PictureEditor
     /// </summary>
     /// <value>The files value exposed by <see cref="PictureEditor"/>.</value>
     [Inject] private PublicationFileService Files { get; set; } = default!;
+    /// <summary>Gets the localization catalog service used by Picture Studio labels and commands.</summary>
+    /// <value>The localization service used to resolve Picture Studio UI text.</value>
+    [Inject] private IFileLocalizationService Localization { get; set; } = default!;
 
     /// <summary>
     /// Gets or sets a value indicating whether the value is visible applies to the picture editor state.
@@ -116,10 +119,13 @@ public partial class PictureEditor
     /// <value>The cancelled value exposed by <see cref="PictureEditor"/>.</value>
     [Parameter] public EventCallback Cancelled { get; set; }
 
-    /// <summary>
-    /// Gets the picture fonts collection maintained or exposed by this picture editor instance for downstream processing.
-    /// </summary>
-    /// <value>The picture fonts value exposed by <see cref="PictureEditor"/>.</value>
+    /// <summary>Resolves one canonical English Picture Studio label through the active localization catalog.</summary>
+    /// <param name="text">Canonical English UI text to resolve.</param>
+    /// <returns>The localized UI text, or the supplied English text when no translation exists.</returns>
+    private string LT(string text) => Localization.GetText(text);
+
+    /// <summary>Gets the system font-family names available to Picture Studio text layers.</summary>
+    /// <value>The font-family names exposed by the system font catalog.</value>
     private IReadOnlyList<string> PictureFonts => SystemFonts.FontFamilies;
 
     /// <summary>
@@ -414,7 +420,7 @@ public partial class PictureEditor
     /// Gets the canvas hint value that forms part of the picture editor state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The canvas hint value exposed by <see cref="PictureEditor"/>.</value>
-    private string CanvasHint => _drawTool switch
+    private string CanvasHint => LT(_drawTool switch
     {
         PictureDrawTool.Select => "Drag layers directly. Corner handles resize; the round handle rotates. Right-click for layer commands.",
         PictureDrawTool.Eyedropper => "Click the rendered canvas to pick a color, then the Brush tool becomes active.",
@@ -435,7 +441,7 @@ public partial class PictureEditor
         PictureDrawTool.Ellipse => "Drag an ellipse directly onto the canvas. The result remains an editable shape layer.",
         PictureDrawTool.Arrow => "Drag from the arrow tail to its point. The result remains an editable, rotatable shape layer.",
         _ => "Draw directly on the canvas. A paint layer is created automatically when necessary. Right-click does not draw."
-    };
+    });
     /// <summary>
     /// Gets the canvas color value that forms part of the picture editor state consumed or produced by the surrounding workflow.
     /// </summary>
@@ -513,7 +519,7 @@ public partial class PictureEditor
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!Visible) return;
-        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/pictureStudioInterop.js");
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/pictureStudioInterop.js?v=2.6.5");
         _self ??= DotNetObjectReference.Create(this);
         if (_pendingRasterInitialization && !string.IsNullOrWhiteSpace(InitialRasterDataUrl))
         {
@@ -606,6 +612,31 @@ public partial class PictureEditor
     public void PictureLayerSelected(string? id)
     {
         State.SelectLayer(Guid.TryParse(id, out var parsed) ? parsed : null);
+    }
+
+    /// <summary>
+    /// Reorders one Picture Studio layer after a drag-and-drop operation in the front-to-back layer list.
+    /// </summary>
+    /// <param name="draggedId">Identifier of the dragged layer.</param>
+    /// <param name="targetId">Identifier of the layer under the drop marker.</param>
+    /// <param name="placeAfter">Whether the row is placed after the target in the visible front-to-back list.</param>
+    /// <returns>A completed task after the document layer order has been updated.</returns>
+    [JSInvokable]
+    public Task PictureStudioLayerDropped(string draggedId, string targetId, bool placeAfter)
+    {
+        if (!Guid.TryParse(draggedId, out var dragged) || !Guid.TryParse(targetId, out var target) || dragged == target)
+            return Task.CompletedTask;
+
+        var visualOrder = State.Document.Layers.AsEnumerable().Reverse().Select(layer => layer.Id).ToList();
+        if (!visualOrder.Remove(dragged)) return Task.CompletedTask;
+        var targetVisualIndex = visualOrder.IndexOf(target);
+        if (targetVisualIndex < 0) return Task.CompletedTask;
+        visualOrder.Insert(Math.Clamp(targetVisualIndex + (placeAfter ? 1 : 0), 0, visualOrder.Count), dragged);
+        var finalVisualIndex = visualOrder.IndexOf(dragged);
+        var backToFrontIndex = State.Document.Layers.Count - 1 - finalVisualIndex;
+        State.MoveLayerToIndex(dragged, backToFrontIndex);
+        State.SelectLayer(dragged);
+        return InvokeAsync(StateHasChanged);
     }
 
     /// <summary>
@@ -1807,7 +1838,7 @@ public partial class PictureEditor
     /// <param name="tool">Tool value supplied to the picture editor operation and used when producing its result.</param>
     /// <param name="text">Text value supplied to the picture editor operation and used when producing its result.</param>
     /// <returns>The string produced by the operation.</returns>
-    private string ToolText(PictureDrawTool tool, string text) => _drawTool == tool ? $"✓ {text}" : text;
+    private string ToolText(PictureDrawTool tool, string text) { var localized = LT(text); return _drawTool == tool ? $"✓ {localized}" : localized; }
     /// <summary>
     /// Determines whether draw width for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
     /// </summary>
@@ -1906,12 +1937,12 @@ public partial class PictureEditor
     /// Gets the grid text value that forms part of the picture editor state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The grid text value exposed by <see cref="PictureEditor"/>.</value>
-    private string GridText => State.Document.GridVisible ? "✓ Grid" : "Grid";
+    private string GridText => State.Document.GridVisible ? $"✓ {LT("Grid")}" : LT("Grid");
     /// <summary>
     /// Gets the snap text value that forms part of the picture editor state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The snap text value exposed by <see cref="PictureEditor"/>.</value>
-    private string SnapText => State.Document.SnapToGrid ? "✓ Snap" : "Snap";
+    private string SnapText => State.Document.SnapToGrid ? $"✓ {LT("Snap")}" : LT("Snap");
     /// <summary>
     /// Performs make render clouds for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
     /// </summary>
@@ -2394,7 +2425,7 @@ public partial class PictureEditor
     /// <param name="selected">Value indicating whether selected should apply to this operation.</param>
     /// <param name="text">Text value supplied to the picture editor operation and used when producing its result.</param>
     /// <returns>The string produced by the operation.</returns>
-    private string CheckedText(bool selected, string text) => selected ? $"✓ {text}" : text;
+    private string CheckedText(bool selected, string text) => selected ? $"✓ {LT(text)}" : LT(text);
 
     /// <summary>
     /// Performs change document name for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
@@ -3208,16 +3239,16 @@ public partial class PictureEditor
     /// </summary>
     /// <param name="layer">Layer value supplied to the picture editor operation and used when producing its result.</param>
     /// <returns>The string produced by the operation.</returns>
-    private string LayerIcon(PictureLayer layer) => layer.Kind switch
+    private string LayerIconCss(PictureLayer layer) => layer.Kind switch
     {
-        PictureLayerKind.Raster => "▧",
-        PictureLayerKind.Text => "T",
-        PictureLayerKind.Shape => "◇",
-        PictureLayerKind.Fill => "◩",
-        PictureLayerKind.Render => "☁",
-        PictureLayerKind.Paint => "✎",
-        PictureLayerKind.Vector => "⌘",
-        _ => "•"
+        PictureLayerKind.Raster => "pub-icon pub-icon-picture",
+        PictureLayerKind.Text => "pub-icon pub-icon-text",
+        PictureLayerKind.Shape => "pub-icon pub-icon-shape",
+        PictureLayerKind.Fill => "pub-icon pub-icon-gradient",
+        PictureLayerKind.Render => "pub-icon pub-icon-effects",
+        PictureLayerKind.Paint => "pub-icon pub-icon-edit",
+        PictureLayerKind.Vector => "pub-icon pub-icon-vector",
+        _ => "pub-icon pub-icon-layers"
     };
 
     /// <summary>
@@ -3226,7 +3257,7 @@ public partial class PictureEditor
     /// <param name="text">Text value supplied to the picture editor operation and used when producing its result.</param>
     /// <returns>The string produced by the operation.</returns>
     private string PictureTextFontSizeMenuText(TextPictureLayer text) =>
-        $"Font size · {Math.Round(text.FontSizePx).ToString(CultureInfo.InvariantCulture)} px";
+        $"{LT("Font size")} · {Math.Round(text.FontSizePx).ToString(CultureInfo.InvariantCulture)} px";
 
     /// <summary>
     /// Performs render scale menu text for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
@@ -3234,7 +3265,7 @@ public partial class PictureEditor
     /// <param name="render">Render value supplied to the picture editor operation and used when producing its result.</param>
     /// <returns>The string produced by the operation.</returns>
     private string RenderScaleMenuText(RenderPictureLayer render) =>
-        $"Scale · {Math.Round(render.Scale).ToString(CultureInfo.InvariantCulture)} px";
+        $"{LT("Scale")} · {Math.Round(render.Scale).ToString(CultureInfo.InvariantCulture)} px";
 
     /// <summary>
     /// Performs render detail menu text for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
@@ -3242,7 +3273,7 @@ public partial class PictureEditor
     /// <param name="render">Render value supplied to the picture editor operation and used when producing its result.</param>
     /// <returns>The string produced by the operation.</returns>
     private string RenderDetailMenuText(RenderPictureLayer render) =>
-        $"Detail · {render.Detail.ToString(CultureInfo.InvariantCulture)}";
+        $"{LT("Detail")} · {render.Detail.ToString(CultureInfo.InvariantCulture)}";
 
     /// <summary>
     /// Performs render softness menu text for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
@@ -3250,7 +3281,7 @@ public partial class PictureEditor
     /// <param name="render">Render value supplied to the picture editor operation and used when producing its result.</param>
     /// <returns>The string produced by the operation.</returns>
     private string RenderSoftnessMenuText(RenderPictureLayer render) =>
-        $"Softness · {Math.Round(render.Softness * 100).ToString(CultureInfo.InvariantCulture)}%";
+        $"{LT("Softness")} · {Math.Round(render.Softness * 100).ToString(CultureInfo.InvariantCulture)}%";
 
     /// <summary>
     /// Performs render contrast menu text for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
@@ -3258,7 +3289,7 @@ public partial class PictureEditor
     /// <param name="render">Render value supplied to the picture editor operation and used when producing its result.</param>
     /// <returns>The string produced by the operation.</returns>
     private string RenderContrastMenuText(RenderPictureLayer render) =>
-        $"Contrast · {render.RenderContrast.ToString("0.0", CultureInfo.InvariantCulture)}×";
+        $"{LT("Contrast")} · {render.RenderContrast.ToString("0.0", CultureInfo.InvariantCulture)}×";
 
     /// <summary>
     /// Performs render angle menu text for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
@@ -3266,7 +3297,7 @@ public partial class PictureEditor
     /// <param name="render">Render value supplied to the picture editor operation and used when producing its result.</param>
     /// <returns>The string produced by the operation.</returns>
     private string RenderAngleMenuText(RenderPictureLayer render) =>
-        $"Angle · {Math.Round(render.AngleDegrees).ToString(CultureInfo.InvariantCulture)}°";
+        $"{LT("Angle")} · {Math.Round(render.AngleDegrees).ToString(CultureInfo.InvariantCulture)}°";
 
     /// <summary>
     /// Performs render stripe width menu text for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
@@ -3274,7 +3305,7 @@ public partial class PictureEditor
     /// <param name="render">Render value supplied to the picture editor operation and used when producing its result.</param>
     /// <returns>The string produced by the operation.</returns>
     private string RenderStripeWidthMenuText(RenderPictureLayer render) =>
-        $"Stripe width · {Math.Round(render.StripeWidthPx).ToString(CultureInfo.InvariantCulture)} px";
+        $"{LT("Stripe width")} · {Math.Round(render.StripeWidthPx).ToString(CultureInfo.InvariantCulture)} px";
 
     /// <summary>
     /// Performs layer description for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
@@ -3283,14 +3314,14 @@ public partial class PictureEditor
     /// <returns>The string produced by the operation.</returns>
     private string LayerDescription(PictureLayer layer) => layer switch
     {
-        RasterPictureLayer raster => raster.FitMode.ToString(),
+        RasterPictureLayer raster => LT(raster.FitMode.ToString()),
         SvgPictureLayer svg => string.IsNullOrWhiteSpace(svg.GroupPath) ? svg.SourceFormat : $"{svg.SourceFormat} · {svg.GroupPath}",
         TextPictureLayer text => Truncate(text.Text, 28),
-        ShapePictureLayer shape => shape.Shape.ToString(),
-        FillPictureLayer fill => fill.FillKind.ToString(),
-        RenderPictureLayer render => render.RenderKind.ToString(),
-        PaintPictureLayer paint => $"{paint.Strokes.Count} stroke{(paint.Strokes.Count == 1 ? string.Empty : "s")}",
-        _ => layer.Kind.ToString()
+        ShapePictureLayer shape => LT(shape.Shape.ToString()),
+        FillPictureLayer fill => LT(fill.FillKind.ToString()),
+        RenderPictureLayer render => LT(render.RenderKind.ToString()),
+        PaintPictureLayer paint => paint.Strokes.Count == 1 ? $"1 {LT("stroke")}" : $"{paint.Strokes.Count} {LT("strokes")}",
+        _ => LT(layer.Kind.ToString())
     };
 
     /// <summary>
@@ -3300,7 +3331,7 @@ public partial class PictureEditor
     /// <param name="length">Length value supplied to the picture editor operation and used when producing its result.</param>
     /// <returns>The string produced by the operation.</returns>
     private string Truncate(string value, int length) => string.IsNullOrWhiteSpace(value)
-        ? "Empty"
+        ? LT("Empty")
         : value.Length <= length ? value : value[..length] + "…";
 
     /// <summary>

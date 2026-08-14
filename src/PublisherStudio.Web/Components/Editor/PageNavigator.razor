@@ -1,8 +1,9 @@
 @namespace PublisherStudio.Components.Editor
+@inject IFileLocalizationService Localization
 
 <aside class="page-navigator">
     <div class="pane-heading" @oncontextmenu="ShowNavigatorMenu" @oncontextmenu:preventDefault>
-        <strong>Pages</strong>
+        <strong>@LT("Pages")</strong>
         <span>@State.Document.Pages.Count</span>
     </div>
     <div class="page-thumbnail-list" @oncontextmenu="ShowNavigatorMenu" @oncontextmenu:preventDefault>
@@ -35,9 +36,9 @@
         }
     </div>
     <div class="pane-actions">
-        <DxButton Text="Add" Click="@(() => State.AddPage())" />
-        <DxButton Text="Copy" Enabled="State.Document.Pages.Count > 0" Click="@(() => State.DuplicatePage())" />
-        <DxButton Text="Delete" Enabled="State.Document.Pages.Count > 1" Click="@(() => State.DeletePage())" />
+        <DxButton Text='@LT("Add")' Click="@(() => State.AddPage())" />
+        <DxButton Text='@LT("Copy")' Enabled="State.Document.Pages.Count > 0" Click="@(() => State.DuplicatePage())" />
+        <DxButton Text='@LT("Delete")' Enabled="State.Document.Pages.Count > 1" Click="@(() => State.DeletePage())" />
     </div>
 </aside>
 
@@ -45,11 +46,11 @@
     <Items>
         @if (ContextPage is not null)
         {
-            <DxContextMenuItem Text="Select page" Click="SelectContextPage" />
-            <DxContextMenuItem Text="Duplicate page" Click="DuplicateContextPage" />
-            <DxContextMenuItem Text="Add new page" Click="AddPage" />
-            <DxContextMenuItem Text="Delete page" Enabled="@(State.Document.Pages.Count > 1)" Click="DeleteContextPage" />
-            <DxContextMenuItem Text="Page transition" BeginGroup="true">
+            <DxContextMenuItem Text='@LT("Select page")' Click="SelectContextPage" />
+            <DxContextMenuItem Text='@LT("Duplicate page")' Click="DuplicateContextPage" />
+            <DxContextMenuItem Text='@LT("Add new page")' Click="AddPage" />
+            <DxContextMenuItem Text='@LT("Delete page")' Enabled="@(State.Document.Pages.Count > 1)" Click="DeleteContextPage" />
+            <DxContextMenuItem Text='@LT("Page transition")' BeginGroup="true">
                 <Items>
                     <DxContextMenuItem Text="@TransitionText(PublicationPageTransitionKind.None)" Click="TransitionNone" />
                     <DxContextMenuItem Text="@TransitionText(PublicationPageTransitionKind.Fade)" Click="TransitionFade" />
@@ -59,29 +60,31 @@
                     <DxContextMenuItem Text="@TransitionText(PublicationPageTransitionKind.Flip)" Click="TransitionFlip" />
                 </Items>
             </DxContextMenuItem>
-            <DxContextMenuItem Text="Timeline">
+            <DxContextMenuItem Text='@LT("Timeline")'>
                 <Items>
                     <DxContextMenuItem Text="@TimelineCommandText" Click="ToggleTimeline" />
-                    <DxContextMenuItem Text="Fit duration to page content" BeginGroup="true" Click="FitTimelineToContent" />
-                    <DxContextMenuItem Text="Set duration to 10 seconds" Click="SetTenSecondTimeline" />
+                    <DxContextMenuItem Text='@LT("Fit duration to page content")' BeginGroup="true" Click="FitTimelineToContent" />
+                    <DxContextMenuItem Text='@LT("Set duration to 10 seconds")' Click="SetTenSecondTimeline" />
                 </Items>
             </DxContextMenuItem>
         }
         else
         {
-            <DxContextMenuItem Text="Add new page" Click="AddPage" />
-            <DxContextMenuItem Text="Duplicate selected page" Enabled="@(State.Document.Pages.Count > 0)" Click="DuplicateSelectedPage" />
+            <DxContextMenuItem Text='@LT("Add new page")' Click="AddPage" />
+            <DxContextMenuItem Text='@LT("Duplicate selected page")' Enabled="@(State.Document.Pages.Count > 0)" Click="DuplicateSelectedPage" />
             <DxContextMenuItem Text="@TimelineCommandText" BeginGroup="true" Click="ToggleTimeline" />
         }
     </Items>
 </DxContextMenu>
 
 @code {
+    private string LT(string text) => Localization.GetText(text);
+
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
     [Parameter] public bool TimelineVisible { get; set; }
     [Parameter] public EventCallback RequestToggleTimeline { get; set; }
 
-    private string TimelineCommandText => TimelineVisible ? "✓ Timeline pane" : "Timeline pane";
+    private string TimelineCommandText => TimelineVisible ? $"✓ {LT("Timeline pane")}" : LT("Timeline pane");
 
     private DxContextMenu _pageContextMenu = default!;
     private Guid? _contextPageId;
@@ -158,7 +161,18 @@
             .DefaultIfEmpty(0).Max());
 
     private string TransitionText(PublicationPageTransitionKind kind) =>
-        State.CurrentPage.Transition.Kind == kind ? $"✓ {kind}" : kind.ToString();
+        State.CurrentPage.Transition.Kind == kind ? $"✓ {TransitionName(kind)}" : TransitionName(kind);
+
+    private string TransitionName(PublicationPageTransitionKind kind) => LT(kind switch
+    {
+        PublicationPageTransitionKind.None => "None",
+        PublicationPageTransitionKind.Fade => "Fade",
+        PublicationPageTransitionKind.Push => "Push",
+        PublicationPageTransitionKind.Wipe => "Wipe",
+        PublicationPageTransitionKind.Zoom => "Zoom",
+        PublicationPageTransitionKind.Flip => "Flip",
+        _ => kind.ToString()
+    });
 
     private string MiniPageStyle(PublicationPage page) => $"aspect-ratio:{page.WidthMm.ToString(CultureInfo.InvariantCulture)}/{page.HeightMm.ToString(CultureInfo.InvariantCulture)};background:{page.Background}";
     private string MiniElementStyle(PublicationElement element, PublicationPage page) =>

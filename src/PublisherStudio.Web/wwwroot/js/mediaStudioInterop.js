@@ -13,6 +13,11 @@ function baseMimeType(value, fallback = 'application/octet-stream') { try {
     return mimeType.includes('/') ? mimeType : fallback;
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:baseMimeType@6', __javascriptError); throw __javascriptError; }}
 
+function finiteMediaTime(value, fallback = 0) { try {
+    const number = Number(value);
+    return Number.isFinite(number) ? Math.max(0, number) : Math.max(0, Number(fallback) || 0);
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:finiteMediaTime', __javascriptError); return Math.max(0, Number(fallback) || 0); }}
+
 function normalizeMediaDataUrl(dataUrl, fallbackMimeType = 'application/octet-stream') { try {
     const value = String(dataUrl || '');
     if (!value.startsWith('data:')) return value;
@@ -42,6 +47,43 @@ function assignMediaDrop(inputId, file) { try {
     return true;
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:assignMediaDrop@29', __javascriptError); throw __javascriptError; }}
 
+function sharedMediaStudioDragRead(transfer, kind) { try {
+    return globalThis.publisherStudio?.readStudioDragTransfer?.(transfer, kind) || null;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:sharedMediaStudioDragRead', __javascriptError); return null; }}
+
+function sharedMediaStudioDragConfigure(transfer, payload) { try {
+    return globalThis.publisherStudio?.configureStudioDragTransfer?.(transfer, payload) || false;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:sharedMediaStudioDragConfigure', __javascriptError); return false; }}
+
+function sharedMediaStudioDescriptor(transfer) { try {
+    return globalThis.publisherStudio?.studioMediaDescriptorFromTransfer?.(transfer) || null;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:sharedMediaStudioDescriptor', __javascriptError); return null; }}
+
+async function sharedMediaStudioFile(transfer) { try {
+    if (globalThis.publisherStudio?.fileFromStudioDragTransfer)
+        return await globalThis.publisherStudio.fileFromStudioDragTransfer(transfer);
+    return transfer?.files?.[0] || null;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:sharedMediaStudioFile', __javascriptError); throw __javascriptError; }}
+
+function clearSequenceDrop(state) { try {
+    const timeline = document.getElementById('media-studio-sequence-timeline');
+    timeline?.classList.remove('media-sequence-drop-target');
+    timeline?.style.removeProperty('--media-sequence-drop-position');
+    state?.dropRoot?.querySelectorAll?.('.media-sequence-segment.media-segment-dragging')?.forEach(segment => segment.classList.remove('media-segment-dragging'));
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:clearSequenceDrop', __javascriptError); }}
+
+function sequenceInsertionAt(target, clientX) { try {
+    const timeline = target?.closest?.('.media-sequence-timeline');
+    if (!timeline) return null;
+    const duration = Math.max(.01, Number(timeline.dataset.sequenceDuration) || 0);
+    const bounds = timeline.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (Number(clientX) - bounds.left) / Math.max(1, bounds.width)));
+    const seconds = ratio * duration;
+    timeline.style.setProperty('--media-sequence-drop-position', `${ratio * 100}%`);
+    timeline.classList.add('media-sequence-drop-target');
+    return { seconds, ratio };
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:sequenceInsertionAt', __javascriptError); return null; }}
+
 function releaseMediaDropBindings(state) { try {
     const root = state?.dropRoot;
     const handlers = state?.dropHandlers;
@@ -50,6 +92,8 @@ function releaseMediaDropBindings(state) { try {
         root.removeEventListener('dragover', handlers.dragover);
         root.removeEventListener('dragleave', handlers.dragleave);
         root.removeEventListener('drop', handlers.drop);
+        root.removeEventListener('dragstart', handlers.dragstart);
+        root.removeEventListener('dragend', handlers.dragend);
         root.classList.remove('media-file-drag-active');
         root.removeAttribute('data-media-drop-mode');
     }
@@ -60,8 +104,31 @@ function releaseMediaDropBindings(state) { try {
         state.dropRoot = null;
         state.dropHandlers = null;
         state.dropDepth = 0;
+        clearSequenceDrop(state);
     }
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:releaseMediaDropBindings@40', __javascriptError); throw __javascriptError; }}
+
+function clearVideoEffectDropMarkers(root) { try {
+    root?.querySelectorAll?.('.media-video-layer-row,.media-video-filter-row')?.forEach(row => {
+        row.classList.remove('media-effect-dragging', 'media-effect-drop-before', 'media-effect-drop-after');
+    });
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:clearVideoEffectDropMarkers', __javascriptError); }}
+
+function effectDropTarget(target, kind, clientY) { try {
+    const selector = kind === 'video-effect-filter'
+        ? '.media-video-filter-row[data-video-filter-id]'
+        : '.media-video-layer-row[data-video-layer-id]';
+    const row = target?.closest?.(selector);
+    if (!row) return null;
+    const bounds = row.getBoundingClientRect();
+    const placeAfter = Number(clientY) >= bounds.top + bounds.height / 2;
+    row.classList.remove('media-effect-drop-before', 'media-effect-drop-after');
+    row.classList.add(placeAfter ? 'media-effect-drop-after' : 'media-effect-drop-before');
+    return {
+        id: kind === 'video-effect-filter' ? String(row.dataset.videoFilterId || '') : String(row.dataset.videoLayerId || ''),
+        placeAfter
+    };
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:effectDropTarget', __javascriptError); return null; }}
 
 function bindMediaDrop(state, rootId, sourceInputId, insertInputId, projectInputId, expectedKind) { try {
     releaseMediaDropBindings(state);
@@ -71,7 +138,9 @@ function bindMediaDrop(state, rootId, sourceInputId, insertInputId, projectInput
         const file = event.dataTransfer?.files?.[0];
         if (file) return file;
         const item = [...(event.dataTransfer?.items || [])].find(candidate => { try { return (candidate.kind === 'file'); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:callback:[...(event.dataTransfer?.items || [])].find@68', __javascriptError); throw __javascriptError; } });
-        return item ? { name: '', type: item.type || '' } : null;
+        if (item) return { name: '', type: item.type || '' };
+        const media = sharedMediaStudioDescriptor(event.dataTransfer);
+        return media ? { name: media.filename || '', type: media.mime || '' } : null;
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:descriptor@65', __javascriptError); throw __javascriptError; }};
     const modeAt = target => { try { return (target?.closest?.('.media-sequence-editor,.media-range-selector,.media-video-time-overlay') ? 'insert' : 'replace'); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:modeAt@71', __javascriptError); throw __javascriptError; } };
     const videoInsertionAt = (target, clientX) => { try {
@@ -106,9 +175,54 @@ function bindMediaDrop(state, rootId, sourceInputId, insertInputId, projectInput
         root.classList.remove('media-file-drag-active');
         root.removeAttribute('data-media-drop-mode');
         clearVideoInsertion();
+        clearSequenceDrop(state);
+        clearVideoEffectDropMarkers(root);
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:clear@99', __javascriptError); throw __javascriptError; }};
     const handlers = {
+        dragstart: event => { try {
+            if (!event.dataTransfer) return;
+            const filterRow = event.target?.closest?.('.media-video-filter-row[data-video-filter-id]');
+            if (filterRow) {
+                const id = String(filterRow.dataset.videoFilterId || '');
+                sharedMediaStudioDragConfigure(event.dataTransfer, { effectAllowed: 'move', internalKind: 'video-effect-filter', id, name: filterRow.querySelector('span')?.textContent || 'Video effect' });
+                filterRow.classList.add('media-effect-dragging');
+                return;
+            }
+            const layerRow = event.target?.closest?.('.media-video-layer-row[data-video-layer-id]');
+            if (layerRow) {
+                const id = String(layerRow.dataset.videoLayerId || '');
+                sharedMediaStudioDragConfigure(event.dataTransfer, { effectAllowed: 'move', internalKind: 'video-effect-layer', id, name: layerRow.querySelector('span')?.textContent || 'Video layer' });
+                layerRow.classList.add('media-effect-dragging');
+                return;
+            }
+            const segment = event.target?.closest?.('.media-sequence-segment[data-media-segment-id]');
+            if (!segment) return;
+            const segmentId = String(segment.dataset.mediaSegmentId || '');
+            const timeline = segment.closest?.('.media-sequence-timeline');
+            const preview = document.getElementById(state.id || '');
+            const source = String(timeline?.dataset?.selectedSegmentId === segmentId
+                ? (preview?.currentSrc || preview?.getAttribute?.('src') || '')
+                : '');
+            const mime = String(segment.dataset.mediaSegmentMime || (expectedKind === 'video' ? 'video/webm' : 'audio/webm'));
+            const name = String(segment.dataset.mediaSegmentName || (expectedKind === 'video' ? 'Video clip' : 'Audio clip'));
+            let filename = name.replace(/[<>:"/\\|?*\u0000-\u001f]+/g, '-').trim() || 'media-clip';
+            const extension = mime.includes('mp4') ? 'mp4' : mime.includes('mpeg') ? 'mp3' : mime.includes('ogg') ? (expectedKind === 'video' ? 'ogv' : 'ogg') : 'webm';
+            if (!new RegExp(`\\.${extension}$`, 'i').test(filename)) filename += `.${extension}`;
+            sharedMediaStudioDragConfigure(event.dataTransfer, {
+                effectAllowed: 'copyMove', internalKind: 'media-segment', id: segmentId,
+                name, filename, mime, href: source
+            });
+            segment.classList.add('media-segment-dragging');
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:dragstart:segment', __javascriptError); throw __javascriptError; }},
+        dragend: event => { try { clearSequenceDrop(state); clearVideoEffectDropMarkers(root); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:dragend:segment', __javascriptError); }},
         dragenter: event => { try {
+            const effectLayer = sharedMediaStudioDragRead(event.dataTransfer, 'video-effect-layer');
+            const effectFilter = sharedMediaStudioDragRead(event.dataTransfer, 'video-effect-filter');
+            if (effectLayer?.id || effectFilter?.id) {
+                event.preventDefault();
+                state.dropDepth++;
+                return;
+            }
             const file = descriptor(event);
             if (!file) return;
             event.preventDefault();
@@ -116,6 +230,27 @@ function bindMediaDrop(state, rootId, sourceInputId, insertInputId, projectInput
             show(modeAt(event.target));
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:dragenter@106', __javascriptError); throw __javascriptError; }},
         dragover: event => { try {
+            const effectLayer = sharedMediaStudioDragRead(event.dataTransfer, 'video-effect-layer');
+            const effectFilter = sharedMediaStudioDragRead(event.dataTransfer, 'video-effect-filter');
+            if (effectLayer?.id || effectFilter?.id) {
+                const kind = effectFilter?.id ? 'video-effect-filter' : 'video-effect-layer';
+                clearVideoEffectDropMarkers(root);
+                const target = effectDropTarget(event.target, kind, event.clientY);
+                if (!target || target.id === String((effectFilter || effectLayer).id)) return;
+                event.preventDefault();
+                event.stopPropagation();
+                event.dataTransfer.dropEffect = 'move';
+                return;
+            }
+            const internal = sharedMediaStudioDragRead(event.dataTransfer, 'media-segment');
+            if (internal?.id) {
+                const insertion = sequenceInsertionAt(event.target, event.clientX);
+                if (!insertion) return;
+                event.preventDefault();
+                event.stopPropagation();
+                event.dataTransfer.dropEffect = 'move';
+                return;
+            }
             const file = descriptor(event);
             if (!file) return;
             event.preventDefault();
@@ -123,7 +258,8 @@ function bindMediaDrop(state, rootId, sourceInputId, insertInputId, projectInput
             const kind = mediaDropKind(file);
             event.dataTransfer.dropEffect = kind === expectedKind || (expectedKind === 'video' && kind === 'project') ? 'copy' : 'none';
             show(kind === 'project' ? 'project' : modeAt(event.target));
-            if (!videoInsertionAt(event.target, event.clientX)) clearVideoInsertion();
+            const sequenceInsertion = sequenceInsertionAt(event.target, event.clientX);
+            if (!sequenceInsertion && !videoInsertionAt(event.target, event.clientX)) clearVideoInsertion();
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:dragover@113', __javascriptError); throw __javascriptError; }},
         dragleave: event => { try {
             if (event.relatedTarget && root.contains(event.relatedTarget)) return;
@@ -131,14 +267,39 @@ function bindMediaDrop(state, rootId, sourceInputId, insertInputId, projectInput
             if (state.dropDepth === 0) clear();
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:dragleave@123', __javascriptError); throw __javascriptError; }},
         drop: async event => { try {
-            const file = event.dataTransfer?.files?.[0]
-                || [...(event.dataTransfer?.items || [])].find(candidate => { try { return (candidate.kind === 'file'); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:callback:[...(event.dataTransfer?.items || [])].find@130', __javascriptError); throw __javascriptError; } })?.getAsFile?.();
+            const effectLayer = sharedMediaStudioDragRead(event.dataTransfer, 'video-effect-layer');
+            const effectFilter = sharedMediaStudioDragRead(event.dataTransfer, 'video-effect-filter');
+            if (effectLayer?.id || effectFilter?.id) {
+                const kind = effectFilter?.id ? 'video-effect-filter' : 'video-effect-layer';
+                const target = effectDropTarget(event.target, kind, event.clientY);
+                event.preventDefault();
+                event.stopPropagation();
+                clearVideoEffectDropMarkers(root);
+                if (!target || target.id === String((effectFilter || effectLayer).id)) return;
+                if (kind === 'video-effect-filter')
+                    await state.dotnet?.invokeMethodAsync('MediaStudioVideoFilterDropped', String(effectFilter.id), target.id, target.placeAfter);
+                else
+                    await state.dotnet?.invokeMethodAsync('MediaStudioVideoLayerDropped', String(effectLayer.id), target.id, target.placeAfter);
+                return;
+            }
+            const internal = sharedMediaStudioDragRead(event.dataTransfer, 'media-segment');
+            if (internal?.id) {
+                const sequenceInsertion = sequenceInsertionAt(event.target, event.clientX);
+                if (!sequenceInsertion) { clear(); return; }
+                event.preventDefault();
+                event.stopPropagation();
+                clear();
+                await state.dotnet?.invokeMethodAsync('MediaStudioTimelineSegmentDropped', String(internal.id), sequenceInsertion.seconds);
+                return;
+            }
+            const sequenceInsertion = sequenceInsertionAt(event.target, event.clientX);
+            const file = await sharedMediaStudioFile(event.dataTransfer);
             if (!file) return;
             event.preventDefault();
             event.stopPropagation();
             const actualKind = mediaDropKind(file);
             const mode = actualKind === 'project' ? 'project' : modeAt(event.target);
-            const videoInsertion = mode === 'insert' ? videoInsertionAt(event.target, event.clientX) : null;
+            const videoInsertion = mode === 'insert' && !sequenceInsertion ? videoInsertionAt(event.target, event.clientX) : null;
             clear();
             if (actualKind === 'project' && expectedKind === 'video') {
                 if (!assignMediaDrop(projectInputId, file))
@@ -151,7 +312,11 @@ function bindMediaDrop(state, rootId, sourceInputId, insertInputId, projectInput
                     `The dropped file '${file.name || 'file'}' is ${actualKind || 'not recognized as media'}; this Studio accepts ${expectedKind} files.`).catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:promise-catch@144', __promiseError);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:callback:state.dotnet?.invokeMethodAsync( \'MediaStudioFileDropRejected\', `The d@146', __javascriptError); throw __javascriptError; }});
                 return;
             }
-            if (videoInsertion) {
+            if (sequenceInsertion && mode === 'insert') {
+                try {
+                    await state.dotnet?.invokeMethodAsync('MediaStudioDropTimelinePointSelected', sequenceInsertion.seconds);
+                } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:suppressed-catch:timeline-drop', __caughtJavaScriptError); }
+            } else if (videoInsertion) {
                 try {
                     await state.dotnet?.invokeMethodAsync(
                         'MediaStudioDropInsertionPointSelected',
@@ -171,6 +336,8 @@ function bindMediaDrop(state, rootId, sourceInputId, insertInputId, projectInput
     root.addEventListener('dragover', handlers.dragover);
     root.addEventListener('dragleave', handlers.dragleave);
     root.addEventListener('drop', handlers.drop);
+    root.addEventListener('dragstart', handlers.dragstart);
+    root.addEventListener('dragend', handlers.dragend);
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:bindMediaDrop@61', __javascriptError); throw __javascriptError; }}
 
 function stateFor(id) { try {
@@ -762,7 +929,7 @@ function requestVideoDurationProbe(state, video, overlay) { try {
     if (!(video instanceof HTMLVideoElement) || !overlay || state.durationProbePending) return;
     if (resolvedVideoDuration(video) > .01 || video.readyState < 1) return;
     state.durationProbePending = true;
-    state.durationProbeRestoreTime = Math.max(0, Number(video.currentTime) || 0);
+    state.durationProbeRestoreTime = finiteMediaTime(video.currentTime);
     const finish = () => { try {
         if (!state.durationProbePending) return;
         state.durationProbePending = false;
@@ -771,7 +938,7 @@ function requestVideoDurationProbe(state, video, overlay) { try {
         if (state.durationProbeSeekedHandler) video.removeEventListener('seeked', state.durationProbeSeekedHandler);
         state.durationProbeSeekedHandler = null;
         reportResolvedVideoDuration(state, video, overlay);
-        try { video.currentTime = state.durationProbeRestoreTime; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:suppressed-catch@703', __caughtJavaScriptError);  }
+        try { video.currentTime = finiteMediaTime(state.durationProbeRestoreTime); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:suppressed-catch@703', __caughtJavaScriptError);  }
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:finish@695', __javascriptError); throw __javascriptError; }};
     state.durationProbeSeekedHandler = finish;
     video.addEventListener('seeked', finish, { once: true });
@@ -849,7 +1016,7 @@ function bindVideoTimeOverlay(state, timeOverlayId) { try {
     const locallyScrub = sourceSeconds => { try {
         const current = setVideoPlayheadVisual(overlay, sourceSeconds);
         cancelRangePlayback(state, video, true);
-        try { if (Number.isFinite(video.duration)) video.currentTime = current; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:suppressed-catch@781', __caughtJavaScriptError);  }
+        try { if (Number.isFinite(video.duration)) video.currentTime = finiteMediaTime(current); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:suppressed-catch@781', __caughtJavaScriptError);  }
         return current;
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:locallyScrub@778', __javascriptError); throw __javascriptError; }};
 
@@ -1132,7 +1299,7 @@ function bindSequenceSelectionHandles(state, timelineId, timeOverlayId) { try {
 function locallySeekMedia(id, seconds) { try {
     const element = mediaElement(id);
     if (!element) return;
-    try { element.currentTime = Math.max(0, Number(seconds) || 0); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:suppressed-catch@1064', __caughtJavaScriptError);  }
+    try { element.currentTime = finiteMediaTime(seconds); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:suppressed-catch@1064', __caughtJavaScriptError);  }
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:locallySeekMedia@1061', __javascriptError); throw __javascriptError; }}
 
 export function configureVideoEffects(videoId, canvasId, config) { try {
@@ -1267,25 +1434,31 @@ async function waveformFromSource(dataUrl, sampleCount = 96) { try {
 
 async function posterFromVideo(video) { try {
     try {
-        const previous = video.currentTime;
-        const target = Math.min(Math.max(.05, video.duration * .12), Math.max(.05, video.duration - .05));
-        await new Promise(resolve => { try {
-            if (Math.abs(video.currentTime - target) < .005) { resolve(); return; }
-            const timer = setTimeout(done, 4000);
-            function done() { try {
-                clearTimeout(timer);
-                video.removeEventListener('seeked', done);
-                resolve();
-             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:done@1204', __javascriptError); throw __javascriptError; }}
-            video.addEventListener('seeked', done, { once: true });
-            video.currentTime = target;
-         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:ArrowFunction@1201', __javascriptError); throw __javascriptError; }});
+        const previous = Number(video.currentTime);
+        const duration = Number(video.duration);
+        const finiteDuration = Number.isFinite(duration) && duration > 0 ? duration : 0;
+        const target = finiteDuration > .05
+            ? Math.min(Math.max(.05, finiteDuration * .12), Math.max(.05, finiteDuration - .05))
+            : 0;
+        if (target > 0 && Number.isFinite(target)) {
+            await new Promise(resolve => { try {
+                if (Math.abs((Number(video.currentTime) || 0) - target) < .005) { resolve(); return; }
+                const timer = setTimeout(done, 4000);
+                function done() { try {
+                    clearTimeout(timer);
+                    video.removeEventListener('seeked', done);
+                    resolve();
+                 } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:done@1204', __javascriptError); throw __javascriptError; }}
+                video.addEventListener('seeked', done, { once: true });
+                video.currentTime = target;
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:ArrowFunction@1201', __javascriptError); resolve(); }});
+        }
         const canvas = document.createElement('canvas');
         canvas.width = Math.max(1, video.videoWidth || 640);
         canvas.height = Math.max(1, video.videoHeight || 360);
-        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        canvas.getContext('2d', { willReadFrequently: false }).drawImage(video, 0, 0, canvas.width, canvas.height);
         const poster = canvas.toDataURL('image/jpeg', .82);
-        video.currentTime = Number.isFinite(previous) ? previous : 0;
+        try { video.currentTime = Number.isFinite(previous) ? Math.max(0, previous) : 0; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:posterFromVideo:restore', __caughtJavaScriptError); }
         return poster;
     } catch {
         return '';
@@ -1300,7 +1473,11 @@ async function inspectElement(element, dataUrl, kind) { try {
     const durationSeconds = Number.isFinite(element.duration) ? element.duration : 0;
     const waveformSamples = kind === 'audio' ? await waveformFromSource(normalizedDataUrl) : [];
     const posterDataUrl = kind === 'video' && element instanceof HTMLVideoElement ? await posterFromVideo(element) : '';
-    element.currentTime = 0;
+    try {
+        if (Number.isFinite(Number(element.duration)) && Number(element.duration) > 0) element.currentTime = 0;
+    } catch (__caughtJavaScriptError) {
+        publisherStudioDiagnostics.report('js/mediaStudioInterop.js:inspectElement:reset-currentTime', __caughtJavaScriptError);
+    }
     return { durationSeconds, waveformSamples, posterDataUrl };
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:inspectElement@1224', __javascriptError); throw __javascriptError; }}
 
@@ -1527,10 +1704,11 @@ export async function playMediaRange(id, start, end, volume, rate, muted, loop) 
     const state = stateFor(id);
     cancelRangePlayback(state, element, true);
     const commandVersion = state.playCommandVersion;
-    const rangeStart = Math.max(0, Number(start) || 0);
+    const rangeStart = finiteMediaTime(start);
     const requestedEnd = Number(end);
-    const rangeEnd = Math.max(rangeStart + .01, Number.isFinite(requestedEnd) ? requestedEnd : Number(element.duration) || rangeStart + .01);
-    try { element.currentTime = rangeStart; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:suppressed-catch@1477', __caughtJavaScriptError);  }
+    const mediaDuration = Number(element.duration);
+    const rangeEnd = Math.max(rangeStart + .01, Number.isFinite(requestedEnd) ? requestedEnd : (Number.isFinite(mediaDuration) ? mediaDuration : rangeStart + .01));
+    try { element.currentTime = finiteMediaTime(rangeStart); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:suppressed-catch@1477', __caughtJavaScriptError);  }
     element.volume = Math.max(0, Math.min(1, Number(volume) || 0));
     element.playbackRate = Math.max(.25, Math.min(4, Number(rate) || 1));
     element.muted = Boolean(muted);
@@ -1538,14 +1716,14 @@ export async function playMediaRange(id, start, end, volume, rate, muted, loop) 
     state.rangeHandler = () => { try {
         if (commandVersion !== state.playCommandVersion || state.stopAt == null || element.currentTime < state.stopAt - .015) return;
         if (loop) {
-            try { element.currentTime = rangeStart; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:suppressed-catch@1485', __caughtJavaScriptError);  }
+            try { element.currentTime = finiteMediaTime(rangeStart); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:suppressed-catch@1485', __caughtJavaScriptError);  }
             const retry = element.play();
             if (retry?.catch) retry.catch(error => { try { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:promise-catch@1487', error); 
                 if (!isInterruptedPlaybackError(error) && commandVersion === state.playCommandVersion)
                     console.warn('PublisherStudio loop playback failed.', error);
              } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:callback:retry.catch@1487', __javascriptError); throw __javascriptError; }});
         } else {
-            const stopAt = state.stopAt;
+            const stopAt = finiteMediaTime(state.stopAt, rangeEnd);
             cancelRangePlayback(state, element, true);
             try { element.currentTime = stopAt; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:suppressed-catch@1494', __caughtJavaScriptError);  }
         }
@@ -1574,7 +1752,7 @@ export function seekMedia(id, seconds) { try {
     const element = mediaElement(id);
     if (!element) return false;
     cancelRangePlayback(stateFor(id), element, true);
-    try { element.currentTime = Math.max(0, Number(seconds) || 0); } catch { return false; }
+    try { element.currentTime = finiteMediaTime(seconds); } catch { return false; }
     return true;
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:seekMedia@1517', __javascriptError); throw __javascriptError; }}
 

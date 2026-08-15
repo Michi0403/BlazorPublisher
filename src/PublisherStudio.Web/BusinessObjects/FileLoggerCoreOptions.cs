@@ -3,38 +3,18 @@ using System.Text.Json.Serialization;
 
 namespace PublisherStudio.BusinessObjects;
 
-/// <summary>Configures PublisherStudio file logging.</summary>
+/// <summary>
+/// Carries PublisherStudio file logger settings used by the optional file logging provider.
+/// </summary>
 public sealed class FileLoggerCoreOptions
 {
-    /// <summary>Optional explicit log path. Blank uses the PublisherStudio local-application-data log file.</summary>
+    /// <summary>Allows callers to override the default runtime-directory log destination when a specific file is required.</summary>
+    /// <value>An explicit log file path, or an empty value to use the current application runtime directory.</value>
     [JsonInclude]
     public string? FilePath { get; set; }
 
-    /// <summary>Minimum severity written to the file.</summary>
+    /// <summary>Gets or sets the minimum severity accepted by the file logging provider.</summary>
+    /// <value>The minimum configured file log level.</value>
     [JsonInclude]
     public CoreLogLevel CoreLogLevel { get; set; } = CoreLogLevel.Information;
-
-    /// <summary>Maximum number of pending lines retained when producers temporarily outpace disk IO.</summary>
-    [JsonInclude]
-    public int MaxQueueLength { get; set; } = 8192;
-
-    /// <summary>Returns the configured path or PublisherStudio's stable per-user default.</summary>
-    public string ResolvePath()
-    {
-        try
-        {
-            if (!string.IsNullOrWhiteSpace(FilePath))
-                return Path.GetFullPath(Environment.ExpandEnvironmentVariables(FilePath));
-
-            var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            if (string.IsNullOrWhiteSpace(local))
-                local = AppContext.BaseDirectory;
-            return Path.Combine(local, "PublisherStudio", "PublisherStudio.log");
-        }
-        catch (Exception exception)
-        {
-            System.Diagnostics.Trace.TraceError($"PublisherStudio file-log path resolution failed: {exception}");
-            throw;
-        }
-    }
 }

@@ -52,8 +52,8 @@ try:
     require('src/PublisherStudio.Web/Localization/de-DE.json',
             '"Text.White␠/␠light␠→␠red": "Weiß / hell → rot"',
             '"Text.Page␠appearance␠&␠effects": "Seitendarstellung & Effekte"')
-    require('src/PublisherStudio.Web/PublisherStudio.Web.csproj','<Version>2.7.3</Version>')
-    require('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj','<Version>2.7.3</Version>')
+    require('src/PublisherStudio.Web/PublisherStudio.Web.csproj','<Version>2.7.4</Version>')
+    require('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj','<Version>2.7.4</Version>')
     print('PublisherStudio 2.6.2 picture/page-effect source audit passed: recolor, paint paths, layered/merged application/export, alpha-safe selected export, page color/effect layers, animation, and format/version wiring are present.')
 except AssertionError as exc:
     print(f'PublisherStudio 2.6.2 picture/page-effect source audit failed: {exc}', file=sys.stderr)

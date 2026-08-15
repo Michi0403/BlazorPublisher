@@ -1,13 +1,7 @@
-# PublisherStudio 2.7.3 logging and recording recovery
+# PublisherStudio 2.7.4
 
-PublisherStudio 2.7.3 restores the persistent application file logger and hardens Video/Audio Studio recording finalization across Blazor disconnect/reconnect boundaries. A completed browser recording is retained before capture hardware is released and can be recovered by a newly attached circuit. Logging state lives in BusinessObjects and the DI implementation lives under Services/Logging; Razor helper statics were converted to instance members.
+Source-only logging maintenance repair release.
 
-## Versions
+See `CHANGELOG-v2.7.4-LOGGING-MAINTENANCE-REPAIR.md` and `VALIDATION-v2.7.4-source.md` for the shipped changes and source-validation scope.
 
-- PublisherStudio.Web: 2.7.3
-- PublisherStudio.InstallerConsole: 2.7.3
-- LocalGPT Wire Protocol package: 2.1.1 (unchanged)
-
-Default application log: `%LocalAppData%\PublisherStudio\PublisherStudio.log`.
-
-See `CHANGELOG-v2.7.3-LOGGING-RECORDING-RECOVERY.md` and `VALIDATION-v2.7.3-source.md`.
+The LocalGPT wire protocol remains at its existing version; this release does not change the protocol contract.

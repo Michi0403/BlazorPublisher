@@ -10,21 +10,20 @@ def forbid(rel, needle):
     if needle in text(rel): raise AssertionError(f"{rel} unexpectedly contains: {needle}")
 try:
     for rel in ('src/PublisherStudio.Web/PublisherStudio.Web.csproj','src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'):
-        require(rel,'<Version>2.7.3</Version>')
+        require(rel,'<Version>2.7.4</Version>')
     for rel in (
         'src/PublisherStudio.Web/BusinessObjects/ApplicationLogEntry.cs',
         'src/PublisherStudio.Web/BusinessObjects/FileLoggerCoreOptions.cs',
         'src/PublisherStudio.Web/BusinessObjects/LoggingCoreOptions.cs',
         'src/PublisherStudio.Web/BusinessObjects/Enums/CoreLogLevel.cs',
-        'src/PublisherStudio.Web/Services/Logging/FileLogger.cs',
-        'src/PublisherStudio.Web/Services/Logging/FileLoggerProvider.cs',
+        'src/PublisherStudio.Web/Logging/FileLogger.cs',
+        'src/PublisherStudio.Web/Logging/FileLoggerProvider.cs',
         'src/PublisherStudio.Web/Services/LoggingConfigurationService.cs'):
         if not (ROOT/rel).is_file(): raise AssertionError(f'missing logging source {rel}')
-    require('src/PublisherStudio.Web/BusinessObjects/FileLoggerCoreOptions.cs','Path.Combine(local, "PublisherStudio", "PublisherStudio.log")')
-    require('src/PublisherStudio.Web/Services/LoggingConfigurationService.cs','AddSingleton<ILoggerProvider, FileLoggerProvider>()')
-    require('src/PublisherStudio.Web/Services/Logging/FileLogger.cs','new ApplicationLogEntry')
-    forbid('src/PublisherStudio.Web/Services/Logging/FileLogger.cs',' static ')
-    forbid('src/PublisherStudio.Web/Services/Logging/FileLoggerProvider.cs',' static ')
+    require('src/PublisherStudio.Web/Logging/FileLogger.cs','Path.Combine(Directory.GetCurrentDirectory(), "PublisherStudio.log")')
+    require('src/PublisherStudio.Web/Services/LoggingConfigurationService.cs','new FileLoggerProvider(provider.GetRequiredService<IOptionsMonitor<FileLoggerCoreOptions>>()')
+    forbid('src/PublisherStudio.Web/Logging/FileLogger.cs',' static ')
+    forbid('src/PublisherStudio.Web/Logging/FileLoggerProvider.cs',' static ')
     forbid('src/PublisherStudio.Web/BusinessObjects/LoggingCoreOptions.cs',' const ')
     forbid('src/PublisherStudio.Web/BusinessObjects/FileLoggerCoreOptions.cs',' const ')
     require('src/PublisherStudio.Web/Program.cs','new LoggingConfigurationService(builder.Services, builder.Configuration, startupLogger).Configure(builder.Logging);')
@@ -33,7 +32,7 @@ try:
     forbid('src/PublisherStudio.Web/Program.cs','level >= LogLevel.Warning')
     config=json.loads(text('src/PublisherStudio.Web/appsettings.json'))
     file_core=config['LoggingCore']['FileCore']
-    assert config['LoggingCore']['CoreLogLevel']==2 and file_core['CoreLogLevel']==2 and file_core['MaxQueueLength']>=128
+    assert config['LoggingCore']['CoreLogLevel']==2 and file_core['CoreLogLevel']==2 and file_core['FilePath']==''
 
     media=text('src/PublisherStudio.Web/Components/Editor/MediaStudio.razor')
     for needle in (
@@ -43,7 +42,7 @@ try:
         'ApplyRetainedRecordingInfo(retainedRecording)',
         'InvokeAsync<RetainedMediaRecordingInfo?>',
         'stopMediaRecording',
-        './js/mediaStudioInterop.js?v=2.7.3'):
+        './js/mediaStudioInterop.js?v=2.7.4'):
         if needle not in media: raise AssertionError(f'MediaStudio.razor missing {needle}')
 
     js=text('src/PublisherStudio.Web/wwwroot/js/mediaStudioInterop.js')

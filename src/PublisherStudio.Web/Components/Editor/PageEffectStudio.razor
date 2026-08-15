@@ -217,6 +217,6 @@
         }
     }
 
-    private static string SafeColor(string? value) => !string.IsNullOrWhiteSpace(value) && value.StartsWith('#') && value.Length is 4 or 7 ? value : "#ffffff";
-    private static string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+    private string SafeColor(string? value) => !string.IsNullOrWhiteSpace(value) && value.StartsWith('#') && value.Length is 4 or 7 ? value : "#ffffff";
+    private string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
 }

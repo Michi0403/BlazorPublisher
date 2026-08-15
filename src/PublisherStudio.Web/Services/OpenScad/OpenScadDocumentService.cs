@@ -379,10 +379,18 @@ public sealed class OpenScadDocumentService(
     /// <returns>The collection produced by the operation.</returns>
     private IEnumerable<OpenScadNode> Enumerate(IEnumerable<OpenScadNode> nodes)
     {
-        foreach (var node in nodes)
+        System.Diagnostics.Trace.TraceInformation("Entering iterator OpenScadDocumentService.Enumerate.");
+        try
         {
-            yield return node;
-            foreach (var child in Enumerate(node.Children)) yield return child;
+            foreach (var node in nodes)
+            {
+                yield return node;
+                foreach (var child in Enumerate(node.Children)) yield return child;
+            }
+        }
+        finally
+        {
+            System.Diagnostics.Trace.TraceInformation("Completed iterator OpenScadDocumentService.Enumerate.");
         }
     }
 }

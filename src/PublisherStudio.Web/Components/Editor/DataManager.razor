@@ -476,7 +476,7 @@
         catch (Exception ex) { _error = ex.Message; }
     }
 
-    private static string GuessCsvDelimiter(string source)
+    private string GuessCsvDelimiter(string source)
     {
         var firstLine = (source ?? string.Empty).Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? string.Empty;
         var candidates = new[] { ',', ';', '\t', '|' };
@@ -571,8 +571,8 @@
         catch (Exception exception) { _error = exception.Message; }
     }
 
-    private static string ValidationCss(PublicationDataValidationSeverity severity) => severity.ToString().ToLowerInvariant();
-    private static string ValidationIcon(PublicationDataValidationSeverity severity) => severity switch
+    private string ValidationCss(PublicationDataValidationSeverity severity) => severity.ToString().ToLowerInvariant();
+    private string ValidationIcon(PublicationDataValidationSeverity severity) => severity switch
     {
         PublicationDataValidationSeverity.Success => "✓",
         PublicationDataValidationSeverity.Warning => "⚠",
@@ -588,7 +588,7 @@
             .ToList();
     }
 
-    private static string SourceName(PublicationDataObject data) => !string.IsNullOrWhiteSpace(data.SourceReference) ? "Spreadsheet selection" : data.SourceKind switch
+    private string SourceName(PublicationDataObject data) => !string.IsNullOrWhiteSpace(data.SourceReference) ? "Spreadsheet selection" : data.SourceKind switch
     {
         PublicationDataSourceKind.PublicationPages => "Live pages",
         PublicationDataSourceKind.PublicationDocument => "Live document",
@@ -597,7 +597,7 @@
         PublicationDataSourceKind.Web => $"{data.Web.Transport}",
         _ => data.SourceKind.ToString()
     };
-    private static bool IsBuiltIn(PublicationDataSourceKind kind) => kind is PublicationDataSourceKind.PublicationPages or PublicationDataSourceKind.PublicationDocument or PublicationDataSourceKind.DocumentObjects or PublicationDataSourceKind.PublicationMedia;
+    private bool IsBuiltIn(PublicationDataSourceKind kind) => kind is PublicationDataSourceKind.PublicationPages or PublicationDataSourceKind.PublicationDocument or PublicationDataSourceKind.DocumentObjects or PublicationDataSourceKind.PublicationMedia;
     private void SelectLivePages() => SelectLive(PublicationDataSourceKind.PublicationPages);
     private void SelectLiveDocument() => SelectLive(PublicationDataSourceKind.PublicationDocument);
     private void SelectLiveObjects() => SelectLive(PublicationDataSourceKind.DocumentObjects);
@@ -643,6 +643,6 @@
         if (value != PublicationDataSourceKind.Web) ParsePreview();
     }
     private void ChangeDocumentScope(ChangeEventArgs args) { if (Enum.TryParse<DocumentObjectDataScope>(args.Value?.ToString(), out var value)) _draft.DocumentScope = value; }
-    private static bool Checked(ChangeEventArgs args) => args.Value is bool value && value;
-    private static string Friendly(string value) => string.Concat(value.Select((character, index) => index > 0 && char.IsUpper(character) ? $" {character}" : character.ToString()));
+    private bool Checked(ChangeEventArgs args) => args.Value is bool value && value;
+    private string Friendly(string value) => string.Concat(value.Select((character, index) => index > 0 && char.IsUpper(character) ? $" {character}" : character.ToString()));
 }

@@ -74,7 +74,7 @@
         Notifications.Dismiss(id);
     }
 
-    private static string Icon(UserNotificationSeverity severity) => severity switch
+    private string Icon(UserNotificationSeverity severity) => severity switch
     {
         UserNotificationSeverity.Success => "✓",
         UserNotificationSeverity.Warning => "!",

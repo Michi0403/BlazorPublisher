@@ -360,6 +360,8 @@ function stateFor(id) { try {
             retainedRecordingKind: '',
             retainedRecordingMimeType: '',
             retainedRecordingFileName: '',
+            retainedRecordingInfo: null,
+            recordingFinalizationError: '',
             keyboardHandler: null,
             rootId: '',
             frameStageId: '',
@@ -416,6 +418,8 @@ function releaseRetainedRecording(state) { try {
     state.retainedRecordingKind = '';
     state.retainedRecordingMimeType = '';
     state.retainedRecordingFileName = '';
+    state.retainedRecordingInfo = null;
+    state.recordingFinalizationError = '';
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:releaseRetainedRecording@236', __javascriptError); throw __javascriptError; }}
 
 function recordingExtension(mimeType) { try {
@@ -1571,7 +1575,7 @@ async function retainRecording(state, blob, kind) { try {
         }
     }
 
-    await state.dotnet?.invokeMethodAsync('MediaRecordingReady', {
+    const retainedInfo = {
         objectUrl: state.retainedRecordingUrl,
         mimeType,
         fileName: state.retainedRecordingFileName,
@@ -1580,8 +1584,29 @@ async function retainRecording(state, blob, kind) { try {
         waveformSamples: info.waveformSamples || [],
         posterDataUrl: info.posterDataUrl || '',
         metadataWarning
-    });
- } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:retainRecording@1300', __javascriptError); throw __javascriptError; }}
+    };
+    state.retainedRecordingInfo = retainedInfo;
+    state.recordingFinalizationError = '';
+
+    // The browser-owned Blob is authoritative. A Blazor circuit may reconnect while MediaRecorder
+    // finalizes, so a stale DotNetObjectReference must never make us throw away the completed file.
+    try {
+        await state.dotnet?.invokeMethodAsync('MediaRecordingReady', retainedInfo);
+    } catch (callbackError) {
+        publisherStudioDiagnostics.report('js/mediaStudioInterop.js:retainRecording:dotnet-callback', callbackError);
+    }
+    return retainedInfo;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:retainRecording', __javascriptError); throw __javascriptError; }}
+
+export function getMediaRecordingState(id, dotnet) { try {
+    const state = stateFor(id);
+    if (dotnet) state.dotnet = dotnet;
+    return {
+        isRecording: Boolean(state.recorder && state.recorder.state !== 'inactive'),
+        retainedRecording: state.retainedRecordingInfo,
+        finalizationError: state.recordingFinalizationError || ''
+    };
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:getMediaRecordingState', __javascriptError); throw __javascriptError; }}
 
 export async function embedRetainedRecording(id) { try {
     const state = stateFor(id);
@@ -1636,6 +1661,7 @@ export async function startMediaRecording(id, kind, source, dotnet) { try {
     const state = stateFor(id);
     state.dotnet = dotnet || state.dotnet;
     if (state.recorder && state.recorder.state !== 'inactive') return;
+    state.recordingFinalizationError = '';
     state.stream = await streamFor(kind, source);
     state.chunks = [];
     state.discardRecording = false;
@@ -1660,7 +1686,9 @@ export async function startMediaRecording(id, kind, source, dotnet) { try {
             if (!blob.size) throw new Error('The browser completed the recording but produced an empty file.');
             await retainRecording(state, blob, kind);
         } catch (error) {
-            await state.dotnet?.invokeMethodAsync('MediaRecordingFailed', error?.message || String(error));
+            state.recordingFinalizationError = error?.message || String(error);
+            try { await state.dotnet?.invokeMethodAsync('MediaRecordingFailed', state.recordingFinalizationError); }
+            catch (callbackError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:recording-failed:dotnet-callback', callbackError); }
         } finally {
             releaseRecordingCapture(state);
             state.stream = null;
@@ -1681,15 +1709,37 @@ export async function startMediaRecording(id, kind, source, dotnet) { try {
     await state.dotnet?.invokeMethodAsync('MediaRecordingCleared');
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:startMediaRecording@1385', __javascriptError); throw __javascriptError; }}
 
-export function stopMediaRecording(id) { try {
+export async function stopMediaRecording(id, dotnet) { try {
     const state = stateFor(id);
+    if (dotnet) state.dotnet = dotnet;
     state.discardRecording = false;
-    if (state.recorder && state.recorder.state !== 'inactive') state.recorder.stop();
-    // MediaRecorder finalization and metadata inspection may continue after Stop. The browser
-    // capture permission must not: release camera/screen/microphone tracks immediately so the
-    // browser privacy indicator reflects actual hardware use rather than post-processing time.
-    releaseRecordingCapture(state);
- } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:stopMediaRecording@1450', __javascriptError); throw __javascriptError; }}
+    state.recordingFinalizationError = '';
+
+    if (state.recorder && state.recorder.state !== 'inactive') {
+        // Flush a final chunk before stop. Do not stop the capture tracks here: Chromium can still
+        // need them while dispatching the final dataavailable/stop events. The stop handler releases
+        // hardware immediately after the Blob has safely been retained.
+        try {
+            if (state.recorder.state === 'recording' && typeof state.recorder.requestData === 'function')
+                state.recorder.requestData();
+        } catch (__caughtJavaScriptError) {
+            publisherStudioDiagnostics.report('js/mediaStudioInterop.js:stopMediaRecording:requestData', __caughtJavaScriptError);
+        }
+        state.recorder.stop();
+    }
+
+    const deadline = Date.now() + 30000;
+    while (Date.now() < deadline) {
+        if (state.retainedRecordingInfo) return state.retainedRecordingInfo;
+        if (state.recordingFinalizationError) throw new Error(state.recordingFinalizationError);
+        if (!state.recorder && !state.stream && (!state.chunks || state.chunks.length === 0)) break;
+        await new Promise(resolve => setTimeout(resolve, 50));
+    }
+
+    if (state.retainedRecordingInfo) return state.retainedRecordingInfo;
+    if (state.recordingFinalizationError) throw new Error(state.recordingFinalizationError);
+    throw new Error('The browser stopped recording but did not finalize a retained media file.');
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:stopMediaRecording', __javascriptError); throw __javascriptError; }}
 
 export function cancelMediaRecording(id) { try {
     const state = stateFor(id);

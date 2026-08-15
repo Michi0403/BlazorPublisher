@@ -34,6 +34,7 @@ public static class Program
         var hostLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("PublisherStudio.Host");
         try
         {
+            hostLogger.LogInformation("Starting PublisherStudio host with persistent application logging enabled.");
             await app.StartAsync().ConfigureAwait(false);
             endpointWriter.Write(app);
             await app.WaitForShutdownAsync().ConfigureAwait(false);
@@ -140,9 +141,13 @@ public static class Program
                 }));
         });
 
+        new LoggingConfigurationService(builder.Services, builder.Configuration, startupLogger).Configure(builder.Logging);
         builder.Services.AddPublisherStudioApplication(builder.Configuration, startupLogger);
         if (!builder.Environment.IsDevelopment())
-            builder.Logging.AddFilter((category, level) => level >= LogLevel.Warning);
+        {
+            builder.Logging.AddFilter("Microsoft", LogLevel.Warning);
+            builder.Logging.AddFilter("System", LogLevel.Warning);
+        }
 
         var app = builder.Build();
         systemVariables.AttachLogger(app.Services.GetRequiredService<ILogger<SystemVariableStoreService>>());

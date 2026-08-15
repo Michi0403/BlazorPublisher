@@ -85,7 +85,7 @@ def main() -> int:
     services = app / 'Services'
     parser = load_parser(root / 'build/audit_application_architecture.py')
     failures: list[str] = []
-    checked = skipped_yield = skipped_boot = 0
+    checked = checked_yield = skipped_boot = 0
 
     for path in sorted(services.rglob('*.cs')):
         if any(part in {'bin', 'obj', 'Migrations'} for part in path.parts):
@@ -95,7 +95,13 @@ def main() -> int:
             body = text[method.body_start:method.end]
             masked = parser.mask_csharp(body)
             if re.search(r'\byield\b', masked):
-                skipped_yield += 1
+                checked_yield += 1
+                ident = f'{path.relative_to(app).as_posix()}:{line_of(text, method.start)} {method.type_name}.{method.name}'
+                if not re.search(r'\btry\b', masked) or not re.search(r'\bfinally\b', masked):
+                    failures.append(f'{ident}: iterator/yield method missing try/finally boundary')
+                    continue
+                if not has_logging(body):
+                    failures.append(f'{ident}: iterator/yield method missing ILogger/Trace diagnostics')
                 continue
             if (method.type_name, method.name) in BOOT_EXCLUSIONS[args.product]:
                 skipped_boot += 1
@@ -112,10 +118,10 @@ def main() -> int:
         print('Service resilience audit failed:')
         for failure in failures:
             print(f'  - {failure}')
-        print(f'Checked {checked} service methods; skipped {skipped_yield} yield methods and {skipped_boot} Program/Startup boot methods.')
+        print(f'Checked {checked} service methods and {checked_yield} iterator/yield methods; skipped {skipped_boot} Program/Startup boot methods.')
         return 1
 
-    print(f'Service resilience audit passed: {checked} service methods own try/catch + diagnostics; skipped {skipped_yield} yield methods and {skipped_boot} direct Program/Startup methods.')
+    print(f'Service resilience audit passed: {checked} service methods own try/catch + diagnostics; {checked_yield} iterator/yield methods own try/finally + diagnostics; skipped {skipped_boot} direct Program/Startup methods.')
     return 0
 
 if __name__ == '__main__':

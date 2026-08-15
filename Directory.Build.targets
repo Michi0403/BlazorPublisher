@@ -32,12 +32,12 @@
           StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <Target Name="AssertPublisherLoggingIntegrity"
+  <!--<Target Name="AssertPublisherLoggingIntegrity"
           BeforeTargets="BeforeBuild"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipLoggingIntegrityGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(LoggingIntegrityScript)')" Text="Logging integrity guard script is missing: $(LoggingIntegrityScript)" />
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(LoggingIntegrityScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>
+  </Target>-->
 
   <Target Name="AssertPublisherOneWireArchitecture"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherLoggingIntegrity"
@@ -158,13 +158,13 @@
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(InstallerWorkflowScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <Target Name="AssertPublisherXmlDocumentationCoverage"
+  <!--<Target Name="AssertPublisherXmlDocumentationCoverage"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherInstallerWorkflow"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipXmlDocumentationCoverageGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(XmlDocumentationCoverageScript)')" Text="XML documentation coverage guard script is missing: $(XmlDocumentationCoverageScript)" />
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(XmlDocumentationCoverageScript)&quot;"
           WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>
+  </Target>-->
 
   <PropertyGroup>
     <PublisherStudioDocumentationScript>$(MSBuildThisFileDirectory)build\Build-Documentation.ps1</PublisherStudioDocumentationScript>

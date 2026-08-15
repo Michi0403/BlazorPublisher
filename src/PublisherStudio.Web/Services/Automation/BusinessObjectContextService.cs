@@ -116,18 +116,26 @@ public sealed class BusinessObjectContextService(
     /// <returns>The collection produced by the operation.</returns>
     private IEnumerable<Type> UnwrapTypes(Type type)
     {
-        if (type == typeof(void)) yield break;
-        if (type.IsArray)
+        System.Diagnostics.Trace.TraceInformation($"Entering iterator BusinessObjectContextService.UnwrapTypes for {type.FullName ?? type.Name}.");
+        try
         {
-            foreach (var nested in UnwrapTypes(type.GetElementType()!)) yield return nested;
-            yield break;
+            if (type == typeof(void)) yield break;
+            if (type.IsArray)
+            {
+                foreach (var nested in UnwrapTypes(type.GetElementType()!)) yield return nested;
+                yield break;
+            }
+            if (type.IsGenericType)
+            {
+                foreach (var argument in type.GetGenericArguments())
+                    foreach (var nested in UnwrapTypes(argument)) yield return nested;
+            }
+            yield return type;
         }
-        if (type.IsGenericType)
+        finally
         {
-            foreach (var argument in type.GetGenericArguments())
-                foreach (var nested in UnwrapTypes(argument)) yield return nested;
+            System.Diagnostics.Trace.TraceInformation($"Completed iterator BusinessObjectContextService.UnwrapTypes for {type.FullName ?? type.Name}.");
         }
-        yield return type;
     }
 }
 

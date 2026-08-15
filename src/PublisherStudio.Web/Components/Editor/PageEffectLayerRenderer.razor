@@ -18,7 +18,7 @@
     [Parameter, EditorRequired] public PublicationPage Page { get; set; } = default!;
     [Parameter] public PublicationPageEffectPlacement Placement { get; set; }
 
-    private static string LayerStyle(PublicationPageEffectLayer effect)
+    private string LayerStyle(PublicationPageEffectLayer effect)
     {
         var duration = Math.Clamp(effect.DurationSeconds, .05, 3600).ToString("0.###", CultureInfo.InvariantCulture);
         var delay = Math.Clamp(effect.DelaySeconds, 0, 3600).ToString("0.###", CultureInfo.InvariantCulture);
@@ -39,7 +39,7 @@
         return $"--page-effect-duration:{duration}s;--page-effect-delay:{delay}s;--page-effect-iterations:{iterations};--page-effect-direction:{direction};--page-effect-easing:{easing};--page-effect-from-opacity:{fromOpacity};--page-effect-to-opacity:{toOpacity};mix-blend-mode:{blend};";
     }
 
-    private static string FillStyle(PublicationPageEffectLayer effect, bool final)
+    private string FillStyle(PublicationPageEffectLayer effect, bool final)
     {
         var first = final ? effect.ToColor : effect.Color;
         var second = final ? effect.ToSecondaryColor : effect.SecondaryColor;

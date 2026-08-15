@@ -7,8 +7,8 @@ def require(path, needle):
     if needle not in text: raise RuntimeError(f'{path} missing: {needle}')
 if (root/'build/async-continuation-baseline.json').exists():
     raise SystemExit('Legacy async-continuation-baseline.json must not exist; raw-await grandfathering is forbidden.')
-require('src/PublisherStudio.Web/PublisherStudio.Web.csproj','<Version>2.7.2</Version>')
-require('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj','<Version>2.7.2</Version>')
+require('src/PublisherStudio.Web/PublisherStudio.Web.csproj','<Version>2.7.3</Version>')
+require('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj','<Version>2.7.3</Version>')
 require('build/Assert-AsyncContinuationPolicy.ps1','No raw-await baseline fallback is permitted')
 require('src/PublisherStudio.Web/Components/Editor/InspectorPanel.razor','Components.JoinDisplayValues(dataVisual.ValueFields)')
 result=subprocess.run([sys.executable,str(root/'build/audit_async_continuations.py'),'--source-root',str(root/'src/PublisherStudio.Web')],text=True,capture_output=True)

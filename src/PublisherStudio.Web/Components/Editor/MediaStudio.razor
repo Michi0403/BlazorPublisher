@@ -8,6 +8,7 @@
 @inject VideoLayerInterchangeService VideoLayerInterchange
 @inject IPublisherRuntimePolicyDataService RuntimePolicy
 @inject IFileLocalizationService Localization
+@inject ILogger<MediaStudio> Logger
 
 @if (Visible)
 {
@@ -849,6 +850,7 @@
     private IJSObjectReference? _module;
     private Guid _loadedSession;
     private Guid _initializedSession;
+    private Guid _recordingRecoveryAttemptedSession;
     private string _name = "Audio";
     private string _dataUrl = string.Empty;
     private string _mimeType = string.Empty;
@@ -1115,6 +1117,7 @@
     {
         if (!Visible || SessionId == Guid.Empty || SessionId == _loadedSession) return;
         _loadedSession = SessionId;
+        _recordingRecoveryAttemptedSession = Guid.Empty;
         MediaAssets.Remove(_previewAssetId);
         _previewAssetId = Guid.NewGuid();
         _previewSource = string.Empty;
@@ -1234,25 +1237,90 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!Visible || _disposed || SessionId == Guid.Empty) return;
+        var stateChanged = false;
         try
         {
             var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+            if (_recordingRecoveryAttemptedSession != SessionId)
+            {
+                _recordingRecoveryAttemptedSession = SessionId;
+                var stateInvocation = module.InvokeAsync<BrowserMediaRecordingState>(
+                    "getMediaRecordingState",
+                    "media-studio-preview",
+                    _self);
+                var browserState = await stateInvocation.ConfigureAwait(true);
+                if (browserState.RetainedRecording is { SizeBytes: > 0 } retainedRecording)
+                {
+                    ApplyRetainedRecordingInfo(retainedRecording);
+                    stateChanged = true;
+                    Logger.LogInformation(
+                        "Recovered retained {MediaKind} recording {FileName} ({SizeBytes} bytes) after Media Studio render/circuit attachment.",
+                        IsVideo ? "video" : "audio",
+                        retainedRecording.FileName,
+                        retainedRecording.SizeBytes);
+                }
+                else if (browserState.IsRecording && !_recording)
+                {
+                    _recording = true;
+                    _warning = "Browser recording is still active after the UI reconnected.";
+                    stateChanged = true;
+                    Logger.LogInformation(
+                        "Recovered active {MediaKind} recording state after Media Studio render/circuit attachment.",
+                        IsVideo ? "video" : "audio");
+                }
+
+                if (!string.IsNullOrWhiteSpace(browserState.FinalizationError))
+                {
+                    _recording = false;
+                    _error = $"Recording finalization failed in the browser: {browserState.FinalizationError}";
+                    stateChanged = true;
+                    Logger.LogError(
+                        "Browser reported a retained recording finalization error after Media Studio reconnect: {RecordingError}",
+                        browserState.FinalizationError);
+                }
+            }
+
             if (IsVideo && HasSource) await SyncVideoEffectsAsync(module).ConfigureAwait(true);
+            if (stateChanged) await InvokeAsync(StateHasChanged).ConfigureAwait(true);
         }
-        catch (JSDisconnectedException) { }
-        catch (TaskCanceledException) { }
-        catch (ObjectDisposedException) { }
+        catch (JSDisconnectedException ex)
+        {
+            Logger.LogWarning(ex, "Media Studio browser connection disconnected while attaching or recovering recording state.");
+        }
+        catch (TaskCanceledException ex)
+        {
+            Logger.LogWarning(ex, "Media Studio browser attachment or recording-state recovery was canceled.");
+        }
+        catch (ObjectDisposedException ex)
+        {
+            Logger.LogDebug(ex, "Media Studio was disposed while browser attachment or recording-state recovery was in progress.");
+        }
         catch (JSException ex)
         {
+            Logger.LogError(ex, "Media Studio browser initialization failed.");
             _error = $"Media Studio could not initialize: {ex.Message}";
-            try { await InvokeAsync(StateHasChanged).ConfigureAwait(true); } catch (ObjectDisposedException) { }
+            try { await InvokeAsync(StateHasChanged).ConfigureAwait(true); }
+            catch (ObjectDisposedException disposedException)
+            {
+                Logger.LogDebug(disposedException, "Media Studio was disposed before its initialization error could be rendered.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Unexpected Media Studio render/recovery failure.");
+            _error = $"Media Studio could not restore browser media state: {ex.Message}";
+            try { await InvokeAsync(StateHasChanged).ConfigureAwait(true); }
+            catch (ObjectDisposedException disposedException)
+            {
+                Logger.LogDebug(disposedException, "Media Studio was disposed before its recovery error could be rendered.");
+            }
         }
     }
 
     private async Task<IJSObjectReference> EnsureMediaModuleAsync()
     {
         if (_disposed) throw new ObjectDisposedException(nameof(MediaStudio));
-        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.7.2").ConfigureAwait(true);
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.7.3").ConfigureAwait(true);
         _self ??= DotNetObjectReference.Create(this);
         if (SessionId != Guid.Empty)
         {
@@ -3178,19 +3246,74 @@
         try
         {
             var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+            Logger.LogInformation(
+                "Starting Media Studio {MediaKind} recording from {RecordingSource} for session {SessionId}.",
+                IsVideo ? "video" : "audio",
+                source,
+                SessionId);
             _recording = true;
             await module.InvokeVoidAsync("startMediaRecording", "media-studio-preview", IsVideo ? "video" : "audio", source, _self).ConfigureAwait(true);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex,
+                "Starting Media Studio {MediaKind} recording from {RecordingSource} failed for session {SessionId}.",
+                IsVideo ? "video" : "audio",
+                source,
+                SessionId);
             _recording = false;
             _error = ex.Message;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
         }
     }
 
     private async Task StopRecording()
     {
-        if (_module is not null) await _module.InvokeVoidAsync("stopMediaRecording", "media-studio-preview").ConfigureAwait(true);
+        if (_module is null) return;
+        _error = null;
+        try
+        {
+            Logger.LogInformation(
+                "Stopping Media Studio {MediaKind} recording for session {SessionId}; waiting for browser Blob finalization.",
+                IsVideo ? "video" : "audio",
+                SessionId);
+            var stopInvocation = _module.InvokeAsync<RetainedMediaRecordingInfo?>(
+                "stopMediaRecording",
+                "media-studio-preview",
+                _self);
+            var retainedRecording = await stopInvocation.ConfigureAwait(true);
+            if (retainedRecording is null || retainedRecording.SizeBytes <= 0 || string.IsNullOrWhiteSpace(retainedRecording.ObjectUrl))
+                throw new InvalidDataException("The browser stopped recording but did not return a retained media file.");
+
+            ApplyRetainedRecordingInfo(retainedRecording);
+            Logger.LogInformation(
+                "Media Studio {MediaKind} recording finalized as {FileName} ({SizeBytes} bytes) for session {SessionId}.",
+                IsVideo ? "video" : "audio",
+                retainedRecording.FileName,
+                retainedRecording.SizeBytes,
+                SessionId);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        }
+        catch (Exception ex) when (ex is JSDisconnectedException or TaskCanceledException or ObjectDisposedException)
+        {
+            Logger.LogWarning(ex,
+                "Media Studio disconnected while stopping {MediaKind} recording for session {SessionId}; browser-owned recording state will be recovered after reconnect.",
+                IsVideo ? "video" : "audio",
+                SessionId);
+            _warning = "The UI disconnected while the browser was finalizing the recording. Reopen or reconnect this studio to recover the browser-owned recording.";
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex,
+                "Stopping/finalizing Media Studio {MediaKind} recording failed for session {SessionId}.",
+                IsVideo ? "video" : "audio",
+                SessionId);
+            _recording = false;
+            _error = $"The recording could not be finalized: {ex.Message}";
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        }
     }
 
     private async Task GenerateTone()
@@ -3239,9 +3362,9 @@
         return InvokeAsync(StateHasChanged);
     }
 
-    [JSInvokable]
-    public async Task MediaRecordingReady(RetainedMediaRecordingInfo info)
+    private void ApplyRetainedRecordingInfo(RetainedMediaRecordingInfo info)
     {
+        ArgumentNullException.ThrowIfNull(info);
         _recording = false;
         _recordingBuffer = null;
         _recordingId = null;
@@ -3264,7 +3387,29 @@
         _warning = string.IsNullOrWhiteSpace(info.MetadataWarning)
             ? "Recording completed. It remains available for download until this studio closes."
             : $"Recording completed and remains downloadable. Browser metadata warning: {info.MetadataWarning}";
-        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+    }
+
+    [JSInvokable]
+    public async Task MediaRecordingReady(RetainedMediaRecordingInfo info)
+    {
+        try
+        {
+            ApplyRetainedRecordingInfo(info);
+            Logger.LogInformation(
+                "Browser retained Media Studio {MediaKind} recording {FileName} ({SizeBytes} bytes) for session {SessionId}.",
+                IsVideo ? "video" : "audio",
+                _retainedRecordingFileName,
+                _retainedRecordingSizeBytes,
+                SessionId);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Applying the completed Media Studio recording failed for session {SessionId}.", SessionId);
+            _recording = false;
+            _error = $"The completed recording could not be restored in the studio: {ex.Message}";
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        }
     }
 
     [JSInvokable]
@@ -3327,15 +3472,28 @@
     [JSInvokable]
     public Task MediaRecordingFailed(string message)
     {
-        _recording = false;
-        _embedding = false;
-        _recordingBuffer = null;
-        _recordingId = null;
-        _recordingExpectedChunks = 0;
-        _recordingNextChunk = 0;
-        _recordingExpectedBytes = 0;
-        _error = message;
-        return InvokeAsync(StateHasChanged);
+        try
+        {
+            Logger.LogError(
+                "Browser MediaRecorder failed for {MediaKind} session {SessionId}: {RecordingError}",
+                IsVideo ? "video" : "audio",
+                SessionId,
+                message);
+            _recording = false;
+            _embedding = false;
+            _recordingBuffer = null;
+            _recordingId = null;
+            _recordingExpectedChunks = 0;
+            _recordingNextChunk = 0;
+            _recordingExpectedBytes = 0;
+            _error = message;
+            return InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Handling a Media Studio recording failure callback failed for session {SessionId}.", SessionId);
+            throw;
+        }
     }
 
     private void RefreshPreviewSource()
@@ -3681,10 +3839,16 @@
         {
             var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
             await module.InvokeVoidAsync("downloadRetainedRecording", "media-studio-preview", _retainedRecordingFileName).ConfigureAwait(true);
+            Logger.LogInformation(
+                "Downloaded retained Media Studio recording {FileName} ({SizeBytes} bytes) for session {SessionId}.",
+                _retainedRecordingFileName,
+                _retainedRecordingSizeBytes,
+                SessionId);
             _warning = $"Downloaded {_retainedRecordingFileName} ({FormatBytes(_retainedRecordingSizeBytes)}).";
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Downloading retained Media Studio recording failed for session {SessionId}.", SessionId);
             _error = $"The completed recording could not be downloaded: {ex.Message}";
         }
     }
@@ -3937,6 +4101,13 @@
             unit++;
         }
         return $"{display:0.##} {units[unit]}";
+    }
+
+    public sealed class BrowserMediaRecordingState
+    {
+        public bool IsRecording { get; set; }
+        public RetainedMediaRecordingInfo? RetainedRecording { get; set; }
+        public string FinalizationError { get; set; } = string.Empty;
     }
 
     public sealed class RetainedMediaRecordingInfo

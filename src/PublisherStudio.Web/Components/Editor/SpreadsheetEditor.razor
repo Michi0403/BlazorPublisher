@@ -438,8 +438,8 @@
         }
     }
 
-    private static string ValidationCss(PublicationDataValidationSeverity severity) => severity.ToString().ToLowerInvariant();
-    private static string ValidationIcon(PublicationDataValidationSeverity severity) => severity switch
+    private string ValidationCss(PublicationDataValidationSeverity severity) => severity.ToString().ToLowerInvariant();
+    private string ValidationIcon(PublicationDataValidationSeverity severity) => severity switch
     {
         PublicationDataValidationSeverity.Success => "✓",
         PublicationDataValidationSeverity.Warning => "⚠",

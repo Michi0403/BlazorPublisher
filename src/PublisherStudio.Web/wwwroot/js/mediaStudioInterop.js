@@ -364,6 +364,8 @@ function stateFor(id) { try {
             recordingFinalizationError: '',
             recordingStopRequested: false,
             recordingFinalizing: false,
+            recordingStartedAtMs: 0,
+            recordingStopRequestedAtMs: 0,
             keyboardHandler: null,
             rootId: '',
             frameStageId: '',
@@ -1551,6 +1553,38 @@ async function streamFor(kind, source) { try {
     return navigator.mediaDevices.getUserMedia({ audio: true });
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:streamFor@1285', __javascriptError); throw __javascriptError; }}
 
+async function enrichRetainedRecordingMetadata(state, retainedBlob, retainedUrl, retainedInfo, kind) { try {
+    const preview = mediaElement(state.id);
+    let info = { durationSeconds: retainedInfo.durationSeconds || .01, waveformSamples: [], posterDataUrl: '' };
+    let metadataWarning = '';
+    try {
+        if (!preview) throw new Error('Media preview is not available.');
+        preview.muted = false;
+        info = await inspectElement(preview, retainedUrl, kind);
+    } catch (error) {
+        metadataWarning = error?.message || String(error);
+        if (preview && state.retainedRecordingUrl === retainedUrl) {
+            preview.src = retainedUrl;
+            preview.load();
+        }
+    }
+
+    if (state.retainedRecordingBlob !== retainedBlob || state.retainedRecordingUrl !== retainedUrl) return;
+    const enrichedInfo = {
+        ...retainedInfo,
+        durationSeconds: Math.max(.01, Number(info.durationSeconds) || Number(retainedInfo.durationSeconds) || .01),
+        waveformSamples: info.waveformSamples || [],
+        posterDataUrl: info.posterDataUrl || '',
+        metadataWarning
+    };
+    state.retainedRecordingInfo = enrichedInfo;
+    try {
+        await state.dotnet?.invokeMethodAsync('MediaRecordingMetadataReady', enrichedInfo);
+    } catch (callbackError) {
+        publisherStudioDiagnostics.report('js/mediaStudioInterop.js:enrichRetainedRecordingMetadata:dotnet-callback', callbackError);
+    }
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:enrichRetainedRecordingMetadata', __javascriptError); throw __javascriptError; }}
+
 async function retainRecording(state, blob, kind) { try {
     const fallbackMimeType = kind === 'video' ? 'video/webm' : 'audio/webm';
     const mimeType = baseMimeType(blob.type, fallbackMimeType);
@@ -1562,41 +1596,37 @@ async function retainRecording(state, blob, kind) { try {
     state.retainedRecordingMimeType = mimeType;
     state.retainedRecordingFileName = recordingFileName(kind, mimeType);
 
-    const preview = mediaElement(state.id);
-    let info = { durationSeconds: 0, waveformSamples: [], posterDataUrl: '' };
-    let metadataWarning = '';
-    try {
-        if (!preview) throw new Error('Media preview is not available.');
-        preview.muted = false;
-        info = await inspectElement(preview, state.retainedRecordingUrl, kind);
-    } catch (error) {
-        metadataWarning = error?.message || String(error);
-        if (preview) {
-            preview.src = state.retainedRecordingUrl;
-            preview.load();
-        }
-    }
-
+    const stopAt = state.recordingStopRequestedAtMs > 0 ? state.recordingStopRequestedAtMs : performance.now();
+    const startedAt = state.recordingStartedAtMs > 0 ? state.recordingStartedAtMs : stopAt - 10;
+    const estimatedDurationSeconds = Math.max(.01, (stopAt - startedAt) / 1000);
     const retainedInfo = {
         objectUrl: state.retainedRecordingUrl,
         mimeType,
         fileName: state.retainedRecordingFileName,
         sizeBytes: retainedBlob.size,
-        durationSeconds: info.durationSeconds || 0,
-        waveformSamples: info.waveformSamples || [],
-        posterDataUrl: info.posterDataUrl || '',
-        metadataWarning
+        durationSeconds: estimatedDurationSeconds,
+        waveformSamples: [],
+        posterDataUrl: '',
+        metadataWarning: 'Browser metadata analysis is continuing in the background.'
     };
     state.retainedRecordingInfo = retainedInfo;
     state.recordingFinalizationError = '';
+    state.recordingFinalizing = false;
+    state.recordingStopRequested = false;
 
-    // The browser-owned Blob is authoritative. A Blazor circuit may reconnect while MediaRecorder
-    // finalizes, so a stale DotNetObjectReference must never make us throw away the completed file.
-    try {
-        await state.dotnet?.invokeMethodAsync('MediaRecordingReady', retainedInfo);
-    } catch (callbackError) {
-        publisherStudioDiagnostics.report('js/mediaStudioInterop.js:retainRecording:dotnet-callback', callbackError);
+    const preview = mediaElement(state.id);
+    if (preview) {
+        preview.src = state.retainedRecordingUrl;
+        preview.load();
     }
+
+    // A complete Blob is already safe to download/embed. Do not hold Save/Insert hostage to
+    // duration/poster/waveform analysis: expose the retained file first, enrich metadata later.
+    Promise.resolve(state.dotnet?.invokeMethodAsync('MediaRecordingReady', retainedInfo))
+        .catch(callbackError => publisherStudioDiagnostics.report('js/mediaStudioInterop.js:retainRecording:dotnet-callback', callbackError));
+
+    void enrichRetainedRecordingMetadata(state, retainedBlob, state.retainedRecordingUrl, retainedInfo, kind)
+        .catch(error => publisherStudioDiagnostics.report('js/mediaStudioInterop.js:retainRecording:metadata-enrichment', error));
     return retainedInfo;
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:retainRecording', __javascriptError); throw __javascriptError; }}
 
@@ -1663,6 +1693,7 @@ function requestMediaRecordingStop(state) { try {
     if (!state.recorder || state.recorder.state === 'inactive') return Boolean(state.retainedRecordingInfo);
     state.recordingStopRequested = true;
     state.recordingFinalizing = true;
+    state.recordingStopRequestedAtMs = performance.now();
     try {
         if (state.recorder.state === 'recording' && typeof state.recorder.requestData === 'function')
             state.recorder.requestData();
@@ -1682,6 +1713,8 @@ export async function startMediaRecording(id, kind, source, dotnet) { try {
     state.recordingFinalizationError = '';
     state.recordingStopRequested = false;
     state.recordingFinalizing = false;
+    state.recordingStartedAtMs = 0;
+    state.recordingStopRequestedAtMs = 0;
     state.stream = await streamFor(kind, source);
     state.chunks = [];
     state.discardRecording = false;
@@ -1720,6 +1753,8 @@ export async function startMediaRecording(id, kind, source, dotnet) { try {
             state.chunks = [];
             state.recordingStopRequested = false;
             state.recordingFinalizing = false;
+            state.recordingStartedAtMs = 0;
+            state.recordingStopRequestedAtMs = 0;
         }
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:callback:state.recorder.addEventListener@1417', __javascriptError); throw __javascriptError; }}, { once: true });
     const endingTracks = kind === 'video' && state.stream.getVideoTracks().length
@@ -1730,6 +1765,7 @@ export async function startMediaRecording(id, kind, source, dotnet) { try {
             requestMediaRecordingStop(state);
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:callback:track.addEventListener@1441', __javascriptError); throw __javascriptError; }}, { once: true });
     }
+    state.recordingStartedAtMs = performance.now();
     state.recorder.start(250);
     releaseRetainedRecording(state);
     await state.dotnet?.invokeMethodAsync('MediaRecordingCleared');
@@ -1753,6 +1789,8 @@ export function cancelMediaRecording(id) { try {
     releaseRecordingCapture(state);
     state.recordingStopRequested = false;
     state.recordingFinalizing = false;
+    state.recordingStartedAtMs = 0;
+    state.recordingStopRequestedAtMs = 0;
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:cancelMediaRecording@1456', __javascriptError); throw __javascriptError; }}
 
 export async function playMediaRange(id, start, end, volume, rate, muted, loop) { try {

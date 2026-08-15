@@ -10,7 +10,7 @@ def forbid(rel, needle):
     if needle in text(rel): raise AssertionError(f"{rel} unexpectedly contains: {needle}")
 try:
     for rel in ('src/PublisherStudio.Web/PublisherStudio.Web.csproj','src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'):
-        require(rel,'<Version>2.7.6</Version>')
+        require(rel,'<Version>2.7.7</Version>')
     media='src/PublisherStudio.Web/Components/Editor/MediaStudio.razor'
     js='src/PublisherStudio.Web/wwwroot/js/mediaStudioInterop.js'
     require(media,'private bool _recordingStopping;')
@@ -19,7 +19,7 @@ try:
     require(media,'browser finalization continues asynchronously')
     require(media,'public bool IsFinalizing { get; set; }')
     require(media,'else if (browserState.IsFinalizing)')
-    require(media,'./js/mediaStudioInterop.js?v=2.7.6')
+    require(media,'./js/mediaStudioInterop.js?v=2.7.7')
     require(js,'function requestMediaRecordingStop(state)')
     require(js,'recordingStopRequested: false')
     require(js,'recordingFinalizing: false')

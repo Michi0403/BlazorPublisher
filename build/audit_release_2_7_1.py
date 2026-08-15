@@ -26,7 +26,7 @@ try:
         "src/PublisherStudio.Web/PublisherStudio.Web.csproj",
         "src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj",
     ]:
-        require(rel, "<Version>2.7.6</Version>")
+        require(rel, "<Version>2.7.7</Version>")
         match = re.search(r"<Version>(\d+)\.(\d+)\.(\d+)</Version>", read(rel))
         if not match or int(match.group(2)) > 9 or int(match.group(3)) > 9:
             raise AssertionError(f"version-slot policy failed for {rel}")
@@ -37,7 +37,7 @@ try:
         "src/PublisherStudio.Web/Components/Editor/MediaStudio.razor",
         "src/PublisherStudio.Web/Components/Pages/Editor.razor",
     ]:
-        require(rel, "v=2.7.6")
+        require(rel, "v=2.7.7")
 
     modes = []
     for path in (root / "src/PublisherStudio.Web").rglob("*.razor"):

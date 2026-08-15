@@ -1245,7 +1245,8 @@
         try
         {
             var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
-            if (_recordingRecoveryAttemptedSession != SessionId)
+            var shouldRefreshRecordingOwnership = _recordingRecoveryAttemptedSession != SessionId || _recording || _recordingStopping;
+            if (shouldRefreshRecordingOwnership)
             {
                 _recordingRecoveryAttemptedSession = SessionId;
                 var stateInvocation = module.InvokeAsync<BrowserMediaRecordingState>(
@@ -1255,33 +1256,48 @@
                 var browserState = await stateInvocation.ConfigureAwait(true);
                 if (browserState.RetainedRecording is { SizeBytes: > 0 } retainedRecording)
                 {
+                    var changed = !HasRetainedRecording
+                        || _recording
+                        || _recordingStopping
+                        || !string.Equals(_retainedRecordingObjectUrl, retainedRecording.ObjectUrl, StringComparison.Ordinal);
                     ApplyRetainedRecordingInfo(retainedRecording);
-                    stateChanged = true;
-                    Logger.LogInformation(
-                        "Recovered retained {MediaKind} recording {FileName} ({SizeBytes} bytes) after Media Studio render/circuit attachment.",
-                        IsVideo ? "video" : "audio",
-                        retainedRecording.FileName,
-                        retainedRecording.SizeBytes);
+                    stateChanged |= changed;
+                    if (changed)
+                    {
+                        Logger.LogInformation(
+                            "Recovered retained {MediaKind} recording {FileName} ({SizeBytes} bytes) after Media Studio render/circuit attachment.",
+                            IsVideo ? "video" : "audio",
+                            retainedRecording.FileName,
+                            retainedRecording.SizeBytes);
+                    }
                 }
                 else if (browserState.IsFinalizing)
                 {
+                    var changed = !_recording || !_recordingStopping;
                     _recording = true;
                     _recordingStopping = true;
                     _warning = "Browser recording is finalizing after the UI reconnected.";
-                    stateChanged = true;
-                    Logger.LogInformation(
-                        "Recovered finalizing {MediaKind} recording state after Media Studio render/circuit attachment.",
-                        IsVideo ? "video" : "audio");
+                    stateChanged |= changed;
+                    if (changed)
+                    {
+                        Logger.LogInformation(
+                            "Recovered finalizing {MediaKind} recording state after Media Studio render/circuit attachment.",
+                            IsVideo ? "video" : "audio");
+                    }
                 }
-                else if (browserState.IsRecording && !_recording)
+                else if (browserState.IsRecording)
                 {
+                    var changed = !_recording || _recordingStopping;
                     _recording = true;
                     _recordingStopping = false;
                     _warning = "Browser recording is still active after the UI reconnected.";
-                    stateChanged = true;
-                    Logger.LogInformation(
-                        "Recovered active {MediaKind} recording state after Media Studio render/circuit attachment.",
-                        IsVideo ? "video" : "audio");
+                    stateChanged |= changed;
+                    if (changed)
+                    {
+                        Logger.LogInformation(
+                            "Recovered active {MediaKind} recording state after Media Studio render/circuit attachment.",
+                            IsVideo ? "video" : "audio");
+                    }
                 }
 
                 if (!string.IsNullOrWhiteSpace(browserState.FinalizationError))
@@ -1336,7 +1352,7 @@
     private async Task<IJSObjectReference> EnsureMediaModuleAsync()
     {
         if (_disposed) throw new ObjectDisposedException(nameof(MediaStudio));
-        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.7.6").ConfigureAwait(true);
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.7.7").ConfigureAwait(true);
         _self ??= DotNetObjectReference.Create(this);
         if (SessionId != Guid.Empty)
         {
@@ -3430,6 +3446,65 @@
             _recording = false;
             _recordingStopping = false;
             _error = $"The completed recording could not be restored in the studio: {ex.Message}";
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        }
+    }
+
+    /// <summary>
+    /// Applies metadata that the browser resolved after the completed recording was already made
+    /// available for download, editing, insertion, or replacement.
+    /// </summary>
+    /// <param name="info">The enriched retained-recording metadata for the current browser Blob.</param>
+    [JSInvokable]
+    public async Task MediaRecordingMetadataReady(RetainedMediaRecordingInfo info)
+    {
+        try
+        {
+            if (!HasRetainedRecording
+                || string.IsNullOrWhiteSpace(info.ObjectUrl)
+                || !string.Equals(_retainedRecordingObjectUrl, info.ObjectUrl, StringComparison.Ordinal))
+                return;
+
+            var previousDuration = Math.Max(.01, _duration);
+            var resolvedDuration = Math.Max(.01, info.DurationSeconds);
+            var representedFullClip = _trimStart <= .001 && Math.Abs(_trimEnd - previousDuration) <= Math.Max(.02, previousDuration / 10000d);
+            _duration = resolvedDuration;
+            if (representedFullClip)
+            {
+                _trimStart = 0;
+                _trimEnd = resolvedDuration;
+                if (!_videoSelectionUserCommitted)
+                {
+                    _videoSelectionPointSeconds = 0;
+                    _videoSelectionStartSeconds = 0;
+                    _videoSelectionEndSeconds = resolvedDuration;
+                }
+            }
+            else
+            {
+                _trimStart = Math.Clamp(_trimStart, 0, resolvedDuration);
+                _trimEnd = Math.Clamp(_trimEnd, _trimStart, resolvedDuration);
+                _videoSelectionPointSeconds = Math.Clamp(_videoSelectionPointSeconds, 0, resolvedDuration);
+                _videoSelectionStartSeconds = Math.Clamp(_videoSelectionStartSeconds, 0, resolvedDuration);
+                _videoSelectionEndSeconds = Math.Clamp(_videoSelectionEndSeconds, _videoSelectionStartSeconds, resolvedDuration);
+            }
+
+            if (!string.IsNullOrWhiteSpace(info.PosterDataUrl)) _posterDataUrl = info.PosterDataUrl;
+            if (info.WaveformSamples is { Count: > 0 }) _waveform = info.WaveformSamples;
+            _warning = string.IsNullOrWhiteSpace(info.MetadataWarning)
+                ? "Recording completed. Browser metadata was resolved without blocking Save, Insert, Replace, or Download."
+                : $"Recording completed and remains editable. Browser metadata warning: {info.MetadataWarning}";
+            Logger.LogInformation(
+                "Browser enriched retained Media Studio {MediaKind} recording metadata to {DurationSeconds:F3}s for session {SessionId}.",
+                IsVideo ? "video" : "audio",
+                resolvedDuration,
+                SessionId);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Applying enriched Media Studio recording metadata failed for session {SessionId}.", SessionId);
+            _warning = "The recording is available, but optional browser metadata enrichment failed. Save, Insert, Replace, and Download remain available.";
             await InvokeAsync(StateHasChanged).ConfigureAwait(true);
         }
     }

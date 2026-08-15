@@ -10,7 +10,7 @@ def forbid(rel, needle):
     if needle in text(rel): raise AssertionError(f"{rel} unexpectedly contains: {needle}")
 try:
     for rel in ('src/PublisherStudio.Web/PublisherStudio.Web.csproj','src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'):
-        require(rel,'<Version>2.7.5</Version>')
+        require(rel,'<Version>2.7.6</Version>')
     for rel in (
         'src/PublisherStudio.Web/BusinessObjects/ApplicationLogEntry.cs',
         'src/PublisherStudio.Web/BusinessObjects/FileLoggerCoreOptions.cs',

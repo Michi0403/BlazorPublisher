@@ -17,8 +17,8 @@ def require(rel,*needles):
     if missing: raise AssertionError(f"{rel} missing {missing}")
 
 try:
-    require('src/PublisherStudio.Web/PublisherStudio.Web.csproj','<Version>2.7.5</Version>')
-    require('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj','<Version>2.7.5</Version>')
+    require('src/PublisherStudio.Web/PublisherStudio.Web.csproj','<Version>2.7.6</Version>')
+    require('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj','<Version>2.7.6</Version>')
 
     require('src/PublisherStudio.Web/BusinessObjects/UserNotificationModels.cs','DurationMilliseconds { get; set; } = 10000;')
     require('src/PublisherStudio.Web/Components/Shared/UserNotificationHost.razor',
@@ -34,7 +34,7 @@ try:
             '.website-publication .publication-panel-element > :is(.data-visual-view,.devextreme-publication-component,.publication-video-renderer,.live-source-view,.publication-panel)')
 
     require('src/PublisherStudio.Web/Components/Editor/MediaStudio.razor',
-            '"media-studio-sequence-timeline",', './js/mediaStudioInterop.js?v=2.7.5')
+            '"media-studio-sequence-timeline",', './js/mediaStudioInterop.js?v=2.7.6')
     if 'IsVideo ? "media-studio-sequence-timeline" : string.Empty' in read('src/PublisherStudio.Web/Components/Editor/MediaStudio.razor'):
         raise AssertionError('Audio Studio is still excluded from the shared sequence-timeline drag surface')
 

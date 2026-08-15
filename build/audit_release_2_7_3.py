@@ -10,7 +10,7 @@ def forbid(rel, needle):
     if needle in text(rel): raise AssertionError(f"{rel} unexpectedly contains: {needle}")
 try:
     for rel in ('src/PublisherStudio.Web/PublisherStudio.Web.csproj','src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'):
-        require(rel,'<Version>2.7.5</Version>')
+        require(rel,'<Version>2.7.6</Version>')
     for rel in (
         'src/PublisherStudio.Web/BusinessObjects/ApplicationLogEntry.cs',
         'src/PublisherStudio.Web/BusinessObjects/FileLoggerCoreOptions.cs',
@@ -40,21 +40,23 @@ try:
         'getMediaRecordingState',
         'BrowserMediaRecordingState',
         'ApplyRetainedRecordingInfo(retainedRecording)',
-        'InvokeAsync<RetainedMediaRecordingInfo?>',
+        'InvokeAsync<bool>',
         'stopMediaRecording',
-        './js/mediaStudioInterop.js?v=2.7.5'):
+        './js/mediaStudioInterop.js?v=2.7.6'):
         if needle not in media: raise AssertionError(f'MediaStudio.razor missing {needle}')
 
     js=text('src/PublisherStudio.Web/wwwroot/js/mediaStudioInterop.js')
-    require('src/PublisherStudio.Web/wwwroot/js/mediaStudioInterop.js','export async function stopMediaRecording(id, dotnet)')
+    require('src/PublisherStudio.Web/wwwroot/js/mediaStudioInterop.js','export function stopMediaRecording(id, dotnet)')
     require('src/PublisherStudio.Web/wwwroot/js/mediaStudioInterop.js','state.recorder.requestData()')
     require('src/PublisherStudio.Web/wwwroot/js/mediaStudioInterop.js','state.retainedRecordingInfo = retainedInfo;')
     require('src/PublisherStudio.Web/wwwroot/js/mediaStudioInterop.js','export function getMediaRecordingState(id, dotnet)')
-    stop=re.search(r'export async function stopMediaRecording\(id, dotnet\) \{ try \{(?P<body>.*?)\n \} catch \(__javascriptError\)',js,re.S)
+    stop=re.search(r'export function stopMediaRecording\(id, dotnet\) \{ try \{(?P<body>.*?)\n \} catch \(__javascriptError\)',js,re.S)
     if not stop: raise AssertionError('could not isolate stopMediaRecording')
-    if 'releaseRecordingCapture(state)' in stop.group('body'):
-        raise AssertionError('stopMediaRecording still releases capture tracks before recorder finalization')
-    require('src/PublisherStudio.Web/wwwroot/js/mediaStudioInterop.js','finally {\n            releaseRecordingCapture(state);')
+    if 'while (Date.now()' in stop.group('body') or 'await new Promise' in stop.group('body'):
+        raise AssertionError('stopMediaRecording must return immediately instead of waiting on Blob finalization')
+    require('src/PublisherStudio.Web/wwwroot/js/mediaStudioInterop.js','function requestMediaRecordingStop(state)')
+    require('src/PublisherStudio.Web/wwwroot/js/mediaStudioInterop.js','recordingFinalizing: false')
+    require('src/PublisherStudio.Web/wwwroot/js/mediaStudioInterop.js','releaseRecordingCapture(state);\n            state.stream = null;\n            await retainRecording')
     require('build/audit_service_resilience.py','iterator/yield')
     print('PublisherStudio 2.7.3 logging/recording recovery source audit passed.')
 except Exception as exc:

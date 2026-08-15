@@ -25,20 +25,20 @@
             <DxRibbon CssClass="media-studio-ribbon categorized-ribbon" SizeMode="SizeMode.Medium" AdaptivityAutoCollapseItemsToGroups="true">
                 <DxRibbonTab Text='@LT("Home")'>
                     <DxRibbonGroup Text='@LT("Source")' IconCssClass="pub-icon pub-icon-media">
-                        <DxRibbonItem Text="@ImportMenuText" IconCssClass="pub-icon pub-icon-open" IsPrimary="true" Enabled="@(!_recording)" Click="OpenMediaPicker" />
+                        <DxRibbonItem Text="@ImportMenuText" IconCssClass="pub-icon pub-icon-open" IsPrimary="true" Enabled="@(!_recording && !_recordingStopping)" Click="OpenMediaPicker" />
                         @if (IsVideo)
                         {
-                            <DxRibbonItem Text='@LT("Import project…")' IconCssClass="pub-icon pub-icon-open" Enabled="@(!_recording)" Click="OpenVideoProjectPicker" />
+                            <DxRibbonItem Text='@LT("Import project…")' IconCssClass="pub-icon pub-icon-open" Enabled="@(!_recording && !_recordingStopping)" Click="OpenVideoProjectPicker" />
                             <DxRibbonItem Text='@LT("Relink media…")' IconCssClass="pub-icon pub-icon-refresh" Enabled="@HasVideoProject" Click="OpenVideoProjectMediaPicker" />
-                            <DxRibbonItem Text='@LT("Record camera")' IconCssClass="pub-icon pub-icon-video" Enabled="@(!_recording)" Click="RecordCamera" />
-                            <DxRibbonItem Text='@LT("Record screen")' IconCssClass="pub-icon pub-icon-video" Enabled="@(!_recording)" Click="RecordScreen" />
+                            <DxRibbonItem Text='@LT("Record camera")' IconCssClass="pub-icon pub-icon-video" Enabled="@(!_recording && !_recordingStopping)" Click="RecordCamera" />
+                            <DxRibbonItem Text='@LT("Record screen")' IconCssClass="pub-icon pub-icon-video" Enabled="@(!_recording && !_recordingStopping)" Click="RecordScreen" />
                         }
                         else
                         {
-                            <DxRibbonItem Text='@LT("Record microphone")' IconCssClass="pub-icon pub-icon-audio" Enabled="@(!_recording)" Click="RecordMicrophone" />
-                            <DxRibbonItem Text='@LT("Generate tone")' IconCssClass="pub-icon pub-icon-audio" Enabled="@(!_recording)" Click="GenerateTone" />
+                            <DxRibbonItem Text='@LT("Record microphone")' IconCssClass="pub-icon pub-icon-audio" Enabled="@(!_recording && !_recordingStopping)" Click="RecordMicrophone" />
+                            <DxRibbonItem Text='@LT("Generate tone")' IconCssClass="pub-icon pub-icon-audio" Enabled="@(!_recording && !_recordingStopping)" Click="GenerateTone" />
                         }
-                        <DxRibbonItem Text='@LT("Stop recording")' IconCssClass="pub-icon pub-icon-stop" Enabled="@_recording" Click="StopRecording" />
+                        <DxRibbonItem Text='@LT("Stop recording")' IconCssClass="pub-icon pub-icon-stop" Enabled="@(_recording && !_recordingStopping)" Click="StopRecording" />
                     </DxRibbonGroup>
                     <DxRibbonGroup Text='@LT("Playback")' IconCssClass="pub-icon pub-icon-play">
                         <DxRibbonItem Text='@LT("Play range")' IconCssClass="pub-icon pub-icon-play" Enabled="@HasSource" Click="PlaySelection" />
@@ -749,7 +749,7 @@
                         <DxButton Text='@LT("Download recording")' Click="DownloadRecording" />
                     }
                     <DxButton Text='@LT("Cancel")' Click="Cancel" />
-                    <DxButton Text="@ApplyButtonText" Enabled="@(HasSource && !_recording && !_saving && !_embedding)" Click="Save" RenderStyle="ButtonRenderStyle.Primary" />
+                    <DxButton Text="@ApplyButtonText" Enabled="@(HasSource && !_recording && !_recordingStopping && !_saving && !_embedding)" Click="Save" RenderStyle="ButtonRenderStyle.Primary" />
                 </div>
             </footer>
         </section>
@@ -758,20 +758,20 @@
 
 <DxContextMenu @ref="_mediaContextMenu">
     <Items>
-        <DxContextMenuItem Text="@ImportMenuText" Enabled="@(!_recording)" Click="OpenMediaPicker" />
+        <DxContextMenuItem Text="@ImportMenuText" Enabled="@(!_recording && !_recordingStopping)" Click="OpenMediaPicker" />
         @if (IsVideo)
         {
-            <DxContextMenuItem Text='@LT("Import open video project…")' Enabled="@(!_recording)" Click="OpenVideoProjectPicker" />
+            <DxContextMenuItem Text='@LT("Import open video project…")' Enabled="@(!_recording && !_recordingStopping)" Click="OpenVideoProjectPicker" />
             <DxContextMenuItem Text='@LT("Relink project media…")' Enabled="@HasVideoProject" Click="OpenVideoProjectMediaPicker" />
-            <DxContextMenuItem Text='@LT("Record camera…")' Enabled="@(!_recording)" Click="RecordCamera" />
-            <DxContextMenuItem Text='@LT("Record screen…")' Enabled="@(!_recording)" Click="RecordScreen" />
+            <DxContextMenuItem Text='@LT("Record camera…")' Enabled="@(!_recording && !_recordingStopping)" Click="RecordCamera" />
+            <DxContextMenuItem Text='@LT("Record screen…")' Enabled="@(!_recording && !_recordingStopping)" Click="RecordScreen" />
         }
         else
         {
-            <DxContextMenuItem Text='@LT("Record microphone…")' Enabled="@(!_recording)" Click="RecordMicrophone" />
-            <DxContextMenuItem Text='@LT("Generate example tone")' Enabled="@(!_recording)" Click="GenerateTone" />
+            <DxContextMenuItem Text='@LT("Record microphone…")' Enabled="@(!_recording && !_recordingStopping)" Click="RecordMicrophone" />
+            <DxContextMenuItem Text='@LT("Generate example tone")' Enabled="@(!_recording && !_recordingStopping)" Click="GenerateTone" />
         }
-        <DxContextMenuItem Text='@LT("Stop recording")' Enabled="@_recording" Click="StopRecording" />
+        <DxContextMenuItem Text='@LT("Stop recording")' Enabled="@(_recording && !_recordingStopping)" Click="StopRecording" />
         <DxContextMenuItem Text='@LT("Download completed recording")' Enabled="@HasRetainedRecording" Click="DownloadRecording" />
         <DxContextMenuItem Text='@LT("Play selected range")' Enabled="@HasSource" BeginGroup="true" Click="PlaySelection" />
         <DxContextMenuItem Text='@LT("Pause")' Enabled="@HasSource" Click="PausePreview" />
@@ -824,7 +824,7 @@
         <DxContextMenuItem Text="@(_muted ? LT("Unmute") : LT("Mute"))" BeginGroup="true" Click="ToggleMutedFromMenu" />
         <DxContextMenuItem Text="@(_loop ? LT("Disable loop") : LT("Loop selected range"))" Click="ToggleLoopFromMenu" />
         <DxContextMenuItem Text="@SendToConverterMenuText" Enabled="@HasSelectedSegment" BeginGroup="true" Click="SendSelectedMediaToConverter" />
-        <DxContextMenuItem Text='@LT("Import replacement…")' Enabled="@(!_recording)" BeginGroup="true" Click="OpenMediaPicker" />
+        <DxContextMenuItem Text='@LT("Import replacement…")' Enabled="@(!_recording && !_recordingStopping)" BeginGroup="true" Click="OpenMediaPicker" />
     </Items>
 </DxContextMenu>
 
@@ -869,6 +869,7 @@
     private bool _loop;
     private bool _autoPlay = true;
     private bool _recording;
+    private bool _recordingStopping;
     private bool _saving;
     private bool _embedding;
     private double _embeddingProgress;
@@ -1094,8 +1095,10 @@
     private string ImportMenuText => IsVideo ? LT("Import video…") : LT("Import audio…");
     private string Accept => IsVideo ? "video/mp4,video/webm,video/ogg,video/quicktime" : "audio/mpeg,audio/wav,audio/ogg,audio/webm,audio/mp4,audio/aac,audio/flac";
     private string MimeLabel => string.IsNullOrWhiteSpace(_mimeType) ? (IsVideo ? LT("Video") : LT("Audio")) : _mimeType;
-    private string SourceStatus => _recording
-        ? LT("Recording…")
+    private string SourceStatus => _recordingStopping
+        ? LT("Finalizing recording…")
+        : _recording
+            ? LT("Recording…")
         : _embedding
             ? $"{LT("Embedding recording")} · {_embeddingProgress:0}%"
             : HasRetainedRecording
@@ -1124,6 +1127,7 @@
         _error = null;
         _warning = null;
         _recording = false;
+        _recordingStopping = false;
         _saving = false;
         _embedding = false;
         _embeddingProgress = 0;
@@ -1259,9 +1263,20 @@
                         retainedRecording.FileName,
                         retainedRecording.SizeBytes);
                 }
+                else if (browserState.IsFinalizing)
+                {
+                    _recording = true;
+                    _recordingStopping = true;
+                    _warning = "Browser recording is finalizing after the UI reconnected.";
+                    stateChanged = true;
+                    Logger.LogInformation(
+                        "Recovered finalizing {MediaKind} recording state after Media Studio render/circuit attachment.",
+                        IsVideo ? "video" : "audio");
+                }
                 else if (browserState.IsRecording && !_recording)
                 {
                     _recording = true;
+                    _recordingStopping = false;
                     _warning = "Browser recording is still active after the UI reconnected.";
                     stateChanged = true;
                     Logger.LogInformation(
@@ -1272,6 +1287,7 @@
                 if (!string.IsNullOrWhiteSpace(browserState.FinalizationError))
                 {
                     _recording = false;
+                    _recordingStopping = false;
                     _error = $"Recording finalization failed in the browser: {browserState.FinalizationError}";
                     stateChanged = true;
                     Logger.LogError(
@@ -1320,7 +1336,7 @@
     private async Task<IJSObjectReference> EnsureMediaModuleAsync()
     {
         if (_disposed) throw new ObjectDisposedException(nameof(MediaStudio));
-        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.7.5").ConfigureAwait(true);
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.7.6").ConfigureAwait(true);
         _self ??= DotNetObjectReference.Create(this);
         if (SessionId != Guid.Empty)
         {
@@ -3252,6 +3268,7 @@
                 source,
                 SessionId);
             _recording = true;
+            _recordingStopping = false;
             await module.InvokeVoidAsync("startMediaRecording", "media-studio-preview", IsVideo ? "video" : "audio", source, _self).ConfigureAwait(true);
             await InvokeAsync(StateHasChanged).ConfigureAwait(true);
         }
@@ -3263,6 +3280,7 @@
                 source,
                 SessionId);
             _recording = false;
+            _recordingStopping = false;
             _error = ex.Message;
             await InvokeAsync(StateHasChanged).ConfigureAwait(true);
         }
@@ -3270,48 +3288,50 @@
 
     private async Task StopRecording()
     {
-        if (_module is null) return;
+        if (_module is null || !_recording || _recordingStopping) return;
         _error = null;
+        _recordingStopping = true;
+        _warning = "Finalizing the browser recording…";
         try
         {
             Logger.LogInformation(
-                "Stopping Media Studio {MediaKind} recording for session {SessionId}; waiting for browser Blob finalization.",
+                "Stopping Media Studio {MediaKind} recording for session {SessionId}; browser finalization continues asynchronously.",
                 IsVideo ? "video" : "audio",
-                SessionId);
-            var stopInvocation = _module.InvokeAsync<RetainedMediaRecordingInfo?>(
-                "stopMediaRecording",
-                "media-studio-preview",
-                _self);
-            var retainedRecording = await stopInvocation.ConfigureAwait(true);
-            if (retainedRecording is null || retainedRecording.SizeBytes <= 0 || string.IsNullOrWhiteSpace(retainedRecording.ObjectUrl))
-                throw new InvalidDataException("The browser stopped recording but did not return a retained media file.");
-
-            ApplyRetainedRecordingInfo(retainedRecording);
-            Logger.LogInformation(
-                "Media Studio {MediaKind} recording finalized as {FileName} ({SizeBytes} bytes) for session {SessionId}.",
-                IsVideo ? "video" : "audio",
-                retainedRecording.FileName,
-                retainedRecording.SizeBytes,
                 SessionId);
             await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            var stopRequested = await _module.InvokeAsync<bool>(
+                "stopMediaRecording",
+                "media-studio-preview",
+                _self).ConfigureAwait(true);
+            if (!stopRequested)
+            {
+                _recording = false;
+                _recordingStopping = false;
+                _error = "The browser no longer has an active or retained recording to stop.";
+                Logger.LogWarning(
+                    "Media Studio Stop found no active or retained {MediaKind} recording for session {SessionId}.",
+                    IsVideo ? "video" : "audio",
+                    SessionId);
+                await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            }
         }
         catch (Exception ex) when (ex is JSDisconnectedException or TaskCanceledException or ObjectDisposedException)
         {
             Logger.LogWarning(ex,
-                "Media Studio disconnected while stopping {MediaKind} recording for session {SessionId}; browser-owned recording state will be recovered after reconnect.",
+                "Media Studio disconnected after requesting stop for {MediaKind} recording session {SessionId}; browser-owned finalization can be recovered after reconnect.",
                 IsVideo ? "video" : "audio",
                 SessionId);
-            _warning = "The UI disconnected while the browser was finalizing the recording. Reopen or reconnect this studio to recover the browser-owned recording.";
+            _warning = "The UI disconnected after Stop was requested. Reconnect this studio to recover the browser-owned recording.";
             await InvokeAsync(StateHasChanged).ConfigureAwait(true);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex,
-                "Stopping/finalizing Media Studio {MediaKind} recording failed for session {SessionId}.",
+                "Requesting Stop for Media Studio {MediaKind} recording failed for session {SessionId}.",
                 IsVideo ? "video" : "audio",
                 SessionId);
-            _recording = false;
-            _error = $"The recording could not be finalized: {ex.Message}";
+            _recordingStopping = false;
+            _error = $"The recording could not be stopped: {ex.Message}";
             await InvokeAsync(StateHasChanged).ConfigureAwait(true);
         }
     }
@@ -3366,6 +3386,7 @@
     {
         ArgumentNullException.ThrowIfNull(info);
         _recording = false;
+        _recordingStopping = false;
         _recordingBuffer = null;
         _recordingId = null;
         _hasRetainedRecording = info.SizeBytes > 0 && !string.IsNullOrWhiteSpace(info.ObjectUrl);
@@ -3407,6 +3428,7 @@
         {
             Logger.LogError(ex, "Applying the completed Media Studio recording failed for session {SessionId}.", SessionId);
             _recording = false;
+            _recordingStopping = false;
             _error = $"The completed recording could not be restored in the studio: {ex.Message}";
             await InvokeAsync(StateHasChanged).ConfigureAwait(true);
         }
@@ -3480,6 +3502,7 @@
                 SessionId,
                 message);
             _recording = false;
+            _recordingStopping = false;
             _embedding = false;
             _recordingBuffer = null;
             _recordingId = null;
@@ -4105,7 +4128,12 @@
 
     public sealed class BrowserMediaRecordingState
     {
+        /// <summary>Gets or sets whether the browser MediaRecorder is actively capturing.</summary>
+        /// <value><see langword="true"/> while capture is active; otherwise <see langword="false"/>.</value>
         public bool IsRecording { get; set; }
+        /// <summary>Gets or sets whether Stop was requested and browser Blob finalization is still running.</summary>
+        /// <value><see langword="true"/> while the completed Blob is being finalized; otherwise <see langword="false"/>.</value>
+        public bool IsFinalizing { get; set; }
         public RetainedMediaRecordingInfo? RetainedRecording { get; set; }
         public string FinalizationError { get; set; } = string.Empty;
     }

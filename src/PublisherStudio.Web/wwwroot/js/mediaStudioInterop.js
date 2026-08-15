@@ -362,6 +362,8 @@ function stateFor(id) { try {
             retainedRecordingFileName: '',
             retainedRecordingInfo: null,
             recordingFinalizationError: '',
+            recordingStopRequested: false,
+            recordingFinalizing: false,
             keyboardHandler: null,
             rootId: '',
             frameStageId: '',
@@ -1603,6 +1605,7 @@ export function getMediaRecordingState(id, dotnet) { try {
     if (dotnet) state.dotnet = dotnet;
     return {
         isRecording: Boolean(state.recorder && state.recorder.state !== 'inactive'),
+        isFinalizing: Boolean(state.recordingFinalizing),
         retainedRecording: state.retainedRecordingInfo,
         finalizationError: state.recordingFinalizationError || ''
     };
@@ -1655,6 +1658,21 @@ export function clearRetainedRecording(id) { try {
     releaseRetainedRecording(state);
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:clearRetainedRecording@1380', __javascriptError); throw __javascriptError; }}
 
+function requestMediaRecordingStop(state) { try {
+    if (!state || state.recordingStopRequested || state.recordingFinalizing) return false;
+    if (!state.recorder || state.recorder.state === 'inactive') return Boolean(state.retainedRecordingInfo);
+    state.recordingStopRequested = true;
+    state.recordingFinalizing = true;
+    try {
+        if (state.recorder.state === 'recording' && typeof state.recorder.requestData === 'function')
+            state.recorder.requestData();
+    } catch (__caughtJavaScriptError) {
+        publisherStudioDiagnostics.report('js/mediaStudioInterop.js:requestMediaRecordingStop:requestData', __caughtJavaScriptError);
+    }
+    state.recorder.stop();
+    return true;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:requestMediaRecordingStop', __javascriptError); throw __javascriptError; }}
+
 export async function startMediaRecording(id, kind, source, dotnet) { try {
     if (!navigator.mediaDevices || typeof MediaRecorder === 'undefined')
         throw new Error('This browser does not support media recording.');
@@ -1662,6 +1680,8 @@ export async function startMediaRecording(id, kind, source, dotnet) { try {
     state.dotnet = dotnet || state.dotnet;
     if (state.recorder && state.recorder.state !== 'inactive') return;
     state.recordingFinalizationError = '';
+    state.recordingStopRequested = false;
+    state.recordingFinalizing = false;
     state.stream = await streamFor(kind, source);
     state.chunks = [];
     state.discardRecording = false;
@@ -1684,6 +1704,10 @@ export async function startMediaRecording(id, kind, source, dotnet) { try {
             if (state.discardRecording) return;
             const blob = new Blob(state.chunks, { type: state.recorder?.mimeType || mimeType || (kind === 'video' ? 'video/webm' : 'audio/webm') });
             if (!blob.size) throw new Error('The browser completed the recording but produced an empty file.');
+            // The Blob is complete now. Release capture before slower metadata/poster inspection so
+            // browser sharing indicators stop promptly without risking the final dataavailable event.
+            releaseRecordingCapture(state);
+            state.stream = null;
             await retainRecording(state, blob, kind);
         } catch (error) {
             state.recordingFinalizationError = error?.message || String(error);
@@ -1694,6 +1718,8 @@ export async function startMediaRecording(id, kind, source, dotnet) { try {
             state.stream = null;
             state.recorder = null;
             state.chunks = [];
+            state.recordingStopRequested = false;
+            state.recordingFinalizing = false;
         }
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:callback:state.recorder.addEventListener@1417', __javascriptError); throw __javascriptError; }}, { once: true });
     const endingTracks = kind === 'video' && state.stream.getVideoTracks().length
@@ -1701,7 +1727,7 @@ export async function startMediaRecording(id, kind, source, dotnet) { try {
         : state.stream.getAudioTracks();
     for (const track of endingTracks) {
         track.addEventListener('ended', () => { try {
-            if (state.recorder && state.recorder.state !== 'inactive') state.recorder.stop();
+            requestMediaRecordingStop(state);
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:callback:track.addEventListener@1441', __javascriptError); throw __javascriptError; }}, { once: true });
     }
     state.recorder.start(250);
@@ -1709,36 +1735,15 @@ export async function startMediaRecording(id, kind, source, dotnet) { try {
     await state.dotnet?.invokeMethodAsync('MediaRecordingCleared');
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:startMediaRecording@1385', __javascriptError); throw __javascriptError; }}
 
-export async function stopMediaRecording(id, dotnet) { try {
+export function stopMediaRecording(id, dotnet) { try {
     const state = stateFor(id);
     if (dotnet) state.dotnet = dotnet;
     state.discardRecording = false;
     state.recordingFinalizationError = '';
-
-    if (state.recorder && state.recorder.state !== 'inactive') {
-        // Flush a final chunk before stop. Do not stop the capture tracks here: Chromium can still
-        // need them while dispatching the final dataavailable/stop events. The stop handler releases
-        // hardware immediately after the Blob has safely been retained.
-        try {
-            if (state.recorder.state === 'recording' && typeof state.recorder.requestData === 'function')
-                state.recorder.requestData();
-        } catch (__caughtJavaScriptError) {
-            publisherStudioDiagnostics.report('js/mediaStudioInterop.js:stopMediaRecording:requestData', __caughtJavaScriptError);
-        }
-        state.recorder.stop();
-    }
-
-    const deadline = Date.now() + 30000;
-    while (Date.now() < deadline) {
-        if (state.retainedRecordingInfo) return state.retainedRecordingInfo;
-        if (state.recordingFinalizationError) throw new Error(state.recordingFinalizationError);
-        if (!state.recorder && !state.stream && (!state.chunks || state.chunks.length === 0)) break;
-        await new Promise(resolve => setTimeout(resolve, 50));
-    }
-
-    if (state.retainedRecordingInfo) return state.retainedRecordingInfo;
-    if (state.recordingFinalizationError) throw new Error(state.recordingFinalizationError);
-    throw new Error('The browser stopped recording but did not finalize a retained media file.');
+    // Preserve the original asynchronous MediaRecorder contract: trigger Stop once and return
+    // immediately. The browser owns finalization and reports MediaRecordingReady later. This keeps
+    // Blazor/SignalR out of the potentially slow Blob metadata path and makes repeated clicks safe.
+    return requestMediaRecordingStop(state);
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:stopMediaRecording', __javascriptError); throw __javascriptError; }}
 
 export function cancelMediaRecording(id) { try {
@@ -1746,6 +1751,8 @@ export function cancelMediaRecording(id) { try {
     state.discardRecording = true;
     try { if (state.recorder && state.recorder.state !== 'inactive') state.recorder.stop(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:suppressed-catch@1464', __caughtJavaScriptError);  }
     releaseRecordingCapture(state);
+    state.recordingStopRequested = false;
+    state.recordingFinalizing = false;
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:cancelMediaRecording@1456', __javascriptError); throw __javascriptError; }}
 
 export async function playMediaRange(id, start, end, volume, rate, muted, loop) { try {

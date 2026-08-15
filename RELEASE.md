@@ -1,19 +1,9 @@
-# PublisherStudio 2.7.0 shared Local Chat localization cleanup
+# PublisherStudio 2.7.2 paired Council rejoin release
 
-PublisherStudio 2.7.0 removes the incorrect `ChatGPT`/`LocalChatGPT` wording from the shared localization catalogs inherited by the integrated LocalGPT-facing UI vocabulary. PublisherStudio itself did not expose the problematic home card in the inspected source, so no unrelated editor behavior was changed.
-
-The version rolls from 2.6.9 to 2.7.0 because the project version policy does not permit a `2.6.10` release. Browser module cache-busters are advanced with the application version.
+PublisherStudio 2.7.2 accompanies LocalGPT 2.8.9. No PublisherStudio editor or LocalGPT bridge behavior changes are required for the LocalGPT browser-circuit recovery repair.
 
 ## Versions
 
-- PublisherStudio.Web: 2.7.0
-- PublisherStudio.InstallerConsole: 2.7.0
-- LocalGPT wire protocol: 2.1.1 (unchanged)
-- publication format: unchanged
-
-## Compatibility notes
-
-- Publisher-started Council sessions remain durable LocalGPT `/chat` sessions.
-- No editor, Panel Studio, media-studio, render-mode, or 1-Wire behavior was intentionally changed.
-- The Japanese startup/default-language quirk was not modified.
-- No GitHub access, `dotnet`, MSBuild, Visual Studio build, publish, or package restore was used to validate this source archive. The Windows build remains authoritative.
+- PublisherStudio.Web: 2.7.2
+- PublisherStudio.InstallerConsole: 2.7.2
+- LocalGPT Wire Protocol package: 2.1.1 (unchanged)

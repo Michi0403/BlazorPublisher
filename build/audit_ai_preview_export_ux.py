@@ -43,8 +43,8 @@ try:
             'Edit selection', 'AiProofreadSelection', 'AiTranslateSelection', 'GetTextSpanAsync', 'ReplaceSelectionWithAiProposalAsync', '_aiStoryPrompt = $"{instruction}\\n\\nSelected story text:')
     require('src/PublisherStudio.Web/BusinessObjects/PublicationModels.cs', 'FormatVersion { get; set; } = "1.58"')
     require('src/PublisherStudio.Web/Components/Layout/MainLayout.razor', '@inject NavigationManager Navigation', '@key="Navigation.Uri"')
-    require('src/PublisherStudio.Web/PublisherStudio.Web.csproj','<Version>2.7.0</Version>')
-    require('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj','<Version>2.7.0</Version>')
+    require('src/PublisherStudio.Web/PublisherStudio.Web.csproj','<Version>2.7.2</Version>')
+    require('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj','<Version>2.7.2</Version>')
     print('PublisherStudio 2.6.5 preview/AI/export UX compatibility source audit passed: custom preview presets, inspector UX, embedded language selection, compressed single HTML exports, StoryEditor AI editing, and LocalGPT-backed DevExtreme Chat are wired.')
 except AssertionError as exc:
     print(f'PublisherStudio 2.6.5 preview/AI/export UX compatibility source audit failed: {exc}', file=sys.stderr)

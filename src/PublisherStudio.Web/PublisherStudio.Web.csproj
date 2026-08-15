@@ -6,7 +6,7 @@
     <InvariantGlobalization>false</InvariantGlobalization>
     <RootNamespace>PublisherStudio</RootNamespace>
     <AssemblyName>PublisherStudio.Web</AssemblyName>
-    <Version>2.7.4</Version>
+    <Version>2.7.5</Version>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
     <ApplicationIcon>..\..\assets\PublisherStudio.ico</ApplicationIcon>
@@ -23,6 +23,10 @@
     <DevExtremeRuntimeLicenseVersionFile>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-license.version</DevExtremeRuntimeLicenseVersionFile>
     <DevExtremeClientAssetMetadata>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-assets.meta.json</DevExtremeClientAssetMetadata>
   </PropertyGroup>
+  <ItemGroup>
+    <!-- 2.7.5 upgrade compatibility: ignore the transient 2.7.4 logger location if an in-place source update leaves it behind. -->
+    <Compile Remove="Logging\FileLogger.cs;Logging\FileLoggerProvider.cs" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="LocalGPT.WireProtocolVersion" Version="$(LocalGptWireProtocolVersion)" />
   </ItemGroup>

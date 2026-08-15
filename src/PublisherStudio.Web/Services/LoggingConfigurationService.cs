@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PublisherStudio.BusinessObjects;
 using PublisherStudio.BusinessObjects.Enums;
-using PublisherStudio.Logging;
+using PublisherStudio.Services.Logging;
 
 namespace PublisherStudio.Services;
 

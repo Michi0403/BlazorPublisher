@@ -177,6 +177,16 @@
       "logCalls": 0,
       "catchBlocks": 3
     },
+    "src/PublisherStudio.Web/Services/Logging/FileLogger.cs": {
+      "loggerReferences": 3,
+      "logCalls": 0,
+      "catchBlocks": 10
+    },
+    "src/PublisherStudio.Web/Services/Logging/FileLoggerProvider.cs": {
+      "loggerReferences": 1,
+      "logCalls": 0,
+      "catchBlocks": 3
+    },
     "src/PublisherStudio.Web/Services/MediaConversion/IMediaConversionService.cs": {
       "loggerReferences": 0,
       "logCalls": 0,

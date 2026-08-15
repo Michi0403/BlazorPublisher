@@ -10,25 +10,23 @@ def forbid(rel, needle):
     if needle in text(rel): raise AssertionError(f"{rel} unexpectedly contains: {needle}")
 try:
     for rel in ('src/PublisherStudio.Web/PublisherStudio.Web.csproj','src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'):
-        require(rel,'<Version>2.7.4</Version>')
+        require(rel,'<Version>2.7.5</Version>')
     for rel in (
         'src/PublisherStudio.Web/BusinessObjects/ApplicationLogEntry.cs',
         'src/PublisherStudio.Web/BusinessObjects/FileLoggerCoreOptions.cs',
         'src/PublisherStudio.Web/BusinessObjects/LoggingCoreOptions.cs',
         'src/PublisherStudio.Web/BusinessObjects/LoggerNullScope.cs',
-        'src/PublisherStudio.Web/Logging/FileLogger.cs',
-        'src/PublisherStudio.Web/Logging/FileLoggerProvider.cs',
+        'src/PublisherStudio.Web/Services/Logging/FileLogger.cs',
+        'src/PublisherStudio.Web/Services/Logging/FileLoggerProvider.cs',
         'src/PublisherStudio.Web/Services/LoggingConfigurationService.cs'):
         if not (ROOT/rel).is_file(): raise AssertionError(f'missing logging source {rel}')
-    if (ROOT/'src/PublisherStudio.Web/Services/Logging').exists():
-        raise AssertionError('file logging provider must mirror LocalGPT infrastructure placement, not Services/Logging')
-    logger=text('src/PublisherStudio.Web/Logging/FileLogger.cs')
+        logger=text('src/PublisherStudio.Web/Services/Logging/FileLogger.cs')
     if 'Path.Combine(Directory.GetCurrentDirectory(), "PublisherStudio.log")' not in logger:
         raise AssertionError('blank FilePath no longer mirrors LocalGPT current-runtime-directory behavior')
     forbid('src/PublisherStudio.Web/BusinessObjects/FileLoggerCoreOptions.cs','ResolvePath(')
     forbid('src/PublisherStudio.Web/BusinessObjects/FileLoggerCoreOptions.cs','MaxQueueLength')
-    forbid('src/PublisherStudio.Web/Logging/FileLogger.cs',' static ')
-    forbid('src/PublisherStudio.Web/Logging/FileLoggerProvider.cs',' static ')
+    forbid('src/PublisherStudio.Web/Services/Logging/FileLogger.cs',' static ')
+    forbid('src/PublisherStudio.Web/Services/Logging/FileLoggerProvider.cs',' static ')
     forbid('src/PublisherStudio.Web/BusinessObjects/LoggingCoreOptions.cs',' const ')
     forbid('src/PublisherStudio.Web/BusinessObjects/FileLoggerCoreOptions.cs',' const ')
     require('src/PublisherStudio.Web/Services/LoggingConfigurationService.cs','new FileLoggerProvider(provider.GetRequiredService<IOptionsMonitor<FileLoggerCoreOptions>>()')

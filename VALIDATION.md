@@ -1,23 +1,17 @@
-# PublisherStudio 2.6.9 source-only validation
+# PublisherStudio 2.7.0 source validation
 
-Validation is intentionally source-only: no GitHub access, `dotnet`, MSBuild, or .NET compiler was used.
+Validation is source-only by design. No `dotnet`, MSBuild, Visual Studio build, GitHub access, restore, publish, or executable launch was performed.
 
-Passed source audits:
+Checked statically:
 
-- PublisherStudio 2.6.9 LocalGPT session durability release audit.
-- PublisherStudio 2.6.8 regression audit.
-- Strict async continuation audit: 75 source files, 1,039 await tokens, 423 `ConfigureAwait(false)`, 562 renderer-affine `ConfigureAwait(true)`, 49 configured async disposals, and 5 configured async streams.
-- AI preview/export UX, media-studio drag/effect/localization, picture/page-effect, and Panel Studio persistence audits.
-- Application architecture and service-resilience audits; 1,278 service methods own try/catch plus diagnostics.
-- XML documentation coverage: 5,398 direct C# declarations across 178 maintained source files.
-- Documentation/1-Wire contract audit.
+- PublisherStudio.Web and PublisherStudio.InstallerConsole report version 2.7.0 and obey the single-digit minor/patch slot policy;
+- browser module cache-busters use 2.7.0;
+- wire protocol remains 2.1.1;
+- all six built-in localization catalogs contain the maintained Local Chat phrase/text keys without `ChatGPT` values;
+- obsolete `LocalChatGPT` localization aliases are absent;
+- all six localization catalogs have identical key sets;
+- PublisherStudio still contains 5 `@rendermode` directives, matching the prior source release exactly;
+- repository Python regression audits were run where they do not invoke .NET tooling;
+- generated Python bytecode/cache output is removed before packaging.
 
-Reviewed release invariants:
-
-- PublisherStudio.Web and PublisherStudio.InstallerConsole versions are 2.6.9;
-- 1-Wire protocol remains 2.1.1;
-- Publisher-started Council requests force durable LocalGPT session saving while retaining the existing bridge/request architecture;
-- no media, Panel Studio, export, localization, publication-format, or installer behavior is reverted;
-- all 5 existing `@rendermode` directives exactly match the supplied 2.6.8 source baseline.
-
-The user's Windows .NET 10 + DevExpress build remains authoritative for compile/runtime confirmation.
+The Windows build and runtime test remain authoritative.

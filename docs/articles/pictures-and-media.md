@@ -18,6 +18,8 @@ Video regions are stored as normalized source coordinates, so they remain aligne
 
 The live preview keeps the active browser media stream attached to the preview element. If Blazor replaces the video element, a bounded watchdog reattaches the stream. Saved recording data stays separate from the preview surface.
 
+Recording quality is controlled before capture with source/native, streaming-master, streaming-output, or custom dimensions plus frame rate, codec preference, and explicit video/audio bitrate targets. These settings do not remove or flatten media segments, page layer order, crop regions, or retained recording recovery.
+
 ## Local editing overlays
 
 Internal media sections and selection overlays never become page siblings or picture layers. They are transient editor projections inside a local positioned stacking context. The publication object remains the canonical content, while browser-side pointer feedback stays lightweight and disposable.

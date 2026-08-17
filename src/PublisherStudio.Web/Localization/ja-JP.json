@@ -3251,5 +3251,17 @@
   "Text.Local␠Chat": "ローカルチャット",
   "Phrase.Welcome␠to␠your␠Local␠Chat": "ローカルチャットへようこそ",
   "Text.Welcome␠to␠your␠Local␠Chat": "ローカルチャットへようこそ",
-  "Text.Welcome␠to␠your␠Local␠Chat,␠go␠to␠the␠Setup␠Page␠to␠Setup␠the␠AI␠Chat␠Clients": "ローカルチャットへようこそ。セットアップページでAIチャットクライアントを設定してください。"
+  "Text.Welcome␠to␠your␠Local␠Chat,␠go␠to␠the␠Setup␠Page␠to␠Setup␠the␠AI␠Chat␠Clients": "ローカルチャットへようこそ。セットアップページでAIチャットクライアントを設定してください。",
+  "Text.Recording␠capture␠quality": "録画キャプチャ品質",
+  "Text.Capture␠size": "キャプチャサイズ",
+  "Text.Source/native": "ソース/ネイティブ",
+  "Text.Streaming␠master": "ストリーミング・マスター",
+  "Text.Streaming␠output": "ストリーミング出力",
+  "Text.Capture␠frame␠rate": "キャプチャフレームレート",
+  "Text.Recording␠codec": "録画コーデック",
+  "Text.Auto␠(prefer␠VP9)": "自動（VP9 優先）",
+  "Text.Recording␠video␠bitrate␠(kbps)": "録画ビデオビットレート (kbps)",
+  "Text.Recording␠audio␠bitrate␠(kbps)": "録画オーディオビットレート (kbps)",
+  "Text.The␠browser␠share␠picker␠still␠decides␠which␠screen,␠window,␠or␠tab␠is␠captured;␠PublisherStudio␠then␠requests␠these␠dimensions␠and␠frame␠rate␠without␠cropping␠the␠selected␠surface.": "ブラウザーの共有選択画面で録画する画面、ウィンドウ、タブを選びます。その後 PublisherStudio が、選択した領域を切り抜かずに指定された寸法とフレームレートを要求します。",
+  "Text.Screen␠and␠camera␠recordings␠use␠explicit␠bitrate␠and␠codec␠targets␠instead␠of␠browser␠defaults.␠Source/native␠keeps␠the␠selected␠surface␠dimensions␠while␠still␠applying␠the␠selected␠frame␠rate␠and␠recording␠bitrate.": "画面録画とカメラ録画では、ブラウザー既定値ではなく明示的なビットレートとコーデック目標を使用します。ソース/ネイティブでは選択した領域の寸法を保持しつつ、選択したフレームレートと録画ビットレートを適用します。"
 }

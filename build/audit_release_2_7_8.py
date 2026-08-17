@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Source-only regression audit for PublisherStudio 2.7.8 story-source recovery and 1-Wire compatibility."""
+"""Source-only regression audit for PublisherStudio 2.7.9 story-source recovery and 1-Wire compatibility."""
 from pathlib import Path
 import re
 import sys
@@ -26,15 +26,15 @@ try:
         "src/PublisherStudio.Web/PublisherStudio.Web.csproj",
         "src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj",
     ):
-        require(rel, "<Version>2.7.8</Version>")
+        require(rel, "<Version>2.7.9</Version>")
 
-    require("src/PublisherStudio.Web/Components/App.razor", "publisherInterop.js?v=2.7.8")
+    require("src/PublisherStudio.Web/Components/App.razor", "publisherInterop.js?v=2.7.9")
     for rel in (
         "src/PublisherStudio.Web/Components/Pages/Editor.razor",
         "src/PublisherStudio.Web/Components/Editor/InspectorPanel.razor",
         "src/PublisherStudio.Web/Components/Editor/MediaStudio.razor",
     ):
-        require(rel, "mediaStudioInterop.js?v=2.7.8")
+        require(rel, "mediaStudioInterop.js?v=2.7.9")
 
     factory = "src/PublisherStudio.Web/Services/PublisherDocumentFactory.cs"
     rich = "src/PublisherStudio.Web/Services/RichTextDocumentFactory.cs"
@@ -95,7 +95,7 @@ try:
     require(story, 'RequestedOrganicCapabilities = ["publisher.business-context", "publisher.text.insert.propose"]')
     require("Directory.Build.props", "<LocalGptWireProtocolVersion>2.1.1</LocalGptWireProtocolVersion>")
 
-    print("PublisherStudio 2.7.8 story-source recovery and 1-Wire compatibility source audit passed.")
+    print("PublisherStudio 2.7.9 story-source recovery and 1-Wire compatibility source audit passed.")
 except Exception as exc:
-    print(f"PublisherStudio 2.7.8 source audit failed: {exc}", file=sys.stderr)
+    print(f"PublisherStudio 2.7.9 source audit failed: {exc}", file=sys.stderr)
     raise SystemExit(1)

@@ -10,10 +10,10 @@ def forbid(rel, needle):
     if needle in text(rel): raise AssertionError(f"{rel} unexpectedly contains: {needle}")
 try:
     for rel in ('src/PublisherStudio.Web/PublisherStudio.Web.csproj','src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'):
-        require(rel,'<Version>2.7.8</Version>')
+        require(rel,'<Version>2.7.9</Version>')
     media='src/PublisherStudio.Web/Components/Editor/MediaStudio.razor'
     js='src/PublisherStudio.Web/wwwroot/js/mediaStudioInterop.js'
-    require(media,'./js/mediaStudioInterop.js?v=2.7.8')
+    require(media,'./js/mediaStudioInterop.js?v=2.7.9')
     require(media,'var shouldRefreshRecordingOwnership = _recordingRecoveryAttemptedSession != SessionId || _recording || _recordingStopping;')
     require(media,'public async Task MediaRecordingMetadataReady(RetainedMediaRecordingInfo info)')
     require(media,'Browser metadata was resolved without blocking Save, Insert, Replace, or Download.')

@@ -566,6 +566,21 @@ public sealed record PublisherMediaSessionDefaultsPolicy
     /// <value>The video bitrate kbps value exposed by <see cref="PublisherMediaSessionDefaultsPolicy"/>.</value>
     public int VideoBitrateKbps { get; init; }
     /// <summary>
+    /// Gets or sets the browser Media Studio recording video bitrate in kilobits per second.
+    /// </summary>
+    /// <value>The bitrate target passed to browser MediaRecorder video recordings.</value>
+    public int BrowserRecordingVideoBitrateKbps { get; init; }
+    /// <summary>
+    /// Gets or sets the browser Media Studio recording audio bitrate in kilobits per second.
+    /// </summary>
+    /// <value>The bitrate target passed to browser MediaRecorder audio tracks.</value>
+    public int BrowserRecordingAudioBitrateKbps { get; init; }
+    /// <summary>
+    /// Gets or sets the preferred browser Media Studio video codec family.
+    /// </summary>
+    /// <value><c>auto</c>, <c>vp9</c>, or <c>vp8</c>; unsupported choices fall back through the browser capability probe.</value>
+    public string BrowserRecordingCodecPreference { get; init; } = "auto";
+    /// <summary>
     /// Gets or sets the LAN video bitrate kbps value that forms part of the publisher media session defaults policy state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The LAN video bitrate kbps value exposed by <see cref="PublisherMediaSessionDefaultsPolicy"/>.</value>

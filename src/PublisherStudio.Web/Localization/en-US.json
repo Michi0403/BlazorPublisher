@@ -3251,5 +3251,17 @@
   "Text.Local␠Chat": "Local Chat",
   "Phrase.Welcome␠to␠your␠Local␠Chat": "Welcome to your Local Chat",
   "Text.Welcome␠to␠your␠Local␠Chat": "Welcome to your Local Chat",
-  "Text.Welcome␠to␠your␠Local␠Chat,␠go␠to␠the␠Setup␠Page␠to␠Setup␠the␠AI␠Chat␠Clients": "Welcome to your Local Chat, go to the Setup Page to Setup the AI Chat Clients"
+  "Text.Welcome␠to␠your␠Local␠Chat,␠go␠to␠the␠Setup␠Page␠to␠Setup␠the␠AI␠Chat␠Clients": "Welcome to your Local Chat, go to the Setup Page to Setup the AI Chat Clients",
+  "Text.Recording␠capture␠quality": "Recording capture quality",
+  "Text.Capture␠size": "Capture size",
+  "Text.Source/native": "Source/native",
+  "Text.Streaming␠master": "Streaming master",
+  "Text.Streaming␠output": "Streaming output",
+  "Text.Capture␠frame␠rate": "Capture frame rate",
+  "Text.Recording␠codec": "Recording codec",
+  "Text.Auto␠(prefer␠VP9)": "Auto (prefer VP9)",
+  "Text.Recording␠video␠bitrate␠(kbps)": "Recording video bitrate (kbps)",
+  "Text.Recording␠audio␠bitrate␠(kbps)": "Recording audio bitrate (kbps)",
+  "Text.The␠browser␠share␠picker␠still␠decides␠which␠screen,␠window,␠or␠tab␠is␠captured;␠PublisherStudio␠then␠requests␠these␠dimensions␠and␠frame␠rate␠without␠cropping␠the␠selected␠surface.": "The browser share picker still decides which screen, window, or tab is captured; PublisherStudio then requests these dimensions and frame rate without cropping the selected surface.",
+  "Text.Screen␠and␠camera␠recordings␠use␠explicit␠bitrate␠and␠codec␠targets␠instead␠of␠browser␠defaults.␠Source/native␠keeps␠the␠selected␠surface␠dimensions␠while␠still␠applying␠the␠selected␠frame␠rate␠and␠recording␠bitrate.": "Screen and camera recordings use explicit bitrate and codec targets instead of browser defaults. Source/native keeps the selected surface dimensions while still applying the selected frame rate and recording bitrate."
 }

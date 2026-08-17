@@ -1528,30 +1528,72 @@ export async function inspectMediaFileInput(inputId, kind) { try {
     }
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:inspectMediaFileInput@1256', __javascriptError); throw __javascriptError; }}
 
-function preferredMime(kind) { try {
+function preferredMime(kind, codecPreference = 'auto') { try {
+    const preference = String(codecPreference || 'auto').trim().toLowerCase();
+    const vp9 = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp9'];
+    const vp8 = ['video/webm;codecs=vp8,opus', 'video/webm;codecs=vp8'];
     const choices = kind === 'video'
-        ? ['video/webm;codecs=vp8,opus', 'video/webm;codecs=vp8', 'video/webm;codecs=vp9,opus', 'video/webm']
+        ? (preference === 'vp8' ? [...vp8, ...vp9, 'video/webm'] : [...vp9, ...vp8, 'video/webm'])
         : ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus'];
     const probe = document.createElement(kind === 'video' ? 'video' : 'audio');
-    return choices.find(value => { try { return (MediaRecorder.isTypeSupported(value) && probe.canPlayType(value) !== ''); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:callback:choices.find@1280', __javascriptError); throw __javascriptError; } })
-        || choices.find(value => { try { return (MediaRecorder.isTypeSupported(value)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:callback:choices.find@1281', __javascriptError); throw __javascriptError; } })
+    return choices.find(value => { try { return (MediaRecorder.isTypeSupported(value) && probe.canPlayType(value) !== ''); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:preferredMime:playback-probe', __javascriptError); throw __javascriptError; } })
+        || choices.find(value => { try { return (MediaRecorder.isTypeSupported(value)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:preferredMime:recorder-probe', __javascriptError); throw __javascriptError; } })
         || '';
- } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:preferredMime@1275', __javascriptError); throw __javascriptError; }}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:preferredMime', __javascriptError); throw __javascriptError; }}
 
-async function streamFor(kind, source) { try {
+function normalizedRecordingOptions(options) { try {
+    const positiveInteger = value => { try {
+        const number = Math.trunc(Number(value));
+        return Number.isFinite(number) && number > 0 ? number : 0;
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:normalizedRecordingOptions:positiveInteger', __javascriptError); return 0; }};
+    return {
+        width: positiveInteger(options?.width),
+        height: positiveInteger(options?.height),
+        frameRate: positiveInteger(options?.frameRate),
+        videoBitsPerSecond: positiveInteger(options?.videoBitsPerSecond),
+        audioBitsPerSecond: positiveInteger(options?.audioBitsPerSecond),
+        codecPreference: String(options?.codecPreference || 'auto').trim().toLowerCase()
+    };
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:normalizedRecordingOptions', __javascriptError); throw __javascriptError; }}
+
+function recordingVideoConstraints(options) { try {
+    const normalized = normalizedRecordingOptions(options);
+    const constraints = {};
+    if (normalized.width > 0) constraints.width = { ideal: normalized.width };
+    if (normalized.height > 0) constraints.height = { ideal: normalized.height };
+    if (normalized.frameRate > 0) constraints.frameRate = { ideal: normalized.frameRate };
+    return Object.keys(constraints).length ? constraints : true;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:recordingVideoConstraints', __javascriptError); throw __javascriptError; }}
+
+async function applyRecordingVideoConstraints(stream, options) { try {
+    const track = stream?.getVideoTracks?.()[0];
+    if (!track || typeof track.applyConstraints !== 'function') return;
+    const constraints = recordingVideoConstraints(options);
+    if (constraints === true) return;
+    try { await track.applyConstraints(constraints); }
+    catch (error) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:applyRecordingVideoConstraints:browser-kept-source-settings', error); }
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:applyRecordingVideoConstraints', __javascriptError); throw __javascriptError; }}
+
+async function streamFor(kind, source, options) { try {
+    const videoConstraints = recordingVideoConstraints(options);
     if (source === 'screen') {
-        const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+        const stream = await navigator.mediaDevices.getDisplayMedia({ video: videoConstraints, audio: true });
+        await applyRecordingVideoConstraints(stream, options);
         if (kind === 'video' && stream.getAudioTracks().length === 0) {
             try {
                 const microphone = await navigator.mediaDevices.getUserMedia({ audio: true });
                 for (const track of microphone.getAudioTracks()) stream.addTrack(track);
-            } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:suppressed-catch@1292', __caughtJavaScriptError);  }
+            } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:streamFor:screen-microphone-fallback', __caughtJavaScriptError);  }
         }
         return stream;
     }
-    if (source === 'camera') return navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    if (source === 'camera') {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: true });
+        await applyRecordingVideoConstraints(stream, options);
+        return stream;
+    }
     return navigator.mediaDevices.getUserMedia({ audio: true });
- } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:streamFor@1285', __javascriptError); throw __javascriptError; }}
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:streamFor', __javascriptError); throw __javascriptError; }}
 
 async function enrichRetainedRecordingMetadata(state, retainedBlob, retainedUrl, retainedInfo, kind) { try {
     const preview = mediaElement(state.id);
@@ -1704,25 +1746,30 @@ function requestMediaRecordingStop(state) { try {
     return true;
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:requestMediaRecordingStop', __javascriptError); throw __javascriptError; }}
 
-export async function startMediaRecording(id, kind, source, dotnet) { try {
+export async function startMediaRecording(id, kind, source, dotnet, options = null) { try {
     if (!navigator.mediaDevices || typeof MediaRecorder === 'undefined')
         throw new Error('This browser does not support media recording.');
     const state = stateFor(id);
     state.dotnet = dotnet || state.dotnet;
-    if (state.recorder && state.recorder.state !== 'inactive') return;
+    if (state.recorder && state.recorder.state !== 'inactive') return null;
     state.recordingFinalizationError = '';
     state.recordingStopRequested = false;
     state.recordingFinalizing = false;
     state.recordingStartedAtMs = 0;
     state.recordingStopRequestedAtMs = 0;
-    state.stream = await streamFor(kind, source);
+    const recordingOptions = normalizedRecordingOptions(options);
+    state.stream = await streamFor(kind, source, recordingOptions);
     state.chunks = [];
     state.discardRecording = false;
     const preview = mediaElement(id);
     if (kind === 'video') startRecordingPreviewWatch(state);
-    const mimeType = preferredMime(kind);
+    const mimeType = preferredMime(kind, recordingOptions.codecPreference);
+    const recorderOptions = {};
+    if (mimeType) recorderOptions.mimeType = mimeType;
+    if (kind === 'video' && recordingOptions.videoBitsPerSecond > 0) recorderOptions.videoBitsPerSecond = recordingOptions.videoBitsPerSecond;
+    if (recordingOptions.audioBitsPerSecond > 0) recorderOptions.audioBitsPerSecond = recordingOptions.audioBitsPerSecond;
     try {
-        state.recorder = mimeType ? new MediaRecorder(state.stream, { mimeType }) : new MediaRecorder(state.stream);
+        state.recorder = Object.keys(recorderOptions).length ? new MediaRecorder(state.stream, recorderOptions) : new MediaRecorder(state.stream);
     } catch (error) {
         releaseRecordingCapture(state);
         state.stream = null;
@@ -1769,7 +1816,16 @@ export async function startMediaRecording(id, kind, source, dotnet) { try {
     state.recorder.start(250);
     releaseRetainedRecording(state);
     await state.dotnet?.invokeMethodAsync('MediaRecordingCleared');
- } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:startMediaRecording@1385', __javascriptError); throw __javascriptError; }}
+    const videoSettings = state.stream.getVideoTracks?.()[0]?.getSettings?.() || {};
+    return {
+        mimeType: state.recorder?.mimeType || mimeType || '',
+        width: Number(videoSettings.width) || 0,
+        height: Number(videoSettings.height) || 0,
+        frameRate: Number(videoSettings.frameRate) || 0,
+        videoBitsPerSecond: Number(state.recorder?.videoBitsPerSecond) || recordingOptions.videoBitsPerSecond || 0,
+        audioBitsPerSecond: Number(state.recorder?.audioBitsPerSecond) || recordingOptions.audioBitsPerSecond || 0
+    };
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:startMediaRecording', __javascriptError); throw __javascriptError; }}
 
 export function stopMediaRecording(id, dotnet) { try {
     const state = stateFor(id);

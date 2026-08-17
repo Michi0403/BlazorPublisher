@@ -730,6 +730,38 @@
                             }
                         </section>
                         <section>
+                            <h3>@LT("Recording capture quality")</h3>
+                            <label>@LT("Capture size")
+                                <select @bind="_recordingSizeMode" disabled="@(_recording || _recordingStopping)">
+                                    <option value="source">@LT("Source/native")</option>
+                                    <option value="master">@LT("Streaming master") · @RecordingPolicy.MasterWidth × @RecordingPolicy.MasterHeight</option>
+                                    <option value="output">@LT("Streaming output") · @RecordingPolicy.OutputWidth × @RecordingPolicy.OutputHeight</option>
+                                    <option value="custom">@LT("Custom")</option>
+                                </select>
+                            </label>
+                            @if (_recordingSizeMode == "custom")
+                            {
+                                <div class="property-grid two">
+                                    <label>@LT("Capture width")<input type="number" min="@RecordingPolicy.MinimumWidth" max="@RecordingPolicy.MaximumWidth" step="1" @bind="_recordingCustomWidth" disabled="@(_recording || _recordingStopping)" /></label>
+                                    <label>@LT("Capture height")<input type="number" min="@RecordingPolicy.MinimumHeight" max="@RecordingPolicy.MaximumHeight" step="1" @bind="_recordingCustomHeight" disabled="@(_recording || _recordingStopping)" /></label>
+                                </div>
+                            }
+                            <div class="property-grid two">
+                                <label>@LT("Capture frame rate")<input type="number" min="@RecordingPolicy.MinimumFrameRate" max="@RecordingPolicy.MaximumFrameRate" step="1" @bind="_recordingFrameRate" disabled="@(_recording || _recordingStopping)" /></label>
+                                <label>@LT("Recording codec")
+                                    <select @bind="_recordingCodecPreference" disabled="@(_recording || _recordingStopping)">
+                                        <option value="auto">@LT("Auto (prefer VP9)")</option>
+                                        <option value="vp9">VP9</option>
+                                        <option value="vp8">VP8</option>
+                                    </select>
+                                </label>
+                                <label>@LT("Recording video bitrate (kbps)")<input type="number" min="@RecordingPolicy.MinimumVideoBitrateKbps" max="@RecordingPolicy.MaximumVideoBitrateKbps" step="250" @bind="_recordingVideoBitrateKbps" disabled="@(_recording || _recordingStopping)" /></label>
+                                <label>@LT("Recording audio bitrate (kbps)")<input type="number" min="32" max="1024" step="16" @bind="_recordingAudioBitrateKbps" disabled="@(_recording || _recordingStopping)" /></label>
+                            </div>
+                            <p class="property-note"><b>@RecordingSizeSummary</b> · @_recordingFrameRate fps · @_recordingVideoBitrateKbps kbps. @LT("The browser share picker still decides which screen, window, or tab is captured; PublisherStudio then requests these dimensions and frame rate without cropping the selected surface.")</p>
+                            <p class="property-note">@LT("Screen and camera recordings use explicit bitrate and codec targets instead of browser defaults. Source/native keeps the selected surface dimensions while still applying the selected frame rate and recording bitrate.")</p>
+                        </section>
+                        <section>
                             <h3>@LT("Video")</h3>
                             <p class="property-note">@LT("Camera and screen recording use the browser’s MediaRecorder. Completed recordings stay in the browser until this studio closes, remain downloadable at their original size, and are embedded only when you insert or apply them.")</p>
                             @if (HasRetainedRecording)
@@ -870,6 +902,13 @@
     private bool _autoPlay = true;
     private bool _recording;
     private bool _recordingStopping;
+    private string _recordingSizeMode = "source";
+    private int _recordingCustomWidth;
+    private int _recordingCustomHeight;
+    private int _recordingFrameRate;
+    private int _recordingVideoBitrateKbps;
+    private int _recordingAudioBitrateKbps;
+    private string _recordingCodecPreference = "auto";
     private bool _saving;
     private bool _embedding;
     private double _embeddingProgress;
@@ -923,6 +962,28 @@
 
     private bool IsVideo => Kind == PublicationElementKind.Video;
     private bool HasRetainedRecording => _hasRetainedRecording && _retainedRecordingSizeBytes > 0;
+    private PublisherMediaSessionDefaultsPolicy RecordingPolicy => RuntimePolicy.MediaSessionDefaults;
+    private int RecordingTargetWidth => _recordingSizeMode switch
+    {
+        "master" => RecordingPolicy.MasterWidth,
+        "output" => RecordingPolicy.OutputWidth,
+        "custom" => _recordingCustomWidth,
+        _ => 0
+    };
+    private int RecordingTargetHeight => _recordingSizeMode switch
+    {
+        "master" => RecordingPolicy.MasterHeight,
+        "output" => RecordingPolicy.OutputHeight,
+        "custom" => _recordingCustomHeight,
+        _ => 0
+    };
+    private string RecordingSizeSummary => _recordingSizeMode switch
+    {
+        "master" => $"{LT("Streaming master")} · {RecordingPolicy.MasterWidth} × {RecordingPolicy.MasterHeight}",
+        "output" => $"{LT("Streaming output")} · {RecordingPolicy.OutputWidth} × {RecordingPolicy.OutputHeight}",
+        "custom" => $"{LT("Custom")} · {_recordingCustomWidth} × {_recordingCustomHeight}",
+        _ => LT("Source/native")
+    };
     private bool HasVideoProject => IsVideo && _videoProject is { Tracks.Count: > 0 };
     private IReadOnlyList<MediaTimelineTrack> ProjectVideoTracks => _videoProject?.Tracks
         .Where(track => track.Kind == MediaTimelineTrackKind.Video)
@@ -1128,6 +1189,16 @@
         _warning = null;
         _recording = false;
         _recordingStopping = false;
+        _recordingSizeMode = "source";
+        _recordingCustomWidth = Math.Clamp(RecordingPolicy.MasterWidth, RecordingPolicy.MinimumWidth, RecordingPolicy.MaximumWidth);
+        _recordingCustomHeight = Math.Clamp(RecordingPolicy.MasterHeight, RecordingPolicy.MinimumHeight, RecordingPolicy.MaximumHeight);
+        _recordingFrameRate = Math.Clamp(RecordingPolicy.MasterFrameRate, RecordingPolicy.MinimumFrameRate, RecordingPolicy.MaximumFrameRate);
+        _recordingVideoBitrateKbps = Math.Clamp(
+            RecordingPolicy.BrowserRecordingVideoBitrateKbps > 0 ? RecordingPolicy.BrowserRecordingVideoBitrateKbps : RecordingPolicy.VideoBitrateKbps,
+            RecordingPolicy.MinimumVideoBitrateKbps,
+            RecordingPolicy.MaximumVideoBitrateKbps);
+        _recordingAudioBitrateKbps = Math.Max(32, RecordingPolicy.BrowserRecordingAudioBitrateKbps > 0 ? RecordingPolicy.BrowserRecordingAudioBitrateKbps : RecordingPolicy.AudioBitrateKbps);
+        _recordingCodecPreference = NormalizeRecordingCodecPreference(RecordingPolicy.BrowserRecordingCodecPreference);
         _saving = false;
         _embedding = false;
         _embeddingProgress = 0;
@@ -1352,7 +1423,7 @@
     private async Task<IJSObjectReference> EnsureMediaModuleAsync()
     {
         if (_disposed) throw new ObjectDisposedException(nameof(MediaStudio));
-        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.7.8").ConfigureAwait(true);
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.7.9").ConfigureAwait(true);
         _self ??= DotNetObjectReference.Create(this);
         if (SessionId != Guid.Empty)
         {
@@ -3272,20 +3343,72 @@
     private Task RecordCamera() => StartRecording("camera");
     private Task RecordScreen() => StartRecording("screen");
     private Task RecordMicrophone() => StartRecording("microphone");
+
+    private string NormalizeRecordingCodecPreference(string? value)
+    {
+        var normalized = value?.Trim().ToLowerInvariant();
+        return normalized is "vp8" or "vp9" ? normalized : "auto";
+    }
+
+    private object BuildBrowserRecordingOptions()
+    {
+        var policy = RecordingPolicy;
+        var width = RecordingTargetWidth;
+        var height = RecordingTargetHeight;
+        if (_recordingSizeMode != "source")
+        {
+            width = Math.Clamp(width, policy.MinimumWidth, policy.MaximumWidth);
+            height = Math.Clamp(height, policy.MinimumHeight, policy.MaximumHeight);
+        }
+
+        _recordingFrameRate = Math.Clamp(_recordingFrameRate, policy.MinimumFrameRate, policy.MaximumFrameRate);
+        _recordingVideoBitrateKbps = Math.Clamp(_recordingVideoBitrateKbps, policy.MinimumVideoBitrateKbps, policy.MaximumVideoBitrateKbps);
+        _recordingAudioBitrateKbps = Math.Clamp(_recordingAudioBitrateKbps, 32, 1024);
+        _recordingCodecPreference = NormalizeRecordingCodecPreference(_recordingCodecPreference);
+
+        return new
+        {
+            width,
+            height,
+            frameRate = _recordingFrameRate,
+            videoBitsPerSecond = _recordingVideoBitrateKbps * 1000,
+            audioBitsPerSecond = _recordingAudioBitrateKbps * 1000,
+            codecPreference = _recordingCodecPreference
+        };
+    }
+
     private async Task StartRecording(string source)
     {
         _error = null;
         try
         {
             var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+            var recordingOptions = BuildBrowserRecordingOptions();
             Logger.LogInformation(
-                "Starting Media Studio {MediaKind} recording from {RecordingSource} for session {SessionId}.",
+                "Starting Media Studio {MediaKind} recording from {RecordingSource} for session {SessionId} with capture mode {CaptureMode}, target {CaptureWidth}x{CaptureHeight} at {FrameRate} fps and {VideoBitrateKbps} kbps video.",
                 IsVideo ? "video" : "audio",
                 source,
-                SessionId);
+                SessionId,
+                _recordingSizeMode,
+                RecordingTargetWidth,
+                RecordingTargetHeight,
+                _recordingFrameRate,
+                _recordingVideoBitrateKbps);
             _recording = true;
             _recordingStopping = false;
-            await module.InvokeVoidAsync("startMediaRecording", "media-studio-preview", IsVideo ? "video" : "audio", source, _self).ConfigureAwait(true);
+            var startInfo = await module.InvokeAsync<MediaRecordingStartInfo?>(
+                "startMediaRecording",
+                "media-studio-preview",
+                IsVideo ? "video" : "audio",
+                source,
+                _self,
+                recordingOptions).ConfigureAwait(true);
+            if (IsVideo && startInfo is { Width: > 0, Height: > 0 })
+            {
+                var codec = string.IsNullOrWhiteSpace(startInfo.MimeType) ? "browser codec" : startInfo.MimeType;
+                var bitrate = startInfo.VideoBitsPerSecond > 0 ? $" · {startInfo.VideoBitsPerSecond / 1000:N0} kbps" : string.Empty;
+                _warning = $"Recording {startInfo.Width} × {startInfo.Height} · {startInfo.FrameRate:0.##} fps · {codec}{bitrate}.";
+            }
             await InvokeAsync(StateHasChanged).ConfigureAwait(true);
         }
         catch (Exception ex)
@@ -4223,6 +4346,16 @@
         public List<double> WaveformSamples { get; set; } = [];
         public string PosterDataUrl { get; set; } = string.Empty;
         public string MetadataWarning { get; set; } = string.Empty;
+    }
+
+    private sealed class MediaRecordingStartInfo
+    {
+        public string MimeType { get; set; } = string.Empty;
+        public int Width { get; set; }
+        public int Height { get; set; }
+        public double FrameRate { get; set; }
+        public int VideoBitsPerSecond { get; set; }
+        public int AudioBitsPerSecond { get; set; }
     }
 
     public async ValueTask DisposeAsync()

@@ -42,9 +42,11 @@ public interface IPublisherDocumentFactory
 /// Creates configured publisher document instances from the application's current dependencies and runtime settings.
 /// </summary>
 /// <param name="runtimePolicy">Publisher runtime policy data service dependency used by the publisher document workflow to provide the corresponding application capability.</param>
+/// <param name="richTextFactory">Rich-text document factory used to keep visible template previews and their editable RichEdit source synchronized.</param>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class PublisherDocumentFactory(
     IPublisherRuntimePolicyDataService runtimePolicy,
+    RichTextDocumentFactory richTextFactory,
     ILogger<PublisherDocumentFactory> logger) : IPublisherDocumentFactory
 {
     /// <summary>
@@ -72,7 +74,7 @@ public sealed class PublisherDocumentFactory(
                 Width = defaults.TitleWidth,
                 Height = defaults.TitleHeight,
                 PreviewHtml = defaults.TitlePreviewHtml,
-                DocumentContent = [],
+                DocumentContent = richTextFactory.CreateOpenXmlFromPreviewHtml(defaults.TitlePreviewHtml),
                 StoryFormat = StoryStorageFormat.OpenXml,
                 ZIndex = 2
             });

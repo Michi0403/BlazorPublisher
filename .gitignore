@@ -47,4 +47,3 @@ src/PublisherStudio.Web/wwwroot/help-docs/
 
 
 !Update-GitHubPagesSnapshot.cmd
-*.xml

@@ -333,7 +333,9 @@ public sealed partial class PublicationFileService
                         text.ContentScale = Math.Clamp(text.ContentScale <= 0 ? 1 : text.ContentScale, .1, 12);
                         if (text.DocumentContent is null || text.DocumentContent.Length == 0)
                         {
-                            text.DocumentContent = _richTextFactory.CreateOpenXml("Text frame");
+                            // Older/newly-created publications can contain a rendered preview without a RichEdit source.
+                            // Materialize exactly that visible text as the editable source instead of inventing fallback copy.
+                            text.DocumentContent = _richTextFactory.CreateOpenXmlFromPreviewHtml(text.PreviewHtml);
                             text.StoryFormat = StoryStorageFormat.OpenXml;
                         }
                         else if (LooksLikeHtml(text.DocumentContent))

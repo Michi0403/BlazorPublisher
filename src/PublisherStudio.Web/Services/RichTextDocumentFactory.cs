@@ -1,6 +1,8 @@
 using System.IO.Compression;
+using System.Net;
 using System.Security;
 using System.Text;
+using System.Text.RegularExpressions;
 // logging-policy: pure-helper
 namespace PublisherStudio.Services;
 
@@ -77,6 +79,55 @@ public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> log
 }
 
     /// <summary>
+    /// Creates editable OpenXML from an existing text-frame preview when no stored rich-text document exists.
+    /// </summary>
+    /// <param name="previewHtml">Preview HTML that represents the currently visible text-frame content.</param>
+    /// <returns>The byte array containing a valid OpenXML document package.</returns>
+    public byte[] CreateOpenXmlFromPreviewHtml(string? previewHtml)
+    {
+    try
+    {
+            logger.LogTrace("Creating RichEdit OpenXML from text-frame preview HTML.");
+            if (string.IsNullOrWhiteSpace(previewHtml))
+                return CreateOpenXmlFromPlainText(string.Empty);
+
+            var safeHtml = Regex.Replace(
+                previewHtml,
+                @"<(script|style)\b[^>]*>.*?</\1>",
+                string.Empty,
+                RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant);
+
+            var heading = Regex.Match(
+                safeHtml,
+                @"<h[1-6]\b[^>]*>(?<content>.*?)</h[1-6]>",
+                RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant);
+            if (heading.Success)
+            {
+                var title = HtmlFragmentToPlainText(heading.Groups["content"].Value).Trim();
+                var paragraph = Regex.Match(
+                    safeHtml[(heading.Index + heading.Length)..],
+                    @"<p\b[^>]*>(?<content>.*?)</p>",
+                    RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant);
+                var subtitle = paragraph.Success
+                    ? HtmlFragmentToPlainText(paragraph.Groups["content"].Value).Trim()
+                    : null;
+                if (!string.IsNullOrWhiteSpace(title))
+                    return CreateOpenXml(title, string.IsNullOrWhiteSpace(subtitle) ? null : subtitle);
+            }
+
+            return CreateOpenXmlFromPlainText(HtmlFragmentToPlainText(safeHtml));
+    }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(RichTextDocumentFactory)}.{nameof(CreateOpenXmlFromPreviewHtml)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(RichTextDocumentFactory)}.{nameof(CreateOpenXmlFromPreviewHtml)} failed.");
+        throw;
+    }
+}
+
+    /// <summary>
     /// Creates open XML from markdown.
     /// </summary>
     /// <param name="markdown">Markdown value supplied to the rich text document operation and used when producing its result.</param>
@@ -135,6 +186,68 @@ public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> log
             logger.LogDebug(__serviceMethodException, $"Service method {nameof(RichTextDocumentFactory)}.{nameof(CreateOpenXmlFromMarkdown)} was canceled.");
         else
             logger.LogError(__serviceMethodException, $"Service method {nameof(RichTextDocumentFactory)}.{nameof(CreateOpenXmlFromMarkdown)} failed.");
+        throw;
+    }
+}
+
+    /// <summary>
+    /// Converts bounded preview HTML into plain text while retaining paragraph/list line boundaries.
+    /// </summary>
+    /// <param name="html">HTML fragment to convert.</param>
+    /// <returns>Plain text suitable for a newly materialized RichEdit document.</returns>
+    private string HtmlFragmentToPlainText(string html)
+    {
+    try
+    {
+            if (string.IsNullOrWhiteSpace(html)) return string.Empty;
+
+            var text = Regex.Replace(
+                html,
+                @"<br\s*/?>",
+                "\n",
+                RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+            text = Regex.Replace(
+                text,
+                @"<(li)\b[^>]*>",
+                "• ",
+                RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+            text = Regex.Replace(
+                text,
+                @"</(p|div|h[1-6]|li|tr|section|article|header|footer|blockquote)\s*>",
+                "\n",
+                RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+            text = Regex.Replace(
+                text,
+                @"<[^>]+>",
+                string.Empty,
+                RegexOptions.Singleline | RegexOptions.CultureInvariant);
+            text = WebUtility.HtmlDecode(text).Replace('\u00a0', ' ');
+
+            var normalized = NormalizeLines(text);
+            var lines = normalized
+                .Split('\n')
+                .Select(line => line.Trim())
+                .ToList();
+            while (lines.Count > 0 && string.IsNullOrWhiteSpace(lines[0])) lines.RemoveAt(0);
+            while (lines.Count > 0 && string.IsNullOrWhiteSpace(lines[^1])) lines.RemoveAt(lines.Count - 1);
+
+            var result = new List<string>(lines.Count);
+            var previousBlank = false;
+            foreach (var line in lines)
+            {
+                var blank = string.IsNullOrWhiteSpace(line);
+                if (blank && previousBlank) continue;
+                result.Add(line);
+                previousBlank = blank;
+            }
+            return string.Join("\n", result);
+    }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(RichTextDocumentFactory)}.{nameof(HtmlFragmentToPlainText)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(RichTextDocumentFactory)}.{nameof(HtmlFragmentToPlainText)} failed.");
         throw;
     }
 }

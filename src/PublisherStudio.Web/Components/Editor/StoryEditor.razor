@@ -322,9 +322,14 @@
             _editorRevision++;
             _documentLoadGeneration++;
             _mailMergeSettingsContent = null;
-            _content = TextFrame.DocumentContent.ToArray();
-            _documentFormat = TextFrame.StoryFormat == StoryStorageFormat.Html ? DocumentFormat.Html : DocumentFormat.OpenXml;
-            _legacyConversionPending = TextFrame.StoryFormat == StoryStorageFormat.Html;
+            var hasStoredStoryContent = TextFrame.DocumentContent is { Length: > 0 };
+            _content = hasStoredStoryContent
+                ? TextFrame.DocumentContent.ToArray()
+                : RichTextFactory.CreateOpenXmlFromPreviewHtml(TextFrame.PreviewHtml);
+            _documentFormat = hasStoredStoryContent && TextFrame.StoryFormat == StoryStorageFormat.Html
+                ? DocumentFormat.Html
+                : DocumentFormat.OpenXml;
+            _legacyConversionPending = hasStoredStoryContent && TextFrame.StoryFormat == StoryStorageFormat.Html;
             _upgradingLegacyStory = false;
             _loadedId = TextFrame.Id;
             _error = null;

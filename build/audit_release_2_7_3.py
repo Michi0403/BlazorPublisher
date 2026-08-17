@@ -10,7 +10,7 @@ def forbid(rel, needle):
     if needle in text(rel): raise AssertionError(f"{rel} unexpectedly contains: {needle}")
 try:
     for rel in ('src/PublisherStudio.Web/PublisherStudio.Web.csproj','src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'):
-        require(rel,'<Version>2.7.7</Version>')
+        require(rel,'<Version>2.7.8</Version>')
     for rel in (
         'src/PublisherStudio.Web/BusinessObjects/ApplicationLogEntry.cs',
         'src/PublisherStudio.Web/BusinessObjects/FileLoggerCoreOptions.cs',
@@ -42,7 +42,7 @@ try:
         'ApplyRetainedRecordingInfo(retainedRecording)',
         'InvokeAsync<bool>',
         'stopMediaRecording',
-        './js/mediaStudioInterop.js?v=2.7.7'):
+        './js/mediaStudioInterop.js?v=2.7.8'):
         if needle not in media: raise AssertionError(f'MediaStudio.razor missing {needle}')
 
     js=text('src/PublisherStudio.Web/wwwroot/js/mediaStudioInterop.js')

@@ -24,7 +24,7 @@ try:
         "src/PublisherStudio.Web/PublisherStudio.Web.csproj",
         "src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj",
     ]:
-        require(rel, "<Version>2.7.7</Version>")
+        require(rel, "<Version>2.7.8</Version>")
         match = re.search(r"<Version>(\d+)\.(\d+)\.(\d+)</Version>", read(rel))
         if not match or int(match.group(2)) > 9 or int(match.group(3)) > 9:
             raise AssertionError(f"version-slot policy failed for {rel}")
@@ -35,7 +35,7 @@ try:
         "SaveToMemory = true,",
         "Publisher-started Council work is intentionally a normal LocalGPT /chat session",
     )
-    require("src/PublisherStudio.Web/Components/App.razor", "v=2.7.7")
+    require("src/PublisherStudio.Web/Components/App.razor", "v=2.7.8")
 
     modes=[]
     for path in web.rglob("*.razor"):

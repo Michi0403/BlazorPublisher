@@ -340,7 +340,7 @@ public sealed class EncoderSessionService : IDisposable
                     var width = output?.Width ?? _session.MasterWidth;
                     var height = output?.Height ?? _session.MasterHeight;
                     var frameRate = output?.FrameRate ?? _session.MasterFrameRate;
-                    var bitrate = output?.VideoBitrateKbps ?? 8000;
+                    var bitrate = output?.VideoBitrateKbps ?? _defaults.VideoBitrateKbps;
                     StartProcess($"dry-run:{suffix}", inputId, BuildValidationArguments(inputId, width, height, frameRate, bitrate));
     
         }
@@ -490,7 +490,7 @@ public sealed class EncoderSessionService : IDisposable
                     var playlist = Path.Combine(directory, "index.m3u8");
                     var args = BaseInputArguments(null);
                     AddVideoEncoding(args, _session.LanDefinition.Width, _session.LanDefinition.Height, _session.LanDefinition.FrameRate, _session.LanDefinition.VideoBitrateKbps, 2, 0);
-                    AddAudioEncoding(args, 160, 0);
+                    AddAudioEncoding(args, _session.LanDefinition.AudioBitrateKbps, 0);
                     args.AddRange(["-f", "hls", "-hls_time", "2", "-hls_list_size", "8", "-hls_flags", "delete_segments+append_list+independent_segments", playlist]);
                     StartProcess("lan:hls", null, args);
     
@@ -514,7 +514,7 @@ public sealed class EncoderSessionService : IDisposable
                     if (_session.RtspRelayPort <= 0) return;
                     var args = BaseInputArguments(null);
                     AddVideoEncoding(args, _session.LanDefinition.Width, _session.LanDefinition.Height, _session.LanDefinition.FrameRate, _session.LanDefinition.VideoBitrateKbps, 2, 0);
-                    AddAudioEncoding(args, 160, 0);
+                    AddAudioEncoding(args, _session.LanDefinition.AudioBitrateKbps, 0);
                     args.AddRange(["-f", "rtp_mpegts", $"rtp://127.0.0.1:{_session.RtspRelayPort}?pkt_size=1316"]);
                     StartProcess("lan:rtsp", null, args);
     
@@ -542,7 +542,7 @@ public sealed class EncoderSessionService : IDisposable
             logger.LogTrace($"Entering EncoderSessionService.BuildValidationArguments.");
                     var args = BaseInputArguments(inputId);
                     AddVideoEncoding(args, width, height, frameRate, bitrateKbps, 2, 0);
-                    AddAudioEncoding(args, 160, 0);
+                    AddAudioEncoding(args, _session.LanDefinition.AudioBitrateKbps, 0);
                     args.AddRange(["-f", "null", "-"]);
                     return args;
     

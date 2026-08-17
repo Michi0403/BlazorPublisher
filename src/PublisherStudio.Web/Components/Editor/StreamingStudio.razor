@@ -3,6 +3,7 @@
 @inject TwitchOAuthService TwitchOAuth
 @inject StreamingMediaHostClient MediaHost
 @inject IJSRuntime JS
+@inject PublisherStudio.Services.Streaming.MediaQualityRecommendationService MediaQuality
 @using System.Text.Json
 
 @if (Visible)
@@ -263,11 +264,20 @@
                         </header>
 
                         <section class="streaming-settings-card">
-                            <div class="streaming-card-heading"><div><h3>Master program</h3><p>The compositor captures the publication once at this resolution and frame rate.</p></div><span class="streaming-summary-value">@_draft.MasterWidth × @_draft.MasterHeight · @_draft.MasterFrameRate fps</span></div>
+                            <div class="streaming-card-heading"><div><h3>Master program</h3><p>The compositor captures the publication once. Smart mode derives its working geometry and encoder targets from the actual browser capture instead of assuming one user's display.</p></div><span class="streaming-summary-value">@_draft.MasterWidth × @_draft.MasterHeight · @_draft.MasterFrameRate fps</span></div>
                             <div class="streaming-form-grid four-column">
-                                <label data-help="Horizontal pixel size of the shared master publication render."><span>Master width</span><input type="number" min="640" max="7680" step="2" @bind="_draft.MasterWidth" /></label>
-                                <label data-help="Vertical pixel size of the shared master publication render."><span>Master height</span><input type="number" min="360" max="4320" step="2" @bind="_draft.MasterHeight" /></label>
-                                <label data-help="Frames per second produced by the shared compositor before provider scaling."><span>Master FPS</span><input type="number" min="15" max="120" @bind="_draft.MasterFrameRate" /></label>
+                                <label class="streaming-check-field span-2" data-help="Use actual browser capture settings, runtime quality policy, and encoder capability hints for automatic preselection. Manual fields remain available as fallbacks and overrides."><input type="checkbox" @bind="_draft.AdaptiveMedia.Enabled" /><span><b>Smart adaptive media quality</b><small>Resolution-, frame-rate-, codec-, audio-, and bitrate-aware selection.</small></span></label>
+                                <label><span>Adaptive priority</span><select @bind="_draft.AdaptiveMedia.Profile">@foreach (var value in Enum.GetValues<PublicationAdaptiveQualityProfile>()) { <option value="@value">@value</option> }</select></label>
+                                <label class="streaming-check-field compact"><input type="checkbox" @bind="_draft.AdaptiveMedia.AdaptVideo" /><span><b>Adapt video</b><small>Smart-preselect geometry, frame rate, codec targets and video bitrate.</small></span></label>
+                                <label class="streaming-check-field compact"><input type="checkbox" @bind="_draft.AdaptiveMedia.AdaptAudio" /><span><b>Adapt audio</b><small>Derive audio bitrate from channel count and selected quality priority.</small></span></label>
+                                <label class="streaming-check-field compact"><input type="checkbox" @bind="_draft.AdaptiveMedia.UseProviderKnowledge" /><span><b>Provider knowledge</b><small>Use configurable provider quality tiers; disable to use only the generic policy.</small></span></label>
+                                <label class="streaming-check-field compact"><input type="checkbox" @bind="_draft.AdaptiveMedia.UseBrowserCapabilityProbe" /><span><b>Browser capability probe</b><small>Use browser encoder smoothness and power-efficiency evidence to guide capture preselection.</small></span></label>
+                                <label class="streaming-check-field compact"><input type="checkbox" @bind="_draft.AdaptiveMedia.PreserveNativeResolution" /><span><b>Preserve source resolution</b><small>Avoid automatic downscaling unless explicitly allowed.</small></span></label>
+                                <label class="streaming-check-field compact"><input type="checkbox" @bind="_draft.AdaptiveMedia.AllowFrameRateReduction" /><span><b>Allow FPS fallback</b><small>Only when browser capability probing reports non-smooth encoding.</small></span></label>
+                                <label class="streaming-check-field compact"><input type="checkbox" @bind="_draft.AdaptiveMedia.AllowResolutionReduction" /><span><b>Allow resolution fallback</b><small>Last-resort smoothness fallback; off by default.</small></span></label>
+                                <label data-help="Manual/fallback horizontal pixel size. In smart native-resolution mode the actual selected browser surface is used instead."><span>Master width</span><input type="number" min="640" max="7680" step="2" @bind="_draft.MasterWidth" /></label>
+                                <label data-help="Manual/fallback vertical pixel size. In smart native-resolution mode the actual selected browser surface is used instead."><span>Master height</span><input type="number" min="360" max="4320" step="2" @bind="_draft.MasterHeight" /></label>
+                                <label data-help="Manual/fallback frame rate. Smart mode starts from the source-reported frame rate and may reduce it only when the selected policy permits."><span>Master FPS</span><input type="number" min="15" max="120" @bind="_draft.MasterFrameRate" /></label>
                                 <label class="streaming-check-field compact" data-help="Prefer source timestamps from cameras and capture devices to reduce drift when available."><input type="checkbox" @bind="_draft.PreferDeviceTimestamps" /><span><b>Device timestamps</b><small>Prefer capture timing over browser arrival timing.</small></span></label>
                             </div>
                         </section>
@@ -398,10 +408,12 @@
                         <section class="streaming-settings-card">
                             <div class="streaming-card-heading"><div><h3>Output and protocols</h3><p>Use one LAN encode for the enabled internal delivery protocols.</p></div></div>
                             <div class="streaming-form-grid four-column">
+                                <label data-help="Recommended follows the shared adaptive policy; Custom preserves manual LAN values."><span>Quality preset</span><select value="@_draft.Lan.QualityPreset" @onchange="ChangeLanPreset">@foreach (var value in Enum.GetValues<PublicationStreamQualityPreset>()) { <option value="@value">@value</option> }</select></label>
                                 <label><span>Output width</span><input type="number" min="320" max="7680" step="2" @bind="_draft.Lan.Width" /></label>
                                 <label><span>Output height</span><input type="number" min="180" max="4320" step="2" @bind="_draft.Lan.Height" /></label>
                                 <label><span>Frame rate</span><input type="number" min="15" max="120" @bind="_draft.Lan.FrameRate" /></label>
                                 <label><span>Video bitrate (kbps)</span><input type="number" min="250" max="200000" step="250" @bind="_draft.Lan.VideoBitrateKbps" /></label>
+                                <label><span>Audio bitrate (kbps)</span><input type="number" min="32" max="1024" step="16" @bind="_draft.Lan.AudioBitrateKbps" /></label>
                             </div>
                             <div class="streaming-selection-grid protocols">
                                 <label class="streaming-check-field"><input type="checkbox" @bind="_draft.Lan.EnableBrowserWebRtc" /><span><b>Browser watch page</b><small>Low-latency WebRTC with MediaSource fallback.</small></span></label>
@@ -1151,29 +1163,46 @@
     {
         if (output.QualityPreset == PublicationStreamQualityPreset.Custom) return;
 
-        var values = (output.Provider, output.QualityPreset) switch
+        var recommendation = MediaQuality.RecommendProviderOutput(
+            output.Provider,
+            output.QualityPreset,
+            _draft.MasterWidth,
+            _draft.MasterHeight,
+            _draft.MasterFrameRate,
+            output.VideoCodec,
+            _draft.AdaptiveMedia.Profile,
+            _draft.AdaptiveMedia.UseProviderKnowledge);
+        if (!_draft.AdaptiveMedia.Enabled || _draft.AdaptiveMedia.AdaptVideo)
         {
-            (PublicationStreamProvider.Twitch, PublicationStreamQualityPreset.HighQuality) => (1920, 1080, 60, 8000, 160),
-            (PublicationStreamProvider.Twitch, PublicationStreamQualityPreset.LowLatency) => (1920, 1080, 60, 5500, 160),
-            (PublicationStreamProvider.Twitch, PublicationStreamQualityPreset.BandwidthSaving) => (1280, 720, 30, 3500, 128),
-            (PublicationStreamProvider.Twitch, _) => (1920, 1080, 60, 6000, 160),
+            output.Width = recommendation.Width;
+            output.Height = recommendation.Height;
+            output.FrameRate = recommendation.FrameRate;
+            output.VideoBitrateKbps = recommendation.VideoBitrateKbps;
+            output.KeyFrameIntervalSeconds = recommendation.KeyFrameIntervalSeconds;
+        }
+        if (!_draft.AdaptiveMedia.Enabled || _draft.AdaptiveMedia.AdaptAudio)
+            output.AudioBitrateKbps = recommendation.AudioBitrateKbps;
+    }
 
-            (PublicationStreamProvider.YouTube, PublicationStreamQualityPreset.HighQuality) => (3840, 2160, 60, 30000, 192),
-            (PublicationStreamProvider.YouTube, PublicationStreamQualityPreset.LowLatency) => (1920, 1080, 60, 9000, 160),
-            (PublicationStreamProvider.YouTube, PublicationStreamQualityPreset.BandwidthSaving) => (1280, 720, 30, 4000, 128),
-            (PublicationStreamProvider.YouTube, _) => (3840, 2160, 60, 20000, 192),
+    private void ChangeLanPreset(ChangeEventArgs args)
+    {
+        if (!Enum.TryParse<PublicationStreamQualityPreset>(args.Value?.ToString(), out var preset)) return;
+        _draft.Lan.QualityPreset = preset;
+        if (preset != PublicationStreamQualityPreset.Custom) ApplyLanRecommendation();
+    }
 
-            (_, PublicationStreamQualityPreset.HighQuality) => (3840, 2160, 60, 24000, 192),
-            (_, PublicationStreamQualityPreset.LowLatency) => (1920, 1080, 60, 7000, 160),
-            (_, PublicationStreamQualityPreset.BandwidthSaving) => (1280, 720, 30, 3500, 128),
-            _ => (1920, 1080, 60, 8000, 160)
-        };
-        output.Width = values.Item1;
-        output.Height = values.Item2;
-        output.FrameRate = values.Item3;
-        output.VideoBitrateKbps = values.Item4;
-        output.AudioBitrateKbps = values.Item5;
-        output.KeyFrameIntervalSeconds = 2;
+    private void ApplyLanRecommendation()
+    {
+        var recommendation = MediaQuality.RecommendLan(
+            _draft.MasterWidth,
+            _draft.MasterHeight,
+            _draft.MasterFrameRate,
+            _draft.AdaptiveMedia.Profile);
+        _draft.Lan.Width = recommendation.Width;
+        _draft.Lan.Height = recommendation.Height;
+        _draft.Lan.FrameRate = recommendation.FrameRate;
+        _draft.Lan.VideoBitrateKbps = recommendation.VideoBitrateKbps;
+        _draft.Lan.AudioBitrateKbps = recommendation.AudioBitrateKbps;
     }
 
     private void ApplySelectedOutputDefaults()
@@ -1510,10 +1539,14 @@
             long totalKbps;
             if (_draft.Recording.Variant == PublicationStreamRecordingVariant.CleanMaster)
             {
-                totalKbps = Math.Clamp(
-                    (long)Math.Round(_draft.MasterWidth * (double)_draft.MasterHeight * _draft.MasterFrameRate * 0.16 / 1000.0),
-                    12_000L,
-                    120_000L) + 192;
+                totalKbps = MediaQuality.RecommendVideoBitrateKbps(
+                    _draft.MasterWidth,
+                    _draft.MasterHeight,
+                    _draft.MasterFrameRate,
+                    "mixed",
+                    "h264",
+                    _draft.AdaptiveMedia.Profile)
+                    + MediaQuality.RecommendAudioBitrateKbps(2, _draft.AdaptiveMedia.Profile);
             }
             else
             {
@@ -1539,6 +1572,12 @@
     {
         _twitchOAuthCancellation?.Cancel();
         await CloseTwitchAuthorizationWindowAsync().ConfigureAwait(true);
+        if (_draft.AdaptiveMedia.Enabled)
+        {
+            foreach (var output in _draft.Outputs.Where(item => item.QualityPreset != PublicationStreamQualityPreset.Custom))
+                ApplyQualityPreset(output);
+            if (_draft.Lan.QualityPreset != PublicationStreamQualityPreset.Custom) ApplyLanRecommendation();
+        }
         await Saved.InvokeAsync(_draft).ConfigureAwait(true);
     }
 

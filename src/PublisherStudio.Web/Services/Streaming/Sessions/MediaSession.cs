@@ -103,6 +103,20 @@ public sealed class MediaSession
             MasterWidth = defaults.MasterWidth;
             MasterHeight = defaults.MasterHeight;
             MasterFrameRate = defaults.MasterFrameRate;
+            AdaptiveMedia = new PublicationAdaptiveMediaSettings
+            {
+                Enabled = defaults.AdaptiveQuality.Enabled,
+                AdaptVideo = true,
+                AdaptAudio = true,
+                UseProviderKnowledge = true,
+                UseBrowserCapabilityProbe = defaults.AdaptiveQuality.BrowserCapabilityProbeEnabled,
+                Profile = Enum.TryParse<PublicationAdaptiveQualityProfile>(defaults.AdaptiveQuality.DefaultProfile, true, out var defaultProfile)
+                    ? defaultProfile
+                    : PublicationAdaptiveQualityProfile.Quality,
+                PreserveNativeResolution = defaults.AdaptiveQuality.PreserveNativeResolution,
+                AllowFrameRateReduction = defaults.AdaptiveQuality.AllowFrameRateReduction,
+                AllowResolutionReduction = defaults.AdaptiveQuality.AllowResolutionReduction
+            };
             PreferDeviceTimestamps = defaults.PreferDeviceTimestamps;
             HardwareEncoder = defaults.HardwareEncoder;
             RecordingDefinition.Container = defaults.RecordingContainer;
@@ -113,6 +127,7 @@ public sealed class MediaSession
             LanDefinition.Height = defaults.OutputHeight;
             LanDefinition.FrameRate = defaults.OutputFrameRate;
             LanDefinition.VideoBitrateKbps = defaults.LanVideoBitrateKbps;
+            LanDefinition.AudioBitrateKbps = defaults.AudioBitrateKbps;
             LanDefinition.EnableBrowserWebRtc = defaults.EnableBrowserWebRtc;
             LanDefinition.EnableHls = defaults.EnableHls;
             LanDefinition.EnableRtsp = defaults.EnableRtsp;
@@ -194,6 +209,9 @@ public sealed class MediaSession
     /// </summary>
     /// <value>The master frame rate value exposed by <see cref="MediaSession"/>.</value>
     public int MasterFrameRate { get; private set; }
+    /// <summary>Gets the per-publication adaptive media choices used by encoder and transport paths in this session.</summary>
+    /// <value>The adaptive media settings applied to this media session.</value>
+    public PublicationAdaptiveMediaSettings AdaptiveMedia { get; private set; }
     /// <summary>
     /// Gets or sets a value indicating whether prefer device timestamps applies to the media session state.
     /// </summary>
@@ -285,6 +303,19 @@ public sealed class MediaSession
             MasterWidth = ReadInt(request, "masterWidth", defaults.MasterWidth);
             MasterHeight = ReadInt(request, "masterHeight", defaults.MasterHeight);
             MasterFrameRate = ReadInt(request, "masterFrameRate", defaults.MasterFrameRate);
+            if (request.TryGetProperty("adaptiveMedia", out var adaptiveMedia) && adaptiveMedia.ValueKind == JsonValueKind.Object)
+            {
+                AdaptiveMedia.Enabled = !adaptiveMedia.TryGetProperty("enabled", out var adaptiveEnabled) || adaptiveEnabled.ValueKind != JsonValueKind.False;
+                AdaptiveMedia.AdaptVideo = !adaptiveMedia.TryGetProperty("adaptVideo", out var adaptVideo) || adaptVideo.ValueKind != JsonValueKind.False;
+                AdaptiveMedia.AdaptAudio = !adaptiveMedia.TryGetProperty("adaptAudio", out var adaptAudio) || adaptAudio.ValueKind != JsonValueKind.False;
+                AdaptiveMedia.UseProviderKnowledge = !adaptiveMedia.TryGetProperty("useProviderKnowledge", out var providerKnowledge) || providerKnowledge.ValueKind != JsonValueKind.False;
+                AdaptiveMedia.UseBrowserCapabilityProbe = !adaptiveMedia.TryGetProperty("useBrowserCapabilityProbe", out var capabilityProbe) || capabilityProbe.ValueKind != JsonValueKind.False;
+                var profileName = ReadString(adaptiveMedia, "profile");
+                if (Enum.TryParse<PublicationAdaptiveQualityProfile>(profileName, true, out var profile)) AdaptiveMedia.Profile = profile;
+                AdaptiveMedia.PreserveNativeResolution = !adaptiveMedia.TryGetProperty("preserveNativeResolution", out var preserveNative) || preserveNative.ValueKind != JsonValueKind.False;
+                AdaptiveMedia.AllowFrameRateReduction = !adaptiveMedia.TryGetProperty("allowFrameRateReduction", out var allowFrameRate) || allowFrameRate.ValueKind != JsonValueKind.False;
+                AdaptiveMedia.AllowResolutionReduction = adaptiveMedia.TryGetProperty("allowResolutionReduction", out var allowResolution) && allowResolution.ValueKind == JsonValueKind.True;
+            }
             PreferDeviceTimestamps = !request.TryGetProperty("preferDeviceTimestamps", out var timestamps)
                 ? defaults.PreferDeviceTimestamps
                 : timestamps.ValueKind != JsonValueKind.False;
@@ -638,6 +669,7 @@ public sealed class MediaSession
             LanDefinition.Height = Math.Clamp(ReadInt(lanSettings, "height", defaults.OutputHeight), defaults.MinimumHeight, defaults.MaximumHeight);
             LanDefinition.FrameRate = Math.Clamp(ReadInt(lanSettings, "frameRate", defaults.OutputFrameRate), defaults.MinimumFrameRate, defaults.MaximumFrameRate);
             LanDefinition.VideoBitrateKbps = Math.Clamp(ReadInt(lanSettings, "videoBitrateKbps", defaults.LanVideoBitrateKbps), defaults.MinimumVideoBitrateKbps, defaults.MaximumVideoBitrateKbps);
+            LanDefinition.AudioBitrateKbps = Math.Clamp(ReadInt(lanSettings, "audioBitrateKbps", defaults.AudioBitrateKbps), 32, Math.Max(32, defaults.AdaptiveQuality.MaximumAudioBitrateKbps));
             LanDefinition.EnableBrowserWebRtc = !lanSettings.TryGetProperty("enableBrowserWebRtc", out var browserPlayback)
                 ? defaults.EnableBrowserWebRtc
                 : browserPlayback.ValueKind != JsonValueKind.False;

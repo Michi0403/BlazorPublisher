@@ -453,6 +453,114 @@ public sealed record PublisherDocumentDefaultsPolicy
 /// <summary>
 /// Represents a publisher media session defaults policy application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
+public sealed record PublisherStreamQualityTierPolicy
+{
+    /// <summary>Gets or sets the publication quality preset name represented by this policy tier.</summary>
+    public string Preset { get; init; } = string.Empty;
+    /// <summary>Gets or sets the preferred width for this provider quality tier.</summary>
+    public int Width { get; init; }
+    /// <summary>Gets or sets the preferred height for this provider quality tier.</summary>
+    public int Height { get; init; }
+    /// <summary>Gets or sets the preferred frame rate for this provider quality tier.</summary>
+    public int FrameRate { get; init; }
+    /// <summary>Gets or sets the maximum video bitrate in kilobits per second for this provider quality tier.</summary>
+    public int MaximumVideoBitrateKbps { get; init; }
+    /// <summary>Gets or sets the preferred audio bitrate in kilobits per second for this provider quality tier.</summary>
+    public int AudioBitrateKbps { get; init; }
+    /// <summary>Gets or sets the preferred key-frame interval in seconds for this provider quality tier.</summary>
+    public int KeyFrameIntervalSeconds { get; init; }
+}
+
+/// <summary>Describes configurable provider quality knowledge used by PublisherStudio's adaptive media advisor.</summary>
+public sealed record PublisherStreamProviderQualityPolicy
+{
+    /// <summary>Gets or sets the provider name matched against <see cref="PublicationStreamProvider"/>.</summary>
+    public string Provider { get; init; } = string.Empty;
+    /// <summary>Gets or sets the quality tiers available for this provider.</summary>
+    public List<PublisherStreamQualityTierPolicy> Tiers { get; init; } = [];
+}
+
+/// <summary>Configures PublisherStudio's resolution-, frame-rate-, codec-, and audio-aware adaptive media quality advisor.</summary>
+public sealed record PublisherMediaQualityAdaptationPolicy
+{
+    /// <summary>Gets or sets whether smart adaptive quality is enabled by default.</summary>
+    public bool Enabled { get; init; } = true;
+    /// <summary>Gets or sets the default user-selectable quality profile.</summary>
+    public string DefaultProfile { get; init; } = "Quality";
+    /// <summary>Gets or sets whether native source resolution should be preserved by default.</summary>
+    public bool PreserveNativeResolution { get; init; } = true;
+    /// <summary>Gets or sets whether the browser may reduce frame rate when its capability probe reports non-smooth encoding.</summary>
+    public bool AllowFrameRateReduction { get; init; } = true;
+    /// <summary>Gets or sets whether the browser may reduce resolution as a last-resort smoothness fallback.</summary>
+    public bool AllowResolutionReduction { get; init; }
+    /// <summary>Gets or sets whether browser capability selection should prefer encoders reported as power efficient.</summary>
+    public bool PreferPowerEfficientCodec { get; init; } = true;
+    /// <summary>Gets or sets whether browser capability selection should prefer encoders reported as smooth.</summary>
+    public bool PreferSmoothEncoding { get; init; } = true;
+    /// <summary>Gets or sets whether browser MediaCapabilities probing participates in automatic recording codec and smoothness selection.</summary>
+    public bool BrowserCapabilityProbeEnabled { get; init; } = true;
+    /// <summary>Gets or sets the configurable codec-family tie-break order used after browser support and smoothness/power-efficiency evidence.</summary>
+    public List<string> BrowserCodecPreferenceOrder { get; init; } = ["vp9", "vp8"];
+    /// <summary>Gets or sets the bits-per-pixel-per-frame target for detailed screen content.</summary>
+    public double ScreenBitsPerPixel { get; init; }
+    /// <summary>Gets or sets the bits-per-pixel-per-frame target for camera/motion content.</summary>
+    public double CameraBitsPerPixel { get; init; }
+    /// <summary>Gets or sets the bits-per-pixel-per-frame target for mixed publication program content.</summary>
+    public double MixedBitsPerPixel { get; init; }
+    /// <summary>Gets or sets the bits-per-pixel-per-frame target used for provider output recommendations.</summary>
+    public double ProviderBitsPerPixel { get; init; }
+    /// <summary>Gets or sets the bits-per-pixel-per-frame target used for LAN output recommendations.</summary>
+    public double LanBitsPerPixel { get; init; }
+    /// <summary>Gets or sets the bitrate multiplier for the Efficiency profile.</summary>
+    public double EfficiencyMultiplier { get; init; }
+    /// <summary>Gets or sets the bitrate multiplier for the Balanced profile.</summary>
+    public double BalancedMultiplier { get; init; }
+    /// <summary>Gets or sets the bitrate multiplier for the Quality profile.</summary>
+    public double QualityMultiplier { get; init; }
+    /// <summary>Gets or sets the VP9 bitrate-efficiency factor relative to VP8.</summary>
+    public double Vp9BitrateFactor { get; init; }
+    /// <summary>Gets or sets the VP8 bitrate-efficiency factor.</summary>
+    public double Vp8BitrateFactor { get; init; }
+    /// <summary>Gets or sets the H.264 bitrate-efficiency factor.</summary>
+    public double H264BitrateFactor { get; init; }
+    /// <summary>Gets or sets the HEVC bitrate-efficiency factor.</summary>
+    public double HevcBitrateFactor { get; init; }
+    /// <summary>Gets or sets the AV1 bitrate-efficiency factor.</summary>
+    public double Av1BitrateFactor { get; init; }
+    /// <summary>Gets or sets the minimum adaptive audio bitrate in kilobits per second.</summary>
+    public int MinimumAudioBitrateKbps { get; init; }
+    /// <summary>Gets or sets the adaptive audio bitrate contribution per channel in kilobits per second.</summary>
+    public int AudioBitratePerChannelKbps { get; init; }
+    /// <summary>Gets or sets the maximum adaptive audio bitrate in kilobits per second.</summary>
+    public int MaximumAudioBitrateKbps { get; init; }
+    /// <summary>Gets or sets the default channel count used when a browser cannot report audio track settings.</summary>
+    public int DefaultAudioChannels { get; init; }
+    /// <summary>Gets or sets the maximum frame rate selected automatically; zero keeps the source-reported rate up to the global policy maximum.</summary>
+    public int MaximumAutomaticFrameRate { get; init; }
+    /// <summary>Gets or sets the multiplicative frame-rate fallback applied when browser capability probing reports non-smooth encoding.</summary>
+    public double FrameRateFallbackRatio { get; init; }
+    /// <summary>Gets or sets the multiplicative resolution fallback applied only when last-resort resolution adaptation is allowed.</summary>
+    public double ResolutionFallbackRatio { get; init; }
+    /// <summary>Gets or sets the maximum number of browser smoothness fallback attempts.</summary>
+    public int MaximumAdaptationAttempts { get; init; }
+    /// <summary>Gets or sets the configurable bitrate headroom applied to browser ingest that will be transcoded again downstream.</summary>
+    public double IngestHeadroomMultiplier { get; init; }
+    /// <summary>Gets or sets the browser MediaRecorder chunk interval in milliseconds used by adaptive streaming ingest.</summary>
+    public int RecorderChunkMilliseconds { get; init; }
+    /// <summary>Gets or sets the maximum pixel count used for generated recording poster thumbnails; zero keeps source-sized poster analysis.</summary>
+    public int MetadataPosterMaximumPixels { get; init; }
+    /// <summary>Gets or sets the delay before nonessential recording metadata/poster analysis begins after capture resources have been released.</summary>
+    public int MetadataAnalysisDelayMilliseconds { get; init; }
+    /// <summary>Gets or sets the LAN maximum width selected automatically; zero uses the global media maximum.</summary>
+    public int LanMaximumWidth { get; init; }
+    /// <summary>Gets or sets the LAN maximum height selected automatically; zero uses the global media maximum.</summary>
+    public int LanMaximumHeight { get; init; }
+    /// <summary>Gets or sets the LAN maximum frame rate selected automatically; zero uses the global media maximum.</summary>
+    public int LanMaximumFrameRate { get; init; }
+    /// <summary>Gets or sets provider-specific quality knowledge. A provider named Default is used as the fallback.</summary>
+    public List<PublisherStreamProviderQualityPolicy> ProviderProfiles { get; init; } = [];
+}
+
 public sealed record PublisherMediaSessionDefaultsPolicy
 {
     /// <summary>
@@ -580,6 +688,9 @@ public sealed record PublisherMediaSessionDefaultsPolicy
     /// </summary>
     /// <value><c>auto</c>, <c>vp9</c>, or <c>vp8</c>; unsupported choices fall back through the browser capability probe.</value>
     public string BrowserRecordingCodecPreference { get; init; } = "auto";
+    /// <summary>Gets or sets the adaptive media-quality knowledge and selection policy.</summary>
+    /// <value>The configurable adaptive media-quality policy shared by recording and streaming workflows.</value>
+    public PublisherMediaQualityAdaptationPolicy AdaptiveQuality { get; init; } = new();
     /// <summary>
     /// Gets or sets the LAN video bitrate kbps value that forms part of the publisher media session defaults policy state consumed or produced by the surrounding workflow.
     /// </summary>

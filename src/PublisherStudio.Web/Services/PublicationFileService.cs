@@ -72,6 +72,8 @@ public sealed partial class PublicationFileService
     /// Stores the story page layout service dependency used by <see cref="PublicationFileService"/> to delegate that application responsibility to its owning collaborator.
     /// </summary>
     private readonly IStoryPageLayoutService _storyPageLayouts;
+    /// <summary>Stores the runtime media policy used to normalize legacy streaming values without embedding machine-specific constants.</summary>
+    private readonly IPublisherRuntimePolicyDataService _runtimePolicy;
     /// <summary>
     /// Stores the logger used by <see cref="PublicationFileService"/> to record operational diagnostics without coupling callers to logging details.
     /// </summary>
@@ -104,6 +106,7 @@ public sealed partial class PublicationFileService
     /// <param name="documentFactory">Publisher document factory dependency used by the publication file workflow to provide the corresponding application capability.</param>
     /// <param name="markup">Publication markup service dependency used by the publication file workflow to provide the corresponding application capability.</param>
     /// <param name="storyPageLayouts">Story page layout service dependency used by the publication file workflow to provide the corresponding application capability.</param>
+    /// <param name="runtimePolicy">Runtime policy dependency used to normalize media defaults and limits.</param>
     /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     public PublicationFileService(
         PictureDocumentService pictures,
@@ -120,6 +123,7 @@ public sealed partial class PublicationFileService
         IPublisherDocumentFactory documentFactory,
         IPublicationMarkupService markup,
         IStoryPageLayoutService storyPageLayouts,
+        IPublisherRuntimePolicyDataService runtimePolicy,
         ILogger<PublicationFileService> logger)
     {
         _pictures = pictures;
@@ -136,6 +140,7 @@ public sealed partial class PublicationFileService
         _documentFactory = documentFactory;
         _markup = markup;
         _storyPageLayouts = storyPageLayouts;
+        _runtimePolicy = runtimePolicy;
         this.logger = logger;
     }
 
@@ -1342,33 +1347,43 @@ public sealed partial class PublicationFileService
         {
             logger.LogTrace($"Entering PublicationFileService.NormalizeStreaming.");
                     var streaming = document.Streaming;
+                    var mediaDefaults = _runtimePolicy.MediaSessionDefaults;
                     streaming.Outputs ??= [];
                     streaming.Recording ??= new PublicationRecordingSettings();
                     streaming.Lan ??= new PublicationLanStreamingSettings();
+                    streaming.AdaptiveMedia ??= new PublicationAdaptiveMediaSettings
+                    {
+                        Enabled = mediaDefaults.AdaptiveQuality.Enabled,
+                        Profile = Enum.TryParse<PublicationAdaptiveQualityProfile>(mediaDefaults.AdaptiveQuality.DefaultProfile, true, out var profile) ? profile : PublicationAdaptiveQualityProfile.Quality,
+                        PreserveNativeResolution = mediaDefaults.AdaptiveQuality.PreserveNativeResolution,
+                        AllowFrameRateReduction = mediaDefaults.AdaptiveQuality.AllowFrameRateReduction,
+                        AllowResolutionReduction = mediaDefaults.AdaptiveQuality.AllowResolutionReduction
+                    };
                     streaming.Hotkeys ??= [];
-                    streaming.MasterWidth = Math.Clamp(streaming.MasterWidth <= 0 ? 3840 : streaming.MasterWidth, 320, 7680);
-                    streaming.MasterHeight = Math.Clamp(streaming.MasterHeight <= 0 ? 2160 : streaming.MasterHeight, 180, 4320);
-                    streaming.MasterFrameRate = Math.Clamp(streaming.MasterFrameRate <= 0 ? 60 : streaming.MasterFrameRate, 15, 120);
+                    streaming.MasterWidth = Math.Clamp(streaming.MasterWidth <= 0 ? mediaDefaults.MasterWidth : streaming.MasterWidth, mediaDefaults.MinimumWidth, mediaDefaults.MaximumWidth);
+                    streaming.MasterHeight = Math.Clamp(streaming.MasterHeight <= 0 ? mediaDefaults.MasterHeight : streaming.MasterHeight, mediaDefaults.MinimumHeight, mediaDefaults.MaximumHeight);
+                    streaming.MasterFrameRate = Math.Clamp(streaming.MasterFrameRate <= 0 ? mediaDefaults.MasterFrameRate : streaming.MasterFrameRate, mediaDefaults.MinimumFrameRate, mediaDefaults.MaximumFrameRate);
                     if (streaming.ProgramPageId is { } pageId && document.Pages.All(page => page.Id != pageId)) streaming.ProgramPageId = null;
                     foreach (var output in streaming.Outputs)
                     {
                         output.Name = string.IsNullOrWhiteSpace(output.Name) ? output.Provider.ToString() : output.Name.Trim();
-                        output.Width = Math.Clamp(output.Width <= 0 ? 1920 : output.Width, 320, 7680);
-                        output.Height = Math.Clamp(output.Height <= 0 ? 1080 : output.Height, 180, 4320);
-                        output.FrameRate = Math.Clamp(output.FrameRate <= 0 ? 60 : output.FrameRate, 15, 120);
-                        output.VideoBitrateKbps = Math.Clamp(output.VideoBitrateKbps <= 0 ? 6000 : output.VideoBitrateKbps, 250, 200000);
-                        output.AudioBitrateKbps = Math.Clamp(output.AudioBitrateKbps <= 0 ? 160 : output.AudioBitrateKbps, 32, 1024);
-                        output.KeyFrameIntervalSeconds = Math.Clamp(output.KeyFrameIntervalSeconds <= 0 ? 2 : output.KeyFrameIntervalSeconds, 1, 10);
+                        output.Width = Math.Clamp(output.Width <= 0 ? mediaDefaults.OutputWidth : output.Width, mediaDefaults.MinimumWidth, mediaDefaults.MaximumWidth);
+                        output.Height = Math.Clamp(output.Height <= 0 ? mediaDefaults.OutputHeight : output.Height, mediaDefaults.MinimumHeight, mediaDefaults.MaximumHeight);
+                        output.FrameRate = Math.Clamp(output.FrameRate <= 0 ? mediaDefaults.OutputFrameRate : output.FrameRate, mediaDefaults.MinimumFrameRate, mediaDefaults.MaximumFrameRate);
+                        output.VideoBitrateKbps = Math.Clamp(output.VideoBitrateKbps <= 0 ? mediaDefaults.VideoBitrateKbps : output.VideoBitrateKbps, mediaDefaults.MinimumVideoBitrateKbps, mediaDefaults.MaximumVideoBitrateKbps);
+                        output.AudioBitrateKbps = Math.Clamp(output.AudioBitrateKbps <= 0 ? mediaDefaults.AudioBitrateKbps : output.AudioBitrateKbps, 32, Math.Max(32, mediaDefaults.AdaptiveQuality.MaximumAudioBitrateKbps));
+                        output.KeyFrameIntervalSeconds = Math.Clamp(output.KeyFrameIntervalSeconds <= 0 ? mediaDefaults.KeyFrameIntervalSeconds : output.KeyFrameIntervalSeconds, 1, 10);
                     }
                     streaming.Recording.SelectedOutputIds ??= [];
                     streaming.Recording.SelectedOutputIds = streaming.Recording.SelectedOutputIds.Where(id => streaming.Outputs.Any(output => output.Id == id)).Distinct().ToList();
-                    streaming.Recording.SegmentSeconds = Math.Clamp(streaming.Recording.SegmentSeconds <= 0 ? 10 : streaming.Recording.SegmentSeconds, 2, 120);
-                    streaming.Lan.Port = Math.Clamp(streaming.Lan.Port <= 0 ? 17848 : streaming.Lan.Port, 1024, 65535);
-                    streaming.Lan.Width = Math.Clamp(streaming.Lan.Width <= 0 ? 1920 : streaming.Lan.Width, 320, 7680);
-                    streaming.Lan.Height = Math.Clamp(streaming.Lan.Height <= 0 ? 1080 : streaming.Lan.Height, 180, 4320);
-                    streaming.Lan.FrameRate = Math.Clamp(streaming.Lan.FrameRate <= 0 ? 60 : streaming.Lan.FrameRate, 15, 120);
-                    streaming.Lan.VideoBitrateKbps = Math.Clamp(streaming.Lan.VideoBitrateKbps <= 0 ? 8000 : streaming.Lan.VideoBitrateKbps, 250, 200000);
-                    streaming.Lan.ViewerLimit = Math.Clamp(streaming.Lan.ViewerLimit <= 0 ? 50 : streaming.Lan.ViewerLimit, 1, 10000);
+                    streaming.Recording.SegmentSeconds = Math.Clamp(streaming.Recording.SegmentSeconds <= 0 ? mediaDefaults.RecordingSegmentSeconds : streaming.Recording.SegmentSeconds, 2, 120);
+                    streaming.Lan.Port = Math.Clamp(streaming.Lan.Port <= 0 ? mediaDefaults.LanPort : streaming.Lan.Port, mediaDefaults.MinimumPort, mediaDefaults.MaximumPort);
+                    streaming.Lan.Width = Math.Clamp(streaming.Lan.Width <= 0 ? mediaDefaults.OutputWidth : streaming.Lan.Width, mediaDefaults.MinimumWidth, mediaDefaults.MaximumWidth);
+                    streaming.Lan.Height = Math.Clamp(streaming.Lan.Height <= 0 ? mediaDefaults.OutputHeight : streaming.Lan.Height, mediaDefaults.MinimumHeight, mediaDefaults.MaximumHeight);
+                    streaming.Lan.FrameRate = Math.Clamp(streaming.Lan.FrameRate <= 0 ? mediaDefaults.OutputFrameRate : streaming.Lan.FrameRate, mediaDefaults.MinimumFrameRate, mediaDefaults.MaximumFrameRate);
+                    streaming.Lan.VideoBitrateKbps = Math.Clamp(streaming.Lan.VideoBitrateKbps <= 0 ? mediaDefaults.LanVideoBitrateKbps : streaming.Lan.VideoBitrateKbps, mediaDefaults.MinimumVideoBitrateKbps, mediaDefaults.MaximumVideoBitrateKbps);
+                    streaming.Lan.AudioBitrateKbps = Math.Clamp(streaming.Lan.AudioBitrateKbps <= 0 ? mediaDefaults.AudioBitrateKbps : streaming.Lan.AudioBitrateKbps, 32, Math.Max(32, mediaDefaults.AdaptiveQuality.MaximumAudioBitrateKbps));
+                    streaming.Lan.ViewerLimit = Math.Clamp(streaming.Lan.ViewerLimit <= 0 ? mediaDefaults.ViewerLimit : streaming.Lan.ViewerLimit, mediaDefaults.MinimumViewerLimit, mediaDefaults.MaximumViewerLimit);
                     streaming.Hotkeys = streaming.Hotkeys
                         .Where(item => !string.IsNullOrWhiteSpace(item.Gesture) && !string.IsNullOrWhiteSpace(item.Command))
                         .GroupBy(item => item.Id == Guid.Empty ? Guid.NewGuid() : item.Id)

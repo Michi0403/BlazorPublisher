@@ -366,6 +366,7 @@ function stateFor(id) { try {
             recordingFinalizing: false,
             recordingStartedAtMs: 0,
             recordingStopRequestedAtMs: 0,
+            recordingOptions: null,
             keyboardHandler: null,
             rootId: '',
             frameStageId: '',
@@ -1440,7 +1441,7 @@ async function waveformFromSource(dataUrl, sampleCount = 96) { try {
     }
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:waveformFromSource@1166', __javascriptError); throw __javascriptError; }}
 
-async function posterFromVideo(video) { try {
+async function posterFromVideo(video, maximumPixels = 0) { try {
     try {
         const previous = Number(video.currentTime);
         const duration = Number(video.duration);
@@ -1462,8 +1463,15 @@ async function posterFromVideo(video) { try {
              } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:ArrowFunction@1201', __javascriptError); resolve(); }});
         }
         const canvas = document.createElement('canvas');
-        canvas.width = Math.max(1, video.videoWidth || 640);
-        canvas.height = Math.max(1, video.videoHeight || 360);
+        const sourceWidth = Math.max(1, video.videoWidth || 640);
+        const sourceHeight = Math.max(1, video.videoHeight || 360);
+        const sourcePixels = sourceWidth * sourceHeight;
+        const pixelLimit = Math.max(0, Math.trunc(Number(maximumPixels) || 0));
+        const scale = pixelLimit > 0 && sourcePixels > pixelLimit
+            ? Math.sqrt(pixelLimit / sourcePixels)
+            : 1;
+        canvas.width = Math.max(1, Math.round(sourceWidth * scale));
+        canvas.height = Math.max(1, Math.round(sourceHeight * scale));
         canvas.getContext('2d', { willReadFrequently: false }).drawImage(video, 0, 0, canvas.width, canvas.height);
         const poster = canvas.toDataURL('image/jpeg', .82);
         try { video.currentTime = Number.isFinite(previous) ? Math.max(0, previous) : 0; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:posterFromVideo:restore', __caughtJavaScriptError); }
@@ -1473,14 +1481,16 @@ async function posterFromVideo(video) { try {
     }
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:posterFromVideo@1197', __javascriptError); throw __javascriptError; }}
 
-async function inspectElement(element, dataUrl, kind) { try {
+async function inspectElement(element, dataUrl, kind, metadataOptions = null) { try {
     const normalizedDataUrl = normalizeMediaDataUrl(dataUrl, kind === 'video' ? 'video/webm' : 'audio/webm');
     element.src = normalizedDataUrl;
     element.load();
     await waitForMetadata(element);
     const durationSeconds = Number.isFinite(element.duration) ? element.duration : 0;
     const waveformSamples = kind === 'audio' ? await waveformFromSource(normalizedDataUrl) : [];
-    const posterDataUrl = kind === 'video' && element instanceof HTMLVideoElement ? await posterFromVideo(element) : '';
+    const posterDataUrl = kind === 'video' && element instanceof HTMLVideoElement
+        ? await posterFromVideo(element, metadataOptions?.metadataPosterMaximumPixels)
+        : '';
     try {
         if (Number.isFinite(Number(element.duration)) && Number(element.duration) > 0) element.currentTime = 0;
     } catch (__caughtJavaScriptError) {
@@ -1528,18 +1538,79 @@ export async function inspectMediaFileInput(inputId, kind) { try {
     }
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:inspectMediaFileInput@1256', __javascriptError); throw __javascriptError; }}
 
-function preferredMime(kind, codecPreference = 'auto') { try {
+function normalizedCodecPreferenceOrder(value) { try {
+    const requested = Array.isArray(value) ? value : [];
+    const normalized = requested
+        .map(item => String(item || '').trim().toLowerCase())
+        .filter(item => item === 'vp9' || item === 'vp8')
+        .filter((item, index, values) => values.indexOf(item) === index);
+    for (const fallback of ['vp9', 'vp8']) if (!normalized.includes(fallback)) normalized.push(fallback);
+    return normalized;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:normalizedCodecPreferenceOrder', __javascriptError); return ['vp9', 'vp8']; }}
+
+function recordingMimeCandidates(codecPreference, codecPreferenceOrder = null) { try {
     const preference = String(codecPreference || 'auto').trim().toLowerCase();
-    const vp9 = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp9'];
-    const vp8 = ['video/webm;codecs=vp8,opus', 'video/webm;codecs=vp8'];
+    const families = {
+        vp9: ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp9'],
+        vp8: ['video/webm;codecs=vp8,opus', 'video/webm;codecs=vp8']
+    };
+    const order = preference === 'vp8' || preference === 'vp9'
+        ? [preference, ...normalizedCodecPreferenceOrder(codecPreferenceOrder).filter(item => item !== preference)]
+        : normalizedCodecPreferenceOrder(codecPreferenceOrder);
+    return [...order.flatMap(item => families[item] || []), 'video/webm'];
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:recordingMimeCandidates', __javascriptError); return ['video/webm']; }}
+
+function preferredMime(kind, codecPreference = 'auto', codecPreferenceOrder = null) { try {
     const choices = kind === 'video'
-        ? (preference === 'vp8' ? [...vp8, ...vp9, 'video/webm'] : [...vp9, ...vp8, 'video/webm'])
+        ? recordingMimeCandidates(codecPreference, codecPreferenceOrder)
         : ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus'];
     const probe = document.createElement(kind === 'video' ? 'video' : 'audio');
     return choices.find(value => { try { return (MediaRecorder.isTypeSupported(value) && probe.canPlayType(value) !== ''); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:preferredMime:playback-probe', __javascriptError); throw __javascriptError; } })
         || choices.find(value => { try { return (MediaRecorder.isTypeSupported(value)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:preferredMime:recorder-probe', __javascriptError); throw __javascriptError; } })
         || '';
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:preferredMime', __javascriptError); throw __javascriptError; }}
+
+function normalizedAdaptiveRecordingPolicy(value) { try {
+    const number = (candidate, fallback = 0) => {
+        const parsed = Number(candidate);
+        return Number.isFinite(parsed) ? parsed : fallback;
+    };
+    const boolean = (candidate, fallback = false) => candidate === undefined || candidate === null ? fallback : Boolean(candidate);
+    return {
+        enabled: boolean(value?.enabled, false),
+        adaptVideo: boolean(value?.adaptVideo, true),
+        adaptAudio: boolean(value?.adaptAudio, true),
+        useBrowserCapabilityProbe: boolean(value?.useBrowserCapabilityProbe, true),
+        profile: String(value?.profile || 'quality').trim().toLowerCase(),
+        preserveNativeResolution: boolean(value?.preserveNativeResolution, true),
+        allowFrameRateReduction: boolean(value?.allowFrameRateReduction, true),
+        allowResolutionReduction: boolean(value?.allowResolutionReduction, false),
+        preferPowerEfficientCodec: boolean(value?.preferPowerEfficientCodec, true),
+        preferSmoothEncoding: boolean(value?.preferSmoothEncoding, true),
+        codecPreferenceOrder: normalizedCodecPreferenceOrder(value?.codecPreferenceOrder),
+        screenBitsPerPixel: number(value?.screenBitsPerPixel),
+        cameraBitsPerPixel: number(value?.cameraBitsPerPixel),
+        mixedBitsPerPixel: number(value?.mixedBitsPerPixel),
+        efficiencyMultiplier: number(value?.efficiencyMultiplier, 1),
+        balancedMultiplier: number(value?.balancedMultiplier, 1),
+        qualityMultiplier: number(value?.qualityMultiplier, 1),
+        vp9BitrateFactor: number(value?.vp9BitrateFactor, 1),
+        vp8BitrateFactor: number(value?.vp8BitrateFactor, 1),
+        minimumVideoBitrateKbps: Math.max(0, Math.trunc(number(value?.minimumVideoBitrateKbps))),
+        maximumVideoBitrateKbps: Math.max(0, Math.trunc(number(value?.maximumVideoBitrateKbps))),
+        minimumAudioBitrateKbps: Math.max(0, Math.trunc(number(value?.minimumAudioBitrateKbps))),
+        audioBitratePerChannelKbps: Math.max(0, Math.trunc(number(value?.audioBitratePerChannelKbps))),
+        maximumAudioBitrateKbps: Math.max(0, Math.trunc(number(value?.maximumAudioBitrateKbps))),
+        defaultAudioChannels: Math.max(1, Math.trunc(number(value?.defaultAudioChannels, 2))),
+        maximumAutomaticFrameRate: Math.max(0, number(value?.maximumAutomaticFrameRate)),
+        minimumFrameRate: Math.max(1, number(value?.minimumFrameRate, 1)),
+        frameRateFallbackRatio: Math.min(.99, Math.max(.1, number(value?.frameRateFallbackRatio, .75))),
+        resolutionFallbackRatio: Math.min(.99, Math.max(.1, number(value?.resolutionFallbackRatio, .85))),
+        maximumAdaptationAttempts: Math.max(0, Math.trunc(number(value?.maximumAdaptationAttempts, 0))),
+        metadataPosterMaximumPixels: Math.max(0, Math.trunc(number(value?.metadataPosterMaximumPixels, 0))),
+        metadataAnalysisDelayMilliseconds: Math.min(10000, Math.max(0, Math.trunc(number(value?.metadataAnalysisDelayMilliseconds, 0))))
+    };
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:normalizedAdaptiveRecordingPolicy', __javascriptError); throw __javascriptError; }}
 
 function normalizedRecordingOptions(options) { try {
     const positiveInteger = value => { try {
@@ -1550,11 +1621,182 @@ function normalizedRecordingOptions(options) { try {
         width: positiveInteger(options?.width),
         height: positiveInteger(options?.height),
         frameRate: positiveInteger(options?.frameRate),
+        maximumFrameRate: positiveInteger(options?.maximumFrameRate),
         videoBitsPerSecond: positiveInteger(options?.videoBitsPerSecond),
         audioBitsPerSecond: positiveInteger(options?.audioBitsPerSecond),
-        codecPreference: String(options?.codecPreference || 'auto').trim().toLowerCase()
+        recorderChunkMilliseconds: Math.min(5000, Math.max(100, positiveInteger(options?.recorderChunkMilliseconds) || 500)),
+        codecPreference: String(options?.codecPreference || 'auto').trim().toLowerCase(),
+        adaptive: normalizedAdaptiveRecordingPolicy(options?.adaptive)
     };
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:normalizedRecordingOptions', __javascriptError); throw __javascriptError; }}
+
+function adaptiveProfileMultiplier(policy) { try {
+    if (policy.profile === 'efficiency') return policy.efficiencyMultiplier > 0 ? policy.efficiencyMultiplier : 1;
+    if (policy.profile === 'balanced') return policy.balancedMultiplier > 0 ? policy.balancedMultiplier : 1;
+    return policy.qualityMultiplier > 0 ? policy.qualityMultiplier : 1;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:adaptiveProfileMultiplier', __javascriptError); return 1; }}
+
+function adaptiveCodecFactor(mimeType, policy) { try {
+    const mime = String(mimeType || '').toLowerCase();
+    if (mime.includes('vp9')) return policy.vp9BitrateFactor > 0 ? policy.vp9BitrateFactor : 1;
+    if (mime.includes('vp8')) return policy.vp8BitrateFactor > 0 ? policy.vp8BitrateFactor : 1;
+    return 1;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:adaptiveCodecFactor', __javascriptError); return 1; }}
+
+function mediaCapabilitiesVideoContentType(mimeType) { try {
+    const mime = String(mimeType || '').toLowerCase();
+    if (mime.includes('vp9')) return 'video/webm;codecs=vp9';
+    if (mime.includes('vp8')) return 'video/webm;codecs=vp8';
+    return baseMimeType(mime, 'video/webm');
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:mediaCapabilitiesVideoContentType', __javascriptError); return 'video/webm'; }}
+
+function mediaCapabilitiesAudioConfiguration(stream, audioBitsPerSecond) { try {
+    const track = stream?.getAudioTracks?.()[0];
+    if (!track || !(audioBitsPerSecond > 0)) return null;
+    const settings = track.getSettings?.() || {};
+    return {
+        contentType: 'audio/webm;codecs=opus',
+        channels: Math.max(1, Number(settings.channelCount) || 2),
+        bitrate: Math.max(1, Math.round(audioBitsPerSecond)),
+        samplerate: Math.max(8000, Number(settings.sampleRate) || 48000)
+    };
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:mediaCapabilitiesAudioConfiguration', __javascriptError); return null; }}
+
+function adaptiveVideoBitsPerSecond(settings, source, mimeType, options) { try {
+    const policy = options.adaptive;
+    if (!policy.enabled || !policy.adaptVideo) return options.videoBitsPerSecond;
+    const width = Math.max(1, Number(settings?.width) || options.width || 0);
+    const height = Math.max(1, Number(settings?.height) || options.height || 0);
+    let frameRate = Math.max(1, Number(settings?.frameRate) || options.maximumFrameRate || 0);
+    if (!width || !height || !frameRate) return 0;
+    const ceiling = options.maximumFrameRate > 0 ? options.maximumFrameRate : policy.maximumAutomaticFrameRate;
+    if (ceiling > 0) frameRate = Math.min(frameRate, ceiling);
+    const contentBpp = source === 'screen'
+        ? policy.screenBitsPerPixel
+        : source === 'camera'
+            ? policy.cameraBitsPerPixel
+            : policy.mixedBitsPerPixel;
+    if (!(contentBpp > 0)) return 0;
+    let bits = width * height * frameRate * contentBpp * adaptiveProfileMultiplier(policy) * adaptiveCodecFactor(mimeType, policy);
+    const minimum = Math.max(0, policy.minimumVideoBitrateKbps) * 1000;
+    const maximum = Math.max(minimum, policy.maximumVideoBitrateKbps * 1000);
+    if (maximum > 0) bits = Math.min(bits, maximum);
+    if (minimum > 0) bits = Math.max(bits, minimum);
+    return Math.max(1, Math.round(bits));
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:adaptiveVideoBitsPerSecond', __javascriptError); return options.videoBitsPerSecond || 0; }}
+
+function adaptiveAudioBitsPerSecond(stream, options) { try {
+    const policy = options.adaptive;
+    if (!policy.enabled || !policy.adaptAudio) return options.audioBitsPerSecond;
+    const settings = stream?.getAudioTracks?.()[0]?.getSettings?.() || {};
+    const channels = Math.max(1, Number(settings.channelCount) || policy.defaultAudioChannels || 1);
+    let kbps = Math.max(1, policy.audioBitratePerChannelKbps) * channels * adaptiveProfileMultiplier(policy);
+    if (policy.minimumAudioBitrateKbps > 0) kbps = Math.max(kbps, policy.minimumAudioBitrateKbps);
+    if (policy.maximumAudioBitrateKbps > 0) kbps = Math.min(kbps, policy.maximumAudioBitrateKbps);
+    return Math.max(1, Math.round(kbps * 1000));
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:adaptiveAudioBitsPerSecond', __javascriptError); return options.audioBitsPerSecond || 0; }}
+
+async function probeAdaptiveRecordingProfile(stream, source, options) { try {
+    const videoTrack = stream?.getVideoTracks?.()[0];
+    if (!videoTrack) return { mimeType: preferredMime('audio', options.codecPreference, options.adaptive.codecPreferenceOrder), videoBitsPerSecond: 0, audioBitsPerSecond: adaptiveAudioBitsPerSecond(stream, options) };
+    try { videoTrack.contentHint = source === 'screen' ? 'detail' : 'motion'; } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:probeAdaptiveRecordingProfile:contentHint', __caughtJavaScriptError); }
+
+    const canProbe = options.adaptive.enabled && options.adaptive.adaptVideo && options.adaptive.useBrowserCapabilityProbe && navigator.mediaCapabilities && typeof navigator.mediaCapabilities.encodingInfo === 'function';
+    const choose = async () => {
+        const settings = videoTrack.getSettings?.() || {};
+        const width = Math.max(1, Number(settings.width) || options.width || 1);
+        const height = Math.max(1, Number(settings.height) || options.height || 1);
+        const frameRate = Math.max(1, Number(settings.frameRate) || options.maximumFrameRate || 1);
+        const audioBitsPerSecond = adaptiveAudioBitsPerSecond(stream, options);
+        const candidates = recordingMimeCandidates(options.codecPreference, options.adaptive.codecPreferenceOrder).filter(type => {
+            try { return !MediaRecorder.isTypeSupported || MediaRecorder.isTypeSupported(type); }
+            catch { return false; }
+        });
+        let best = null;
+        for (const mimeType of candidates) {
+            const videoBitsPerSecond = adaptiveVideoBitsPerSecond(settings, source, mimeType, options);
+            let capability = null;
+            if (canProbe && videoBitsPerSecond > 0) {
+                try {
+                    const capabilityRequest = {
+                        type: 'record',
+                        video: {
+                            contentType: mediaCapabilitiesVideoContentType(mimeType),
+                            width,
+                            height,
+                            bitrate: videoBitsPerSecond,
+                            framerate: frameRate
+                        }
+                    };
+                    const audioConfiguration = mediaCapabilitiesAudioConfiguration(stream, audioBitsPerSecond);
+                    if (audioConfiguration) capabilityRequest.audio = audioConfiguration;
+                    capability = await navigator.mediaCapabilities.encodingInfo(capabilityRequest);
+                } catch (__capabilityError) {
+                    publisherStudioDiagnostics.report('js/mediaStudioInterop.js:probeAdaptiveRecordingProfile:encodingInfo', __capabilityError);
+                }
+            }
+            const supported = capability ? capability.supported !== false : true;
+            if (!supported) continue;
+            const family = mimeType.includes('vp9') ? 'vp9' : mimeType.includes('vp8') ? 'vp8' : '';
+            const preferenceIndex = options.adaptive.codecPreferenceOrder.indexOf(family);
+            const preferenceScore = preferenceIndex < 0 ? 0 : Math.max(0, options.adaptive.codecPreferenceOrder.length - preferenceIndex);
+            const score = (capability?.smooth ? 100 : 0)
+                + (capability?.powerEfficient && options.adaptive.preferPowerEfficientCodec ? 20 : 0)
+                + preferenceScore;
+            const candidate = { mimeType, videoBitsPerSecond, audioBitsPerSecond, smooth: capability?.smooth !== false, score };
+            if (!best || candidate.score > best.score) best = candidate;
+        }
+        return best || {
+            mimeType: preferredMime('video', options.codecPreference, options.adaptive.codecPreferenceOrder),
+            videoBitsPerSecond: adaptiveVideoBitsPerSecond(settings, source, preferredMime('video', options.codecPreference, options.adaptive.codecPreferenceOrder), options),
+            audioBitsPerSecond,
+            smooth: true,
+            score: 0
+        };
+    };
+
+    let selected = await choose();
+    let attempt = 0;
+    while (options.adaptive.enabled
+        && options.adaptive.preferSmoothEncoding
+        && selected
+        && selected.smooth === false
+        && attempt < options.adaptive.maximumAdaptationAttempts) {
+        attempt++;
+        const settings = videoTrack.getSettings?.() || {};
+        let changed = false;
+        if (options.adaptive.allowFrameRateReduction && typeof videoTrack.applyConstraints === 'function') {
+            const currentFps = Number(settings.frameRate) || options.maximumFrameRate || 0;
+            const nextFps = Math.max(options.adaptive.minimumFrameRate, currentFps * options.adaptive.frameRateFallbackRatio);
+            if (currentFps > options.adaptive.minimumFrameRate && nextFps < currentFps) {
+                try {
+                    await videoTrack.applyConstraints({ frameRate: { ideal: nextFps, max: nextFps } });
+                    changed = true;
+                } catch (__constraintError) {
+                    publisherStudioDiagnostics.report('js/mediaStudioInterop.js:probeAdaptiveRecordingProfile:fps-fallback', __constraintError);
+                }
+            }
+        }
+        if (!changed && options.adaptive.allowResolutionReduction && typeof videoTrack.applyConstraints === 'function') {
+            const width = Number(settings.width) || 0;
+            const height = Number(settings.height) || 0;
+            if (width > 1 && height > 1) {
+                try {
+                    await videoTrack.applyConstraints({
+                        width: { ideal: Math.max(1, Math.round(width * options.adaptive.resolutionFallbackRatio)) },
+                        height: { ideal: Math.max(1, Math.round(height * options.adaptive.resolutionFallbackRatio)) }
+                    });
+                    changed = true;
+                } catch (__constraintError) {
+                    publisherStudioDiagnostics.report('js/mediaStudioInterop.js:probeAdaptiveRecordingProfile:resolution-fallback', __constraintError);
+                }
+            }
+        }
+        if (!changed) break;
+        selected = await choose();
+    }
+    return selected;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:probeAdaptiveRecordingProfile', __javascriptError); throw __javascriptError; }}
 
 function recordingVideoConstraints(options) { try {
     const normalized = normalizedRecordingOptions(options);
@@ -1601,8 +1843,13 @@ async function enrichRetainedRecordingMetadata(state, retainedBlob, retainedUrl,
     let metadataWarning = '';
     try {
         if (!preview) throw new Error('Media preview is not available.');
+        const metadataOptions = state.recordingOptions?.adaptive || null;
+        const analysisDelay = Math.max(0, Number(metadataOptions?.metadataAnalysisDelayMilliseconds) || 0);
+        if (analysisDelay > 0)
+            await new Promise(resolve => setTimeout(resolve, analysisDelay));
+        if (state.retainedRecordingBlob !== retainedBlob || state.retainedRecordingUrl !== retainedUrl) return;
         preview.muted = false;
-        info = await inspectElement(preview, retainedUrl, kind);
+        info = await inspectElement(preview, retainedUrl, kind, metadataOptions);
     } catch (error) {
         metadataWarning = error?.message || String(error);
         if (preview && state.retainedRecordingUrl === retainedUrl) {
@@ -1758,16 +2005,26 @@ export async function startMediaRecording(id, kind, source, dotnet, options = nu
     state.recordingStartedAtMs = 0;
     state.recordingStopRequestedAtMs = 0;
     const recordingOptions = normalizedRecordingOptions(options);
+    state.recordingOptions = recordingOptions;
     state.stream = await streamFor(kind, source, recordingOptions);
     state.chunks = [];
     state.discardRecording = false;
     const preview = mediaElement(id);
     if (kind === 'video') startRecordingPreviewWatch(state);
-    const mimeType = preferredMime(kind, recordingOptions.codecPreference);
+    const adaptiveProfile = kind === 'video'
+        ? await probeAdaptiveRecordingProfile(state.stream, source, recordingOptions)
+        : { mimeType: preferredMime(kind, recordingOptions.codecPreference, recordingOptions.adaptive.codecPreferenceOrder), videoBitsPerSecond: 0, audioBitsPerSecond: adaptiveAudioBitsPerSecond(state.stream, recordingOptions) };
+    const mimeType = adaptiveProfile?.mimeType || preferredMime(kind, recordingOptions.codecPreference, recordingOptions.adaptive.codecPreferenceOrder);
     const recorderOptions = {};
     if (mimeType) recorderOptions.mimeType = mimeType;
-    if (kind === 'video' && recordingOptions.videoBitsPerSecond > 0) recorderOptions.videoBitsPerSecond = recordingOptions.videoBitsPerSecond;
-    if (recordingOptions.audioBitsPerSecond > 0) recorderOptions.audioBitsPerSecond = recordingOptions.audioBitsPerSecond;
+    const selectedVideoBitsPerSecond = recordingOptions.adaptive.enabled && recordingOptions.adaptive.adaptVideo
+        ? Number(adaptiveProfile?.videoBitsPerSecond) || 0
+        : recordingOptions.videoBitsPerSecond;
+    const selectedAudioBitsPerSecond = recordingOptions.adaptive.enabled && recordingOptions.adaptive.adaptAudio
+        ? Number(adaptiveProfile?.audioBitsPerSecond) || 0
+        : recordingOptions.audioBitsPerSecond;
+    if (kind === 'video' && selectedVideoBitsPerSecond > 0) recorderOptions.videoBitsPerSecond = selectedVideoBitsPerSecond;
+    if (selectedAudioBitsPerSecond > 0) recorderOptions.audioBitsPerSecond = selectedAudioBitsPerSecond;
     try {
         state.recorder = Object.keys(recorderOptions).length ? new MediaRecorder(state.stream, recorderOptions) : new MediaRecorder(state.stream);
     } catch (error) {
@@ -1813,7 +2070,7 @@ export async function startMediaRecording(id, kind, source, dotnet, options = nu
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:callback:track.addEventListener@1441', __javascriptError); throw __javascriptError; }}, { once: true });
     }
     state.recordingStartedAtMs = performance.now();
-    state.recorder.start(250);
+    state.recorder.start(recordingOptions.recorderChunkMilliseconds);
     releaseRetainedRecording(state);
     await state.dotnet?.invokeMethodAsync('MediaRecordingCleared');
     const videoSettings = state.stream.getVideoTracks?.()[0]?.getSettings?.() || {};
@@ -1822,8 +2079,8 @@ export async function startMediaRecording(id, kind, source, dotnet, options = nu
         width: Number(videoSettings.width) || 0,
         height: Number(videoSettings.height) || 0,
         frameRate: Number(videoSettings.frameRate) || 0,
-        videoBitsPerSecond: Number(state.recorder?.videoBitsPerSecond) || recordingOptions.videoBitsPerSecond || 0,
-        audioBitsPerSecond: Number(state.recorder?.audioBitsPerSecond) || recordingOptions.audioBitsPerSecond || 0
+        videoBitsPerSecond: Number(state.recorder?.videoBitsPerSecond) || selectedVideoBitsPerSecond || 0,
+        audioBitsPerSecond: Number(state.recorder?.audioBitsPerSecond) || selectedAudioBitsPerSecond || 0
     };
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:startMediaRecording', __javascriptError); throw __javascriptError; }}
 

@@ -731,6 +731,32 @@
                         </section>
                         <section>
                             <h3>@LT("Recording capture quality")</h3>
+                            <div class="property-grid two">
+                                <label>@LT("Quality selection")
+                                    <select value="@(_recordingAdaptiveQuality ? "adaptive" : "manual")" @onchange="ChangeRecordingQualityMode" disabled="@(_recording || _recordingStopping)">
+                                        <option value="adaptive">@LT("Smart adaptive")</option>
+                                        <option value="manual">@LT("Manual")</option>
+                                    </select>
+                                </label>
+                                <label>@LT("Adaptive priority")
+                                    <select @bind="_recordingAdaptiveProfile" disabled="@(!_recordingAdaptiveQuality || _recording || _recordingStopping)">
+                                        <option value="efficiency">@LT("Efficiency")</option>
+                                        <option value="balanced">@LT("Balanced")</option>
+                                        <option value="quality">@LT("Quality")</option>
+                                    </select>
+                                </label>
+                            </div>
+                            @if (_recordingAdaptiveQuality)
+                            {
+                                <div class="property-grid two">
+                                    <label class="check-row"><input type="checkbox" @bind="_recordingAdaptVideo" disabled="@(_recording || _recordingStopping)" /> @LT("Adapt video automatically")</label>
+                                    <label class="check-row"><input type="checkbox" @bind="_recordingAdaptAudio" disabled="@(_recording || _recordingStopping)" /> @LT("Adapt audio automatically")</label>
+                                    <label class="check-row"><input type="checkbox" @bind="_recordingUseBrowserCapabilityProbe" disabled="@(_recording || _recordingStopping)" /> @LT("Use browser capability probe")</label>
+                                    <label class="check-row"><input type="checkbox" @bind="_recordingPreserveNativeResolution" disabled="@(_recording || _recordingStopping)" /> @LT("Preserve native source resolution")</label>
+                                    <label class="check-row"><input type="checkbox" @bind="_recordingAllowFrameRateReduction" disabled="@(_recording || _recordingStopping)" /> @LT("Allow smoothness FPS fallback")</label>
+                                    <label class="check-row"><input type="checkbox" @bind="_recordingAllowResolutionReduction" disabled="@(_recording || _recordingStopping)" /> @LT("Allow last-resort resolution fallback")</label>
+                                </div>
+                            }
                             <label>@LT("Capture size")
                                 <select @bind="_recordingSizeMode" disabled="@(_recording || _recordingStopping)">
                                     <option value="source">@LT("Source/native")</option>
@@ -747,19 +773,19 @@
                                 </div>
                             }
                             <div class="property-grid two">
-                                <label>@LT("Capture frame rate")<input type="number" min="@RecordingPolicy.MinimumFrameRate" max="@RecordingPolicy.MaximumFrameRate" step="1" @bind="_recordingFrameRate" disabled="@(_recording || _recordingStopping)" /></label>
+                                <label>@(_recordingAdaptiveQuality ? LT("Automatic FPS ceiling (0 = source)") : LT("Capture frame rate"))<input type="number" min="@(_recordingAdaptiveQuality ? 0 : RecordingPolicy.MinimumFrameRate)" max="@RecordingPolicy.MaximumFrameRate" step="1" @bind="_recordingFrameRate" disabled="@(_recording || _recordingStopping)" /></label>
                                 <label>@LT("Recording codec")
                                     <select @bind="_recordingCodecPreference" disabled="@(_recording || _recordingStopping)">
-                                        <option value="auto">@LT("Auto (prefer VP9)")</option>
+                                        <option value="auto">@LT("Auto (browser-capability ranked)")</option>
                                         <option value="vp9">VP9</option>
                                         <option value="vp8">VP8</option>
                                     </select>
                                 </label>
-                                <label>@LT("Recording video bitrate (kbps)")<input type="number" min="@RecordingPolicy.MinimumVideoBitrateKbps" max="@RecordingPolicy.MaximumVideoBitrateKbps" step="250" @bind="_recordingVideoBitrateKbps" disabled="@(_recording || _recordingStopping)" /></label>
-                                <label>@LT("Recording audio bitrate (kbps)")<input type="number" min="32" max="1024" step="16" @bind="_recordingAudioBitrateKbps" disabled="@(_recording || _recordingStopping)" /></label>
+                                <label>@LT("Recording video bitrate (kbps)")<input type="number" min="@RecordingPolicy.MinimumVideoBitrateKbps" max="@RecordingPolicy.MaximumVideoBitrateKbps" step="250" @bind="_recordingVideoBitrateKbps" disabled="@((_recordingAdaptiveQuality && _recordingAdaptVideo) || _recording || _recordingStopping)" /></label>
+                                <label>@LT("Recording audio bitrate (kbps)")<input type="number" min="@Math.Max(32, RecordingPolicy.AdaptiveQuality.MinimumAudioBitrateKbps)" max="@Math.Max(32, RecordingPolicy.AdaptiveQuality.MaximumAudioBitrateKbps)" step="16" @bind="_recordingAudioBitrateKbps" disabled="@((_recordingAdaptiveQuality && _recordingAdaptAudio) || _recording || _recordingStopping)" /></label>
                             </div>
-                            <p class="property-note"><b>@RecordingSizeSummary</b> · @_recordingFrameRate fps · @_recordingVideoBitrateKbps kbps. @LT("The browser share picker still decides which screen, window, or tab is captured; PublisherStudio then requests these dimensions and frame rate without cropping the selected surface.")</p>
-                            <p class="property-note">@LT("Screen and camera recordings use explicit bitrate and codec targets instead of browser defaults. Source/native keeps the selected surface dimensions while still applying the selected frame rate and recording bitrate.")</p>
+                            <p class="property-note"><b>@RecordingSizeSummary</b> · @(_recordingAdaptiveQuality ? LT("smart bitrate / codec selection") : $"{_recordingFrameRate} fps · {_recordingVideoBitrateKbps} kbps"). @LT("The browser share picker still decides which screen, window, or tab is captured; PublisherStudio never assumes one user's monitor resolution.")</p>
+                            <p class="property-note">@LT("Smart adaptive mode waits for the real capture-track settings, then uses browser MediaCapabilities where available plus configurable runtime quality policy to select codec, video bitrate, audio bitrate, and smoothness fallbacks. Manual mode keeps every explicit control available.")</p>
                         </section>
                         <section>
                             <h3>@LT("Video")</h3>
@@ -902,6 +928,14 @@
     private bool _autoPlay = true;
     private bool _recording;
     private bool _recordingStopping;
+    private bool _recordingAdaptiveQuality = true;
+    private string _recordingAdaptiveProfile = "quality";
+    private bool _recordingAdaptVideo = true;
+    private bool _recordingAdaptAudio = true;
+    private bool _recordingUseBrowserCapabilityProbe = true;
+    private bool _recordingPreserveNativeResolution = true;
+    private bool _recordingAllowFrameRateReduction = true;
+    private bool _recordingAllowResolutionReduction;
     private string _recordingSizeMode = "source";
     private int _recordingCustomWidth;
     private int _recordingCustomHeight;
@@ -1189,10 +1223,20 @@
         _warning = null;
         _recording = false;
         _recordingStopping = false;
+        _recordingAdaptiveQuality = RecordingPolicy.AdaptiveQuality.Enabled;
+        _recordingAdaptiveProfile = NormalizeAdaptiveProfile(RecordingPolicy.AdaptiveQuality.DefaultProfile);
+        _recordingAdaptVideo = true;
+        _recordingAdaptAudio = true;
+        _recordingUseBrowserCapabilityProbe = RecordingPolicy.AdaptiveQuality.BrowserCapabilityProbeEnabled;
+        _recordingPreserveNativeResolution = RecordingPolicy.AdaptiveQuality.PreserveNativeResolution;
+        _recordingAllowFrameRateReduction = RecordingPolicy.AdaptiveQuality.AllowFrameRateReduction;
+        _recordingAllowResolutionReduction = RecordingPolicy.AdaptiveQuality.AllowResolutionReduction;
         _recordingSizeMode = "source";
         _recordingCustomWidth = Math.Clamp(RecordingPolicy.MasterWidth, RecordingPolicy.MinimumWidth, RecordingPolicy.MaximumWidth);
         _recordingCustomHeight = Math.Clamp(RecordingPolicy.MasterHeight, RecordingPolicy.MinimumHeight, RecordingPolicy.MaximumHeight);
-        _recordingFrameRate = Math.Clamp(RecordingPolicy.MasterFrameRate, RecordingPolicy.MinimumFrameRate, RecordingPolicy.MaximumFrameRate);
+        _recordingFrameRate = RecordingPolicy.AdaptiveQuality.MaximumAutomaticFrameRate > 0
+            ? Math.Clamp(RecordingPolicy.AdaptiveQuality.MaximumAutomaticFrameRate, RecordingPolicy.MinimumFrameRate, RecordingPolicy.MaximumFrameRate)
+            : 0;
         _recordingVideoBitrateKbps = Math.Clamp(
             RecordingPolicy.BrowserRecordingVideoBitrateKbps > 0 ? RecordingPolicy.BrowserRecordingVideoBitrateKbps : RecordingPolicy.VideoBitrateKbps,
             RecordingPolicy.MinimumVideoBitrateKbps,
@@ -1423,7 +1467,7 @@
     private async Task<IJSObjectReference> EnsureMediaModuleAsync()
     {
         if (_disposed) throw new ObjectDisposedException(nameof(MediaStudio));
-        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.7.9").ConfigureAwait(true);
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.8.0").ConfigureAwait(true);
         _self ??= DotNetObjectReference.Create(this);
         if (SessionId != Guid.Empty)
         {
@@ -3344,6 +3388,17 @@
     private Task RecordScreen() => StartRecording("screen");
     private Task RecordMicrophone() => StartRecording("microphone");
 
+    private void ChangeRecordingQualityMode(ChangeEventArgs args)
+    {
+        _recordingAdaptiveQuality = string.Equals(args.Value?.ToString(), "adaptive", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private string NormalizeAdaptiveProfile(string? value)
+    {
+        var normalized = value?.Trim().ToLowerInvariant();
+        return normalized is "efficiency" or "balanced" or "quality" ? normalized : "quality";
+    }
+
     private string NormalizeRecordingCodecPreference(string? value)
     {
         var normalized = value?.Trim().ToLowerInvariant();
@@ -3353,6 +3408,7 @@
     private object BuildBrowserRecordingOptions()
     {
         var policy = RecordingPolicy;
+        var adaptive = policy.AdaptiveQuality;
         var width = RecordingTargetWidth;
         var height = RecordingTargetHeight;
         if (_recordingSizeMode != "source")
@@ -3361,19 +3417,59 @@
             height = Math.Clamp(height, policy.MinimumHeight, policy.MaximumHeight);
         }
 
-        _recordingFrameRate = Math.Clamp(_recordingFrameRate, policy.MinimumFrameRate, policy.MaximumFrameRate);
+        _recordingFrameRate = _recordingAdaptiveQuality && _recordingFrameRate <= 0
+            ? 0
+            : Math.Clamp(_recordingFrameRate, policy.MinimumFrameRate, policy.MaximumFrameRate);
         _recordingVideoBitrateKbps = Math.Clamp(_recordingVideoBitrateKbps, policy.MinimumVideoBitrateKbps, policy.MaximumVideoBitrateKbps);
-        _recordingAudioBitrateKbps = Math.Clamp(_recordingAudioBitrateKbps, 32, 1024);
+        _recordingAudioBitrateKbps = Math.Clamp(_recordingAudioBitrateKbps, 32, Math.Max(32, adaptive.MaximumAudioBitrateKbps));
         _recordingCodecPreference = NormalizeRecordingCodecPreference(_recordingCodecPreference);
+        _recordingAdaptiveProfile = NormalizeAdaptiveProfile(_recordingAdaptiveProfile);
 
         return new
         {
             width,
             height,
-            frameRate = _recordingFrameRate,
-            videoBitsPerSecond = _recordingVideoBitrateKbps * 1000,
-            audioBitsPerSecond = _recordingAudioBitrateKbps * 1000,
-            codecPreference = _recordingCodecPreference
+            frameRate = _recordingAdaptiveQuality ? 0 : _recordingFrameRate,
+            maximumFrameRate = _recordingAdaptiveQuality ? _recordingFrameRate : 0,
+            videoBitsPerSecond = _recordingAdaptiveQuality && _recordingAdaptVideo ? 0 : _recordingVideoBitrateKbps * 1000,
+            audioBitsPerSecond = _recordingAdaptiveQuality && _recordingAdaptAudio ? 0 : _recordingAudioBitrateKbps * 1000,
+            recorderChunkMilliseconds = Math.Clamp(adaptive.RecorderChunkMilliseconds, 100, 5000),
+            codecPreference = _recordingCodecPreference,
+            adaptive = new
+            {
+                enabled = _recordingAdaptiveQuality,
+                adaptVideo = _recordingAdaptVideo,
+                adaptAudio = _recordingAdaptAudio,
+                useBrowserCapabilityProbe = _recordingUseBrowserCapabilityProbe,
+                profile = _recordingAdaptiveProfile,
+                preserveNativeResolution = _recordingPreserveNativeResolution,
+                allowFrameRateReduction = _recordingAllowFrameRateReduction,
+                allowResolutionReduction = _recordingAllowResolutionReduction,
+                preferPowerEfficientCodec = adaptive.PreferPowerEfficientCodec,
+                preferSmoothEncoding = adaptive.PreferSmoothEncoding,
+                codecPreferenceOrder = adaptive.BrowserCodecPreferenceOrder,
+                screenBitsPerPixel = adaptive.ScreenBitsPerPixel,
+                cameraBitsPerPixel = adaptive.CameraBitsPerPixel,
+                mixedBitsPerPixel = adaptive.MixedBitsPerPixel,
+                efficiencyMultiplier = adaptive.EfficiencyMultiplier,
+                balancedMultiplier = adaptive.BalancedMultiplier,
+                qualityMultiplier = adaptive.QualityMultiplier,
+                vp9BitrateFactor = adaptive.Vp9BitrateFactor,
+                vp8BitrateFactor = adaptive.Vp8BitrateFactor,
+                minimumVideoBitrateKbps = policy.MinimumVideoBitrateKbps,
+                maximumVideoBitrateKbps = policy.MaximumVideoBitrateKbps,
+                minimumAudioBitrateKbps = adaptive.MinimumAudioBitrateKbps,
+                audioBitratePerChannelKbps = adaptive.AudioBitratePerChannelKbps,
+                maximumAudioBitrateKbps = adaptive.MaximumAudioBitrateKbps,
+                defaultAudioChannels = adaptive.DefaultAudioChannels,
+                maximumAutomaticFrameRate = adaptive.MaximumAutomaticFrameRate,
+                minimumFrameRate = policy.MinimumFrameRate,
+                frameRateFallbackRatio = adaptive.FrameRateFallbackRatio,
+                resolutionFallbackRatio = adaptive.ResolutionFallbackRatio,
+                maximumAdaptationAttempts = adaptive.MaximumAdaptationAttempts,
+                metadataPosterMaximumPixels = Math.Max(0, adaptive.MetadataPosterMaximumPixels),
+                metadataAnalysisDelayMilliseconds = Math.Clamp(adaptive.MetadataAnalysisDelayMilliseconds, 0, 10000)
+            }
         };
     }
 

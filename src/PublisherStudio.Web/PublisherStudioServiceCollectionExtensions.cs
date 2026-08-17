@@ -19,6 +19,7 @@ using PublisherStudio.Services.UserExperience;
 using PublisherStudio.Services.Publication.Import;
 using PublisherStudio.Services.VideoStudio.Export;
 using PublisherStudio.Services.VideoStudio.Import;
+using PublisherStudio.Services.Streaming;
 using PublisherStudio.Services.Streaming.Capture;
 using PublisherStudio.Services.Streaming.Encoding;
 using PublisherStudio.Services.Streaming.Metadata;
@@ -89,6 +90,7 @@ public static class PublisherStudioServiceCollectionExtensions
         services.AddPublisherStreaming(logger);
         AddSingleton<StreamingMediaHostClient, StreamingMediaHostClient>(services);
         AddSingleton<StreamingSessionService, StreamingSessionService>(services);
+        AddSingleton<MediaQualityRecommendationService, MediaQualityRecommendationService>(services);
 
         AddSingleton<WordArtPathGeometry, WordArtPathGeometry>(services);
         AddSingleton<ConnectorGeometry, ConnectorGeometry>(services);

@@ -275,7 +275,14 @@ public sealed class PublisherRuntimePolicyDataService : IPublisherRuntimePolicyD
                 options.DocumentDefaults.StoryPageHeightMillimeters <= 0 ||
                 options.DocumentDefaults.PagePresets.Count == 0 ||
                 options.MediaSessionDefaults.MasterWidth <= 0 ||
-                options.MediaSessionDefaults.IngestChannelCapacity <= 0)
+                options.MediaSessionDefaults.IngestChannelCapacity <= 0 ||
+                options.MediaSessionDefaults.AdaptiveQuality.ScreenBitsPerPixel <= 0 ||
+                options.MediaSessionDefaults.AdaptiveQuality.CameraBitsPerPixel <= 0 ||
+                options.MediaSessionDefaults.AdaptiveQuality.MixedBitsPerPixel <= 0 ||
+                options.MediaSessionDefaults.AdaptiveQuality.ProviderBitsPerPixel <= 0 ||
+                options.MediaSessionDefaults.AdaptiveQuality.LanBitsPerPixel <= 0 ||
+                options.MediaSessionDefaults.AdaptiveQuality.IngestHeadroomMultiplier <= 0 ||
+                options.MediaSessionDefaults.AdaptiveQuality.RecorderChunkMilliseconds <= 0)
                 throw new InvalidDataException("The PublisherStudio runtime policy contains invalid numeric, text, endpoint, native, or media-preset values.");
 
             _ = AudioClientInterfaceId;

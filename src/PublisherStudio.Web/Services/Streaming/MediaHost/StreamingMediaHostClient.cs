@@ -152,6 +152,7 @@ public sealed class StreamingMediaHostClient(
                 MasterHeight = document.Streaming.MasterHeight,
                 MasterFrameRate = document.Streaming.MasterFrameRate,
                 PreferDeviceTimestamps = document.Streaming.PreferDeviceTimestamps,
+                AdaptiveMedia = document.Streaming.AdaptiveMedia,
                 FfmpegPath = settings.FfmpegPath,
                 HardwareEncoder = settings.HardwareEncoder,
                 Outputs = providers,
@@ -317,6 +318,9 @@ public sealed class MediaHostStartSessionRequest
     /// </summary>
     /// <value>The prefer device timestamps value exposed by <see cref="MediaHostStartSessionRequest"/>.</value>
     public bool PreferDeviceTimestamps { get; set; }
+    /// <summary>Gets or sets the per-publication adaptive media quality choices forwarded to the media host.</summary>
+    /// <value>The adaptive media settings used by recording and streaming encoder paths.</value>
+    public PublicationAdaptiveMediaSettings AdaptiveMedia { get; set; } = new();
     /// <summary>
     /// Gets or sets the FFmpeg path used by this media host start session instance to locate the associated file-system resource.
     /// </summary>

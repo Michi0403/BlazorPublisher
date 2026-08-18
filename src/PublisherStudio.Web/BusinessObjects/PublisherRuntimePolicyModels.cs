@@ -456,27 +456,40 @@ public sealed record PublisherDocumentDefaultsPolicy
 public sealed record PublisherStreamQualityTierPolicy
 {
     /// <summary>Gets or sets the publication quality preset name represented by this policy tier.</summary>
+    /// <value>The preset value exposed by <see cref="PublisherStreamQualityTierPolicy"/>.</value>
     public string Preset { get; init; } = string.Empty;
     /// <summary>Gets or sets the preferred width for this provider quality tier.</summary>
+    /// <value>The width value exposed by <see cref="PublisherStreamQualityTierPolicy"/>.</value>
     public int Width { get; init; }
     /// <summary>Gets or sets the preferred height for this provider quality tier.</summary>
+    /// <value>The height value exposed by <see cref="PublisherStreamQualityTierPolicy"/>.</value>
     public int Height { get; init; }
     /// <summary>Gets or sets the preferred frame rate for this provider quality tier.</summary>
+    /// <value>The frame rate value exposed by <see cref="PublisherStreamQualityTierPolicy"/>.</value>
     public int FrameRate { get; init; }
     /// <summary>Gets or sets the maximum video bitrate in kilobits per second for this provider quality tier.</summary>
+    /// <value>The maximum video bitrate kbps value exposed by <see cref="PublisherStreamQualityTierPolicy"/>.</value>
     public int MaximumVideoBitrateKbps { get; init; }
     /// <summary>Gets or sets the preferred audio bitrate in kilobits per second for this provider quality tier.</summary>
+    /// <value>The audio bitrate kbps value exposed by <see cref="PublisherStreamQualityTierPolicy"/>.</value>
     public int AudioBitrateKbps { get; init; }
     /// <summary>Gets or sets the preferred key-frame interval in seconds for this provider quality tier.</summary>
+    /// <value>The key frame interval seconds value exposed by <see cref="PublisherStreamQualityTierPolicy"/>.</value>
     public int KeyFrameIntervalSeconds { get; init; }
 }
 
 /// <summary>Describes configurable provider quality knowledge used by PublisherStudio's adaptive media advisor.</summary>
 public sealed record PublisherStreamProviderQualityPolicy
 {
-    /// <summary>Gets or sets the provider name matched against <see cref="PublicationStreamProvider"/>.</summary>
+    /// <summary>
+    /// Gets or sets the provider value that forms part of the publisher stream provider quality policy state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The provider value exposed by <see cref="PublisherStreamProviderQualityPolicy"/>.</value>
     public string Provider { get; init; } = string.Empty;
-    /// <summary>Gets or sets the quality tiers available for this provider.</summary>
+    /// <summary>
+    /// Gets or sets the tiers collection maintained or exposed by this publisher stream provider quality policy instance for downstream processing.
+    /// </summary>
+    /// <value>The tiers value exposed by <see cref="PublisherStreamProviderQualityPolicy"/>.</value>
     public List<PublisherStreamQualityTierPolicy> Tiers { get; init; } = [];
 }
 
@@ -484,83 +497,140 @@ public sealed record PublisherStreamProviderQualityPolicy
 public sealed record PublisherMediaQualityAdaptationPolicy
 {
     /// <summary>Gets or sets whether smart adaptive quality is enabled by default.</summary>
+    /// <value>The enabled value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public bool Enabled { get; init; } = true;
-    /// <summary>Gets or sets the default user-selectable quality profile.</summary>
+    /// <summary>
+    /// Gets or sets the default profile value that forms part of the publisher media quality adaptation policy state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The default profile value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public string DefaultProfile { get; init; } = "Quality";
     /// <summary>Gets or sets whether native source resolution should be preserved by default.</summary>
+    /// <value>The preserve native resolution value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public bool PreserveNativeResolution { get; init; } = true;
     /// <summary>Gets or sets whether the browser may reduce frame rate when its capability probe reports non-smooth encoding.</summary>
+    /// <value>The allow frame rate reduction value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public bool AllowFrameRateReduction { get; init; } = true;
     /// <summary>Gets or sets whether the browser may reduce resolution as a last-resort smoothness fallback.</summary>
+    /// <value>The allow resolution reduction value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public bool AllowResolutionReduction { get; init; }
     /// <summary>Gets or sets whether browser capability selection should prefer encoders reported as power efficient.</summary>
+    /// <value>The prefer power efficient codec value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public bool PreferPowerEfficientCodec { get; init; } = true;
     /// <summary>Gets or sets whether browser capability selection should prefer encoders reported as smooth.</summary>
+    /// <value>The prefer smooth encoding value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public bool PreferSmoothEncoding { get; init; } = true;
     /// <summary>Gets or sets whether browser MediaCapabilities probing participates in automatic recording codec and smoothness selection.</summary>
+    /// <value>The browser capability probe enabled value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public bool BrowserCapabilityProbeEnabled { get; init; } = true;
     /// <summary>Gets or sets the configurable codec-family tie-break order used after browser support and smoothness/power-efficiency evidence.</summary>
+    /// <value>The browser codec preference order value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public List<string> BrowserCodecPreferenceOrder { get; init; } = ["vp9", "vp8"];
     /// <summary>Gets or sets the bits-per-pixel-per-frame target for detailed screen content.</summary>
+    /// <value>The screen bits per pixel value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public double ScreenBitsPerPixel { get; init; }
     /// <summary>Gets or sets the bits-per-pixel-per-frame target for camera/motion content.</summary>
+    /// <value>The camera bits per pixel value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public double CameraBitsPerPixel { get; init; }
     /// <summary>Gets or sets the bits-per-pixel-per-frame target for mixed publication program content.</summary>
+    /// <value>The mixed bits per pixel value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public double MixedBitsPerPixel { get; init; }
     /// <summary>Gets or sets the bits-per-pixel-per-frame target used for provider output recommendations.</summary>
+    /// <value>The provider bits per pixel value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public double ProviderBitsPerPixel { get; init; }
     /// <summary>Gets or sets the bits-per-pixel-per-frame target used for LAN output recommendations.</summary>
+    /// <value>The LAN bits per pixel value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public double LanBitsPerPixel { get; init; }
-    /// <summary>Gets or sets the bitrate multiplier for the Efficiency profile.</summary>
+    /// <summary>
+    /// Gets or sets the efficiency multiplier value that forms part of the publisher media quality adaptation policy state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The efficiency multiplier value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public double EfficiencyMultiplier { get; init; }
-    /// <summary>Gets or sets the bitrate multiplier for the Balanced profile.</summary>
+    /// <summary>
+    /// Gets or sets the balanced multiplier value that forms part of the publisher media quality adaptation policy state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The balanced multiplier value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public double BalancedMultiplier { get; init; }
-    /// <summary>Gets or sets the bitrate multiplier for the Quality profile.</summary>
+    /// <summary>
+    /// Gets or sets the quality multiplier value that forms part of the publisher media quality adaptation policy state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The quality multiplier value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public double QualityMultiplier { get; init; }
     /// <summary>Gets or sets the VP9 bitrate-efficiency factor relative to VP8.</summary>
+    /// <value>The vp9 bitrate factor value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public double Vp9BitrateFactor { get; init; }
-    /// <summary>Gets or sets the VP8 bitrate-efficiency factor.</summary>
+    /// <summary>
+    /// Gets or sets the vp8 bitrate factor value that forms part of the publisher media quality adaptation policy state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The vp8 bitrate factor value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public double Vp8BitrateFactor { get; init; }
-    /// <summary>Gets or sets the H.264 bitrate-efficiency factor.</summary>
+    /// <summary>
+    /// Gets or sets the h264 bitrate factor value that forms part of the publisher media quality adaptation policy state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The h264 bitrate factor value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public double H264BitrateFactor { get; init; }
-    /// <summary>Gets or sets the HEVC bitrate-efficiency factor.</summary>
+    /// <summary>
+    /// Gets or sets the hevc bitrate factor value that forms part of the publisher media quality adaptation policy state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The hevc bitrate factor value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public double HevcBitrateFactor { get; init; }
-    /// <summary>Gets or sets the AV1 bitrate-efficiency factor.</summary>
+    /// <summary>
+    /// Gets or sets the av1 bitrate factor value that forms part of the publisher media quality adaptation policy state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The av1 bitrate factor value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public double Av1BitrateFactor { get; init; }
     /// <summary>Gets or sets the minimum adaptive audio bitrate in kilobits per second.</summary>
+    /// <value>The minimum audio bitrate kbps value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public int MinimumAudioBitrateKbps { get; init; }
     /// <summary>Gets or sets the adaptive audio bitrate contribution per channel in kilobits per second.</summary>
+    /// <value>The audio bitrate per channel kbps value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public int AudioBitratePerChannelKbps { get; init; }
     /// <summary>Gets or sets the maximum adaptive audio bitrate in kilobits per second.</summary>
+    /// <value>The maximum audio bitrate kbps value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public int MaximumAudioBitrateKbps { get; init; }
     /// <summary>Gets or sets the default channel count used when a browser cannot report audio track settings.</summary>
+    /// <value>The default audio channels value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public int DefaultAudioChannels { get; init; }
     /// <summary>Gets or sets the maximum frame rate selected automatically; zero keeps the source-reported rate up to the global policy maximum.</summary>
+    /// <value>The maximum automatic frame rate value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public int MaximumAutomaticFrameRate { get; init; }
     /// <summary>Gets or sets the multiplicative frame-rate fallback applied when browser capability probing reports non-smooth encoding.</summary>
+    /// <value>The frame rate fallback ratio value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public double FrameRateFallbackRatio { get; init; }
     /// <summary>Gets or sets the multiplicative resolution fallback applied only when last-resort resolution adaptation is allowed.</summary>
+    /// <value>The resolution fallback ratio value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public double ResolutionFallbackRatio { get; init; }
     /// <summary>Gets or sets the maximum number of browser smoothness fallback attempts.</summary>
+    /// <value>The maximum adaptation attempts value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public int MaximumAdaptationAttempts { get; init; }
     /// <summary>Gets or sets the configurable bitrate headroom applied to browser ingest that will be transcoded again downstream.</summary>
+    /// <value>The ingest headroom multiplier value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public double IngestHeadroomMultiplier { get; init; }
     /// <summary>Gets or sets the browser MediaRecorder chunk interval in milliseconds used by adaptive streaming ingest.</summary>
+    /// <value>The recorder chunk milliseconds value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public int RecorderChunkMilliseconds { get; init; }
     /// <summary>Gets or sets the maximum pixel count used for generated recording poster thumbnails; zero keeps source-sized poster analysis.</summary>
+    /// <value>The metadata poster maximum pixels value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public int MetadataPosterMaximumPixels { get; init; }
     /// <summary>Gets or sets the delay before nonessential recording metadata/poster analysis begins after capture resources have been released.</summary>
+    /// <value>The metadata analysis delay milliseconds value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public int MetadataAnalysisDelayMilliseconds { get; init; }
     /// <summary>Gets or sets the LAN maximum width selected automatically; zero uses the global media maximum.</summary>
+    /// <value>The LAN maximum width value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public int LanMaximumWidth { get; init; }
     /// <summary>Gets or sets the LAN maximum height selected automatically; zero uses the global media maximum.</summary>
+    /// <value>The LAN maximum height value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public int LanMaximumHeight { get; init; }
     /// <summary>Gets or sets the LAN maximum frame rate selected automatically; zero uses the global media maximum.</summary>
+    /// <value>The LAN maximum frame rate value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public int LanMaximumFrameRate { get; init; }
     /// <summary>Gets or sets provider-specific quality knowledge. A provider named Default is used as the fallback.</summary>
+    /// <value>The provider profiles value exposed by <see cref="PublisherMediaQualityAdaptationPolicy"/>.</value>
     public List<PublisherStreamProviderQualityPolicy> ProviderProfiles { get; init; } = [];
 }
 
+/// <summary>
+/// Represents a publisher media session defaults policy application type, grouping the state and behavior that belong to that domain concept.
+/// </summary>
 public sealed record PublisherMediaSessionDefaultsPolicy
 {
     /// <summary>

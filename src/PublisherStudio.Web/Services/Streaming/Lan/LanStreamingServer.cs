@@ -581,6 +581,7 @@ public sealed class MediaLanDefinition
     /// <value>The video bitrate kbps value exposed by <see cref="MediaLanDefinition"/>.</value>
     public int VideoBitrateKbps { get; set; } = 8000;
     /// <summary>Gets or sets the audio bitrate kbps value used by LAN HLS and RTSP encoders.</summary>
+    /// <value>The audio bitrate kbps value exposed by <see cref="MediaLanDefinition"/>.</value>
     public int AudioBitrateKbps { get; set; } = 160;
     /// <summary>
     /// Gets or sets a value indicating whether browser web rtc applies to the media LAN definition state.

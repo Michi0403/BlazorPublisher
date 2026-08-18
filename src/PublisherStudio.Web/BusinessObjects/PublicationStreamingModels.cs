@@ -139,6 +139,9 @@ public enum PublicationStreamSessionMode
     Live
 }
 
+/// <summary>
+/// Defines the supported publication adaptive quality profile values used to select or describe behavior in the surrounding workflow.
+/// </summary>
 public enum PublicationAdaptiveQualityProfile
 {
     Efficiency,
@@ -150,22 +153,31 @@ public enum PublicationAdaptiveQualityProfile
 public sealed class PublicationAdaptiveMediaSettings
 {
     /// <summary>Gets or sets whether adaptive quality recommendations are active for this publication.</summary>
+    /// <value>The enabled value exposed by <see cref="PublicationAdaptiveMediaSettings"/>.</value>
     public bool Enabled { get; set; } = true;
     /// <summary>Gets or sets whether video geometry, codec and bitrate are smart-selected while leaving manual controls available.</summary>
+    /// <value>The adapt video value exposed by <see cref="PublicationAdaptiveMediaSettings"/>.</value>
     public bool AdaptVideo { get; set; } = true;
     /// <summary>Gets or sets whether audio bitrate is smart-selected from source/channel and provider knowledge.</summary>
+    /// <value>The adapt audio value exposed by <see cref="PublicationAdaptiveMediaSettings"/>.</value>
     public bool AdaptAudio { get; set; } = true;
     /// <summary>Gets or sets whether provider-specific quality knowledge participates in smart output preselection.</summary>
+    /// <value>The use provider knowledge value exposed by <see cref="PublicationAdaptiveMediaSettings"/>.</value>
     public bool UseProviderKnowledge { get; set; } = true;
     /// <summary>Gets or sets whether browser MediaCapabilities evidence may refine recording codec/FPS choices.</summary>
+    /// <value>The use browser capability probe value exposed by <see cref="PublicationAdaptiveMediaSettings"/>.</value>
     public bool UseBrowserCapabilityProbe { get; set; } = true;
     /// <summary>Gets or sets the publication quality priority used by the adaptive advisor.</summary>
+    /// <value>The profile value exposed by <see cref="PublicationAdaptiveMediaSettings"/>.</value>
     public PublicationAdaptiveQualityProfile Profile { get; set; } = PublicationAdaptiveQualityProfile.Quality;
     /// <summary>Gets or sets whether the browser should preserve the selected capture surface's native resolution.</summary>
+    /// <value>The preserve native resolution value exposed by <see cref="PublicationAdaptiveMediaSettings"/>.</value>
     public bool PreserveNativeResolution { get; set; } = true;
     /// <summary>Gets or sets whether automatic smoothness recovery may lower frame rate before compromising resolution.</summary>
+    /// <value>The allow frame rate reduction value exposed by <see cref="PublicationAdaptiveMediaSettings"/>.</value>
     public bool AllowFrameRateReduction { get; set; } = true;
     /// <summary>Gets or sets whether automatic smoothness recovery may lower resolution as a last resort.</summary>
+    /// <value>The allow resolution reduction value exposed by <see cref="PublicationAdaptiveMediaSettings"/>.</value>
     public bool AllowResolutionReduction { get; set; }
 }
 
@@ -217,6 +229,7 @@ public sealed class PublicationStreamingSettings
     /// <value>The prefer device timestamps value exposed by <see cref="PublicationStreamingSettings"/>.</value>
     public bool PreferDeviceTimestamps { get; set; } = true;
     /// <summary>Gets or sets the smart adaptive media quality choices shared by this publication's recording and streaming paths.</summary>
+    /// <value>The adaptive media value exposed by <see cref="PublicationStreamingSettings"/>.</value>
     public PublicationAdaptiveMediaSettings AdaptiveMedia { get; set; } = new();
     /// <summary>
     /// Gets or sets the master width value that forms part of the publication streaming state consumed or produced by the surrounding workflow.
@@ -405,8 +418,10 @@ public sealed class PublicationLanStreamingSettings
     /// <value>The video bitrate kbps value exposed by <see cref="PublicationLanStreamingSettings"/>.</value>
     public int VideoBitrateKbps { get; set; } = 8000;
     /// <summary>Gets or sets the LAN audio bitrate in kilobits per second.</summary>
+    /// <value>The audio bitrate kbps value exposed by <see cref="PublicationLanStreamingSettings"/>.</value>
     public int AudioBitrateKbps { get; set; } = 160;
     /// <summary>Gets or sets the LAN quality preset; Recommended is refreshed by the adaptive advisor while Custom preserves manual values.</summary>
+    /// <value>The quality preset value exposed by <see cref="PublicationLanStreamingSettings"/>.</value>
     public PublicationStreamQualityPreset QualityPreset { get; set; } = PublicationStreamQualityPreset.Recommended;
     /// <summary>
     /// Gets or sets a value indicating whether browser web rtc applies to the publication LAN streaming state.

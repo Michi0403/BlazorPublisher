@@ -1,6 +1,7 @@
 @namespace PublisherStudio.Components.Editor
 @inject PanelDocumentService Panels
 
+@inject ILogger<PanelLibrary> Logger
 <section class="panel-library-dock" aria-label="Panel and dashboard library">
     <header><div><strong>Panel library</strong><small>Reusable live views built from PublisherStudio components.</small></div><button type="button" class="window-close" @onclick="Close">×</button></header>
     <div class="panel-library-grid">

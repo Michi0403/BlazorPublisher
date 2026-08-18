@@ -10,7 +10,16 @@
 @code {
     protected override void OnInitialized()
     {
-        Logger.LogError("PublisherStudio rendered the fatal error page.");
-        Notifications.Error("Review the application log for the underlying exception.", "PublisherStudio request failed", nameof(Error), persistent: true);
+        try
+        {
+            Logger.LogError("PublisherStudio rendered the fatal error page.");
+            Notifications.Error("Review the application log for the underlying exception.", "PublisherStudio request failed", nameof(Error), persistent: true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(Error)}.{nameof(OnInitialized)} failed.");
+            throw;
+        }
     }
 }

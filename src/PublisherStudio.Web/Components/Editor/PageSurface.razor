@@ -764,200 +764,409 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (_disposed || _canvasInitializationInProgress) return;
-
-        _canvasInitializationInProgress = true;
         try
         {
-            var selectedElementIds = EditorText.BuildCanvasSelectedElementIds(SelectionVisualsEnabled, State.SelectedElementIds);
-            var selectionKey = EditorText.BuildCanvasSelectionKey(SelectionVisualsEnabled, InteractionEnabled, selectedElementIds);
-            var clipboardKey = $"{State.CanPaste}:{State.ClipboardRevision}";
-            var initializationKey = $"{State.CurrentPage.Id:N}|" +
-                $"{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}|{State.Document.View.CanvasZoomMode}|{State.CropMode}|{State.ContentPanMode}|{State.Document.View.RulerUnit}|" +
-                $"{State.Document.View.RulersVisible}|{State.Document.View.GuidesVisible}|{State.Document.View.SnapToGrid}|" +
-                $"{State.Document.View.SnapToGuides}|{State.Document.View.SnapToPage}|{State.Document.View.SnapToObjects}|{State.Document.View.SnapInObjects}|" +
-                $"{State.Document.View.GridSpacingMm.ToString("R", CultureInfo.InvariantCulture)}|{State.ConnectorTool}|{selectionKey}|{clipboardKey}";
-            var dataVisualLayoutKey = $"{State.CurrentPage.Id:N}|{State.Revision}|{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}|{State.Document.View.CanvasZoomMode}";
+            if (_disposed || _canvasInitializationInProgress) return;
 
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js").ConfigureAwait(true);
-            if (initializationKey != _canvasInitializationKey)
+            _canvasInitializationInProgress = true;
+            try
             {
-                _self ??= DotNetObjectReference.Create(this);
-                var initialized = await _module.InvokeAsync<bool>("initializeCanvas",
-                    "publisher-stage", "publisher-scroll-area", "publisher-page", "publisher-horizontal-ruler", "publisher-vertical-ruler", _self,
-                    new
-                    {
-                        pxPerMm = PixelsPerMm,
-                        zoomMode = State.Document.View.CanvasZoomMode.ToString(),
-                        cropMode = State.CropMode,
-                        contentPanMode = State.ContentPanMode,
-                        unit = State.Document.View.RulerUnit.ToString(),
-                        rulersVisible = State.Document.View.RulersVisible,
-                        guidesVisible = State.Document.View.GuidesVisible,
-                        snapToGrid = State.Document.View.SnapToGrid,
-                        snapToGuides = State.Document.View.SnapToGuides,
-                        snapToPage = State.Document.View.SnapToPage,
-                        snapToObjects = State.Document.View.SnapToObjects,
-                        snapInObjects = State.Document.View.SnapInObjects,
-                        gridSpacingMm = State.Document.View.GridSpacingMm,
-                        connectorTool = State.ConnectorTool.ToString(),
-                        interactionEnabled = InteractionEnabled,
-                        selectedElementIds,
-                        internalClipboardAvailable = State.CanPaste,
-                        clipboardRevision = State.ClipboardRevision
-                    }).ConfigureAwait(true);
-                if (initialized) _canvasInitializationKey = initializationKey;
-            }
+                var selectedElementIds = EditorText.BuildCanvasSelectedElementIds(SelectionVisualsEnabled, State.SelectedElementIds);
+                var selectionKey = EditorText.BuildCanvasSelectionKey(SelectionVisualsEnabled, InteractionEnabled, selectedElementIds);
+                var clipboardKey = $"{State.CanPaste}:{State.ClipboardRevision}";
+                var initializationKey = $"{State.CurrentPage.Id:N}|" +
+                    $"{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}|{State.Document.View.CanvasZoomMode}|{State.CropMode}|{State.ContentPanMode}|{State.Document.View.RulerUnit}|" +
+                    $"{State.Document.View.RulersVisible}|{State.Document.View.GuidesVisible}|{State.Document.View.SnapToGrid}|" +
+                    $"{State.Document.View.SnapToGuides}|{State.Document.View.SnapToPage}|{State.Document.View.SnapToObjects}|{State.Document.View.SnapInObjects}|" +
+                    $"{State.Document.View.GridSpacingMm.ToString("R", CultureInfo.InvariantCulture)}|{State.ConnectorTool}|{selectionKey}|{clipboardKey}";
+                var dataVisualLayoutKey = $"{State.CurrentPage.Id:N}|{State.Revision}|{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}|{State.Document.View.CanvasZoomMode}";
 
-            if (dataVisualLayoutKey != _dataVisualLayoutKey)
-            {
-                _dataVisualLayoutKey = dataVisualLayoutKey;
-                if (State.CurrentPage.Elements.Any(element => element is DataVisualElement))
-                    await _module.InvokeVoidAsync("refreshDataVisualLayout", "publisher-page").ConfigureAwait(true);
-                await _module.InvokeVoidAsync("initializeSignalConnectors", "publisher-page", new { autoStart = false, editor = true }).ConfigureAwait(true);
+                _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js").ConfigureAwait(true);
+                if (initializationKey != _canvasInitializationKey)
+                {
+                    _self ??= DotNetObjectReference.Create(this);
+                    var initialized = await _module.InvokeAsync<bool>("initializeCanvas",
+                        "publisher-stage", "publisher-scroll-area", "publisher-page", "publisher-horizontal-ruler", "publisher-vertical-ruler", _self,
+                        new
+                        {
+                            pxPerMm = PixelsPerMm,
+                            zoomMode = State.Document.View.CanvasZoomMode.ToString(),
+                            cropMode = State.CropMode,
+                            contentPanMode = State.ContentPanMode,
+                            unit = State.Document.View.RulerUnit.ToString(),
+                            rulersVisible = State.Document.View.RulersVisible,
+                            guidesVisible = State.Document.View.GuidesVisible,
+                            snapToGrid = State.Document.View.SnapToGrid,
+                            snapToGuides = State.Document.View.SnapToGuides,
+                            snapToPage = State.Document.View.SnapToPage,
+                            snapToObjects = State.Document.View.SnapToObjects,
+                            snapInObjects = State.Document.View.SnapInObjects,
+                            gridSpacingMm = State.Document.View.GridSpacingMm,
+                            connectorTool = State.ConnectorTool.ToString(),
+                            interactionEnabled = InteractionEnabled,
+                            selectedElementIds,
+                            internalClipboardAvailable = State.CanPaste,
+                            clipboardRevision = State.ClipboardRevision
+                        }).ConfigureAwait(true);
+                    if (initialized) _canvasInitializationKey = initializationKey;
+                }
+
+                if (dataVisualLayoutKey != _dataVisualLayoutKey)
+                {
+                    _dataVisualLayoutKey = dataVisualLayoutKey;
+                    if (State.CurrentPage.Elements.Any(element => element is DataVisualElement))
+                        await _module.InvokeVoidAsync("refreshDataVisualLayout", "publisher-page").ConfigureAwait(true);
+                    await _module.InvokeVoidAsync("initializeSignalConnectors", "publisher-page", new { autoStart = false, editor = true }).ConfigureAwait(true);
+                }
             }
+            catch (JSDisconnectedException exception)
+            {
+                Logger.LogDebug(exception, "Publisher canvas initialization stopped because the InteractiveServer circuit disconnected.");
+            }
+            catch (TaskCanceledException exception)
+            {
+                Logger.LogDebug(exception, "Publisher canvas initialization was canceled.");
+            }
+            catch (ObjectDisposedException exception)
+            {
+                Logger.LogDebug(exception, "Publisher canvas initialization stopped because an interop resource was disposed.");
+            }
+            catch (InvalidOperationException exception)
+            {
+                Logger.LogWarning(exception, "Publisher canvas initialization could not complete because the interactive renderer was not ready.");
+            }
+            catch (JSException exception)
+            {
+                Logger.LogError(exception, "Publisher canvas JavaScript initialization failed.");
+                Notifications.Warning("Canvas interaction could not initialize completely. Review the local log if the problem continues.", "Canvas warning", nameof(PageSurface));
+            }
+            catch (Exception exception)
+            {
+                Logger.LogError(exception, "Publisher canvas initialization failed unexpectedly.");
+                Notifications.Error("Canvas initialization failed. Review the local application log for technical details.", "Canvas error", nameof(PageSurface));
+            }
+            finally
+            {
+                _canvasInitializationInProgress = false;
+            }
+    
         }
-        catch (JSDisconnectedException exception)
+        catch (Exception __componentMethodException)
         {
-            Logger.LogDebug(exception, "Publisher canvas initialization stopped because the InteractiveServer circuit disconnected.");
-        }
-        catch (TaskCanceledException exception)
-        {
-            Logger.LogDebug(exception, "Publisher canvas initialization was canceled.");
-        }
-        catch (ObjectDisposedException exception)
-        {
-            Logger.LogDebug(exception, "Publisher canvas initialization stopped because an interop resource was disposed.");
-        }
-        catch (InvalidOperationException exception)
-        {
-            Logger.LogWarning(exception, "Publisher canvas initialization could not complete because the interactive renderer was not ready.");
-        }
-        catch (JSException exception)
-        {
-            Logger.LogError(exception, "Publisher canvas JavaScript initialization failed.");
-            Notifications.Warning("Canvas interaction could not initialize completely. Review the local log if the problem continues.", "Canvas warning", nameof(PageSurface));
-        }
-        catch (Exception exception)
-        {
-            Logger.LogError(exception, "Publisher canvas initialization failed unexpectedly.");
-            Notifications.Error("Canvas initialization failed. Review the local application log for technical details.", "Canvas error", nameof(PageSurface));
-        }
-        finally
-        {
-            _canvasInitializationInProgress = false;
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(OnAfterRenderAsync)} failed.");
+            throw;
         }
     }
 
-    [JSInvokable] public void SelectElement(string id, bool additive = false) { if (Guid.TryParse(id, out var guid)) State.SelectElement(guid, additive); }
-    [JSInvokable] public void ClearSelectionFromCanvas() => State.SelectElement(null);
+    public async Task FitPageAsync()
+    {
+        try
+        {
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js").ConfigureAwait(true);
+            var zoom = await _module.InvokeAsync<double>(
+                "calculateFitZoom",
+                "publisher-stage",
+                State.CurrentPage.WidthMm,
+                State.CurrentPage.HeightMm,
+                State.Document.View.RulersVisible).ConfigureAwait(true);
+            State.SetZoom(zoom);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(FitPageAsync)} failed.");
+            throw;
+        }
+    }
+
+    [JSInvokable] public void SelectElement(string id, bool additive = false) {
+        try
+        {
+     if (Guid.TryParse(id, out var guid)) State.SelectElement(guid, additive); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SelectElement)} failed.");
+            throw;
+        }
+    }
+    [JSInvokable] public void ClearSelectionFromCanvas() {
+        try
+        {
+            State.SelectElement(null);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ClearSelectionFromCanvas)} failed.");
+            throw;
+        }
+    }
     [JSInvokable]
     public void NavigateToPage(string target)
     {
-        var value = (target ?? string.Empty).Trim();
-        var page = State.Document.Pages.FirstOrDefault(candidate => string.Equals(candidate.Id.ToString("D"), value, StringComparison.OrdinalIgnoreCase))
-            ?? State.Document.Pages.FirstOrDefault(candidate => string.Equals(candidate.Name, value, StringComparison.OrdinalIgnoreCase));
-        if (page is null && int.TryParse(value, out var number) && number >= 1 && number <= State.Document.Pages.Count) page = State.Document.Pages[number - 1];
-        if (page is not null) State.SelectPage(page.Id);
+        try
+        {
+            var value = (target ?? string.Empty).Trim();
+            var page = State.Document.Pages.FirstOrDefault(candidate => string.Equals(candidate.Id.ToString("D"), value, StringComparison.OrdinalIgnoreCase))
+                ?? State.Document.Pages.FirstOrDefault(candidate => string.Equals(candidate.Name, value, StringComparison.OrdinalIgnoreCase));
+            if (page is null && int.TryParse(value, out var number) && number >= 1 && number <= State.Document.Pages.Count) page = State.Document.Pages[number - 1];
+            if (page is not null) State.SelectPage(page.Id);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(NavigateToPage)} failed.");
+            throw;
+        }
     }
     [JSInvokable]
     public void SetSelectionFromCanvas(string[]? ids)
     {
-        State.SetSelection((ids ?? [])
-            .Select(value => Guid.TryParse(value, out var parsed) ? parsed : Guid.Empty)
-            .Where(value => value != Guid.Empty));
+        try
+        {
+            State.SetSelection((ids ?? [])
+                .Select(value => Guid.TryParse(value, out var parsed) ? parsed : Guid.Empty)
+                .Where(value => value != Guid.Empty));
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SetSelectionFromCanvas)} failed.");
+            throw;
+        }
     }
     [JSInvokable]
     public Task ActivateElement(string id)
     {
-        if (!Guid.TryParse(id, out var guid)) return Task.CompletedTask;
-        var element = State.CurrentPage.Elements.FirstOrDefault(item => item.Id == guid);
-        if (element is null) return Task.CompletedTask;
-        State.SelectElement(guid);
-        return DoubleClick(element);
+        try
+        {
+            if (!Guid.TryParse(id, out var guid)) return Task.CompletedTask;
+            var element = State.CurrentPage.Elements.FirstOrDefault(item => item.Id == guid);
+            if (element is null) return Task.CompletedTask;
+            State.SelectElement(guid);
+            return DoubleClick(element);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ActivateElement)} failed.");
+            throw;
+        }
     }
 
     [JSInvokable]
     public async Task OpenElementContextMenu(string id, double clientX, double clientY, double pageX, double pageY, double screenX, double screenY)
     {
-        if (!Guid.TryParse(id, out var guid)) return;
-        var element = State.CurrentPage.Elements.FirstOrDefault(item => item.Id == guid);
-        if (element is null) return;
-        // DevExpress positions a context menu from PageX/PageY. Supplying only
-        // ClientX/ClientY caused the menu to jump to stale or zero page coordinates.
-        var args = new MouseEventArgs
+        try
         {
-            Type = "contextmenu",
-            Button = 2,
-            Buttons = 2,
-            ClientX = clientX,
-            ClientY = clientY,
-            PageX = pageX,
-            PageY = pageY,
-            ScreenX = screenX,
-            ScreenY = screenY
-        };
-        await ShowElementContextMenu(element, args).ConfigureAwait(true);
+            if (!Guid.TryParse(id, out var guid)) return;
+            var element = State.CurrentPage.Elements.FirstOrDefault(item => item.Id == guid);
+            if (element is null) return;
+            // DevExpress positions a context menu from PageX/PageY. Supplying only
+            // ClientX/ClientY caused the menu to jump to stale or zero page coordinates.
+            var args = new MouseEventArgs
+            {
+                Type = "contextmenu",
+                Button = 2,
+                Buttons = 2,
+                ClientX = clientX,
+                ClientY = clientY,
+                PageX = pageX,
+                PageY = pageY,
+                ScreenX = screenX,
+                ScreenY = screenY
+            };
+            await ShowElementContextMenu(element, args).ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(OpenElementContextMenu)} failed.");
+            throw;
+        }
     }
     [JSInvokable]
     public void CommitMove(string id, double x, double y, string[]? movingIds = null)
     {
-        if (!Guid.TryParse(id, out var guid)) return;
-        var parsedIds = movingIds?
-            .Select(value => Guid.TryParse(value, out var parsed) ? parsed : Guid.Empty)
-            .Where(value => value != Guid.Empty)
-            .ToArray();
-        State.CommitMove(guid, x, y, parsedIds);
+        try
+        {
+            if (!Guid.TryParse(id, out var guid)) return;
+            var parsedIds = movingIds?
+                .Select(value => Guid.TryParse(value, out var parsed) ? parsed : Guid.Empty)
+                .Where(value => value != Guid.Empty)
+                .ToArray();
+            State.CommitMove(guid, x, y, parsedIds);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(CommitMove)} failed.");
+            throw;
+        }
     }
-    [JSInvokable] public void CommitBounds(string id, double x, double y, double width, double height) { if (Guid.TryParse(id, out var guid)) State.CommitBounds(guid, x, y, width, height); }
-    [JSInvokable] public void CommitCrop(string id, double cropX, double cropY, double cropScale) { if (Guid.TryParse(id, out var guid)) State.CommitCrop(guid, cropX, cropY, cropScale); }
-    [JSInvokable] public void CommitContentViewport(string id, double offsetX, double offsetY, double scale) { if (Guid.TryParse(id, out var guid)) State.CommitContentViewport(guid, offsetX, offsetY, scale); }
-    [JSInvokable] public void CommitMapViewport(string id, double longitude, double latitude, double zoom) { if (Guid.TryParse(id, out var guid)) State.CommitMapViewport(guid, longitude, latitude, zoom); }
-    [JSInvokable] public void AddGuideAt(string orientation, double positionMm) { if (Enum.TryParse<GuideOrientation>(orientation, true, out var parsed)) State.AddGuideAt(parsed, positionMm); }
-    [JSInvokable] public void CommitGuide(string id, double positionMm) { if (Guid.TryParse(id, out var guid)) State.CommitGuide(guid, positionMm); }
-    [JSInvokable] public void DeleteGuide(string id) { if (Guid.TryParse(id, out var guid)) State.DeleteGuide(guid); }
+    [JSInvokable] public void CommitBounds(string id, double x, double y, double width, double height) {
+        try
+        {
+     if (Guid.TryParse(id, out var guid)) State.CommitBounds(guid, x, y, width, height); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(CommitBounds)} failed.");
+            throw;
+        }
+    }
+    [JSInvokable] public void CommitCrop(string id, double cropX, double cropY, double cropScale) {
+        try
+        {
+     if (Guid.TryParse(id, out var guid)) State.CommitCrop(guid, cropX, cropY, cropScale); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(CommitCrop)} failed.");
+            throw;
+        }
+    }
+    [JSInvokable] public void CommitContentViewport(string id, double offsetX, double offsetY, double scale) {
+        try
+        {
+     if (Guid.TryParse(id, out var guid)) State.CommitContentViewport(guid, offsetX, offsetY, scale); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(CommitContentViewport)} failed.");
+            throw;
+        }
+    }
+    [JSInvokable] public void CommitMapViewport(string id, double longitude, double latitude, double zoom) {
+        try
+        {
+     if (Guid.TryParse(id, out var guid)) State.CommitMapViewport(guid, longitude, latitude, zoom); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(CommitMapViewport)} failed.");
+            throw;
+        }
+    }
+    [JSInvokable] public void AddGuideAt(string orientation, double positionMm) {
+        try
+        {
+     if (Enum.TryParse<GuideOrientation>(orientation, true, out var parsed)) State.AddGuideAt(parsed, positionMm); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddGuideAt)} failed.");
+            throw;
+        }
+    }
+    [JSInvokable] public void CommitGuide(string id, double positionMm) {
+        try
+        {
+     if (Guid.TryParse(id, out var guid)) State.CommitGuide(guid, positionMm); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(CommitGuide)} failed.");
+            throw;
+        }
+    }
+    [JSInvokable] public void DeleteGuide(string id) {
+        try
+        {
+     if (Guid.TryParse(id, out var guid)) State.DeleteGuide(guid); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(DeleteGuide)} failed.");
+            throw;
+        }
+    }
     [JSInvokable] public void CommitConnector(string sourceId, string sourceAnchor, string targetId, string targetAnchor, string tool)
     {
-        if (!Guid.TryParse(sourceId, out var sourceGuid) || !Guid.TryParse(targetId, out var targetGuid)) return;
-        if (!Enum.TryParse<ConnectorAnchor>(sourceAnchor, true, out var parsedSource) || !Enum.TryParse<ConnectorAnchor>(targetAnchor, true, out var parsedTarget)) return;
-        var marker = string.Equals(tool, nameof(ConnectorToolKind.Arrow), StringComparison.OrdinalIgnoreCase) ? ConnectorMarker.Arrow : ConnectorMarker.None;
-        State.AddConnector(sourceGuid, parsedSource, targetGuid, parsedTarget, marker);
+        try
+        {
+            if (!Guid.TryParse(sourceId, out var sourceGuid) || !Guid.TryParse(targetId, out var targetGuid)) return;
+            if (!Enum.TryParse<ConnectorAnchor>(sourceAnchor, true, out var parsedSource) || !Enum.TryParse<ConnectorAnchor>(targetAnchor, true, out var parsedTarget)) return;
+            var marker = string.Equals(tool, nameof(ConnectorToolKind.Arrow), StringComparison.OrdinalIgnoreCase) ? ConnectorMarker.Arrow : ConnectorMarker.None;
+            State.AddConnector(sourceGuid, parsedSource, targetGuid, parsedTarget, marker);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(CommitConnector)} failed.");
+            throw;
+        }
     }
     [JSInvokable] public void ReconnectConnector(string connectorId, string endpoint, string elementId, string anchor)
     {
-        if (!Guid.TryParse(connectorId, out var connectorGuid) || !Guid.TryParse(elementId, out var elementGuid)) return;
-        if (!Enum.TryParse<ConnectorAnchor>(anchor, true, out var parsedAnchor)) return;
-        State.ReconnectConnector(connectorGuid, string.Equals(endpoint, "source", StringComparison.OrdinalIgnoreCase), elementGuid, parsedAnchor);
+        try
+        {
+            if (!Guid.TryParse(connectorId, out var connectorGuid) || !Guid.TryParse(elementId, out var elementGuid)) return;
+            if (!Enum.TryParse<ConnectorAnchor>(anchor, true, out var parsedAnchor)) return;
+            State.ReconnectConnector(connectorGuid, string.Equals(endpoint, "source", StringComparison.OrdinalIgnoreCase), elementGuid, parsedAnchor);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ReconnectConnector)} failed.");
+            throw;
+        }
     }
     [JSInvokable]
     public void CommitSignalConnector(string sourceKind, string sourceId, string sourceAnchor, double sourceX, double sourceY,
         string targetKind, string targetId, string targetAnchor, double targetX, double targetY, string tool)
     {
-        if (!TryConnectorEndpoint(sourceKind, sourceId, sourceAnchor, sourceX, sourceY, out var source) ||
-            !TryConnectorEndpoint(targetKind, targetId, targetAnchor, targetX, targetY, out var target)) return;
-        var marker = string.Equals(tool, nameof(ConnectorToolKind.SignalArrow), StringComparison.OrdinalIgnoreCase)
-            ? ConnectorMarker.Arrow : ConnectorMarker.None;
-        State.AddSignalConnector(source, target, marker);
+        try
+        {
+            if (!TryConnectorEndpoint(sourceKind, sourceId, sourceAnchor, sourceX, sourceY, out var source) ||
+                !TryConnectorEndpoint(targetKind, targetId, targetAnchor, targetX, targetY, out var target)) return;
+            var marker = string.Equals(tool, nameof(ConnectorToolKind.SignalArrow), StringComparison.OrdinalIgnoreCase)
+                ? ConnectorMarker.Arrow : ConnectorMarker.None;
+            State.AddSignalConnector(source, target, marker);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(CommitSignalConnector)} failed.");
+            throw;
+        }
     }
     [JSInvokable]
     public void ReconnectSignalConnector(string connectorId, string endpoint, string kind, string elementId, string anchor, double x, double y)
     {
-        if (!Guid.TryParse(connectorId, out var connectorGuid) ||
-            !TryConnectorEndpoint(kind, elementId, anchor, x, y, out var replacement)) return;
-        State.ReconnectConnectorEndpoint(connectorGuid, string.Equals(endpoint, "source", StringComparison.OrdinalIgnoreCase), replacement);
+        try
+        {
+            if (!Guid.TryParse(connectorId, out var connectorGuid) ||
+                !TryConnectorEndpoint(kind, elementId, anchor, x, y, out var replacement)) return;
+            State.ReconnectConnectorEndpoint(connectorGuid, string.Equals(endpoint, "source", StringComparison.OrdinalIgnoreCase), replacement);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ReconnectSignalConnector)} failed.");
+            throw;
+        }
     }
     private bool TryConnectorEndpoint(string kind, string elementId, string anchor, double x, double y, out ConnectorEndpoint endpoint)
     {
-        endpoint = new ConnectorEndpoint();
-        if (!Enum.TryParse<ConnectorEndpointKind>(kind, true, out var parsedKind)) return false;
-        endpoint.Kind = parsedKind;
-        endpoint.X = Math.Clamp(x, 0, State.CurrentPage.WidthMm);
-        endpoint.Y = Math.Clamp(y, 0, State.CurrentPage.HeightMm);
-        if (parsedKind == ConnectorEndpointKind.Canvas) return true;
-        if (!Guid.TryParse(elementId, out var elementGuid) || !Enum.TryParse<ConnectorAnchor>(anchor, true, out var parsedAnchor)) return false;
-        endpoint.ElementId = elementGuid;
-        endpoint.Anchor = parsedAnchor;
-        return true;
+        try
+        {
+            endpoint = new ConnectorEndpoint();
+            if (!Enum.TryParse<ConnectorEndpointKind>(kind, true, out var parsedKind)) return false;
+            endpoint.Kind = parsedKind;
+            endpoint.X = Math.Clamp(x, 0, State.CurrentPage.WidthMm);
+            endpoint.Y = Math.Clamp(y, 0, State.CurrentPage.HeightMm);
+            if (parsedKind == ConnectorEndpointKind.Canvas) return true;
+            if (!Guid.TryParse(elementId, out var elementGuid) || !Enum.TryParse<ConnectorAnchor>(anchor, true, out var parsedAnchor)) return false;
+            endpoint.ElementId = elementGuid;
+            endpoint.Anchor = parsedAnchor;
+            return true;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(TryConnectorEndpoint)} failed.");
+            throw;
+        }
     }
     [JSInvokable]
     public void CommitConnectorAdvanced(
@@ -965,11 +1174,20 @@
         string targetKind, string targetId, string targetAnchor, string targetPortId, bool targetCreatePort, double targetRelativeX, double targetRelativeY, double targetX, double targetY,
         string tool)
     {
-        if (!TryConnectorEndpointAdvanced(sourceKind, sourceId, sourceAnchor, sourcePortId, sourceCreatePort, sourceRelativeX, sourceRelativeY, sourceX, sourceY, out var source, out var pendingSource) ||
-            !TryConnectorEndpointAdvanced(targetKind, targetId, targetAnchor, targetPortId, targetCreatePort, targetRelativeX, targetRelativeY, targetX, targetY, out var target, out var pendingTarget)) return;
-        var marker = tool is nameof(ConnectorToolKind.Arrow) or nameof(ConnectorToolKind.SignalArrow) ? ConnectorMarker.Arrow : ConnectorMarker.None;
-        var signal = tool is nameof(ConnectorToolKind.SignalConnector) or nameof(ConnectorToolKind.SignalArrow);
-        State.AddConnectorAdvanced(source, target, marker, signal, pendingSource, pendingTarget);
+        try
+        {
+            if (!TryConnectorEndpointAdvanced(sourceKind, sourceId, sourceAnchor, sourcePortId, sourceCreatePort, sourceRelativeX, sourceRelativeY, sourceX, sourceY, out var source, out var pendingSource) ||
+                !TryConnectorEndpointAdvanced(targetKind, targetId, targetAnchor, targetPortId, targetCreatePort, targetRelativeX, targetRelativeY, targetX, targetY, out var target, out var pendingTarget)) return;
+            var marker = tool is nameof(ConnectorToolKind.Arrow) or nameof(ConnectorToolKind.SignalArrow) ? ConnectorMarker.Arrow : ConnectorMarker.None;
+            var signal = tool is nameof(ConnectorToolKind.SignalConnector) or nameof(ConnectorToolKind.SignalArrow);
+            State.AddConnectorAdvanced(source, target, marker, signal, pendingSource, pendingTarget);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(CommitConnectorAdvanced)} failed.");
+            throw;
+        }
     }
 
     [JSInvokable]
@@ -977,103 +1195,329 @@
         string connectorId, string endpoint,
         string kind, string elementId, string anchor, string portId, bool createPort, double relativeX, double relativeY, double x, double y)
     {
-        if (!Guid.TryParse(connectorId, out var connectorGuid) ||
-            !TryConnectorEndpointAdvanced(kind, elementId, anchor, portId, createPort, relativeX, relativeY, x, y, out var replacement, out var pendingPort)) return;
-        State.ReconnectConnectorEndpoint(connectorGuid, string.Equals(endpoint, "source", StringComparison.OrdinalIgnoreCase), replacement, pendingPort);
+        try
+        {
+            if (!Guid.TryParse(connectorId, out var connectorGuid) ||
+                !TryConnectorEndpointAdvanced(kind, elementId, anchor, portId, createPort, relativeX, relativeY, x, y, out var replacement, out var pendingPort)) return;
+            State.ReconnectConnectorEndpoint(connectorGuid, string.Equals(endpoint, "source", StringComparison.OrdinalIgnoreCase), replacement, pendingPort);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ReconnectConnectorAdvanced)} failed.");
+            throw;
+        }
     }
 
     [JSInvokable]
     public void CommitConnectorControl(string connectorId, int controlIndex, double x, double y)
     {
-        if (Guid.TryParse(connectorId, out var connectorGuid)) State.CommitConnectorControl(connectorGuid, controlIndex, x, y);
+        try
+        {
+            if (Guid.TryParse(connectorId, out var connectorGuid)) State.CommitConnectorControl(connectorGuid, controlIndex, x, y);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(CommitConnectorControl)} failed.");
+            throw;
+        }
     }
 
     [JSInvokable]
     public void CommitConnectorRoute(string connectorId, double control1X, double control1Y, double control2X, double control2Y)
     {
-        if (Guid.TryParse(connectorId, out var connectorGuid)) State.CommitConnectorRoute(connectorGuid, control1X, control1Y, control2X, control2Y);
+        try
+        {
+            if (Guid.TryParse(connectorId, out var connectorGuid)) State.CommitConnectorRoute(connectorGuid, control1X, control1Y, control2X, control2Y);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(CommitConnectorRoute)} failed.");
+            throw;
+        }
     }
 
     private bool TryConnectorEndpointAdvanced(
         string kind, string elementId, string anchor, string portId, bool createPort, double relativeX, double relativeY, double x, double y,
         out ConnectorEndpoint endpoint, out PublicationConnectorPort? pendingPort)
     {
-        pendingPort = null;
-        endpoint = new ConnectorEndpoint();
-        if (!Enum.TryParse<ConnectorEndpointKind>(kind, true, out var parsedKind)) return false;
-        endpoint.Kind = parsedKind;
-        endpoint.X = Math.Clamp(x, 0, State.CurrentPage.WidthMm);
-        endpoint.Y = Math.Clamp(y, 0, State.CurrentPage.HeightMm);
-        if (parsedKind == ConnectorEndpointKind.Canvas) return true;
-        if (!Guid.TryParse(elementId, out var elementGuid)) return false;
-        endpoint.ElementId = elementGuid;
-        endpoint.Anchor = Enum.TryParse<ConnectorAnchor>(anchor, true, out var parsedAnchor) ? parsedAnchor : ConnectorAnchor.Center;
-        if (Guid.TryParse(portId, out var parsedPortId)) endpoint.PortId = parsedPortId;
-        if (createPort)
+        try
         {
-            pendingPort = new PublicationConnectorPort
+            pendingPort = null;
+            endpoint = new ConnectorEndpoint();
+            if (!Enum.TryParse<ConnectorEndpointKind>(kind, true, out var parsedKind)) return false;
+            endpoint.Kind = parsedKind;
+            endpoint.X = Math.Clamp(x, 0, State.CurrentPage.WidthMm);
+            endpoint.Y = Math.Clamp(y, 0, State.CurrentPage.HeightMm);
+            if (parsedKind == ConnectorEndpointKind.Canvas) return true;
+            if (!Guid.TryParse(elementId, out var elementGuid)) return false;
+            endpoint.ElementId = elementGuid;
+            endpoint.Anchor = Enum.TryParse<ConnectorAnchor>(anchor, true, out var parsedAnchor) ? parsedAnchor : ConnectorAnchor.Center;
+            if (Guid.TryParse(portId, out var parsedPortId)) endpoint.PortId = parsedPortId;
+            if (createPort)
             {
-                Name = "Connector point",
-                XPercent = Math.Clamp(relativeX, 0, 1),
-                YPercent = Math.Clamp(relativeY, 0, 1)
-            };
-            endpoint.PortId = pendingPort.Id;
-            endpoint.Anchor = ConnectorAnchor.Center;
+                pendingPort = new PublicationConnectorPort
+                {
+                    Name = "Connector point",
+                    XPercent = Math.Clamp(relativeX, 0, 1),
+                    YPercent = Math.Clamp(relativeY, 0, 1)
+                };
+                endpoint.PortId = pendingPort.Id;
+                endpoint.Anchor = ConnectorAnchor.Center;
+            }
+            return true;
+    
         }
-        return true;
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(TryConnectorEndpointAdvanced)} failed.");
+            throw;
+        }
     }
 
-    [JSInvokable] public void CancelActiveTool() => State.CancelActiveTool();
-    [JSInvokable] public Task DropInsert(string kind, double x, double y) => RequestCanvasInsert.InvokeAsync(new CanvasInsertRequest(kind, x, y));
-    [JSInvokable] public void SetInsertionPoint(double x, double y) => State.SetInsertionPoint(x, y);
+    [JSInvokable] public void CancelActiveTool() {
+        try
+        {
+            State.CancelActiveTool();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(CancelActiveTool)} failed.");
+            throw;
+        }
+    }
+    [JSInvokable] public Task DropInsert(string kind, double x, double y) {
+        try
+        {
+            return RequestCanvasInsert.InvokeAsync(new CanvasInsertRequest(kind, x, y));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(DropInsert)} failed.");
+            throw;
+        }
+    }
+    [JSInvokable] public void SetInsertionPoint(double x, double y) {
+        try
+        {
+            State.SetInsertionPoint(x, y);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SetInsertionPoint)} failed.");
+            throw;
+        }
+    }
     [JSInvokable]
     public Task CompleteExternalFileDrop(string assetId, string kind, string name, string mimeType, long size,
         double durationSeconds, int pixelWidth, int pixelHeight, double x, double y,
         string? targetElementId, string? targetElementKind, double targetX, double targetY)
     {
-        if (!Guid.TryParse(assetId, out var parsed))
-            return RequestExternalDropError.InvokeAsync("The dropped file could not be registered.");
-        Guid? parsedTargetId = Guid.TryParse(targetElementId, out var targetId) ? targetId : null;
-        return RequestExternalFileDrop.InvokeAsync(new ExternalFileDropRequest(
-            parsed, kind, name, mimeType, size, durationSeconds, pixelWidth, pixelHeight, x, y,
-            parsedTargetId, targetElementKind ?? string.Empty, targetX, targetY));
+        try
+        {
+            if (!Guid.TryParse(assetId, out var parsed))
+                return RequestExternalDropError.InvokeAsync("The dropped file could not be registered.");
+            Guid? parsedTargetId = Guid.TryParse(targetElementId, out var targetId) ? targetId : null;
+            return RequestExternalFileDrop.InvokeAsync(new ExternalFileDropRequest(
+                parsed, kind, name, mimeType, size, durationSeconds, pixelWidth, pixelHeight, x, y,
+                parsedTargetId, targetElementKind ?? string.Empty, targetX, targetY));
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(CompleteExternalFileDrop)} failed.");
+            throw;
+        }
     }
-    [JSInvokable] public Task ExternalFileDropFailed(string message) => RequestExternalDropError.InvokeAsync(message);
-    [JSInvokable] public void KeyboardCopy() => State.CopySelected();
-    [JSInvokable] public void KeyboardCut() => State.CutSelected();
-    [JSInvokable] public void KeyboardPaste() => State.Paste();
-    [JSInvokable] public void KeyboardDuplicate() => State.DuplicateSelected();
-    [JSInvokable] public void KeyboardDelete() => State.DeleteSelected();
-    [JSInvokable] public void KeyboardSelectAll() => State.SelectAll();
-    [JSInvokable] public void KeyboardGroup() => State.GroupSelected();
-    [JSInvokable] public void KeyboardUngroup() => State.UngroupSelected();
-    [JSInvokable] public void KeyboardUndo() => State.Undo();
-    [JSInvokable] public void KeyboardRedo() => State.Redo();
-    [JSInvokable] public void KeyboardNudge(double dx, double dy) => State.NudgeSelection(dx, dy);
+    [JSInvokable] public Task ExternalFileDropFailed(string message) {
+        try
+        {
+            return RequestExternalDropError.InvokeAsync(message);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ExternalFileDropFailed)} failed.");
+            throw;
+        }
+    }
+    [JSInvokable] public void KeyboardCopy() {
+        try
+        {
+            State.CopySelected();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(KeyboardCopy)} failed.");
+            throw;
+        }
+    }
+    [JSInvokable] public void KeyboardCut() {
+        try
+        {
+            State.CutSelected();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(KeyboardCut)} failed.");
+            throw;
+        }
+    }
+    [JSInvokable] public void KeyboardPaste() {
+        try
+        {
+            State.Paste();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(KeyboardPaste)} failed.");
+            throw;
+        }
+    }
+    [JSInvokable] public void KeyboardDuplicate() {
+        try
+        {
+            State.DuplicateSelected();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(KeyboardDuplicate)} failed.");
+            throw;
+        }
+    }
+    [JSInvokable] public void KeyboardDelete() {
+        try
+        {
+            State.DeleteSelected();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(KeyboardDelete)} failed.");
+            throw;
+        }
+    }
+    [JSInvokable] public void KeyboardSelectAll() {
+        try
+        {
+            State.SelectAll();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(KeyboardSelectAll)} failed.");
+            throw;
+        }
+    }
+    [JSInvokable] public void KeyboardGroup() {
+        try
+        {
+            State.GroupSelected();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(KeyboardGroup)} failed.");
+            throw;
+        }
+    }
+    [JSInvokable] public void KeyboardUngroup() {
+        try
+        {
+            State.UngroupSelected();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(KeyboardUngroup)} failed.");
+            throw;
+        }
+    }
+    [JSInvokable] public void KeyboardUndo() {
+        try
+        {
+            State.Undo();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(KeyboardUndo)} failed.");
+            throw;
+        }
+    }
+    [JSInvokable] public void KeyboardRedo() {
+        try
+        {
+            State.Redo();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(KeyboardRedo)} failed.");
+            throw;
+        }
+    }
+    [JSInvokable] public void KeyboardNudge(double dx, double dy) {
+        try
+        {
+            State.NudgeSelection(dx, dy);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(KeyboardNudge)} failed.");
+            throw;
+        }
+    }
     [JSInvokable]
     public void KeyboardLayerMove(string command)
     {
-        switch ((command ?? string.Empty).Trim().ToLowerInvariant())
+        try
         {
-            case "front": State.BringToFront(); break;
-            case "forward": State.BringForward(); break;
-            case "backward": State.SendBackward(); break;
-            case "back": State.SendToBack(); break;
+            switch ((command ?? string.Empty).Trim().ToLowerInvariant())
+            {
+                case "front": State.BringToFront(); break;
+                case "forward": State.BringForward(); break;
+                case "backward": State.SendBackward(); break;
+                case "back": State.SendToBack(); break;
+            }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(KeyboardLayerMove)} failed.");
+            throw;
         }
     }
     [JSInvokable]
     public Task ReportCanvasInteractionError(string operation, string message)
     {
-        var safeOperation = string.IsNullOrWhiteSpace(operation) ? "Canvas interaction" : operation.Trim();
-        var safeMessage = string.IsNullOrWhiteSpace(message) ? "The browser interaction could not be completed." : message.Trim();
-        Logger.LogWarning("Mainframe browser interaction {Operation} failed: {Message}", safeOperation, safeMessage);
-        Notifications.Warning(safeMessage, safeOperation, nameof(PageSurface));
-        return Task.CompletedTask;
+        try
+        {
+            var safeOperation = string.IsNullOrWhiteSpace(operation) ? "Canvas interaction" : operation.Trim();
+            var safeMessage = string.IsNullOrWhiteSpace(message) ? "The browser interaction could not be completed." : message.Trim();
+            Logger.LogWarning("Mainframe browser interaction {Operation} failed: {Message}", safeOperation, safeMessage);
+            Notifications.Warning(safeMessage, safeOperation, nameof(PageSurface));
+            return Task.CompletedTask;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ReportCanvasInteractionError)} failed.");
+            throw;
+        }
     }
 
-    private void ResetPointerState() => State.CancelActiveTool();
+    private void ResetPointerState() {
+        try
+        {
+            State.CancelActiveTool();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ResetPointerState)} failed.");
+            throw;
+        }
+    }
 
-    private string ElementDesignerHelp(PublicationElement element) => element switch
+    private string ElementDesignerHelp(PublicationElement element) {
+        try
+        {
+            return element switch
     {
         TextFrameElement => "Double-click to open Story Editor. Right-click for text-frame commands; drag to move and use the handles to resize.",
         ImageFrameElement => "Double-click to enter picture crop positioning. Right-click to open Picture Studio, replace, crop, fit, or transform the picture.",
@@ -1089,255 +1533,1478 @@
         ShapeElement => "Right-click to change the shape type. Drag to move and use the handles to resize or rotate.",
         _ => "Right-click for object commands. Drag to move and use the handles to resize or rotate."
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ElementDesignerHelp)} failed.");
+            throw;
+        }
+    }
 
     private Task DoubleClick(PublicationElement element)
     {
-        if (element is TextFrameElement) return EditTextRequested.InvokeAsync(element.Id);
-        if (element is ImageFrameElement) State.ToggleCropMode();
-        if (element is DataVisualElement) return RequestEditDataVisual.InvokeAsync();
-        if (element is DevExtremeComponentElement) return RequestEditComponent.InvokeAsync();
-        if (element is SpreadsheetElement) return RequestEditSpreadsheet.InvokeAsync();
-        if (element is PublicationMediaElement) return RequestEditMedia.InvokeAsync();
-        if (element is BarcodeElement) return RequestEditBarcode.InvokeAsync();
-        if (element is PanelElement or HtmlEmbedElement) return RequestEditPanel.InvokeAsync();
-        if (element is LiveSourceElement liveSource) return ActivateLiveSource(liveSource);
-        return Task.CompletedTask;
+        try
+        {
+            if (element is TextFrameElement) return EditTextRequested.InvokeAsync(element.Id);
+            if (element is ImageFrameElement) State.ToggleCropMode();
+            if (element is DataVisualElement) return RequestEditDataVisual.InvokeAsync();
+            if (element is DevExtremeComponentElement) return RequestEditComponent.InvokeAsync();
+            if (element is SpreadsheetElement) return RequestEditSpreadsheet.InvokeAsync();
+            if (element is PublicationMediaElement) return RequestEditMedia.InvokeAsync();
+            if (element is BarcodeElement) return RequestEditBarcode.InvokeAsync();
+            if (element is PanelElement or HtmlEmbedElement) return RequestEditPanel.InvokeAsync();
+            if (element is LiveSourceElement liveSource) return ActivateLiveSource(liveSource);
+            return Task.CompletedTask;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(DoubleClick)} failed.");
+            throw;
+        }
     }
 
     private async Task ShowElementContextMenu(PublicationElement element, MouseEventArgs args)
     {
-        if (!InteractionEnabled) return;
-        State.SetPrimarySelection(element.Id);
-        if (element is not ConnectorElement)
+        try
         {
-            try
+            if (!InteractionEnabled) return;
+            State.SetPrimarySelection(element.Id);
+            if (element is not ConnectorElement)
             {
-                _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js").ConfigureAwait(true);
-                var point = await _module.InvokeAsync<double[]>("elementRelativePoint", "publisher-page", element.Id.ToString("D"), args.ClientX, args.ClientY).ConfigureAwait(true);
-                if (point.Length >= 2)
+                try
                 {
-                    _contextPortX = Math.Clamp(point[0], 0, 1);
-                    _contextPortY = Math.Clamp(point[1], 0, 1);
+                    _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js").ConfigureAwait(true);
+                    var point = await _module.InvokeAsync<double[]>("elementRelativePoint", "publisher-page", element.Id.ToString("D"), args.ClientX, args.ClientY).ConfigureAwait(true);
+                    if (point.Length >= 2)
+                    {
+                        _contextPortX = Math.Clamp(point[0], 0, 1);
+                        _contextPortY = Math.Clamp(point[1], 0, 1);
+                    }
                 }
+                catch { _contextPortX = _contextPortY = .5; }
             }
-            catch { _contextPortX = _contextPortY = .5; }
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            await _contextMenu.ShowAsync(args).ConfigureAwait(true);
+    
         }
-        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
-        await _contextMenu.ShowAsync(args).ConfigureAwait(true);
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ShowElementContextMenu)} failed.");
+            throw;
+        }
     }
 
     private async Task ShowPageContextMenu(MouseEventArgs args)
     {
-        if (!InteractionEnabled) return;
-        State.SelectElement(null);
-        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
-        await _contextMenu.ShowAsync(args).ConfigureAwait(true);
+        try
+        {
+            if (!InteractionEnabled) return;
+            State.SelectElement(null);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            await _contextMenu.ShowAsync(args).ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ShowPageContextMenu)} failed.");
+            throw;
+        }
     }
 
     private void AddConnectorPortHere()
     {
-        if (State.SelectedElement is { } element and not ConnectorElement)
-            State.AddConnectorPort(element.Id, _contextPortX, _contextPortY);
+        try
+        {
+            if (State.SelectedElement is { } element and not ConnectorElement)
+                State.AddConnectorPort(element.Id, _contextPortX, _contextPortY);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddConnectorPortHere)} failed.");
+            throw;
+        }
     }
     private void AddConnectorPortAtCenter()
     {
-        if (State.SelectedElement is { } element and not ConnectorElement)
-            State.AddConnectorPort(element.Id, .5, .5);
+        try
+        {
+            if (State.SelectedElement is { } element and not ConnectorElement)
+                State.AddConnectorPort(element.Id, .5, .5);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddConnectorPortAtCenter)} failed.");
+            throw;
+        }
     }
     private void ResetSelectedConnectorRoute()
     {
-        if (State.SelectedElement is ConnectorElement connector) State.ResetConnectorRoute(connector.Id);
+        try
+        {
+            if (State.SelectedElement is ConnectorElement connector) State.ResetConnectorRoute(connector.Id);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ResetSelectedConnectorRoute)} failed.");
+            throw;
+        }
     }
 
-    private Task EditSelectedStory() => State.SelectedElement is TextFrameElement text ? EditTextRequested.InvokeAsync(text.Id) : Task.CompletedTask;
-    private Task ReplaceSelectedPicture() => RequestReplacePicture.InvokeAsync();
-    private Task InsertPicture() => RequestPicture.InvokeAsync();
-    private Task CreatePicture() => RequestCreatePicture.InvokeAsync();
-    private Task EditSelectedPicture() => RequestEditPicture.InvokeAsync();
-    private Task InsertSpreadsheet() => RequestInsertSpreadsheet.InvokeAsync();
-    private Task CreateSpreadsheet() => RequestCreateSpreadsheet.InvokeAsync();
-    private Task EditSelectedSpreadsheet() => RequestEditSpreadsheet.InvokeAsync();
-    private Task DownloadSelectedSpreadsheet() => RequestDownloadSpreadsheet.InvokeAsync();
+    private Task EditSelectedStory() {
+        try
+        {
+            return State.SelectedElement is TextFrameElement text ? EditTextRequested.InvokeAsync(text.Id) : Task.CompletedTask;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(EditSelectedStory)} failed.");
+            throw;
+        }
+    }
+    private Task ReplaceSelectedPicture() {
+        try
+        {
+            return RequestReplacePicture.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ReplaceSelectedPicture)} failed.");
+            throw;
+        }
+    }
+    private Task InsertPicture() {
+        try
+        {
+            return RequestPicture.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertPicture)} failed.");
+            throw;
+        }
+    }
+    private Task CreatePicture() {
+        try
+        {
+            return RequestCreatePicture.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(CreatePicture)} failed.");
+            throw;
+        }
+    }
+    private Task EditSelectedPicture() {
+        try
+        {
+            return RequestEditPicture.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(EditSelectedPicture)} failed.");
+            throw;
+        }
+    }
+    private Task InsertSpreadsheet() {
+        try
+        {
+            return RequestInsertSpreadsheet.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertSpreadsheet)} failed.");
+            throw;
+        }
+    }
+    private Task CreateSpreadsheet() {
+        try
+        {
+            return RequestCreateSpreadsheet.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(CreateSpreadsheet)} failed.");
+            throw;
+        }
+    }
+    private Task EditSelectedSpreadsheet() {
+        try
+        {
+            return RequestEditSpreadsheet.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(EditSelectedSpreadsheet)} failed.");
+            throw;
+        }
+    }
+    private Task DownloadSelectedSpreadsheet() {
+        try
+        {
+            return RequestDownloadSpreadsheet.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(DownloadSelectedSpreadsheet)} failed.");
+            throw;
+        }
+    }
     private void ToggleSpreadsheetGridLines()
     {
-        if (State.SelectedElement is SpreadsheetElement spreadsheet)
-            State.UpdateSelected(_ => spreadsheet.ShowGridLines = !spreadsheet.ShowGridLines);
+        try
+        {
+            if (State.SelectedElement is SpreadsheetElement spreadsheet)
+                State.UpdateSelected(_ => spreadsheet.ShowGridLines = !spreadsheet.ShowGridLines);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ToggleSpreadsheetGridLines)} failed.");
+            throw;
+        }
     }
     private void ToggleSpreadsheetSheetName()
     {
-        if (State.SelectedElement is SpreadsheetElement spreadsheet)
-            State.UpdateSelected(_ => spreadsheet.ShowSheetName = !spreadsheet.ShowSheetName);
+        try
+        {
+            if (State.SelectedElement is SpreadsheetElement spreadsheet)
+                State.UpdateSelected(_ => spreadsheet.ShowSheetName = !spreadsheet.ShowSheetName);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ToggleSpreadsheetSheetName)} failed.");
+            throw;
+        }
     }
     private void SetTextFit(PublicationContentFitMode mode)
     {
-        if (State.SelectedElement is TextFrameElement text)
-            State.UpdateSelected(_ => text.ContentFit = mode);
+        try
+        {
+            if (State.SelectedElement is TextFrameElement text)
+                State.UpdateSelected(_ => text.ContentFit = mode);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SetTextFit)} failed.");
+            throw;
+        }
     }
-    private void TextFitClip() => SetTextFit(PublicationContentFitMode.Clip);
-    private void TextFitWhole() => SetTextFit(PublicationContentFitMode.Fit);
-    private void TextFitFill() => SetTextFit(PublicationContentFitMode.Fill);
-    private void TextFitStretch() => SetTextFit(PublicationContentFitMode.Stretch);
+    private void TextFitClip() {
+        try
+        {
+            SetTextFit(PublicationContentFitMode.Clip);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(TextFitClip)} failed.");
+            throw;
+        }
+    }
+    private void TextFitWhole() {
+        try
+        {
+            SetTextFit(PublicationContentFitMode.Fit);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(TextFitWhole)} failed.");
+            throw;
+        }
+    }
+    private void TextFitFill() {
+        try
+        {
+            SetTextFit(PublicationContentFitMode.Fill);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(TextFitFill)} failed.");
+            throw;
+        }
+    }
+    private void TextFitStretch() {
+        try
+        {
+            SetTextFit(PublicationContentFitMode.Stretch);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(TextFitStretch)} failed.");
+            throw;
+        }
+    }
     private void SetSpreadsheetFit(PublicationContentFitMode mode)
     {
-        if (State.SelectedElement is SpreadsheetElement spreadsheet)
-            State.UpdateSelected(_ => spreadsheet.ContentFit = mode);
+        try
+        {
+            if (State.SelectedElement is SpreadsheetElement spreadsheet)
+                State.UpdateSelected(_ => spreadsheet.ContentFit = mode);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SetSpreadsheetFit)} failed.");
+            throw;
+        }
     }
-    private void SpreadsheetFitClip() => SetSpreadsheetFit(PublicationContentFitMode.Clip);
-    private void SpreadsheetFitWhole() => SetSpreadsheetFit(PublicationContentFitMode.Fit);
-    private void SpreadsheetFitFill() => SetSpreadsheetFit(PublicationContentFitMode.Fill);
-    private void SpreadsheetFitStretch() => SetSpreadsheetFit(PublicationContentFitMode.Stretch);
-    private Task EditSelectedDataVisual() => RequestEditDataVisual.InvokeAsync();
-    private Task EditSelectedComponent() => RequestEditComponent.InvokeAsync();
-    private void ComponentPageScope() => SetSelectedComponentScope(PublicationComponentScope.Page);
-    private void ComponentDocumentScope() => SetSelectedComponentScope(PublicationComponentScope.Document);
-    private void SetSelectedComponentScope(PublicationComponentScope scope) => State.SetSelectedComponentScope(scope);
-    private Task InsertComponentGrid() => RequestInsertComponent.InvokeAsync(PublicationComponentKind.DataGrid);
-    private Task InsertComponentTreeList() => RequestInsertComponent.InvokeAsync(PublicationComponentKind.TreeList);
-    private Task InsertComponentScheduler() => RequestInsertComponent.InvokeAsync(PublicationComponentKind.Scheduler);
-    private Task InsertComponentForm() => RequestInsertComponent.InvokeAsync(PublicationComponentKind.Form);
-    private Task InsertComponentMenu() => RequestInsertComponent.InvokeAsync(PublicationComponentKind.Menu);
-    private Task InsertComponentPivotGrid() => RequestInsertComponent.InvokeAsync(PublicationComponentKind.PivotGrid);
-    private Task InsertComponentButton() => RequestInsertComponent.InvokeAsync(PublicationComponentKind.Button);
-    private Task ManageData() => RequestManageData.InvokeAsync();
-    private Task InsertVideo() => RequestInsertVideo.InvokeAsync();
-    private Task InsertAudio() => RequestInsertAudio.InvokeAsync();
-    private Task CreateVideo() => RequestCreateVideo.InvokeAsync();
-    private Task CreateAudio() => RequestCreateAudio.InvokeAsync();
-    private Task ActivateSelectedLiveSource() => State.SelectedElement is LiveSourceElement liveSource
+    private void SpreadsheetFitClip() {
+        try
+        {
+            SetSpreadsheetFit(PublicationContentFitMode.Clip);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SpreadsheetFitClip)} failed.");
+            throw;
+        }
+    }
+    private void SpreadsheetFitWhole() {
+        try
+        {
+            SetSpreadsheetFit(PublicationContentFitMode.Fit);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SpreadsheetFitWhole)} failed.");
+            throw;
+        }
+    }
+    private void SpreadsheetFitFill() {
+        try
+        {
+            SetSpreadsheetFit(PublicationContentFitMode.Fill);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SpreadsheetFitFill)} failed.");
+            throw;
+        }
+    }
+    private void SpreadsheetFitStretch() {
+        try
+        {
+            SetSpreadsheetFit(PublicationContentFitMode.Stretch);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SpreadsheetFitStretch)} failed.");
+            throw;
+        }
+    }
+    private Task EditSelectedDataVisual() {
+        try
+        {
+            return RequestEditDataVisual.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(EditSelectedDataVisual)} failed.");
+            throw;
+        }
+    }
+    private Task EditSelectedComponent() {
+        try
+        {
+            return RequestEditComponent.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(EditSelectedComponent)} failed.");
+            throw;
+        }
+    }
+    private void ComponentPageScope() {
+        try
+        {
+            SetSelectedComponentScope(PublicationComponentScope.Page);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ComponentPageScope)} failed.");
+            throw;
+        }
+    }
+    private void ComponentDocumentScope() {
+        try
+        {
+            SetSelectedComponentScope(PublicationComponentScope.Document);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ComponentDocumentScope)} failed.");
+            throw;
+        }
+    }
+    private void SetSelectedComponentScope(PublicationComponentScope scope) {
+        try
+        {
+            State.SetSelectedComponentScope(scope);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SetSelectedComponentScope)} failed.");
+            throw;
+        }
+    }
+    private Task InsertComponentGrid() {
+        try
+        {
+            return RequestInsertComponent.InvokeAsync(PublicationComponentKind.DataGrid);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertComponentGrid)} failed.");
+            throw;
+        }
+    }
+    private Task InsertComponentTreeList() {
+        try
+        {
+            return RequestInsertComponent.InvokeAsync(PublicationComponentKind.TreeList);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertComponentTreeList)} failed.");
+            throw;
+        }
+    }
+    private Task InsertComponentScheduler() {
+        try
+        {
+            return RequestInsertComponent.InvokeAsync(PublicationComponentKind.Scheduler);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertComponentScheduler)} failed.");
+            throw;
+        }
+    }
+    private Task InsertComponentForm() {
+        try
+        {
+            return RequestInsertComponent.InvokeAsync(PublicationComponentKind.Form);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertComponentForm)} failed.");
+            throw;
+        }
+    }
+    private Task InsertComponentMenu() {
+        try
+        {
+            return RequestInsertComponent.InvokeAsync(PublicationComponentKind.Menu);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertComponentMenu)} failed.");
+            throw;
+        }
+    }
+    private Task InsertComponentPivotGrid() {
+        try
+        {
+            return RequestInsertComponent.InvokeAsync(PublicationComponentKind.PivotGrid);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertComponentPivotGrid)} failed.");
+            throw;
+        }
+    }
+    private Task InsertComponentButton() {
+        try
+        {
+            return RequestInsertComponent.InvokeAsync(PublicationComponentKind.Button);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertComponentButton)} failed.");
+            throw;
+        }
+    }
+    private Task ManageData() {
+        try
+        {
+            return RequestManageData.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ManageData)} failed.");
+            throw;
+        }
+    }
+    private Task InsertVideo() {
+        try
+        {
+            return RequestInsertVideo.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertVideo)} failed.");
+            throw;
+        }
+    }
+    private Task InsertAudio() {
+        try
+        {
+            return RequestInsertAudio.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertAudio)} failed.");
+            throw;
+        }
+    }
+    private Task CreateVideo() {
+        try
+        {
+            return RequestCreateVideo.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(CreateVideo)} failed.");
+            throw;
+        }
+    }
+    private Task CreateAudio() {
+        try
+        {
+            return RequestCreateAudio.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(CreateAudio)} failed.");
+            throw;
+        }
+    }
+    private Task ActivateSelectedLiveSource() {
+        try
+        {
+            return State.SelectedElement is LiveSourceElement liveSource
         ? ActivateLiveSource(liveSource)
         : Task.CompletedTask;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ActivateSelectedLiveSource)} failed.");
+            throw;
+        }
+    }
     private async Task ActivateLiveSource(LiveSourceElement liveSource)
     {
-        try { await JS.InvokeVoidAsync("publisherStreaming.activateSource", liveSource.Id.ToString("N")).ConfigureAwait(true); }
-        catch { }
+        try
+        {
+            try { await JS.InvokeVoidAsync("publisherStreaming.activateSource", liveSource.Id.ToString("N")).ConfigureAwait(true); }
+            catch { }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ActivateLiveSource)} failed.");
+            throw;
+        }
     }
     private void UpdateSelectedLiveSource(Action<LiveSourceElement> update)
     {
-        if (State.SelectedElement is LiveSourceElement liveSource) State.UpdateSelected(_ => update(liveSource));
+        try
+        {
+            if (State.SelectedElement is LiveSourceElement liveSource) State.UpdateSelected(_ => update(liveSource));
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(UpdateSelectedLiveSource)} failed.");
+            throw;
+        }
     }
-    private void SetSelectedLiveSourceKind(PublicationLiveSourceKind kind) => UpdateSelectedLiveSource(source => source.SourceKind = kind);
-    private void LiveSourceCamera() => SetSelectedLiveSourceKind(PublicationLiveSourceKind.Camera);
-    private void LiveSourceScreen() => SetSelectedLiveSourceKind(PublicationLiveSourceKind.Screen);
-    private void LiveSourceWindow() => SetSelectedLiveSourceKind(PublicationLiveSourceKind.Window);
-    private void LiveSourceBrowserTab() => SetSelectedLiveSourceKind(PublicationLiveSourceKind.BrowserTab);
-    private void LiveSourceCaptureDevice() => SetSelectedLiveSourceKind(PublicationLiveSourceKind.CaptureDevice);
-    private void LiveSourceMicrophone() => SetSelectedLiveSourceKind(PublicationLiveSourceKind.Microphone);
-    private void LiveSourceSystemAudio() => SetSelectedLiveSourceKind(PublicationLiveSourceKind.SystemAudio);
-    private void LiveSourceApplicationAudio() => SetSelectedLiveSourceKind(PublicationLiveSourceKind.ApplicationAudio);
-    private void LiveSourceNetworkMedia() => SetSelectedLiveSourceKind(PublicationLiveSourceKind.NetworkMedia);
-    private void LiveSourceNowPlaying() => SetSelectedLiveSourceKind(PublicationLiveSourceKind.NowPlaying);
-    private void ToggleLiveSourceAudio() => UpdateSelectedLiveSource(source => source.IncludeAudio = !source.IncludeAudio);
-    private void ToggleLiveSourceMuted() => UpdateSelectedLiveSource(source => source.Muted = !source.Muted);
-    private void SetSelectedLiveSourceFit(PublicationLiveSourceFitMode fit) => UpdateSelectedLiveSource(source => source.FitMode = fit);
-    private void LiveSourceFitContain() => SetSelectedLiveSourceFit(PublicationLiveSourceFitMode.Contain);
-    private void LiveSourceFitCover() => SetSelectedLiveSourceFit(PublicationLiveSourceFitMode.Cover);
-    private void LiveSourceFitStretch() => SetSelectedLiveSourceFit(PublicationLiveSourceFitMode.Stretch);
+    private void SetSelectedLiveSourceKind(PublicationLiveSourceKind kind) {
+        try
+        {
+            UpdateSelectedLiveSource(source => source.SourceKind = kind);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SetSelectedLiveSourceKind)} failed.");
+            throw;
+        }
+    }
+    private void LiveSourceCamera() {
+        try
+        {
+            SetSelectedLiveSourceKind(PublicationLiveSourceKind.Camera);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(LiveSourceCamera)} failed.");
+            throw;
+        }
+    }
+    private void LiveSourceScreen() {
+        try
+        {
+            SetSelectedLiveSourceKind(PublicationLiveSourceKind.Screen);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(LiveSourceScreen)} failed.");
+            throw;
+        }
+    }
+    private void LiveSourceWindow() {
+        try
+        {
+            SetSelectedLiveSourceKind(PublicationLiveSourceKind.Window);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(LiveSourceWindow)} failed.");
+            throw;
+        }
+    }
+    private void LiveSourceBrowserTab() {
+        try
+        {
+            SetSelectedLiveSourceKind(PublicationLiveSourceKind.BrowserTab);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(LiveSourceBrowserTab)} failed.");
+            throw;
+        }
+    }
+    private void LiveSourceCaptureDevice() {
+        try
+        {
+            SetSelectedLiveSourceKind(PublicationLiveSourceKind.CaptureDevice);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(LiveSourceCaptureDevice)} failed.");
+            throw;
+        }
+    }
+    private void LiveSourceMicrophone() {
+        try
+        {
+            SetSelectedLiveSourceKind(PublicationLiveSourceKind.Microphone);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(LiveSourceMicrophone)} failed.");
+            throw;
+        }
+    }
+    private void LiveSourceSystemAudio() {
+        try
+        {
+            SetSelectedLiveSourceKind(PublicationLiveSourceKind.SystemAudio);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(LiveSourceSystemAudio)} failed.");
+            throw;
+        }
+    }
+    private void LiveSourceApplicationAudio() {
+        try
+        {
+            SetSelectedLiveSourceKind(PublicationLiveSourceKind.ApplicationAudio);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(LiveSourceApplicationAudio)} failed.");
+            throw;
+        }
+    }
+    private void LiveSourceNetworkMedia() {
+        try
+        {
+            SetSelectedLiveSourceKind(PublicationLiveSourceKind.NetworkMedia);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(LiveSourceNetworkMedia)} failed.");
+            throw;
+        }
+    }
+    private void LiveSourceNowPlaying() {
+        try
+        {
+            SetSelectedLiveSourceKind(PublicationLiveSourceKind.NowPlaying);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(LiveSourceNowPlaying)} failed.");
+            throw;
+        }
+    }
+    private void ToggleLiveSourceAudio() {
+        try
+        {
+            UpdateSelectedLiveSource(source => source.IncludeAudio = !source.IncludeAudio);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ToggleLiveSourceAudio)} failed.");
+            throw;
+        }
+    }
+    private void ToggleLiveSourceMuted() {
+        try
+        {
+            UpdateSelectedLiveSource(source => source.Muted = !source.Muted);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ToggleLiveSourceMuted)} failed.");
+            throw;
+        }
+    }
+    private void SetSelectedLiveSourceFit(PublicationLiveSourceFitMode fit) {
+        try
+        {
+            UpdateSelectedLiveSource(source => source.FitMode = fit);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SetSelectedLiveSourceFit)} failed.");
+            throw;
+        }
+    }
+    private void LiveSourceFitContain() {
+        try
+        {
+            SetSelectedLiveSourceFit(PublicationLiveSourceFitMode.Contain);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(LiveSourceFitContain)} failed.");
+            throw;
+        }
+    }
+    private void LiveSourceFitCover() {
+        try
+        {
+            SetSelectedLiveSourceFit(PublicationLiveSourceFitMode.Cover);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(LiveSourceFitCover)} failed.");
+            throw;
+        }
+    }
+    private void LiveSourceFitStretch() {
+        try
+        {
+            SetSelectedLiveSourceFit(PublicationLiveSourceFitMode.Stretch);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(LiveSourceFitStretch)} failed.");
+            throw;
+        }
+    }
 
-    private Task EditSelectedMedia() => RequestEditMedia.InvokeAsync();
-    private Task InsertBarcode() => RequestInsertBarcode.InvokeAsync();
-    private Task EditSelectedBarcode() => RequestEditBarcode.InvokeAsync();
-    private Task InsertPanel() => RequestInsertPanel.InvokeAsync();
-    private Task InsertHtmlEmbed() => RequestInsertHtmlEmbed.InvokeAsync();
-    private Task EditSelectedPanel() => RequestEditPanel.InvokeAsync();
-    private Task ToggleTimeline() => RequestToggleTimeline.InvokeAsync();
-    private Task PlaySelectedMedia() => State.SelectedElement is PublicationMediaElement media
+    private Task EditSelectedMedia() {
+        try
+        {
+            return RequestEditMedia.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(EditSelectedMedia)} failed.");
+            throw;
+        }
+    }
+    private Task InsertBarcode() {
+        try
+        {
+            return RequestInsertBarcode.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertBarcode)} failed.");
+            throw;
+        }
+    }
+    private Task EditSelectedBarcode() {
+        try
+        {
+            return RequestEditBarcode.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(EditSelectedBarcode)} failed.");
+            throw;
+        }
+    }
+    private Task InsertPanel() {
+        try
+        {
+            return RequestInsertPanel.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertPanel)} failed.");
+            throw;
+        }
+    }
+    private Task InsertHtmlEmbed() {
+        try
+        {
+            return RequestInsertHtmlEmbed.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertHtmlEmbed)} failed.");
+            throw;
+        }
+    }
+    private Task EditSelectedPanel() {
+        try
+        {
+            return RequestEditPanel.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(EditSelectedPanel)} failed.");
+            throw;
+        }
+    }
+    private Task ToggleTimeline() {
+        try
+        {
+            return RequestToggleTimeline.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ToggleTimeline)} failed.");
+            throw;
+        }
+    }
+    private Task PlaySelectedMedia() {
+        try
+        {
+            return State.SelectedElement is PublicationMediaElement media
         ? JS.InvokeVoidAsync("publisherStudio.playPublicationMedia", $"element-{media.Id}").AsTask()
         : Task.CompletedTask;
-    private Task PauseSelectedMedia() => State.SelectedElement is PublicationMediaElement media
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(PlaySelectedMedia)} failed.");
+            throw;
+        }
+    }
+    private Task PauseSelectedMedia() {
+        try
+        {
+            return State.SelectedElement is PublicationMediaElement media
         ? JS.InvokeVoidAsync("publisherStudio.pausePublicationMedia", $"element-{media.Id}").AsTask()
         : Task.CompletedTask;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(PauseSelectedMedia)} failed.");
+            throw;
+        }
+    }
     private void UpdateSelectedMedia(Action<PublicationMediaElement> update)
     {
-        if (State.SelectedElement is PublicationMediaElement media) State.UpdateMedia(media.Id, update);
+        try
+        {
+            if (State.SelectedElement is PublicationMediaElement media) State.UpdateMedia(media.Id, update);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(UpdateSelectedMedia)} failed.");
+            throw;
+        }
     }
-    private void ToggleMediaMuted() => UpdateSelectedMedia(media => media.Muted = !media.Muted);
-    private void ToggleMediaLoop() => UpdateSelectedMedia(media => media.Loop = !media.Loop);
-    private void ToggleMediaAutoPlay() => UpdateSelectedMedia(media => media.AutoPlay = !media.AutoPlay);
-    private void MediaOnPageEnter() => UpdateSelectedMedia(media => media.PlaybackTrigger = PublicationMediaPlaybackTrigger.OnPageEnter);
-    private void MediaOnClick() => UpdateSelectedMedia(media => media.PlaybackTrigger = PublicationMediaPlaybackTrigger.OnClick);
-    private void MediaWithAnimation() => UpdateSelectedMedia(media => media.PlaybackTrigger = PublicationMediaPlaybackTrigger.WithAnimation);
-    private Task InsertChart() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.CartesianChart);
-    private Task InsertPie() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.PieChart);
-    private Task InsertPolar() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.PolarChart);
-    private Task InsertSparkline() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.Sparkline);
-    private Task InsertBarGauge() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.BarGauge);
-    private Task InsertCircularGauge() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.CircularGauge);
-    private Task InsertLinearGauge() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.LinearGauge);
-    private Task InsertRangeSelector() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.RangeSelector);
-    private Task InsertSankey() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.Sankey);
-    private Task InsertFunnel() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.Funnel);
-    private Task InsertPyramid() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.Pyramid);
-    private Task InsertTreeMap() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.TreeMap);
-    private Task InsertDataTable() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.DataTable);
-    private Task InsertKpi() => RequestInsertDataVisual.InvokeAsync(DataVisualKind.KpiProgress);
+    private void ToggleMediaMuted() {
+        try
+        {
+            UpdateSelectedMedia(media => media.Muted = !media.Muted);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ToggleMediaMuted)} failed.");
+            throw;
+        }
+    }
+    private void ToggleMediaLoop() {
+        try
+        {
+            UpdateSelectedMedia(media => media.Loop = !media.Loop);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ToggleMediaLoop)} failed.");
+            throw;
+        }
+    }
+    private void ToggleMediaAutoPlay() {
+        try
+        {
+            UpdateSelectedMedia(media => media.AutoPlay = !media.AutoPlay);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ToggleMediaAutoPlay)} failed.");
+            throw;
+        }
+    }
+    private void MediaOnPageEnter() {
+        try
+        {
+            UpdateSelectedMedia(media => media.PlaybackTrigger = PublicationMediaPlaybackTrigger.OnPageEnter);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(MediaOnPageEnter)} failed.");
+            throw;
+        }
+    }
+    private void MediaOnClick() {
+        try
+        {
+            UpdateSelectedMedia(media => media.PlaybackTrigger = PublicationMediaPlaybackTrigger.OnClick);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(MediaOnClick)} failed.");
+            throw;
+        }
+    }
+    private void MediaWithAnimation() {
+        try
+        {
+            UpdateSelectedMedia(media => media.PlaybackTrigger = PublicationMediaPlaybackTrigger.WithAnimation);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(MediaWithAnimation)} failed.");
+            throw;
+        }
+    }
+    private Task InsertChart() {
+        try
+        {
+            return RequestInsertDataVisual.InvokeAsync(DataVisualKind.CartesianChart);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertChart)} failed.");
+            throw;
+        }
+    }
+    private Task InsertPie() {
+        try
+        {
+            return RequestInsertDataVisual.InvokeAsync(DataVisualKind.PieChart);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertPie)} failed.");
+            throw;
+        }
+    }
+    private Task InsertPolar() {
+        try
+        {
+            return RequestInsertDataVisual.InvokeAsync(DataVisualKind.PolarChart);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertPolar)} failed.");
+            throw;
+        }
+    }
+    private Task InsertSparkline() {
+        try
+        {
+            return RequestInsertDataVisual.InvokeAsync(DataVisualKind.Sparkline);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertSparkline)} failed.");
+            throw;
+        }
+    }
+    private Task InsertBarGauge() {
+        try
+        {
+            return RequestInsertDataVisual.InvokeAsync(DataVisualKind.BarGauge);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertBarGauge)} failed.");
+            throw;
+        }
+    }
+    private Task InsertCircularGauge() {
+        try
+        {
+            return RequestInsertDataVisual.InvokeAsync(DataVisualKind.CircularGauge);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertCircularGauge)} failed.");
+            throw;
+        }
+    }
+    private Task InsertLinearGauge() {
+        try
+        {
+            return RequestInsertDataVisual.InvokeAsync(DataVisualKind.LinearGauge);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertLinearGauge)} failed.");
+            throw;
+        }
+    }
+    private Task InsertRangeSelector() {
+        try
+        {
+            return RequestInsertDataVisual.InvokeAsync(DataVisualKind.RangeSelector);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertRangeSelector)} failed.");
+            throw;
+        }
+    }
+    private Task InsertSankey() {
+        try
+        {
+            return RequestInsertDataVisual.InvokeAsync(DataVisualKind.Sankey);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertSankey)} failed.");
+            throw;
+        }
+    }
+    private Task InsertFunnel() {
+        try
+        {
+            return RequestInsertDataVisual.InvokeAsync(DataVisualKind.Funnel);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertFunnel)} failed.");
+            throw;
+        }
+    }
+    private Task InsertPyramid() {
+        try
+        {
+            return RequestInsertDataVisual.InvokeAsync(DataVisualKind.Pyramid);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertPyramid)} failed.");
+            throw;
+        }
+    }
+    private Task InsertTreeMap() {
+        try
+        {
+            return RequestInsertDataVisual.InvokeAsync(DataVisualKind.TreeMap);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertTreeMap)} failed.");
+            throw;
+        }
+    }
+    private Task InsertDataTable() {
+        try
+        {
+            return RequestInsertDataVisual.InvokeAsync(DataVisualKind.DataTable);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertDataTable)} failed.");
+            throw;
+        }
+    }
+    private Task InsertKpi() {
+        try
+        {
+            return RequestInsertDataVisual.InvokeAsync(DataVisualKind.KpiProgress);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(InsertKpi)} failed.");
+            throw;
+        }
+    }
     private async Task RefreshData()
     {
-        Guid? dataObjectId = State.SelectedElement switch
+        try
         {
-            DataVisualElement visual => visual.DataObjectId,
-            DevExtremeComponentElement component
-                when component.Connection.Mode ==
-                     PublicationComponentDataMode.PublicationDataObject
-                => component.Connection.DataObjectId,
-            _ => null
-        };
-
-        await State.RefreshWebDataAsync(dataObjectId, true).ConfigureAwait(true);
-        State.RefreshDataVisuals();
-
-        await JS.InvokeVoidAsync(
-            "PublisherStudioComponentRuntime.refreshAll",
-            "publisher-page",
-            new
+            Guid? dataObjectId = State.SelectedElement switch
             {
-                polling = false,
-                fetchNow = true
-            }).ConfigureAwait(true);
+                DataVisualElement visual => visual.DataObjectId,
+                DevExtremeComponentElement component
+                    when component.Connection.Mode ==
+                         PublicationComponentDataMode.PublicationDataObject
+                    => component.Connection.DataObjectId,
+                _ => null
+            };
+
+            await State.RefreshWebDataAsync(dataObjectId, true).ConfigureAwait(true);
+            State.RefreshDataVisuals();
+
+            await JS.InvokeVoidAsync(
+                "PublisherStudioComponentRuntime.refreshAll",
+                "publisher-page",
+                new
+                {
+                    polling = false,
+                    fetchNow = true
+                }).ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(RefreshData)} failed.");
+            throw;
+        }
     }
     private void ChangeSelectedDataVisualKind(DataVisualKind kind)
     {
-        if (State.SelectedElement is not DataVisualElement dataVisual) return;
-        State.UpdateSelected(_ =>
+        try
         {
-            dataVisual.VisualKind = kind;
-            if (kind is not (DataVisualKind.CartesianChart or DataVisualKind.PolarChart or DataVisualKind.BarGauge or DataVisualKind.CircularGauge or DataVisualKind.LinearGauge) && dataVisual.ValueFields.Count > 1)
-                dataVisual.ValueFields = [dataVisual.ValueFields[0]];
-        });
+            if (State.SelectedElement is not DataVisualElement dataVisual) return;
+            State.UpdateSelected(_ =>
+            {
+                dataVisual.VisualKind = kind;
+                if (kind is not (DataVisualKind.CartesianChart or DataVisualKind.PolarChart or DataVisualKind.BarGauge or DataVisualKind.CircularGauge or DataVisualKind.LinearGauge) && dataVisual.ValueFields.Count > 1)
+                    dataVisual.ValueFields = [dataVisual.ValueFields[0]];
+            });
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ChangeSelectedDataVisualKind)} failed.");
+            throw;
+        }
     }
-    private void ToggleDataVisualTitle() => UpdateSelectedDataVisual(item => item.ShowTitle = !item.ShowTitle);
-    private void ToggleDataVisualLegend() => UpdateSelectedDataVisual(item => item.ShowLegend = !item.ShowLegend);
-    private void ToggleDataVisualLabels() => UpdateSelectedDataVisual(item => item.ShowLabels = !item.ShowLabels);
-    private void ToggleDataVisualFilterRow() => UpdateSelectedDataVisual(item => item.TableShowFilterRow = !item.TableShowFilterRow);
-    private void SelectedVisualChart() => ChangeSelectedDataVisualKind(DataVisualKind.CartesianChart);
-    private void SelectedVisualPie() => ChangeSelectedDataVisualKind(DataVisualKind.PieChart);
-    private void SelectedVisualPolar() => ChangeSelectedDataVisualKind(DataVisualKind.PolarChart);
-    private void SelectedVisualSparkline() => ChangeSelectedDataVisualKind(DataVisualKind.Sparkline);
-    private void SelectedVisualBarGauge() => ChangeSelectedDataVisualKind(DataVisualKind.BarGauge);
-    private void SelectedVisualCircularGauge() => ChangeSelectedDataVisualKind(DataVisualKind.CircularGauge);
-    private void SelectedVisualLinearGauge() => ChangeSelectedDataVisualKind(DataVisualKind.LinearGauge);
-    private void SelectedVisualRangeSelector() => ChangeSelectedDataVisualKind(DataVisualKind.RangeSelector);
-    private void SelectedVisualSankey() => ChangeSelectedDataVisualKind(DataVisualKind.Sankey);
-    private void SelectedVisualFunnel() => ChangeSelectedDataVisualKind(DataVisualKind.Funnel);
-    private void SelectedVisualPyramid() => ChangeSelectedDataVisualKind(DataVisualKind.Pyramid);
-    private void SelectedVisualTreeMap() => ChangeSelectedDataVisualKind(DataVisualKind.TreeMap);
-    private void SelectedVisualDataTable() => ChangeSelectedDataVisualKind(DataVisualKind.DataTable);
-    private void SelectedVisualKpi() => ChangeSelectedDataVisualKind(DataVisualKind.KpiProgress);
+    private void ToggleDataVisualTitle() {
+        try
+        {
+            UpdateSelectedDataVisual(item => item.ShowTitle = !item.ShowTitle);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ToggleDataVisualTitle)} failed.");
+            throw;
+        }
+    }
+    private void ToggleDataVisualLegend() {
+        try
+        {
+            UpdateSelectedDataVisual(item => item.ShowLegend = !item.ShowLegend);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ToggleDataVisualLegend)} failed.");
+            throw;
+        }
+    }
+    private void ToggleDataVisualLabels() {
+        try
+        {
+            UpdateSelectedDataVisual(item => item.ShowLabels = !item.ShowLabels);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ToggleDataVisualLabels)} failed.");
+            throw;
+        }
+    }
+    private void ToggleDataVisualFilterRow() {
+        try
+        {
+            UpdateSelectedDataVisual(item => item.TableShowFilterRow = !item.TableShowFilterRow);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ToggleDataVisualFilterRow)} failed.");
+            throw;
+        }
+    }
+    private void SelectedVisualChart() {
+        try
+        {
+            ChangeSelectedDataVisualKind(DataVisualKind.CartesianChart);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SelectedVisualChart)} failed.");
+            throw;
+        }
+    }
+    private void SelectedVisualPie() {
+        try
+        {
+            ChangeSelectedDataVisualKind(DataVisualKind.PieChart);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SelectedVisualPie)} failed.");
+            throw;
+        }
+    }
+    private void SelectedVisualPolar() {
+        try
+        {
+            ChangeSelectedDataVisualKind(DataVisualKind.PolarChart);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SelectedVisualPolar)} failed.");
+            throw;
+        }
+    }
+    private void SelectedVisualSparkline() {
+        try
+        {
+            ChangeSelectedDataVisualKind(DataVisualKind.Sparkline);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SelectedVisualSparkline)} failed.");
+            throw;
+        }
+    }
+    private void SelectedVisualBarGauge() {
+        try
+        {
+            ChangeSelectedDataVisualKind(DataVisualKind.BarGauge);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SelectedVisualBarGauge)} failed.");
+            throw;
+        }
+    }
+    private void SelectedVisualCircularGauge() {
+        try
+        {
+            ChangeSelectedDataVisualKind(DataVisualKind.CircularGauge);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SelectedVisualCircularGauge)} failed.");
+            throw;
+        }
+    }
+    private void SelectedVisualLinearGauge() {
+        try
+        {
+            ChangeSelectedDataVisualKind(DataVisualKind.LinearGauge);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SelectedVisualLinearGauge)} failed.");
+            throw;
+        }
+    }
+    private void SelectedVisualRangeSelector() {
+        try
+        {
+            ChangeSelectedDataVisualKind(DataVisualKind.RangeSelector);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SelectedVisualRangeSelector)} failed.");
+            throw;
+        }
+    }
+    private void SelectedVisualSankey() {
+        try
+        {
+            ChangeSelectedDataVisualKind(DataVisualKind.Sankey);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SelectedVisualSankey)} failed.");
+            throw;
+        }
+    }
+    private void SelectedVisualFunnel() {
+        try
+        {
+            ChangeSelectedDataVisualKind(DataVisualKind.Funnel);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SelectedVisualFunnel)} failed.");
+            throw;
+        }
+    }
+    private void SelectedVisualPyramid() {
+        try
+        {
+            ChangeSelectedDataVisualKind(DataVisualKind.Pyramid);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SelectedVisualPyramid)} failed.");
+            throw;
+        }
+    }
+    private void SelectedVisualTreeMap() {
+        try
+        {
+            ChangeSelectedDataVisualKind(DataVisualKind.TreeMap);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SelectedVisualTreeMap)} failed.");
+            throw;
+        }
+    }
+    private void SelectedVisualDataTable() {
+        try
+        {
+            ChangeSelectedDataVisualKind(DataVisualKind.DataTable);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SelectedVisualDataTable)} failed.");
+            throw;
+        }
+    }
+    private void SelectedVisualKpi() {
+        try
+        {
+            ChangeSelectedDataVisualKind(DataVisualKind.KpiProgress);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SelectedVisualKpi)} failed.");
+            throw;
+        }
+    }
     private void UpdateSelectedDataVisual(Action<DataVisualElement> update)
     {
-        if (State.SelectedElement is DataVisualElement item) State.UpdateSelected(_ => update(item));
+        try
+        {
+            if (State.SelectedElement is DataVisualElement item) State.UpdateSelected(_ => update(item));
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(UpdateSelectedDataVisual)} failed.");
+            throw;
+        }
     }
     private void ChangeSelectedShape(PublicationShape shape)
     {
-        if (State.SelectedElement is ShapeElement item) State.UpdateSelected(_ => item.Shape = shape);
+        try
+        {
+            if (State.SelectedElement is ShapeElement item) State.UpdateSelected(_ => item.Shape = shape);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ChangeSelectedShape)} failed.");
+            throw;
+        }
     }
-    private void SelectedShapeRectangle() => ChangeSelectedShape(PublicationShape.Rectangle);
-    private void SelectedShapeRoundedRectangle() => ChangeSelectedShape(PublicationShape.RoundedRectangle);
-    private void SelectedShapeEllipse() => ChangeSelectedShape(PublicationShape.Ellipse);
-    private void SelectedShapeLine() => ChangeSelectedShape(PublicationShape.Line);
-    private string CheckedText(bool selected, string text) => selected ? $"✓ {text}" : text;
-    private string ShapeMenuName(PublicationShape shape) => shape == PublicationShape.RoundedRectangle ? "Rounded rectangle" : shape.ToString();
-    private double NormalizeAngle(double value) => (value % 360 + 360) % 360;
-    private string DataVisualMenuName(DataVisualKind kind) => kind switch
+    private void SelectedShapeRectangle() {
+        try
+        {
+            ChangeSelectedShape(PublicationShape.Rectangle);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SelectedShapeRectangle)} failed.");
+            throw;
+        }
+    }
+    private void SelectedShapeRoundedRectangle() {
+        try
+        {
+            ChangeSelectedShape(PublicationShape.RoundedRectangle);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SelectedShapeRoundedRectangle)} failed.");
+            throw;
+        }
+    }
+    private void SelectedShapeEllipse() {
+        try
+        {
+            ChangeSelectedShape(PublicationShape.Ellipse);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SelectedShapeEllipse)} failed.");
+            throw;
+        }
+    }
+    private void SelectedShapeLine() {
+        try
+        {
+            ChangeSelectedShape(PublicationShape.Line);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SelectedShapeLine)} failed.");
+            throw;
+        }
+    }
+    private string CheckedText(bool selected, string text) {
+        try
+        {
+            return selected ? $"✓ {text}" : text;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(CheckedText)} failed.");
+            throw;
+        }
+    }
+    private string ShapeMenuName(PublicationShape shape) {
+        try
+        {
+            return shape == PublicationShape.RoundedRectangle ? "Rounded rectangle" : shape.ToString();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ShapeMenuName)} failed.");
+            throw;
+        }
+    }
+    private double NormalizeAngle(double value) {
+        try
+        {
+            return (value % 360 + 360) % 360;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(NormalizeAngle)} failed.");
+            throw;
+        }
+    }
+    private string DataVisualMenuName(DataVisualKind kind) {
+        try
+        {
+            return kind switch
     {
         DataVisualKind.CartesianChart => "Chart",
         DataVisualKind.PieChart => "Pie / doughnut",
@@ -1354,130 +3021,996 @@
         DataVisualKind.DataTable => "Data table",
         _ => "KPI progress"
     };
-    private void ToggleCrop() => State.ToggleCropMode();
-    private void ToggleContentPan() => State.ToggleContentPanMode();
-    private void ToggleMapMouseMode() => State.ToggleContentPanMode();
-    private void UseMapObjectMode() { if (State.ContentPanMode) State.ToggleContentPanMode(); }
-    private void UseMapContentMode() { if (!State.ContentPanMode) State.ToggleContentPanMode(); }
-    private void ResetContentViewport() => State.ResetContentViewport();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(DataVisualMenuName)} failed.");
+            throw;
+        }
+    }
+    private void ToggleCrop() {
+        try
+        {
+            State.ToggleCropMode();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ToggleCrop)} failed.");
+            throw;
+        }
+    }
+    private void ToggleContentPan() {
+        try
+        {
+            State.ToggleContentPanMode();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ToggleContentPan)} failed.");
+            throw;
+        }
+    }
+    private void ToggleMapMouseMode() {
+        try
+        {
+            State.ToggleContentPanMode();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ToggleMapMouseMode)} failed.");
+            throw;
+        }
+    }
+    private void UseMapObjectMode() {
+        try
+        {
+     if (State.ContentPanMode) State.ToggleContentPanMode(); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(UseMapObjectMode)} failed.");
+            throw;
+        }
+    }
+    private void UseMapContentMode() {
+        try
+        {
+     if (!State.ContentPanMode) State.ToggleContentPanMode(); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(UseMapContentMode)} failed.");
+            throw;
+        }
+    }
+    private void ResetContentViewport() {
+        try
+        {
+            State.ResetContentViewport();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ResetContentViewport)} failed.");
+            throw;
+        }
+    }
     private void SetTextFrame(Action<TextFrameElement> update)
     {
-        if (State.SelectedElement is TextFrameElement item) State.UpdateSelected(_ => update(item));
+        try
+        {
+            if (State.SelectedElement is TextFrameElement item) State.UpdateSelected(_ => update(item));
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SetTextFrame)} failed.");
+            throw;
+        }
     }
-    private void TextFrameNoFill() => SetTextFrame(item => item.Background = "transparent");
-    private void TextFrameWhiteFill() => SetTextFrame(item => item.Background = "#ffffff");
-    private void PictureFit() => SetImage(image => image.FitInsideFrame = true);
-    private void PictureFill() => SetImage(image => image.FitInsideFrame = false);
-    private void RotatePictureLeft() => SetImage(image => image.ImageRotation = NormalizeAngle(image.ImageRotation - 90));
-    private void RotatePictureRight() => SetImage(image => image.ImageRotation = NormalizeAngle(image.ImageRotation + 90));
-    private void FlipPictureHorizontal() => SetImage(image => image.FlipHorizontal = !image.FlipHorizontal);
-    private void FlipPictureVertical() => SetImage(image => image.FlipVertical = !image.FlipVertical);
-    private void AddFadeInAnimation() => State.AddAnimation(PublicationAnimationEffect.Fade, PublicationAnimationPhase.Entrance);
-    private void AddFlyInAnimation() => State.AddAnimation(PublicationAnimationEffect.Fly, PublicationAnimationPhase.Entrance);
-    private void AddFloatInAnimation() => State.AddAnimation(PublicationAnimationEffect.Float, PublicationAnimationPhase.Entrance);
-    private void AddZoomInAnimation() => State.AddAnimation(PublicationAnimationEffect.Zoom, PublicationAnimationPhase.Entrance);
-    private void AddWipeInAnimation() => State.AddAnimation(PublicationAnimationEffect.Wipe, PublicationAnimationPhase.Entrance);
-    private void AddBounceInAnimation() => State.AddAnimation(PublicationAnimationEffect.Bounce, PublicationAnimationPhase.Entrance);
-    private void AddPulseAnimation() => State.AddAnimation(PublicationAnimationEffect.Pulse, PublicationAnimationPhase.Emphasis);
-    private void AddSpinAnimation() => State.AddAnimation(PublicationAnimationEffect.Spin, PublicationAnimationPhase.Emphasis);
-    private void AddShakeAnimation() => State.AddAnimation(PublicationAnimationEffect.Shake, PublicationAnimationPhase.Emphasis);
-    private void AddGrowShrinkAnimation() => State.AddAnimation(PublicationAnimationEffect.GrowShrink, PublicationAnimationPhase.Emphasis);
-    private void AddBounceAnimation() => State.AddAnimation(PublicationAnimationEffect.Bounce, PublicationAnimationPhase.Emphasis);
-    private void AddMoveAnimation() => State.AddAnimation(PublicationAnimationEffect.Move, PublicationAnimationPhase.Motion);
-    private void AddFadeOutAnimation() => State.AddAnimation(PublicationAnimationEffect.Fade, PublicationAnimationPhase.Exit);
-    private void AddFlyOutAnimation() => State.AddAnimation(PublicationAnimationEffect.Fly, PublicationAnimationPhase.Exit);
-    private void AddZoomOutAnimation() => State.AddAnimation(PublicationAnimationEffect.Zoom, PublicationAnimationPhase.Exit);
-    private void AddWipeOutAnimation() => State.AddAnimation(PublicationAnimationEffect.Wipe, PublicationAnimationPhase.Exit);
-    private void AddPlayMediaAnimation() => State.AddAnimation(PublicationAnimationEffect.PlayMedia, PublicationAnimationPhase.Emphasis);
-    private void AddPauseMediaAnimation() => State.AddAnimation(PublicationAnimationEffect.PauseMedia, PublicationAnimationPhase.Emphasis);
-    private void AddStopMediaAnimation() => State.AddAnimation(PublicationAnimationEffect.StopMedia, PublicationAnimationPhase.Emphasis);
-    private void ClearSelectedAnimations() => State.ClearSelectedAnimations();
-    private Task PreviewSelectedAnimations() => State.SelectedElementId is { } id
+    private void TextFrameNoFill() {
+        try
+        {
+            SetTextFrame(item => item.Background = "transparent");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(TextFrameNoFill)} failed.");
+            throw;
+        }
+    }
+    private void TextFrameWhiteFill() {
+        try
+        {
+            SetTextFrame(item => item.Background = "#ffffff");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(TextFrameWhiteFill)} failed.");
+            throw;
+        }
+    }
+    private void PictureFit() {
+        try
+        {
+            SetImage(image => image.FitInsideFrame = true);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(PictureFit)} failed.");
+            throw;
+        }
+    }
+    private void PictureFill() {
+        try
+        {
+            SetImage(image => image.FitInsideFrame = false);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(PictureFill)} failed.");
+            throw;
+        }
+    }
+    private void RotatePictureLeft() {
+        try
+        {
+            SetImage(image => image.ImageRotation = NormalizeAngle(image.ImageRotation - 90));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(RotatePictureLeft)} failed.");
+            throw;
+        }
+    }
+    private void RotatePictureRight() {
+        try
+        {
+            SetImage(image => image.ImageRotation = NormalizeAngle(image.ImageRotation + 90));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(RotatePictureRight)} failed.");
+            throw;
+        }
+    }
+    private void FlipPictureHorizontal() {
+        try
+        {
+            SetImage(image => image.FlipHorizontal = !image.FlipHorizontal);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(FlipPictureHorizontal)} failed.");
+            throw;
+        }
+    }
+    private void FlipPictureVertical() {
+        try
+        {
+            SetImage(image => image.FlipVertical = !image.FlipVertical);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(FlipPictureVertical)} failed.");
+            throw;
+        }
+    }
+    private void AddFadeInAnimation() {
+        try
+        {
+            State.AddAnimation(PublicationAnimationEffect.Fade, PublicationAnimationPhase.Entrance);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddFadeInAnimation)} failed.");
+            throw;
+        }
+    }
+    private void AddFlyInAnimation() {
+        try
+        {
+            State.AddAnimation(PublicationAnimationEffect.Fly, PublicationAnimationPhase.Entrance);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddFlyInAnimation)} failed.");
+            throw;
+        }
+    }
+    private void AddFloatInAnimation() {
+        try
+        {
+            State.AddAnimation(PublicationAnimationEffect.Float, PublicationAnimationPhase.Entrance);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddFloatInAnimation)} failed.");
+            throw;
+        }
+    }
+    private void AddZoomInAnimation() {
+        try
+        {
+            State.AddAnimation(PublicationAnimationEffect.Zoom, PublicationAnimationPhase.Entrance);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddZoomInAnimation)} failed.");
+            throw;
+        }
+    }
+    private void AddWipeInAnimation() {
+        try
+        {
+            State.AddAnimation(PublicationAnimationEffect.Wipe, PublicationAnimationPhase.Entrance);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddWipeInAnimation)} failed.");
+            throw;
+        }
+    }
+    private void AddBounceInAnimation() {
+        try
+        {
+            State.AddAnimation(PublicationAnimationEffect.Bounce, PublicationAnimationPhase.Entrance);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddBounceInAnimation)} failed.");
+            throw;
+        }
+    }
+    private void AddPulseAnimation() {
+        try
+        {
+            State.AddAnimation(PublicationAnimationEffect.Pulse, PublicationAnimationPhase.Emphasis);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddPulseAnimation)} failed.");
+            throw;
+        }
+    }
+    private void AddSpinAnimation() {
+        try
+        {
+            State.AddAnimation(PublicationAnimationEffect.Spin, PublicationAnimationPhase.Emphasis);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddSpinAnimation)} failed.");
+            throw;
+        }
+    }
+    private void AddShakeAnimation() {
+        try
+        {
+            State.AddAnimation(PublicationAnimationEffect.Shake, PublicationAnimationPhase.Emphasis);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddShakeAnimation)} failed.");
+            throw;
+        }
+    }
+    private void AddGrowShrinkAnimation() {
+        try
+        {
+            State.AddAnimation(PublicationAnimationEffect.GrowShrink, PublicationAnimationPhase.Emphasis);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddGrowShrinkAnimation)} failed.");
+            throw;
+        }
+    }
+    private void AddBounceAnimation() {
+        try
+        {
+            State.AddAnimation(PublicationAnimationEffect.Bounce, PublicationAnimationPhase.Emphasis);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddBounceAnimation)} failed.");
+            throw;
+        }
+    }
+    private void AddMoveAnimation() {
+        try
+        {
+            State.AddAnimation(PublicationAnimationEffect.Move, PublicationAnimationPhase.Motion);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddMoveAnimation)} failed.");
+            throw;
+        }
+    }
+    private void AddFadeOutAnimation() {
+        try
+        {
+            State.AddAnimation(PublicationAnimationEffect.Fade, PublicationAnimationPhase.Exit);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddFadeOutAnimation)} failed.");
+            throw;
+        }
+    }
+    private void AddFlyOutAnimation() {
+        try
+        {
+            State.AddAnimation(PublicationAnimationEffect.Fly, PublicationAnimationPhase.Exit);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddFlyOutAnimation)} failed.");
+            throw;
+        }
+    }
+    private void AddZoomOutAnimation() {
+        try
+        {
+            State.AddAnimation(PublicationAnimationEffect.Zoom, PublicationAnimationPhase.Exit);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddZoomOutAnimation)} failed.");
+            throw;
+        }
+    }
+    private void AddWipeOutAnimation() {
+        try
+        {
+            State.AddAnimation(PublicationAnimationEffect.Wipe, PublicationAnimationPhase.Exit);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddWipeOutAnimation)} failed.");
+            throw;
+        }
+    }
+    private void AddPlayMediaAnimation() {
+        try
+        {
+            State.AddAnimation(PublicationAnimationEffect.PlayMedia, PublicationAnimationPhase.Emphasis);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddPlayMediaAnimation)} failed.");
+            throw;
+        }
+    }
+    private void AddPauseMediaAnimation() {
+        try
+        {
+            State.AddAnimation(PublicationAnimationEffect.PauseMedia, PublicationAnimationPhase.Emphasis);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddPauseMediaAnimation)} failed.");
+            throw;
+        }
+    }
+    private void AddStopMediaAnimation() {
+        try
+        {
+            State.AddAnimation(PublicationAnimationEffect.StopMedia, PublicationAnimationPhase.Emphasis);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddStopMediaAnimation)} failed.");
+            throw;
+        }
+    }
+    private void ClearSelectedAnimations() {
+        try
+        {
+            State.ClearSelectedAnimations();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ClearSelectedAnimations)} failed.");
+            throw;
+        }
+    }
+    private Task PreviewSelectedAnimations() {
+        try
+        {
+            return State.SelectedElementId is { } id
         ? JS.InvokeVoidAsync("publisherStudio.previewElementAnimations", $"element-{id}").AsTask()
         : Task.CompletedTask;
-    private Task PreviewPageAnimations() => JS.InvokeVoidAsync("publisherStudio.previewPageAnimations", "publisher-page").AsTask();
-    private void SetTransition(PublicationPageTransitionKind kind) => State.UpdatePageTransition(item => item.Kind = kind);
-    private void TransitionNone() => SetTransition(PublicationPageTransitionKind.None);
-    private void TransitionFade() => SetTransition(PublicationPageTransitionKind.Fade);
-    private void TransitionPush() => SetTransition(PublicationPageTransitionKind.Push);
-    private void TransitionWipe() => SetTransition(PublicationPageTransitionKind.Wipe);
-    private void TransitionZoom() => SetTransition(PublicationPageTransitionKind.Zoom);
-    private void TransitionFlip() => SetTransition(PublicationPageTransitionKind.Flip);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(PreviewSelectedAnimations)} failed.");
+            throw;
+        }
+    }
+    private Task PreviewPageAnimations() {
+        try
+        {
+            return JS.InvokeVoidAsync("publisherStudio.previewPageAnimations", "publisher-page").AsTask();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(PreviewPageAnimations)} failed.");
+            throw;
+        }
+    }
+    private void SetTransition(PublicationPageTransitionKind kind) {
+        try
+        {
+            State.UpdatePageTransition(item => item.Kind = kind);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SetTransition)} failed.");
+            throw;
+        }
+    }
+    private void TransitionNone() {
+        try
+        {
+            SetTransition(PublicationPageTransitionKind.None);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(TransitionNone)} failed.");
+            throw;
+        }
+    }
+    private void TransitionFade() {
+        try
+        {
+            SetTransition(PublicationPageTransitionKind.Fade);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(TransitionFade)} failed.");
+            throw;
+        }
+    }
+    private void TransitionPush() {
+        try
+        {
+            SetTransition(PublicationPageTransitionKind.Push);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(TransitionPush)} failed.");
+            throw;
+        }
+    }
+    private void TransitionWipe() {
+        try
+        {
+            SetTransition(PublicationPageTransitionKind.Wipe);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(TransitionWipe)} failed.");
+            throw;
+        }
+    }
+    private void TransitionZoom() {
+        try
+        {
+            SetTransition(PublicationPageTransitionKind.Zoom);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(TransitionZoom)} failed.");
+            throw;
+        }
+    }
+    private void TransitionFlip() {
+        try
+        {
+            SetTransition(PublicationPageTransitionKind.Flip);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(TransitionFlip)} failed.");
+            throw;
+        }
+    }
 
-    private void Copy() => State.CopySelected();
-    private void Paste() => State.Paste();
-    private void Duplicate() => State.DuplicateSelected();
-    private void GroupSelected() => State.GroupSelected();
-    private void UngroupSelected() => State.UngroupSelected();
-    private void Delete() => State.DeleteSelected();
-    private void BringToFront() => State.BringToFront();
-    private void BringForward() => State.BringForward();
-    private void SendBackward() => State.SendBackward();
-    private void SendToBack() => State.SendToBack();
-    private void AlignLeft() => State.Align("left");
-    private void AlignCenter() => State.Align("center");
-    private void AlignRight() => State.Align("right");
-    private void AlignTop() => State.Align("top");
-    private void AlignMiddle() => State.Align("middle");
-    private void AlignBottom() => State.Align("bottom");
-    private void ToggleLock() => State.UpdateSelected(element => element.Locked = !element.Locked, allowLocked: true);
-    private void ToggleVisibility() => State.UpdateSelected(element => element.Visible = !element.Visible, allowLocked: true);
-    private void AddText() => State.AddText();
-    private void AddWordArt() => State.AddWordArt();
-    private void AddRectangle() => State.AddShape(PublicationShape.Rectangle);
-    private void AddRoundedRectangle() => State.AddShape(PublicationShape.RoundedRectangle);
-    private void AddEllipse() => State.AddShape(PublicationShape.Ellipse);
-    private void AddLine() => State.AddShape(PublicationShape.Line);
-    private void StartConnector() => State.SetConnectorTool(ConnectorToolKind.Line);
-    private void StartArrowConnector() => State.SetConnectorTool(ConnectorToolKind.Arrow);
-    private void StartSignalConnector() => State.SetConnectorTool(ConnectorToolKind.SignalConnector);
-    private void StartSignalArrow() => State.SetConnectorTool(ConnectorToolKind.SignalArrow);
-    private void AddPage() => State.AddPage();
-    private void DuplicatePage() => State.DuplicatePage();
-    private void DeletePage() => State.DeletePage();
-    private void CycleRulerUnit() => State.CycleRulerUnit();
+    private void Copy() {
+        try
+        {
+            State.CopySelected();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(Copy)} failed.");
+            throw;
+        }
+    }
+    private void Paste() {
+        try
+        {
+            State.Paste();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(Paste)} failed.");
+            throw;
+        }
+    }
+    private void Duplicate() {
+        try
+        {
+            State.DuplicateSelected();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(Duplicate)} failed.");
+            throw;
+        }
+    }
+    private void GroupSelected() {
+        try
+        {
+            State.GroupSelected();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(GroupSelected)} failed.");
+            throw;
+        }
+    }
+    private void UngroupSelected() {
+        try
+        {
+            State.UngroupSelected();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(UngroupSelected)} failed.");
+            throw;
+        }
+    }
+    private void Delete() {
+        try
+        {
+            State.DeleteSelected();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(Delete)} failed.");
+            throw;
+        }
+    }
+    private void BringToFront() {
+        try
+        {
+            State.BringToFront();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(BringToFront)} failed.");
+            throw;
+        }
+    }
+    private void BringForward() {
+        try
+        {
+            State.BringForward();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(BringForward)} failed.");
+            throw;
+        }
+    }
+    private void SendBackward() {
+        try
+        {
+            State.SendBackward();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SendBackward)} failed.");
+            throw;
+        }
+    }
+    private void SendToBack() {
+        try
+        {
+            State.SendToBack();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SendToBack)} failed.");
+            throw;
+        }
+    }
+    private void AlignLeft() {
+        try
+        {
+            State.Align("left");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AlignLeft)} failed.");
+            throw;
+        }
+    }
+    private void AlignCenter() {
+        try
+        {
+            State.Align("center");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AlignCenter)} failed.");
+            throw;
+        }
+    }
+    private void AlignRight() {
+        try
+        {
+            State.Align("right");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AlignRight)} failed.");
+            throw;
+        }
+    }
+    private void AlignTop() {
+        try
+        {
+            State.Align("top");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AlignTop)} failed.");
+            throw;
+        }
+    }
+    private void AlignMiddle() {
+        try
+        {
+            State.Align("middle");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AlignMiddle)} failed.");
+            throw;
+        }
+    }
+    private void AlignBottom() {
+        try
+        {
+            State.Align("bottom");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AlignBottom)} failed.");
+            throw;
+        }
+    }
+    private void ToggleLock() {
+        try
+        {
+            State.UpdateSelected(element => element.Locked = !element.Locked, allowLocked: true);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ToggleLock)} failed.");
+            throw;
+        }
+    }
+    private void ToggleVisibility() {
+        try
+        {
+            State.UpdateSelected(element => element.Visible = !element.Visible, allowLocked: true);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ToggleVisibility)} failed.");
+            throw;
+        }
+    }
+    private void AddText() {
+        try
+        {
+            State.AddText();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddText)} failed.");
+            throw;
+        }
+    }
+    private void AddWordArt() {
+        try
+        {
+            State.AddWordArt();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddWordArt)} failed.");
+            throw;
+        }
+    }
+    private void AddRectangle() {
+        try
+        {
+            State.AddShape(PublicationShape.Rectangle);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddRectangle)} failed.");
+            throw;
+        }
+    }
+    private void AddRoundedRectangle() {
+        try
+        {
+            State.AddShape(PublicationShape.RoundedRectangle);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddRoundedRectangle)} failed.");
+            throw;
+        }
+    }
+    private void AddEllipse() {
+        try
+        {
+            State.AddShape(PublicationShape.Ellipse);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddEllipse)} failed.");
+            throw;
+        }
+    }
+    private void AddLine() {
+        try
+        {
+            State.AddShape(PublicationShape.Line);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddLine)} failed.");
+            throw;
+        }
+    }
+    private void StartConnector() {
+        try
+        {
+            State.SetConnectorTool(ConnectorToolKind.Line);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(StartConnector)} failed.");
+            throw;
+        }
+    }
+    private void StartArrowConnector() {
+        try
+        {
+            State.SetConnectorTool(ConnectorToolKind.Arrow);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(StartArrowConnector)} failed.");
+            throw;
+        }
+    }
+    private void StartSignalConnector() {
+        try
+        {
+            State.SetConnectorTool(ConnectorToolKind.SignalConnector);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(StartSignalConnector)} failed.");
+            throw;
+        }
+    }
+    private void StartSignalArrow() {
+        try
+        {
+            State.SetConnectorTool(ConnectorToolKind.SignalArrow);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(StartSignalArrow)} failed.");
+            throw;
+        }
+    }
+    private void AddPage() {
+        try
+        {
+            State.AddPage();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddPage)} failed.");
+            throw;
+        }
+    }
+    private void DuplicatePage() {
+        try
+        {
+            State.DuplicatePage();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(DuplicatePage)} failed.");
+            throw;
+        }
+    }
+    private void DeletePage() {
+        try
+        {
+            State.DeletePage();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(DeletePage)} failed.");
+            throw;
+        }
+    }
+    private void CycleRulerUnit() {
+        try
+        {
+            State.CycleRulerUnit();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(CycleRulerUnit)} failed.");
+            throw;
+        }
+    }
 
-    private void SetConnector(Action<ConnectorElement> update) { if (State.SelectedElement is ConnectorElement connector) State.UpdateSelected(_ => update(connector)); }
+    private void SetConnector(Action<ConnectorElement> update) {
+        try
+        {
+     if (State.SelectedElement is ConnectorElement connector) State.UpdateSelected(_ => update(connector)); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SetConnector)} failed.");
+            throw;
+        }
+    }
     private void WordArtCustomPath()
     {
-        if (State.SelectedElement is not WordArtElement item) return;
-        State.UpdateSelected(_ =>
+        try
         {
-            item.Warp = WordArtWarp.Custom;
-            item.CustomPathPoints = WordArtGeometry.Normalize(item.CustomPathPoints);
-        });
+            if (State.SelectedElement is not WordArtElement item) return;
+            State.UpdateSelected(_ =>
+            {
+                item.Warp = WordArtWarp.Custom;
+                item.CustomPathPoints = WordArtGeometry.Normalize(item.CustomPathPoints);
+            });
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(WordArtCustomPath)} failed.");
+            throw;
+        }
     }
 
     private void WordArtReversePath()
     {
-        if (State.SelectedElement is not WordArtElement item) return;
-        State.UpdateSelected(_ =>
+        try
         {
-            item.Warp = WordArtWarp.Custom;
-            item.CustomPathPoints = WordArtGeometry.Reverse(item.CustomPathPoints);
-        });
+            if (State.SelectedElement is not WordArtElement item) return;
+            State.UpdateSelected(_ =>
+            {
+                item.Warp = WordArtWarp.Custom;
+                item.CustomPathPoints = WordArtGeometry.Reverse(item.CustomPathPoints);
+            });
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(WordArtReversePath)} failed.");
+            throw;
+        }
     }
 
-    private void ConnectorStraight() => SetConnector(connector => connector.PathKind = ConnectorPathKind.Straight);
-    private void ConnectorElbow() => SetConnector(connector => connector.PathKind = ConnectorPathKind.Elbow);
-    private void ConnectorCurved() => SetConnector(connector => connector.PathKind = ConnectorPathKind.Curved);
-    private void ConnectorArrowEnd() => SetConnector(connector => connector.EndMarker = ConnectorMarker.Arrow);
-    private void ConnectorNoArrow() => SetConnector(connector => connector.EndMarker = ConnectorMarker.None);
+    private void ConnectorStraight() {
+        try
+        {
+            SetConnector(connector => connector.PathKind = ConnectorPathKind.Straight);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ConnectorStraight)} failed.");
+            throw;
+        }
+    }
+    private void ConnectorElbow() {
+        try
+        {
+            SetConnector(connector => connector.PathKind = ConnectorPathKind.Elbow);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ConnectorElbow)} failed.");
+            throw;
+        }
+    }
+    private void ConnectorCurved() {
+        try
+        {
+            SetConnector(connector => connector.PathKind = ConnectorPathKind.Curved);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ConnectorCurved)} failed.");
+            throw;
+        }
+    }
+    private void ConnectorArrowEnd() {
+        try
+        {
+            SetConnector(connector => connector.EndMarker = ConnectorMarker.Arrow);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ConnectorArrowEnd)} failed.");
+            throw;
+        }
+    }
+    private void ConnectorNoArrow() {
+        try
+        {
+            SetConnector(connector => connector.EndMarker = ConnectorMarker.None);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ConnectorNoArrow)} failed.");
+            throw;
+        }
+    }
 
-    private void SetImage(Action<ImageFrameElement> update) { if (State.SelectedElement is ImageFrameElement image) State.UpdateSelected(_ => update(image)); }
+    private void SetImage(Action<ImageFrameElement> update) {
+        try
+        {
+     if (State.SelectedElement is ImageFrameElement image) State.UpdateSelected(_ => update(image)); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(SetImage)} failed.");
+            throw;
+        }
+    }
 
     private void ResetPicture()
     {
-        SetImage(image =>
+        try
         {
-            image.CropX = 0; image.CropY = 0; image.CropScale = 1; image.ImageRotation = 0;
-            image.Opacity = 1; image.Brightness = 1; image.Contrast = 1; image.Saturation = 1;
-            image.HueRotation = 0; image.Invert = 0; image.Grayscale = 0; image.Sepia = 0; image.Blur = 0;
-            image.FlipHorizontal = false; image.FlipVertical = false; image.FitInsideFrame = false; image.TintOpacity = 0;
-        });
+            SetImage(image =>
+            {
+                image.CropX = 0; image.CropY = 0; image.CropScale = 1; image.ImageRotation = 0;
+                image.Opacity = 1; image.Brightness = 1; image.Contrast = 1; image.Saturation = 1;
+                image.HueRotation = 0; image.Invert = 0; image.Grayscale = 0; image.Sepia = 0; image.Blur = 0;
+                image.FlipHorizontal = false; image.FlipVertical = false; image.FitInsideFrame = false; image.TintOpacity = 0;
+            });
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ResetPicture)} failed.");
+            throw;
+        }
     }
 
-    private RenderFragment PictureFilter(ImageFrameElement image) => builder =>
+    private RenderFragment PictureFilter(ImageFrameElement image) {
+        try
+        {
+            return builder =>
     {
         var sequence = 0;
         var id = PictureFilterId(image);
@@ -1522,8 +4055,18 @@
         builder.CloseElement();
         builder.CloseElement();
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(PictureFilter)} failed.");
+            throw;
+        }
+    }
 
-    private RenderFragment WordArt(WordArtElement item) => builder =>
+    private RenderFragment WordArt(WordArtElement item) {
+        try
+        {
+            return builder =>
     {
         var sequence = 0;
         var gradientId = $"wordart-gradient-{item.Id:N}";
@@ -1554,45 +4097,64 @@
         AddWordArtText(builder, ref sequence, item, pathId, item.GradientFill ? $"url(#{gradientId})" : item.FillColor, 0, 0, item.OutlineWidth, true);
         builder.CloseElement();
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(WordArt)} failed.");
+            throw;
+        }
+    }
 
     private void AddWordArtText(RenderTreeBuilder builder, ref int sequence, WordArtElement item, string pathId, string fill, double dx, double dy, double outline, bool main)
     {
-        builder.OpenElement(sequence++, "text");
-        builder.AddAttribute(sequence++, "x", "500");
-        builder.AddAttribute(sequence++, "y", item.Warp == WordArtWarp.None ? "185" : "0");
-        builder.AddAttribute(sequence++, "dx", Inv(dx));
-        builder.AddAttribute(sequence++, "dy", Inv(dy));
-        builder.AddAttribute(sequence++, "text-anchor", "middle");
-        builder.AddAttribute(sequence++, "dominant-baseline", "middle");
-        builder.AddAttribute(sequence++, "font-family", item.FontFamily);
-        builder.AddAttribute(sequence++, "font-size", Inv(item.FontSizePt * 3.5));
-        builder.AddAttribute(sequence++, "font-weight", item.Bold ? "700" : "400");
-        builder.AddAttribute(sequence++, "font-style", item.Italic ? "italic" : "normal");
-        builder.AddAttribute(sequence++, "letter-spacing", Inv(item.LetterSpacing * 2));
-        builder.AddAttribute(sequence++, "fill", fill);
-        builder.AddAttribute(sequence++, "stroke", main ? item.OutlineColor : "none");
-        builder.AddAttribute(sequence++, "stroke-width", Inv(outline));
-        builder.AddAttribute(sequence++, "paint-order", "stroke fill");
-        if (main && item.ShadowEnabled) builder.AddAttribute(sequence++, "class", "wordart-main wordart-shadow");
-        else if (main) builder.AddAttribute(sequence++, "class", "wordart-main");
-        if (item.Warp == WordArtWarp.None)
+        try
         {
-            builder.AddContent(sequence++, item.Text);
-        }
-        else
-        {
-            builder.OpenElement(sequence++, "textPath");
-            builder.AddAttribute(sequence++, "href", $"#{pathId}");
-            builder.AddAttribute(sequence++, "startOffset", "50%");
+            builder.OpenElement(sequence++, "text");
+            builder.AddAttribute(sequence++, "x", "500");
+            builder.AddAttribute(sequence++, "y", item.Warp == WordArtWarp.None ? "185" : "0");
+            builder.AddAttribute(sequence++, "dx", Inv(dx));
+            builder.AddAttribute(sequence++, "dy", Inv(dy));
             builder.AddAttribute(sequence++, "text-anchor", "middle");
-            builder.AddContent(sequence++, item.Text);
+            builder.AddAttribute(sequence++, "dominant-baseline", "middle");
+            builder.AddAttribute(sequence++, "font-family", item.FontFamily);
+            builder.AddAttribute(sequence++, "font-size", Inv(item.FontSizePt * 3.5));
+            builder.AddAttribute(sequence++, "font-weight", item.Bold ? "700" : "400");
+            builder.AddAttribute(sequence++, "font-style", item.Italic ? "italic" : "normal");
+            builder.AddAttribute(sequence++, "letter-spacing", Inv(item.LetterSpacing * 2));
+            builder.AddAttribute(sequence++, "fill", fill);
+            builder.AddAttribute(sequence++, "stroke", main ? item.OutlineColor : "none");
+            builder.AddAttribute(sequence++, "stroke-width", Inv(outline));
+            builder.AddAttribute(sequence++, "paint-order", "stroke fill");
+            if (main && item.ShadowEnabled) builder.AddAttribute(sequence++, "class", "wordart-main wordart-shadow");
+            else if (main) builder.AddAttribute(sequence++, "class", "wordart-main");
+            if (item.Warp == WordArtWarp.None)
+            {
+                builder.AddContent(sequence++, item.Text);
+            }
+            else
+            {
+                builder.OpenElement(sequence++, "textPath");
+                builder.AddAttribute(sequence++, "href", $"#{pathId}");
+                builder.AddAttribute(sequence++, "startOffset", "50%");
+                builder.AddAttribute(sequence++, "text-anchor", "middle");
+                builder.AddContent(sequence++, item.Text);
+                builder.CloseElement();
+            }
             builder.CloseElement();
+    
         }
-        builder.CloseElement();
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AddWordArtText)} failed.");
+            throw;
+        }
     }
 
 
-    private RenderFragment ConnectorMarkerDefinition(ConnectorElement connector, bool start) => builder =>
+    private RenderFragment ConnectorMarkerDefinition(ConnectorElement connector, bool start) {
+        try
+        {
+            return builder =>
     {
         var marker = start ? connector.StartMarker : connector.EndMarker;
         if (marker == ConnectorMarker.None) return;
@@ -1616,117 +4178,427 @@
         builder.CloseElement();
         builder.CloseElement();
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ConnectorMarkerDefinition)} failed.");
+            throw;
+        }
+    }
 
-    private string MarkerId(ConnectorElement connector, bool start) => $"connector-{connector.Id:N}-{(start ? "start" : "end")}";
+    private string MarkerId(ConnectorElement connector, bool start) {
+        try
+        {
+            return $"connector-{connector.Id:N}-{(start ? "start" : "end")}";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(MarkerId)} failed.");
+            throw;
+        }
+    }
     private string MarkerUrl(ConnectorElement connector, bool start)
     {
-        var marker = start ? connector.StartMarker : connector.EndMarker;
-        return marker == ConnectorMarker.None ? string.Empty : $"url(#{MarkerId(connector, start)})";
+        try
+        {
+            var marker = start ? connector.StartMarker : connector.EndMarker;
+            return marker == ConnectorMarker.None ? string.Empty : $"url(#{MarkerId(connector, start)})";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(MarkerUrl)} failed.");
+            throw;
+        }
     }
-    private string AnchorCss(ConnectorAnchor anchor) => anchor.ToString().ToLowerInvariant();
+    private string AnchorCss(ConnectorAnchor anchor) {
+        try
+        {
+            return anchor.ToString().ToLowerInvariant();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AnchorCss)} failed.");
+            throw;
+        }
+    }
 
-    private string VideoFit(PublicationVideoFitMode mode) => mode switch
+    private string VideoFit(PublicationVideoFitMode mode) {
+        try
+        {
+            return mode switch
     {
         PublicationVideoFitMode.Cover => "cover",
         PublicationVideoFitMode.Stretch => "fill",
         _ => "contain"
     };
-    private IEnumerable<double> AudioSamples(AudioElement audio) => audio.WaveformSamples.Count > 0
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(VideoFit)} failed.");
+            throw;
+        }
+    }
+    private IEnumerable<double> AudioSamples(AudioElement audio) {
+        try
+        {
+            return audio.WaveformSamples.Count > 0
         ? audio.WaveformSamples.Take(96)
         : Enumerable.Range(0, 64).Select(index => .22 + Math.Abs(Math.Sin(index * .41)) * .68);
-    private string WaveHeight(double sample) => $"{Math.Clamp(sample, .04, 1) * 100:0.#}%";
-    private string Time(double seconds) => TimeSpan.FromSeconds(Math.Max(0, seconds)).ToString(seconds >= 3600 ? @"h\:mm\:ss" : @"m\:ss");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(AudioSamples)} failed.");
+            throw;
+        }
+    }
+    private string WaveHeight(double sample) {
+        try
+        {
+            return $"{Math.Clamp(sample, .04, 1) * 100:0.#}%";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(WaveHeight)} failed.");
+            throw;
+        }
+    }
+    private string Time(double seconds) {
+        try
+        {
+            return TimeSpan.FromSeconds(Math.Max(0, seconds)).ToString(seconds >= 3600 ? @"h\:mm\:ss" : @"m\:ss");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(Time)} failed.");
+            throw;
+        }
+    }
 
-    private string ElementStyle(PublicationElement element) => $"left:{Mm(element.X)};top:{Mm(element.Y)};width:{Mm(element.Width)};height:{Mm(element.Height)};z-index:{element.ZIndex};transform:rotate({Inv(element.Rotation)}deg)";
-    private string ElementContentStyle(PublicationElement element) => $"width:{ContentMm(element.Width)};height:{ContentMm(element.Height)};--publisher-editor-zoom:{Inv(State.Document.Zoom)}";
-    private string ElementZoomCompatibilityClass(PublicationElement element) => element is DevExtremeComponentElement
+    private string ElementStyle(PublicationElement element) {
+        try
+        {
+            return $"left:{Mm(element.X)};top:{Mm(element.Y)};width:{Mm(element.Width)};height:{Mm(element.Height)};z-index:{element.ZIndex};transform:rotate({Inv(element.Rotation)}deg)";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ElementStyle)} failed.");
+            throw;
+        }
+    }
+    private string ElementContentStyle(PublicationElement element) {
+        try
+        {
+            return $"width:{ContentMm(element.Width)};height:{ContentMm(element.Height)};--publisher-editor-zoom:{Inv(State.Document.Zoom)}";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ElementContentStyle)} failed.");
+            throw;
+        }
+    }
+    private string ElementZoomCompatibilityClass(PublicationElement element) {
+        try
+        {
+            return element is DevExtremeComponentElement
         ? "zoom-transform-compat"
         : string.Empty;
-    private string ElementZoomStrategy(PublicationElement element) => element is DevExtremeComponentElement
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ElementZoomCompatibilityClass)} failed.");
+            throw;
+        }
+    }
+    private string ElementZoomStrategy(PublicationElement element) {
+        try
+        {
+            return element is DevExtremeComponentElement
         ? "transform"
         : "auto";
-    private string ShapeStyle(ShapeElement shape) => shape.Shape == PublicationShape.Line
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ElementZoomStrategy)} failed.");
+            throw;
+        }
+    }
+    private string ShapeStyle(ShapeElement shape) {
+        try
+        {
+            return shape.Shape == PublicationShape.Line
         ? $"background:{shape.Stroke};height:{ContentMm(Math.Max(shape.StrokeWidth, .3))};top:50%;position:absolute;width:100%"
         : $"background:{shape.Fill};border:{ContentMm(shape.StrokeWidth)} solid {shape.Stroke};border-radius:{(shape.Shape == PublicationShape.Ellipse ? "50%" : shape.Shape == PublicationShape.RoundedRectangle ? ContentMm(shape.CornerRadiusMm) : "0")}";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ShapeStyle)} failed.");
+            throw;
+        }
+    }
 
     private string ImageFrameStyle(ImageFrameElement image)
     {
-        var radius = image.MaskShape == ImageMaskShape.Ellipse ? "50%" : image.MaskShape == ImageMaskShape.RoundedRectangle ? ContentMm(image.CornerRadiusMm) : "0";
-        var shadow = image.ShadowEnabled ? "2mm 2mm 4mm rgba(15,23,42,.32)" : "none";
-        return $"border-radius:{radius};border:{ContentMm(image.BorderWidthMm)} solid {image.BorderColor};box-shadow:{shadow}";
+        try
+        {
+            var radius = image.MaskShape == ImageMaskShape.Ellipse ? "50%" : image.MaskShape == ImageMaskShape.RoundedRectangle ? ContentMm(image.CornerRadiusMm) : "0";
+            var shadow = image.ShadowEnabled ? "2mm 2mm 4mm rgba(15,23,42,.32)" : "none";
+            return $"border-radius:{radius};border:{ContentMm(image.BorderWidthMm)} solid {image.BorderColor};box-shadow:{shadow}";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ImageFrameStyle)} failed.");
+            throw;
+        }
     }
 
     private string ImageStyle(ImageFrameElement image)
     {
-        var fit = image.FitInsideFrame ? "contain" : "cover";
-        var sx = image.FlipHorizontal ? -image.CropScale : image.CropScale;
-        var sy = image.FlipVertical ? -image.CropScale : image.CropScale;
-        var tint = image.TintOpacity > .001 ? $"url(#{PictureFilterId(image)}) " : string.Empty;
-        return $"object-fit:{fit};transform:translate({Inv(image.CropX)}%,{Inv(image.CropY)}%) rotate({Inv(image.ImageRotation)}deg) scale({Inv(sx)},{Inv(sy)});opacity:{Inv(image.Opacity)};filter:{tint}brightness({Inv(image.Brightness)}) contrast({Inv(image.Contrast)}) saturate({Inv(image.Saturation)}) hue-rotate({Inv(image.HueRotation)}deg) invert({Inv(image.Invert)}) grayscale({Inv(image.Grayscale)}) sepia({Inv(image.Sepia)}) blur({Inv(image.Blur)}px)";
+        try
+        {
+            var fit = image.FitInsideFrame ? "contain" : "cover";
+            var sx = image.FlipHorizontal ? -image.CropScale : image.CropScale;
+            var sy = image.FlipVertical ? -image.CropScale : image.CropScale;
+            var tint = image.TintOpacity > .001 ? $"url(#{PictureFilterId(image)}) " : string.Empty;
+            return $"object-fit:{fit};transform:translate({Inv(image.CropX)}%,{Inv(image.CropY)}%) rotate({Inv(image.ImageRotation)}deg) scale({Inv(sx)},{Inv(sy)});opacity:{Inv(image.Opacity)};filter:{tint}brightness({Inv(image.Brightness)}) contrast({Inv(image.Contrast)}) saturate({Inv(image.Saturation)}) hue-rotate({Inv(image.HueRotation)}deg) invert({Inv(image.Invert)}) grayscale({Inv(image.Grayscale)}) sepia({Inv(image.Sepia)}) blur({Inv(image.Blur)}px)";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ImageStyle)} failed.");
+            throw;
+        }
     }
 
-    private string PictureFilterId(ImageFrameElement image) => $"picture-filter-{image.Id:N}";
-    private string BlendMode(ImageBlendMode mode) => mode.ToString().ToLowerInvariant();
-    private string WordArtPath(WordArtWarp warp) => warp switch
+    private string PictureFilterId(ImageFrameElement image) {
+        try
+        {
+            return $"picture-filter-{image.Id:N}";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(PictureFilterId)} failed.");
+            throw;
+        }
+    }
+    private string BlendMode(ImageBlendMode mode) {
+        try
+        {
+            return mode.ToString().ToLowerInvariant();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(BlendMode)} failed.");
+            throw;
+        }
+    }
+    private string WordArtPath(WordArtWarp warp) {
+        try
+        {
+            return warp switch
     {
         WordArtWarp.ArchUp => "M 80 225 Q 500 5 920 225",
         WordArtWarp.ArchDown => "M 80 75 Q 500 295 920 75",
         WordArtWarp.Wave => "M 40 165 C 220 20 350 290 520 145 C 690 0 810 280 960 125",
         _ => "M 50 170 L 950 170"
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(WordArtPath)} failed.");
+            throw;
+        }
+    }
 
-    private string GuideStyle(GuideLine guide) => guide.Orientation == GuideOrientation.Horizontal ? $"top:{Mm(guide.PositionMm)}" : $"left:{Mm(guide.PositionMm)}";
-    private string MediaSource(PublicationMediaElement media) => MediaAssets.GetOrRegister(media);
-    private string MediaSegmentSource(PublicationMediaSegment segment) => MediaAssets.GetOrRegister(segment);
-    private string MediaPoster(VideoElement video) => video.EffectiveSegments.FirstOrDefault()?.PosterDataUrl is { Length: > 0 } poster
+    private string GuideStyle(GuideLine guide) {
+        try
+        {
+            return guide.Orientation == GuideOrientation.Horizontal ? $"top:{Mm(guide.PositionMm)}" : $"left:{Mm(guide.PositionMm)}";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(GuideStyle)} failed.");
+            throw;
+        }
+    }
+    private string MediaSource(PublicationMediaElement media) {
+        try
+        {
+            return MediaAssets.GetOrRegister(media);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(MediaSource)} failed.");
+            throw;
+        }
+    }
+    private string MediaSegmentSource(PublicationMediaSegment segment) {
+        try
+        {
+            return MediaAssets.GetOrRegister(segment);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(MediaSegmentSource)} failed.");
+            throw;
+        }
+    }
+    private string MediaPoster(VideoElement video) {
+        try
+        {
+            return video.EffectiveSegments.FirstOrDefault()?.PosterDataUrl is { Length: > 0 } poster
         ? poster
         : video.PosterDataUrl;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(MediaPoster)} failed.");
+            throw;
+        }
+    }
     private string VideoMediaStyle(VideoElement video)
     {
-        var clip = video.FrameClipPolygon is { Count: >= 3 }
-            ? $";clip-path:{FrameClipPath(video.FrameClipPolygon)}"
-            : string.Empty;
-        return $"object-fit:{VideoFit(video.FitMode)}{clip}";
+        try
+        {
+            var clip = video.FrameClipPolygon is { Count: >= 3 }
+                ? $";clip-path:{FrameClipPath(video.FrameClipPolygon)}"
+                : string.Empty;
+            return $"object-fit:{VideoFit(video.FitMode)}{clip}";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(VideoMediaStyle)} failed.");
+            throw;
+        }
     }
-    private string FrameClipPath(IEnumerable<MediaFramePoint> points) =>
-        $"polygon({string.Join(',', points.Select(point => $"{Inv(Math.Clamp(point.X, 0, 1) * 100)}% {Inv(Math.Clamp(point.Y, 0, 1) * 100)}%"))})";
-    private string Mm(double mm) => Px(mm * PixelsPerMm);
-    private string ContentMm(double mm) => Px(mm * RuntimePolicy.BasePixelsPerMillimeter);
-    private string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
-    private string NullableInv(double? value) => value is { } number ? Inv(number) : string.Empty;
-    private string Percent(double value) => $"{Math.Clamp(value, 0, 1) * 100:0.###}%";
-    private string Px(double px) => $"{px.ToString("0.###", CultureInfo.InvariantCulture)}px";
+    private string FrameClipPath(IEnumerable<MediaFramePoint> points) {
+        try
+        {
+            return $"polygon({string.Join(',', points.Select(point => $"{Inv(Math.Clamp(point.X, 0, 1) * 100)}% {Inv(Math.Clamp(point.Y, 0, 1) * 100)}%"))})";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(FrameClipPath)} failed.");
+            throw;
+        }
+    }
+    private string Mm(double mm) {
+        try
+        {
+            return Px(mm * PixelsPerMm);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(Mm)} failed.");
+            throw;
+        }
+    }
+    private string ContentMm(double mm) {
+        try
+        {
+            return Px(mm * RuntimePolicy.BasePixelsPerMillimeter);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ContentMm)} failed.");
+            throw;
+        }
+    }
+    private string Inv(double value) {
+        try
+        {
+            return value.ToString("0.###", CultureInfo.InvariantCulture);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(Inv)} failed.");
+            throw;
+        }
+    }
+    private string NullableInv(double? value) {
+        try
+        {
+            return value is { } number ? Inv(number) : string.Empty;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(NullableInv)} failed.");
+            throw;
+        }
+    }
+    private string Percent(double value) {
+        try
+        {
+            return $"{Math.Clamp(value, 0, 1) * 100:0.###}%";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(Percent)} failed.");
+            throw;
+        }
+    }
+    private string Px(double px) {
+        try
+        {
+            return $"{px.ToString("0.###", CultureInfo.InvariantCulture)}px";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(Px)} failed.");
+            throw;
+        }
+    }
 
     public async ValueTask DisposeAsync()
     {
-        _disposed = true;
         try
         {
-            if (_module is not null) await _module.InvokeVoidAsync("disposeCanvas", "publisher-stage").ConfigureAwait(true);
-        }
-        catch (JSDisconnectedException) { }
-        catch (TaskCanceledException) { }
-        catch (ObjectDisposedException) { }
-        catch (InvalidOperationException) { }
-        finally
-        {
-            _self?.Dispose();
-        }
+            _disposed = true;
+            try
+            {
+                if (_module is not null) await _module.InvokeVoidAsync("disposeCanvas", "publisher-stage").ConfigureAwait(true);
+            }
+            catch (JSDisconnectedException) { }
+            catch (TaskCanceledException) { }
+            catch (ObjectDisposedException) { }
+            catch (InvalidOperationException) { }
+            finally
+            {
+                _self?.Dispose();
+            }
 
-        try
-        {
-            if (_module is not null) await _module.DisposeAsync().ConfigureAwait(true);
+            try
+            {
+                if (_module is not null) await _module.DisposeAsync().ConfigureAwait(true);
+            }
+            catch (JSDisconnectedException) { }
+            catch (TaskCanceledException) { }
+            catch (ObjectDisposedException) { }
+            catch (InvalidOperationException) { }
+    
         }
-        catch (JSDisconnectedException) { }
-        catch (TaskCanceledException) { }
-        catch (ObjectDisposedException) { }
-        catch (InvalidOperationException) { }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(DisposeAsync)} failed.");
+            throw;
+        }
     }
 
-    private string StoryBackground(TextFrameElement text) =>
-        string.IsNullOrWhiteSpace(text.DocumentBackground) || string.Equals(text.DocumentBackground, "transparent", StringComparison.OrdinalIgnoreCase)
+    private string StoryBackground(TextFrameElement text) {
+        try
+        {
+            return string.IsNullOrWhiteSpace(text.DocumentBackground) || string.Equals(text.DocumentBackground, "transparent", StringComparison.OrdinalIgnoreCase)
             ? text.Background
             : text.DocumentBackground;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(StoryBackground)} failed.");
+            throw;
+        }
+    }
 
 
 }

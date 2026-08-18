@@ -3,6 +3,7 @@
 @inject IJSRuntime JS
 @inject PublicationMediaAssetStore MediaAssets
 
+@inject ILogger<VideoMediaView> Logger
 <div class="publication-video-renderer" style="background:@Item.Background">
     <video id="@VideoId"
            class="publication-video-source"
@@ -47,25 +48,46 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var segment = Item.EffectiveSegments.FirstOrDefault();
-        if (segment is null) return;
         try
         {
-            await JS.InvokeVoidAsync("publisherVideoEffects.installById", RuntimeKey, VideoId, CanvasId, new
+            var segment = Item.EffectiveSegments.FirstOrDefault();
+            if (segment is null) return;
+            try
             {
-                fitMode = FitMode,
-                forceCanvas = segment.VideoLayers.Any(LayerNeedsCanvas),
-                layers = segment.VideoLayers.Select(LayerPayload).ToArray()
-            }).ConfigureAwait(true);
+                await JS.InvokeVoidAsync("publisherVideoEffects.installById", RuntimeKey, VideoId, CanvasId, new
+                {
+                    fitMode = FitMode,
+                    forceCanvas = segment.VideoLayers.Any(LayerNeedsCanvas),
+                    layers = segment.VideoLayers.Select(LayerPayload).ToArray()
+                }).ConfigureAwait(true);
+            }
+            catch { }
+    
         }
-        catch { }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(VideoMediaView)}.{nameof(OnAfterRenderAsync)} failed.");
+            throw;
+        }
     }
 
-    private bool LayerNeedsCanvas(VideoEffectLayer layer) =>
-        layer.Kind == VideoEffectLayerKind.Blob3D || !layer.Visible || layer.Opacity < .999 || layer.BlendMode != VideoEffectBlendMode.Normal ||
+    private bool LayerNeedsCanvas(VideoEffectLayer layer) {
+        try
+        {
+            return layer.Kind == VideoEffectLayerKind.Blob3D || !layer.Visible || layer.Opacity < .999 || layer.BlendMode != VideoEffectBlendMode.Normal ||
         layer.HasTemporalRange || layer.Region.Points.Count >= 3 || layer.Filters.Any(filter => filter.Enabled);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(VideoMediaView)}.{nameof(LayerNeedsCanvas)} failed.");
+            throw;
+        }
+    }
 
-    private object LayerPayload(VideoEffectLayer layer) => new
+    private object LayerPayload(VideoEffectLayer layer) {
+        try
+        {
+            return new
     {
         id = layer.Id.ToString("D"),
         layer.Name,
@@ -106,13 +128,49 @@
             htmlExportSupport = filter.HtmlExportSupport.ToString()
         }).ToArray()
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(VideoMediaView)}.{nameof(LayerPayload)} failed.");
+            throw;
+        }
+    }
 
     public async ValueTask DisposeAsync()
     {
-        try { await JS.InvokeVoidAsync("publisherVideoEffects.dispose", RuntimeKey).ConfigureAwait(true); }
-        catch { }
+        try
+        {
+            try { await JS.InvokeVoidAsync("publisherVideoEffects.dispose", RuntimeKey).ConfigureAwait(true); }
+            catch { }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(VideoMediaView)}.{nameof(DisposeAsync)} failed.");
+            throw;
+        }
     }
 
-    private string Time(double seconds) => TimeSpan.FromSeconds(Math.Max(0, seconds)).ToString(seconds >= 3600 ? @"h\:mm\:ss" : @"m\:ss");
-    private string Inv(double value) => value.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+    private string Time(double seconds) {
+        try
+        {
+            return TimeSpan.FromSeconds(Math.Max(0, seconds)).ToString(seconds >= 3600 ? @"h\:mm\:ss" : @"m\:ss");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(VideoMediaView)}.{nameof(Time)} failed.");
+            throw;
+        }
+    }
+    private string Inv(double value) {
+        try
+        {
+            return value.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(VideoMediaView)}.{nameof(Inv)} failed.");
+            throw;
+        }
+    }
 }

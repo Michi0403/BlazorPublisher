@@ -437,14 +437,29 @@ def audit(source_root: Path) -> tuple[list[Finding], dict[str, int]]:
         "async_streams": 0,
     }
     configuration_pattern = re.compile(r"\.ConfigureAwait\s*\(\s*(true|false)\s*\)\s*!?\s*$")
-    lifecycle_names: tuple[str, ...] = ()
-    helper_methods_by_file: dict[str, tuple[str, ...]] = {}
-    discovered_helper_methods: dict[str, set[str]] = {}
+    policy_path = source_root.parents[1] / "build" / "async-continuation-policy.json"
+    baseline = json.loads(policy_path.read_text(encoding="utf-8-sig"))
+    lifecycle_names = tuple(baseline.get(
+        "rendererAffineLifecycleMethods",
+        ("OnInitializedAsync", "OnParametersSetAsync", "OnAfterRenderAsync"),
+    ))
+    helper_methods_by_file = {
+        str(relative): tuple(methods)
+        for relative, methods in baseline.get("rendererAffineHelperMethods", {}).items()
+    }
+    discovered_helper_methods: dict[str, set[str]] = {
+        relative: set() for relative in helper_methods_by_file
+    }
+
+    for relative in helper_methods_by_file:
+        if not (source_root / relative).is_file():
+            findings.append(Finding(relative, 1, "Renderer-affine helper baseline references a missing component file."))
+
     for path in source_files(source_root):
         text = path.read_text(encoding="utf-8-sig", errors="replace")
         relative = path.relative_to(source_root).as_posix()
         regions = csharp_regions(path, text)
-        if not regions:
+        if not regions and path.suffix.lower() != ".razor":
             continue
         file_has_await = False
         is_component = relative.startswith("Components/")
@@ -533,11 +548,21 @@ def audit(source_root: Path) -> tuple[list[Finding], dict[str, int]]:
                 if not uses_true:
                     continue
 
+                in_lifecycle = any(start <= token.start <= end for start, end in lifecycle_ranges)
+                in_renderer_loading_helper = any(
+                    start <= token.start <= end for start, end in renderer_loading_ranges
+                )
                 if not is_component:
                     findings.append(Finding(
                         relative,
                         current_line,
-                        "ConfigureAwait(true) is forbidden outside Components; services/controllers/background code must use ConfigureAwait(false).",
+                        "ConfigureAwait(true) is forbidden outside Components; use ConfigureAwait(false).",
+                    ))
+                elif not in_lifecycle and not in_renderer_loading_helper:
+                    findings.append(Finding(
+                        relative,
+                        current_line,
+                        "ConfigureAwait(true) is allowed only in a Blazor lifecycle method or an exact renderer-affine loading helper listed in async-continuation-policy.json.",
                     ))
 
         if path.suffix.lower() == ".razor":
@@ -567,7 +592,14 @@ def audit(source_root: Path) -> tuple[list[Finding], dict[str, int]]:
         if file_has_await:
             totals["files"] += 1
 
-
+    for relative, expected_methods in helper_methods_by_file.items():
+        discovered = discovered_helper_methods.get(relative, set())
+        for missing_method in sorted(set(expected_methods) - discovered):
+            findings.append(Finding(
+                relative,
+                1,
+                f"Renderer-affine helper baseline method '{missing_method}' was not found as a method declaration.",
+            ))
 
     return findings, totals
 
@@ -589,7 +621,7 @@ def main() -> int:
         return 1
 
     print(
-        "PublisherStudio async continuation validation passed for "
+        "Async continuation validation passed for "
         f"{totals['files']} source files ({totals['awaits']} await tokens, "
         f"{totals['configure_false']} ConfigureAwait(false), "
         f"{totals['configure_true']} renderer-affine ConfigureAwait(true), "

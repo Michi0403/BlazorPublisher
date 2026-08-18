@@ -5,6 +5,8 @@
 @inject IUserNotificationService Notifications
 @inject IJSRuntime JS
 
+@inject ILogger<OrganicApprovalBar> Logger
+@inject ISupervisedTaskRunner TaskRunner
 @if (_visible && _pending.Count > 0)
 {
     <aside class="organic-approval-bar" role="region" aria-label="Organic plugin approvals">
@@ -58,125 +60,217 @@ else if (!_visible && _pending.Count > 0)
 
     protected override void OnInitialized()
     {
-        WorkCoordinator.Changed += OnChanged;
-        Refresh();
+        try
+        {
+            WorkCoordinator.Changed += OnChanged;
+            Refresh();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicApprovalBar)}.{nameof(OnInitialized)} failed.");
+            throw;
+        }
     }
 
     private void Refresh()
     {
-        _pending = WorkCoordinator.GetWork()
-            .Where(item => item.Status == OrganicWorkStatus.PendingApproval)
-            .OrderBy(item => item.CreatedUtc)
-            .ToList();
-        var current = _pending.FirstOrDefault();
-        if (current is null)
+        try
         {
-            _editorWorkItemId = null;
-            _interactionValue = string.Empty;
+            _pending = WorkCoordinator.GetWork()
+                .Where(item => item.Status == OrganicWorkStatus.PendingApproval)
+                .OrderBy(item => item.CreatedUtc)
+                .ToList();
+            var current = _pending.FirstOrDefault();
+            if (current is null)
+            {
+                _editorWorkItemId = null;
+                _interactionValue = string.Empty;
+            }
+            else if (_editorWorkItemId != current.Id)
+            {
+                _editorWorkItemId = current.Id;
+                _interactionValue = current.Request.InteractionValueJson ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(_interactionValue) && TryReadParameter(current.Request, "initialText", out var initialText))
+                    _interactionValue = initialText;
+            }
+    
         }
-        else if (_editorWorkItemId != current.Id)
+        catch (Exception __componentMethodException)
         {
-            _editorWorkItemId = current.Id;
-            _interactionValue = current.Request.InteractionValueJson ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(_interactionValue) && TryReadParameter(current.Request, "initialText", out var initialText))
-                _interactionValue = initialText;
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicApprovalBar)}.{nameof(Refresh)} failed.");
+            throw;
         }
     }
 
-    private void OnChanged() => _ = InvokeAsync(() =>
+    private void OnChanged()
     {
-        Refresh();
-        StateHasChanged();
-    });
+        try
+        {
+            TaskRunner.Run(
+                nameof(OrganicApprovalBar),
+                nameof(OnChanged),
+                async _ => await InvokeAsync(() =>
+                {
+                        Refresh();
+                        StateHasChanged();
+                }).ConfigureAwait(false));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicApprovalBar)}.{nameof(OnChanged)} failed.");
+            throw;
+        }
+    }
 
     private async Task ApproveCurrentAsync()
     {
-        if (_busy || _pending.Count == 0) return;
-        _busy = true;
         try
         {
-            var pending = _pending[0];
-            if (string.Equals(pending.CapabilityKey, "publisher.screen.capture", StringComparison.OrdinalIgnoreCase))
+            if (_busy || _pending.Count == 0) return;
+            _busy = true;
+            try
             {
-                var captureJson = await JS.InvokeAsync<string>("publisherSecureCapture.captureScreen").ConfigureAwait(true);
-                if (!WorkCoordinator.UpdateInteractionValue(pending.Id, captureJson))
-                    throw new InvalidOperationException("The approved browser screenshot could not be attached to the current 1-Wire work item.");
+                var pending = _pending[0];
+                if (string.Equals(pending.CapabilityKey, "publisher.screen.capture", StringComparison.OrdinalIgnoreCase))
+                {
+                    var captureJson = await JS.InvokeAsync<string>("publisherSecureCapture.captureScreen").ConfigureAwait(true);
+                    if (!WorkCoordinator.UpdateInteractionValue(pending.Id, captureJson))
+                        throw new InvalidOperationException("The approved browser screenshot could not be attached to the current 1-Wire work item.");
+                }
+                else if (string.Equals(pending.CapabilityKey, "publisher.screen.record", StringComparison.OrdinalIgnoreCase))
+                {
+                    var maximumSeconds = TryReadIntParameter(pending.Request, "maximumSeconds", 10);
+                    var includeAudio = TryReadBooleanParameter(pending.Request, "includeAudio", false);
+                    var captureJson = await JS.InvokeAsync<string>("publisherSecureCapture.recordScreen", maximumSeconds, includeAudio).ConfigureAwait(true);
+                    if (!WorkCoordinator.UpdateInteractionValue(pending.Id, captureJson))
+                        throw new InvalidOperationException("The approved browser screen recording could not be attached to the current 1-Wire work item.");
+                }
+                else if (NeedsEditor(pending.Request) && !WorkCoordinator.UpdateInteractionValue(pending.Id, _interactionValue))
+                    throw new InvalidOperationException("The pending interaction value could not be attached to the current 1-Wire work item.");
+                var item = await WorkCoordinator.ApproveAsync(pending.Id).ConfigureAwait(true);
+                if (item is not null && Connection.State.IsConnected)
+                    await Connection.SendWorkResultAsync(item).ConfigureAwait(true);
+                Notifications.Success("The requested AI Council action was approved once.", "Organic approval", nameof(OrganicApprovalBar));
             }
-            else if (string.Equals(pending.CapabilityKey, "publisher.screen.record", StringComparison.OrdinalIgnoreCase))
+            finally
             {
-                var maximumSeconds = TryReadIntParameter(pending.Request, "maximumSeconds", 10);
-                var includeAudio = TryReadBooleanParameter(pending.Request, "includeAudio", false);
-                var captureJson = await JS.InvokeAsync<string>("publisherSecureCapture.recordScreen", maximumSeconds, includeAudio).ConfigureAwait(true);
-                if (!WorkCoordinator.UpdateInteractionValue(pending.Id, captureJson))
-                    throw new InvalidOperationException("The approved browser screen recording could not be attached to the current 1-Wire work item.");
+                _busy = false;
+                Refresh();
             }
-            else if (NeedsEditor(pending.Request) && !WorkCoordinator.UpdateInteractionValue(pending.Id, _interactionValue))
-                throw new InvalidOperationException("The pending interaction value could not be attached to the current 1-Wire work item.");
-            var item = await WorkCoordinator.ApproveAsync(pending.Id).ConfigureAwait(true);
-            if (item is not null && Connection.State.IsConnected)
-                await Connection.SendWorkResultAsync(item).ConfigureAwait(true);
-            Notifications.Success("The requested AI Council action was approved once.", "Organic approval", nameof(OrganicApprovalBar));
+    
         }
-        finally
+        catch (Exception __componentMethodException)
         {
-            _busy = false;
-            Refresh();
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicApprovalBar)}.{nameof(ApproveCurrentAsync)} failed.");
+            throw;
         }
     }
 
     private async Task DeclineCurrentAsync()
     {
-        if (_busy || _pending.Count == 0) return;
-        _busy = true;
         try
         {
-            var id = _pending[0].Id;
-            if (WorkCoordinator.Decline(id, "Declined by the PublisherStudio user."))
+            if (_busy || _pending.Count == 0) return;
+            _busy = true;
+            try
             {
-                var item = WorkCoordinator.Get(id);
-                if (item is not null && Connection.State.IsConnected)
-                    await Connection.SendWorkResultAsync(item).ConfigureAwait(true);
-                Notifications.Warning("The requested AI Council action was declined.", "Organic approval", nameof(OrganicApprovalBar));
+                var id = _pending[0].Id;
+                if (WorkCoordinator.Decline(id, "Declined by the PublisherStudio user."))
+                {
+                    var item = WorkCoordinator.Get(id);
+                    if (item is not null && Connection.State.IsConnected)
+                        await Connection.SendWorkResultAsync(item).ConfigureAwait(true);
+                    Notifications.Warning("The requested AI Council action was declined.", "Organic approval", nameof(OrganicApprovalBar));
+                }
             }
+            finally
+            {
+                _busy = false;
+                Refresh();
+            }
+    
         }
-        finally
+        catch (Exception __componentMethodException)
         {
-            _busy = false;
-            Refresh();
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicApprovalBar)}.{nameof(DeclineCurrentAsync)} failed.");
+            throw;
         }
     }
 
-    private bool NeedsEditor(OrganicWireEnvelope request) => ReadEditor(request) is
+    private bool NeedsEditor(OrganicWireEnvelope request) {
+        try
+        {
+            return ReadEditor(request) is
         OrganicInteractionEditor.PlainText or OrganicInteractionEditor.RichText or OrganicInteractionEditor.Json;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicApprovalBar)}.{nameof(NeedsEditor)} failed.");
+            throw;
+        }
+    }
 
-    private string EditorLabel(OrganicWireEnvelope request) => ReadEditor(request) switch
+    private string EditorLabel(OrganicWireEnvelope request) {
+        try
+        {
+            return ReadEditor(request) switch
     {
         OrganicInteractionEditor.RichText => "Text or formatted story content requested by LocalGPT",
         OrganicInteractionEditor.Json => "Structured JSON requested by LocalGPT",
         _ => "Information requested by LocalGPT"
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicApprovalBar)}.{nameof(EditorLabel)} failed.");
+            throw;
+        }
+    }
 
     private OrganicInteractionEditor ReadEditor(OrganicWireEnvelope request)
     {
-        if (request.Properties is not null && request.Properties.TryGetValue("InteractionEditor", out var value))
+        try
         {
-            if (value.ValueKind == System.Text.Json.JsonValueKind.String && Enum.TryParse<OrganicInteractionEditor>(value.GetString(), true, out var parsed))
-                return parsed;
-            if (value.ValueKind == System.Text.Json.JsonValueKind.Number && value.TryGetInt32(out var numeric) && Enum.IsDefined(typeof(OrganicInteractionEditor), numeric))
-                return (OrganicInteractionEditor)numeric;
+            if (request.Properties is not null && request.Properties.TryGetValue("InteractionEditor", out var value))
+            {
+                if (value.ValueKind == System.Text.Json.JsonValueKind.String && Enum.TryParse<OrganicInteractionEditor>(value.GetString(), true, out var parsed))
+                    return parsed;
+                if (value.ValueKind == System.Text.Json.JsonValueKind.Number && value.TryGetInt32(out var numeric) && Enum.IsDefined(typeof(OrganicInteractionEditor), numeric))
+                    return (OrganicInteractionEditor)numeric;
+            }
+            return request.RequiresHumanInteractionOnTargetSystem ? OrganicInteractionEditor.ConfirmationOnly : OrganicInteractionEditor.None;
+    
         }
-        return request.RequiresHumanInteractionOnTargetSystem ? OrganicInteractionEditor.ConfirmationOnly : OrganicInteractionEditor.None;
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicApprovalBar)}.{nameof(ReadEditor)} failed.");
+            throw;
+        }
     }
 
-    private string DescribeInteraction(OrganicWireEnvelope request) => request.InteractionKind switch
+    private string DescribeInteraction(OrganicWireEnvelope request) {
+        try
+        {
+            return request.InteractionKind switch
     {
         OrganicInteractionKind.HumanAndAutomated => "Needs human confirmation and automated interaction on PublisherStudio.",
         OrganicInteractionKind.Human => "Needs human interaction on PublisherStudio.",
         OrganicInteractionKind.Automated => "Uses an automated PublisherStudio interaction after approval.",
         _ => "Requests a bounded PublisherStudio function."
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicApprovalBar)}.{nameof(DescribeInteraction)} failed.");
+            throw;
+        }
+    }
 
-    private string ApproveButtonText(OrganicWireEnvelope request) => request.CapabilityKey switch
+    private string ApproveButtonText(OrganicWireEnvelope request) {
+        try
+        {
+            return request.CapabilityKey switch
     {
         "publisher.text.edit.request" => "Save & return to LocalGPT",
         "publisher.website.content.request" => "Return approved content",
@@ -184,37 +278,111 @@ else if (!_visible && _pending.Count > 0)
         "publisher.screen.record" => "Choose screen & record",
         _ => "Approve once"
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicApprovalBar)}.{nameof(ApproveButtonText)} failed.");
+            throw;
+        }
+    }
 
     private bool TryReadParameter(OrganicWireEnvelope request, string name, out string value)
     {
-        value = string.Empty;
-        if (request.Properties is null || !request.Properties.TryGetValue("Parameters", out var parameters) ||
-            parameters.ValueKind != System.Text.Json.JsonValueKind.Object || !parameters.TryGetProperty(name, out var property) ||
-            property.ValueKind != System.Text.Json.JsonValueKind.String) return false;
-        value = property.GetString() ?? string.Empty;
-        return true;
+        try
+        {
+            value = string.Empty;
+            if (request.Properties is null || !request.Properties.TryGetValue("Parameters", out var parameters) ||
+                parameters.ValueKind != System.Text.Json.JsonValueKind.Object || !parameters.TryGetProperty(name, out var property) ||
+                property.ValueKind != System.Text.Json.JsonValueKind.String) return false;
+            value = property.GetString() ?? string.Empty;
+            return true;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicApprovalBar)}.{nameof(TryReadParameter)} failed.");
+            throw;
+        }
     }
 
     private int TryReadIntParameter(OrganicWireEnvelope request, string name, int fallback)
     {
-        if (request.Properties is not null && request.Properties.TryGetValue("Parameters", out var parameters) &&
-            parameters.ValueKind == System.Text.Json.JsonValueKind.Object && parameters.TryGetProperty(name, out var property) && property.TryGetInt32(out var value))
-            return value;
-        return fallback;
+        try
+        {
+            if (request.Properties is not null && request.Properties.TryGetValue("Parameters", out var parameters) &&
+                parameters.ValueKind == System.Text.Json.JsonValueKind.Object && parameters.TryGetProperty(name, out var property) && property.TryGetInt32(out var value))
+                return value;
+            return fallback;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicApprovalBar)}.{nameof(TryReadIntParameter)} failed.");
+            throw;
+        }
     }
 
     private bool TryReadBooleanParameter(OrganicWireEnvelope request, string name, bool fallback)
     {
-        if (request.Properties is not null && request.Properties.TryGetValue("Parameters", out var parameters) &&
-            parameters.ValueKind == System.Text.Json.JsonValueKind.Object && parameters.TryGetProperty(name, out var property) &&
-            property.ValueKind is System.Text.Json.JsonValueKind.True or System.Text.Json.JsonValueKind.False)
-            return property.GetBoolean();
-        return fallback;
+        try
+        {
+            if (request.Properties is not null && request.Properties.TryGetValue("Parameters", out var parameters) &&
+                parameters.ValueKind == System.Text.Json.JsonValueKind.Object && parameters.TryGetProperty(name, out var property) &&
+                property.ValueKind is System.Text.Json.JsonValueKind.True or System.Text.Json.JsonValueKind.False)
+                return property.GetBoolean();
+            return fallback;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicApprovalBar)}.{nameof(TryReadBooleanParameter)} failed.");
+            throw;
+        }
     }
 
-    private void ToggleCollapsed() => _collapsed = !_collapsed;
-    private void Hide() => _visible = false;
-    private void Show() { _visible = true; _collapsed = false; }
+    private void ToggleCollapsed() {
+        try
+        {
+            _collapsed = !_collapsed;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicApprovalBar)}.{nameof(ToggleCollapsed)} failed.");
+            throw;
+        }
+    }
+    private void Hide() {
+        try
+        {
+            _visible = false;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicApprovalBar)}.{nameof(Hide)} failed.");
+            throw;
+        }
+    }
+    private void Show() {
+        try
+        {
+     _visible = true; _collapsed = false; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicApprovalBar)}.{nameof(Show)} failed.");
+            throw;
+        }
+    }
 
-    public void Dispose() => WorkCoordinator.Changed -= OnChanged;
+    public void Dispose() {
+        try
+        {
+            WorkCoordinator.Changed -= OnChanged;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicApprovalBar)}.{nameof(Dispose)} failed.");
+            throw;
+        }
+    }
 }

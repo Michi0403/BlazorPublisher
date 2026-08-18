@@ -52,6 +52,7 @@ public static class PublisherStudioServiceCollectionExtensions
         services.AddSingleton(Microsoft.Extensions.Options.Options.Create(configurationDocument.OrganicPlugins));
         services.AddSingleton(Microsoft.Extensions.Options.Options.Create(configurationDocument.PublisherStudio.RuntimeValueStores.PanelTextPatterns));
         AddSingleton<IPublisherRuntimePatternService, PublisherRuntimePatternService>(services);
+        AddSingleton<ISupervisedTaskRunner, SupervisedTaskRunner>(services);
 
         AddSingleton<IPanelStudioTextPatternDataService, PanelStudioTextPatternDataService>(services);
         AddSingleton<IPublisherRuntimePolicyDataService, PublisherRuntimePolicyDataService>(services);

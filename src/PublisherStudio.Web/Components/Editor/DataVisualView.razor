@@ -1,6 +1,7 @@
 @namespace PublisherStudio.Components.Editor
 @inject PublicationDataService DataService
 
+@inject ILogger<DataVisualView> Logger
 <div class="data-visual-view" style="@ContainerStyle" data-ps-visual-config="@ClientConfigBase64">
     @if (DataObject is null)
     {

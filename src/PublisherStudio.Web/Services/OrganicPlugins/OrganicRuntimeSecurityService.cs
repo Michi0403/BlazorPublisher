@@ -83,7 +83,7 @@ public sealed class OrganicRuntimeSecurityService(
         await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            _ = await LoadCoreAsync(createWhenMissing: true, cancellationToken).ConfigureAwait(false);
+            await LoadCoreAsync(createWhenMissing: true, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or CryptographicException or JsonException)
         {

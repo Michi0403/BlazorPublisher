@@ -8,6 +8,7 @@
 @inject PublisherStudio.Services.OrganicPlugins.IOrganicResultStore OrganicResults
 @inject PublisherStudio.Services.UserExperience.IUserNotificationService Notifications
 @inject ILogger<StoryEditor> Logger
+@inject ISupervisedTaskRunner TaskRunner
 @inject PublicationFileService Files
 
 @if (Visible && TextFrame is not null)
@@ -290,661 +291,1201 @@
 
     private void CustomizeRichEditRibbon(IRibbon ribbon)
     {
-        var fontGroup = ribbon.Tabs[RichEditRibbonTabNames.Home].Groups[RichEditRibbonGroupNames.HomeFont];
-        var fontNameItem = fontGroup.Items[RichEditBarItemNames.FontName];
-        if (fontNameItem.Type != BarItemTypes.ComboBox) return;
-
-        var fontNameComboBox = (IBarComboBox)fontNameItem;
-        // Preserve DevExpress' built-in entries and append the operating-system catalog.
-        // Clearing the collection left the control at "No data to display" whenever font
-        // discovery was delayed or one duplicate entry was rejected by the ribbon runtime.
-        foreach (var font in SystemFonts.FontFamilies)
+        try
         {
-            try { fontNameComboBox.Items.Add(font, font); }
-            catch (ArgumentException) { }
-            catch (InvalidOperationException) { }
+            var fontGroup = ribbon.Tabs[RichEditRibbonTabNames.Home].Groups[RichEditRibbonGroupNames.HomeFont];
+            var fontNameItem = fontGroup.Items[RichEditBarItemNames.FontName];
+            if (fontNameItem.Type != BarItemTypes.ComboBox) return;
+
+            var fontNameComboBox = (IBarComboBox)fontNameItem;
+            // Preserve DevExpress' built-in entries and append the operating-system catalog.
+            // Clearing the collection left the control at "No data to display" whenever font
+            // discovery was delayed or one duplicate entry was rejected by the ribbon runtime.
+            foreach (var font in SystemFonts.FontFamilies)
+            {
+                try { fontNameComboBox.Items.Add(font, font); }
+                catch (ArgumentException) { }
+                catch (InvalidOperationException) { }
+            }
+            fontNameComboBox.AllowUserInput = true;
+            fontNameComboBox.Tooltip = "Select an installed system font or type another font family.";
+    
         }
-        fontNameComboBox.AllowUserInput = true;
-        fontNameComboBox.Tooltip = "Select an installed system font or type another font family.";
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(CustomizeRichEditRibbon)} failed.");
+            throw;
+        }
     }
 
     protected override void OnInitialized()
     {
-        LocalGptConnection.Changed += OnOrganicStateChanged;
-        OrganicResults.Changed += OnOrganicStateChanged;
-        RefreshAiProposals();
+        try
+        {
+            LocalGptConnection.Changed += OnOrganicStateChanged;
+            OrganicResults.Changed += OnOrganicStateChanged;
+            RefreshAiProposals();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(OnInitialized)} failed.");
+            throw;
+        }
     }
 
     protected override void OnParametersSet()
     {
-        if (Visible && TextFrame is not null && _loadedId != TextFrame.Id)
+        try
         {
-            _editorRevision++;
-            _documentLoadGeneration++;
-            _mailMergeSettingsContent = null;
-            var hasStoredStoryContent = TextFrame.DocumentContent is { Length: > 0 };
-            _content = hasStoredStoryContent
-                ? TextFrame.DocumentContent.ToArray()
-                : RichTextFactory.CreateOpenXmlFromPreviewHtml(TextFrame.PreviewHtml);
-            _documentFormat = hasStoredStoryContent && TextFrame.StoryFormat == StoryStorageFormat.Html
-                ? DocumentFormat.Html
-                : DocumentFormat.OpenXml;
-            _legacyConversionPending = hasStoredStoryContent && TextFrame.StoryFormat == StoryStorageFormat.Html;
-            _upgradingLegacyStory = false;
-            _loadedId = TextFrame.Id;
-            _error = null;
-            RefreshAiProposals();
-            _aiStoryPanelVisible = OpenAiOnShow && CanUseAiCouncil;
-            _fieldData =
-            [
-                new PublicationFieldRecord
-                {
-                    PublicationName = PublicationName,
-                    PageName = PageName,
-                    StoryName = TextFrame.Name,
-                    PageNumber = PageNumber,
-                    PageCount = PageCount,
-                    CurrentDate = DateTime.Today,
-                    CurrentDateTime = DateTime.Now
-                }
-            ];
-        }
+            if (Visible && TextFrame is not null && _loadedId != TextFrame.Id)
+            {
+                _editorRevision++;
+                _documentLoadGeneration++;
+                _mailMergeSettingsContent = null;
+                var hasStoredStoryContent = TextFrame.DocumentContent is { Length: > 0 };
+                _content = hasStoredStoryContent
+                    ? TextFrame.DocumentContent.ToArray()
+                    : RichTextFactory.CreateOpenXmlFromPreviewHtml(TextFrame.PreviewHtml);
+                _documentFormat = hasStoredStoryContent && TextFrame.StoryFormat == StoryStorageFormat.Html
+                    ? DocumentFormat.Html
+                    : DocumentFormat.OpenXml;
+                _legacyConversionPending = hasStoredStoryContent && TextFrame.StoryFormat == StoryStorageFormat.Html;
+                _upgradingLegacyStory = false;
+                _loadedId = TextFrame.Id;
+                _error = null;
+                RefreshAiProposals();
+                _aiStoryPanelVisible = OpenAiOnShow && CanUseAiCouncil;
+                _fieldData =
+                [
+                    new PublicationFieldRecord
+                    {
+                        PublicationName = PublicationName,
+                        PageName = PageName,
+                        StoryName = TextFrame.Name,
+                        PageNumber = PageNumber,
+                        PageCount = PageCount,
+                        CurrentDate = DateTime.Today,
+                        CurrentDateTime = DateTime.Now
+                    }
+                ];
+            }
 
-        if (!Visible)
+            if (!Visible)
+            {
+                _documentLoadGeneration++;
+                _mailMergeSettingsContent = null;
+                _loadedId = null;
+                _legacyConversionPending = false;
+                _upgradingLegacyStory = false;
+                _error = null;
+                _aiStoryPanelVisible = false;
+                ResetStoryPreviewTransfer();
+            }
+    
+        }
+        catch (Exception __componentMethodException)
         {
-            _documentLoadGeneration++;
-            _mailMergeSettingsContent = null;
-            _loadedId = null;
-            _legacyConversionPending = false;
-            _upgradingLegacyStory = false;
-            _error = null;
-            _aiStoryPanelVisible = false;
-            ResetStoryPreviewTransfer();
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(OnParametersSet)} failed.");
+            throw;
         }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!Visible) return;
         try
         {
-            _selfReference ??= DotNetObjectReference.Create(this);
-            await JS.InvokeVoidAsync(
-                "publisherStudio.initializeStoryEditorLayout",
-                "story-editor-shell",
-                "story-editor-host",
-                _selfReference).ConfigureAwait(true);
+            if (!Visible) return;
+            try
+            {
+                _selfReference ??= DotNetObjectReference.Create(this);
+                await JS.InvokeVoidAsync(
+                    "publisherStudio.initializeStoryEditorLayout",
+                    "story-editor-shell",
+                    "story-editor-host",
+                    _selfReference).ConfigureAwait(true);
+            }
+            catch (JSDisconnectedException) { }
+            catch (TaskCanceledException) { }
+    
         }
-        catch (JSDisconnectedException) { }
-        catch (TaskCanceledException) { }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(OnAfterRenderAsync)} failed.");
+            throw;
+        }
     }
 
     private async Task HandleDocumentLoaded(Document _)
     {
-        var generation = _documentLoadGeneration;
-        if (!IsCurrentStoryLoad(generation)) return;
-
-        if (_legacyConversionPending)
+        try
         {
-            await UpgradeLegacyStoryAfterLoad(generation).ConfigureAwait(true);
-            return;
-        }
+            var generation = _documentLoadGeneration;
+            if (!IsCurrentStoryLoad(generation)) return;
 
-        await EnableMailMergeAfterLoad(generation).ConfigureAwait(true);
+            if (_legacyConversionPending)
+            {
+                await UpgradeLegacyStoryAfterLoad(generation).ConfigureAwait(true);
+                return;
+            }
+
+            await EnableMailMergeAfterLoad(generation).ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(HandleDocumentLoaded)} failed.");
+            throw;
+        }
     }
 
     private async Task UpgradeLegacyStoryAfterLoad(int generation)
     {
-        if (_richEdit is null || _upgradingLegacyStory || !IsCurrentStoryLoad(generation)) return;
-
-        _upgradingLegacyStory = true;
-        await SafeStateHasChanged().ConfigureAwait(true);
         try
         {
-            // HTML stories (including older dropped text/Markdown frames) must first be
-            // fully loaded by RichEdit. Exporting from OnAfterRender raced the component's
-            // JavaScript initialization and could also make mail-merge settings run against
-            // a document that did not yet exist.
-            var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml).ConfigureAwait(true);
-            if (!IsCurrentStoryLoad(generation)) return;
+            if (_richEdit is null || _upgradingLegacyStory || !IsCurrentStoryLoad(generation)) return;
 
-            _content = openXml.ToArray();
-            _documentFormat = DocumentFormat.OpenXml;
-            _legacyConversionPending = false;
-            _mailMergeSettingsContent = null;
-            _editorRevision++;
-            _documentLoadGeneration++;
-            _upgradingLegacyStory = false;
+            _upgradingLegacyStory = true;
             await SafeStateHasChanged().ConfigureAwait(true);
-        }
-        catch (OperationCanceledException)
-        {
-            if (IsCurrentStoryLoad(generation))
+            try
             {
+                // HTML stories (including older dropped text/Markdown frames) must first be
+                // fully loaded by RichEdit. Exporting from OnAfterRender raced the component's
+                // JavaScript initialization and could also make mail-merge settings run against
+                // a document that did not yet exist.
+                var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml).ConfigureAwait(true);
+                if (!IsCurrentStoryLoad(generation)) return;
+
+                _content = openXml.ToArray();
+                _documentFormat = DocumentFormat.OpenXml;
+                _legacyConversionPending = false;
+                _mailMergeSettingsContent = null;
+                _editorRevision++;
+                _documentLoadGeneration++;
                 _upgradingLegacyStory = false;
-                _error = "The story editor was closed before the legacy story finished loading.";
                 await SafeStateHasChanged().ConfigureAwait(true);
             }
-        }
-        catch (JSDisconnectedException)
-        {
-            _upgradingLegacyStory = false;
-        }
-        catch (ObjectDisposedException)
-        {
-            _upgradingLegacyStory = false;
-        }
-        catch (Exception ex)
-        {
-            if (IsCurrentStoryLoad(generation))
+            catch (OperationCanceledException)
+            {
+                if (IsCurrentStoryLoad(generation))
+                {
+                    _upgradingLegacyStory = false;
+                    _error = "The story editor was closed before the legacy story finished loading.";
+                    await SafeStateHasChanged().ConfigureAwait(true);
+                }
+            }
+            catch (JSDisconnectedException)
             {
                 _upgradingLegacyStory = false;
-                _error = $"Legacy story conversion failed: {ex.Message}";
-                await SafeStateHasChanged().ConfigureAwait(true);
             }
+            catch (ObjectDisposedException)
+            {
+                _upgradingLegacyStory = false;
+            }
+            catch (Exception ex)
+            {
+                if (IsCurrentStoryLoad(generation))
+                {
+                    _upgradingLegacyStory = false;
+                    _error = $"Legacy story conversion failed: {ex.Message}";
+                    await SafeStateHasChanged().ConfigureAwait(true);
+                }
+            }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(UpgradeLegacyStoryAfterLoad)} failed.");
+            throw;
         }
     }
 
     private async Task EnableMailMergeAfterLoad(int generation)
     {
-        if (!IsCurrentStoryLoad(generation) || _mailMergeSettingsContent is not null) return;
-
-        // DxRichEdit's mail-merge settings perform JavaScript interop as soon as the
-        // settings parameter changes. Keep the RenderFragment stable and attach it only
-        // after DocumentLoaded confirms that the editor has created the document.
-        var fieldData = _fieldData;
-        _mailMergeSettingsContent = builder =>
+        try
         {
-            builder.OpenComponent<DxMailMergeSettings>(0);
-            builder.AddAttribute(1, nameof(DxMailMergeSettings.Data), fieldData);
-            builder.AddAttribute(2, nameof(DxMailMergeSettings.ViewMergedData), true);
-            builder.AddAttribute(3, nameof(DxMailMergeSettings.ActiveRecord), 0);
-            builder.CloseComponent();
-        };
-        await SafeStateHasChanged().ConfigureAwait(true);
+            if (!IsCurrentStoryLoad(generation) || _mailMergeSettingsContent is not null) return;
+
+            // DxRichEdit's mail-merge settings perform JavaScript interop as soon as the
+            // settings parameter changes. Keep the RenderFragment stable and attach it only
+            // after DocumentLoaded confirms that the editor has created the document.
+            var fieldData = _fieldData;
+            _mailMergeSettingsContent = builder =>
+            {
+                builder.OpenComponent<DxMailMergeSettings>(0);
+                builder.AddAttribute(1, nameof(DxMailMergeSettings.Data), fieldData);
+                builder.AddAttribute(2, nameof(DxMailMergeSettings.ViewMergedData), true);
+                builder.AddAttribute(3, nameof(DxMailMergeSettings.ActiveRecord), 0);
+                builder.CloseComponent();
+            };
+            await SafeStateHasChanged().ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(EnableMailMergeAfterLoad)} failed.");
+            throw;
+        }
     }
 
-    private bool IsCurrentStoryLoad(int generation) =>
-        Visible
+    private bool IsCurrentStoryLoad(int generation) {
+        try
+        {
+            return Visible
         && TextFrame is not null
         && _loadedId == TextFrame.Id
         && generation == _documentLoadGeneration;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(IsCurrentStoryLoad)} failed.");
+            throw;
+        }
+    }
 
     private async Task SafeStateHasChanged()
     {
-        try { await InvokeAsync(StateHasChanged).ConfigureAwait(true); }
-        catch (ObjectDisposedException) { }
-        catch (InvalidOperationException) when (!Visible) { }
+        try
+        {
+            try { await InvokeAsync(StateHasChanged).ConfigureAwait(true); }
+            catch (ObjectDisposedException) { }
+            catch (InvalidOperationException) when (!Visible) { }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(SafeStateHasChanged)} failed.");
+            throw;
+        }
     }
 
     private async Task Apply()
     {
-        if (_richEdit is null || _upgradingLegacyStory) return;
-        _error = null;
         try
         {
-            // Export the live RichEdit document directly. SaveDocumentAsync can rebind the
-            // DocumentContent parameter before the export completes and used to drop direct
-            // formatting in the persisted copy even though a manual DOCX download was correct.
-            var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml).ConfigureAwait(true);
-            var html = await _richEdit.ExportDocumentAsync(DocumentFormat.Html).ConfigureAwait(true);
-            var openXmlBackground = Files.ExtractOpenXmlDocumentBackground(openXml);
-            var prepared = await PrepareStoryPreview(html, openXmlBackground).ConfigureAwait(true);
-            var preview = prepared.Html;
-            var documentBackground = prepared.Background;
-            _content = openXml.ToArray();
-            _documentFormat = DocumentFormat.OpenXml;
-            await Saved.InvokeAsync((openXml, preview, documentBackground, StoryStorageFormat.OpenXml)).ConfigureAwait(true);
+            if (_richEdit is null || _upgradingLegacyStory) return;
+            _error = null;
+            try
+            {
+                // Export the live RichEdit document directly. SaveDocumentAsync can rebind the
+                // DocumentContent parameter before the export completes and used to drop direct
+                // formatting in the persisted copy even though a manual DOCX download was correct.
+                var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml).ConfigureAwait(true);
+                var html = await _richEdit.ExportDocumentAsync(DocumentFormat.Html).ConfigureAwait(true);
+                var openXmlBackground = Files.ExtractOpenXmlDocumentBackground(openXml);
+                var prepared = await PrepareStoryPreview(html, openXmlBackground).ConfigureAwait(true);
+                var preview = prepared.Html;
+                var documentBackground = prepared.Background;
+                _content = openXml.ToArray();
+                _documentFormat = DocumentFormat.OpenXml;
+                await Saved.InvokeAsync((openXml, preview, documentBackground, StoryStorageFormat.OpenXml)).ConfigureAwait(true);
+            }
+            catch (Exception ex)
+            {
+                _error = ex.Message;
+            }
+    
         }
-        catch (Exception ex)
+        catch (Exception __componentMethodException)
         {
-            _error = ex.Message;
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(Apply)} failed.");
+            throw;
         }
     }
 
     private void OpenAiStoryPanel()
     {
-        _aiStoryPanelVisible = true;
-        RefreshAiProposals();
+        try
+        {
+            _aiStoryPanelVisible = true;
+            RefreshAiProposals();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(OpenAiStoryPanel)} failed.");
+            throw;
+        }
     }
 
-    private void CloseAiStoryPanel() => _aiStoryPanelVisible = false;
+    private void CloseAiStoryPanel() {
+        try
+        {
+            _aiStoryPanelVisible = false;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(CloseAiStoryPanel)} failed.");
+            throw;
+        }
+    }
 
     private void RefreshAiProposals()
     {
-        _aiProposals = OrganicResults.GetTextProposals();
-        if (!AiCouncilTeams.Any(team => string.Equals(team.Key, _aiTeamKey, StringComparison.OrdinalIgnoreCase)))
-            _aiTeamKey = AiCouncilTeams.First().Key;
+        try
+        {
+            _aiProposals = OrganicResults.GetTextProposals();
+            if (!AiCouncilTeams.Any(team => string.Equals(team.Key, _aiTeamKey, StringComparison.OrdinalIgnoreCase)))
+                _aiTeamKey = AiCouncilTeams.First().Key;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(RefreshAiProposals)} failed.");
+            throw;
+        }
     }
 
-    private void OnOrganicStateChanged() => _ = InvokeAsync(() =>
+    private void OnOrganicStateChanged()
     {
-        RefreshAiProposals();
-        StateHasChanged();
-    });
+        try
+        {
+            TaskRunner.Run(
+                nameof(StoryEditor),
+                nameof(OnOrganicStateChanged),
+                async _ => await InvokeAsync(() =>
+                {
+                        RefreshAiProposals();
+                        StateHasChanged();
+                }).ConfigureAwait(false));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(OnOrganicStateChanged)} failed.");
+            throw;
+        }
+    }
 
-    private Task AiProofreadSelection() => SubmitAiSelectionEditAsync("Proofread the selected text. Correct spelling, grammar, punctuation, and awkward phrasing while preserving meaning and formatting intent.");
-    private Task AiShortenSelection() => SubmitAiSelectionEditAsync("Shorten the selected text while preserving its important facts, meaning, and tone.");
-    private Task AiExpandSelection() => SubmitAiSelectionEditAsync("Expand the selected text with useful detail and clearer transitions without inventing unsupported facts.");
-    private Task AiSummarizeSelection() => SubmitAiSelectionEditAsync("Summarize the selected text into a concise, publication-ready version.");
-    private Task AiExplainSelection() => SubmitAiSelectionEditAsync("Rewrite the selected text as a clearer explanation for a reader who is unfamiliar with the topic.");
-    private Task AiProfessionalSelection() => SubmitAiSelectionEditAsync("Rewrite the selected text in a polished professional tone while preserving its meaning.");
-    private Task AiFriendlySelection() => SubmitAiSelectionEditAsync("Rewrite the selected text in a warm, friendly, natural tone while preserving its meaning.");
-    private Task AiTranslateSelection() => SubmitAiSelectionEditAsync("Translate the selected text into the language implied by the surrounding publication or user request. Preserve names, numbers, and technical terms where appropriate.");
+    private Task AiProofreadSelection() {
+        try
+        {
+            return SubmitAiSelectionEditAsync("Proofread the selected text. Correct spelling, grammar, punctuation, and awkward phrasing while preserving meaning and formatting intent.");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(AiProofreadSelection)} failed.");
+            throw;
+        }
+    }
+    private Task AiShortenSelection() {
+        try
+        {
+            return SubmitAiSelectionEditAsync("Shorten the selected text while preserving its important facts, meaning, and tone.");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(AiShortenSelection)} failed.");
+            throw;
+        }
+    }
+    private Task AiExpandSelection() {
+        try
+        {
+            return SubmitAiSelectionEditAsync("Expand the selected text with useful detail and clearer transitions without inventing unsupported facts.");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(AiExpandSelection)} failed.");
+            throw;
+        }
+    }
+    private Task AiSummarizeSelection() {
+        try
+        {
+            return SubmitAiSelectionEditAsync("Summarize the selected text into a concise, publication-ready version.");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(AiSummarizeSelection)} failed.");
+            throw;
+        }
+    }
+    private Task AiExplainSelection() {
+        try
+        {
+            return SubmitAiSelectionEditAsync("Rewrite the selected text as a clearer explanation for a reader who is unfamiliar with the topic.");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(AiExplainSelection)} failed.");
+            throw;
+        }
+    }
+    private Task AiProfessionalSelection() {
+        try
+        {
+            return SubmitAiSelectionEditAsync("Rewrite the selected text in a polished professional tone while preserving its meaning.");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(AiProfessionalSelection)} failed.");
+            throw;
+        }
+    }
+    private Task AiFriendlySelection() {
+        try
+        {
+            return SubmitAiSelectionEditAsync("Rewrite the selected text in a warm, friendly, natural tone while preserving its meaning.");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(AiFriendlySelection)} failed.");
+            throw;
+        }
+    }
+    private Task AiTranslateSelection() {
+        try
+        {
+            return SubmitAiSelectionEditAsync("Translate the selected text into the language implied by the surrounding publication or user request. Preserve names, numbers, and technical terms where appropriate.");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(AiTranslateSelection)} failed.");
+            throw;
+        }
+    }
 
     private async Task SubmitAiSelectionEditAsync(string instruction)
     {
-        if (!CanUseAiCouncil || TextFrame is null) return;
         try
         {
-            if (!HasSelectedStoryText)
+            if (!CanUseAiCouncil || TextFrame is null) return;
+            try
             {
-                _aiStoryPanelVisible = true;
-                _error = "Select text in the story before using an AI text-editing command.";
-                await SafeStateHasChanged().ConfigureAwait(true);
-                return;
-            }
+                if (!HasSelectedStoryText)
+                {
+                    _aiStoryPanelVisible = true;
+                    _error = "Select text in the story before using an AI text-editing command.";
+                    await SafeStateHasChanged().ConfigureAwait(true);
+                    return;
+                }
 
-            var span = await _selection.ActiveSubDocument.GetTextSpanAsync(_selection.Intervals[0]).ConfigureAwait(true);
-            var selectedText = span.Text?.Trim() ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(selectedText))
+                var span = await _selection.ActiveSubDocument.GetTextSpanAsync(_selection.Intervals[0]).ConfigureAwait(true);
+                var selectedText = span.Text?.Trim() ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(selectedText))
+                {
+                    _aiStoryPanelVisible = true;
+                    _error = "The current selection does not contain editable text.";
+                    await SafeStateHasChanged().ConfigureAwait(true);
+                    return;
+                }
+
+                _aiStoryPrompt = $"{instruction}\n\nSelected story text:\n{selectedText}\n\nReturn only the replacement text as the proposal.";
+                _aiStoryPanelVisible = true;
+                await SafeStateHasChanged().ConfigureAwait(true);
+                await RequestAiStoryAsync().ConfigureAwait(true);
+            }
+            catch (OperationCanceledException)
             {
-                _aiStoryPanelVisible = true;
-                _error = "The current selection does not contain editable text.";
+                _error = "The AI text-editing request was canceled before the selected text could be read.";
                 await SafeStateHasChanged().ConfigureAwait(true);
-                return;
             }
-
-            _aiStoryPrompt = $"{instruction}\n\nSelected story text:\n{selectedText}\n\nReturn only the replacement text as the proposal.";
-            _aiStoryPanelVisible = true;
-            await SafeStateHasChanged().ConfigureAwait(true);
-            await RequestAiStoryAsync().ConfigureAwait(true);
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Could not prepare an AI selection-editing request for story {StoryId}.", TextFrame.Id);
+                _error = ex.Message;
+                await SafeStateHasChanged().ConfigureAwait(true);
+            }
+    
         }
-        catch (OperationCanceledException)
+        catch (Exception __componentMethodException)
         {
-            _error = "The AI text-editing request was canceled before the selected text could be read.";
-            await SafeStateHasChanged().ConfigureAwait(true);
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Could not prepare an AI selection-editing request for story {StoryId}.", TextFrame.Id);
-            _error = ex.Message;
-            await SafeStateHasChanged().ConfigureAwait(true);
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(SubmitAiSelectionEditAsync)} failed.");
+            throw;
         }
     }
 
     private async Task HandleAiPromptKeyDown(KeyboardEventArgs args)
     {
-        if (args.CtrlKey && string.Equals(args.Key, "Enter", StringComparison.OrdinalIgnoreCase))
-            await RequestAiStoryAsync().ConfigureAwait(true);
+        try
+        {
+            if (args.CtrlKey && string.Equals(args.Key, "Enter", StringComparison.OrdinalIgnoreCase))
+                await RequestAiStoryAsync().ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(HandleAiPromptKeyDown)} failed.");
+            throw;
+        }
     }
 
     private async Task RequestAiStoryAsync()
     {
-        if (!CanSendAiStoryRequest || TextFrame is null) return;
         try
         {
-            var request = new OrganicCouncilPromptRequest
+            if (!CanSendAiStoryRequest || TextFrame is null) return;
+            try
             {
-                TeamKey = _aiTeamKey,
-                MaxRounds = 1,
-                MaxOutputTokens = 262144,
-                MaxContextTokens = 262144,
-                MaxParallelModels = 1,
-                IncludeMemory = true,
-                SaveToMemory = true,
-                RequestedOrganicCapabilities = ["publisher.business-context", "publisher.text.insert.propose"],
-                ExternalProjectContextJson = System.Text.Json.JsonSerializer.Serialize(new
+                var request = new OrganicCouncilPromptRequest
                 {
-                    Source = "PublisherStudio StoryEditor",
-                    PublicationName,
-                    PageName,
-                    StoryId = TextFrame.Id,
-                    StoryName = TextFrame.Name,
-                    Target = AiProposalTarget,
-                    Workflow = "Reviewable story text proposal"
-                })
-            };
-            request.Prompt = $"""
-PublisherStudio Story Editor user request:
-{_aiStoryPrompt.Trim()}
+                    TeamKey = _aiTeamKey,
+                    MaxRounds = 1,
+                    MaxOutputTokens = 262144,
+                    MaxContextTokens = 262144,
+                    MaxParallelModels = 1,
+                    IncludeMemory = true,
+                    SaveToMemory = true,
+                    RequestedOrganicCapabilities = ["publisher.business-context", "publisher.text.insert.propose"],
+                    ExternalProjectContextJson = System.Text.Json.JsonSerializer.Serialize(new
+                    {
+                        Source = "PublisherStudio StoryEditor",
+                        PublicationName,
+                        PageName,
+                        StoryId = TextFrame.Id,
+                        StoryName = TextFrame.Name,
+                        Target = AiProposalTarget,
+                        Workflow = "Reviewable story text proposal"
+                    })
+                };
+                request.Prompt = $"""
+    PublisherStudio Story Editor user request:
+    {_aiStoryPrompt.Trim()}
 
-Current publication: {PublicationName}
-Current page: {PageName}
-Current story: {TextFrame.Name}
+    Current publication: {PublicationName}
+    Current page: {PageName}
+    Current story: {TextFrame.Name}
 
-Required result contract:
-1. Produce polished story text matching the user's topic, audience, tone and requested facts.
-2. Before completing, invoke publisher.text.proposal.request with JSON parameters containing target exactly '{AiProposalTarget}', the final text, and a concise reason.
-3. Never mutate the publication automatically. The user reviews and explicitly inserts the proposal in PublisherStudio.
-""";
-            var correlationId = await LocalGptConnection.SendCouncilRequestAsync(request).ConfigureAwait(true);
-            Logger.LogInformation("Submitted StoryEditor AI Council request {CorrelationId} for story {StoryId}.", correlationId, TextFrame.Id);
-            Notifications.Success($"Council request {correlationId} was submitted. You can close this editor; the run remains active.", "Story proposal requested", nameof(StoryEditor));
-            _aiStoryPrompt = string.Empty;
+    Required result contract:
+    1. Produce polished story text matching the user's topic, audience, tone and requested facts.
+    2. Before completing, invoke publisher.text.proposal.request with JSON parameters containing target exactly '{AiProposalTarget}', the final text, and a concise reason.
+    3. Never mutate the publication automatically. The user reviews and explicitly inserts the proposal in PublisherStudio.
+    """;
+                var correlationId = await LocalGptConnection.SendCouncilRequestAsync(request).ConfigureAwait(true);
+                Logger.LogInformation("Submitted StoryEditor AI Council request {CorrelationId} for story {StoryId}.", correlationId, TextFrame.Id);
+                Notifications.Success($"Council request {correlationId} was submitted. You can close this editor; the run remains active.", "Story proposal requested", nameof(StoryEditor));
+                _aiStoryPrompt = string.Empty;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Could not submit an AI Council story request for {StoryId}.", TextFrame.Id);
+                _error = ex.Message;
+                Notifications.Error(ex.Message, "Story proposal request failed", nameof(StoryEditor));
+            }
+    
         }
-        catch (Exception ex)
+        catch (Exception __componentMethodException)
         {
-            Logger.LogError(ex, "Could not submit an AI Council story request for {StoryId}.", TextFrame.Id);
-            _error = ex.Message;
-            Notifications.Error(ex.Message, "Story proposal request failed", nameof(StoryEditor));
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(RequestAiStoryAsync)} failed.");
+            throw;
         }
     }
 
     private async Task InsertAiProposalAsync(OrganicTextInsertionProposal proposal)
     {
-        if (_selection is null) return;
         try
         {
-            await _selection.ActiveSubDocument.AddTextAsync(_selection.CaretPosition, proposal.Text).ConfigureAwait(true);
-            OrganicResults.RemoveTextProposal(proposal.Id);
-            RefreshAiProposals();
-            Logger.LogInformation("User inserted AI Council proposal {ProposalId} into story {StoryId}.", proposal.Id, TextFrame?.Id);
-            Notifications.Success("The reviewed Council proposal was inserted at the caret.", "Story updated", nameof(StoryEditor));
+            if (_selection is null) return;
+            try
+            {
+                await _selection.ActiveSubDocument.AddTextAsync(_selection.CaretPosition, proposal.Text).ConfigureAwait(true);
+                OrganicResults.RemoveTextProposal(proposal.Id);
+                RefreshAiProposals();
+                Logger.LogInformation("User inserted AI Council proposal {ProposalId} into story {StoryId}.", proposal.Id, TextFrame?.Id);
+                Notifications.Success("The reviewed Council proposal was inserted at the caret.", "Story updated", nameof(StoryEditor));
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Could not insert AI Council proposal {ProposalId}.", proposal.Id);
+                _error = ex.Message;
+                Notifications.Error(ex.Message, "Proposal was not inserted", nameof(StoryEditor));
+            }
+    
         }
-        catch (Exception ex)
+        catch (Exception __componentMethodException)
         {
-            Logger.LogError(ex, "Could not insert AI Council proposal {ProposalId}.", proposal.Id);
-            _error = ex.Message;
-            Notifications.Error(ex.Message, "Proposal was not inserted", nameof(StoryEditor));
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(InsertAiProposalAsync)} failed.");
+            throw;
         }
     }
 
     private async Task ReplaceSelectionWithAiProposalAsync(OrganicTextInsertionProposal proposal)
     {
-        if (!HasSelectedStoryText) return;
         try
         {
-            var interval = _selection.Intervals[0];
-            var start = interval.Start;
-            await _selection.ActiveSubDocument.RemoveAsync(interval).ConfigureAwait(true);
-            await _selection.ActiveSubDocument.AddTextAsync(start, proposal.Text).ConfigureAwait(true);
-            OrganicResults.RemoveTextProposal(proposal.Id);
-            RefreshAiProposals();
-            Logger.LogInformation("User replaced the selected story text with AI Council proposal {ProposalId} in story {StoryId}.", proposal.Id, TextFrame?.Id);
-            Notifications.Success("The reviewed Council proposal replaced the selected story text.", "Story updated", nameof(StoryEditor));
+            if (!HasSelectedStoryText) return;
+            try
+            {
+                var interval = _selection.Intervals[0];
+                var start = interval.Start;
+                await _selection.ActiveSubDocument.RemoveAsync(interval).ConfigureAwait(true);
+                await _selection.ActiveSubDocument.AddTextAsync(start, proposal.Text).ConfigureAwait(true);
+                OrganicResults.RemoveTextProposal(proposal.Id);
+                RefreshAiProposals();
+                Logger.LogInformation("User replaced the selected story text with AI Council proposal {ProposalId} in story {StoryId}.", proposal.Id, TextFrame?.Id);
+                Notifications.Success("The reviewed Council proposal replaced the selected story text.", "Story updated", nameof(StoryEditor));
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Could not replace the selected story text with AI Council proposal {ProposalId}.", proposal.Id);
+                _error = ex.Message;
+                Notifications.Error(ex.Message, "Selection was not replaced", nameof(StoryEditor));
+            }
+    
         }
-        catch (Exception ex)
+        catch (Exception __componentMethodException)
         {
-            Logger.LogError(ex, "Could not replace the selected story text with AI Council proposal {ProposalId}.", proposal.Id);
-            _error = ex.Message;
-            Notifications.Error(ex.Message, "Selection was not replaced", nameof(StoryEditor));
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(ReplaceSelectionWithAiProposalAsync)} failed.");
+            throw;
         }
     }
 
     private void DismissAiProposal(Guid proposalId)
     {
-        if (!OrganicResults.RemoveTextProposal(proposalId)) return;
-        RefreshAiProposals();
-        Logger.LogInformation("User dismissed AI Council proposal {ProposalId}.", proposalId);
-        Notifications.Information("The proposal was dismissed.", source: nameof(StoryEditor));
+        try
+        {
+            if (!OrganicResults.RemoveTextProposal(proposalId)) return;
+            RefreshAiProposals();
+            Logger.LogInformation("User dismissed AI Council proposal {ProposalId}.", proposalId);
+            Notifications.Information("The proposal was dismissed.", source: nameof(StoryEditor));
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(DismissAiProposal)} failed.");
+            throw;
+        }
     }
 
     private Task OpenCodeWorkspace()
     {
-        _codeWorkspaceVisible = true;
-        AnalyzeCodeWorkspace();
-        return Task.CompletedTask;
+        try
+        {
+            _codeWorkspaceVisible = true;
+            AnalyzeCodeWorkspace();
+            return Task.CompletedTask;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(OpenCodeWorkspace)} failed.");
+            throw;
+        }
     }
 
-    private void CloseCodeWorkspace() => _codeWorkspaceVisible = false;
+    private void CloseCodeWorkspace() {
+        try
+        {
+            _codeWorkspaceVisible = false;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(CloseCodeWorkspace)} failed.");
+            throw;
+        }
+    }
 
     private Task FormatCodeWorkspace()
     {
-        var result = CodeFormatting.Format(new CodeTextRequest(_codeLanguageId, _codeWorkspaceText, _codeIndentSize));
-        _codeWorkspaceText = result.Text;
-        _codeTokens = result.Tokens;
-        _codeWorkspaceVisible = true;
-        return Task.CompletedTask;
+        try
+        {
+            var result = CodeFormatting.Format(new CodeTextRequest(_codeLanguageId, _codeWorkspaceText, _codeIndentSize));
+            _codeWorkspaceText = result.Text;
+            _codeTokens = result.Tokens;
+            _codeWorkspaceVisible = true;
+            return Task.CompletedTask;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(FormatCodeWorkspace)} failed.");
+            throw;
+        }
     }
 
     private Task ToggleCodeComments()
     {
-        var result = CodeFormatting.ToggleComment(new CodeCommentRequest(_codeLanguageId, _codeWorkspaceText));
-        _codeWorkspaceText = result.Text;
-        _codeTokens = result.Tokens;
-        _codeWorkspaceVisible = true;
-        return Task.CompletedTask;
+        try
+        {
+            var result = CodeFormatting.ToggleComment(new CodeCommentRequest(_codeLanguageId, _codeWorkspaceText));
+            _codeWorkspaceText = result.Text;
+            _codeTokens = result.Tokens;
+            _codeWorkspaceVisible = true;
+            return Task.CompletedTask;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(ToggleCodeComments)} failed.");
+            throw;
+        }
     }
 
     private void AnalyzeCodeWorkspace()
     {
-        _codeTokens = CodeFormatting.Analyze(new CodeTextRequest(_codeLanguageId, _codeWorkspaceText, _codeIndentSize)).Tokens;
+        try
+        {
+            _codeTokens = CodeFormatting.Analyze(new CodeTextRequest(_codeLanguageId, _codeWorkspaceText, _codeIndentSize)).Tokens;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(AnalyzeCodeWorkspace)} failed.");
+            throw;
+        }
     }
 
     private async Task InsertCodeAtCaret()
     {
-        if (_selection is null) return;
         try
         {
-            var profile = CodeLanguages.Get(_codeLanguageId);
-            var normalized = CodeFormatting.Format(new CodeTextRequest(_codeLanguageId, _codeWorkspaceText, _codeIndentSize));
-            _codeWorkspaceText = normalized.Text;
-            _codeTokens = normalized.Tokens;
-            var block = $"{Environment.NewLine}[{profile.DisplayName}]{Environment.NewLine}{_codeWorkspaceText}{Environment.NewLine}";
-            await _selection.ActiveSubDocument.AddTextAsync(_selection.CaretPosition, block).ConfigureAwait(true);
+            if (_selection is null) return;
+            try
+            {
+                var profile = CodeLanguages.Get(_codeLanguageId);
+                var normalized = CodeFormatting.Format(new CodeTextRequest(_codeLanguageId, _codeWorkspaceText, _codeIndentSize));
+                _codeWorkspaceText = normalized.Text;
+                _codeTokens = normalized.Tokens;
+                var block = $"{Environment.NewLine}[{profile.DisplayName}]{Environment.NewLine}{_codeWorkspaceText}{Environment.NewLine}";
+                await _selection.ActiveSubDocument.AddTextAsync(_selection.CaretPosition, block).ConfigureAwait(true);
+            }
+            catch (Exception ex)
+            {
+                _error = ex.Message;
+            }
+    
         }
-        catch (Exception ex)
+        catch (Exception __componentMethodException)
         {
-            _error = ex.Message;
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(InsertCodeAtCaret)} failed.");
+            throw;
         }
     }
 
     private async Task InsertField(string code)
     {
-        if (_richEdit is null || _selection is null) return;
         try
         {
-            var field = await _selection.ActiveSubDocument.Fields.CreateAsync(_selection.CaretPosition, code).ConfigureAwait(true);
-            await _selection.ActiveSubDocument.Fields.UpdateAsync(field).ConfigureAwait(true);
+            if (_richEdit is null || _selection is null) return;
+            try
+            {
+                var field = await _selection.ActiveSubDocument.Fields.CreateAsync(_selection.CaretPosition, code).ConfigureAwait(true);
+                await _selection.ActiveSubDocument.Fields.UpdateAsync(field).ConfigureAwait(true);
+            }
+            catch (Exception ex)
+            {
+                _error = ex.Message;
+            }
+    
         }
-        catch (Exception ex)
+        catch (Exception __componentMethodException)
         {
-            _error = ex.Message;
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(InsertField)} failed.");
+            throw;
         }
     }
 
-    private Task InsertDateField() => InsertField("DATE");
-    private Task InsertTimeField() => InsertField("TIME");
-    private Task InsertPageField() => InsertField("PAGE");
-    private Task InsertPageCountField() => InsertField("NUMPAGES");
-    private Task InsertPublicationField() => InsertField("MERGEFIELD PublicationName");
-    private Task InsertPageNameField() => InsertField("MERGEFIELD PageName");
-    private Task InsertStoryNameField() => InsertField("MERGEFIELD StoryName");
+    private Task InsertDateField() {
+        try
+        {
+            return InsertField("DATE");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(InsertDateField)} failed.");
+            throw;
+        }
+    }
+    private Task InsertTimeField() {
+        try
+        {
+            return InsertField("TIME");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(InsertTimeField)} failed.");
+            throw;
+        }
+    }
+    private Task InsertPageField() {
+        try
+        {
+            return InsertField("PAGE");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(InsertPageField)} failed.");
+            throw;
+        }
+    }
+    private Task InsertPageCountField() {
+        try
+        {
+            return InsertField("NUMPAGES");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(InsertPageCountField)} failed.");
+            throw;
+        }
+    }
+    private Task InsertPublicationField() {
+        try
+        {
+            return InsertField("MERGEFIELD PublicationName");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(InsertPublicationField)} failed.");
+            throw;
+        }
+    }
+    private Task InsertPageNameField() {
+        try
+        {
+            return InsertField("MERGEFIELD PageName");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(InsertPageNameField)} failed.");
+            throw;
+        }
+    }
+    private Task InsertStoryNameField() {
+        try
+        {
+            return InsertField("MERGEFIELD StoryName");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(InsertStoryNameField)} failed.");
+            throw;
+        }
+    }
 
     private async Task UpdateFields()
     {
-        if (_richEdit is null) return;
-        try { await _richEdit.DocumentAPI.Fields.UpdateAllAsync(true).ConfigureAwait(true); }
-        catch (Exception ex) { _error = ex.Message; }
+        try
+        {
+            if (_richEdit is null) return;
+            try { await _richEdit.DocumentAPI.Fields.UpdateAllAsync(true).ConfigureAwait(true); }
+            catch (Exception ex) { _error = ex.Message; }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(UpdateFields)} failed.");
+            throw;
+        }
     }
 
     private async Task ShowFieldCodes()
     {
-        if (_richEdit is null) return;
-        try { await _richEdit.DocumentAPI.Fields.ShowAllFieldCodesAsync(true).ConfigureAwait(true); }
-        catch (Exception ex) { _error = ex.Message; }
+        try
+        {
+            if (_richEdit is null) return;
+            try { await _richEdit.DocumentAPI.Fields.ShowAllFieldCodesAsync(true).ConfigureAwait(true); }
+            catch (Exception ex) { _error = ex.Message; }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(ShowFieldCodes)} failed.");
+            throw;
+        }
     }
 
     private async Task ShowFieldResults()
     {
-        if (_richEdit is null) return;
-        try { await _richEdit.DocumentAPI.Fields.ShowAllFieldResultsAsync(true).ConfigureAwait(true); }
-        catch (Exception ex) { _error = ex.Message; }
+        try
+        {
+            if (_richEdit is null) return;
+            try { await _richEdit.DocumentAPI.Fields.ShowAllFieldResultsAsync(true).ConfigureAwait(true); }
+            catch (Exception ex) { _error = ex.Message; }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(ShowFieldResults)} failed.");
+            throw;
+        }
     }
 
-    private Task ExportDocx() => ExportStory(DocumentFormat.OpenXml, ".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-    private Task ExportRtf() => ExportStory(DocumentFormat.Rtf, ".rtf", "application/rtf");
-    private Task ExportText() => ExportStory(DocumentFormat.PlainText, ".txt", "text/plain;charset=utf-8");
-    private Task ExportHtml() => ExportStory(DocumentFormat.Html, ".html", "text/html;charset=utf-8");
+    private Task ExportDocx() {
+        try
+        {
+            return ExportStory(DocumentFormat.OpenXml, ".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(ExportDocx)} failed.");
+            throw;
+        }
+    }
+    private Task ExportRtf() {
+        try
+        {
+            return ExportStory(DocumentFormat.Rtf, ".rtf", "application/rtf");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(ExportRtf)} failed.");
+            throw;
+        }
+    }
+    private Task ExportText() {
+        try
+        {
+            return ExportStory(DocumentFormat.PlainText, ".txt", "text/plain;charset=utf-8");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(ExportText)} failed.");
+            throw;
+        }
+    }
+    private Task ExportHtml() {
+        try
+        {
+            return ExportStory(DocumentFormat.Html, ".html", "text/html;charset=utf-8");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(ExportHtml)} failed.");
+            throw;
+        }
+    }
 
     private async Task ExportStory(DocumentFormat format, string extension, string mimeType)
     {
-        if (_richEdit is null || TextFrame is null) return;
         try
         {
-            var content = await _richEdit.ExportDocumentAsync(format).ConfigureAwait(true);
-            if (format == DocumentFormat.Html)
+            if (_richEdit is null || TextFrame is null) return;
+            try
             {
-                var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml).ConfigureAwait(true);
-                var prepared = await PrepareStoryPreview(
-                    content,
-                    Files.ExtractOpenXmlDocumentBackground(openXml)).ConfigureAwait(true);
-                var pageLayout = Files.ExtractOpenXmlPageLayout(openXml);
-                content = System.Text.Encoding.UTF8.GetBytes(StandaloneStoryHtml(
-                    prepared,
-                    $"{PublicationName} – {TextFrame.Name}",
-                    pageLayout));
+                var content = await _richEdit.ExportDocumentAsync(format).ConfigureAwait(true);
+                if (format == DocumentFormat.Html)
+                {
+                    var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml).ConfigureAwait(true);
+                    var prepared = await PrepareStoryPreview(
+                        content,
+                        Files.ExtractOpenXmlDocumentBackground(openXml)).ConfigureAwait(true);
+                    var pageLayout = Files.ExtractOpenXmlPageLayout(openXml);
+                    content = System.Text.Encoding.UTF8.GetBytes(StandaloneStoryHtml(
+                        prepared,
+                        $"{PublicationName} – {TextFrame.Name}",
+                        pageLayout));
+                }
+                var baseName = Files.SafeFileName($"{PublicationName}-{TextFrame.Name}");
+                var stream = new MemoryStream(content);
+                await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
+                using var reference = new DotNetStreamReference(stream);
+                await JS.InvokeVoidAsync("publisherStudio.downloadStream", baseName + extension, reference, mimeType).ConfigureAwait(true);
             }
-            var baseName = Files.SafeFileName($"{PublicationName}-{TextFrame.Name}");
-            var stream = new MemoryStream(content);
-            await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
-            using var reference = new DotNetStreamReference(stream);
-            await JS.InvokeVoidAsync("publisherStudio.downloadStream", baseName + extension, reference, mimeType).ConfigureAwait(true);
+            catch (Exception ex)
+            {
+                _error = ex.Message;
+            }
+    
         }
-        catch (Exception ex)
+        catch (Exception __componentMethodException)
         {
-            _error = ex.Message;
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(ExportStory)} failed.");
+            throw;
         }
     }
 
     [JSInvokable]
-    public Task PrintStoryFromClient() => PrintStory();
+    public Task PrintStoryFromClient() {
+        try
+        {
+            return PrintStory();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(PrintStoryFromClient)} failed.");
+            throw;
+        }
+    }
 
     private async Task PrintStory()
     {
-        if (_richEdit is null || TextFrame is null) return;
-        _error = null;
-        var title = $"{PublicationName} – {TextFrame.Name}";
-        string? previewId = null;
         try
         {
-            // Open the preview window before the first asynchronous document export so the
-            // browser still treats it as a direct user action instead of blocking the popup.
-            previewId = await JS.InvokeAsync<string?>("publisherStudio.claimStoryPrintPreview", title).ConfigureAwait(true);
-            if (string.IsNullOrWhiteSpace(previewId))
-                throw new InvalidOperationException("The browser blocked the story print-preview window. Allow popups for this local PublisherStudio address and try again.");
-
-            var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml).ConfigureAwait(true);
-            var html = await _richEdit.ExportDocumentAsync(DocumentFormat.Html).ConfigureAwait(true);
-            var prepared = await PrepareStoryPreview(
-                html,
-                Files.ExtractOpenXmlDocumentBackground(openXml)).ConfigureAwait(true);
-            var pageLayout = Files.ExtractOpenXmlPageLayout(openXml);
-            await JS.InvokeVoidAsync(
-                "publisherStudio.completeStoryPrintPreview",
-                previewId,
-                StandaloneStoryHtml(prepared, title, pageLayout, printPreview: true)).ConfigureAwait(true);
-        }
-        catch (Exception ex)
-        {
-            _error = ex.Message;
-            if (!string.IsNullOrWhiteSpace(previewId))
+            if (_richEdit is null || TextFrame is null) return;
+            _error = null;
+            var title = $"{PublicationName} – {TextFrame.Name}";
+            string? previewId = null;
+            try
             {
-                try { await JS.InvokeVoidAsync("publisherStudio.failStoryPrintPreview", previewId, ex.Message).ConfigureAwait(true); }
-                catch (JSDisconnectedException) { }
-                catch (TaskCanceledException) { }
-                catch (JSException) { }
+                // Open the preview window before the first asynchronous document export so the
+                // browser still treats it as a direct user action instead of blocking the popup.
+                previewId = await JS.InvokeAsync<string?>("publisherStudio.claimStoryPrintPreview", title).ConfigureAwait(true);
+                if (string.IsNullOrWhiteSpace(previewId))
+                    throw new InvalidOperationException("The browser blocked the story print-preview window. Allow popups for this local PublisherStudio address and try again.");
+
+                var openXml = await _richEdit.ExportDocumentAsync(DocumentFormat.OpenXml).ConfigureAwait(true);
+                var html = await _richEdit.ExportDocumentAsync(DocumentFormat.Html).ConfigureAwait(true);
+                var prepared = await PrepareStoryPreview(
+                    html,
+                    Files.ExtractOpenXmlDocumentBackground(openXml)).ConfigureAwait(true);
+                var pageLayout = Files.ExtractOpenXmlPageLayout(openXml);
+                await JS.InvokeVoidAsync(
+                    "publisherStudio.completeStoryPrintPreview",
+                    previewId,
+                    StandaloneStoryHtml(prepared, title, pageLayout, printPreview: true)).ConfigureAwait(true);
             }
+            catch (Exception ex)
+            {
+                _error = ex.Message;
+                if (!string.IsNullOrWhiteSpace(previewId))
+                {
+                    try { await JS.InvokeVoidAsync("publisherStudio.failStoryPrintPreview", previewId, ex.Message).ConfigureAwait(true); }
+                    catch (JSDisconnectedException) { }
+                    catch (TaskCanceledException) { }
+                    catch (JSException) { }
+                }
+            }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(PrintStory)} failed.");
+            throw;
         }
     }
 
     private async Task<StoryPreviewResult> PrepareStoryPreview(byte[] html, string? preferredBackground = null)
     {
-        var normalizedPreferredBackground = Files.NormalizeCssBackground(preferredBackground);
-        var fallback = new StoryPreviewResult
-        {
-            Html = Files.ExtractHtmlBody(html),
-            Background = IsVisibleBackground(normalizedPreferredBackground)
-                ? normalizedPreferredBackground
-                : TextFrame?.DocumentBackground ?? "transparent"
-        };
         try
         {
-            ResetStoryPreviewTransfer();
-            using var htmlStream = new MemoryStream(html, writable: false);
-            using var htmlReference = new DotNetStreamReference(htmlStream);
-            using var receiverReference = DotNetObjectReference.Create(this);
-            await JS.InvokeVoidAsync(
-                "publisherStudio.prepareStoryPreviewHtmlInChunks",
-                htmlReference,
-                normalizedPreferredBackground,
-                receiverReference).ConfigureAwait(true);
+            var normalizedPreferredBackground = Files.NormalizeCssBackground(preferredBackground);
+            var fallback = new StoryPreviewResult
+            {
+                Html = Files.ExtractHtmlBody(html),
+                Background = IsVisibleBackground(normalizedPreferredBackground)
+                    ? normalizedPreferredBackground
+                    : TextFrame?.DocumentBackground ?? "transparent"
+            };
+            try
+            {
+                ResetStoryPreviewTransfer();
+                using var htmlStream = new MemoryStream(html, writable: false);
+                using var htmlReference = new DotNetStreamReference(htmlStream);
+                using var receiverReference = DotNetObjectReference.Create(this);
+                await JS.InvokeVoidAsync(
+                    "publisherStudio.prepareStoryPreviewHtmlInChunks",
+                    htmlReference,
+                    normalizedPreferredBackground,
+                    receiverReference).ConfigureAwait(true);
 
-            var prepared = _storyPreviewResult
-                ?? throw new JSException(_storyPreviewTransferError ?? "The formatted story preview transfer did not complete.");
-            if (IsVisibleBackground(normalizedPreferredBackground))
-                prepared.Background = normalizedPreferredBackground;
-            prepared.Background = Files.NormalizeCssBackground(prepared.Background);
-            ResetStoryPreviewTransfer();
-            return prepared;
+                var prepared = _storyPreviewResult
+                    ?? throw new JSException(_storyPreviewTransferError ?? "The formatted story preview transfer did not complete.");
+                if (IsVisibleBackground(normalizedPreferredBackground))
+                    prepared.Background = normalizedPreferredBackground;
+                prepared.Background = Files.NormalizeCssBackground(prepared.Background);
+                ResetStoryPreviewTransfer();
+                return prepared;
+            }
+            catch (JSDisconnectedException) { ResetStoryPreviewTransfer(); return fallback; }
+            catch (TaskCanceledException) { ResetStoryPreviewTransfer(); return fallback; }
+            catch (JSException) { ResetStoryPreviewTransfer(); return fallback; }
+    
         }
-        catch (JSDisconnectedException) { ResetStoryPreviewTransfer(); return fallback; }
-        catch (TaskCanceledException) { ResetStoryPreviewTransfer(); return fallback; }
-        catch (JSException) { ResetStoryPreviewTransfer(); return fallback; }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(PrepareStoryPreview)} failed.");
+            throw;
+        }
     }
 
     [JSInvokable]
     public bool BeginStoryPreviewTransfer(string transferId, int totalLength, int chunkCount, string background)
     {
-        ResetStoryPreviewTransfer();
-        if (string.IsNullOrWhiteSpace(transferId) || totalLength < 0 || chunkCount <= 0)
+        try
         {
-            _storyPreviewTransferError = "The story preview transfer metadata is invalid.";
-            return false;
-        }
+            ResetStoryPreviewTransfer();
+            if (string.IsNullOrWhiteSpace(transferId) || totalLength < 0 || chunkCount <= 0)
+            {
+                _storyPreviewTransferError = "The story preview transfer metadata is invalid.";
+                return false;
+            }
 
-        _storyPreviewTransferId = transferId;
-        _storyPreviewExpectedLength = totalLength;
-        _storyPreviewExpectedChunks = chunkCount;
-        _storyPreviewBackground = Files.NormalizeCssBackground(background);
-        return true;
+            _storyPreviewTransferId = transferId;
+            _storyPreviewExpectedLength = totalLength;
+            _storyPreviewExpectedChunks = chunkCount;
+            _storyPreviewBackground = Files.NormalizeCssBackground(background);
+            return true;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(BeginStoryPreviewTransfer)} failed.");
+            throw;
+        }
     }
 
     [JSInvokable]
     public bool AppendStoryPreviewChunk(string transferId, int chunkIndex, string chunk)
     {
-        if (!string.Equals(_storyPreviewTransferId, transferId, StringComparison.Ordinal)
-            || chunkIndex != _storyPreviewNextChunk)
+        try
         {
-            _storyPreviewTransferError = "The formatted story preview chunks arrived out of order.";
-            return false;
-        }
+            if (!string.Equals(_storyPreviewTransferId, transferId, StringComparison.Ordinal)
+                || chunkIndex != _storyPreviewNextChunk)
+            {
+                _storyPreviewTransferError = "The formatted story preview chunks arrived out of order.";
+                return false;
+            }
 
-        _storyPreviewBuffer.Append(chunk ?? string.Empty);
-        _storyPreviewNextChunk++;
-        return true;
+            _storyPreviewBuffer.Append(chunk ?? string.Empty);
+            _storyPreviewNextChunk++;
+            return true;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(AppendStoryPreviewChunk)} failed.");
+            throw;
+        }
     }
 
     [JSInvokable]
     public bool CompleteStoryPreviewTransfer(string transferId)
     {
-        if (!string.Equals(_storyPreviewTransferId, transferId, StringComparison.Ordinal)
-            || _storyPreviewNextChunk != _storyPreviewExpectedChunks
-            || _storyPreviewBuffer.Length != _storyPreviewExpectedLength)
+        try
         {
-            _storyPreviewTransferError = "The formatted story preview transfer was incomplete.";
-            return false;
-        }
+            if (!string.Equals(_storyPreviewTransferId, transferId, StringComparison.Ordinal)
+                || _storyPreviewNextChunk != _storyPreviewExpectedChunks
+                || _storyPreviewBuffer.Length != _storyPreviewExpectedLength)
+            {
+                _storyPreviewTransferError = "The formatted story preview transfer was incomplete.";
+                return false;
+            }
 
-        _storyPreviewResult = new StoryPreviewResult
+            _storyPreviewResult = new StoryPreviewResult
+            {
+                Html = _storyPreviewBuffer.ToString(),
+                Background = _storyPreviewBackground
+            };
+            return true;
+    
+        }
+        catch (Exception __componentMethodException)
         {
-            Html = _storyPreviewBuffer.ToString(),
-            Background = _storyPreviewBackground
-        };
-        return true;
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(CompleteStoryPreviewTransfer)} failed.");
+            throw;
+        }
     }
 
     private void ResetStoryPreviewTransfer()
     {
-        _storyPreviewTransferId = null;
-        _storyPreviewBuffer.Clear();
-        _storyPreviewExpectedLength = 0;
-        _storyPreviewExpectedChunks = 0;
-        _storyPreviewNextChunk = 0;
-        _storyPreviewBackground = "transparent";
-        _storyPreviewResult = null;
-        _storyPreviewTransferError = null;
+        try
+        {
+            _storyPreviewTransferId = null;
+            _storyPreviewBuffer.Clear();
+            _storyPreviewExpectedLength = 0;
+            _storyPreviewExpectedChunks = 0;
+            _storyPreviewNextChunk = 0;
+            _storyPreviewBackground = "transparent";
+            _storyPreviewResult = null;
+            _storyPreviewTransferError = null;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(ResetStoryPreviewTransfer)} failed.");
+            throw;
+        }
     }
 
     private string StandaloneStoryHtml(
@@ -953,318 +1494,374 @@ Required result contract:
         StoryPageLayout pageLayout,
         bool printPreview = false)
     {
-        var safeTitle = System.Net.WebUtility.HtmlEncode(title);
-        var background = Files.NormalizeCssBackground(prepared.Background);
-        var pageBackground = IsVisibleBackground(background) ? background : "#ffffff";
-        var pageWidth = CssMillimeters(pageLayout.PageWidthMm);
-        var pageHeight = CssMillimeters(pageLayout.PageHeightMm);
-        var marginTop = CssMillimeters(pageLayout.MarginTopMm);
-        var marginRight = CssMillimeters(pageLayout.MarginRightMm);
-        var marginBottom = CssMillimeters(pageLayout.MarginBottomMm);
-        var marginLeft = CssMillimeters(pageLayout.MarginLeftMm);
-        var contentWidth = CssMillimeters(pageLayout.ContentWidthMm);
-        var contentHeight = CssMillimeters(pageLayout.ContentHeightMm);
-        var pageDescription = System.Net.WebUtility.HtmlEncode(
-            $"{FormatMeasurement(pageLayout.PageWidthMm)} × {FormatMeasurement(pageLayout.PageHeightMm)} mm, "
-            + (pageLayout.IsLandscape ? "landscape" : "portrait"));
-        var previewMode = printPreview ? "true" : "false";
-        var toolbar = printPreview
-            ? $$"""<nav class="publisher-print-toolbar" aria-label="Story PDF preview status"><strong>Preparing exact story PDF…</strong><span id="publisher-print-status">Document page: {{pageDescription}}. The generated PDF is the print preview.</span><button type="button" onclick="window.close()">Close</button></nav>"""
-            : string.Empty;
-        var rendererScript = printPreview
-            ? """<script src="__PUBLISHER_HTML2CANVAS_URL__"></script>"""
-            : string.Empty;
+        try
+        {
+            var safeTitle = System.Net.WebUtility.HtmlEncode(title);
+            var background = Files.NormalizeCssBackground(prepared.Background);
+            var pageBackground = IsVisibleBackground(background) ? background : "#ffffff";
+            var pageWidth = CssMillimeters(pageLayout.PageWidthMm);
+            var pageHeight = CssMillimeters(pageLayout.PageHeightMm);
+            var marginTop = CssMillimeters(pageLayout.MarginTopMm);
+            var marginRight = CssMillimeters(pageLayout.MarginRightMm);
+            var marginBottom = CssMillimeters(pageLayout.MarginBottomMm);
+            var marginLeft = CssMillimeters(pageLayout.MarginLeftMm);
+            var contentWidth = CssMillimeters(pageLayout.ContentWidthMm);
+            var contentHeight = CssMillimeters(pageLayout.ContentHeightMm);
+            var pageDescription = System.Net.WebUtility.HtmlEncode(
+                $"{FormatMeasurement(pageLayout.PageWidthMm)} × {FormatMeasurement(pageLayout.PageHeightMm)} mm, "
+                + (pageLayout.IsLandscape ? "landscape" : "portrait"));
+            var previewMode = printPreview ? "true" : "false";
+            var toolbar = printPreview
+                ? $$"""<nav class="publisher-print-toolbar" aria-label="Story PDF preview status"><strong>Preparing exact story PDF…</strong><span id="publisher-print-status">Document page: {{pageDescription}}. The generated PDF is the print preview.</span><button type="button" onclick="window.close()">Close</button></nav>"""
+                : string.Empty;
+            var rendererScript = printPreview
+                ? """<script src="__PUBLISHER_HTML2CANVAS_URL__"></script>"""
+                : string.Empty;
 
-        return $$"""
-            <!doctype html>
-            <html lang="en">
-            <head>
-              <meta charset="utf-8">
-              <meta name="viewport" content="width=device-width,initial-scale=1">
-              <title>{{safeTitle}}</title>
-              <style>
-                * { box-sizing:border-box; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
-                @page { size:{{pageWidth}} {{pageHeight}}; margin:0; }
-                :root {
-                  --publisher-page-width:{{pageWidth}};
-                  --publisher-page-height:{{pageHeight}};
-                  --publisher-margin-top:{{marginTop}};
-                  --publisher-margin-right:{{marginRight}};
-                  --publisher-margin-bottom:{{marginBottom}};
-                  --publisher-margin-left:{{marginLeft}};
-                  --publisher-content-width:{{contentWidth}};
-                  --publisher-content-height:{{contentHeight}};
-                  --publisher-story-page-background:{{pageBackground}};
-                }
-                html,body { min-height:100%; margin:0; background:#e5e7eb; }
-                body { padding:24px; font-family:Segoe UI,Arial,sans-serif; }
-                .publisher-print-toolbar { position:sticky; z-index:20; top:0; display:flex; align-items:center; gap:12px; width:min(100%,1200px); margin:0 auto 14px; padding:10px 12px; border:1px solid #cbd5e1; border-radius:5px; background:white; box-shadow:0 3px 14px #0002; }
-                .publisher-print-toolbar span { flex:1; color:#526071; font-size:12px; }
-                .publisher-print-toolbar button { padding:7px 13px; border:1px solid #9ba5b1; border-radius:4px; background:white; cursor:pointer; }
-                .publisher-print-toolbar.error { border-color:#ef9a9a; }
-                .publisher-print-toolbar.error strong { color:#a61b1b; }
-                .publisher-story-source { display:none !important; }
-                .publisher-story-pages { display:grid; justify-content:center; gap:18px; }
-                .publisher-story-sheet { position:relative; isolation:isolate; width:var(--publisher-page-width); height:var(--publisher-page-height); padding:var(--publisher-margin-top) var(--publisher-margin-right) var(--publisher-margin-bottom) var(--publisher-margin-left); overflow:hidden; background:var(--publisher-story-page-background); box-shadow:0 3px 18px #0003; break-after:page; page-break-after:always; }
-                .publisher-story-sheet:last-child { break-after:auto; page-break-after:auto; }
-                .publisher-story-viewport { position:relative; width:var(--publisher-content-width); height:var(--publisher-content-height); overflow:hidden; }
-                .publisher-story-flow, .publisher-story-measure { position:absolute; top:0; left:0; width:var(--publisher-content-width); height:var(--publisher-content-height); max-width:none; min-width:0; margin:0; padding:0; overflow:visible; column-width:var(--publisher-content-width); column-gap:0; column-fill:auto; }
-                .publisher-story-measure { position:fixed; z-index:-1000; top:0; left:-100000px; opacity:0; pointer-events:none; }
-                .publisher-story-flow > *, .publisher-story-measure > * { max-width:100%; }
-                .publisher-story-flow [data-publisher-print-fill], .publisher-story-measure [data-publisher-print-fill] { background-color:var(--publisher-print-fill,transparent) !important; }
-                @media print {
-                  html,body { min-height:0; background:var(--publisher-story-page-background) !important; }
-                  body { padding:0; }
-                  .publisher-print-toolbar, .publisher-story-source, .publisher-story-measure { display:none !important; }
-                  .publisher-story-pages { display:block; }
-                  .publisher-story-sheet { margin:0; box-shadow:none; }
-                }
-              </style>
-            </head>
-            <body data-page-width-mm="{{FormatMeasurement(pageLayout.PageWidthMm)}}" data-page-height-mm="{{FormatMeasurement(pageLayout.PageHeightMm)}}">
-              {{toolbar}}
-              <div id="publisher-story-source" class="publisher-story-source" aria-hidden="true">{{prepared.Html}}</div>
-              <div id="publisher-story-measure" class="publisher-story-measure" aria-hidden="true"></div>
-              <main id="publisher-story-pages" class="publisher-story-pages" aria-label="Story pages"></main>
-              {{rendererScript}}
-              <script>
-                (() => {
-                  'use strict';
-                  const previewMode = {{previewMode}};
-                  const sourceHost = document.getElementById('publisher-story-source');
-                  const sourceDocument = sourceHost?.querySelector('.publisher-story-document');
-                  const measure = document.getElementById('publisher-story-measure');
-                  const pageHost = document.getElementById('publisher-story-pages');
-                  const status = document.getElementById('publisher-print-status');
-                  const toolbar = document.querySelector('.publisher-print-toolbar');
-                  const pageBackground = getComputedStyle(document.documentElement)
-                    .getPropertyValue('--publisher-story-page-background').trim() || '#ffffff';
-                  const inheritedRootProperties = [
-                    'color','font-family','font-size','font-weight','font-style','font-variant','font-stretch','line-height',
-                    'letter-spacing','word-spacing','text-align','text-indent','text-transform','text-shadow',
-                    'text-decoration-line','text-decoration-style','text-decoration-color','text-decoration-thickness',
-                    'white-space','overflow-wrap','word-break','hyphens','vertical-align','direction','unicode-bidi'
-                  ];
-
-                  const nextFrame = () => new Promise(resolve => requestAnimationFrame(() => resolve()));
-                  const visibleFill = value => {
-                    const normalized = String(value || '').replaceAll(' ', '').toLowerCase();
-                    return normalized && normalized !== 'transparent' && normalized !== 'rgba(0,0,0,0)';
-                  };
-                  const waitForImages = root => Promise.all([...root.querySelectorAll('img')].map(image => image.complete
-                    ? Promise.resolve()
-                    : new Promise(resolve => {
-                        const finish = () => resolve();
-                        image.addEventListener('load', finish, { once:true });
-                        image.addEventListener('error', finish, { once:true });
-                        setTimeout(finish, 5000);
-                      })));
-                  const materializePrintFills = root => {
-                    root.querySelectorAll('[data-publisher-print-fill]').forEach(node => {
-                      const computed = getComputedStyle(node);
-                      const fill = computed.getPropertyValue('--publisher-print-fill').trim() || computed.backgroundColor;
-                      if (!visibleFill(fill)) return;
-                      node.style.setProperty('--publisher-print-fill', fill);
-                      node.style.setProperty('background-color', fill, 'important');
-                      node.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
-                      node.style.setProperty('print-color-adjust', 'exact', 'important');
-                    });
-                  };
-                  const normalizeColumnBreaks = root => {
-                    root.querySelectorAll('*').forEach(node => {
-                      const before = `${node.style.getPropertyValue('break-before')} ${node.style.getPropertyValue('page-break-before')}`.toLowerCase();
-                      const after = `${node.style.getPropertyValue('break-after')} ${node.style.getPropertyValue('page-break-after')}`.toLowerCase();
-                      if (before.includes('page') || before.includes('always')) node.style.setProperty('break-before', 'column');
-                      if (after.includes('page') || after.includes('always')) node.style.setProperty('break-after', 'column');
-                    });
-                  };
-                  const createFlow = className => {
-                    const flow = document.createElement('div');
-                    flow.className = className;
-                    const sourceStyle = sourceDocument?.style;
-                    if (sourceStyle) {
-                      for (const property of inheritedRootProperties) {
-                        const value = sourceStyle.getPropertyValue(property);
-                        if (value) flow.style.setProperty(property, value, sourceStyle.getPropertyPriority(property));
-                      }
+            return $$"""
+                <!doctype html>
+                <html lang="en">
+                <head>
+                  <meta charset="utf-8">
+                  <meta name="viewport" content="width=device-width,initial-scale=1">
+                  <title>{{safeTitle}}</title>
+                  <style>
+                    * { box-sizing:border-box; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+                    @page { size:{{pageWidth}} {{pageHeight}}; margin:0; }
+                    :root {
+                      --publisher-page-width:{{pageWidth}};
+                      --publisher-page-height:{{pageHeight}};
+                      --publisher-margin-top:{{marginTop}};
+                      --publisher-margin-right:{{marginRight}};
+                      --publisher-margin-bottom:{{marginBottom}};
+                      --publisher-margin-left:{{marginLeft}};
+                      --publisher-content-width:{{contentWidth}};
+                      --publisher-content-height:{{contentHeight}};
+                      --publisher-story-page-background:{{pageBackground}};
                     }
-                    flow.innerHTML = sourceDocument?.innerHTML || '<p></p>';
-                    normalizeColumnBreaks(flow);
-                    materializePrintFills(flow);
-                    return flow;
-                  };
-
-                  const paginate = async () => {
-                    if (!sourceHost || !measure || !pageHost)
-                      throw new Error('The Story preview page could not be initialized.');
-                    measure.replaceChildren(createFlow('publisher-story-measure-content'));
-                    try { await document.fonts?.ready; } catch { }
-                    await waitForImages(measure);
-                    await nextFrame();
-                    await nextFrame();
-                    const columnWidth = measure.getBoundingClientRect().width;
-                    if (!(columnWidth > 0)) throw new Error('The DOCX content width is invalid.');
-                    const pageCount = Math.max(1, Math.ceil(measure.scrollWidth / columnWidth - .001));
-                    const fragment = document.createDocumentFragment();
-                    for (let pageIndex = 0; pageIndex < pageCount; pageIndex++) {
-                      const page = document.createElement('section');
-                      page.className = 'publisher-story-sheet';
-                      page.setAttribute('aria-label', `Story page ${pageIndex + 1} of ${pageCount}`);
-                      const viewport = document.createElement('div');
-                      viewport.className = 'publisher-story-viewport';
-                      const flow = createFlow('publisher-story-flow');
-                      flow.style.transform = `translate3d(${-pageIndex * columnWidth}px,0,0)`;
-                      viewport.append(flow);
-                      page.append(viewport);
-                      fragment.append(page);
+                    html,body { min-height:100%; margin:0; background:#e5e7eb; }
+                    body { padding:24px; font-family:Segoe UI,Arial,sans-serif; }
+                    .publisher-print-toolbar { position:sticky; z-index:20; top:0; display:flex; align-items:center; gap:12px; width:min(100%,1200px); margin:0 auto 14px; padding:10px 12px; border:1px solid #cbd5e1; border-radius:5px; background:white; box-shadow:0 3px 14px #0002; }
+                    .publisher-print-toolbar span { flex:1; color:#526071; font-size:12px; }
+                    .publisher-print-toolbar button { padding:7px 13px; border:1px solid #9ba5b1; border-radius:4px; background:white; cursor:pointer; }
+                    .publisher-print-toolbar.error { border-color:#ef9a9a; }
+                    .publisher-print-toolbar.error strong { color:#a61b1b; }
+                    .publisher-story-source { display:none !important; }
+                    .publisher-story-pages { display:grid; justify-content:center; gap:18px; }
+                    .publisher-story-sheet { position:relative; isolation:isolate; width:var(--publisher-page-width); height:var(--publisher-page-height); padding:var(--publisher-margin-top) var(--publisher-margin-right) var(--publisher-margin-bottom) var(--publisher-margin-left); overflow:hidden; background:var(--publisher-story-page-background); box-shadow:0 3px 18px #0003; break-after:page; page-break-after:always; }
+                    .publisher-story-sheet:last-child { break-after:auto; page-break-after:auto; }
+                    .publisher-story-viewport { position:relative; width:var(--publisher-content-width); height:var(--publisher-content-height); overflow:hidden; }
+                    .publisher-story-flow, .publisher-story-measure { position:absolute; top:0; left:0; width:var(--publisher-content-width); height:var(--publisher-content-height); max-width:none; min-width:0; margin:0; padding:0; overflow:visible; column-width:var(--publisher-content-width); column-gap:0; column-fill:auto; }
+                    .publisher-story-measure { position:fixed; z-index:-1000; top:0; left:-100000px; opacity:0; pointer-events:none; }
+                    .publisher-story-flow > *, .publisher-story-measure > * { max-width:100%; }
+                    .publisher-story-flow [data-publisher-print-fill], .publisher-story-measure [data-publisher-print-fill] { background-color:var(--publisher-print-fill,transparent) !important; }
+                    @media print {
+                      html,body { min-height:0; background:var(--publisher-story-page-background) !important; }
+                      body { padding:0; }
+                      .publisher-print-toolbar, .publisher-story-source, .publisher-story-measure { display:none !important; }
+                      .publisher-story-pages { display:block; }
+                      .publisher-story-sheet { margin:0; box-shadow:none; }
                     }
-                    pageHost.replaceChildren(fragment);
-                    measure.remove();
-                    sourceHost.remove();
-                    document.body.dataset.publisherReady = 'true';
-                    await waitForImages(pageHost);
-                    await nextFrame();
-                    await nextFrame();
-                    return [...pageHost.querySelectorAll('.publisher-story-sheet')];
-                  };
-
-                  const ascii = value => new TextEncoder().encode(value);
-                  const pdfNumber = value => Number(value).toFixed(3).replace(/\.000$/, '').replace(/(\.\d*?)0+$/, '$1');
-                  const canvasJpeg = canvas => new Promise((resolve, reject) => canvas.toBlob(async blob => {
-                    if (!blob) { reject(new Error('The browser could not encode a Story page image.')); return; }
-                    resolve(new Uint8Array(await blob.arrayBuffer()));
-                  }, 'image/jpeg', .985));
-                  const createImagePdf = (images, pageWidthMm, pageHeightMm) => {
-                    const pageWidthPoints = pageWidthMm * 72 / 25.4;
-                    const pageHeightPoints = pageHeightMm * 72 / 25.4;
-                    const objectCount = 2 + images.length * 3;
-                    const objects = new Array(objectCount + 1);
-                    const pageIds = images.map((_, index) => 3 + index * 3);
-                    objects[1] = [ascii('<< /Type /Catalog /Pages 2 0 R >>')];
-                    objects[2] = [ascii(`<< /Type /Pages /Count ${images.length} /Kids [${pageIds.map(id => `${id} 0 R`).join(' ')}] >>`)];
-                    images.forEach((image, index) => {
-                      const pageId = 3 + index * 3;
-                      const imageId = pageId + 1;
-                      const contentId = pageId + 2;
-                      const draw = ascii(`q\n${pdfNumber(pageWidthPoints)} 0 0 ${pdfNumber(pageHeightPoints)} 0 0 cm\n/Im0 Do\nQ\n`);
-                      objects[pageId] = [ascii(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pdfNumber(pageWidthPoints)} ${pdfNumber(pageHeightPoints)}] /Resources << /XObject << /Im0 ${imageId} 0 R >> >> /Contents ${contentId} 0 R >>`)];
-                      objects[imageId] = [
-                        ascii(`<< /Type /XObject /Subtype /Image /Width ${image.width} /Height ${image.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${image.bytes.length} >>\nstream\n`),
-                        image.bytes,
-                        ascii('\nendstream')
+                  </style>
+                </head>
+                <body data-page-width-mm="{{FormatMeasurement(pageLayout.PageWidthMm)}}" data-page-height-mm="{{FormatMeasurement(pageLayout.PageHeightMm)}}">
+                  {{toolbar}}
+                  <div id="publisher-story-source" class="publisher-story-source" aria-hidden="true">{{prepared.Html}}</div>
+                  <div id="publisher-story-measure" class="publisher-story-measure" aria-hidden="true"></div>
+                  <main id="publisher-story-pages" class="publisher-story-pages" aria-label="Story pages"></main>
+                  {{rendererScript}}
+                  <script>
+                    (() => {
+                      'use strict';
+                      const previewMode = {{previewMode}};
+                      const sourceHost = document.getElementById('publisher-story-source');
+                      const sourceDocument = sourceHost?.querySelector('.publisher-story-document');
+                      const measure = document.getElementById('publisher-story-measure');
+                      const pageHost = document.getElementById('publisher-story-pages');
+                      const status = document.getElementById('publisher-print-status');
+                      const toolbar = document.querySelector('.publisher-print-toolbar');
+                      const pageBackground = getComputedStyle(document.documentElement)
+                        .getPropertyValue('--publisher-story-page-background').trim() || '#ffffff';
+                      const inheritedRootProperties = [
+                        'color','font-family','font-size','font-weight','font-style','font-variant','font-stretch','line-height',
+                        'letter-spacing','word-spacing','text-align','text-indent','text-transform','text-shadow',
+                        'text-decoration-line','text-decoration-style','text-decoration-color','text-decoration-thickness',
+                        'white-space','overflow-wrap','word-break','hyphens','vertical-align','direction','unicode-bidi'
                       ];
-                      objects[contentId] = [ascii(`<< /Length ${draw.length} >>\nstream\n`), draw, ascii('endstream')];
-                    });
 
-                    const header = new Uint8Array([37,80,68,70,45,49,46,52,10,37,226,227,207,211,10]);
-                    const chunks = [header];
-                    const offsets = new Array(objectCount + 1).fill(0);
-                    let length = header.length;
-                    const push = chunk => { chunks.push(chunk); length += chunk.length; };
-                    for (let objectId = 1; objectId <= objectCount; objectId++) {
-                      offsets[objectId] = length;
-                      push(ascii(`${objectId} 0 obj\n`));
-                      for (const chunk of objects[objectId]) push(chunk);
-                      push(ascii('\nendobj\n'));
-                    }
-                    const xrefOffset = length;
-                    push(ascii(`xref\n0 ${objectCount + 1}\n`));
-                    push(ascii('0000000000 65535 f \n'));
-                    for (let objectId = 1; objectId <= objectCount; objectId++)
-                      push(ascii(`${String(offsets[objectId]).padStart(10, '0')} 00000 n \n`));
-                    push(ascii(`trailer\n<< /Size ${objectCount + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`));
-                    return new Blob(chunks, { type:'application/pdf' });
-                  };
+                      const nextFrame = () => new Promise(resolve => requestAnimationFrame(() => resolve()));
+                      const visibleFill = value => {
+                        const normalized = String(value || '').replaceAll(' ', '').toLowerCase();
+                        return normalized && normalized !== 'transparent' && normalized !== 'rgba(0,0,0,0)';
+                      };
+                      const waitForImages = root => Promise.all([...root.querySelectorAll('img')].map(image => image.complete
+                        ? Promise.resolve()
+                        : new Promise(resolve => {
+                            const finish = () => resolve();
+                            image.addEventListener('load', finish, { once:true });
+                            image.addEventListener('error', finish, { once:true });
+                            setTimeout(finish, 5000);
+                          })));
+                      const materializePrintFills = root => {
+                        root.querySelectorAll('[data-publisher-print-fill]').forEach(node => {
+                          const computed = getComputedStyle(node);
+                          const fill = computed.getPropertyValue('--publisher-print-fill').trim() || computed.backgroundColor;
+                          if (!visibleFill(fill)) return;
+                          node.style.setProperty('--publisher-print-fill', fill);
+                          node.style.setProperty('background-color', fill, 'important');
+                          node.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
+                          node.style.setProperty('print-color-adjust', 'exact', 'important');
+                        });
+                      };
+                      const normalizeColumnBreaks = root => {
+                        root.querySelectorAll('*').forEach(node => {
+                          const before = `${node.style.getPropertyValue('break-before')} ${node.style.getPropertyValue('page-break-before')}`.toLowerCase();
+                          const after = `${node.style.getPropertyValue('break-after')} ${node.style.getPropertyValue('page-break-after')}`.toLowerCase();
+                          if (before.includes('page') || before.includes('always')) node.style.setProperty('break-before', 'column');
+                          if (after.includes('page') || after.includes('always')) node.style.setProperty('break-after', 'column');
+                        });
+                      };
+                      const createFlow = className => {
+                        const flow = document.createElement('div');
+                        flow.className = className;
+                        const sourceStyle = sourceDocument?.style;
+                        if (sourceStyle) {
+                          for (const property of inheritedRootProperties) {
+                            const value = sourceStyle.getPropertyValue(property);
+                            if (value) flow.style.setProperty(property, value, sourceStyle.getPropertyPriority(property));
+                          }
+                        }
+                        flow.innerHTML = sourceDocument?.innerHTML || '<p></p>';
+                        normalizeColumnBreaks(flow);
+                        materializePrintFills(flow);
+                        return flow;
+                      };
 
-                  const openExactPdfPreview = async pages => {
-                    if (typeof window.html2canvas !== 'function')
-                      throw new Error('The local Story PDF renderer did not load.');
-                    const pageWidthMm = Number(document.body.dataset.pageWidthMm);
-                    const pageHeightMm = Number(document.body.dataset.pageHeightMm);
-                    if (!(pageWidthMm > 0 && pageHeightMm > 0))
-                      throw new Error('The DOCX paper size is invalid.');
-                    const images = [];
-                    for (let index = 0; index < pages.length; index++) {
-                      if (status) status.textContent = `Rendering exact PDF page ${index + 1} of ${pages.length}…`;
-                      const page = pages[index];
-                      const bounds = page.getBoundingClientRect();
-                      const scale = Math.max(1, Math.min(2, 4096 / Math.max(bounds.width, 1), 4096 / Math.max(bounds.height, 1)));
-                      const canvas = await window.html2canvas(page, {
-                        backgroundColor:pageBackground,
-                        scale,
-                        useCORS:true,
-                        allowTaint:false,
-                        logging:false,
-                        removeContainer:true,
-                        width:bounds.width,
-                        height:bounds.height,
-                        windowWidth:Math.ceil(bounds.width),
-                        windowHeight:Math.ceil(bounds.height),
-                        scrollX:0,
-                        scrollY:0
-                      });
-                      const bytes = await canvasJpeg(canvas);
-                      images.push({ bytes, width:canvas.width, height:canvas.height });
-                      canvas.width = 1;
-                      canvas.height = 1;
-                    }
-                    if (status) status.textContent = 'Opening the exact PDF print preview…';
-                    const pdf = createImagePdf(images, pageWidthMm, pageHeightMm);
-                    const pdfUrl = URL.createObjectURL(pdf);
-                    globalThis.__publisherStoryPdfUrl = pdfUrl;
-                    location.replace(pdfUrl);
-                  };
+                      const paginate = async () => {
+                        if (!sourceHost || !measure || !pageHost)
+                          throw new Error('The Story preview page could not be initialized.');
+                        measure.replaceChildren(createFlow('publisher-story-measure-content'));
+                        try { await document.fonts?.ready; } catch { }
+                        await waitForImages(measure);
+                        await nextFrame();
+                        await nextFrame();
+                        const columnWidth = measure.getBoundingClientRect().width;
+                        if (!(columnWidth > 0)) throw new Error('The DOCX content width is invalid.');
+                        const pageCount = Math.max(1, Math.ceil(measure.scrollWidth / columnWidth - .001));
+                        const fragment = document.createDocumentFragment();
+                        for (let pageIndex = 0; pageIndex < pageCount; pageIndex++) {
+                          const page = document.createElement('section');
+                          page.className = 'publisher-story-sheet';
+                          page.setAttribute('aria-label', `Story page ${pageIndex + 1} of ${pageCount}`);
+                          const viewport = document.createElement('div');
+                          viewport.className = 'publisher-story-viewport';
+                          const flow = createFlow('publisher-story-flow');
+                          flow.style.transform = `translate3d(${-pageIndex * columnWidth}px,0,0)`;
+                          viewport.append(flow);
+                          page.append(viewport);
+                          fragment.append(page);
+                        }
+                        pageHost.replaceChildren(fragment);
+                        measure.remove();
+                        sourceHost.remove();
+                        document.body.dataset.publisherReady = 'true';
+                        await waitForImages(pageHost);
+                        await nextFrame();
+                        await nextFrame();
+                        return [...pageHost.querySelectorAll('.publisher-story-sheet')];
+                      };
 
-                  const fail = error => {
-                    console.error('Story PDF preview failed.', error);
-                    toolbar?.classList.add('error');
-                    const strong = toolbar?.querySelector('strong');
-                    if (strong) strong.textContent = 'Story PDF preview failed';
-                    if (status) status.textContent = error?.message || String(error);
-                  };
+                      const ascii = value => new TextEncoder().encode(value);
+                      const pdfNumber = value => Number(value).toFixed(3).replace(/\.000$/, '').replace(/(\.\d*?)0+$/, '$1');
+                      const canvasJpeg = canvas => new Promise((resolve, reject) => canvas.toBlob(async blob => {
+                        if (!blob) { reject(new Error('The browser could not encode a Story page image.')); return; }
+                        resolve(new Uint8Array(await blob.arrayBuffer()));
+                      }, 'image/jpeg', .985));
+                      const createImagePdf = (images, pageWidthMm, pageHeightMm) => {
+                        const pageWidthPoints = pageWidthMm * 72 / 25.4;
+                        const pageHeightPoints = pageHeightMm * 72 / 25.4;
+                        const objectCount = 2 + images.length * 3;
+                        const objects = new Array(objectCount + 1);
+                        const pageIds = images.map((_, index) => 3 + index * 3);
+                        objects[1] = [ascii('<< /Type /Catalog /Pages 2 0 R >>')];
+                        objects[2] = [ascii(`<< /Type /Pages /Count ${images.length} /Kids [${pageIds.map(id => `${id} 0 R`).join(' ')}] >>`)];
+                        images.forEach((image, index) => {
+                          const pageId = 3 + index * 3;
+                          const imageId = pageId + 1;
+                          const contentId = pageId + 2;
+                          const draw = ascii(`q\n${pdfNumber(pageWidthPoints)} 0 0 ${pdfNumber(pageHeightPoints)} 0 0 cm\n/Im0 Do\nQ\n`);
+                          objects[pageId] = [ascii(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pdfNumber(pageWidthPoints)} ${pdfNumber(pageHeightPoints)}] /Resources << /XObject << /Im0 ${imageId} 0 R >> >> /Contents ${contentId} 0 R >>`)];
+                          objects[imageId] = [
+                            ascii(`<< /Type /XObject /Subtype /Image /Width ${image.width} /Height ${image.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${image.bytes.length} >>\nstream\n`),
+                            image.bytes,
+                            ascii('\nendstream')
+                          ];
+                          objects[contentId] = [ascii(`<< /Length ${draw.length} >>\nstream\n`), draw, ascii('endstream')];
+                        });
 
-                  addEventListener('beforeprint', () => materializePrintFills(document));
-                  addEventListener('load', async () => {
-                    try {
-                      const pages = await paginate();
-                      if (previewMode) await openExactPdfPreview(pages);
-                    } catch (error) {
-                      fail(error);
-                    }
-                  }, { once:true });
-                })();
-              </script>
-            </body>
-            </html>
-            """;
+                        const header = new Uint8Array([37,80,68,70,45,49,46,52,10,37,226,227,207,211,10]);
+                        const chunks = [header];
+                        const offsets = new Array(objectCount + 1).fill(0);
+                        let length = header.length;
+                        const push = chunk => { chunks.push(chunk); length += chunk.length; };
+                        for (let objectId = 1; objectId <= objectCount; objectId++) {
+                          offsets[objectId] = length;
+                          push(ascii(`${objectId} 0 obj\n`));
+                          for (const chunk of objects[objectId]) push(chunk);
+                          push(ascii('\nendobj\n'));
+                        }
+                        const xrefOffset = length;
+                        push(ascii(`xref\n0 ${objectCount + 1}\n`));
+                        push(ascii('0000000000 65535 f \n'));
+                        for (let objectId = 1; objectId <= objectCount; objectId++)
+                          push(ascii(`${String(offsets[objectId]).padStart(10, '0')} 00000 n \n`));
+                        push(ascii(`trailer\n<< /Size ${objectCount + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`));
+                        return new Blob(chunks, { type:'application/pdf' });
+                      };
+
+                      const openExactPdfPreview = async pages => {
+                        if (typeof window.html2canvas !== 'function')
+                          throw new Error('The local Story PDF renderer did not load.');
+                        const pageWidthMm = Number(document.body.dataset.pageWidthMm);
+                        const pageHeightMm = Number(document.body.dataset.pageHeightMm);
+                        if (!(pageWidthMm > 0 && pageHeightMm > 0))
+                          throw new Error('The DOCX paper size is invalid.');
+                        const images = [];
+                        for (let index = 0; index < pages.length; index++) {
+                          if (status) status.textContent = `Rendering exact PDF page ${index + 1} of ${pages.length}…`;
+                          const page = pages[index];
+                          const bounds = page.getBoundingClientRect();
+                          const scale = Math.max(1, Math.min(2, 4096 / Math.max(bounds.width, 1), 4096 / Math.max(bounds.height, 1)));
+                          const canvas = await window.html2canvas(page, {
+                            backgroundColor:pageBackground,
+                            scale,
+                            useCORS:true,
+                            allowTaint:false,
+                            logging:false,
+                            removeContainer:true,
+                            width:bounds.width,
+                            height:bounds.height,
+                            windowWidth:Math.ceil(bounds.width),
+                            windowHeight:Math.ceil(bounds.height),
+                            scrollX:0,
+                            scrollY:0
+                          });
+                          const bytes = await canvasJpeg(canvas);
+                          images.push({ bytes, width:canvas.width, height:canvas.height });
+                          canvas.width = 1;
+                          canvas.height = 1;
+                        }
+                        if (status) status.textContent = 'Opening the exact PDF print preview…';
+                        const pdf = createImagePdf(images, pageWidthMm, pageHeightMm);
+                        const pdfUrl = URL.createObjectURL(pdf);
+                        globalThis.__publisherStoryPdfUrl = pdfUrl;
+                        location.replace(pdfUrl);
+                      };
+
+                      const fail = error => {
+                        console.error('Story PDF preview failed.', error);
+                        toolbar?.classList.add('error');
+                        const strong = toolbar?.querySelector('strong');
+                        if (strong) strong.textContent = 'Story PDF preview failed';
+                        if (status) status.textContent = error?.message || String(error);
+                      };
+
+                      addEventListener('beforeprint', () => materializePrintFills(document));
+                      addEventListener('load', async () => {
+                        try {
+                          const pages = await paginate();
+                          if (previewMode) await openExactPdfPreview(pages);
+                        } catch (error) {
+                          fail(error);
+                        }
+                      }, { once:true });
+                    })();
+                  </script>
+                </body>
+                </html>
+                """;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(StandaloneStoryHtml)} failed.");
+            throw;
+        }
     }
 
-    private string CssMillimeters(double value) => FormatMeasurement(value) + "mm";
+    private string CssMillimeters(double value) {
+        try
+        {
+            return FormatMeasurement(value) + "mm";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(CssMillimeters)} failed.");
+            throw;
+        }
+    }
 
-    private string FormatMeasurement(double value) =>
-        value.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+    private string FormatMeasurement(double value) {
+        try
+        {
+            return value.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(FormatMeasurement)} failed.");
+            throw;
+        }
+    }
 
     private bool IsVisibleBackground(string? value)
     {
-        if (string.IsNullOrWhiteSpace(value)) return false;
-        var normalized = value.Trim();
-        return !string.Equals(normalized, "transparent", StringComparison.OrdinalIgnoreCase)
-            && !string.Equals(normalized, "none", StringComparison.OrdinalIgnoreCase)
-            && !string.Equals(normalized, "rgba(0, 0, 0, 0)", StringComparison.OrdinalIgnoreCase)
-            && !string.Equals(normalized, "rgba(0,0,0,0)", StringComparison.OrdinalIgnoreCase);
+        try
+        {
+            if (string.IsNullOrWhiteSpace(value)) return false;
+            var normalized = value.Trim();
+            return !string.Equals(normalized, "transparent", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(normalized, "none", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(normalized, "rgba(0, 0, 0, 0)", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(normalized, "rgba(0,0,0,0)", StringComparison.OrdinalIgnoreCase);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(IsVisibleBackground)} failed.");
+            throw;
+        }
     }
 
-    private Task Cancel() => Cancelled.InvokeAsync();
+    private Task Cancel() {
+        try
+        {
+            return Cancelled.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(Cancel)} failed.");
+            throw;
+        }
+    }
 
     public void Dispose()
     {
-        LocalGptConnection.Changed -= OnOrganicStateChanged;
-        OrganicResults.Changed -= OnOrganicStateChanged;
-        _documentLoadGeneration++;
-        _mailMergeSettingsContent = null;
-        ResetStoryPreviewTransfer();
-        _selfReference?.Dispose();
-        _selfReference = null;
+        try
+        {
+            LocalGptConnection.Changed -= OnOrganicStateChanged;
+            OrganicResults.Changed -= OnOrganicStateChanged;
+            _documentLoadGeneration++;
+            _mailMergeSettingsContent = null;
+            ResetStoryPreviewTransfer();
+            _selfReference?.Dispose();
+            _selfReference = null;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(Dispose)} failed.");
+            throw;
+        }
     }
 
     public sealed class StoryPreviewResult

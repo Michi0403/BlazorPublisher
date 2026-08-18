@@ -5,6 +5,8 @@
 @inject PublicationMediaAssetStore MediaAssets
 @inject IPublisherRuntimePolicyDataService RuntimePolicy
 
+@inject ILogger<MediaConverterStudio> Logger
+@inject ISupervisedTaskRunner TaskRunner
 @if (Visible)
 {
     <div class="modal-backdrop data-modal-backdrop media-converter-backdrop">
@@ -366,390 +368,1037 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        if (!Visible) { _wasVisible = false; _dropBound = false; return; }
-        if (InitialSource is not null && !ReferenceEquals(InitialSource, _lastInitialSource))
-        {
-            _memorySource = InitialSource;
-            _file = null;
-            _lastInitialSource = InitialSource;
-            if (InitialSource.SuggestedOptions is not null) _options = InitialSource.SuggestedOptions.Clone();
-            if (!string.IsNullOrWhiteSpace(InitialSource.SuggestedPresetId)) _presetId = InitialSource.SuggestedPresetId;
-        }
-        if (_wasVisible) return;
-        _wasVisible = true;
         try
         {
-            _error = string.Empty;
-            _capabilities = await Conversions.GetCapabilitiesAsync().ConfigureAwait(true);
-            _profiles.Clear();
-            _profiles.AddRange(Conversions.GetProfiles());
-            RefreshJobs();
-            EnsurePreset();
+            if (!Visible) { _wasVisible = false; _dropBound = false; return; }
+            if (InitialSource is not null && !ReferenceEquals(InitialSource, _lastInitialSource))
+            {
+                _memorySource = InitialSource;
+                _file = null;
+                _lastInitialSource = InitialSource;
+                if (InitialSource.SuggestedOptions is not null) _options = InitialSource.SuggestedOptions.Clone();
+                if (!string.IsNullOrWhiteSpace(InitialSource.SuggestedPresetId)) _presetId = InitialSource.SuggestedPresetId;
+            }
+            if (_wasVisible) return;
+            _wasVisible = true;
+            try
+            {
+                _error = string.Empty;
+                _capabilities = await Conversions.GetCapabilitiesAsync().ConfigureAwait(true);
+                _profiles.Clear();
+                _profiles.AddRange(Conversions.GetProfiles());
+                RefreshJobs();
+                EnsurePreset();
+            }
+            catch (Exception exception)
+            {
+                _error = exception.Message;
+            }
+    
         }
-        catch (Exception exception)
+        catch (Exception __componentMethodException)
         {
-            _error = exception.Message;
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(OnParametersSetAsync)} failed.");
+            throw;
         }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!Visible || _dropBound) return;
-        _self ??= DotNetObjectReference.Create(this);
         try
         {
-            await JS.InvokeVoidAsync("publisherStudio.bindMediaConverterDrop", _sourceDropZone, _self).ConfigureAwait(true);
-            _dropBound = true;
+            if (!Visible || _dropBound) return;
+            _self ??= DotNetObjectReference.Create(this);
+            try
+            {
+                await JS.InvokeVoidAsync("publisherStudio.bindMediaConverterDrop", _sourceDropZone, _self).ConfigureAwait(true);
+                _dropBound = true;
+            }
+            catch (JSException exception)
+            {
+                _error = $"The media drop surface could not be initialized: {exception.Message}";
+            }
+    
         }
-        catch (JSException exception)
+        catch (Exception __componentMethodException)
         {
-            _error = $"The media drop surface could not be initialized: {exception.Message}";
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(OnAfterRenderAsync)} failed.");
+            throw;
         }
     }
 
     [JSInvokable]
     public Task ReceiveDroppedMedia(string assetId, string fileName, string mimeType)
     {
-        if (!Guid.TryParse(assetId, out var id) || !MediaAssets.TryGet(id, out var bytes, out var storedMime, out _))
+        try
         {
-            _error = "The dropped media could not be retained by PublisherStudio.";
+            if (!Guid.TryParse(assetId, out var id) || !MediaAssets.TryGet(id, out var bytes, out var storedMime, out _))
+            {
+                _error = "The dropped media could not be retained by PublisherStudio.";
+                return InvokeAsync(StateHasChanged);
+            }
+            _file = null;
+            _memorySource = new MediaConversionInsertRequest(
+                string.IsNullOrWhiteSpace(fileName) ? "dropped-media" : fileName,
+                string.IsNullOrWhiteSpace(mimeType) ? storedMime : mimeType,
+                bytes,
+                "Drag and drop");
+            _selectedProfileId = Guid.Empty;
+            _error = string.Empty;
+            EnsurePreset();
             return InvokeAsync(StateHasChanged);
+    
         }
-        _file = null;
-        _memorySource = new MediaConversionInsertRequest(
-            string.IsNullOrWhiteSpace(fileName) ? "dropped-media" : fileName,
-            string.IsNullOrWhiteSpace(mimeType) ? storedMime : mimeType,
-            bytes,
-            "Drag and drop");
-        _selectedProfileId = Guid.Empty;
-        _error = string.Empty;
-        EnsurePreset();
-        return InvokeAsync(StateHasChanged);
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(ReceiveDroppedMedia)} failed.");
+            throw;
+        }
     }
 
     [JSInvokable]
     public Task ReceiveMediaDropError(string message)
     {
-        _error = string.IsNullOrWhiteSpace(message) ? "The dropped media could not be loaded." : message;
-        return InvokeAsync(StateHasChanged);
+        try
+        {
+            _error = string.IsNullOrWhiteSpace(message) ? "The dropped media could not be loaded." : message;
+            return InvokeAsync(StateHasChanged);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(ReceiveMediaDropError)} failed.");
+            throw;
+        }
     }
 
-    private Task OpenSourcePicker() => JS.InvokeVoidAsync("publisherStudio.clickElement", "media-converter-source-input").AsTask();
+    private Task OpenSourcePicker() {
+        try
+        {
+            return JS.InvokeVoidAsync("publisherStudio.clickElement", "media-converter-source-input").AsTask();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(OpenSourcePicker)} failed.");
+            throw;
+        }
+    }
     private void SelectFile(InputFileChangeEventArgs args)
     {
-        _file = args.File;
-        _memorySource = null;
-        _selectedProfileId = Guid.Empty;
-        EnsurePreset();
+        try
+        {
+            _file = args.File;
+            _memorySource = null;
+            _selectedProfileId = Guid.Empty;
+            EnsurePreset();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(SelectFile)} failed.");
+            throw;
+        }
     }
-    private void ClearSource() { _file = null; _memorySource = null; }
+    private void ClearSource() {
+        try
+        {
+     _file = null; _memorySource = null; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(ClearSource)} failed.");
+            throw;
+        }
+    }
     private void EnsurePreset()
     {
-        if (MatchingPresets.Any(preset => preset.Id == _presetId && preset.Available))
+        try
         {
+            if (MatchingPresets.Any(preset => preset.Id == _presetId && preset.Available))
+            {
+                ApplyPresetGuidance(overwriteEncoderFields: false);
+                return;
+            }
+            var first = MatchingPresets.FirstOrDefault(preset => preset.Available) ?? MatchingPresets.FirstOrDefault();
+            _presetId = first?.Id ?? string.Empty;
             ApplyPresetGuidance(overwriteEncoderFields: false);
-            return;
+    
         }
-        var first = MatchingPresets.FirstOrDefault(preset => preset.Available) ?? MatchingPresets.FirstOrDefault();
-        _presetId = first?.Id ?? string.Empty;
-        ApplyPresetGuidance(overwriteEncoderFields: false);
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(EnsurePreset)} failed.");
+            throw;
+        }
     }
 
     private void ChangePreset(ChangeEventArgs args)
     {
-        _presetId = Text(args);
-        _selectedProfileId = Guid.Empty;
-        ApplyPresetGuidance(overwriteEncoderFields: true);
+        try
+        {
+            _presetId = Text(args);
+            _selectedProfileId = Guid.Empty;
+            ApplyPresetGuidance(overwriteEncoderFields: true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(ChangePreset)} failed.");
+            throw;
+        }
     }
 
     private void ApplyPresetGuidance(bool overwriteEncoderFields)
     {
-        var preset = SelectedPreset;
-        if (preset is null) return;
-        var inputKind = preset.InputKind.Trim().ToLowerInvariant();
-        var encoders = preset.RequiredEncoders.Where(value => !string.IsNullOrWhiteSpace(value)).ToArray();
-        var videoEncoder = inputKind is "video" or "image" ? encoders.FirstOrDefault() ?? string.Empty : string.Empty;
-        var audioEncoder = inputKind == "audio" ? encoders.FirstOrDefault() ?? string.Empty : encoders.Skip(1).FirstOrDefault() ?? string.Empty;
-        if (overwriteEncoderFields || string.IsNullOrWhiteSpace(_options.VideoCodec)) _options.VideoCodec = videoEncoder;
-        if (overwriteEncoderFields || string.IsNullOrWhiteSpace(_options.AudioCodec)) _options.AudioCodec = audioEncoder;
-        if (overwriteEncoderFields || string.IsNullOrWhiteSpace(_options.OutputExtension)) _options.OutputExtension = preset.OutputExtension;
-        if (overwriteEncoderFields || string.IsNullOrWhiteSpace(_options.OutputMimeType)) _options.OutputMimeType = preset.OutputMimeType;
-        if (overwriteEncoderFields || string.IsNullOrWhiteSpace(_options.VideoEncoderPreset)) _options.VideoEncoderPreset = preset.RecommendedVideoEncoderPreset;
-        if (overwriteEncoderFields || string.IsNullOrWhiteSpace(_options.PixelFormat)) _options.PixelFormat = preset.RecommendedPixelFormat;
-        if (overwriteEncoderFields || _options.Crf is null) _options.Crf = preset.RecommendedCrf;
-        if (overwriteEncoderFields || _options.AudioBitrateKbps is null) _options.AudioBitrateKbps = preset.RecommendedAudioBitrateKbps;
+        try
+        {
+            var preset = SelectedPreset;
+            if (preset is null) return;
+            var inputKind = preset.InputKind.Trim().ToLowerInvariant();
+            var encoders = preset.RequiredEncoders.Where(value => !string.IsNullOrWhiteSpace(value)).ToArray();
+            var videoEncoder = inputKind is "video" or "image" ? encoders.FirstOrDefault() ?? string.Empty : string.Empty;
+            var audioEncoder = inputKind == "audio" ? encoders.FirstOrDefault() ?? string.Empty : encoders.Skip(1).FirstOrDefault() ?? string.Empty;
+            if (overwriteEncoderFields || string.IsNullOrWhiteSpace(_options.VideoCodec)) _options.VideoCodec = videoEncoder;
+            if (overwriteEncoderFields || string.IsNullOrWhiteSpace(_options.AudioCodec)) _options.AudioCodec = audioEncoder;
+            if (overwriteEncoderFields || string.IsNullOrWhiteSpace(_options.OutputExtension)) _options.OutputExtension = preset.OutputExtension;
+            if (overwriteEncoderFields || string.IsNullOrWhiteSpace(_options.OutputMimeType)) _options.OutputMimeType = preset.OutputMimeType;
+            if (overwriteEncoderFields || string.IsNullOrWhiteSpace(_options.VideoEncoderPreset)) _options.VideoEncoderPreset = preset.RecommendedVideoEncoderPreset;
+            if (overwriteEncoderFields || string.IsNullOrWhiteSpace(_options.PixelFormat)) _options.PixelFormat = preset.RecommendedPixelFormat;
+            if (overwriteEncoderFields || _options.Crf is null) _options.Crf = preset.RecommendedCrf;
+            if (overwriteEncoderFields || _options.AudioBitrateKbps is null) _options.AudioBitrateKbps = preset.RecommendedAudioBitrateKbps;
 
-        var guidance = _profiles
-            .Where(profile => profile.BuiltIn && string.Equals(profile.PresetId, preset.Id, StringComparison.OrdinalIgnoreCase))
-            .OrderBy(profile => profile.Options.Target == _options.Target ? 0 : 1)
-            .ThenBy(profile => profile.Name.Contains("balanced", StringComparison.OrdinalIgnoreCase) ? 0 : 1)
-            .FirstOrDefault();
-        if (guidance is null) return;
-        var options = guidance.Options;
-        if (overwriteEncoderFields || string.IsNullOrWhiteSpace(_options.VideoEncoderPreset)) _options.VideoEncoderPreset = options.VideoEncoderPreset;
-        if (overwriteEncoderFields || string.IsNullOrWhiteSpace(_options.PixelFormat)) _options.PixelFormat = options.PixelFormat;
-        if (overwriteEncoderFields || _options.Crf is null) _options.Crf = options.Crf;
-        if (overwriteEncoderFields || _options.AudioBitrateKbps is null) _options.AudioBitrateKbps = options.AudioBitrateKbps;
-        if (overwriteEncoderFields || _options.VideoBitrateKbps is null) _options.VideoBitrateKbps = options.VideoBitrateKbps;
-        if (overwriteEncoderFields || _options.MaximumVideoBitrateKbps is null) _options.MaximumVideoBitrateKbps = options.MaximumVideoBitrateKbps;
-        if (overwriteEncoderFields || _options.VideoBufferKbps is null) _options.VideoBufferKbps = options.VideoBufferKbps;
-        if (overwriteEncoderFields) _options.FastStart = options.FastStart;
+            var guidance = _profiles
+                .Where(profile => profile.BuiltIn && string.Equals(profile.PresetId, preset.Id, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(profile => profile.Options.Target == _options.Target ? 0 : 1)
+                .ThenBy(profile => profile.Name.Contains("balanced", StringComparison.OrdinalIgnoreCase) ? 0 : 1)
+                .FirstOrDefault();
+            if (guidance is null) return;
+            var options = guidance.Options;
+            if (overwriteEncoderFields || string.IsNullOrWhiteSpace(_options.VideoEncoderPreset)) _options.VideoEncoderPreset = options.VideoEncoderPreset;
+            if (overwriteEncoderFields || string.IsNullOrWhiteSpace(_options.PixelFormat)) _options.PixelFormat = options.PixelFormat;
+            if (overwriteEncoderFields || _options.Crf is null) _options.Crf = options.Crf;
+            if (overwriteEncoderFields || _options.AudioBitrateKbps is null) _options.AudioBitrateKbps = options.AudioBitrateKbps;
+            if (overwriteEncoderFields || _options.VideoBitrateKbps is null) _options.VideoBitrateKbps = options.VideoBitrateKbps;
+            if (overwriteEncoderFields || _options.MaximumVideoBitrateKbps is null) _options.MaximumVideoBitrateKbps = options.MaximumVideoBitrateKbps;
+            if (overwriteEncoderFields || _options.VideoBufferKbps is null) _options.VideoBufferKbps = options.VideoBufferKbps;
+            if (overwriteEncoderFields) _options.FastStart = options.FastStart;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(ApplyPresetGuidance)} failed.");
+            throw;
+        }
     }
 
     private async Task Start()
     {
-        if (!CanStart) return;
         try
         {
-            _error = string.Empty;
-            MediaConversionJobInfo job;
-            if (_file is not null)
+            if (!CanStart) return;
+            try
             {
-                var source = _file.OpenReadStream(long.MaxValue);
-                await using var configuredSourceAsyncDisposal = source.ConfigureAwait(true);
-                job = await Conversions.QueueAsync(source, _file.Name, _file.ContentType, _presetId, _options).ConfigureAwait(true);
+                _error = string.Empty;
+                MediaConversionJobInfo job;
+                if (_file is not null)
+                {
+                    var source = _file.OpenReadStream(long.MaxValue);
+                    await using var configuredSourceAsyncDisposal = source.ConfigureAwait(true);
+                    job = await Conversions.QueueAsync(source, _file.Name, _file.ContentType, _presetId, _options).ConfigureAwait(true);
+                }
+                else if (_memorySource is not null)
+                {
+                    var source = new MemoryStream(_memorySource.Content, writable: false);
+                    await using var configuredSourceAsyncDisposal = source.ConfigureAwait(true);
+                    job = await Conversions.QueueAsync(source, _memorySource.FileName, _memorySource.MimeType, _presetId, _options).ConfigureAwait(true);
+                }
+                else return;
+                _jobs.RemoveAll(existing => existing.Id == job.Id);
+                _jobs.Insert(0, job);
+                _selectedJobId = job.Id;
+                StartPolling();
             }
-            else if (_memorySource is not null)
+            catch (Exception exception)
             {
-                var source = new MemoryStream(_memorySource.Content, writable: false);
-                await using var configuredSourceAsyncDisposal = source.ConfigureAwait(true);
-                job = await Conversions.QueueAsync(source, _memorySource.FileName, _memorySource.MimeType, _presetId, _options).ConfigureAwait(true);
+                _error = exception.Message;
             }
-            else return;
-            _jobs.RemoveAll(existing => existing.Id == job.Id);
-            _jobs.Insert(0, job);
-            _selectedJobId = job.Id;
-            StartPolling();
+    
         }
-        catch (Exception exception)
+        catch (Exception __componentMethodException)
         {
-            _error = exception.Message;
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(Start)} failed.");
+            throw;
         }
     }
 
     private void StartPolling()
     {
-        if (_polling is not null) return;
-        _polling = new CancellationTokenSource();
-        _ = PollAsync(_polling.Token);
+        try
+        {
+            if (_polling is not null) return;
+            _polling = new CancellationTokenSource();
+            TaskRunner.Run(
+                nameof(MediaConverterStudio),
+                nameof(PollAsync),
+                _ => PollAsync(_polling.Token),
+                _polling.Token);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(StartPolling)} failed.");
+            throw;
+        }
     }
     private async Task PollAsync(CancellationToken cancellationToken)
     {
         try
         {
-            while (!cancellationToken.IsCancellationRequested)
+            try
             {
-                await Task.Delay(500, cancellationToken).ConfigureAwait(true);
-                RefreshJobs();
-                await InvokeAsync(StateHasChanged).ConfigureAwait(true);
-                if (_jobs.All(job => job.Status is not (MediaConversionJobStatus.Queued or MediaConversionJobStatus.Running))) break;
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    await Task.Delay(500, cancellationToken).ConfigureAwait(false);
+                    await InvokeAsync(() =>
+                    {
+                        RefreshJobs();
+                        StateHasChanged();
+                    }).ConfigureAwait(false);
+                    if (_jobs.All(job => job.Status is not (MediaConversionJobStatus.Queued or MediaConversionJobStatus.Running))) break;
+                }
             }
+            catch (OperationCanceledException exception) when (cancellationToken.IsCancellationRequested)
+            {
+                Logger.LogDebug(exception, "Media Converter polling was canceled by its owning Studio lifetime.");
+            }
+            finally
+            {
+                _polling?.Dispose();
+                _polling = null;
+            }
+    
         }
-        catch (OperationCanceledException) { }
-        finally
+        catch (Exception __componentMethodException)
         {
-            _polling?.Dispose();
-            _polling = null;
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(PollAsync)} failed.");
+            throw;
         }
     }
     private void RefreshJobs()
     {
-        var latest = Conversions.GetJobs().ToDictionary(job => job.Id);
-        for (var index = 0; index < _jobs.Count; index++) if (latest.TryGetValue(_jobs[index].Id, out var job)) _jobs[index] = job;
-        foreach (var job in latest.Values.OrderByDescending(job => job.CreatedUtc)) if (_jobs.All(existing => existing.Id != job.Id)) _jobs.Add(job);
-        if (_selectedJobId is null && _jobs.Count > 0) _selectedJobId = _jobs[0].Id;
+        try
+        {
+            var latest = Conversions.GetJobs().ToDictionary(job => job.Id);
+            for (var index = 0; index < _jobs.Count; index++) if (latest.TryGetValue(_jobs[index].Id, out var job)) _jobs[index] = job;
+            foreach (var job in latest.Values.OrderByDescending(job => job.CreatedUtc)) if (_jobs.All(existing => existing.Id != job.Id)) _jobs.Add(job);
+            if (_selectedJobId is null && _jobs.Count > 0) _selectedJobId = _jobs[0].Id;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(RefreshJobs)} failed.");
+            throw;
+        }
     }
-    private void RefreshJobsCommand() { RefreshJobs(); StartPolling(); }
-    private void SelectJob(Guid id) => _selectedJobId = id;
+    private void RefreshJobsCommand() {
+        try
+        {
+     RefreshJobs(); StartPolling(); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(RefreshJobsCommand)} failed.");
+            throw;
+        }
+    }
+    private void SelectJob(Guid id) {
+        try
+        {
+            _selectedJobId = id;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(SelectJob)} failed.");
+            throw;
+        }
+    }
 
 
     private async Task OpenSourceInStudio()
     {
         try
         {
-            _error = string.Empty;
-            if (!CanOpenSourceInStudio) throw new InvalidOperationException("Only image, audio, or video sources can be opened in a Studio.");
-            MediaConversionInsertRequest request;
-            if (_memorySource is not null)
+            try
             {
-                request = new MediaConversionInsertRequest(_memorySource.FileName, ResolveMimeType(_memorySource.MimeType, _memorySource.FileName), _memorySource.Content.ToArray(), _memorySource.Origin);
+                _error = string.Empty;
+                if (!CanOpenSourceInStudio) throw new InvalidOperationException("Only image, audio, or video sources can be opened in a Studio.");
+                MediaConversionInsertRequest request;
+                if (_memorySource is not null)
+                {
+                    request = new MediaConversionInsertRequest(_memorySource.FileName, ResolveMimeType(_memorySource.MimeType, _memorySource.FileName), _memorySource.Content.ToArray(), _memorySource.Origin);
+                }
+                else if (_file is not null)
+                {
+                    var source = _file.OpenReadStream(long.MaxValue);
+                    await using var configuredSourceAsyncDisposal = source.ConfigureAwait(true);
+                    using var memory = new MemoryStream();
+                    await source.CopyToAsync(memory).ConfigureAwait(true);
+                    var mime = ResolveMimeType(_file.ContentType, _file.Name);
+                    request = new MediaConversionInsertRequest(_file.Name, mime, memory.ToArray(), "Media Converter source");
+                }
+                else
+                {
+                    return;
+                }
+                await OpenedInStudio.InvokeAsync(request).ConfigureAwait(true);
             }
-            else if (_file is not null)
+            catch (Exception exception)
             {
-                var source = _file.OpenReadStream(long.MaxValue);
-                await using var configuredSourceAsyncDisposal = source.ConfigureAwait(true);
-                using var memory = new MemoryStream();
-                await source.CopyToAsync(memory).ConfigureAwait(true);
-                var mime = ResolveMimeType(_file.ContentType, _file.Name);
-                request = new MediaConversionInsertRequest(_file.Name, mime, memory.ToArray(), "Media Converter source");
+                _error = exception.Message;
             }
-            else
-            {
-                return;
-            }
-            await OpenedInStudio.InvokeAsync(request).ConfigureAwait(true);
+    
         }
-        catch (Exception exception)
+        catch (Exception __componentMethodException)
         {
-            _error = exception.Message;
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(OpenSourceInStudio)} failed.");
+            throw;
         }
     }
 
     private async Task<MediaConversionInsertRequest> ReadOutput(MediaConversionJobInfo job)
     {
-        var output = await Conversions.OpenOutputAsync(job.Id).ConfigureAwait(true);
-        if (output is null) throw new InvalidOperationException("The converted file is no longer available.");
-        var stream = output;
-        await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
-        using var memory = new MemoryStream();
-        await stream.CopyToAsync(memory).ConfigureAwait(true);
-        return new MediaConversionInsertRequest(job.OutputFileName, job.OutputMimeType, memory.ToArray(), "FFmpeg conversion");
+        try
+        {
+            var output = await Conversions.OpenOutputAsync(job.Id).ConfigureAwait(true);
+            if (output is null) throw new InvalidOperationException("The converted file is no longer available.");
+            var stream = output;
+            await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
+            using var memory = new MemoryStream();
+            await stream.CopyToAsync(memory).ConfigureAwait(true);
+            return new MediaConversionInsertRequest(job.OutputFileName, job.OutputMimeType, memory.ToArray(), "FFmpeg conversion");
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(ReadOutput)} failed.");
+            throw;
+        }
     }
     private async Task Download(MediaConversionJobInfo job)
     {
         try
         {
-            _error = string.Empty;
-            var output = await Conversions.OpenOutputAsync(job.Id).ConfigureAwait(true);
-            if (output is null) throw new InvalidOperationException("The converted file is no longer available.");
-            var stream = output;
-            await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
-            using var reference = new DotNetStreamReference(stream, leaveOpen: false);
-            await JS.InvokeVoidAsync("publisherStudio.downloadStream", job.OutputFileName, reference, job.OutputMimeType).ConfigureAwait(true);
+            try
+            {
+                _error = string.Empty;
+                var output = await Conversions.OpenOutputAsync(job.Id).ConfigureAwait(true);
+                if (output is null) throw new InvalidOperationException("The converted file is no longer available.");
+                var stream = output;
+                await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
+                using var reference = new DotNetStreamReference(stream, leaveOpen: false);
+                await JS.InvokeVoidAsync("publisherStudio.downloadStream", job.OutputFileName, reference, job.OutputMimeType).ConfigureAwait(true);
+            }
+            catch (Exception exception) { _error = exception.Message; }
+    
         }
-        catch (Exception exception) { _error = exception.Message; }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(Download)} failed.");
+            throw;
+        }
     }
     private async Task Insert(MediaConversionJobInfo job)
     {
-        try { await Inserted.InvokeAsync(await ReadOutput(job).ConfigureAwait(true)).ConfigureAwait(true); }
-        catch (Exception exception) { _error = exception.Message; }
+        try
+        {
+            try { await Inserted.InvokeAsync(await ReadOutput(job).ConfigureAwait(true)).ConfigureAwait(true); }
+            catch (Exception exception) { _error = exception.Message; }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(Insert)} failed.");
+            throw;
+        }
     }
     private async Task OpenInStudio(MediaConversionJobInfo job)
     {
         try
         {
-            if (!CanOpenInStudio(job.OutputMimeType)) throw new InvalidOperationException("Only image, audio, or video output can be opened in a Studio.");
-            await OpenedInStudio.InvokeAsync(await ReadOutput(job).ConfigureAwait(true)).ConfigureAwait(true);
+            try
+            {
+                if (!CanOpenInStudio(job.OutputMimeType)) throw new InvalidOperationException("Only image, audio, or video output can be opened in a Studio.");
+                await OpenedInStudio.InvokeAsync(await ReadOutput(job).ConfigureAwait(true)).ConfigureAwait(true);
+            }
+            catch (Exception exception) { _error = exception.Message; }
+    
         }
-        catch (Exception exception) { _error = exception.Message; }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(OpenInStudio)} failed.");
+            throw;
+        }
     }
-    private Task DownloadSelected() => SelectedJob is { } job ? Download(job) : Task.CompletedTask;
-    private Task InsertSelected() => SelectedJob is { } job ? Insert(job) : Task.CompletedTask;
-    private Task OpenSelectedInStudio() => SelectedJob is { } job ? OpenInStudio(job) : Task.CompletedTask;
-    private void CancelSelected() { if (_selectedJobId is { } id) Cancel(id); }
-    private void RemoveSelected() { if (_selectedJobId is { } id) Remove(id); }
-    private Task ShowConverterContextMenu(MouseEventArgs args) => _contextMenu.ShowAsync(args);
+    private Task DownloadSelected() {
+        try
+        {
+            return SelectedJob is { } job ? Download(job) : Task.CompletedTask;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(DownloadSelected)} failed.");
+            throw;
+        }
+    }
+    private Task InsertSelected() {
+        try
+        {
+            return SelectedJob is { } job ? Insert(job) : Task.CompletedTask;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(InsertSelected)} failed.");
+            throw;
+        }
+    }
+    private Task OpenSelectedInStudio() {
+        try
+        {
+            return SelectedJob is { } job ? OpenInStudio(job) : Task.CompletedTask;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(OpenSelectedInStudio)} failed.");
+            throw;
+        }
+    }
+    private void CancelSelected() {
+        try
+        {
+     if (_selectedJobId is { } id) Cancel(id); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(CancelSelected)} failed.");
+            throw;
+        }
+    }
+    private void RemoveSelected() {
+        try
+        {
+     if (_selectedJobId is { } id) Remove(id); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(RemoveSelected)} failed.");
+            throw;
+        }
+    }
+    private Task ShowConverterContextMenu(MouseEventArgs args) {
+        try
+        {
+            return _contextMenu.ShowAsync(args);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(ShowConverterContextMenu)} failed.");
+            throw;
+        }
+    }
     private async Task ShowJobContextMenu(MediaConversionJobInfo job, MouseEventArgs args)
     {
-        _selectedJobId = job.Id;
-        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
-        await _contextMenu.ShowAsync(args).ConfigureAwait(true);
+        try
+        {
+            _selectedJobId = job.Id;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            await _contextMenu.ShowAsync(args).ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(ShowJobContextMenu)} failed.");
+            throw;
+        }
     }
-    private void Cancel(Guid id) { Conversions.Cancel(id); RefreshJobs(); }
-    private void Remove(Guid id) { Conversions.Remove(id); _jobs.RemoveAll(job => job.Id == id); if (_selectedJobId == id) _selectedJobId = _jobs.FirstOrDefault()?.Id; }
-    private Task DefaultJobAction(MediaConversionJobInfo job) => job.Status == MediaConversionJobStatus.Completed && CanOpenInStudio(job.OutputMimeType) ? OpenInStudio(job) : Task.CompletedTask;
+    private void Cancel(Guid id) {
+        try
+        {
+     Conversions.Cancel(id); RefreshJobs(); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(Cancel)} failed.");
+            throw;
+        }
+    }
+    private void Remove(Guid id) {
+        try
+        {
+     Conversions.Remove(id); _jobs.RemoveAll(job => job.Id == id); if (_selectedJobId == id) _selectedJobId = _jobs.FirstOrDefault()?.Id; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(Remove)} failed.");
+            throw;
+        }
+    }
+    private Task DefaultJobAction(MediaConversionJobInfo job) {
+        try
+        {
+            return job.Status == MediaConversionJobStatus.Completed && CanOpenInStudio(job.OutputMimeType) ? OpenInStudio(job) : Task.CompletedTask;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(DefaultJobAction)} failed.");
+            throw;
+        }
+    }
 
     private void SelectProfile(ChangeEventArgs args)
     {
-        if (!Guid.TryParse(Text(args), out var id) || id == Guid.Empty) { _selectedProfileId = Guid.Empty; return; }
-        var profile = _profiles.FirstOrDefault(candidate => candidate.Id == id);
-        if (profile is null) return;
-        _selectedProfileId = profile.Id;
-        _presetId = profile.PresetId;
-        _options = profile.Options.Clone();
-        _profileName = profile.Name;
-        _profileDescription = profile.Description;
-        EnsurePreset();
+        try
+        {
+            if (!Guid.TryParse(Text(args), out var id) || id == Guid.Empty) { _selectedProfileId = Guid.Empty; return; }
+            var profile = _profiles.FirstOrDefault(candidate => candidate.Id == id);
+            if (profile is null) return;
+            _selectedProfileId = profile.Id;
+            _presetId = profile.PresetId;
+            _options = profile.Options.Clone();
+            _profileName = profile.Name;
+            _profileDescription = profile.Description;
+            EnsurePreset();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(SelectProfile)} failed.");
+            throw;
+        }
     }
     private void SaveProfile()
     {
         try
         {
-            var current = _profiles.FirstOrDefault(profile => profile.Id == _selectedProfileId && !profile.BuiltIn);
-            var saved = Conversions.SaveProfile(new MediaConversionProfile
+            try
             {
-                Id = current?.Id ?? Guid.NewGuid(), Name = _profileName, Description = _profileDescription,
-                PresetId = _presetId, Options = _options.Clone()
-            });
-            _profiles.RemoveAll(profile => profile.Id == saved.Id);
-            _profiles.Add(saved);
-            _selectedProfileId = saved.Id;
-            _error = string.Empty;
+                var current = _profiles.FirstOrDefault(profile => profile.Id == _selectedProfileId && !profile.BuiltIn);
+                var saved = Conversions.SaveProfile(new MediaConversionProfile
+                {
+                    Id = current?.Id ?? Guid.NewGuid(), Name = _profileName, Description = _profileDescription,
+                    PresetId = _presetId, Options = _options.Clone()
+                });
+                _profiles.RemoveAll(profile => profile.Id == saved.Id);
+                _profiles.Add(saved);
+                _selectedProfileId = saved.Id;
+                _error = string.Empty;
+            }
+            catch (Exception exception) { _error = exception.Message; }
+    
         }
-        catch (Exception exception) { _error = exception.Message; }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(SaveProfile)} failed.");
+            throw;
+        }
     }
     private void DeleteProfile()
     {
-        if (!CanDeleteProfile) return;
-        if (Conversions.DeleteProfile(_selectedProfileId)) _profiles.RemoveAll(profile => profile.Id == _selectedProfileId);
-        _selectedProfileId = Guid.Empty;
-    }
-
-    private void ResolutionSource() { _options.Width = null; _options.Height = null; }
-    private void Resolution2160() => SetResolution(3840, 2160);
-    private void Resolution1440() => SetResolution(2560, 1440);
-    private void Resolution1080() => SetResolution(1920, 1080);
-    private void Resolution720() => SetResolution(1280, 720);
-    private void Resolution480() => SetResolution(854, 480);
-    private void ResolutionVertical() => SetResolution(1080, 1920);
-    private void SetResolution(int width, int height) { _options.Width = width; _options.Height = height; }
-    private void ScaleFit() { _options.ScaleMode = MediaConversionScaleMode.Fit; _options.PreserveAspectRatio = true; }
-    private void ScaleFill() { _options.ScaleMode = MediaConversionScaleMode.Fill; _options.PreserveAspectRatio = true; }
-    private void ScaleStretch() { _options.ScaleMode = MediaConversionScaleMode.Stretch; _options.PreserveAspectRatio = false; }
-    private void ScalePreserve() { _options.ScaleMode = MediaConversionScaleMode.Preserve; _options.PreserveAspectRatio = true; }
-    private void FrameRate30() => _options.FrameRate = 30;
-    private void FrameRate60() => _options.FrameRate = 60;
-    private void FrameRateSource() => _options.FrameRate = null;
-    private void ToggleNormalizeAudio() => _options.NormalizeAudio = !_options.NormalizeAudio;
-    private void ToggleDisableAudio() => _options.DisableAudio = !_options.DisableAudio;
-    private void ToggleDeinterlace() => _options.Deinterlace = !_options.Deinterlace;
-    private void AudioStereo() => _options.AudioChannels = 2;
-    private void AudioMono() => _options.AudioChannels = 1;
-
-    private void PublisherStudioWebDefaults() => ApplyBuiltIn("PublisherStudio HTML · balanced");
-    private void BroadWebDefaults() => ApplyBuiltIn("Browser compatibility · MP4");
-    private void EditingDefaults() => ApplyBuiltIn("Editing intermediate · ProRes");
-    private void ArchiveDefaults() => ApplyBuiltIn("Lossless archive · FFV1");
-    private void ApplyBuiltIn(string name)
-    {
-        var profile = _profiles.FirstOrDefault(candidate => candidate.BuiltIn && candidate.Name == name);
-        if (profile is null) return;
-        _selectedProfileId = profile.Id; _presetId = profile.PresetId; _options = profile.Options.Clone();
-        _profileName = profile.Name; _profileDescription = profile.Description; EnsurePreset();
-    }
-
-    private void ChangeTarget(ChangeEventArgs args) { if (Enum.TryParse<MediaConversionTarget>(Text(args), out var value)) _options.Target = value; }
-    private void ChangeScaleMode(ChangeEventArgs args) { if (Enum.TryParse<MediaConversionScaleMode>(Text(args), out var value)) _options.ScaleMode = value; }
-    private void ChangeMetadata(ChangeEventArgs args)
-    {
-        _options.Metadata.Clear();
-        foreach (var line in Text(args).Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        try
         {
-            var separator = line.IndexOf('=');
-            if (separator <= 0) continue;
-            _options.Metadata[line[..separator].Trim()] = line[(separator + 1)..].Trim();
+            if (!CanDeleteProfile) return;
+            if (Conversions.DeleteProfile(_selectedProfileId)) _profiles.RemoveAll(profile => profile.Id == _selectedProfileId);
+            _selectedProfileId = Guid.Empty;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(DeleteProfile)} failed.");
+            throw;
         }
     }
 
-    private string ResolveMimeType(string? mimeType, string fileName) =>
-        string.IsNullOrWhiteSpace(mimeType) || string.Equals(mimeType, "application/octet-stream", StringComparison.OrdinalIgnoreCase)
+    private void ResolutionSource() {
+        try
+        {
+     _options.Width = null; _options.Height = null; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(ResolutionSource)} failed.");
+            throw;
+        }
+    }
+    private void Resolution2160() {
+        try
+        {
+            SetResolution(3840, 2160);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(Resolution2160)} failed.");
+            throw;
+        }
+    }
+    private void Resolution1440() {
+        try
+        {
+            SetResolution(2560, 1440);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(Resolution1440)} failed.");
+            throw;
+        }
+    }
+    private void Resolution1080() {
+        try
+        {
+            SetResolution(1920, 1080);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(Resolution1080)} failed.");
+            throw;
+        }
+    }
+    private void Resolution720() {
+        try
+        {
+            SetResolution(1280, 720);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(Resolution720)} failed.");
+            throw;
+        }
+    }
+    private void Resolution480() {
+        try
+        {
+            SetResolution(854, 480);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(Resolution480)} failed.");
+            throw;
+        }
+    }
+    private void ResolutionVertical() {
+        try
+        {
+            SetResolution(1080, 1920);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(ResolutionVertical)} failed.");
+            throw;
+        }
+    }
+    private void SetResolution(int width, int height) {
+        try
+        {
+     _options.Width = width; _options.Height = height; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(SetResolution)} failed.");
+            throw;
+        }
+    }
+    private void ScaleFit() {
+        try
+        {
+     _options.ScaleMode = MediaConversionScaleMode.Fit; _options.PreserveAspectRatio = true; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(ScaleFit)} failed.");
+            throw;
+        }
+    }
+    private void ScaleFill() {
+        try
+        {
+     _options.ScaleMode = MediaConversionScaleMode.Fill; _options.PreserveAspectRatio = true; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(ScaleFill)} failed.");
+            throw;
+        }
+    }
+    private void ScaleStretch() {
+        try
+        {
+     _options.ScaleMode = MediaConversionScaleMode.Stretch; _options.PreserveAspectRatio = false; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(ScaleStretch)} failed.");
+            throw;
+        }
+    }
+    private void ScalePreserve() {
+        try
+        {
+     _options.ScaleMode = MediaConversionScaleMode.Preserve; _options.PreserveAspectRatio = true; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(ScalePreserve)} failed.");
+            throw;
+        }
+    }
+    private void FrameRate30() {
+        try
+        {
+            _options.FrameRate = 30;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(FrameRate30)} failed.");
+            throw;
+        }
+    }
+    private void FrameRate60() {
+        try
+        {
+            _options.FrameRate = 60;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(FrameRate60)} failed.");
+            throw;
+        }
+    }
+    private void FrameRateSource() {
+        try
+        {
+            _options.FrameRate = null;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(FrameRateSource)} failed.");
+            throw;
+        }
+    }
+    private void ToggleNormalizeAudio() {
+        try
+        {
+            _options.NormalizeAudio = !_options.NormalizeAudio;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(ToggleNormalizeAudio)} failed.");
+            throw;
+        }
+    }
+    private void ToggleDisableAudio() {
+        try
+        {
+            _options.DisableAudio = !_options.DisableAudio;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(ToggleDisableAudio)} failed.");
+            throw;
+        }
+    }
+    private void ToggleDeinterlace() {
+        try
+        {
+            _options.Deinterlace = !_options.Deinterlace;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(ToggleDeinterlace)} failed.");
+            throw;
+        }
+    }
+    private void AudioStereo() {
+        try
+        {
+            _options.AudioChannels = 2;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(AudioStereo)} failed.");
+            throw;
+        }
+    }
+    private void AudioMono() {
+        try
+        {
+            _options.AudioChannels = 1;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(AudioMono)} failed.");
+            throw;
+        }
+    }
+
+    private void PublisherStudioWebDefaults() {
+        try
+        {
+            ApplyBuiltIn("PublisherStudio HTML · balanced");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(PublisherStudioWebDefaults)} failed.");
+            throw;
+        }
+    }
+    private void BroadWebDefaults() {
+        try
+        {
+            ApplyBuiltIn("Browser compatibility · MP4");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(BroadWebDefaults)} failed.");
+            throw;
+        }
+    }
+    private void EditingDefaults() {
+        try
+        {
+            ApplyBuiltIn("Editing intermediate · ProRes");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(EditingDefaults)} failed.");
+            throw;
+        }
+    }
+    private void ArchiveDefaults() {
+        try
+        {
+            ApplyBuiltIn("Lossless archive · FFV1");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(ArchiveDefaults)} failed.");
+            throw;
+        }
+    }
+    private void ApplyBuiltIn(string name)
+    {
+        try
+        {
+            var profile = _profiles.FirstOrDefault(candidate => candidate.BuiltIn && candidate.Name == name);
+            if (profile is null) return;
+            _selectedProfileId = profile.Id; _presetId = profile.PresetId; _options = profile.Options.Clone();
+            _profileName = profile.Name; _profileDescription = profile.Description; EnsurePreset();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(ApplyBuiltIn)} failed.");
+            throw;
+        }
+    }
+
+    private void ChangeTarget(ChangeEventArgs args) {
+        try
+        {
+     if (Enum.TryParse<MediaConversionTarget>(Text(args), out var value)) _options.Target = value; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(ChangeTarget)} failed.");
+            throw;
+        }
+    }
+    private void ChangeScaleMode(ChangeEventArgs args) {
+        try
+        {
+     if (Enum.TryParse<MediaConversionScaleMode>(Text(args), out var value)) _options.ScaleMode = value; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(ChangeScaleMode)} failed.");
+            throw;
+        }
+    }
+    private void ChangeMetadata(ChangeEventArgs args)
+    {
+        try
+        {
+            _options.Metadata.Clear();
+            foreach (var line in Text(args).Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                var separator = line.IndexOf('=');
+                if (separator <= 0) continue;
+                _options.Metadata[line[..separator].Trim()] = line[(separator + 1)..].Trim();
+            }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(ChangeMetadata)} failed.");
+            throw;
+        }
+    }
+
+    private string ResolveMimeType(string? mimeType, string fileName) {
+        try
+        {
+            return string.IsNullOrWhiteSpace(mimeType) || string.Equals(mimeType, "application/octet-stream", StringComparison.OrdinalIgnoreCase)
             ? MimeFromName(fileName)
             : mimeType;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(ResolveMimeType)} failed.");
+            throw;
+        }
+    }
 
-    private bool CanOpenInStudio(string? mimeType) =>
-        mimeType?.StartsWith("image/", StringComparison.OrdinalIgnoreCase) == true
+    private bool CanOpenInStudio(string? mimeType) {
+        try
+        {
+            return mimeType?.StartsWith("image/", StringComparison.OrdinalIgnoreCase) == true
         || mimeType?.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) == true
         || mimeType?.StartsWith("video/", StringComparison.OrdinalIgnoreCase) == true;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(CanOpenInStudio)} failed.");
+            throw;
+        }
+    }
 
-    private string StudioName(string? mimeType) =>
-        mimeType?.StartsWith("image/", StringComparison.OrdinalIgnoreCase) == true ? "Picture Studio"
+    private string StudioName(string? mimeType) {
+        try
+        {
+            return mimeType?.StartsWith("image/", StringComparison.OrdinalIgnoreCase) == true ? "Picture Studio"
         : mimeType?.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) == true ? "Audio Studio"
         : mimeType?.StartsWith("video/", StringComparison.OrdinalIgnoreCase) == true ? "Video Studio"
         : "Studio";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(StudioName)} failed.");
+            throw;
+        }
+    }
 
-    private string StudioTooltip(string? mimeType) => $"Open the converted output in {StudioName(mimeType)}";
+    private string StudioTooltip(string? mimeType) {
+        try
+        {
+            return $"Open the converted output in {StudioName(mimeType)}";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(StudioTooltip)} failed.");
+            throw;
+        }
+    }
 
-    private string MimeFromName(string fileName) => Path.GetExtension(fileName).ToLowerInvariant() switch
+    private string MimeFromName(string fileName) {
+        try
+        {
+            return Path.GetExtension(fileName).ToLowerInvariant() switch
     {
         ".webm" => "video/webm",
         ".mov" => "video/quicktime",
@@ -767,24 +1416,150 @@
         ".bmp" => "image/bmp",
         _ => "application/octet-stream"
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(MimeFromName)} failed.");
+            throw;
+        }
+    }
 
-    private string PresetName(string id) => _capabilities?.Presets.FirstOrDefault(preset => preset.Id == id)?.Name ?? id;
-    private string Text(ChangeEventArgs args) => args.Value?.ToString() ?? string.Empty;
-    private bool Bool(ChangeEventArgs args) => args.Value is bool value ? value : bool.TryParse(Text(args), out var parsed) && parsed;
-    private int? NullableInt(ChangeEventArgs args) => int.TryParse(Text(args), NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) && value > 0 ? value : null;
-    private double? NullableDouble(ChangeEventArgs args) => double.TryParse(Text(args), NumberStyles.Float, CultureInfo.InvariantCulture, out var value) && value >= 0 && double.IsFinite(value) ? value : null;
-    private double Double(ChangeEventArgs args, double fallback) => double.TryParse(Text(args), NumberStyles.Float, CultureInfo.InvariantCulture, out var value) && double.IsFinite(value) ? value : fallback;
-    private string NullableNumber(double? value) => value?.ToString("0.###", CultureInfo.InvariantCulture) ?? string.Empty;
-    private string NullableNumber(int? value) => value?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
-    private string Number(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
-    private string FormatBytes(long bytes) => bytes switch { >= 1024L * 1024 * 1024 => $"{bytes / 1024d / 1024 / 1024:0.##} GB", >= 1024L * 1024 => $"{bytes / 1024d / 1024:0.##} MB", >= 1024 => $"{bytes / 1024d:0.##} KB", _ => $"{bytes} B" };
+    private string PresetName(string id) {
+        try
+        {
+            return _capabilities?.Presets.FirstOrDefault(preset => preset.Id == id)?.Name ?? id;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(PresetName)} failed.");
+            throw;
+        }
+    }
+    private string Text(ChangeEventArgs args) {
+        try
+        {
+            return args.Value?.ToString() ?? string.Empty;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(Text)} failed.");
+            throw;
+        }
+    }
+    private bool Bool(ChangeEventArgs args) {
+        try
+        {
+            return args.Value is bool value ? value : bool.TryParse(Text(args), out var parsed) && parsed;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(Bool)} failed.");
+            throw;
+        }
+    }
+    private int? NullableInt(ChangeEventArgs args) {
+        try
+        {
+            return int.TryParse(Text(args), NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) && value > 0 ? value : null;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(NullableInt)} failed.");
+            throw;
+        }
+    }
+    private double? NullableDouble(ChangeEventArgs args) {
+        try
+        {
+            return double.TryParse(Text(args), NumberStyles.Float, CultureInfo.InvariantCulture, out var value) && value >= 0 && double.IsFinite(value) ? value : null;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(NullableDouble)} failed.");
+            throw;
+        }
+    }
+    private double Double(ChangeEventArgs args, double fallback) {
+        try
+        {
+            return double.TryParse(Text(args), NumberStyles.Float, CultureInfo.InvariantCulture, out var value) && double.IsFinite(value) ? value : fallback;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(Double)} failed.");
+            throw;
+        }
+    }
+    private string NullableNumber(double? value) {
+        try
+        {
+            return value?.ToString("0.###", CultureInfo.InvariantCulture) ?? string.Empty;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(NullableNumber)} failed.");
+            throw;
+        }
+    }
+    private string NullableNumber(int? value) {
+        try
+        {
+            return value?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(NullableNumber)} failed.");
+            throw;
+        }
+    }
+    private string Number(double value) {
+        try
+        {
+            return value.ToString("0.###", CultureInfo.InvariantCulture);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(Number)} failed.");
+            throw;
+        }
+    }
+    private string FormatBytes(long bytes) {
+        try
+        {
+            return bytes switch { >= 1024L * 1024 * 1024 => $"{bytes / 1024d / 1024 / 1024:0.##} GB", >= 1024L * 1024 => $"{bytes / 1024d / 1024:0.##} MB", >= 1024 => $"{bytes / 1024d:0.##} KB", _ => $"{bytes} B" };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(FormatBytes)} failed.");
+            throw;
+        }
+    }
 
-    private Task Close() => Closed.InvokeAsync();
+    private Task Close() {
+        try
+        {
+            return Closed.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(Close)} failed.");
+            throw;
+        }
+    }
     public async ValueTask DisposeAsync()
     {
-        if (_polling is not null) { await _polling.CancelAsync().ConfigureAwait(true); _polling.Dispose(); _polling = null; }
-        try { await JS.InvokeVoidAsync("publisherStudio.unbindMediaConverterDrop", _sourceDropZone).ConfigureAwait(true); } catch { }
-        _self?.Dispose();
-        _self = null;
+        try
+        {
+            if (_polling is not null) { await _polling.CancelAsync().ConfigureAwait(true); _polling.Dispose(); _polling = null; }
+            try { await JS.InvokeVoidAsync("publisherStudio.unbindMediaConverterDrop", _sourceDropZone).ConfigureAwait(true); } catch { }
+            _self?.Dispose();
+            _self = null;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(DisposeAsync)} failed.");
+            throw;
+        }
     }
 }

@@ -544,31 +544,40 @@
 
     protected override void OnParametersSet()
     {
-        if (!Visible)
+        try
         {
-            _loadedId = null;
-            _dropSurfaceBound = false;
-            _dropSurfaceBindingKey = null;
-            _designSurfaceLayoutKey = null;
-            _lastInteractionSurfaceNotification = string.Empty;
-            _pictureEditorVisible = false;
-            _pictureEditorTargetId = null;
-            return;
-        }
+            if (!Visible)
+            {
+                _loadedId = null;
+                _dropSurfaceBound = false;
+                _dropSurfaceBindingKey = null;
+                _designSurfaceLayoutKey = null;
+                _lastInteractionSurfaceNotification = string.Empty;
+                _pictureEditorVisible = false;
+                _pictureEditorTargetId = null;
+                return;
+            }
 
-        var id = InitialPanel?.Id;
-        if (_draft is not null && _loadedId == id) return;
-        _draft = InitialPanel is null ? Panels.CreateBlank() : (PanelElement)Files.CloneElement(InitialPanel);
-        Panels.Normalize(Document, _draft);
-        _selectedViewId = _draft.ActiveViewId;
-        _selectedElementId = CurrentView?.Elements.OrderByDescending(element => element.ZIndex).FirstOrDefault()?.Id;
-        _loadedId = id;
-        _error = string.Empty;
-        _lastInteractionSurfaceNotification = string.Empty;
-        _interactionPreview = false;
-        _previewSizeKey = "design";
-        RefreshPreviewPresets();
-        RefreshAdvancedJson();
+            var id = InitialPanel?.Id;
+            if (_draft is not null && _loadedId == id) return;
+            _draft = InitialPanel is null ? Panels.CreateBlank() : (PanelElement)Files.CloneElement(InitialPanel);
+            Panels.Normalize(Document, _draft);
+            _selectedViewId = _draft.ActiveViewId;
+            _selectedElementId = CurrentView?.Elements.OrderByDescending(element => element.ZIndex).FirstOrDefault()?.Id;
+            _loadedId = id;
+            _error = string.Empty;
+            _lastInteractionSurfaceNotification = string.Empty;
+            _interactionPreview = false;
+            _previewSizeKey = "design";
+            RefreshPreviewPresets();
+            RefreshAdvancedJson();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(OnParametersSet)} failed.");
+            throw;
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -623,107 +632,358 @@
 
     private void SelectView(Guid id)
     {
-        _selectedViewId = id;
-        _previewRevision++;
-        if (_draft is not null) _draft.ActiveViewId = id;
-        SelectElement(CurrentView?.Elements.LastOrDefault()?.Id);
+        try
+        {
+            _selectedViewId = id;
+            _previewRevision++;
+            if (_draft is not null) _draft.ActiveViewId = id;
+            SelectElement(CurrentView?.Elements.LastOrDefault()?.Id);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(SelectView)} failed.");
+            throw;
+        }
     }
 
     private void SelectElement(Guid? id)
     {
-        _selectedElementId = id;
-        if (SelectedElement is { } selected)
+        try
         {
-            _templateName = selected.Name;
-            _templateDescription = $"Reusable {selected.Kind} configured in Panel Studio.";
+            _selectedElementId = id;
+            if (SelectedElement is { } selected)
+            {
+                _templateName = selected.Name;
+                _templateDescription = $"Reusable {selected.Kind} configured in Panel Studio.";
+            }
+            RefreshAdvancedJson();
+    
         }
-        RefreshAdvancedJson();
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(SelectElement)} failed.");
+            throw;
+        }
     }
 
     private void AddView()
     {
-        if (_draft is null) return;
-        var view = new PublicationPanelView { Name = $"View {_draft.Views.Count + 1}", Slug = $"view-{_draft.Views.Count + 1}" };
-        _draft.Views.Add(view);
-        SelectView(view.Id);
+        try
+        {
+            if (_draft is null) return;
+            var view = new PublicationPanelView { Name = $"View {_draft.Views.Count + 1}", Slug = $"view-{_draft.Views.Count + 1}" };
+            _draft.Views.Add(view);
+            SelectView(view.Id);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(AddView)} failed.");
+            throw;
+        }
     }
 
     private void DuplicateView()
     {
-        if (_draft is null || CurrentView is null) return;
-        var clone = new PublicationPanelView
+        try
         {
-            Name = CurrentView.Name + " copy",
-            Slug = CurrentView.Slug + "-copy",
-            Background = CurrentView.Background,
-            Elements = CurrentView.Elements.Select(Files.CloneElement).ToList()
-        };
-        _draft.Views.Add(clone);
-        SelectView(clone.Id);
+            if (_draft is null || CurrentView is null) return;
+            var clone = new PublicationPanelView
+            {
+                Name = CurrentView.Name + " copy",
+                Slug = CurrentView.Slug + "-copy",
+                Background = CurrentView.Background,
+                Elements = CurrentView.Elements.Select(Files.CloneElement).ToList()
+            };
+            _draft.Views.Add(clone);
+            SelectView(clone.Id);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(DuplicateView)} failed.");
+            throw;
+        }
     }
 
     private void DeleteView()
     {
-        if (_draft is null || CurrentView is null || _draft.Views.Count <= 1) return;
-        _draft.Views.Remove(CurrentView);
-        SelectView(_draft.Views[0].Id);
+        try
+        {
+            if (_draft is null || CurrentView is null || _draft.Views.Count <= 1) return;
+            _draft.Views.Remove(CurrentView);
+            SelectView(_draft.Views[0].Id);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(DeleteView)} failed.");
+            throw;
+        }
     }
 
-    private void AddText() => AddTool("text");
-    private void AddPicture() => AddTool("picture");
-    private void AddVideo() => AddTool("video");
-    private void AddAudio() => AddTool("audio");
-    private void AddShape() => AddTool("shape");
-    private void AddKpi() => AddTool("kpi");
-    private void AddChart() => AddTool("chart");
-    private void AddTable() => AddTool("table");
-    private void AddDataGrid() => AddTool("datagrid");
-    private void AddButton() => AddTool("button");
-    private void AddMenu() => AddTool("menu");
-    private void AddChat() => AddTool("chat");
-    private void AddMap() => AddTool("map");
-    private void AddCamera() => AddTool("camera");
-    private void AddScreen() => AddTool("screen");
-    private void AddHtml() => AddTool("html");
-    private void AddNestedPanel() => AddTool("panel");
+    private void AddText() {
+        try
+        {
+            AddTool("text");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(AddText)} failed.");
+            throw;
+        }
+    }
+    private void AddPicture() {
+        try
+        {
+            AddTool("picture");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(AddPicture)} failed.");
+            throw;
+        }
+    }
+    private void AddVideo() {
+        try
+        {
+            AddTool("video");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(AddVideo)} failed.");
+            throw;
+        }
+    }
+    private void AddAudio() {
+        try
+        {
+            AddTool("audio");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(AddAudio)} failed.");
+            throw;
+        }
+    }
+    private void AddShape() {
+        try
+        {
+            AddTool("shape");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(AddShape)} failed.");
+            throw;
+        }
+    }
+    private void AddKpi() {
+        try
+        {
+            AddTool("kpi");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(AddKpi)} failed.");
+            throw;
+        }
+    }
+    private void AddChart() {
+        try
+        {
+            AddTool("chart");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(AddChart)} failed.");
+            throw;
+        }
+    }
+    private void AddTable() {
+        try
+        {
+            AddTool("table");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(AddTable)} failed.");
+            throw;
+        }
+    }
+    private void AddDataGrid() {
+        try
+        {
+            AddTool("datagrid");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(AddDataGrid)} failed.");
+            throw;
+        }
+    }
+    private void AddButton() {
+        try
+        {
+            AddTool("button");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(AddButton)} failed.");
+            throw;
+        }
+    }
+    private void AddMenu() {
+        try
+        {
+            AddTool("menu");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(AddMenu)} failed.");
+            throw;
+        }
+    }
+    private void AddChat() {
+        try
+        {
+            AddTool("chat");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(AddChat)} failed.");
+            throw;
+        }
+    }
+    private void AddMap() {
+        try
+        {
+            AddTool("map");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(AddMap)} failed.");
+            throw;
+        }
+    }
+    private void AddCamera() {
+        try
+        {
+            AddTool("camera");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(AddCamera)} failed.");
+            throw;
+        }
+    }
+    private void AddScreen() {
+        try
+        {
+            AddTool("screen");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(AddScreen)} failed.");
+            throw;
+        }
+    }
+    private void AddHtml() {
+        try
+        {
+            AddTool("html");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(AddHtml)} failed.");
+            throw;
+        }
+    }
+    private void AddNestedPanel() {
+        try
+        {
+            AddTool("panel");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(AddNestedPanel)} failed.");
+            throw;
+        }
+    }
 
     private void AddTool(string toolId)
     {
-        var element = CreateToolElement(toolId);
-        if (element is null || _draft is null) return;
-        element.X = Math.Max(0, (_draft.CanvasWidth - element.Width) / 2);
-        element.Y = Math.Max(0, (_draft.CanvasHeight - element.Height) / 2);
-        AddElement(element);
+        try
+        {
+            var element = CreateToolElement(toolId);
+            if (element is null || _draft is null) return;
+            element.X = Math.Max(0, (_draft.CanvasWidth - element.Width) / 2);
+            element.Y = Math.Max(0, (_draft.CanvasHeight - element.Height) / 2);
+            AddElement(element);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(AddTool)} failed.");
+            throw;
+        }
     }
 
     private PublicationElement? CreateToolElement(string toolId)
     {
-        if (toolId.StartsWith("template:", StringComparison.OrdinalIgnoreCase)
-            && Guid.TryParse(toolId["template:".Length..], out var templateId))
+        try
         {
-            var template = Document.ComponentTemplates.FirstOrDefault(item => item.Id == templateId);
-            if (template is null) return null;
-            _selectedTemplateId = template.Id;
-            var clone = Files.CloneElement(template.Prototype);
-            clone.Id = Guid.NewGuid();
-            return clone;
+            if (toolId.StartsWith("template:", StringComparison.OrdinalIgnoreCase)
+                && Guid.TryParse(toolId["template:".Length..], out var templateId))
+            {
+                var template = Document.ComponentTemplates.FirstOrDefault(item => item.Id == templateId);
+                if (template is null) return null;
+                _selectedTemplateId = template.Id;
+                var clone = Files.CloneElement(template.Prototype);
+                clone.Id = Guid.NewGuid();
+                return clone;
+            }
+            return Panels.CreateComponentTool(Document, toolId);
+    
         }
-        return Panels.CreateComponentTool(Document, toolId);
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(CreateToolElement)} failed.");
+            throw;
+        }
     }
 
     private void BeginPaletteDrag(PanelComponentToolDescriptor tool)
     {
-        _dragToolId = tool.Id;
-        _dragExistingId = null;
-        _dragPrototype = CreateToolElement(tool.Id);
+        try
+        {
+            _dragToolId = tool.Id;
+            _dragExistingId = null;
+            _dragPrototype = CreateToolElement(tool.Id);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(BeginPaletteDrag)} failed.");
+            throw;
+        }
     }
 
     private void BeginExistingDrag(Guid id)
     {
-        SelectElement(id);
-        _dragToolId = string.Empty;
-        _dragExistingId = id;
-        _dragPrototype = SelectedElement is null ? null : Files.CloneElement(SelectedElement);
+        try
+        {
+            SelectElement(id);
+            _dragToolId = string.Empty;
+            _dragExistingId = id;
+            _dragPrototype = SelectedElement is null ? null : Files.CloneElement(SelectedElement);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(BeginExistingDrag)} failed.");
+            throw;
+        }
     }
 
     private async Task DropDraggedElement(DragEventArgs args)
@@ -795,8 +1055,10 @@
     }
 
     [JSInvokable]
-    public Task CommitPanelElementBounds(string elementId, double x, double y, double width, double height) =>
-        RunPanelInteropAsync("CommitBounds", () =>
+    public Task CommitPanelElementBounds(string elementId, double x, double y, double width, double height) {
+        try
+        {
+            return RunPanelInteropAsync("CommitBounds", () =>
         {
             var draft = _draft;
             var view = CurrentView;
@@ -815,26 +1077,53 @@
             _selectedElementId = element.Id;
             RefreshAdvancedJson();
         });
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(CommitPanelElementBounds)} failed.");
+            throw;
+        }
+    }
 
     [JSInvokable]
-    public Task SelectPanelElement(string elementId) =>
-        RunPanelInteropAsync("SelectElement", () =>
+    public Task SelectPanelElement(string elementId) {
+        try
+        {
+            return RunPanelInteropAsync("SelectElement", () =>
         {
             if (Guid.TryParse(elementId, out var id))
                 SelectElement(id);
         });
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(SelectPanelElement)} failed.");
+            throw;
+        }
+    }
 
     [JSInvokable]
     public Task ActivatePanelElement(string elementId)
     {
-        if (!Guid.TryParse(elementId, out var id))
-            return Task.CompletedTask;
-        return RunPanelInteropAsync("ActivateElement", () => ActivateElementInteraction(id));
+        try
+        {
+            if (!Guid.TryParse(elementId, out var id))
+                return Task.CompletedTask;
+            return RunPanelInteropAsync("ActivateElement", () => ActivateElementInteraction(id));
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ActivatePanelElement)} failed.");
+            throw;
+        }
     }
 
     [JSInvokable]
-    public Task PanelStudioCommand(string command, double amount = 1) =>
-        RunPanelInteropAsync("Command", () =>
+    public Task PanelStudioCommand(string command, double amount = 1) {
+        try
+        {
+            return RunPanelInteropAsync("Command", () =>
         {
             if (_disposed || _interactionPreview)
                 return;
@@ -852,6 +1141,13 @@
                 case "back": SendElementToBack(); break;
             }
         });
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(PanelStudioCommand)} failed.");
+            throw;
+        }
+    }
 
     private async Task RunPanelInteropAsync(string operation, Action action)
     {
@@ -893,20 +1189,38 @@
     [JSInvokable]
     public Task ReportPanelInteractionError(string message)
     {
-        var detail = string.IsNullOrWhiteSpace(message) ? "Unknown browser interaction error." : message.Trim();
-        if (_disposed || IsExpectedInteractionShutdown(detail))
+        try
         {
-            Logger.LogDebug($"Panel Studio browser interaction ended normally. Binding:{_interactionBindingId} View:{_selectedViewId} Selected:{_selectedElementId} Mode:{(_interactionPreview ? "Interact" : "Arrange")} Detail:{detail}");
-            return Task.CompletedTask;
-        }
+            var detail = string.IsNullOrWhiteSpace(message) ? "Unknown browser interaction error." : message.Trim();
+            if (_disposed || IsExpectedInteractionShutdown(detail))
+            {
+                Logger.LogDebug($"Panel Studio browser interaction ended normally. Binding:{_interactionBindingId} View:{_selectedViewId} Selected:{_selectedElementId} Mode:{(_interactionPreview ? "Interact" : "Arrange")} Detail:{detail}");
+                return Task.CompletedTask;
+            }
 
-        Logger.LogWarning("Panel Studio browser interaction failed: {Message}", detail);
-        Notifications.Warning(detail, "Panel Studio interaction", nameof(PanelStudio));
-        return Task.CompletedTask;
+            Logger.LogWarning("Panel Studio browser interaction failed: {Message}", detail);
+            Notifications.Warning(detail, "Panel Studio interaction", nameof(PanelStudio));
+            return Task.CompletedTask;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ReportPanelInteractionError)} failed.");
+            throw;
+        }
     }
 
-    private bool IsExpectedInteractionShutdown(string message) =>
-        PanelText.IsExpectedInteractionShutdown(message, Logger);
+    private bool IsExpectedInteractionShutdown(string message) {
+        try
+        {
+            return PanelText.IsExpectedInteractionShutdown(message, Logger);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(IsExpectedInteractionShutdown)} failed.");
+            throw;
+        }
+    }
 
     private async Task<PanelCanvasPoint> ResolveCanvasPoint(DragEventArgs args)
     {
@@ -939,9 +1253,18 @@
 
     private void EndDrag()
     {
-        _dragToolId = string.Empty;
-        _dragExistingId = null;
-        _dragPrototype = null;
+        try
+        {
+            _dragToolId = string.Empty;
+            _dragExistingId = null;
+            _dragPrototype = null;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(EndDrag)} failed.");
+            throw;
+        }
     }
 
     // Panel Studio edits the panel's local authoring canvas, never the Mainframe frame that contains it.
@@ -1004,14 +1327,33 @@
 
     private void OpenPreviewPresetEditor()
     {
-        var current = SelectedPreviewPreset;
-        _previewPresetName = current is { BuiltIn: false } ? current.Name : string.Empty;
-        _previewPresetWidth = current?.Width ?? Math.Max(160, (int)Math.Round(PanelDesignWidthPxValue));
-        _previewPresetHeight = current?.Height ?? Math.Max(120, (int)Math.Round(PanelDesignHeightPxValue));
-        _previewPresetEditorVisible = true;
+        try
+        {
+            var current = SelectedPreviewPreset;
+            _previewPresetName = current is { BuiltIn: false } ? current.Name : string.Empty;
+            _previewPresetWidth = current?.Width ?? Math.Max(160, (int)Math.Round(PanelDesignWidthPxValue));
+            _previewPresetHeight = current?.Height ?? Math.Max(120, (int)Math.Round(PanelDesignHeightPxValue));
+            _previewPresetEditorVisible = true;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(OpenPreviewPresetEditor)} failed.");
+            throw;
+        }
     }
 
-    private void ClosePreviewPresetEditor() => _previewPresetEditorVisible = false;
+    private void ClosePreviewPresetEditor() {
+        try
+        {
+            _previewPresetEditorVisible = false;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ClosePreviewPresetEditor)} failed.");
+            throw;
+        }
+    }
 
     private void SavePreviewPreset()
     {
@@ -1067,18 +1409,67 @@
 
     private string HitStyle(PublicationElement element)
     {
-        if (_draft is null) return string.Empty;
-        var left = element.X / Math.Max(1, _draft.CanvasWidth) * 100;
-        var top = element.Y / Math.Max(1, _draft.CanvasHeight) * 100;
-        var width = element.Width / Math.Max(1, _draft.CanvasWidth) * 100;
-        var height = element.Height / Math.Max(1, _draft.CanvasHeight) * 100;
-        return $"left:{Inv(left)}%;top:{Inv(top)}%;width:{Inv(width)}%;height:{Inv(height)}%;z-index:{Math.Max(1, element.ZIndex)};transform:rotate({Inv(element.Rotation)}deg)";
+        try
+        {
+            if (_draft is null) return string.Empty;
+            var left = element.X / Math.Max(1, _draft.CanvasWidth) * 100;
+            var top = element.Y / Math.Max(1, _draft.CanvasHeight) * 100;
+            var width = element.Width / Math.Max(1, _draft.CanvasWidth) * 100;
+            var height = element.Height / Math.Max(1, _draft.CanvasHeight) * 100;
+            return $"left:{Inv(left)}%;top:{Inv(top)}%;width:{Inv(width)}%;height:{Inv(height)}%;z-index:{Math.Max(1, element.ZIndex)};transform:rotate({Inv(element.Rotation)}deg)";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(HitStyle)} failed.");
+            throw;
+        }
     }
 
-    private string NormalizedX(PublicationElement element) => Inv(element.X / Math.Max(1, _draft?.CanvasWidth ?? 1));
-    private string NormalizedY(PublicationElement element) => Inv(element.Y / Math.Max(1, _draft?.CanvasHeight ?? 1));
-    private string NormalizedWidth(PublicationElement element) => Inv(element.Width / Math.Max(1, _draft?.CanvasWidth ?? 1));
-    private string NormalizedHeight(PublicationElement element) => Inv(element.Height / Math.Max(1, _draft?.CanvasHeight ?? 1));
+    private string NormalizedX(PublicationElement element) {
+        try
+        {
+            return Inv(element.X / Math.Max(1, _draft?.CanvasWidth ?? 1));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(NormalizedX)} failed.");
+            throw;
+        }
+    }
+    private string NormalizedY(PublicationElement element) {
+        try
+        {
+            return Inv(element.Y / Math.Max(1, _draft?.CanvasHeight ?? 1));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(NormalizedY)} failed.");
+            throw;
+        }
+    }
+    private string NormalizedWidth(PublicationElement element) {
+        try
+        {
+            return Inv(element.Width / Math.Max(1, _draft?.CanvasWidth ?? 1));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(NormalizedWidth)} failed.");
+            throw;
+        }
+    }
+    private string NormalizedHeight(PublicationElement element) {
+        try
+        {
+            return Inv(element.Height / Math.Max(1, _draft?.CanvasHeight ?? 1));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(NormalizedHeight)} failed.");
+            throw;
+        }
+    }
 
     private async Task ExportPanelJsonAsync()
     {
@@ -1212,41 +1603,62 @@
 
     private PublicationElement? ImportStandardJsonCanvasNode(JsonElement node)
     {
-        var type = node.TryGetProperty("type", out var typeProperty) ? typeProperty.GetString() ?? string.Empty : string.Empty;
-        var text = node.TryGetProperty("text", out var textProperty) ? textProperty.GetString() ?? string.Empty : string.Empty;
-        return type.ToLowerInvariant() switch
+        try
         {
-            "text" => new TextFrameElement
+            var type = node.TryGetProperty("type", out var typeProperty) ? typeProperty.GetString() ?? string.Empty : string.Empty;
+            var text = node.TryGetProperty("text", out var textProperty) ? textProperty.GetString() ?? string.Empty : string.Empty;
+            return type.ToLowerInvariant() switch
             {
-                Name = "Imported text",
-                PreviewHtml = $"<p>{WebUtility.HtmlEncode(text).Replace(Environment.NewLine, "<br>")}</p>",
-                Background = "#ffffff",
-                BorderColor = "#cbd5e1",
-                BorderWidth = .2
-            },
-            "link" => new HtmlEmbedElement
-            {
-                Name = "Imported link",
-                Html = $"<main><a href=\"{WebUtility.HtmlEncode(node.TryGetProperty("url", out var url) ? url.GetString() : string.Empty)}\" target=\"_blank\" rel=\"noopener noreferrer\">{WebUtility.HtmlEncode(text.Length == 0 ? "Open link" : text)}</a></main>",
-                Css = "html,body{margin:0;height:100%;font:16px Segoe UI,system-ui,sans-serif}main{box-sizing:border-box;padding:20px}"
-            },
-            "file" => new TextFrameElement
-            {
-                Name = "Imported file reference",
-                PreviewHtml = $"<p><strong>File</strong><br>{WebUtility.HtmlEncode(node.TryGetProperty("file", out var file) ? file.GetString() : string.Empty)}</p>",
-                Background = "#f8fafc",
-                BorderColor = "#94a3b8",
-                BorderWidth = .2
-            },
-            "group" => new ShapeElement { Name = string.IsNullOrWhiteSpace(text) ? "Imported group" : text, Shape = PublicationShape.RoundedRectangle, Fill = "#f8fafc", Stroke = "#94a3b8", CornerRadiusMm = 2 },
-            _ => null
-        };
+                "text" => new TextFrameElement
+                {
+                    Name = "Imported text",
+                    PreviewHtml = $"<p>{WebUtility.HtmlEncode(text).Replace(Environment.NewLine, "<br>")}</p>",
+                    Background = "#ffffff",
+                    BorderColor = "#cbd5e1",
+                    BorderWidth = .2
+                },
+                "link" => new HtmlEmbedElement
+                {
+                    Name = "Imported link",
+                    Html = $"<main><a href=\"{WebUtility.HtmlEncode(node.TryGetProperty("url", out var url) ? url.GetString() : string.Empty)}\" target=\"_blank\" rel=\"noopener noreferrer\">{WebUtility.HtmlEncode(text.Length == 0 ? "Open link" : text)}</a></main>",
+                    Css = "html,body{margin:0;height:100%;font:16px Segoe UI,system-ui,sans-serif}main{box-sizing:border-box;padding:20px}"
+                },
+                "file" => new TextFrameElement
+                {
+                    Name = "Imported file reference",
+                    PreviewHtml = $"<p><strong>File</strong><br>{WebUtility.HtmlEncode(node.TryGetProperty("file", out var file) ? file.GetString() : string.Empty)}</p>",
+                    Background = "#f8fafc",
+                    BorderColor = "#94a3b8",
+                    BorderWidth = .2
+                },
+                "group" => new ShapeElement { Name = string.IsNullOrWhiteSpace(text) ? "Imported group" : text, Shape = PublicationShape.RoundedRectangle, Fill = "#f8fafc", Stroke = "#94a3b8", CornerRadiusMm = 2 },
+                _ => null
+            };
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ImportStandardJsonCanvasNode)} failed.");
+            throw;
+        }
     }
 
-    private double ReadNumber(JsonElement node, string propertyName, double fallback) =>
-        PanelText.ReadNumber(node, propertyName, fallback, Logger);
+    private double ReadNumber(JsonElement node, string propertyName, double fallback) {
+        try
+        {
+            return PanelText.ReadNumber(node, propertyName, fallback, Logger);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ReadNumber)} failed.");
+            throw;
+        }
+    }
 
-    private string JsonCanvasNodeType(PublicationElement element) => element switch
+    private string JsonCanvasNodeType(PublicationElement element) {
+        try
+        {
+            return element switch
     {
         TextFrameElement => "text",
         ImageFrameElement => "file",
@@ -1254,8 +1666,18 @@
         PanelElement => "group",
         _ => "group"
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(JsonCanvasNodeType)} failed.");
+            throw;
+        }
+    }
 
-    private string JsonCanvasColor(PublicationElement element) => element switch
+    private string JsonCanvasColor(PublicationElement element) {
+        try
+        {
+            return element switch
     {
         TextFrameElement => "5",
         ImageFrameElement => "4",
@@ -1264,10 +1686,37 @@
         HtmlEmbedElement => "3",
         _ => "1"
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(JsonCanvasColor)} failed.");
+            throw;
+        }
+    }
 
-    private string PlainText(string? markup) => PanelText.PlainText(markup, Logger);
+    private string PlainText(string? markup) {
+        try
+        {
+            return PanelText.PlainText(markup, Logger);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(PlainText)} failed.");
+            throw;
+        }
+    }
 
-    private string SafeFileName(string? value, string fallback) => PanelText.SafeFileName(value, fallback, Logger);
+    private string SafeFileName(string? value, string fallback) {
+        try
+        {
+            return PanelText.SafeFileName(value, fallback, Logger);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(SafeFileName)} failed.");
+            throw;
+        }
+    }
 
     private async Task ImportHtml(InputFileChangeEventArgs args)
     {
@@ -1336,80 +1785,183 @@
 
     private void AddElement(PublicationElement element)
     {
-        if (CurrentView is { } view) AddElement(view, element);
+        try
+        {
+            if (CurrentView is { } view) AddElement(view, element);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(AddElement)} failed.");
+            throw;
+        }
     }
 
     private void AddElement(PublicationPanelView view, PublicationElement element)
     {
-        element.ZIndex = Layout.NextZ(view.Elements);
-        view.Elements.Add(element);
-        Layout.NormalizeZOrder(view.Elements);
-        if (_draft is not null) Panels.Normalize(Document, _draft);
-        SelectElement(element.Id);
+        try
+        {
+            element.ZIndex = Layout.NextZ(view.Elements);
+            view.Elements.Add(element);
+            Layout.NormalizeZOrder(view.Elements);
+            if (_draft is not null) Panels.Normalize(Document, _draft);
+            SelectElement(element.Id);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(AddElement)} failed.");
+            throw;
+        }
     }
 
     private void DuplicateElement()
     {
-        if (CurrentView is null || SelectedElement is null) return;
-        var clone = Files.CloneElement(SelectedElement);
-        clone.Id = Guid.NewGuid();
-        clone.Name += " copy";
-        clone.X += 4;
-        clone.Y += 4;
-        clone.ZIndex = Layout.NextZ(CurrentView.Elements);
-        CurrentView.Elements.Add(clone);
-        SelectElement(clone.Id);
+        try
+        {
+            if (CurrentView is null || SelectedElement is null) return;
+            var clone = Files.CloneElement(SelectedElement);
+            clone.Id = Guid.NewGuid();
+            clone.Name += " copy";
+            clone.X += 4;
+            clone.Y += 4;
+            clone.ZIndex = Layout.NextZ(CurrentView.Elements);
+            CurrentView.Elements.Add(clone);
+            SelectElement(clone.Id);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(DuplicateElement)} failed.");
+            throw;
+        }
     }
 
     private void DeleteElement()
     {
-        if (CurrentView is null || SelectedElement is null) return;
-        CurrentView.Elements.Remove(SelectedElement);
-        Layout.NormalizeZOrder(CurrentView.Elements);
-        SelectElement(CurrentView.Elements.OrderByDescending(element => element.ZIndex).FirstOrDefault()?.Id);
+        try
+        {
+            if (CurrentView is null || SelectedElement is null) return;
+            CurrentView.Elements.Remove(SelectedElement);
+            Layout.NormalizeZOrder(CurrentView.Elements);
+            SelectElement(CurrentView.Elements.OrderByDescending(element => element.ZIndex).FirstOrDefault()?.Id);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(DeleteElement)} failed.");
+            throw;
+        }
     }
 
-    private void BringElementToFront() => MoveElement(PublicationLayerMove.BringToFront);
-    private void MoveElementUp() => MoveElement(PublicationLayerMove.BringForward);
-    private void MoveElementDown() => MoveElement(PublicationLayerMove.SendBackward);
-    private void SendElementToBack() => MoveElement(PublicationLayerMove.SendToBack);
+    private void BringElementToFront() {
+        try
+        {
+            MoveElement(PublicationLayerMove.BringToFront);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(BringElementToFront)} failed.");
+            throw;
+        }
+    }
+    private void MoveElementUp() {
+        try
+        {
+            MoveElement(PublicationLayerMove.BringForward);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(MoveElementUp)} failed.");
+            throw;
+        }
+    }
+    private void MoveElementDown() {
+        try
+        {
+            MoveElement(PublicationLayerMove.SendBackward);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(MoveElementDown)} failed.");
+            throw;
+        }
+    }
+    private void SendElementToBack() {
+        try
+        {
+            MoveElement(PublicationLayerMove.SendToBack);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(SendElementToBack)} failed.");
+            throw;
+        }
+    }
 
     private void MoveElement(PublicationLayerMove move)
     {
-        if (CurrentView is null || SelectedElement is not { } selected) return;
-        var id = selected.Id;
-        var x = selected.X;
-        var y = selected.Y;
-        var width = selected.Width;
-        var height = selected.Height;
-        var rotation = selected.Rotation;
-        Layout.MoveLayer(CurrentView.Elements, id, move);
-        // A layer command changes only Z order. Preserve the authored geometry even when a
-        // browser pointer-up arrives late after the context menu opened.
-        if (CurrentView.Elements.FirstOrDefault(element => element.Id == id) is { } moved)
+        try
         {
-            moved.X = x;
-            moved.Y = y;
-            moved.Width = width;
-            moved.Height = height;
-            moved.Rotation = rotation;
+            if (CurrentView is null || SelectedElement is not { } selected) return;
+            var id = selected.Id;
+            var x = selected.X;
+            var y = selected.Y;
+            var width = selected.Width;
+            var height = selected.Height;
+            var rotation = selected.Rotation;
+            Layout.MoveLayer(CurrentView.Elements, id, move);
+            // A layer command changes only Z order. Preserve the authored geometry even when a
+            // browser pointer-up arrives late after the context menu opened.
+            if (CurrentView.Elements.FirstOrDefault(element => element.Id == id) is { } moved)
+            {
+                moved.X = x;
+                moved.Y = y;
+                moved.Width = width;
+                moved.Height = height;
+                moved.Rotation = rotation;
+            }
+            SelectElement(id);
+    
         }
-        SelectElement(id);
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(MoveElement)} failed.");
+            throw;
+        }
     }
 
     private void NudgeSelected(double deltaX, double deltaY)
     {
-        if (_draft is null || SelectedElement is null) return;
-        Layout.Nudge(SelectedElement, deltaX, deltaY, _draft.CanvasWidth, _draft.CanvasHeight);
-        RefreshAdvancedJson();
+        try
+        {
+            if (_draft is null || SelectedElement is null) return;
+            Layout.Nudge(SelectedElement, deltaX, deltaY, _draft.CanvasWidth, _draft.CanvasHeight);
+            RefreshAdvancedJson();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(NudgeSelected)} failed.");
+            throw;
+        }
     }
 
     private async Task ShowElementContextMenu(Guid id, MouseEventArgs args)
     {
-        await CancelPanelPointerAsync().ConfigureAwait(false);
-        SelectElement(id);
-        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
-        await _elementContextMenu.ShowAsync(args).ConfigureAwait(false);
+        try
+        {
+            await CancelPanelPointerAsync().ConfigureAwait(false);
+            SelectElement(id);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            await _elementContextMenu.ShowAsync(args).ConfigureAwait(false);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ShowElementContextMenu)} failed.");
+            throw;
+        }
     }
 
     private void EnableInteractionPreview()
@@ -1442,25 +1994,44 @@
         }
     }
 
-    private Task EditSelectedComponent() => SelectedElement is { } selected
+    private Task EditSelectedComponent() {
+        try
+        {
+            return SelectedElement is { } selected
         ? ActivateElementInteraction(selected.Id)
         : Task.CompletedTask;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(EditSelectedComponent)} failed.");
+            throw;
+        }
+    }
 
     private async Task ActivateElementInteraction(Guid id)
     {
-        await CancelPanelPointerAsync().ConfigureAwait(false);
-        SelectElement(id);
-        if (SelectedElement is ImageFrameElement)
+        try
         {
-            _interactionPreview = false;
-            _pictureEditorTargetId = id;
-            _pictureEditorSessionId = Guid.NewGuid();
-            _pictureEditorVisible = true;
+            await CancelPanelPointerAsync().ConfigureAwait(false);
+            SelectElement(id);
+            if (SelectedElement is ImageFrameElement)
+            {
+                _interactionPreview = false;
+                _pictureEditorTargetId = id;
+                _pictureEditorSessionId = Guid.NewGuid();
+                _pictureEditorVisible = true;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return;
+            }
+            EnableInteractionPreview();
             await InvokeAsync(StateHasChanged).ConfigureAwait(false);
-            return;
+    
         }
-        EnableInteractionPreview();
-        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ActivateElementInteraction)} failed.");
+            throw;
+        }
     }
 
     private async Task CancelPanelPointerAsync()
@@ -1489,76 +2060,133 @@
 
     private async Task SavePanelPicture(PictureEditorResult result)
     {
-        if (PanelPictureTarget is { } image)
+        try
         {
-            image.DataUrl = result.DataUrl;
-            image.OriginalDataUrl = result.DataUrl;
-            image.PictureSource = result.SourceDocument;
-            if (!string.IsNullOrWhiteSpace(result.Name)) image.Name = result.Name;
-            SelectElement(image.Id);
+            if (PanelPictureTarget is { } image)
+            {
+                image.DataUrl = result.DataUrl;
+                image.OriginalDataUrl = result.DataUrl;
+                image.PictureSource = result.SourceDocument;
+                if (!string.IsNullOrWhiteSpace(result.Name)) image.Name = result.Name;
+                SelectElement(image.Id);
+            }
+            ClosePanelPictureEditor();
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    
         }
-        ClosePanelPictureEditor();
-        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(SavePanelPicture)} failed.");
+            throw;
+        }
     }
 
     private void ClosePanelPictureEditor()
     {
-        _pictureEditorVisible = false;
-        _pictureEditorTargetId = null;
+        try
+        {
+            _pictureEditorVisible = false;
+            _pictureEditorTargetId = null;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ClosePanelPictureEditor)} failed.");
+            throw;
+        }
     }
 
     private void SelectTemplate(Guid id)
     {
-        var template = Document.ComponentTemplates.FirstOrDefault(item => item.Id == id);
-        if (template is null) return;
-        _selectedTemplateId = template.Id;
-        _templateName = template.Name;
-        _templateCategory = template.Category;
-        _templateDescription = template.Description;
+        try
+        {
+            var template = Document.ComponentTemplates.FirstOrDefault(item => item.Id == id);
+            if (template is null) return;
+            _selectedTemplateId = template.Id;
+            _templateName = template.Name;
+            _templateCategory = template.Category;
+            _templateDescription = template.Description;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(SelectTemplate)} failed.");
+            throw;
+        }
     }
 
     private async Task SaveSelectedAsTemplate()
     {
-        if (SelectedElement is null) return;
-        var name = string.IsNullOrWhiteSpace(_templateName) ? SelectedElement.Name : _templateName.Trim();
-        var template = _selectedTemplateId is { } selectedId
-            ? Document.ComponentTemplates.FirstOrDefault(item => item.Id == selectedId)
-            : null;
-        template ??= new PublicationElementTemplate();
-        var isNew = !Document.ComponentTemplates.Contains(template);
+        try
+        {
+            if (SelectedElement is null) return;
+            var name = string.IsNullOrWhiteSpace(_templateName) ? SelectedElement.Name : _templateName.Trim();
+            var template = _selectedTemplateId is { } selectedId
+                ? Document.ComponentTemplates.FirstOrDefault(item => item.Id == selectedId)
+                : null;
+            template ??= new PublicationElementTemplate();
+            var isNew = !Document.ComponentTemplates.Contains(template);
 
-        // Pointer-up commits are serialized by browser interop. Flush immediately before
-        // cloning so the reusable prototype contains the exact last arranged bounds.
-        await FlushPanelStudioInteractionsAsync().ConfigureAwait(false);
-        template.Prototype = Files.CloneElement(SelectedElement);
-        template.Prototype.Id = Guid.NewGuid();
-        template.Name = name;
-        template.Description = _templateDescription.Trim();
-        template.Category = string.IsNullOrWhiteSpace(_templateCategory) ? "My modules" : _templateCategory.Trim();
-        template.IconCssClass = IconFor(SelectedElement);
-        template.ModifiedUtc = DateTimeOffset.UtcNow;
-        Panels.NormalizeTemplate(Document, template);
-        if (isNew) Document.ComponentTemplates.Add(template);
-        SelectTemplate(template.Id);
+            // Pointer-up commits are serialized by browser interop. Flush immediately before
+            // cloning so the reusable prototype contains the exact last arranged bounds.
+            await FlushPanelStudioInteractionsAsync().ConfigureAwait(false);
+            template.Prototype = Files.CloneElement(SelectedElement);
+            template.Prototype.Id = Guid.NewGuid();
+            template.Name = name;
+            template.Description = _templateDescription.Trim();
+            template.Category = string.IsNullOrWhiteSpace(_templateCategory) ? "My modules" : _templateCategory.Trim();
+            template.IconCssClass = IconFor(SelectedElement);
+            template.ModifiedUtc = DateTimeOffset.UtcNow;
+            Panels.NormalizeTemplate(Document, template);
+            if (isNew) Document.ComponentTemplates.Add(template);
+            SelectTemplate(template.Id);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(SaveSelectedAsTemplate)} failed.");
+            throw;
+        }
     }
 
     private async Task SaveSelectedAsNewTemplate()
     {
-        _selectedTemplateId = null;
-        await SaveSelectedAsTemplate().ConfigureAwait(false);
+        try
+        {
+            _selectedTemplateId = null;
+            await SaveSelectedAsTemplate().ConfigureAwait(false);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(SaveSelectedAsNewTemplate)} failed.");
+            throw;
+        }
     }
 
     private void DeleteSelectedTemplate()
     {
-        if (_selectedTemplateId is not { } id) return;
-        Document.ComponentTemplates.RemoveAll(template => template.Id == id);
-        _selectedTemplateId = null;
-        _templateName = SelectedElement?.Name ?? string.Empty;
-        _templateCategory = "My modules";
-        _templateDescription = SelectedElement is null ? string.Empty : $"Reusable {SelectedElement.Kind} configured in Panel Studio.";
+        try
+        {
+            if (_selectedTemplateId is not { } id) return;
+            Document.ComponentTemplates.RemoveAll(template => template.Id == id);
+            _selectedTemplateId = null;
+            _templateName = SelectedElement?.Name ?? string.Empty;
+            _templateCategory = "My modules";
+            _templateDescription = SelectedElement is null ? string.Empty : $"Reusable {SelectedElement.Kind} configured in Panel Studio.";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(DeleteSelectedTemplate)} failed.");
+            throw;
+        }
     }
 
-    private string IconFor(PublicationElement element) => element switch
+    private string IconFor(PublicationElement element) {
+        try
+        {
+            return element switch
     {
         TextFrameElement => "pub-icon pub-icon-text",
         ImageFrameElement => "pub-icon pub-icon-picture",
@@ -1572,6 +2200,13 @@
         PanelElement => "pub-icon pub-icon-panel",
         _ => "pub-icon pub-icon-panel"
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(IconFor)} failed.");
+            throw;
+        }
+    }
 
     private void RefreshAdvancedJson()
     {
@@ -1608,8 +2243,17 @@
 
     private void ToggleInteractionPreview()
     {
-        if (_interactionPreview) DisableInteractionPreview();
-        else EnableInteractionPreview();
+        try
+        {
+            if (_interactionPreview) DisableInteractionPreview();
+            else EnableInteractionPreview();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ToggleInteractionPreview)} failed.");
+            throw;
+        }
     }
     private void RefreshPreview()
     {
@@ -1626,14 +2270,94 @@
         }
     }
 
-    private void ChangePanelName(ChangeEventArgs args) { if (_draft is not null) _draft.Name = Text(args); }
-    private void ChangeViewName(ChangeEventArgs args) { if (CurrentView is not null) CurrentView.Name = Text(args); }
-    private void ChangeElementName(ChangeEventArgs args) { if (SelectedElement is not null) SelectedElement.Name = Text(args); }
-    private void ChangeNavigation(ChangeEventArgs args) { if (_draft is not null && Enum.TryParse<PublicationPanelNavigationMode>(Text(args), out var mode)) _draft.NavigationMode = mode; }
-    private void ChangeLayoutMode(ChangeEventArgs args) { if (_draft is not null && Enum.TryParse<PublicationPanelLayoutMode>(Text(args), out var mode)) _draft.LayoutMode = mode; }
-    private void ChangeNestedNavigation(ChangeEventArgs args) { if (SelectedElement is PanelElement nested && Enum.TryParse<PublicationPanelNavigationMode>(Text(args), out var mode)) nested.NavigationMode = mode; }
-    private void ChangeVisualKind(ChangeEventArgs args) { if (SelectedElement is DataVisualElement visual && Enum.TryParse<DataVisualKind>(Text(args), out var kind)) visual.VisualKind = kind; }
-    private void ChangeVisualDataObject(ChangeEventArgs args) { if (SelectedElement is DataVisualElement visual && Guid.TryParse(Text(args), out var id)) visual.DataObjectId = id; }
+    private void ChangePanelName(ChangeEventArgs args) {
+        try
+        {
+     if (_draft is not null) _draft.Name = Text(args); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ChangePanelName)} failed.");
+            throw;
+        }
+    }
+    private void ChangeViewName(ChangeEventArgs args) {
+        try
+        {
+     if (CurrentView is not null) CurrentView.Name = Text(args); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ChangeViewName)} failed.");
+            throw;
+        }
+    }
+    private void ChangeElementName(ChangeEventArgs args) {
+        try
+        {
+     if (SelectedElement is not null) SelectedElement.Name = Text(args); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ChangeElementName)} failed.");
+            throw;
+        }
+    }
+    private void ChangeNavigation(ChangeEventArgs args) {
+        try
+        {
+     if (_draft is not null && Enum.TryParse<PublicationPanelNavigationMode>(Text(args), out var mode)) _draft.NavigationMode = mode; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ChangeNavigation)} failed.");
+            throw;
+        }
+    }
+    private void ChangeLayoutMode(ChangeEventArgs args) {
+        try
+        {
+     if (_draft is not null && Enum.TryParse<PublicationPanelLayoutMode>(Text(args), out var mode)) _draft.LayoutMode = mode; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ChangeLayoutMode)} failed.");
+            throw;
+        }
+    }
+    private void ChangeNestedNavigation(ChangeEventArgs args) {
+        try
+        {
+     if (SelectedElement is PanelElement nested && Enum.TryParse<PublicationPanelNavigationMode>(Text(args), out var mode)) nested.NavigationMode = mode; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ChangeNestedNavigation)} failed.");
+            throw;
+        }
+    }
+    private void ChangeVisualKind(ChangeEventArgs args) {
+        try
+        {
+     if (SelectedElement is DataVisualElement visual && Enum.TryParse<DataVisualKind>(Text(args), out var kind)) visual.VisualKind = kind; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ChangeVisualKind)} failed.");
+            throw;
+        }
+    }
+    private void ChangeVisualDataObject(ChangeEventArgs args) {
+        try
+        {
+     if (SelectedElement is DataVisualElement visual && Guid.TryParse(Text(args), out var id)) visual.DataObjectId = id; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ChangeVisualDataObject)} failed.");
+            throw;
+        }
+    }
     private void ChangeVisualValueFields(ChangeEventArgs args)
     {
         try
@@ -1648,14 +2372,84 @@
             Notifications.Error("The visual field list could not be updated.", "Panel Studio", nameof(PanelStudio));
         }
     }
-    private void ChangeComponentKind(ChangeEventArgs args) { if (SelectedElement is DevExtremeComponentElement component && Enum.TryParse<PublicationComponentKind>(Text(args), out var kind)) { component.ComponentKind = kind; Components.Normalize(Document, component); } }
-    private void ChangeComponentDataMode(ChangeEventArgs args) { if (SelectedElement is DevExtremeComponentElement component && Enum.TryParse<PublicationComponentDataMode>(Text(args), out var mode)) component.Connection.Mode = mode; }
-    private void ChangeComponentDataObject(ChangeEventArgs args) { if (SelectedElement is DevExtremeComponentElement component && Guid.TryParse(Text(args), out var id)) component.Connection.DataObjectId = id; }
-    private void ChangeChatDisplayMode(ChangeEventArgs args) { if (SelectedElement is DevExtremeComponentElement component && Enum.TryParse<PublicationChatDisplayMode>(Text(args), out var mode)) component.ChatDisplayMode = mode; }
-    private void ChangeLiveSourceKind(ChangeEventArgs args) { if (SelectedElement is LiveSourceElement live && Enum.TryParse<PublicationLiveSourceKind>(Text(args), out var kind)) live.SourceKind = kind; }
-    private void ToggleViewEnabled(ChangeEventArgs args) { if (CurrentView is not null) CurrentView.Enabled = AsBool(args); }
+    private void ChangeComponentKind(ChangeEventArgs args) {
+        try
+        {
+     if (SelectedElement is DevExtremeComponentElement component && Enum.TryParse<PublicationComponentKind>(Text(args), out var kind)) { component.ComponentKind = kind; Components.Normalize(Document, component); } 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ChangeComponentKind)} failed.");
+            throw;
+        }
+    }
+    private void ChangeComponentDataMode(ChangeEventArgs args) {
+        try
+        {
+     if (SelectedElement is DevExtremeComponentElement component && Enum.TryParse<PublicationComponentDataMode>(Text(args), out var mode)) component.Connection.Mode = mode; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ChangeComponentDataMode)} failed.");
+            throw;
+        }
+    }
+    private void ChangeComponentDataObject(ChangeEventArgs args) {
+        try
+        {
+     if (SelectedElement is DevExtremeComponentElement component && Guid.TryParse(Text(args), out var id)) component.Connection.DataObjectId = id; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ChangeComponentDataObject)} failed.");
+            throw;
+        }
+    }
+    private void ChangeChatDisplayMode(ChangeEventArgs args) {
+        try
+        {
+     if (SelectedElement is DevExtremeComponentElement component && Enum.TryParse<PublicationChatDisplayMode>(Text(args), out var mode)) component.ChatDisplayMode = mode; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ChangeChatDisplayMode)} failed.");
+            throw;
+        }
+    }
+    private void ChangeLiveSourceKind(ChangeEventArgs args) {
+        try
+        {
+     if (SelectedElement is LiveSourceElement live && Enum.TryParse<PublicationLiveSourceKind>(Text(args), out var kind)) live.SourceKind = kind; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ChangeLiveSourceKind)} failed.");
+            throw;
+        }
+    }
+    private void ToggleViewEnabled(ChangeEventArgs args) {
+        try
+        {
+     if (CurrentView is not null) CurrentView.Enabled = AsBool(args); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ToggleViewEnabled)} failed.");
+            throw;
+        }
+    }
 
-    private bool AsBool(ChangeEventArgs args) => PanelText.AsBool(args, Logger);
+    private bool AsBool(ChangeEventArgs args) {
+        try
+        {
+            return PanelText.AsBool(args, Logger);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(AsBool)} failed.");
+            throw;
+        }
+    }
 
     /// <summary>
     /// Waits for queued pointer/keyboard layout commits to reach the Blazor circuit before
@@ -1663,14 +2457,63 @@
     /// </summary>
     private async Task FlushPanelStudioInteractionsAsync()
     {
-        if (!_dropSurfaceBound) return;
-        _ = await JS.InvokeAsync<bool>("publisherStudio.flushPanelStudioInteractions", _canvasElement).ConfigureAwait(false);
+        try
+        {
+            if (!_dropSurfaceBound) return;
+            _ = await JS.InvokeAsync<bool>("publisherStudio.flushPanelStudioInteractions", _canvasElement).ConfigureAwait(false);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(FlushPanelStudioInteractionsAsync)} failed.");
+            throw;
+        }
     }
 
-    private string Text(ChangeEventArgs args) => PanelText.Text(args, Logger);
-    private string Inv(double value) => PanelText.Invariant(value, Logger);
-    private void ChangeNumber(ChangeEventArgs args, Action<double> update) => PanelText.ChangeNumber(args, update, Logger);
-    private void ChangeInt(ChangeEventArgs args, Action<int> update) => PanelText.ChangeInt(args, update, Logger);
+    private string Text(ChangeEventArgs args) {
+        try
+        {
+            return PanelText.Text(args, Logger);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(Text)} failed.");
+            throw;
+        }
+    }
+    private string Inv(double value) {
+        try
+        {
+            return PanelText.Invariant(value, Logger);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(Inv)} failed.");
+            throw;
+        }
+    }
+    private void ChangeNumber(ChangeEventArgs args, Action<double> update) {
+        try
+        {
+            PanelText.ChangeNumber(args, update, Logger);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ChangeNumber)} failed.");
+            throw;
+        }
+    }
+    private void ChangeInt(ChangeEventArgs args, Action<int> update) {
+        try
+        {
+            PanelText.ChangeInt(args, update, Logger);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ChangeInt)} failed.");
+            throw;
+        }
+    }
 
     private async Task Save()
     {
@@ -1703,7 +2546,17 @@
         }
     }
 
-    private Task Cancel() => Cancelled.InvokeAsync();
+    private Task Cancel() {
+        try
+        {
+            return Cancelled.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(Cancel)} failed.");
+            throw;
+        }
+    }
 
     public async ValueTask DisposeAsync()
     {

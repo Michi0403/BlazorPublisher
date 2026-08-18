@@ -27,12 +27,14 @@ public interface INativeCaptureSessionFactory
 /// <param name="runtimePolicy">Publisher runtime policy data service dependency used by the native capture session workflow to provide the corresponding application capability.</param>
 /// <param name="ffmpegLocator">Ffmpeg locator value supplied to the native capture session operation and used when producing its result.</param>
 /// <param name="processLoopbackFactory">Windows process loopback capture factory dependency used by the native capture session workflow to provide the corresponding application capability.</param>
+/// <param name="taskRunner">Supervised task runner used for intentionally concurrent native capture pumps.</param>
 /// <param name="loggerFactory">Logger factory dependency used by the native capture session workflow to provide the corresponding application capability.</param>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class NativeCaptureSessionFactory(
     IPublisherRuntimePolicyDataService runtimePolicy,
     FfmpegLocator ffmpegLocator,
     IWindowsProcessLoopbackCaptureFactory processLoopbackFactory,
+    ISupervisedTaskRunner taskRunner,
     ILoggerFactory loggerFactory,
     ILogger<NativeCaptureSessionFactory> logger) : INativeCaptureSessionFactory
 {
@@ -51,6 +53,7 @@ public sealed class NativeCaptureSessionFactory(
                 runtimePolicy,
                 ffmpegLocator,
                 processLoopbackFactory,
+                taskRunner,
                 loggerFactory.CreateLogger<NativeCaptureSession>());
         }
         catch (Exception exception)
@@ -219,6 +222,8 @@ public sealed class NativeCaptureSession : IDisposable
     /// Stores the internal disposed state used by <see cref="NativeCaptureSession"/> while executing its surrounding workflow.
     /// </summary>
     private bool _disposed;
+    /// <summary>Observes the native capture pump so it cannot become discarded asynchronous work.</summary>
+    private readonly ISupervisedTaskRunner _taskRunner;
 
     /// <summary>
     /// Initializes a new <see cref="NativeCaptureSession"/> instance and captures the dependencies or initial state required by its native capture session workflow.
@@ -227,18 +232,21 @@ public sealed class NativeCaptureSession : IDisposable
     /// <param name="runtimePolicy">Publisher runtime policy data service dependency used by the native capture session workflow to provide the corresponding application capability.</param>
     /// <param name="ffmpegLocator">Ffmpeg locator value supplied to the native capture session operation and used when producing its result.</param>
     /// <param name="processLoopbackFactory">Windows process loopback capture factory dependency used by the native capture session workflow to provide the corresponding application capability.</param>
+    /// <param name="taskRunner">Supervised task runner used to observe the capture pump.</param>
     /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     public NativeCaptureSession(
         NativeCaptureRequest request,
         IPublisherRuntimePolicyDataService runtimePolicy,
         FfmpegLocator ffmpegLocator,
         IWindowsProcessLoopbackCaptureFactory processLoopbackFactory,
+        ISupervisedTaskRunner taskRunner,
         ILogger<NativeCaptureSession> logger)
     {
         _request = request;
         _runtimePolicy = runtimePolicy;
         _ffmpegLocator = ffmpegLocator;
         _processLoopbackFactory = processLoopbackFactory;
+        _taskRunner = taskRunner;
         this.logger = logger;
         Id = Guid.NewGuid();
         IsAudioOnly = request.Kind.Equals("Microphone", StringComparison.OrdinalIgnoreCase)
@@ -303,7 +311,7 @@ public sealed class NativeCaptureSession : IDisposable
                     _process = process;
                     process.BeginErrorReadLine();
                     Status = "capturing";
-                    _ = Task.Run(() => PumpAsync(process.StandardOutput.BaseStream, _cancellation.Token));
+                    _taskRunner.Run(nameof(NativeCaptureSession), $"Pump:{Id:D}", _ => PumpAsync(process.StandardOutput.BaseStream, _cancellation.Token), _cancellation.Token);
                     if (_request.Kind.Equals("ApplicationAudio", StringComparison.OrdinalIgnoreCase)
                         && ResolveBackend("applicationaudio") == "wasapi-process-loopback")
                     {

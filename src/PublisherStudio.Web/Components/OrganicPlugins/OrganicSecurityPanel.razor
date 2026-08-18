@@ -101,119 +101,219 @@
     private bool _allowDestructiveReset;
     private bool _renderQr;
 
-    protected override async Task OnInitializedAsync() => await RefreshAsync().ConfigureAwait(true);
+    protected override async Task OnInitializedAsync() {
+        try
+        {
+            return await RefreshAsync().ConfigureAwait(true);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicSecurityPanel)}.{nameof(OnInitializedAsync)} failed.");
+            throw;
+        }
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!_renderQr) return;
-        _renderQr = false;
-        await JS.InvokeVoidAsync("publisherOrganicSecurity.renderQr", "organic-security-otp-qr", _otpUri, "PublisherStudio Authenticator enrollment").ConfigureAwait(true);
-        await JS.InvokeVoidAsync("publisherOrganicSecurity.renderQr", "organic-security-ticket-qr", _pairingTicketJson, "PublisherStudio public 1-Wire pairing ticket").ConfigureAwait(true);
+        try
+        {
+            if (!_renderQr) return;
+            _renderQr = false;
+            await JS.InvokeVoidAsync("publisherOrganicSecurity.renderQr", "organic-security-otp-qr", _otpUri, "PublisherStudio Authenticator enrollment").ConfigureAwait(true);
+            await JS.InvokeVoidAsync("publisherOrganicSecurity.renderQr", "organic-security-ticket-qr", _pairingTicketJson, "PublisherStudio public 1-Wire pairing ticket").ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicSecurityPanel)}.{nameof(OnAfterRenderAsync)} failed.");
+            throw;
+        }
     }
 
     private async Task RefreshAsync()
     {
-        _status = await Security.GetStatusAsync().ConfigureAwait(true);
-        _trustedPeers = await Security.GetTrustedPeersAsync().ConfigureAwait(true);
-        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        try
+        {
+            _status = await Security.GetStatusAsync().ConfigureAwait(true);
+            _trustedPeers = await Security.GetTrustedPeersAsync().ConfigureAwait(true);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicSecurityPanel)}.{nameof(RefreshAsync)} failed.");
+            throw;
+        }
     }
 
     private async Task CreateAsync()
     {
         try
         {
-            await Security.EnsureCreatedAsync().ConfigureAwait(true);
-            Notifications.Success("The runtime-only PublisherStudio 1-Wire identity was created.", "1-Wire Security", nameof(OrganicSecurityPanel));
-            await RefreshAsync().ConfigureAwait(true);
+            try
+            {
+                await Security.EnsureCreatedAsync().ConfigureAwait(true);
+                Notifications.Success("The runtime-only PublisherStudio 1-Wire identity was created.", "1-Wire Security", nameof(OrganicSecurityPanel));
+                await RefreshAsync().ConfigureAwait(true);
+            }
+            catch (Exception ex) { Report(ex, "The runtime identity could not be created."); }
+    
         }
-        catch (Exception ex) { Report(ex, "The runtime identity could not be created."); }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicSecurityPanel)}.{nameof(CreateAsync)} failed.");
+            throw;
+        }
     }
 
     private async Task CreatePairingMaterialAsync()
     {
         try
         {
-            await Security.EnsureCreatedAsync().ConfigureAwait(true);
-            _otpUri = await Security.GetOtpAuthUriAsync().ConfigureAwait(true);
-            _pairingTicketJson = JsonSerializer.Serialize(await Security.CreatePairingTicketAsync(TimeSpan.FromMinutes(15)).ConfigureAwait(true), JsonOptions);
-            _renderQr = true;
-            await RefreshAsync().ConfigureAwait(true);
+            try
+            {
+                await Security.EnsureCreatedAsync().ConfigureAwait(true);
+                _otpUri = await Security.GetOtpAuthUriAsync().ConfigureAwait(true);
+                _pairingTicketJson = JsonSerializer.Serialize(await Security.CreatePairingTicketAsync(TimeSpan.FromMinutes(15)).ConfigureAwait(true), JsonOptions);
+                _renderQr = true;
+                await RefreshAsync().ConfigureAwait(true);
+            }
+            catch (Exception ex) { Report(ex, "Pairing material could not be created."); }
+    
         }
-        catch (Exception ex) { Report(ex, "Pairing material could not be created."); }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicSecurityPanel)}.{nameof(CreatePairingMaterialAsync)} failed.");
+            throw;
+        }
     }
 
     private async Task RegenerateAsync()
     {
         try
         {
-            if (!_allowDestructiveReset) return;
-            await Security.RegenerateAsync().ConfigureAwait(true);
-            ClearMaterial();
-            Notifications.Warning("PublisherStudio generated a new identity. Previous encrypted trust is no longer valid.", "1-Wire trust reset", nameof(OrganicSecurityPanel));
-            await RefreshAsync().ConfigureAwait(true);
+            try
+            {
+                if (!_allowDestructiveReset) return;
+                await Security.RegenerateAsync().ConfigureAwait(true);
+                ClearMaterial();
+                Notifications.Warning("PublisherStudio generated a new identity. Previous encrypted trust is no longer valid.", "1-Wire trust reset", nameof(OrganicSecurityPanel));
+                await RefreshAsync().ConfigureAwait(true);
+            }
+            catch (Exception ex) { Report(ex, "The runtime identity could not be regenerated."); }
+    
         }
-        catch (Exception ex) { Report(ex, "The runtime identity could not be regenerated."); }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicSecurityPanel)}.{nameof(RegenerateAsync)} failed.");
+            throw;
+        }
     }
 
     private async Task DeleteAsync()
     {
         try
         {
-            if (!_allowDestructiveReset) return;
-            await Security.DeleteAsync().ConfigureAwait(true);
-            ClearMaterial();
-            Notifications.Warning("The PublisherStudio runtime identity and local trust bindings were deleted.", "1-Wire trust reset", nameof(OrganicSecurityPanel));
-            await RefreshAsync().ConfigureAwait(true);
+            try
+            {
+                if (!_allowDestructiveReset) return;
+                await Security.DeleteAsync().ConfigureAwait(true);
+                ClearMaterial();
+                Notifications.Warning("The PublisherStudio runtime identity and local trust bindings were deleted.", "1-Wire trust reset", nameof(OrganicSecurityPanel));
+                await RefreshAsync().ConfigureAwait(true);
+            }
+            catch (Exception ex) { Report(ex, "The runtime identity could not be deleted."); }
+    
         }
-        catch (Exception ex) { Report(ex, "The runtime identity could not be deleted."); }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicSecurityPanel)}.{nameof(DeleteAsync)} failed.");
+            throw;
+        }
     }
 
     private async Task EstablishTrustAsync()
     {
         try
         {
-            var ticket = JsonSerializer.Deserialize<OneWirePairingTicket>(_remoteTicketJson, JsonOptions)
-                ?? throw new InvalidDataException("The remote pairing ticket is empty or invalid.");
-            var accepted = await Security.EstablishTrustAsync(new OneWireTrustEstablishmentRequest
+            try
             {
-                Ticket = ticket,
-                MfaCode = _mfaCode.Trim(),
-                ValidForMinutes = _validForMinutes
-            }).ConfigureAwait(true);
-            if (!accepted)
-            {
-                Notifications.Warning("The current PublisherStudio MFA code was not accepted.", "1-Wire trust", nameof(OrganicSecurityPanel));
-                return;
+                var ticket = JsonSerializer.Deserialize<OneWirePairingTicket>(_remoteTicketJson, JsonOptions)
+                    ?? throw new InvalidDataException("The remote pairing ticket is empty or invalid.");
+                var accepted = await Security.EstablishTrustAsync(new OneWireTrustEstablishmentRequest
+                {
+                    Ticket = ticket,
+                    MfaCode = _mfaCode.Trim(),
+                    ValidForMinutes = _validForMinutes
+                }).ConfigureAwait(true);
+                if (!accepted)
+                {
+                    Notifications.Warning("The current PublisherStudio MFA code was not accepted.", "1-Wire trust", nameof(OrganicSecurityPanel));
+                    return;
+                }
+                _mfaCode = string.Empty;
+                Notifications.Success($"Trusted {ticket.DisplayName} for the selected validity period.", "1-Wire trust", nameof(OrganicSecurityPanel));
+                await RefreshAsync().ConfigureAwait(true);
             }
-            _mfaCode = string.Empty;
-            Notifications.Success($"Trusted {ticket.DisplayName} for the selected validity period.", "1-Wire trust", nameof(OrganicSecurityPanel));
-            await RefreshAsync().ConfigureAwait(true);
+            catch (Exception ex) { Report(ex, "The peer could not be trusted."); }
+    
         }
-        catch (Exception ex) { Report(ex, "The peer could not be trusted."); }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicSecurityPanel)}.{nameof(EstablishTrustAsync)} failed.");
+            throw;
+        }
     }
 
     private async Task RevokeAsync(string peerId)
     {
         try
         {
-            await Security.RevokeTrustAsync(peerId).ConfigureAwait(true);
-            Notifications.Warning($"Trust for {peerId} was revoked.", "1-Wire trust", nameof(OrganicSecurityPanel));
-            await RefreshAsync().ConfigureAwait(true);
+            try
+            {
+                await Security.RevokeTrustAsync(peerId).ConfigureAwait(true);
+                Notifications.Warning($"Trust for {peerId} was revoked.", "1-Wire trust", nameof(OrganicSecurityPanel));
+                await RefreshAsync().ConfigureAwait(true);
+            }
+            catch (Exception ex) { Report(ex, "The trust binding could not be revoked."); }
+    
         }
-        catch (Exception ex) { Report(ex, "The trust binding could not be revoked."); }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicSecurityPanel)}.{nameof(RevokeAsync)} failed.");
+            throw;
+        }
     }
 
     private void ClearMaterial()
     {
-        _otpUri = string.Empty;
-        _pairingTicketJson = string.Empty;
-        _allowDestructiveReset = false;
-        _renderQr = true;
+        try
+        {
+            _otpUri = string.Empty;
+            _pairingTicketJson = string.Empty;
+            _allowDestructiveReset = false;
+            _renderQr = true;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicSecurityPanel)}.{nameof(ClearMaterial)} failed.");
+            throw;
+        }
     }
 
     private void Report(Exception exception, string message)
     {
-        Logger.LogError(exception, "{Message}", message);
-        Notifications.Error(exception.Message, message, nameof(OrganicSecurityPanel));
+        try
+        {
+            Logger.LogError(exception, "{Message}", message);
+            Notifications.Error(exception.Message, message, nameof(OrganicSecurityPanel));
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicSecurityPanel)}.{nameof(Report)} failed.");
+            throw;
+        }
     }
 }

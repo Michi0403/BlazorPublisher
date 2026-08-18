@@ -13,12 +13,14 @@ namespace PublisherStudio.Services.Streaming.Encoding;
 /// <param name="ffmpegLocator">Ffmpeg locator value supplied to the encoder orchestrator operation and used when producing its result.</param>
 /// <param name="encoderResolver">Ffmpeg encoder resolver dependency used by the encoder orchestrator workflow to provide the corresponding application capability.</param>
 /// <param name="runtimePolicy">Publisher runtime policy data service dependency used by the encoder orchestrator workflow to provide the corresponding application capability.</param>
+/// <param name="taskRunner">Runner that owns intentionally concurrent encoder operations and observes their completion.</param>
 /// <param name="loggerFactory">Logger factory dependency used by the encoder orchestrator workflow to provide the corresponding application capability.</param>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class EncoderOrchestrator(
     FfmpegLocator ffmpegLocator,
     FfmpegEncoderResolver encoderResolver,
     IPublisherRuntimePolicyDataService runtimePolicy,
+    ISupervisedTaskRunner taskRunner,
     ILoggerFactory loggerFactory,
     ILogger<EncoderOrchestrator> logger)
 {
@@ -37,6 +39,7 @@ public sealed class EncoderOrchestrator(
                         ffmpegLocator,
                         encoderResolver,
                         runtimePolicy.MediaSessionDefaults,
+                        taskRunner,
                         loggerFactory.CreateLogger<EncoderSessionService>());
                     session.Encoder.NotifyIngest(inputId);
     
@@ -131,6 +134,10 @@ public sealed class EncoderSessionService : IDisposable
     /// </summary>
     private readonly FfmpegEncoderSet _videoEncoders;
     /// <summary>
+    /// Observes intentionally concurrent encoder work so completion, cancellation, and failures remain owned.
+    /// </summary>
+    private readonly ISupervisedTaskRunner _taskRunner;
+    /// <summary>
     /// Stores the in-memory recording patterns collection maintained internally by <see cref="EncoderSessionService"/> for its current workflow state.
     /// </summary>
     private readonly List<string> _recordingPatterns = [];
@@ -146,18 +153,21 @@ public sealed class EncoderSessionService : IDisposable
     /// <param name="ffmpegLocator">Ffmpeg locator value supplied to the encoder session operation and used when producing its result.</param>
     /// <param name="encoderResolver">Ffmpeg encoder resolver dependency used by the encoder session workflow to provide the corresponding application capability.</param>
     /// <param name="defaults">Defaults value supplied to the encoder session operation and used when producing its result.</param>
+    /// <param name="taskRunner">Runner that owns intentionally concurrent encoder operations and observes their completion.</param>
     /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     public EncoderSessionService(
         MediaSession session,
         FfmpegLocator ffmpegLocator,
         FfmpegEncoderResolver encoderResolver,
         PublisherMediaSessionDefaultsPolicy defaults,
+        ISupervisedTaskRunner taskRunner,
         ILogger<EncoderSessionService> logger)
     {
         _session = session;
         _ffmpegLocator = ffmpegLocator;
         _encoderResolver = encoderResolver;
         _defaults = defaults;
+        _taskRunner = taskRunner;
         this.logger = logger;
         _videoEncoders = _encoderResolver.Resolve(session.FfmpegPath, session.HardwareEncoder);
     }
@@ -835,7 +845,7 @@ public sealed class EncoderSessionService : IDisposable
             lock (_sync) _manualStops.Remove(key);
             if (!restart) _restartAttempts.TryRemove(key, out _);
             _processes[key] = process;
-            var inputWriter = new PipelineInputWriter(process, key, message => LastError = message, _defaults, logger);
+            var inputWriter = new PipelineInputWriter(process, key, message => LastError = message, _defaults, _taskRunner, logger);
             _inputWriters[key] = inputWriter;
             process.BeginErrorReadLine();
             process.BeginOutputReadLine();
@@ -906,17 +916,27 @@ public sealed class EncoderSessionService : IDisposable
                     if (_disposed || !ShouldRun(key, inputId)) return;
                     var attempt = _restartAttempts.AddOrUpdate(key, 1, (_, value) => Math.Min(20, value + 1));
                     var delay = TimeSpan.FromSeconds(Math.Min(30, Math.Pow(2, Math.Min(5, attempt))));
-                    _ = Task.Run(async () =>
-                    {
-                        try { await Task.Delay(delay).ConfigureAwait(false); }
-                        catch { return; }
-                        lock (_sync)
+                    _taskRunner.Run(
+                        nameof(EncoderSessionService),
+                        nameof(ScheduleRestart),
+                        async cancellationToken =>
                         {
-                            if (_disposed || !ShouldRun(key, inputId) || _processes.ContainsKey(key)) return;
-                            StartProcess(key, inputId, arguments, restart: true);
-                            if (_processes.ContainsKey(key)) Status = "encoding";
-                        }
-                    });
+                            try
+                            {
+                                await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
+                            }
+                            catch (OperationCanceledException exception) when (cancellationToken.IsCancellationRequested)
+                            {
+                                logger.LogDebug(exception, "Encoder restart delay was canceled for pipeline {Pipeline}.", key);
+                                return;
+                            }
+                            lock (_sync)
+                            {
+                                if (_disposed || !ShouldRun(key, inputId) || _processes.ContainsKey(key)) return;
+                                StartProcess(key, inputId, arguments, restart: true);
+                                if (_processes.ContainsKey(key)) Status = "encoding";
+                            }
+                        });
     
         }
         catch (Exception exception)
@@ -1026,7 +1046,10 @@ public sealed class EncoderSessionService : IDisposable
             var patterns = _recordingPatterns.ToArray();
             _recordingPatterns.Clear();
             var executable = _ffmpegLocator.Resolve(_session.FfmpegPath) ?? "ffmpeg";
-            _ = Task.Run(async () =>
+            _taskRunner.Run(
+                nameof(EncoderSessionService),
+                nameof(ScheduleRecordingRemux),
+                async cancellationToken =>
             {
                 try
                 {
@@ -1284,6 +1307,10 @@ public sealed class EncoderSessionService : IDisposable
         /// Stores the internal aborting state used by <see cref="PipelineInputWriter"/> while executing its surrounding workflow.
         /// </summary>
         private int aborting;
+        /// <summary>
+        /// Observes intentionally concurrent pipeline-control work so task failures are never discarded.
+        /// </summary>
+        private readonly ISupervisedTaskRunner taskRunner;
 
         /// <summary>
         /// Initializes a new <see cref="PipelineInputWriter"/> instance and captures the dependencies or initial state required by its pipeline input workflow.
@@ -1292,12 +1319,14 @@ public sealed class EncoderSessionService : IDisposable
         /// <param name="key">Key value supplied to the pipeline input operation and used when producing its result.</param>
         /// <param name="reportError">Report error value supplied to the pipeline input operation and used when producing its result.</param>
         /// <param name="defaults">Defaults value supplied to the pipeline input operation and used when producing its result.</param>
+        /// <param name="taskRunner">Runner that owns intentionally concurrent pipeline-control operations.</param>
         /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
         public PipelineInputWriter(
             Process process,
             string key,
             Action<string> reportError,
             PublisherMediaSessionDefaultsPolicy defaults,
+            ISupervisedTaskRunner taskRunner,
             ILogger logger)
         {
             try
@@ -1306,6 +1335,7 @@ public sealed class EncoderSessionService : IDisposable
                 this.key = key;
                 this.reportError = reportError;
                 this.defaults = defaults;
+                this.taskRunner = taskRunner;
                 this.logger = logger;
                 queue = Channel.CreateBounded<byte[]>(new BoundedChannelOptions(defaults.EncoderPipelineChannelCapacity)
                 {
@@ -1355,20 +1385,25 @@ public sealed class EncoderSessionService : IDisposable
                     return;
                 }
                 reportError($"FFmpeg pipeline '{key}' exceeded its ingest buffer and is restarting instead of blocking the other outputs.");
-                _ = Task.Run(() =>
-                {
-                    try
+                taskRunner.Run(
+                    nameof(PipelineInputWriter),
+                    nameof(AbortForBackpressure),
+                    _ =>
                     {
-                        if (!process.HasExited)
+                        try
                         {
-                            process.Kill(entireProcessTree: true);
+                            if (!process.HasExited)
+                            {
+                                process.Kill(entireProcessTree: true);
+                            }
+                            return Task.CompletedTask;
                         }
-                    }
-                    catch (Exception exception)
-                    {
-                        logger.LogWarning(exception, $"Could not stop backpressured FFmpeg pipeline {key}.");
-                    }
-                });
+                        catch (Exception exception)
+                        {
+                            logger.LogWarning(exception, $"Could not stop backpressured FFmpeg pipeline {key}.");
+                            throw;
+                        }
+                    });
                 logger.LogWarning($"Aborted FFmpeg pipeline {key} because of backpressure.");
             }
             catch (Exception exception)

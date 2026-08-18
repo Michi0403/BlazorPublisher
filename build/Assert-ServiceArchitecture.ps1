@@ -39,9 +39,20 @@ $maintainedFiles = Get-ChildItem -LiteralPath $sourceRoot -Recurse -File | Where
 foreach ($file in $maintainedFiles) {
     $relative = $file.FullName.Substring($RepositoryRoot.Length).TrimStart([char[]]@('\', '/')).Replace([char]'\', [char]'/')
     $text = Get-Content -LiteralPath $file.FullName -Raw
-    if ($text -match '(?m)^\s*_\s*=(?!>)\s*[^;\r\n]*Async\s*\(') {
-        $errors.Add("Discarded asynchronous work is forbidden; await it or route it through an owned/supervised lifetime: $relative")
+    if ($text -match '(?m)^\s*_\s*=(?!>)\s*(?!await\b)[^;\r\n]*(?:Async\s*\(|InvokeAsync\s*\(|Task\.Run\s*\()') {
+        $errors.Add("Discarded asynchronous work is forbidden; await it or use ISupervisedTaskRunner: $relative")
     }
+
+    if ($text -match '(?m)^\s*new\s+SupervisedTaskRunner\s*\(') {
+        $errors.Add("SupervisedTaskRunner must be resolved through DI, not manually constructed: $relative")
+    }
+}
+
+
+$registrationPath = Join-Path $sourceRoot 'PublisherStudioServiceCollectionExtensions.cs'
+$registrationText = Get-Content -LiteralPath $registrationPath -Raw
+if ($registrationText.IndexOf('AddSingleton<ISupervisedTaskRunner, SupervisedTaskRunner>(services);', [StringComparison]::Ordinal) -lt 0) {
+    $errors.Add('PublisherStudio must retain singleton DI registration for ISupervisedTaskRunner -> SupervisedTaskRunner.')
 }
 
 $methodGuard = Join-Path $PSScriptRoot 'Assert-MethodDiagnostics.ps1'
@@ -62,4 +73,4 @@ if ($errors.Count -gt 0) {
     throw "Service architecture validation failed with $($errors.Count) problem(s)."
 }
 
-Write-Host 'Service architecture validation passed: DI/static-state rules, asynchronous ownership, and all-service method resilience enforcement remain intact.' -ForegroundColor Green
+Write-Host 'Service architecture validation passed: DI/static-state rules, ISupervisedTaskRunner ownership, and zero-exemption service resilience enforcement remain intact.' -ForegroundColor Green

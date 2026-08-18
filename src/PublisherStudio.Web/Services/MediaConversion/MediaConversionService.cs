@@ -159,6 +159,8 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     /// Stores the internal disposed state used by <see cref="MediaConversionService"/> while executing its surrounding workflow.
     /// </summary>
     private bool _disposed;
+    /// <summary>Observes intentionally concurrent conversion jobs so their failures and cancellation remain owned.</summary>
+    private readonly ISupervisedTaskRunner _taskRunner;
 
     /// <summary>
     /// Initializes a new <see cref="MediaConversionService"/> instance and captures the dependencies or initial state required by its media conversion workflow.
@@ -167,12 +169,14 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     /// <param name="runtimePolicy">Publisher runtime policy data service dependency used by the media conversion workflow to provide the corresponding application capability.</param>
     /// <param name="runtimePatterns">Publisher runtime pattern service dependency used by the media conversion workflow to provide the corresponding application capability.</param>
     /// <param name="publisherConfiguration">Publisher configuration value supplied to the media conversion operation and used when producing its result.</param>
+    /// <param name="taskRunner">Supervised task runner used for intentionally concurrent conversion jobs.</param>
     /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     public MediaConversionService(
         FfmpegLocator ffmpegLocator,
         IPublisherRuntimePolicyDataService runtimePolicy,
         IPublisherRuntimePatternService runtimePatterns,
         PublisherStudioConfigurationNode publisherConfiguration,
+        ISupervisedTaskRunner taskRunner,
         ILogger<MediaConversionService> logger)
     {
         this.logger = logger;
@@ -180,6 +184,7 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         _runtimePolicy = runtimePolicy;
         _runtimePatterns = runtimePatterns;
         _publisherConfiguration = publisherConfiguration;
+        _taskRunner = taskRunner;
         var publisherRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PublisherStudio");
         _root = Path.Combine(publisherRoot, "MediaConversions");
         _profilesPath = Path.Combine(publisherRoot, "MediaConversionProfiles.json");
@@ -330,7 +335,7 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
                         Cancellation = linked
                     };
                     if (!_jobs.TryAdd(id, job)) throw new InvalidOperationException("The conversion job could not be registered.");
-                    _ = Task.Run(() => ExecuteAsync(job, capabilities.Executable), CancellationToken.None);
+                    _taskRunner.Run(nameof(MediaConversionService), $"ExecuteConversion:{id:D}", _ => ExecuteAsync(job, capabilities.Executable), linked.Token);
                     return Snapshot(job);
     
         }

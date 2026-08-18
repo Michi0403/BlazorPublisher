@@ -1,6 +1,7 @@
 @namespace PublisherStudio.Components.Editor
 @inject IFileLocalizationService Localization
 
+@inject ILogger<PageNavigator> Logger
 <aside class="page-navigator">
     <div class="pane-heading" @oncontextmenu="ShowNavigatorMenu" @oncontextmenu:preventDefault>
         <strong>@LT("Pages")</strong>
@@ -78,7 +79,17 @@
 </DxContextMenu>
 
 @code {
-    private string LT(string text) => Localization.GetText(text);
+    private string LT(string text) {
+        try
+        {
+            return Localization.GetText(text);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageNavigator)}.{nameof(LT)} failed.");
+            throw;
+        }
+    }
 
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
     [Parameter] public bool TimelineVisible { get; set; }
@@ -92,64 +103,226 @@
 
     private async Task ShowPageMenu(PublicationPage publicationPage, MouseEventArgs args)
     {
-        _contextPageId = publicationPage.Id;
-        State.SelectPage(publicationPage.Id);
-        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
-        await _pageContextMenu.ShowAsync(args).ConfigureAwait(true);
+        try
+        {
+            _contextPageId = publicationPage.Id;
+            State.SelectPage(publicationPage.Id);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            await _pageContextMenu.ShowAsync(args).ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageNavigator)}.{nameof(ShowPageMenu)} failed.");
+            throw;
+        }
     }
 
     private async Task ShowNavigatorMenu(MouseEventArgs args)
     {
-        _contextPageId = null;
-        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
-        await _pageContextMenu.ShowAsync(args).ConfigureAwait(true);
+        try
+        {
+            _contextPageId = null;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            await _pageContextMenu.ShowAsync(args).ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageNavigator)}.{nameof(ShowNavigatorMenu)} failed.");
+            throw;
+        }
     }
 
     private void SelectContextPage()
     {
-        if (_contextPageId is { } id) State.SelectPage(id);
+        try
+        {
+            if (_contextPageId is { } id) State.SelectPage(id);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageNavigator)}.{nameof(SelectContextPage)} failed.");
+            throw;
+        }
     }
 
     private void DuplicateContextPage()
     {
-        SelectContextPage();
-        State.DuplicatePage();
+        try
+        {
+            SelectContextPage();
+            State.DuplicatePage();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageNavigator)}.{nameof(DuplicateContextPage)} failed.");
+            throw;
+        }
     }
 
     private void DeleteContextPage()
     {
-        SelectContextPage();
-        State.DeletePage();
-        _contextPageId = State.SelectedPageId;
+        try
+        {
+            SelectContextPage();
+            State.DeletePage();
+            _contextPageId = State.SelectedPageId;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageNavigator)}.{nameof(DeleteContextPage)} failed.");
+            throw;
+        }
     }
 
-    private void AddPage() => State.AddPage();
-    private Task ToggleTimeline() => RequestToggleTimeline.InvokeAsync();
-    private void DuplicateSelectedPage() => State.DuplicatePage();
+    private void AddPage() {
+        try
+        {
+            State.AddPage();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageNavigator)}.{nameof(AddPage)} failed.");
+            throw;
+        }
+    }
+    private Task ToggleTimeline() {
+        try
+        {
+            return RequestToggleTimeline.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageNavigator)}.{nameof(ToggleTimeline)} failed.");
+            throw;
+        }
+    }
+    private void DuplicateSelectedPage() {
+        try
+        {
+            State.DuplicatePage();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageNavigator)}.{nameof(DuplicateSelectedPage)} failed.");
+            throw;
+        }
+    }
 
     private void SetTransition(PublicationPageTransitionKind kind)
     {
-        SelectContextPage();
-        State.UpdatePageTransition(transition => transition.Kind = kind);
+        try
+        {
+            SelectContextPage();
+            State.UpdatePageTransition(transition => transition.Kind = kind);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageNavigator)}.{nameof(SetTransition)} failed.");
+            throw;
+        }
     }
 
-    private void TransitionNone() => SetTransition(PublicationPageTransitionKind.None);
-    private void TransitionFade() => SetTransition(PublicationPageTransitionKind.Fade);
-    private void TransitionPush() => SetTransition(PublicationPageTransitionKind.Push);
-    private void TransitionWipe() => SetTransition(PublicationPageTransitionKind.Wipe);
-    private void TransitionZoom() => SetTransition(PublicationPageTransitionKind.Zoom);
-    private void TransitionFlip() => SetTransition(PublicationPageTransitionKind.Flip);
+    private void TransitionNone() {
+        try
+        {
+            SetTransition(PublicationPageTransitionKind.None);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageNavigator)}.{nameof(TransitionNone)} failed.");
+            throw;
+        }
+    }
+    private void TransitionFade() {
+        try
+        {
+            SetTransition(PublicationPageTransitionKind.Fade);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageNavigator)}.{nameof(TransitionFade)} failed.");
+            throw;
+        }
+    }
+    private void TransitionPush() {
+        try
+        {
+            SetTransition(PublicationPageTransitionKind.Push);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageNavigator)}.{nameof(TransitionPush)} failed.");
+            throw;
+        }
+    }
+    private void TransitionWipe() {
+        try
+        {
+            SetTransition(PublicationPageTransitionKind.Wipe);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageNavigator)}.{nameof(TransitionWipe)} failed.");
+            throw;
+        }
+    }
+    private void TransitionZoom() {
+        try
+        {
+            SetTransition(PublicationPageTransitionKind.Zoom);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageNavigator)}.{nameof(TransitionZoom)} failed.");
+            throw;
+        }
+    }
+    private void TransitionFlip() {
+        try
+        {
+            SetTransition(PublicationPageTransitionKind.Flip);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageNavigator)}.{nameof(TransitionFlip)} failed.");
+            throw;
+        }
+    }
 
     private void FitTimelineToContent()
     {
-        SelectContextPage();
-        State.SetPageTimelineDuration(Math.Max(1, TimelineContentEnd + .5));
+        try
+        {
+            SelectContextPage();
+            State.SetPageTimelineDuration(Math.Max(1, TimelineContentEnd + .5));
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageNavigator)}.{nameof(FitTimelineToContent)} failed.");
+            throw;
+        }
     }
 
     private void SetTenSecondTimeline()
     {
-        SelectContextPage();
-        State.SetPageTimelineDuration(10);
+        try
+        {
+            SelectContextPage();
+            State.SetPageTimelineDuration(10);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageNavigator)}.{nameof(SetTenSecondTimeline)} failed.");
+            throw;
+        }
     }
 
     private double TimelineContentEnd => Math.Max(
@@ -160,10 +333,22 @@
             .Select(item => item.TimelineStartSeconds + item.TimelineLengthSeconds)
             .DefaultIfEmpty(0).Max());
 
-    private string TransitionText(PublicationPageTransitionKind kind) =>
-        State.CurrentPage.Transition.Kind == kind ? $"✓ {TransitionName(kind)}" : TransitionName(kind);
+    private string TransitionText(PublicationPageTransitionKind kind) {
+        try
+        {
+            return State.CurrentPage.Transition.Kind == kind ? $"✓ {TransitionName(kind)}" : TransitionName(kind);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageNavigator)}.{nameof(TransitionText)} failed.");
+            throw;
+        }
+    }
 
-    private string TransitionName(PublicationPageTransitionKind kind) => LT(kind switch
+    private string TransitionName(PublicationPageTransitionKind kind) {
+        try
+        {
+            return LT(kind switch
     {
         PublicationPageTransitionKind.None => "None",
         PublicationPageTransitionKind.Fade => "Fade",
@@ -173,9 +358,45 @@
         PublicationPageTransitionKind.Flip => "Flip",
         _ => kind.ToString()
     });
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageNavigator)}.{nameof(TransitionName)} failed.");
+            throw;
+        }
+    }
 
-    private string MiniPageStyle(PublicationPage page) => $"aspect-ratio:{page.WidthMm.ToString(CultureInfo.InvariantCulture)}/{page.HeightMm.ToString(CultureInfo.InvariantCulture)};background:{page.Background}";
-    private string MiniElementStyle(PublicationElement element, PublicationPage page) =>
-        $"left:{Inv(element.X / page.WidthMm * 100)}%;top:{Inv(element.Y / page.HeightMm * 100)}%;width:{Inv(element.Width / page.WidthMm * 100)}%;height:{Inv(element.Height / page.HeightMm * 100)}%;transform:rotate({Inv(element.Rotation)}deg)";
-    private string Inv(double value) => value.ToString("0.##", CultureInfo.InvariantCulture);
+    private string MiniPageStyle(PublicationPage page) {
+        try
+        {
+            return $"aspect-ratio:{page.WidthMm.ToString(CultureInfo.InvariantCulture)}/{page.HeightMm.ToString(CultureInfo.InvariantCulture)};background:{page.Background}";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageNavigator)}.{nameof(MiniPageStyle)} failed.");
+            throw;
+        }
+    }
+    private string MiniElementStyle(PublicationElement element, PublicationPage page) {
+        try
+        {
+            return $"left:{Inv(element.X / page.WidthMm * 100)}%;top:{Inv(element.Y / page.HeightMm * 100)}%;width:{Inv(element.Width / page.WidthMm * 100)}%;height:{Inv(element.Height / page.HeightMm * 100)}%;transform:rotate({Inv(element.Rotation)}deg)";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageNavigator)}.{nameof(MiniElementStyle)} failed.");
+            throw;
+        }
+    }
+    private string Inv(double value) {
+        try
+        {
+            return value.ToString("0.##", CultureInfo.InvariantCulture);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageNavigator)}.{nameof(Inv)} failed.");
+            throw;
+        }
+    }
 }

@@ -3,6 +3,7 @@
 @inject PublicationComponentService Components
 @inject IJSRuntime JS
 
+@inject ILogger<DevExtremeComponentView> Logger
 <div class="devextreme-publication-component @(Item.ShowTitle ? "has-component-title" : null) @Item.CustomCssClass" style="@ContainerStyle">
     @if (Item.ShowTitle)
     {
@@ -56,26 +57,54 @@
         _ => false
     };
     private string ContainerStyle => $"background:{Item.Background};border:{Item.BorderWidthMm.ToString("0.###", CultureInfo.InvariantCulture)}mm solid {Item.BorderColor};{Item.CustomCss}";
-    private string Inv(double value) => value.ToString("0.####", CultureInfo.InvariantCulture);
+    private string Inv(double value) {
+        try
+        {
+            return value.ToString("0.####", CultureInfo.InvariantCulture);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentView)}.{nameof(Inv)} failed.");
+            throw;
+        }
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (MissingData) return;
-        var config = ClientConfigBase64;
-        if (string.Equals(config, _lastRenderedConfig, StringComparison.Ordinal)) return;
         try
         {
-            await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.renderById", ElementId, config).ConfigureAwait(true);
-            _lastRenderedConfig = config;
+            if (MissingData) return;
+            var config = ClientConfigBase64;
+            if (string.Equals(config, _lastRenderedConfig, StringComparison.Ordinal)) return;
+            try
+            {
+                await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.renderById", ElementId, config).ConfigureAwait(true);
+                _lastRenderedConfig = config;
+            }
+            catch (JSDisconnectedException) { }
+            catch (InvalidOperationException) { }
+    
         }
-        catch (JSDisconnectedException) { }
-        catch (InvalidOperationException) { }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentView)}.{nameof(OnAfterRenderAsync)} failed.");
+            throw;
+        }
     }
 
     public async ValueTask DisposeAsync()
     {
-        try { await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.disposeById", ElementId).ConfigureAwait(true); }
-        catch (JSDisconnectedException) { }
-        catch (InvalidOperationException) { }
+        try
+        {
+            try { await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.disposeById", ElementId).ConfigureAwait(true); }
+            catch (JSDisconnectedException) { }
+            catch (InvalidOperationException) { }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentView)}.{nameof(DisposeAsync)} failed.");
+            throw;
+        }
     }
 }

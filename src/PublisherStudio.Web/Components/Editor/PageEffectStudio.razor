@@ -144,12 +144,45 @@
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
     [Parameter] public EventCallback Closed { get; set; }
 
-    private Task Close() => Closed.InvokeAsync();
+    private Task Close() {
+        try
+        {
+            return Closed.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageEffectStudio)}.{nameof(Close)} failed.");
+            throw;
+        }
+    }
 
-    private void ChangePageColor(ChangeEventArgs args) => SafeUpdate("change page color", () => State.UpdatePage(page => page.Background = SafeColor(args.Value?.ToString())));
-    private void SetTransparent() => SafeUpdate("make page transparent", () => State.UpdatePage(page => page.Background = "transparent"));
+    private void ChangePageColor(ChangeEventArgs args) {
+        try
+        {
+            SafeUpdate("change page color", () => State.UpdatePage(page => page.Background = SafeColor(args.Value?.ToString())));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageEffectStudio)}.{nameof(ChangePageColor)} failed.");
+            throw;
+        }
+    }
+    private void SetTransparent() {
+        try
+        {
+            SafeUpdate("make page transparent", () => State.UpdatePage(page => page.Background = "transparent"));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageEffectStudio)}.{nameof(SetTransparent)} failed.");
+            throw;
+        }
+    }
 
-    private void AddEffect(PublicationPageEffectKind kind) => SafeUpdate("add page effect", () => State.UpdatePage(page => page.EffectLayers.Add(new PublicationPageEffectLayer
+    private void AddEffect(PublicationPageEffectKind kind) {
+        try
+        {
+            SafeUpdate("add page effect", () => State.UpdatePage(page => page.EffectLayers.Add(new PublicationPageEffectLayer
     {
         Name = kind switch
         {
@@ -166,37 +199,140 @@
         Opacity = .7,
         ToOpacity = .7
     })));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageEffectStudio)}.{nameof(AddEffect)} failed.");
+            throw;
+        }
+    }
 
-    private void RemoveEffect(Guid id) => SafeUpdate("remove page effect", () => State.UpdatePage(page => page.EffectLayers.RemoveAll(item => item.Id == id)));
+    private void RemoveEffect(Guid id) {
+        try
+        {
+            SafeUpdate("remove page effect", () => State.UpdatePage(page => page.EffectLayers.RemoveAll(item => item.Id == id)));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageEffectStudio)}.{nameof(RemoveEffect)} failed.");
+            throw;
+        }
+    }
 
-    private void Update(Guid id, Action<PublicationPageEffectLayer> action) => SafeUpdate("update page effect", () => State.UpdatePage(page =>
+    private void Update(Guid id, Action<PublicationPageEffectLayer> action) {
+        try
+        {
+            SafeUpdate("update page effect", () => State.UpdatePage(page =>
     {
         var effect = page.EffectLayers.FirstOrDefault(item => item.Id == id);
         if (effect is not null) action(effect);
     }));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageEffectStudio)}.{nameof(Update)} failed.");
+            throw;
+        }
+    }
 
-    private void UpdateText(Guid id, ChangeEventArgs args, Action<PublicationPageEffectLayer, string> update) =>
-        Update(id, effect => update(effect, args.Value?.ToString()?.Trim() ?? string.Empty));
+    private void UpdateText(Guid id, ChangeEventArgs args, Action<PublicationPageEffectLayer, string> update) {
+        try
+        {
+            Update(id, effect => update(effect, args.Value?.ToString()?.Trim() ?? string.Empty));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageEffectStudio)}.{nameof(UpdateText)} failed.");
+            throw;
+        }
+    }
 
-    private void UpdateBool(Guid id, ChangeEventArgs args, Action<PublicationPageEffectLayer, bool> update) =>
-        Update(id, effect => update(effect, args.Value is bool value ? value : bool.TryParse(args.Value?.ToString(), out var parsed) && parsed));
+    private void UpdateBool(Guid id, ChangeEventArgs args, Action<PublicationPageEffectLayer, bool> update) {
+        try
+        {
+            Update(id, effect => update(effect, args.Value is bool value ? value : bool.TryParse(args.Value?.ToString(), out var parsed) && parsed));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageEffectStudio)}.{nameof(UpdateBool)} failed.");
+            throw;
+        }
+    }
 
     private void UpdateDouble(Guid id, ChangeEventArgs args, double minimum, double maximum, Action<PublicationPageEffectLayer, double> update)
     {
-        if (double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
-            Update(id, effect => update(effect, Math.Clamp(value, minimum, maximum)));
+        try
+        {
+            if (double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
+                Update(id, effect => update(effect, Math.Clamp(value, minimum, maximum)));
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageEffectStudio)}.{nameof(UpdateDouble)} failed.");
+            throw;
+        }
     }
 
     private void UpdateInt(Guid id, ChangeEventArgs args, int minimum, int maximum, Action<PublicationPageEffectLayer, int> update)
     {
-        if (int.TryParse(args.Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var value))
-            Update(id, effect => update(effect, Math.Clamp(value, minimum, maximum)));
+        try
+        {
+            if (int.TryParse(args.Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var value))
+                Update(id, effect => update(effect, Math.Clamp(value, minimum, maximum)));
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageEffectStudio)}.{nameof(UpdateInt)} failed.");
+            throw;
+        }
     }
 
-    private void UpdatePlacement(Guid id, ChangeEventArgs args) => UpdateEnum(id, args, (PublicationPageEffectLayer item, PublicationPageEffectPlacement value) => item.Placement = value);
-    private void UpdateKind(Guid id, ChangeEventArgs args) => UpdateEnum(id, args, (PublicationPageEffectLayer item, PublicationPageEffectKind value) => item.Kind = value);
-    private void UpdateBlendMode(Guid id, ChangeEventArgs args) => UpdateEnum(id, args, (PublicationPageEffectLayer item, PublicationPageEffectBlendMode value) => item.BlendMode = value);
-    private void UpdateEasing(Guid id, ChangeEventArgs args) => UpdateEnum(id, args, (PublicationPageEffectLayer item, PublicationAnimationEasing value) => item.Easing = value);
+    private void UpdatePlacement(Guid id, ChangeEventArgs args) {
+        try
+        {
+            UpdateEnum(id, args, (PublicationPageEffectLayer item, PublicationPageEffectPlacement value) => item.Placement = value);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageEffectStudio)}.{nameof(UpdatePlacement)} failed.");
+            throw;
+        }
+    }
+    private void UpdateKind(Guid id, ChangeEventArgs args) {
+        try
+        {
+            UpdateEnum(id, args, (PublicationPageEffectLayer item, PublicationPageEffectKind value) => item.Kind = value);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageEffectStudio)}.{nameof(UpdateKind)} failed.");
+            throw;
+        }
+    }
+    private void UpdateBlendMode(Guid id, ChangeEventArgs args) {
+        try
+        {
+            UpdateEnum(id, args, (PublicationPageEffectLayer item, PublicationPageEffectBlendMode value) => item.BlendMode = value);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageEffectStudio)}.{nameof(UpdateBlendMode)} failed.");
+            throw;
+        }
+    }
+    private void UpdateEasing(Guid id, ChangeEventArgs args) {
+        try
+        {
+            UpdateEnum(id, args, (PublicationPageEffectLayer item, PublicationAnimationEasing value) => item.Easing = value);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageEffectStudio)}.{nameof(UpdateEasing)} failed.");
+            throw;
+        }
+    }
 
     private void UpdateEnum<T>(Guid id, ChangeEventArgs args, Action<PublicationPageEffectLayer, T> update) where T : struct, Enum
     {
@@ -208,15 +344,44 @@
     {
         try
         {
-            update();
+            try
+            {
+                update();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Page effect operation {Operation} failed.", operation);
+                Notifications.Error(ex.Message, "Page effect update failed", nameof(PageEffectStudio));
+            }
+    
         }
-        catch (Exception ex)
+        catch (Exception __componentMethodException)
         {
-            Logger.LogError(ex, "Page effect operation {Operation} failed.", operation);
-            Notifications.Error(ex.Message, "Page effect update failed", nameof(PageEffectStudio));
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageEffectStudio)}.{nameof(SafeUpdate)} failed.");
+            throw;
         }
     }
 
-    private string SafeColor(string? value) => !string.IsNullOrWhiteSpace(value) && value.StartsWith('#') && value.Length is 4 or 7 ? value : "#ffffff";
-    private string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+    private string SafeColor(string? value) {
+        try
+        {
+            return !string.IsNullOrWhiteSpace(value) && value.StartsWith('#') && value.Length is 4 or 7 ? value : "#ffffff";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageEffectStudio)}.{nameof(SafeColor)} failed.");
+            throw;
+        }
+    }
+    private string Inv(double value) {
+        try
+        {
+            return value.ToString("0.###", CultureInfo.InvariantCulture);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageEffectStudio)}.{nameof(Inv)} failed.");
+            throw;
+        }
+    }
 }

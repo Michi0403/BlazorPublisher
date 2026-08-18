@@ -6,12 +6,17 @@ namespace PublisherStudio.Services.Streaming.UseCases.Editor;
 /// Coordinates streaming session behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
 /// <param name="mediaHost">Streaming media host client dependency used by the streaming session workflow to provide the corresponding application capability.</param>
-public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
+/// <param name="taskRunner">Runner that owns intentionally concurrent streaming operations and observes their completion.</param>
+public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost, ISupervisedTaskRunner taskRunner)
 {
     /// <summary>
     /// Stores the streaming media host client dependency used by <see cref="StreamingSessionService"/> to delegate that application responsibility to its owning collaborator.
     /// </summary>
     private readonly StreamingMediaHostClient _mediaHost = mediaHost;
+    /// <summary>
+    /// Observes intentionally concurrent media-host work so exceptions and cancellation remain owned by the service lifetime.
+    /// </summary>
+    private readonly ISupervisedTaskRunner _taskRunner = taskRunner;
     /// <summary>
     /// Stores the synchronization primitive that protects concurrent access to gate state owned by <see cref="StreamingSessionService"/>.
     /// </summary>
@@ -218,7 +223,7 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
             await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                _ = await SetRecordingCoreAsync(!_snapshot.Recording, cancellationToken).ConfigureAwait(false);
+                await SetRecordingCoreAsync(!_snapshot.Recording, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -297,7 +302,8 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
     try
     {
             _snapshot.ProgramPageId = pageId;
-            if (_snapshot.SessionId is { } sessionId) _ = _mediaHost.SetProgramPageAsync(sessionId, pageId);
+            if (_snapshot.SessionId is { } sessionId)
+                _taskRunner.Run(nameof(StreamingSessionService), nameof(SetProgramPage), cancellationToken => _mediaHost.SetProgramPageAsync(sessionId, pageId, cancellationToken));
             Changed?.Invoke();
     
     }
@@ -367,24 +373,40 @@ public sealed class StreamingSessionService(StreamingMediaHostClient mediaHost)
             StopEventPolling();
             _eventPollCancellation = new CancellationTokenSource();
             var cancellationToken = _eventPollCancellation.Token;
-            _ = Task.Run(async () =>
-            {
-                while (!cancellationToken.IsCancellationRequested)
+            _taskRunner.Run(
+                nameof(StreamingSessionService),
+                nameof(StartEventPolling),
+                async token =>
                 {
-                    try
+                    while (!token.IsCancellationRequested)
                     {
-                        var events = await _mediaHost.ReadEventsAsync(sessionId, cancellationToken).ConfigureAwait(false);
-                        foreach (var hotkeyEvent in events) HotkeyTriggered?.Invoke(hotkeyEvent);
-                        await Task.Delay(300, cancellationToken).ConfigureAwait(false);
+                        try
+                        {
+                            var events = await _mediaHost.ReadEventsAsync(sessionId, token).ConfigureAwait(false);
+                            foreach (var hotkeyEvent in events) HotkeyTriggered?.Invoke(hotkeyEvent);
+                            await Task.Delay(300, token).ConfigureAwait(false);
+                        }
+                        catch (OperationCanceledException exception) when (token.IsCancellationRequested)
+                        {
+                            System.Diagnostics.Trace.TraceInformation($"Streaming event polling for {sessionId:D} was canceled: {exception.Message}");
+                            break;
+                        }
+                        catch (Exception exception)
+                        {
+                            System.Diagnostics.Trace.TraceWarning($"Streaming event polling for {sessionId:D} failed and will retry: {exception}");
+                            try
+                            {
+                                await Task.Delay(1000, token).ConfigureAwait(false);
+                            }
+                            catch (OperationCanceledException retryCancellation) when (token.IsCancellationRequested)
+                            {
+                                System.Diagnostics.Trace.TraceInformation($"Streaming event polling retry for {sessionId:D} was canceled: {retryCancellation.Message}");
+                                break;
+                            }
+                        }
                     }
-                    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { break; }
-                    catch
-                    {
-                        try { await Task.Delay(1000, cancellationToken).ConfigureAwait(false); }
-                        catch (OperationCanceledException) { break; }
-                    }
-                }
-            }, cancellationToken);
+                },
+                cancellationToken);
     
     }
     catch (Exception __serviceMethodException)

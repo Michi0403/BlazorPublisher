@@ -1,6 +1,7 @@
 @namespace PublisherStudio.Components.Editor
 @inject PublicationMediaAssetStore MediaAssets
 
+@inject ILogger<PrintPublication> Logger
 <div class="print-publication" aria-hidden="true"
      data-publication-culture="@(string.IsNullOrWhiteSpace(Document.ProjectSettings.Culture) ? CultureInfo.CurrentUICulture.Name : Document.ProjectSettings.Culture)"
      data-playback-start="@Document.Playback.StartAutomatically.ToString().ToLowerInvariant()"
@@ -166,7 +167,10 @@
 @code {
     [Parameter, EditorRequired] public PublicationDocument Document { get; set; } = default!;
 
-    private RenderFragment PictureFilter(ImageFrameElement image) => builder =>
+    private RenderFragment PictureFilter(ImageFrameElement image) {
+        try
+        {
+            return builder =>
     {
         var sequence = 0;
         var id = PictureFilterId(image);
@@ -211,8 +215,18 @@
         builder.CloseElement();
         builder.CloseElement();
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(PictureFilter)} failed.");
+            throw;
+        }
+    }
 
-    private RenderFragment WordArt(WordArtElement item) => builder =>
+    private RenderFragment WordArt(WordArtElement item) {
+        try
+        {
+            return builder =>
     {
         var sequence = 0;
         var gradientId = $"print-wordart-gradient-{item.Id:N}";
@@ -242,43 +256,62 @@
         AddWordArtText(builder, ref sequence, item, pathId, item.GradientFill ? $"url(#{gradientId})" : item.FillColor, 0, 0, item.OutlineWidth, true);
         builder.CloseElement();
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(WordArt)} failed.");
+            throw;
+        }
+    }
 
     private void AddWordArtText(RenderTreeBuilder builder, ref int sequence, WordArtElement item, string pathId, string fill, double dx, double dy, double outline, bool main)
     {
-        builder.OpenElement(sequence++, "text");
-        builder.AddAttribute(sequence++, "x", "500");
-        builder.AddAttribute(sequence++, "y", item.Warp == WordArtWarp.None ? "185" : "0");
-        builder.AddAttribute(sequence++, "dx", Inv(dx));
-        builder.AddAttribute(sequence++, "dy", Inv(dy));
-        builder.AddAttribute(sequence++, "text-anchor", "middle");
-        builder.AddAttribute(sequence++, "dominant-baseline", "middle");
-        builder.AddAttribute(sequence++, "font-family", item.FontFamily);
-        builder.AddAttribute(sequence++, "font-size", Inv(item.FontSizePt * 3.5));
-        builder.AddAttribute(sequence++, "font-weight", item.Bold ? "700" : "400");
-        builder.AddAttribute(sequence++, "font-style", item.Italic ? "italic" : "normal");
-        builder.AddAttribute(sequence++, "letter-spacing", Inv(item.LetterSpacing * 2));
-        builder.AddAttribute(sequence++, "fill", fill);
-        builder.AddAttribute(sequence++, "stroke", main ? item.OutlineColor : "none");
-        builder.AddAttribute(sequence++, "stroke-width", Inv(outline));
-        builder.AddAttribute(sequence++, "paint-order", "stroke fill");
-        if (main && item.ShadowEnabled) builder.AddAttribute(sequence++, "class", "wordart-main wordart-shadow");
-        if (item.Warp == WordArtWarp.None)
+        try
         {
-            builder.AddContent(sequence++, item.Text);
-        }
-        else
-        {
-            builder.OpenElement(sequence++, "textPath");
-            builder.AddAttribute(sequence++, "href", $"#{pathId}");
-            builder.AddAttribute(sequence++, "startOffset", "50%");
+            builder.OpenElement(sequence++, "text");
+            builder.AddAttribute(sequence++, "x", "500");
+            builder.AddAttribute(sequence++, "y", item.Warp == WordArtWarp.None ? "185" : "0");
+            builder.AddAttribute(sequence++, "dx", Inv(dx));
+            builder.AddAttribute(sequence++, "dy", Inv(dy));
             builder.AddAttribute(sequence++, "text-anchor", "middle");
-            builder.AddContent(sequence++, item.Text);
+            builder.AddAttribute(sequence++, "dominant-baseline", "middle");
+            builder.AddAttribute(sequence++, "font-family", item.FontFamily);
+            builder.AddAttribute(sequence++, "font-size", Inv(item.FontSizePt * 3.5));
+            builder.AddAttribute(sequence++, "font-weight", item.Bold ? "700" : "400");
+            builder.AddAttribute(sequence++, "font-style", item.Italic ? "italic" : "normal");
+            builder.AddAttribute(sequence++, "letter-spacing", Inv(item.LetterSpacing * 2));
+            builder.AddAttribute(sequence++, "fill", fill);
+            builder.AddAttribute(sequence++, "stroke", main ? item.OutlineColor : "none");
+            builder.AddAttribute(sequence++, "stroke-width", Inv(outline));
+            builder.AddAttribute(sequence++, "paint-order", "stroke fill");
+            if (main && item.ShadowEnabled) builder.AddAttribute(sequence++, "class", "wordart-main wordart-shadow");
+            if (item.Warp == WordArtWarp.None)
+            {
+                builder.AddContent(sequence++, item.Text);
+            }
+            else
+            {
+                builder.OpenElement(sequence++, "textPath");
+                builder.AddAttribute(sequence++, "href", $"#{pathId}");
+                builder.AddAttribute(sequence++, "startOffset", "50%");
+                builder.AddAttribute(sequence++, "text-anchor", "middle");
+                builder.AddContent(sequence++, item.Text);
+                builder.CloseElement();
+            }
             builder.CloseElement();
+    
         }
-        builder.CloseElement();
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(AddWordArtText)} failed.");
+            throw;
+        }
     }
 
-    private RenderFragment ConnectorMarkerDefinition(ConnectorElement connector, bool start) => builder =>
+    private RenderFragment ConnectorMarkerDefinition(ConnectorElement connector, bool start) {
+        try
+        {
+            return builder =>
     {
         var marker = start ? connector.StartMarker : connector.EndMarker;
         if (marker == ConnectorMarker.None) return;
@@ -302,79 +335,310 @@
         builder.CloseElement();
         builder.CloseElement();
     };
-
-    private string MarkerId(ConnectorElement connector, bool start) => $"print-connector-{connector.Id:N}-{(start ? "start" : "end")}";
-    private string MarkerUrl(ConnectorElement connector, bool start)
-    {
-        var marker = start ? connector.StartMarker : connector.EndMarker;
-        return marker == ConnectorMarker.None ? string.Empty : $"url(#{MarkerId(connector, start)})";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(ConnectorMarkerDefinition)} failed.");
+            throw;
+        }
     }
 
-    private string VideoFit(PublicationVideoFitMode mode) => mode switch
+    private string MarkerId(ConnectorElement connector, bool start) {
+        try
+        {
+            return $"print-connector-{connector.Id:N}-{(start ? "start" : "end")}";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(MarkerId)} failed.");
+            throw;
+        }
+    }
+    private string MarkerUrl(ConnectorElement connector, bool start)
+    {
+        try
+        {
+            var marker = start ? connector.StartMarker : connector.EndMarker;
+            return marker == ConnectorMarker.None ? string.Empty : $"url(#{MarkerId(connector, start)})";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(MarkerUrl)} failed.");
+            throw;
+        }
+    }
+
+    private string VideoFit(PublicationVideoFitMode mode) {
+        try
+        {
+            return mode switch
     {
         PublicationVideoFitMode.Cover => "cover",
         PublicationVideoFitMode.Stretch => "fill",
         _ => "contain"
     };
-    private IEnumerable<double> AudioSamples(AudioElement audio) => audio.WaveformSamples.Count > 0
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(VideoFit)} failed.");
+            throw;
+        }
+    }
+    private IEnumerable<double> AudioSamples(AudioElement audio) {
+        try
+        {
+            return audio.WaveformSamples.Count > 0
         ? audio.WaveformSamples.Take(96)
         : Enumerable.Range(0, 64).Select(index => .22 + Math.Abs(Math.Sin(index * .41)) * .68);
-    private string WaveHeight(double sample) => $"{Math.Clamp(sample, .04, 1) * 100:0.#}%";
-    private string Time(double seconds) => TimeSpan.FromSeconds(Math.Max(0, seconds)).ToString(seconds >= 3600 ? @"h\:mm\:ss" : @"m\:ss");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(AudioSamples)} failed.");
+            throw;
+        }
+    }
+    private string WaveHeight(double sample) {
+        try
+        {
+            return $"{Math.Clamp(sample, .04, 1) * 100:0.#}%";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(WaveHeight)} failed.");
+            throw;
+        }
+    }
+    private string Time(double seconds) {
+        try
+        {
+            return TimeSpan.FromSeconds(Math.Max(0, seconds)).ToString(seconds >= 3600 ? @"h\:mm\:ss" : @"m\:ss");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(Time)} failed.");
+            throw;
+        }
+    }
 
-    private string PageStyle(PublicationPage p) => $"width:{Mm(p.WidthMm)};height:{Mm(p.HeightMm)};background:{p.Background};--publisher-print-fill:{p.Background}";
-    private string ElementStyle(PublicationElement e) => $"left:{Mm(e.X)};top:{Mm(e.Y)};width:{Mm(e.Width)};height:{Mm(e.Height)};z-index:{e.ZIndex};transform:rotate({Inv(e.Rotation)}deg)";
-    private string ShapeStyle(ShapeElement s) => s.Shape == PublicationShape.Line
+    private string PageStyle(PublicationPage p) {
+        try
+        {
+            return $"width:{Mm(p.WidthMm)};height:{Mm(p.HeightMm)};background:{p.Background};--publisher-print-fill:{p.Background}";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(PageStyle)} failed.");
+            throw;
+        }
+    }
+    private string ElementStyle(PublicationElement e) {
+        try
+        {
+            return $"left:{Mm(e.X)};top:{Mm(e.Y)};width:{Mm(e.Width)};height:{Mm(e.Height)};z-index:{e.ZIndex};transform:rotate({Inv(e.Rotation)}deg)";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(ElementStyle)} failed.");
+            throw;
+        }
+    }
+    private string ShapeStyle(ShapeElement s) {
+        try
+        {
+            return s.Shape == PublicationShape.Line
         ? $"background:{s.Stroke};height:{Mm(Math.Max(s.StrokeWidth, .3))};top:50%;position:absolute;width:100%"
         : $"background:{s.Fill};border:{Mm(s.StrokeWidth)} solid {s.Stroke};border-radius:{(s.Shape == PublicationShape.Ellipse ? "50%" : s.Shape == PublicationShape.RoundedRectangle ? Mm(s.CornerRadiusMm) : "0")}";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(ShapeStyle)} failed.");
+            throw;
+        }
+    }
 
     private string ImageFrameStyle(ImageFrameElement i)
     {
-        var radius = i.MaskShape == ImageMaskShape.Ellipse ? "50%" : i.MaskShape == ImageMaskShape.RoundedRectangle ? Mm(i.CornerRadiusMm) : "0";
-        var shadow = i.ShadowEnabled ? "2mm 2mm 4mm rgba(15,23,42,.32)" : "none";
-        return $"border-radius:{radius};border:{Mm(i.BorderWidthMm)} solid {i.BorderColor};box-shadow:{shadow}";
+        try
+        {
+            var radius = i.MaskShape == ImageMaskShape.Ellipse ? "50%" : i.MaskShape == ImageMaskShape.RoundedRectangle ? Mm(i.CornerRadiusMm) : "0";
+            var shadow = i.ShadowEnabled ? "2mm 2mm 4mm rgba(15,23,42,.32)" : "none";
+            return $"border-radius:{radius};border:{Mm(i.BorderWidthMm)} solid {i.BorderColor};box-shadow:{shadow}";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(ImageFrameStyle)} failed.");
+            throw;
+        }
     }
 
     private string ImageStyle(ImageFrameElement i)
     {
-        var fit = i.FitInsideFrame ? "contain" : "cover";
-        var sx = i.FlipHorizontal ? -i.CropScale : i.CropScale;
-        var sy = i.FlipVertical ? -i.CropScale : i.CropScale;
-        var tint = i.TintOpacity > .001 ? $"url(#{PictureFilterId(i)}) " : string.Empty;
-        return $"object-fit:{fit};transform:translate({Inv(i.CropX)}%,{Inv(i.CropY)}%) rotate({Inv(i.ImageRotation)}deg) scale({Inv(sx)},{Inv(sy)});opacity:{Inv(i.Opacity)};filter:{tint}brightness({Inv(i.Brightness)}) contrast({Inv(i.Contrast)}) saturate({Inv(i.Saturation)}) hue-rotate({Inv(i.HueRotation)}deg) invert({Inv(i.Invert)}) grayscale({Inv(i.Grayscale)}) sepia({Inv(i.Sepia)}) blur({Inv(i.Blur)}px)";
+        try
+        {
+            var fit = i.FitInsideFrame ? "contain" : "cover";
+            var sx = i.FlipHorizontal ? -i.CropScale : i.CropScale;
+            var sy = i.FlipVertical ? -i.CropScale : i.CropScale;
+            var tint = i.TintOpacity > .001 ? $"url(#{PictureFilterId(i)}) " : string.Empty;
+            return $"object-fit:{fit};transform:translate({Inv(i.CropX)}%,{Inv(i.CropY)}%) rotate({Inv(i.ImageRotation)}deg) scale({Inv(sx)},{Inv(sy)});opacity:{Inv(i.Opacity)};filter:{tint}brightness({Inv(i.Brightness)}) contrast({Inv(i.Contrast)}) saturate({Inv(i.Saturation)}) hue-rotate({Inv(i.HueRotation)}deg) invert({Inv(i.Invert)}) grayscale({Inv(i.Grayscale)}) sepia({Inv(i.Sepia)}) blur({Inv(i.Blur)}px)";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(ImageStyle)} failed.");
+            throw;
+        }
     }
 
-    private string PictureFilterId(ImageFrameElement image) => $"print-picture-filter-{image.Id:N}";
-    private string BlendMode(ImageBlendMode mode) => mode.ToString().ToLowerInvariant();
-    private string WordArtPath(WordArtWarp warp) => warp switch
+    private string PictureFilterId(ImageFrameElement image) {
+        try
+        {
+            return $"print-picture-filter-{image.Id:N}";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(PictureFilterId)} failed.");
+            throw;
+        }
+    }
+    private string BlendMode(ImageBlendMode mode) {
+        try
+        {
+            return mode.ToString().ToLowerInvariant();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(BlendMode)} failed.");
+            throw;
+        }
+    }
+    private string WordArtPath(WordArtWarp warp) {
+        try
+        {
+            return warp switch
     {
         WordArtWarp.ArchUp => "M 80 225 Q 500 5 920 225",
         WordArtWarp.ArchDown => "M 80 75 Q 500 295 920 75",
         WordArtWarp.Wave => "M 40 165 C 220 20 350 290 520 145 C 690 0 810 280 960 125",
         _ => "M 50 170 L 950 170"
     };
-    private string Mm(double value) => $"{Inv(value)}mm";
-    private string MediaSource(PublicationMediaElement media) => MediaAssets.GetOrRegister(media);
-    private string MediaSegmentSource(PublicationMediaSegment segment) => MediaAssets.GetOrRegister(segment);
-    private string MediaPoster(VideoElement video) => video.EffectiveSegments.FirstOrDefault()?.PosterDataUrl is { Length: > 0 } poster
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(WordArtPath)} failed.");
+            throw;
+        }
+    }
+    private string Mm(double value) {
+        try
+        {
+            return $"{Inv(value)}mm";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(Mm)} failed.");
+            throw;
+        }
+    }
+    private string MediaSource(PublicationMediaElement media) {
+        try
+        {
+            return MediaAssets.GetOrRegister(media);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(MediaSource)} failed.");
+            throw;
+        }
+    }
+    private string MediaSegmentSource(PublicationMediaSegment segment) {
+        try
+        {
+            return MediaAssets.GetOrRegister(segment);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(MediaSegmentSource)} failed.");
+            throw;
+        }
+    }
+    private string MediaPoster(VideoElement video) {
+        try
+        {
+            return video.EffectiveSegments.FirstOrDefault()?.PosterDataUrl is { Length: > 0 } poster
         ? poster
         : video.PosterDataUrl;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(MediaPoster)} failed.");
+            throw;
+        }
+    }
     private string VideoMediaStyle(VideoElement video)
     {
-        var clip = video.FrameClipPolygon is { Count: >= 3 }
-            ? $";clip-path:{FrameClipPath(video.FrameClipPolygon)}"
-            : string.Empty;
-        return $"object-fit:{VideoFit(video.FitMode)}{clip}";
+        try
+        {
+            var clip = video.FrameClipPolygon is { Count: >= 3 }
+                ? $";clip-path:{FrameClipPath(video.FrameClipPolygon)}"
+                : string.Empty;
+            return $"object-fit:{VideoFit(video.FitMode)}{clip}";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(VideoMediaStyle)} failed.");
+            throw;
+        }
     }
-    private string FrameClipPath(IEnumerable<MediaFramePoint> points) =>
-        $"polygon({string.Join(',', points.Select(point => $"{Inv(Math.Clamp(point.X, 0, 1) * 100)}% {Inv(Math.Clamp(point.Y, 0, 1) * 100)}%"))})";
-    private string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
-    private string NullableInv(double? value) => value is { } actual ? Inv(actual) : string.Empty;
+    private string FrameClipPath(IEnumerable<MediaFramePoint> points) {
+        try
+        {
+            return $"polygon({string.Join(',', points.Select(point => $"{Inv(Math.Clamp(point.X, 0, 1) * 100)}% {Inv(Math.Clamp(point.Y, 0, 1) * 100)}%"))})";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(FrameClipPath)} failed.");
+            throw;
+        }
+    }
+    private string Inv(double value) {
+        try
+        {
+            return value.ToString("0.###", CultureInfo.InvariantCulture);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(Inv)} failed.");
+            throw;
+        }
+    }
+    private string NullableInv(double? value) {
+        try
+        {
+            return value is { } actual ? Inv(actual) : string.Empty;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(NullableInv)} failed.");
+            throw;
+        }
+    }
 
-    private string StoryBackground(TextFrameElement text) =>
-        string.IsNullOrWhiteSpace(text.DocumentBackground) || string.Equals(text.DocumentBackground, "transparent", StringComparison.OrdinalIgnoreCase)
+    private string StoryBackground(TextFrameElement text) {
+        try
+        {
+            return string.IsNullOrWhiteSpace(text.DocumentBackground) || string.Equals(text.DocumentBackground, "transparent", StringComparison.OrdinalIgnoreCase)
             ? text.Background
             : text.DocumentBackground;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PrintPublication)}.{nameof(StoryBackground)} failed.");
+            throw;
+        }
+    }
 
 
 }

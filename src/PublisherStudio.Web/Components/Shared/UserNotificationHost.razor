@@ -2,6 +2,8 @@
 @implements IDisposable
 @inject PublisherStudio.Services.UserExperience.IUserNotificationService Notifications
 
+@inject ILogger<UserNotificationHost> Logger
+@inject ISupervisedTaskRunner TaskRunner
 <div class="publisher-notification-host" aria-live="polite" aria-atomic="false">
     @foreach (var message in Notifications.Messages)
     {
@@ -30,67 +32,122 @@
 
     protected override void OnInitialized()
     {
-        Notifications.Changed += OnChanged;
-        SynchronizeExpirationTimers();
+        try
+        {
+            Notifications.Changed += OnChanged;
+            SynchronizeExpirationTimers();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(UserNotificationHost)}.{nameof(OnInitialized)} failed.");
+            throw;
+        }
     }
 
     private void OnChanged()
     {
-        SynchronizeExpirationTimers();
-        _ = InvokeAsync(StateHasChanged);
+        try
+        {
+            SynchronizeExpirationTimers();
+            TaskRunner.Run(nameof(UserNotificationHost), nameof(OnChanged), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(false));
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(UserNotificationHost)}.{nameof(OnChanged)} failed.");
+            throw;
+        }
     }
 
     private void SynchronizeExpirationTimers()
     {
-        if (_disposed) return;
-        lock (_timerGate)
+        try
         {
-            var activeIds = Notifications.Messages.Select(message => message.Id).ToHashSet();
-            foreach (var staleId in _expirationTimers.Keys.Where(id => !activeIds.Contains(id)).ToArray())
+            if (_disposed) return;
+            lock (_timerGate)
             {
-                _expirationTimers[staleId].Dispose();
-                _expirationTimers.Remove(staleId);
-            }
+                var activeIds = Notifications.Messages.Select(message => message.Id).ToHashSet();
+                foreach (var staleId in _expirationTimers.Keys.Where(id => !activeIds.Contains(id)).ToArray())
+                {
+                    _expirationTimers[staleId].Dispose();
+                    _expirationTimers.Remove(staleId);
+                }
 
-            foreach (var message in Notifications.Messages.Where(message => !message.Persistent))
-            {
-                if (_expirationTimers.ContainsKey(message.Id)) continue;
-                var elapsed = DateTimeOffset.UtcNow - message.CreatedUtc;
-                var remaining = TimeSpan.FromMilliseconds(Math.Max(1, message.DurationMilliseconds - elapsed.TotalMilliseconds));
-                _expirationTimers[message.Id] = new Timer(ExpireNotification, message.Id, remaining, Timeout.InfiniteTimeSpan);
+                foreach (var message in Notifications.Messages.Where(message => !message.Persistent))
+                {
+                    if (_expirationTimers.ContainsKey(message.Id)) continue;
+                    var elapsed = DateTimeOffset.UtcNow - message.CreatedUtc;
+                    var remaining = TimeSpan.FromMilliseconds(Math.Max(1, message.DurationMilliseconds - elapsed.TotalMilliseconds));
+                    _expirationTimers[message.Id] = new Timer(ExpireNotification, message.Id, remaining, Timeout.InfiniteTimeSpan);
+                }
             }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(UserNotificationHost)}.{nameof(SynchronizeExpirationTimers)} failed.");
+            throw;
         }
     }
 
     private void ExpireNotification(object? state)
     {
-        if (_disposed || state is not Guid id) return;
-        Timer? timer = null;
-        lock (_timerGate)
+        try
         {
-            if (_expirationTimers.Remove(id, out var ownedTimer)) timer = ownedTimer;
+            if (_disposed || state is not Guid id) return;
+            Timer? timer = null;
+            lock (_timerGate)
+            {
+                if (_expirationTimers.Remove(id, out var ownedTimer)) timer = ownedTimer;
+            }
+            timer?.Dispose();
+            Notifications.Dismiss(id);
+    
         }
-        timer?.Dispose();
-        Notifications.Dismiss(id);
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(UserNotificationHost)}.{nameof(ExpireNotification)} failed.");
+            throw;
+        }
     }
 
-    private string Icon(UserNotificationSeverity severity) => severity switch
+    private string Icon(UserNotificationSeverity severity) {
+        try
+        {
+            return severity switch
     {
         UserNotificationSeverity.Success => "✓",
         UserNotificationSeverity.Warning => "!",
         UserNotificationSeverity.Error => "×",
         _ => "i"
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(UserNotificationHost)}.{nameof(Icon)} failed.");
+            throw;
+        }
+    }
 
     public void Dispose()
     {
-        if (_disposed) return;
-        _disposed = true;
-        Notifications.Changed -= OnChanged;
-        lock (_timerGate)
+        try
         {
-            foreach (var timer in _expirationTimers.Values) timer.Dispose();
-            _expirationTimers.Clear();
+            if (_disposed) return;
+            _disposed = true;
+            Notifications.Changed -= OnChanged;
+            lock (_timerGate)
+            {
+                foreach (var timer in _expirationTimers.Values) timer.Dispose();
+                _expirationTimers.Clear();
+            }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(UserNotificationHost)}.{nameof(Dispose)} failed.");
+            throw;
         }
     }
 }

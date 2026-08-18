@@ -18,6 +18,8 @@ public sealed class LanStreamingServer : IAsyncDisposable
     /// Stores the logger used by <see cref="LanStreamingServer"/> to record operational diagnostics without coupling callers to logging details.
     /// </summary>
     private readonly ILogger<LanStreamingServer> _logger;
+    /// <summary>Observes RTSP client work created by this LAN server.</summary>
+    private readonly ISupervisedTaskRunner _taskRunner;
     /// <summary>
     /// Stores the synchronization primitive that protects concurrent access to viewer gate state owned by <see cref="LanStreamingServer"/>.
     /// </summary>
@@ -43,10 +45,12 @@ public sealed class LanStreamingServer : IAsyncDisposable
     /// Initializes a new <see cref="LanStreamingServer"/> instance and captures the dependencies or initial state required by its LAN streaming server workflow.
     /// </summary>
     /// <param name="session">Session value supplied to the LAN streaming server operation and used when producing its result.</param>
+    /// <param name="taskRunner">Supervised task runner used by the LAN/RTSP server lifetime.</param>
     /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
-    public LanStreamingServer(MediaSession session, ILogger<LanStreamingServer> logger)
+    public LanStreamingServer(MediaSession session, ISupervisedTaskRunner taskRunner, ILogger<LanStreamingServer> logger)
     {
         _session = session;
+        _taskRunner = taskRunner;
         _logger = logger;
         _viewerGate = new SemaphoreSlim(Math.Clamp(session.LanDefinition.ViewerLimit, 1, 10_000));
         AccessToken = session.LanDefinition.RequireAccessToken
@@ -133,7 +137,7 @@ public sealed class LanStreamingServer : IAsyncDisposable
             if (_session.LanDefinition.EnableRtsp && _rtspServer is null)
             {
                 var address = ResolveAddress(_session.LanDefinition.BindAddress);
-                _rtspServer = new RtspLanServer(address, _session.LanDefinition.RtspPort, AccessToken);
+                _rtspServer = new RtspLanServer(address, _session.LanDefinition.RtspPort, _taskRunner, AccessToken);
                 _session.RtspRelayPort = _rtspServer.RtpInputPort;
                 _session.RtspUrl = RtspUrl ?? string.Empty;
                 _rtspServer.Start();

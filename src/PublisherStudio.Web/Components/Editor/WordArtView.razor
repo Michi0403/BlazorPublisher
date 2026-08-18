@@ -1,6 +1,7 @@
 @namespace PublisherStudio.Components.Editor
 @inject PublicationMediaAssetStore MediaAssets
 
+@inject ILogger<WordArtView> Logger
 <svg class="wordart-svg"
      viewBox="0 0 1000 300"
      preserveAspectRatio="none"
@@ -321,11 +322,30 @@
 
     private string SafeColor(string? value, string fallback)
     {
-        if (string.IsNullOrWhiteSpace(value)) return fallback;
-        var color = value.Trim();
-        if (color.Equals("transparent", StringComparison.OrdinalIgnoreCase)) return fallback;
-        return color;
+        try
+        {
+            if (string.IsNullOrWhiteSpace(value)) return fallback;
+            var color = value.Trim();
+            if (color.Equals("transparent", StringComparison.OrdinalIgnoreCase)) return fallback;
+            return color;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(WordArtView)}.{nameof(SafeColor)} failed.");
+            throw;
+        }
     }
 
-    private string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+    private string Inv(double value) {
+        try
+        {
+            return value.ToString("0.###", CultureInfo.InvariantCulture);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(WordArtView)}.{nameof(Inv)} failed.");
+            throw;
+        }
+    }
 }

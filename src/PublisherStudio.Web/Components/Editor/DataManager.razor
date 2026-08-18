@@ -3,6 +3,7 @@
 @inject PublicationWebDataService WebDataService
 @inject PublicationWebhookStore Webhooks
 
+@inject ILogger<DataManager> Logger
 @if (Visible)
 {
     <div class="modal-backdrop data-modal-backdrop">
@@ -377,7 +378,17 @@
     private string WebhookRoute => $"/api/publisher/webhooks/{_draft.Web.Id}/{_draft.Web.WebhookToken}";
     private string CurrentPublicationRoute => $"/api/publisher/publications/{State.Document.Id}";
     private string CurrentPagesRoute => $"/api/publisher/publications/{State.Document.Id}/pages";
-    private string DataRowsRoute(Guid dataId) => $"/api/publisher/publications/{State.Document.Id}/data/{dataId}/rows";
+    private string DataRowsRoute(Guid dataId) {
+        try
+        {
+            return $"/api/publisher/publications/{State.Document.Id}/data/{dataId}/rows";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(DataRowsRoute)} failed.");
+            throw;
+        }
+    }
     private string SourceInputLabel => _draft.SourceKind switch
     {
         PublicationDataSourceKind.Json => "JSON",
@@ -398,197 +409,419 @@
 
     protected override void OnParametersSet()
     {
-        if (Visible && !_wasVisible)
+        try
         {
-            DataService.EnsureBuiltInObjects(State.Document);
-            _error = null;
-            SetDraft(State.Document.DataObjects.Count > 0 ? DataService.Clone(State.Document.DataObjects[0]) : DataService.CreateSample());
+            if (Visible && !_wasVisible)
+            {
+                DataService.EnsureBuiltInObjects(State.Document);
+                _error = null;
+                SetDraft(State.Document.DataObjects.Count > 0 ? DataService.Clone(State.Document.DataObjects[0]) : DataService.CreateSample());
+            }
+            _wasVisible = Visible;
+    
         }
-        _wasVisible = Visible;
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(OnParametersSet)} failed.");
+            throw;
+        }
     }
 
     private void SetDraft(PublicationDataObject value)
     {
-        _draft = value;
-        _draft.Web ??= new PublicationWebBinding();
-        _draft.Web.Headers ??= [];
-        _draft.SourceReference ??= string.Empty;
-        Webhooks.Register(_draft.Web.Id, _draft.Web.WebhookToken);
-        _headerLines = string.Join(Environment.NewLine, _draft.Web.Headers.Select(header => $"{header.Name}: {header.Value}"));
-        ParseSnapshotIfAvailable();
+        try
+        {
+            _draft = value;
+            _draft.Web ??= new PublicationWebBinding();
+            _draft.Web.Headers ??= [];
+            _draft.SourceReference ??= string.Empty;
+            Webhooks.Register(_draft.Web.Id, _draft.Web.WebhookToken);
+            _headerLines = string.Join(Environment.NewLine, _draft.Web.Headers.Select(header => $"{header.Name}: {header.Value}"));
+            ParseSnapshotIfAvailable();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(SetDraft)} failed.");
+            throw;
+        }
     }
 
-    private void Select(PublicationDataObject data) { SetDraft(DataService.Clone(data)); _error = null; }
+    private void Select(PublicationDataObject data) {
+        try
+        {
+     SetDraft(DataService.Clone(data)); _error = null; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(Select)} failed.");
+            throw;
+        }
+    }
     private void CreateNew()
     {
-        SetDraft(new PublicationDataObject { Name = "New Data", SourceKind = PublicationDataSourceKind.DelimitedText, RawSource = "Category,Value\nA,10\nB,20\nC,15" });
-        ParsePreview();
+        try
+        {
+            SetDraft(new PublicationDataObject { Name = "New Data", SourceKind = PublicationDataSourceKind.DelimitedText, RawSource = "Category,Value\nA,10\nB,20\nC,15" });
+            ParsePreview();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(CreateNew)} failed.");
+            throw;
+        }
     }
     private void CreateSample()
     {
-        var value = DataService.CreateSample($"Quarterly Sales {State.Document.DataObjects.Count + 1}");
-        value.Id = Guid.NewGuid(); SetDraft(value); _error = null;
+        try
+        {
+            var value = DataService.CreateSample($"Quarterly Sales {State.Document.DataObjects.Count + 1}");
+            value.Id = Guid.NewGuid(); SetDraft(value); _error = null;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(CreateSample)} failed.");
+            throw;
+        }
     }
 
     private async Task ParseOrRefresh()
     {
-        if (_draft.SourceKind == PublicationDataSourceKind.Web) await RefreshWeb().ConfigureAwait(true); else ParsePreview();
+        try
+        {
+            if (_draft.SourceKind == PublicationDataSourceKind.Web) await RefreshWeb().ConfigureAwait(true); else ParsePreview();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ParseOrRefresh)} failed.");
+            throw;
+        }
     }
 
     private void ParsePreview()
     {
-        try { DataService.ParseInto(_draft); _error = null; }
-        catch (Exception ex) { _error = ex.Message; }
+        try
+        {
+            try { DataService.ParseInto(_draft); _error = null; }
+            catch (Exception ex) { _error = ex.Message; }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ParsePreview)} failed.");
+            throw;
+        }
     }
 
     private void ParseSnapshotIfAvailable()
     {
-        if (IsBuiltIn(_draft.SourceKind) || string.IsNullOrWhiteSpace(_draft.RawSource)) return;
-        ParsePreview();
+        try
+        {
+            if (IsBuiltIn(_draft.SourceKind) || string.IsNullOrWhiteSpace(_draft.RawSource)) return;
+            ParsePreview();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ParseSnapshotIfAvailable)} failed.");
+            throw;
+        }
     }
 
     private async Task RefreshWeb()
     {
         try
         {
-            ApplyHeaderLines();
-            await WebDataService.RefreshAsync(_draft).ConfigureAwait(true);
-            _error = null;
+            try
+            {
+                ApplyHeaderLines();
+                await WebDataService.RefreshAsync(_draft).ConfigureAwait(true);
+                _error = null;
+            }
+            catch (Exception ex) { _error = ex.Message; }
+    
         }
-        catch (Exception ex) { _error = ex.Message; }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(RefreshWeb)} failed.");
+            throw;
+        }
     }
 
     private async Task ImportDataFile(InputFileChangeEventArgs args)
     {
         try
         {
-            var file = args.File;
-            var stream = file.OpenReadStream(long.MaxValue);
-            await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
-            using var reader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true);
-            _draft.RawSource = await reader.ReadToEndAsync().ConfigureAwait(true);
-            var extension = Path.GetExtension(file.Name).ToLowerInvariant();
-            _draft.SourceKind = extension switch { ".json" => PublicationDataSourceKind.Json, ".xml" => PublicationDataSourceKind.Xml, _ => PublicationDataSourceKind.DelimitedText };
-            if (extension == ".tsv") _draft.Delimiter = "\t";
-            else if (extension == ".csv") _draft.Delimiter = GuessCsvDelimiter(_draft.RawSource);
-            ParsePreview();
+            try
+            {
+                var file = args.File;
+                var stream = file.OpenReadStream(long.MaxValue);
+                await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
+                using var reader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true);
+                _draft.RawSource = await reader.ReadToEndAsync().ConfigureAwait(true);
+                var extension = Path.GetExtension(file.Name).ToLowerInvariant();
+                _draft.SourceKind = extension switch { ".json" => PublicationDataSourceKind.Json, ".xml" => PublicationDataSourceKind.Xml, _ => PublicationDataSourceKind.DelimitedText };
+                if (extension == ".tsv") _draft.Delimiter = "\t";
+                else if (extension == ".csv") _draft.Delimiter = GuessCsvDelimiter(_draft.RawSource);
+                ParsePreview();
+            }
+            catch (Exception ex) { _error = ex.Message; }
+    
         }
-        catch (Exception ex) { _error = ex.Message; }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ImportDataFile)} failed.");
+            throw;
+        }
     }
 
     private string GuessCsvDelimiter(string source)
     {
-        var firstLine = (source ?? string.Empty).Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? string.Empty;
-        var candidates = new[] { ',', ';', '\t', '|' };
-        return candidates.OrderByDescending(candidate => firstLine.Count(character => character == candidate)).First().ToString();
+        try
+        {
+            var firstLine = (source ?? string.Empty).Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? string.Empty;
+            var candidates = new[] { ',', ';', '\t', '|' };
+            return candidates.OrderByDescending(candidate => firstLine.Count(character => character == candidate)).First().ToString();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(GuessCsvDelimiter)} failed.");
+            throw;
+        }
     }
 
     private async Task Save()
     {
         try
         {
-            if (string.IsNullOrWhiteSpace(_draft.Name)) throw new InvalidDataException("Enter a data object name.");
-            ApplyHeaderLines();
-            if (_draft.SourceKind == PublicationDataSourceKind.Web)
+            try
             {
-                // Saving the binding must not depend on the endpoint being online or a
-                // webhook payload already having arrived. Fetch is an explicit action;
-                // preserve and parse the latest embedded snapshot when one exists.
-                if (!string.IsNullOrWhiteSpace(_draft.RawSource)) DataService.ParseInto(_draft);
-                else { _draft.Columns = []; _draft.Rows = []; _draft.ModifiedUtc = DateTimeOffset.UtcNow; }
+                if (string.IsNullOrWhiteSpace(_draft.Name)) throw new InvalidDataException("Enter a data object name.");
+                ApplyHeaderLines();
+                if (_draft.SourceKind == PublicationDataSourceKind.Web)
+                {
+                    // Saving the binding must not depend on the endpoint being online or a
+                    // webhook payload already having arrived. Fetch is an explicit action;
+                    // preserve and parse the latest embedded snapshot when one exists.
+                    if (!string.IsNullOrWhiteSpace(_draft.RawSource)) DataService.ParseInto(_draft);
+                    else { _draft.Columns = []; _draft.Rows = []; _draft.ModifiedUtc = DateTimeOffset.UtcNow; }
+                }
+                else DataService.ParseInto(_draft);
+                var validation = DataService.Validate(_draft);
+                if (validation.Severity == PublicationDataValidationSeverity.Error)
+                    throw new InvalidDataException(validation.Issues.FirstOrDefault(issue => issue.Severity == PublicationDataValidationSeverity.Error)?.Message ?? validation.Message);
+                State.UpsertDataObject(_draft);
+                SetDraft(DataService.Clone(State.Document.DataObjects.First(data => data.Id == _draft.Id)));
+                _error = null;
+                await DataChanged.InvokeAsync().ConfigureAwait(true);
             }
-            else DataService.ParseInto(_draft);
-            var validation = DataService.Validate(_draft);
-            if (validation.Severity == PublicationDataValidationSeverity.Error)
-                throw new InvalidDataException(validation.Issues.FirstOrDefault(issue => issue.Severity == PublicationDataValidationSeverity.Error)?.Message ?? validation.Message);
-            State.UpsertDataObject(_draft);
-            SetDraft(DataService.Clone(State.Document.DataObjects.First(data => data.Id == _draft.Id)));
-            _error = null;
-            await DataChanged.InvokeAsync().ConfigureAwait(true);
+            catch (Exception ex) { _error = ex.Message; }
+    
         }
-        catch (Exception ex) { _error = ex.Message; }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(Save)} failed.");
+            throw;
+        }
     }
 
     private async Task Delete()
     {
-        if (!ExistingDraft || IsBuiltInDraft) return;
-        if (!State.DeleteDataObject(_draft.Id)) { _error = "This data object is still used by a data visual."; return; }
-        SetDraft(State.Document.DataObjects.Count > 0 ? DataService.Clone(State.Document.DataObjects[0]) : DataService.CreateSample());
-        await DataChanged.InvokeAsync().ConfigureAwait(true);
+        try
+        {
+            if (!ExistingDraft || IsBuiltInDraft) return;
+            if (!State.DeleteDataObject(_draft.Id)) { _error = "This data object is still used by a data visual."; return; }
+            SetDraft(State.Document.DataObjects.Count > 0 ? DataService.Clone(State.Document.DataObjects[0]) : DataService.CreateSample());
+            await DataChanged.InvokeAsync().ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(Delete)} failed.");
+            throw;
+        }
     }
 
     private void DetachSnapshot()
     {
-        try { DataService.EnsureManagedSnapshot(_draft); _error = null; }
-        catch (Exception exception) { _error = exception.Message; }
+        try
+        {
+            try { DataService.EnsureManagedSnapshot(_draft); _error = null; }
+            catch (Exception exception) { _error = exception.Message; }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(DetachSnapshot)} failed.");
+            throw;
+        }
     }
 
     private void AddColumn()
     {
-        try { DataService.AddColumn(_draft); _error = null; }
-        catch (Exception exception) { _error = exception.Message; }
+        try
+        {
+            try { DataService.AddColumn(_draft); _error = null; }
+            catch (Exception exception) { _error = exception.Message; }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(AddColumn)} failed.");
+            throw;
+        }
     }
 
     private void AddRow()
     {
-        try { DataService.AddRow(_draft); _error = null; }
-        catch (Exception exception) { _error = exception.Message; }
+        try
+        {
+            try { DataService.AddRow(_draft); _error = null; }
+            catch (Exception exception) { _error = exception.Message; }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(AddRow)} failed.");
+            throw;
+        }
     }
 
     private void RemoveColumn(string columnName)
     {
-        try { DataService.RemoveColumn(_draft, columnName); _error = null; }
-        catch (Exception exception) { _error = exception.Message; }
+        try
+        {
+            try { DataService.RemoveColumn(_draft, columnName); _error = null; }
+            catch (Exception exception) { _error = exception.Message; }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(RemoveColumn)} failed.");
+            throw;
+        }
     }
 
     private void RemoveRow(int rowIndex)
     {
-        try { DataService.RemoveRow(_draft, rowIndex); _error = null; }
-        catch (Exception exception) { _error = exception.Message; }
+        try
+        {
+            try { DataService.RemoveRow(_draft, rowIndex); _error = null; }
+            catch (Exception exception) { _error = exception.Message; }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(RemoveRow)} failed.");
+            throw;
+        }
     }
 
     private void RenameColumn(string oldName, ChangeEventArgs args)
     {
-        try { DataService.RenameColumn(_draft, oldName, args.Value?.ToString() ?? string.Empty); _error = null; }
-        catch (Exception exception) { _error = exception.Message; }
+        try
+        {
+            try { DataService.RenameColumn(_draft, oldName, args.Value?.ToString() ?? string.Empty); _error = null; }
+            catch (Exception exception) { _error = exception.Message; }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(RenameColumn)} failed.");
+            throw;
+        }
     }
 
     private void ChangeColumnKind(string columnName, ChangeEventArgs args)
     {
         try
         {
-            var text = args.Value?.ToString() ?? "Auto";
-            DataService.SetColumnKind(_draft, columnName, Enum.TryParse<PublicationDataValueKind>(text, out var kind) ? kind : null);
-            DataService.WriteManagedSnapshot(_draft);
-            _error = null;
+            try
+            {
+                var text = args.Value?.ToString() ?? "Auto";
+                DataService.SetColumnKind(_draft, columnName, Enum.TryParse<PublicationDataValueKind>(text, out var kind) ? kind : null);
+                DataService.WriteManagedSnapshot(_draft);
+                _error = null;
+            }
+            catch (Exception exception) { _error = exception.Message; }
+    
         }
-        catch (Exception exception) { _error = exception.Message; }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ChangeColumnKind)} failed.");
+            throw;
+        }
     }
 
     private void ChangeCell(int rowIndex, string columnName, ChangeEventArgs args)
     {
-        try { DataService.SetCellValue(_draft, rowIndex, columnName, args.Value?.ToString() ?? string.Empty); _error = null; }
-        catch (Exception exception) { _error = exception.Message; }
+        try
+        {
+            try { DataService.SetCellValue(_draft, rowIndex, columnName, args.Value?.ToString() ?? string.Empty); _error = null; }
+            catch (Exception exception) { _error = exception.Message; }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ChangeCell)} failed.");
+            throw;
+        }
     }
 
-    private string ValidationCss(PublicationDataValidationSeverity severity) => severity.ToString().ToLowerInvariant();
-    private string ValidationIcon(PublicationDataValidationSeverity severity) => severity switch
+    private string ValidationCss(PublicationDataValidationSeverity severity) {
+        try
+        {
+            return severity.ToString().ToLowerInvariant();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ValidationCss)} failed.");
+            throw;
+        }
+    }
+    private string ValidationIcon(PublicationDataValidationSeverity severity) {
+        try
+        {
+            return severity switch
     {
         PublicationDataValidationSeverity.Success => "✓",
         PublicationDataValidationSeverity.Warning => "⚠",
         _ => "✕"
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ValidationIcon)} failed.");
+            throw;
+        }
+    }
 
     private void ApplyHeaderLines()
     {
-        _draft.Web.Headers = _headerLines.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Select(line => line.Split(new[] { ':' }, 2))
-            .Where(parts => parts.Length == 2 && !string.IsNullOrWhiteSpace(parts[0]))
-            .Select(parts => new PublicationWebHeader { Name = parts[0].Trim(), Value = parts[1].Trim() })
-            .ToList();
+        try
+        {
+            _draft.Web.Headers = _headerLines.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(line => line.Split(new[] { ':' }, 2))
+                .Where(parts => parts.Length == 2 && !string.IsNullOrWhiteSpace(parts[0]))
+                .Select(parts => new PublicationWebHeader { Name = parts[0].Trim(), Value = parts[1].Trim() })
+                .ToList();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ApplyHeaderLines)} failed.");
+            throw;
+        }
     }
 
-    private string SourceName(PublicationDataObject data) => !string.IsNullOrWhiteSpace(data.SourceReference) ? "Spreadsheet selection" : data.SourceKind switch
+    private string SourceName(PublicationDataObject data) {
+        try
+        {
+            return !string.IsNullOrWhiteSpace(data.SourceReference) ? "Spreadsheet selection" : data.SourceKind switch
     {
         PublicationDataSourceKind.PublicationPages => "Live pages",
         PublicationDataSourceKind.PublicationDocument => "Live document",
@@ -597,52 +830,356 @@
         PublicationDataSourceKind.Web => $"{data.Web.Transport}",
         _ => data.SourceKind.ToString()
     };
-    private bool IsBuiltIn(PublicationDataSourceKind kind) => kind is PublicationDataSourceKind.PublicationPages or PublicationDataSourceKind.PublicationDocument or PublicationDataSourceKind.DocumentObjects or PublicationDataSourceKind.PublicationMedia;
-    private void SelectLivePages() => SelectLive(PublicationDataSourceKind.PublicationPages);
-    private void SelectLiveDocument() => SelectLive(PublicationDataSourceKind.PublicationDocument);
-    private void SelectLiveObjects() => SelectLive(PublicationDataSourceKind.DocumentObjects);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(SourceName)} failed.");
+            throw;
+        }
+    }
+    private bool IsBuiltIn(PublicationDataSourceKind kind) {
+        try
+        {
+            return kind is PublicationDataSourceKind.PublicationPages or PublicationDataSourceKind.PublicationDocument or PublicationDataSourceKind.DocumentObjects or PublicationDataSourceKind.PublicationMedia;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(IsBuiltIn)} failed.");
+            throw;
+        }
+    }
+    private void SelectLivePages() {
+        try
+        {
+            SelectLive(PublicationDataSourceKind.PublicationPages);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(SelectLivePages)} failed.");
+            throw;
+        }
+    }
+    private void SelectLiveDocument() {
+        try
+        {
+            SelectLive(PublicationDataSourceKind.PublicationDocument);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(SelectLiveDocument)} failed.");
+            throw;
+        }
+    }
+    private void SelectLiveObjects() {
+        try
+        {
+            SelectLive(PublicationDataSourceKind.DocumentObjects);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(SelectLiveObjects)} failed.");
+            throw;
+        }
+    }
     private void SelectLive(PublicationDataSourceKind kind)
     {
-        DataService.EnsureBuiltInObjects(State.Document);
-        var data = State.Document.DataObjects.First(candidate => candidate.SourceKind == kind);
-        Select(data);
+        try
+        {
+            DataService.EnsureBuiltInObjects(State.Document);
+            var data = State.Document.DataObjects.First(candidate => candidate.SourceKind == kind);
+            Select(data);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(SelectLive)} failed.");
+            throw;
+        }
     }
-    private int ResolvedRowCount(PublicationDataObject data) => DataService.ResolveRows(State.Document, data, State.SelectedPageId).Count;
-    private Task Close() => Closed.InvokeAsync();
-    private void ChangeName(ChangeEventArgs args) => _draft.Name = args.Value?.ToString() ?? string.Empty;
-    private void ChangeRawSource(ChangeEventArgs args) => _draft.RawSource = args.Value?.ToString() ?? string.Empty;
-    private void ToggleHeaders(ChangeEventArgs args) { _draft.FirstRowContainsHeaders = Checked(args); ParseSnapshotIfAvailable(); }
-    private void ChangeDelimiter(ChangeEventArgs args) { _draft.Delimiter = args.Value?.ToString() == "tab" ? "\t" : args.Value?.ToString() ?? ","; ParseSnapshotIfAvailable(); }
-    private void ChangeHeaderLines(ChangeEventArgs args) => _headerLines = args.Value?.ToString() ?? string.Empty;
-    private void ChangeRequestBody(ChangeEventArgs args) => _draft.Web.RequestBody = args.Value?.ToString() ?? string.Empty;
-    private void ChangeWebUrl(ChangeEventArgs args) => _draft.Web.Url = args.Value?.ToString() ?? string.Empty;
-    private void ChangeJsonPath(ChangeEventArgs args) { _draft.Web.JsonPath = args.Value?.ToString() ?? string.Empty; ParseSnapshotIfAvailable(); }
-    private void ChangeRefreshSeconds(ChangeEventArgs args) { if (int.TryParse(args.Value?.ToString(), out var value)) _draft.Web.RefreshIntervalSeconds = Math.Max(0, value); }
-    private void ChangeTimeoutSeconds(ChangeEventArgs args) { if (int.TryParse(args.Value?.ToString(), out var value)) _draft.Web.TimeoutSeconds = Math.Max(0, value); }
-    private void ToggleWebEnabled(ChangeEventArgs args) => _draft.Web.Enabled = Checked(args);
-    private void ToggleRefreshOnOpen(ChangeEventArgs args) => _draft.Web.RefreshOnOpen = Checked(args);
-    private void ToggleSnapshotFallback(ChangeEventArgs args) => _draft.Web.UseSnapshotOnFailure = Checked(args);
-    private void ToggleHtmlFetch(ChangeEventArgs args) => _draft.Web.AllowExportedHtmlFetch = Checked(args);
-    private void ToggleWebHeaders(ChangeEventArgs args) { _draft.Web.FirstRowContainsHeaders = Checked(args); ParseSnapshotIfAvailable(); }
-    private void ChangeWebDelimiter(ChangeEventArgs args) { _draft.Web.Delimiter = args.Value?.ToString() == "tab" ? "\t" : args.Value?.ToString() ?? ","; ParseSnapshotIfAvailable(); }
-    private void ChangeWebMethod(ChangeEventArgs args) { if (Enum.TryParse<PublicationWebHttpMethod>(args.Value?.ToString(), out var value)) _draft.Web.Method = value; }
-    private void ChangeResponseFormat(ChangeEventArgs args) { if (Enum.TryParse<PublicationWebResponseFormat>(args.Value?.ToString(), out var value)) { _draft.Web.ResponseFormat = value; ParseSnapshotIfAvailable(); } }
+    private int ResolvedRowCount(PublicationDataObject data) {
+        try
+        {
+            return DataService.ResolveRows(State.Document, data, State.SelectedPageId).Count;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ResolvedRowCount)} failed.");
+            throw;
+        }
+    }
+    private Task Close() {
+        try
+        {
+            return Closed.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(Close)} failed.");
+            throw;
+        }
+    }
+    private void ChangeName(ChangeEventArgs args) {
+        try
+        {
+            _draft.Name = args.Value?.ToString() ?? string.Empty;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ChangeName)} failed.");
+            throw;
+        }
+    }
+    private void ChangeRawSource(ChangeEventArgs args) {
+        try
+        {
+            _draft.RawSource = args.Value?.ToString() ?? string.Empty;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ChangeRawSource)} failed.");
+            throw;
+        }
+    }
+    private void ToggleHeaders(ChangeEventArgs args) {
+        try
+        {
+     _draft.FirstRowContainsHeaders = Checked(args); ParseSnapshotIfAvailable(); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ToggleHeaders)} failed.");
+            throw;
+        }
+    }
+    private void ChangeDelimiter(ChangeEventArgs args) {
+        try
+        {
+     _draft.Delimiter = args.Value?.ToString() == "tab" ? "\t" : args.Value?.ToString() ?? ","; ParseSnapshotIfAvailable(); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ChangeDelimiter)} failed.");
+            throw;
+        }
+    }
+    private void ChangeHeaderLines(ChangeEventArgs args) {
+        try
+        {
+            _headerLines = args.Value?.ToString() ?? string.Empty;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ChangeHeaderLines)} failed.");
+            throw;
+        }
+    }
+    private void ChangeRequestBody(ChangeEventArgs args) {
+        try
+        {
+            _draft.Web.RequestBody = args.Value?.ToString() ?? string.Empty;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ChangeRequestBody)} failed.");
+            throw;
+        }
+    }
+    private void ChangeWebUrl(ChangeEventArgs args) {
+        try
+        {
+            _draft.Web.Url = args.Value?.ToString() ?? string.Empty;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ChangeWebUrl)} failed.");
+            throw;
+        }
+    }
+    private void ChangeJsonPath(ChangeEventArgs args) {
+        try
+        {
+     _draft.Web.JsonPath = args.Value?.ToString() ?? string.Empty; ParseSnapshotIfAvailable(); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ChangeJsonPath)} failed.");
+            throw;
+        }
+    }
+    private void ChangeRefreshSeconds(ChangeEventArgs args) {
+        try
+        {
+     if (int.TryParse(args.Value?.ToString(), out var value)) _draft.Web.RefreshIntervalSeconds = Math.Max(0, value); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ChangeRefreshSeconds)} failed.");
+            throw;
+        }
+    }
+    private void ChangeTimeoutSeconds(ChangeEventArgs args) {
+        try
+        {
+     if (int.TryParse(args.Value?.ToString(), out var value)) _draft.Web.TimeoutSeconds = Math.Max(0, value); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ChangeTimeoutSeconds)} failed.");
+            throw;
+        }
+    }
+    private void ToggleWebEnabled(ChangeEventArgs args) {
+        try
+        {
+            _draft.Web.Enabled = Checked(args);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ToggleWebEnabled)} failed.");
+            throw;
+        }
+    }
+    private void ToggleRefreshOnOpen(ChangeEventArgs args) {
+        try
+        {
+            _draft.Web.RefreshOnOpen = Checked(args);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ToggleRefreshOnOpen)} failed.");
+            throw;
+        }
+    }
+    private void ToggleSnapshotFallback(ChangeEventArgs args) {
+        try
+        {
+            _draft.Web.UseSnapshotOnFailure = Checked(args);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ToggleSnapshotFallback)} failed.");
+            throw;
+        }
+    }
+    private void ToggleHtmlFetch(ChangeEventArgs args) {
+        try
+        {
+            _draft.Web.AllowExportedHtmlFetch = Checked(args);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ToggleHtmlFetch)} failed.");
+            throw;
+        }
+    }
+    private void ToggleWebHeaders(ChangeEventArgs args) {
+        try
+        {
+     _draft.Web.FirstRowContainsHeaders = Checked(args); ParseSnapshotIfAvailable(); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ToggleWebHeaders)} failed.");
+            throw;
+        }
+    }
+    private void ChangeWebDelimiter(ChangeEventArgs args) {
+        try
+        {
+     _draft.Web.Delimiter = args.Value?.ToString() == "tab" ? "\t" : args.Value?.ToString() ?? ","; ParseSnapshotIfAvailable(); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ChangeWebDelimiter)} failed.");
+            throw;
+        }
+    }
+    private void ChangeWebMethod(ChangeEventArgs args) {
+        try
+        {
+     if (Enum.TryParse<PublicationWebHttpMethod>(args.Value?.ToString(), out var value)) _draft.Web.Method = value; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ChangeWebMethod)} failed.");
+            throw;
+        }
+    }
+    private void ChangeResponseFormat(ChangeEventArgs args) {
+        try
+        {
+     if (Enum.TryParse<PublicationWebResponseFormat>(args.Value?.ToString(), out var value)) { _draft.Web.ResponseFormat = value; ParseSnapshotIfAvailable(); } 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ChangeResponseFormat)} failed.");
+            throw;
+        }
+    }
     private void ChangeWebTransport(ChangeEventArgs args)
     {
-        if (!Enum.TryParse<PublicationWebTransportKind>(args.Value?.ToString(), out var value)) return;
-        _draft.Web.Transport = value;
-        if (value == PublicationWebTransportKind.MonolithApi && string.IsNullOrWhiteSpace(_draft.Web.Url)) _draft.Web.Url = "/api/publisher/system/status";
+        try
+        {
+            if (!Enum.TryParse<PublicationWebTransportKind>(args.Value?.ToString(), out var value)) return;
+            _draft.Web.Transport = value;
+            if (value == PublicationWebTransportKind.MonolithApi && string.IsNullOrWhiteSpace(_draft.Web.Url)) _draft.Web.Url = "/api/publisher/system/status";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ChangeWebTransport)} failed.");
+            throw;
+        }
     }
     private void ChangeSourceKind(ChangeEventArgs args)
     {
-        if (!Enum.TryParse<PublicationDataSourceKind>(args.Value?.ToString(), out var value)) return;
-        _draft.SourceKind = value;
-        if (value == PublicationDataSourceKind.Json && string.IsNullOrWhiteSpace(_draft.RawSource)) _draft.RawSource = "[{\"Category\":\"A\",\"Value\":10}]";
-        if (value == PublicationDataSourceKind.Xml && string.IsNullOrWhiteSpace(_draft.RawSource)) _draft.RawSource = "<rows><row><Category>A</Category><Value>10</Value></row></rows>";
-        if (value == PublicationDataSourceKind.Web && string.IsNullOrWhiteSpace(_draft.Web.Url)) _draft.Web.Url = "/api/publisher/system/status";
-        if (value != PublicationDataSourceKind.Web) ParsePreview();
+        try
+        {
+            if (!Enum.TryParse<PublicationDataSourceKind>(args.Value?.ToString(), out var value)) return;
+            _draft.SourceKind = value;
+            if (value == PublicationDataSourceKind.Json && string.IsNullOrWhiteSpace(_draft.RawSource)) _draft.RawSource = "[{\"Category\":\"A\",\"Value\":10}]";
+            if (value == PublicationDataSourceKind.Xml && string.IsNullOrWhiteSpace(_draft.RawSource)) _draft.RawSource = "<rows><row><Category>A</Category><Value>10</Value></row></rows>";
+            if (value == PublicationDataSourceKind.Web && string.IsNullOrWhiteSpace(_draft.Web.Url)) _draft.Web.Url = "/api/publisher/system/status";
+            if (value != PublicationDataSourceKind.Web) ParsePreview();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ChangeSourceKind)} failed.");
+            throw;
+        }
     }
-    private void ChangeDocumentScope(ChangeEventArgs args) { if (Enum.TryParse<DocumentObjectDataScope>(args.Value?.ToString(), out var value)) _draft.DocumentScope = value; }
-    private bool Checked(ChangeEventArgs args) => args.Value is bool value && value;
-    private string Friendly(string value) => string.Concat(value.Select((character, index) => index > 0 && char.IsUpper(character) ? $" {character}" : character.ToString()));
+    private void ChangeDocumentScope(ChangeEventArgs args) {
+        try
+        {
+     if (Enum.TryParse<DocumentObjectDataScope>(args.Value?.ToString(), out var value)) _draft.DocumentScope = value; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(ChangeDocumentScope)} failed.");
+            throw;
+        }
+    }
+    private bool Checked(ChangeEventArgs args) {
+        try
+        {
+            return args.Value is bool value && value;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(Checked)} failed.");
+            throw;
+        }
+    }
+    private string Friendly(string value) {
+        try
+        {
+            return string.Concat(value.Select((character, index) => index > 0 && char.IsUpper(character) ? $" {character}" : character.ToString()));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataManager)}.{nameof(Friendly)} failed.");
+            throw;
+        }
+    }
 }

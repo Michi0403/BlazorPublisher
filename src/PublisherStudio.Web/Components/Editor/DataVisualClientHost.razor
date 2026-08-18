@@ -3,6 +3,7 @@
 @inject PublicationDataService DataService
 @inject IJSRuntime JS
 
+@inject ILogger<DataVisualClientHost> Logger
 <div id="@ElementId" class="data-visual-client-host"></div>
 
 @code {
@@ -17,24 +18,42 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var config = ClientConfig;
-        var configJson = System.Text.Json.JsonSerializer.Serialize(config);
-        if (!firstRender && string.Equals(configJson, _lastClientConfigJson, StringComparison.Ordinal))
-            return;
+        try
+        {
+            var config = ClientConfig;
+            var configJson = System.Text.Json.JsonSerializer.Serialize(config);
+            if (!firstRender && string.Equals(configJson, _lastClientConfigJson, StringComparison.Ordinal))
+                return;
 
-        _lastClientConfigJson = configJson;
-        try { await JS.InvokeVoidAsync("PublisherStudioLiveDataRuntime.renderVisualById", ElementId, config).ConfigureAwait(true); }
-        catch (JSDisconnectedException) { }
-        catch (InvalidOperationException) { }
+            _lastClientConfigJson = configJson;
+            try { await JS.InvokeVoidAsync("PublisherStudioLiveDataRuntime.renderVisualById", ElementId, config).ConfigureAwait(true); }
+            catch (JSDisconnectedException) { }
+            catch (InvalidOperationException) { }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataVisualClientHost)}.{nameof(OnAfterRenderAsync)} failed.");
+            throw;
+        }
     }
 
     public async ValueTask DisposeAsync()
     {
         try
         {
-            await JS.InvokeVoidAsync("PublisherStudioLiveDataRuntime.disposeById", ElementId).ConfigureAwait(true);
+            try
+            {
+                await JS.InvokeVoidAsync("PublisherStudioLiveDataRuntime.disposeById", ElementId).ConfigureAwait(true);
+            }
+            catch (JSDisconnectedException) { }
+            catch (InvalidOperationException) { }
+    
         }
-        catch (JSDisconnectedException) { }
-        catch (InvalidOperationException) { }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataVisualClientHost)}.{nameof(DisposeAsync)} failed.");
+            throw;
+        }
     }
 }

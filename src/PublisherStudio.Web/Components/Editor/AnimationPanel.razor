@@ -1,6 +1,7 @@
 @namespace PublisherStudio.Components.Editor
 @inject IJSRuntime JS
 
+@inject ILogger<AnimationPanel> Logger
 <div class="animation-panel">
     <div class="animation-preview-bar">
         <button type="button" title="Preview the complete current page" @onclick="PreviewPage">▶ Page</button>
@@ -270,174 +271,817 @@
 
     protected override void OnParametersSet()
     {
-        if (_lastElementId == State.SelectedElementId && _selectedAnimationId is { } selectedId && Timeline.Any(item => item.Animation.Id == selectedId)) return;
-        _lastElementId = State.SelectedElementId;
-        _selectedAnimationId = State.SelectedElement?.Animations.OrderBy(item => item.Order).FirstOrDefault()?.Id;
+        try
+        {
+            if (_lastElementId == State.SelectedElementId && _selectedAnimationId is { } selectedId && Timeline.Any(item => item.Animation.Id == selectedId)) return;
+            _lastElementId = State.SelectedElementId;
+            _selectedAnimationId = State.SelectedElement?.Animations.OrderBy(item => item.Order).FirstOrDefault()?.Id;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(OnParametersSet)} failed.");
+            throw;
+        }
     }
 
     private void SelectAnimation(Guid elementId, Guid animationId)
     {
-        State.SelectElement(elementId);
-        _lastElementId = elementId;
-        _selectedAnimationId = animationId;
+        try
+        {
+            State.SelectElement(elementId);
+            _lastElementId = elementId;
+            _selectedAnimationId = animationId;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(SelectAnimation)} failed.");
+            throw;
+        }
     }
 
     private void Add(PublicationAnimationEffect effect, PublicationAnimationPhase phase)
     {
-        var animation = State.AddAnimation(effect, phase);
-        _selectedAnimationId = animation?.Id;
+        try
+        {
+            var animation = State.AddAnimation(effect, phase);
+            _selectedAnimationId = animation?.Id;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(Add)} failed.");
+            throw;
+        }
     }
 
-    private void AddFadeIn() => Add(PublicationAnimationEffect.Fade, PublicationAnimationPhase.Entrance);
-    private void AddFlyIn() => Add(PublicationAnimationEffect.Fly, PublicationAnimationPhase.Entrance);
-    private void AddZoomIn() => Add(PublicationAnimationEffect.Zoom, PublicationAnimationPhase.Entrance);
-    private void AddWipeIn() => Add(PublicationAnimationEffect.Wipe, PublicationAnimationPhase.Entrance);
-    private void AddPulse() => Add(PublicationAnimationEffect.Pulse, PublicationAnimationPhase.Emphasis);
-    private void AddSpin() => Add(PublicationAnimationEffect.Spin, PublicationAnimationPhase.Emphasis);
-    private void AddMove() => Add(PublicationAnimationEffect.Move, PublicationAnimationPhase.Motion);
-    private void AddFadeOut() => Add(PublicationAnimationEffect.Fade, PublicationAnimationPhase.Exit);
-    private void AddPlayMedia() => Add(PublicationAnimationEffect.PlayMedia, PublicationAnimationPhase.Emphasis);
-    private void AddPauseMedia() => Add(PublicationAnimationEffect.PauseMedia, PublicationAnimationPhase.Emphasis);
-    private void AddStopMedia() => Add(PublicationAnimationEffect.StopMedia, PublicationAnimationPhase.Emphasis);
+    private void AddFadeIn() {
+        try
+        {
+            Add(PublicationAnimationEffect.Fade, PublicationAnimationPhase.Entrance);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(AddFadeIn)} failed.");
+            throw;
+        }
+    }
+    private void AddFlyIn() {
+        try
+        {
+            Add(PublicationAnimationEffect.Fly, PublicationAnimationPhase.Entrance);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(AddFlyIn)} failed.");
+            throw;
+        }
+    }
+    private void AddZoomIn() {
+        try
+        {
+            Add(PublicationAnimationEffect.Zoom, PublicationAnimationPhase.Entrance);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(AddZoomIn)} failed.");
+            throw;
+        }
+    }
+    private void AddWipeIn() {
+        try
+        {
+            Add(PublicationAnimationEffect.Wipe, PublicationAnimationPhase.Entrance);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(AddWipeIn)} failed.");
+            throw;
+        }
+    }
+    private void AddPulse() {
+        try
+        {
+            Add(PublicationAnimationEffect.Pulse, PublicationAnimationPhase.Emphasis);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(AddPulse)} failed.");
+            throw;
+        }
+    }
+    private void AddSpin() {
+        try
+        {
+            Add(PublicationAnimationEffect.Spin, PublicationAnimationPhase.Emphasis);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(AddSpin)} failed.");
+            throw;
+        }
+    }
+    private void AddMove() {
+        try
+        {
+            Add(PublicationAnimationEffect.Move, PublicationAnimationPhase.Motion);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(AddMove)} failed.");
+            throw;
+        }
+    }
+    private void AddFadeOut() {
+        try
+        {
+            Add(PublicationAnimationEffect.Fade, PublicationAnimationPhase.Exit);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(AddFadeOut)} failed.");
+            throw;
+        }
+    }
+    private void AddPlayMedia() {
+        try
+        {
+            Add(PublicationAnimationEffect.PlayMedia, PublicationAnimationPhase.Emphasis);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(AddPlayMedia)} failed.");
+            throw;
+        }
+    }
+    private void AddPauseMedia() {
+        try
+        {
+            Add(PublicationAnimationEffect.PauseMedia, PublicationAnimationPhase.Emphasis);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(AddPauseMedia)} failed.");
+            throw;
+        }
+    }
+    private void AddStopMedia() {
+        try
+        {
+            Add(PublicationAnimationEffect.StopMedia, PublicationAnimationPhase.Emphasis);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(AddStopMedia)} failed.");
+            throw;
+        }
+    }
 
-    private void MoveEarlier() { if (_selectedAnimationId is { } id) State.MoveAnimation(id, -1); }
-    private void MoveLater() { if (_selectedAnimationId is { } id) State.MoveAnimation(id, 1); }
+    private void MoveEarlier() {
+        try
+        {
+     if (_selectedAnimationId is { } id) State.MoveAnimation(id, -1); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(MoveEarlier)} failed.");
+            throw;
+        }
+    }
+    private void MoveLater() {
+        try
+        {
+     if (_selectedAnimationId is { } id) State.MoveAnimation(id, 1); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(MoveLater)} failed.");
+            throw;
+        }
+    }
     private void DeleteAnimation()
     {
-        if (_selectedAnimationId is not { } id) return;
-        State.DeleteAnimation(id);
-        _selectedAnimationId = State.SelectedElement?.Animations.OrderBy(item => item.Order).FirstOrDefault()?.Id;
+        try
+        {
+            if (_selectedAnimationId is not { } id) return;
+            State.DeleteAnimation(id);
+            _selectedAnimationId = State.SelectedElement?.Animations.OrderBy(item => item.Order).FirstOrDefault()?.Id;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(DeleteAnimation)} failed.");
+            throw;
+        }
     }
 
-    private Task PreviewPage() => JS.InvokeVoidAsync("publisherStudio.previewPageAnimations", "publisher-page").AsTask();
-    private Task PreviewObject() => JS.InvokeVoidAsync("publisherStudio.previewElementAnimations", $"element-{State.SelectedElementId}").AsTask();
-    private Task PreviewSelectedStep() => _selectedAnimationId is { } id
+    private Task PreviewPage() {
+        try
+        {
+            return JS.InvokeVoidAsync("publisherStudio.previewPageAnimations", "publisher-page").AsTask();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(PreviewPage)} failed.");
+            throw;
+        }
+    }
+    private Task PreviewObject() {
+        try
+        {
+            return JS.InvokeVoidAsync("publisherStudio.previewElementAnimations", $"element-{State.SelectedElementId}").AsTask();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(PreviewObject)} failed.");
+            throw;
+        }
+    }
+    private Task PreviewSelectedStep() {
+        try
+        {
+            return _selectedAnimationId is { } id
         ? JS.InvokeVoidAsync("publisherStudio.previewAnimationStep", "publisher-page", id.ToString()).AsTask()
         : Task.CompletedTask;
-    private Task StopPreview() => JS.InvokeVoidAsync("publisherStudio.stopAnimationPreview", "publisher-page").AsTask();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(PreviewSelectedStep)} failed.");
+            throw;
+        }
+    }
+    private Task StopPreview() {
+        try
+        {
+            return JS.InvokeVoidAsync("publisherStudio.stopAnimationPreview", "publisher-page").AsTask();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(StopPreview)} failed.");
+            throw;
+        }
+    }
 
-    private void ChangeTransitionKind(ChangeEventArgs args) { if (Enum.TryParse<PublicationPageTransitionKind>(Text(args), out var value)) State.UpdatePageTransition(item => item.Kind = value); }
-    private void ChangeTransitionDirection(ChangeEventArgs args) { if (Enum.TryParse<PublicationAnimationDirection>(Text(args), out var value)) State.UpdatePageTransition(item => item.Direction = value); }
-    private void ChangeTransitionEasing(ChangeEventArgs args) { if (Enum.TryParse<PublicationAnimationEasing>(Text(args), out var value)) State.UpdatePageTransition(item => item.Easing = value); }
-    private void ChangeTransitionDuration(ChangeEventArgs args) { if (TryDouble(args, out var value)) State.UpdatePageTransitionLive("duration", item => item.DurationSeconds = value); }
-    private void ToggleAdvanceOnClick(ChangeEventArgs args) => State.UpdatePageTransition(item => item.AdvanceOnClick = Bool(args));
-    private void ToggleAutoAdvance(ChangeEventArgs args) => State.UpdatePageTransition(item => item.AutoAdvance = Bool(args));
-    private void ChangeAutoAdvanceSeconds(ChangeEventArgs args) { if (TryDouble(args, out var value)) State.UpdatePageTransitionLive("auto-advance", item => item.AutoAdvanceSeconds = value); }
+    private void ChangeTransitionKind(ChangeEventArgs args) {
+        try
+        {
+     if (Enum.TryParse<PublicationPageTransitionKind>(Text(args), out var value)) State.UpdatePageTransition(item => item.Kind = value); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ChangeTransitionKind)} failed.");
+            throw;
+        }
+    }
+    private void ChangeTransitionDirection(ChangeEventArgs args) {
+        try
+        {
+     if (Enum.TryParse<PublicationAnimationDirection>(Text(args), out var value)) State.UpdatePageTransition(item => item.Direction = value); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ChangeTransitionDirection)} failed.");
+            throw;
+        }
+    }
+    private void ChangeTransitionEasing(ChangeEventArgs args) {
+        try
+        {
+     if (Enum.TryParse<PublicationAnimationEasing>(Text(args), out var value)) State.UpdatePageTransition(item => item.Easing = value); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ChangeTransitionEasing)} failed.");
+            throw;
+        }
+    }
+    private void ChangeTransitionDuration(ChangeEventArgs args) {
+        try
+        {
+     if (TryDouble(args, out var value)) State.UpdatePageTransitionLive("duration", item => item.DurationSeconds = value); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ChangeTransitionDuration)} failed.");
+            throw;
+        }
+    }
+    private void ToggleAdvanceOnClick(ChangeEventArgs args) {
+        try
+        {
+            State.UpdatePageTransition(item => item.AdvanceOnClick = Bool(args));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ToggleAdvanceOnClick)} failed.");
+            throw;
+        }
+    }
+    private void ToggleAutoAdvance(ChangeEventArgs args) {
+        try
+        {
+            State.UpdatePageTransition(item => item.AutoAdvance = Bool(args));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ToggleAutoAdvance)} failed.");
+            throw;
+        }
+    }
+    private void ChangeAutoAdvanceSeconds(ChangeEventArgs args) {
+        try
+        {
+     if (TryDouble(args, out var value)) State.UpdatePageTransitionLive("auto-advance", item => item.AutoAdvanceSeconds = value); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ChangeAutoAdvanceSeconds)} failed.");
+            throw;
+        }
+    }
 
-    private void ChangeAnimationName(ChangeEventArgs args) => Update(item => item.Name = Text(args));
+    private void ChangeAnimationName(ChangeEventArgs args) {
+        try
+        {
+            Update(item => item.Name = Text(args));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ChangeAnimationName)} failed.");
+            throw;
+        }
+    }
     private void ChangeAnimationPhase(ChangeEventArgs args)
     {
-        if (!Enum.TryParse<PublicationAnimationPhase>(Text(args), out var value)) return;
-        Update(item =>
+        try
         {
-            item.Phase = value;
-            if (!EffectsFor(value).Contains(item.Effect)) item.Effect = EffectsFor(value)[0];
-        });
+            if (!Enum.TryParse<PublicationAnimationPhase>(Text(args), out var value)) return;
+            Update(item =>
+            {
+                item.Phase = value;
+                if (!EffectsFor(value).Contains(item.Effect)) item.Effect = EffectsFor(value)[0];
+            });
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ChangeAnimationPhase)} failed.");
+            throw;
+        }
     }
-    private void ChangeAnimationEffect(ChangeEventArgs args) { if (Enum.TryParse<PublicationAnimationEffect>(Text(args), out var value)) Update(item => item.Effect = value); }
-    private void ChangeAnimationTrigger(ChangeEventArgs args) { if (Enum.TryParse<PublicationAnimationTrigger>(Text(args), out var value)) Update(item => item.Trigger = value); }
-    private void ChangeAnimationEasing(ChangeEventArgs args) { if (Enum.TryParse<PublicationAnimationEasing>(Text(args), out var value)) Update(item => item.Easing = value); }
-    private void ChangeAnimationDirection(ChangeEventArgs args) { if (Enum.TryParse<PublicationAnimationDirection>(Text(args), out var value)) Update(item => item.Direction = value); }
-    private void ChangeAnimationDuration(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateLive("duration", item => item.DurationSeconds = value); }
-    private void ChangeAnimationDelay(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateLive("delay", item => item.DelaySeconds = value); }
-    private void ChangeAnimationDistance(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateLive("distance", item => item.DistancePercent = value); }
-    private void ChangeAnimationScale(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateLive("scale", item => item.ScalePercent = value); }
-    private void ChangeAnimationRotation(ChangeEventArgs args) { if (TryDouble(args, out var value)) UpdateLive("rotation", item => item.RotationDegrees = value); }
-    private void ChangeAnimationRepeat(ChangeEventArgs args) { if (int.TryParse(Text(args), out var value)) Update(item => item.RepeatCount = value); }
-    private void ToggleAnimationAutoReverse(ChangeEventArgs args) => Update(item => item.AutoReverse = Bool(args));
-    private void EndLiveEdit(ChangeEventArgs _) => State.EndLiveEdit();
+    private void ChangeAnimationEffect(ChangeEventArgs args) {
+        try
+        {
+     if (Enum.TryParse<PublicationAnimationEffect>(Text(args), out var value)) Update(item => item.Effect = value); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ChangeAnimationEffect)} failed.");
+            throw;
+        }
+    }
+    private void ChangeAnimationTrigger(ChangeEventArgs args) {
+        try
+        {
+     if (Enum.TryParse<PublicationAnimationTrigger>(Text(args), out var value)) Update(item => item.Trigger = value); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ChangeAnimationTrigger)} failed.");
+            throw;
+        }
+    }
+    private void ChangeAnimationEasing(ChangeEventArgs args) {
+        try
+        {
+     if (Enum.TryParse<PublicationAnimationEasing>(Text(args), out var value)) Update(item => item.Easing = value); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ChangeAnimationEasing)} failed.");
+            throw;
+        }
+    }
+    private void ChangeAnimationDirection(ChangeEventArgs args) {
+        try
+        {
+     if (Enum.TryParse<PublicationAnimationDirection>(Text(args), out var value)) Update(item => item.Direction = value); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ChangeAnimationDirection)} failed.");
+            throw;
+        }
+    }
+    private void ChangeAnimationDuration(ChangeEventArgs args) {
+        try
+        {
+     if (TryDouble(args, out var value)) UpdateLive("duration", item => item.DurationSeconds = value); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ChangeAnimationDuration)} failed.");
+            throw;
+        }
+    }
+    private void ChangeAnimationDelay(ChangeEventArgs args) {
+        try
+        {
+     if (TryDouble(args, out var value)) UpdateLive("delay", item => item.DelaySeconds = value); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ChangeAnimationDelay)} failed.");
+            throw;
+        }
+    }
+    private void ChangeAnimationDistance(ChangeEventArgs args) {
+        try
+        {
+     if (TryDouble(args, out var value)) UpdateLive("distance", item => item.DistancePercent = value); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ChangeAnimationDistance)} failed.");
+            throw;
+        }
+    }
+    private void ChangeAnimationScale(ChangeEventArgs args) {
+        try
+        {
+     if (TryDouble(args, out var value)) UpdateLive("scale", item => item.ScalePercent = value); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ChangeAnimationScale)} failed.");
+            throw;
+        }
+    }
+    private void ChangeAnimationRotation(ChangeEventArgs args) {
+        try
+        {
+     if (TryDouble(args, out var value)) UpdateLive("rotation", item => item.RotationDegrees = value); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ChangeAnimationRotation)} failed.");
+            throw;
+        }
+    }
+    private void ChangeAnimationRepeat(ChangeEventArgs args) {
+        try
+        {
+     if (int.TryParse(Text(args), out var value)) Update(item => item.RepeatCount = value); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ChangeAnimationRepeat)} failed.");
+            throw;
+        }
+    }
+    private void ToggleAnimationAutoReverse(ChangeEventArgs args) {
+        try
+        {
+            Update(item => item.AutoReverse = Bool(args));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ToggleAnimationAutoReverse)} failed.");
+            throw;
+        }
+    }
+    private void EndLiveEdit(ChangeEventArgs _) {
+        try
+        {
+            State.EndLiveEdit();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(EndLiveEdit)} failed.");
+            throw;
+        }
+    }
 
     private void ToggleHiddenAtPresentationStart(ChangeEventArgs args)
     {
-        if (State.SelectedElement is not { } selected) return;
-        State.UpdateSelected(_ => selected.HiddenAtPresentationStart = Bool(args));
+        try
+        {
+            if (State.SelectedElement is not { } selected) return;
+            State.UpdateSelected(_ => selected.HiddenAtPresentationStart = Bool(args));
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ToggleHiddenAtPresentationStart)} failed.");
+            throw;
+        }
     }
 
     private void ChangeInteractionAction(ChangeEventArgs args)
     {
-        if (!Enum.TryParse<PublicationInteractionAction>(Text(args), out var value)) return;
-        var selected = State.SelectedElement;
-        State.UpdateInteraction(item =>
+        try
         {
-            item.Action = value;
-            if (!IsMediaInteraction(value)) return;
-            if (selected is PublicationMediaElement)
+            if (!Enum.TryParse<PublicationInteractionAction>(Text(args), out var value)) return;
+            var selected = State.SelectedElement;
+            State.UpdateInteraction(item =>
             {
-                item.TargetElementId = null;
-                return;
-            }
-            var currentTargetIsMedia = item.TargetElementId is { } targetId && State.CurrentPage.Elements.OfType<PublicationMediaElement>().Any(media => media.Id == targetId);
-            if (!currentTargetIsMedia)
-                item.TargetElementId = State.CurrentPage.Elements.OfType<PublicationMediaElement>().FirstOrDefault()?.Id;
-        });
+                item.Action = value;
+                if (!IsMediaInteraction(value)) return;
+                if (selected is PublicationMediaElement)
+                {
+                    item.TargetElementId = null;
+                    return;
+                }
+                var currentTargetIsMedia = item.TargetElementId is { } targetId && State.CurrentPage.Elements.OfType<PublicationMediaElement>().Any(media => media.Id == targetId);
+                if (!currentTargetIsMedia)
+                    item.TargetElementId = State.CurrentPage.Elements.OfType<PublicationMediaElement>().FirstOrDefault()?.Id;
+            });
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ChangeInteractionAction)} failed.");
+            throw;
+        }
     }
-    private void ChangeInteractionPage(ChangeEventArgs args) => State.UpdateInteraction(item => item.TargetPageId = Guid.TryParse(Text(args), out var value) ? value : null);
-    private void ChangeInteractionElement(ChangeEventArgs args) => State.UpdateInteraction(item => item.TargetElementId = Guid.TryParse(Text(args), out var value) ? value : null);
-    private void ChangeInteractionUrl(ChangeEventArgs args) => State.UpdateInteraction(item => item.Url = Text(args));
-    private void ToggleInteractionNewWindow(ChangeEventArgs args) => State.UpdateInteraction(item => item.OpenInNewWindow = Bool(args));
+    private void ChangeInteractionPage(ChangeEventArgs args) {
+        try
+        {
+            State.UpdateInteraction(item => item.TargetPageId = Guid.TryParse(Text(args), out var value) ? value : null);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ChangeInteractionPage)} failed.");
+            throw;
+        }
+    }
+    private void ChangeInteractionElement(ChangeEventArgs args) {
+        try
+        {
+            State.UpdateInteraction(item => item.TargetElementId = Guid.TryParse(Text(args), out var value) ? value : null);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ChangeInteractionElement)} failed.");
+            throw;
+        }
+    }
+    private void ChangeInteractionUrl(ChangeEventArgs args) {
+        try
+        {
+            State.UpdateInteraction(item => item.Url = Text(args));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ChangeInteractionUrl)} failed.");
+            throw;
+        }
+    }
+    private void ToggleInteractionNewWindow(ChangeEventArgs args) {
+        try
+        {
+            State.UpdateInteraction(item => item.OpenInNewWindow = Bool(args));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ToggleInteractionNewWindow)} failed.");
+            throw;
+        }
+    }
 
-    private void ToggleStartAutomatically(ChangeEventArgs args) => SetPlayback(item => item.StartAutomatically = Bool(args));
-    private void ToggleLoopPresentation(ChangeEventArgs args) => SetPlayback(item => item.LoopPresentation = Bool(args));
-    private void ToggleShowControls(ChangeEventArgs args) => SetPlayback(item => item.ShowControls = Bool(args));
+    private void ToggleStartAutomatically(ChangeEventArgs args) {
+        try
+        {
+            SetPlayback(item => item.StartAutomatically = Bool(args));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ToggleStartAutomatically)} failed.");
+            throw;
+        }
+    }
+    private void ToggleLoopPresentation(ChangeEventArgs args) {
+        try
+        {
+            SetPlayback(item => item.LoopPresentation = Bool(args));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ToggleLoopPresentation)} failed.");
+            throw;
+        }
+    }
+    private void ToggleShowControls(ChangeEventArgs args) {
+        try
+        {
+            SetPlayback(item => item.ShowControls = Bool(args));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(ToggleShowControls)} failed.");
+            throw;
+        }
+    }
     private void SetPlayback(Action<PublicationPlaybackSettings> update)
     {
-        var value = BoolCopy(State.Document.Playback);
-        update(value);
-        State.SetPlayback(value);
+        try
+        {
+            var value = BoolCopy(State.Document.Playback);
+            update(value);
+            State.SetPlayback(value);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(SetPlayback)} failed.");
+            throw;
+        }
     }
 
-    private void Update(Action<PublicationAnimation> change) { if (_selectedAnimationId is { } id) State.UpdateAnimation(id, change); }
-    private void UpdateLive(string key, Action<PublicationAnimation> change) { if (_selectedAnimationId is { } id) State.UpdateAnimationLive(id, key, change); }
+    private void Update(Action<PublicationAnimation> change) {
+        try
+        {
+     if (_selectedAnimationId is { } id) State.UpdateAnimation(id, change); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(Update)} failed.");
+            throw;
+        }
+    }
+    private void UpdateLive(string key, Action<PublicationAnimation> change) {
+        try
+        {
+     if (_selectedAnimationId is { } id) State.UpdateAnimationLive(id, key, change); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(UpdateLive)} failed.");
+            throw;
+        }
+    }
 
-    private PublicationPlaybackSettings BoolCopy(PublicationPlaybackSettings value) => new()
+    private PublicationPlaybackSettings BoolCopy(PublicationPlaybackSettings value) {
+        try
+        {
+            return new()
     {
         LoopPresentation = value.LoopPresentation,
         StartAutomatically = value.StartAutomatically,
         ShowControls = value.ShowControls
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(BoolCopy)} failed.");
+            throw;
+        }
+    }
 
     private PublicationAnimationEffect[] EffectsFor(PublicationAnimationPhase phase)
     {
-        if (phase == PublicationAnimationPhase.Emphasis && State.SelectedElement is PublicationMediaElement)
-            return [PublicationAnimationEffect.Pulse, PublicationAnimationEffect.Spin, PublicationAnimationEffect.Shake, PublicationAnimationEffect.GrowShrink, PublicationAnimationEffect.Bounce,
-                PublicationAnimationEffect.PlayMedia, PublicationAnimationEffect.PauseMedia, PublicationAnimationEffect.StopMedia];
-        return phase switch
+        try
         {
-            PublicationAnimationPhase.Entrance => [PublicationAnimationEffect.Fade, PublicationAnimationEffect.Fly, PublicationAnimationEffect.Float, PublicationAnimationEffect.Zoom, PublicationAnimationEffect.Wipe, PublicationAnimationEffect.Bounce],
-            PublicationAnimationPhase.Emphasis => [PublicationAnimationEffect.Pulse, PublicationAnimationEffect.Spin, PublicationAnimationEffect.Shake, PublicationAnimationEffect.GrowShrink, PublicationAnimationEffect.Bounce],
-            PublicationAnimationPhase.Exit => [PublicationAnimationEffect.Fade, PublicationAnimationEffect.Fly, PublicationAnimationEffect.Zoom, PublicationAnimationEffect.Wipe],
-            _ => [PublicationAnimationEffect.Move]
-        };
+            if (phase == PublicationAnimationPhase.Emphasis && State.SelectedElement is PublicationMediaElement)
+                return [PublicationAnimationEffect.Pulse, PublicationAnimationEffect.Spin, PublicationAnimationEffect.Shake, PublicationAnimationEffect.GrowShrink, PublicationAnimationEffect.Bounce,
+                    PublicationAnimationEffect.PlayMedia, PublicationAnimationEffect.PauseMedia, PublicationAnimationEffect.StopMedia];
+            return phase switch
+            {
+                PublicationAnimationPhase.Entrance => [PublicationAnimationEffect.Fade, PublicationAnimationEffect.Fly, PublicationAnimationEffect.Float, PublicationAnimationEffect.Zoom, PublicationAnimationEffect.Wipe, PublicationAnimationEffect.Bounce],
+                PublicationAnimationPhase.Emphasis => [PublicationAnimationEffect.Pulse, PublicationAnimationEffect.Spin, PublicationAnimationEffect.Shake, PublicationAnimationEffect.GrowShrink, PublicationAnimationEffect.Bounce],
+                PublicationAnimationPhase.Exit => [PublicationAnimationEffect.Fade, PublicationAnimationEffect.Fly, PublicationAnimationEffect.Zoom, PublicationAnimationEffect.Wipe],
+                _ => [PublicationAnimationEffect.Move]
+            };
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(EffectsFor)} failed.");
+            throw;
+        }
     }
 
-    private bool UsesDirection(PublicationAnimationEffect value) => value is PublicationAnimationEffect.Fly or PublicationAnimationEffect.Float or PublicationAnimationEffect.Wipe or PublicationAnimationEffect.Move;
-    private bool UsesDistance(PublicationAnimationEffect value) => value is PublicationAnimationEffect.Fly or PublicationAnimationEffect.Float or PublicationAnimationEffect.Move or PublicationAnimationEffect.Shake;
-    private bool UsesScale(PublicationAnimationEffect value) => value is PublicationAnimationEffect.Zoom or PublicationAnimationEffect.Pulse or PublicationAnimationEffect.GrowShrink or PublicationAnimationEffect.Bounce;
-    private bool UsesRotation(PublicationAnimationEffect value) => value == PublicationAnimationEffect.Spin;
-    private bool IsMediaAnimationEffect(PublicationAnimationEffect value) => value is PublicationAnimationEffect.PlayMedia or PublicationAnimationEffect.PauseMedia or PublicationAnimationEffect.StopMedia;
-    private string TriggerName(PublicationAnimationTrigger value) => value switch
+    private bool UsesDirection(PublicationAnimationEffect value) {
+        try
+        {
+            return value is PublicationAnimationEffect.Fly or PublicationAnimationEffect.Float or PublicationAnimationEffect.Wipe or PublicationAnimationEffect.Move;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(UsesDirection)} failed.");
+            throw;
+        }
+    }
+    private bool UsesDistance(PublicationAnimationEffect value) {
+        try
+        {
+            return value is PublicationAnimationEffect.Fly or PublicationAnimationEffect.Float or PublicationAnimationEffect.Move or PublicationAnimationEffect.Shake;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(UsesDistance)} failed.");
+            throw;
+        }
+    }
+    private bool UsesScale(PublicationAnimationEffect value) {
+        try
+        {
+            return value is PublicationAnimationEffect.Zoom or PublicationAnimationEffect.Pulse or PublicationAnimationEffect.GrowShrink or PublicationAnimationEffect.Bounce;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(UsesScale)} failed.");
+            throw;
+        }
+    }
+    private bool UsesRotation(PublicationAnimationEffect value) {
+        try
+        {
+            return value == PublicationAnimationEffect.Spin;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(UsesRotation)} failed.");
+            throw;
+        }
+    }
+    private bool IsMediaAnimationEffect(PublicationAnimationEffect value) {
+        try
+        {
+            return value is PublicationAnimationEffect.PlayMedia or PublicationAnimationEffect.PauseMedia or PublicationAnimationEffect.StopMedia;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(IsMediaAnimationEffect)} failed.");
+            throw;
+        }
+    }
+    private string TriggerName(PublicationAnimationTrigger value) {
+        try
+        {
+            return value switch
     {
         PublicationAnimationTrigger.OnPageEnter => "When page opens",
         PublicationAnimationTrigger.WithPrevious => "With previous",
         PublicationAnimationTrigger.AfterPrevious => "After previous",
         _ => "On click"
     };
-    private string TriggerGlyph(PublicationAnimationTrigger value) => value switch
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(TriggerName)} failed.");
+            throw;
+        }
+    }
+    private string TriggerGlyph(PublicationAnimationTrigger value) {
+        try
+        {
+            return value switch
     {
         PublicationAnimationTrigger.OnPageEnter => "▶",
         PublicationAnimationTrigger.WithPrevious => "⇉",
         PublicationAnimationTrigger.AfterPrevious => "→",
         _ => "☝"
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(TriggerGlyph)} failed.");
+            throw;
+        }
+    }
     private IEnumerable<PublicationElement> InteractionTargets(PublicationElement selected)
     {
-        var items = State.CurrentPage.Elements.Where(item => item.Id != selected.Id);
-        return IsMediaInteraction(selected.Interaction.Action) ? items.OfType<PublicationMediaElement>() : items;
+        try
+        {
+            var items = State.CurrentPage.Elements.Where(item => item.Id != selected.Id);
+            return IsMediaInteraction(selected.Interaction.Action) ? items.OfType<PublicationMediaElement>() : items;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(InteractionTargets)} failed.");
+            throw;
+        }
     }
-    private bool IsMediaInteraction(PublicationInteractionAction value) => value is
+    private bool IsMediaInteraction(PublicationInteractionAction value) {
+        try
+        {
+            return value is
         PublicationInteractionAction.PlayMedia or PublicationInteractionAction.PauseMedia or PublicationInteractionAction.ToggleMediaPlayback;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(IsMediaInteraction)} failed.");
+            throw;
+        }
+    }
 
-    private string InteractionName(PublicationInteractionAction value) => value switch
+    private string InteractionName(PublicationInteractionAction value) {
+        try
+        {
+            return value switch
     {
         PublicationInteractionAction.None => "Nothing",
         PublicationInteractionAction.NextPage => "Go to next page",
@@ -452,7 +1096,17 @@
         PublicationInteractionAction.PauseMedia => "Pause audio or video",
         _ => "Toggle media playback"
     };
-    private string KindGlyph(PublicationElement item) => item.Kind switch
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(InteractionName)} failed.");
+            throw;
+        }
+    }
+    private string KindGlyph(PublicationElement item) {
+        try
+        {
+            return item.Kind switch
     {
         PublicationElementKind.Text => "T",
         PublicationElementKind.Image => "▧",
@@ -467,10 +1121,77 @@
         PublicationElementKind.LiveSource => "●",
         _ => "•"
     };
-    private string Friendly(string value) => System.Text.RegularExpressions.Regex.Replace(value, "([a-z])([A-Z])", "$1 $2");
-    private string Seconds(double value) => $"{value:0.##} s";
-    private string Inv(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
-    private string Text(ChangeEventArgs args) => args.Value?.ToString() ?? string.Empty;
-    private bool Bool(ChangeEventArgs args) => args.Value is bool value ? value : bool.TryParse(Text(args), out var parsed) && parsed;
-    private bool TryDouble(ChangeEventArgs args, out double value) => double.TryParse(Text(args), NumberStyles.Float, CultureInfo.InvariantCulture, out value);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(KindGlyph)} failed.");
+            throw;
+        }
+    }
+    private string Friendly(string value) {
+        try
+        {
+            return System.Text.RegularExpressions.Regex.Replace(value, "([a-z])([A-Z])", "$1 $2");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(Friendly)} failed.");
+            throw;
+        }
+    }
+    private string Seconds(double value) {
+        try
+        {
+            return $"{value:0.##} s";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(Seconds)} failed.");
+            throw;
+        }
+    }
+    private string Inv(double value) {
+        try
+        {
+            return value.ToString("0.###", CultureInfo.InvariantCulture);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(Inv)} failed.");
+            throw;
+        }
+    }
+    private string Text(ChangeEventArgs args) {
+        try
+        {
+            return args.Value?.ToString() ?? string.Empty;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(Text)} failed.");
+            throw;
+        }
+    }
+    private bool Bool(ChangeEventArgs args) {
+        try
+        {
+            return args.Value is bool value ? value : bool.TryParse(Text(args), out var parsed) && parsed;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(Bool)} failed.");
+            throw;
+        }
+    }
+    private bool TryDouble(ChangeEventArgs args, out double value) {
+        try
+        {
+            return double.TryParse(Text(args), NumberStyles.Float, CultureInfo.InvariantCulture, out value);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(TryDouble)} failed.");
+            throw;
+        }
+    }
 }

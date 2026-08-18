@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Static source audit for PublisherStudio 2.8.4 compile repair and architecture maintenance."""
+"""Static source audit for PublisherStudio 2.8.5 compile repair and architecture maintenance."""
 from pathlib import Path
 import re, sys
 
@@ -29,17 +29,17 @@ try:
     for rel in (
         'src/PublisherStudio.Web/PublisherStudio.Web.csproj',
         'src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'):
-        require(rel, '<Version>2.8.4</Version>')
+        require(rel, '<Version>2.8.5</Version>')
 
     require('src/PublisherStudio.Web/Components/App.razor',
-            'css/site.css?v=20260818-284',
-            'videoEffectRuntime.js?v=2.8.4',
-            'publisherInterop.js?v=2.8.4')
+            'css/site.css?v=20260818-285',
+            'videoEffectRuntime.js?v=2.8.5',
+            'publisherInterop.js?v=2.8.5')
     for rel in (
         'src/PublisherStudio.Web/Components/Pages/Editor.razor',
         'src/PublisherStudio.Web/Components/Editor/InspectorPanel.razor',
         'src/PublisherStudio.Web/Components/Editor/MediaStudio.razor'):
-        require(rel, 'mediaStudioInterop.js?v=2.8.4')
+        require(rel, 'mediaStudioInterop.js?v=2.8.5')
 
     page = 'src/PublisherStudio.Web/Components/Editor/PageSurface.razor'
     require(page,
@@ -74,7 +74,7 @@ try:
             '@inject ILoggerFactory OperationalLoggerFactory',
             '@inject IUserNotificationService OperationalNotifications',
             '<OperationalErrorBoundary',
-            "Fail 'Python is required for the method-granular Razor component resilience audit; the build must not silently weaken this safety policy.'")
+            "Python 3 is required for strict method-granular component resilience")
 
     require('build/Assert-ServiceArchitecture.ps1',
             'audit_service_resilience.py',
@@ -83,11 +83,13 @@ try:
             'Runtime services/clients/registries/runners must be DI instances')
 
     require('build/audit_component_resilience.py',
-            'legacyWithoutBoundary',
-            'New methods are not allowed to join this list.',
+            'no legacy exemption list is permitted',
+            '0 legacy exemptions',
             "missing.append('try/catch')",
             "missing.append('structured logging')")
-    require('build/component-method-resilience-baseline.json', 'legacyWithoutBoundary')
+    if (ROOT / 'build/component-method-resilience-baseline.json').exists():
+        raise AssertionError('Component resilience baseline must not exist.')
+    checks += 1
 
     # Existing broad all-service enforcement must remain unchanged and active.
     require('build/Assert-MethodDiagnostics.ps1', 'audit_service_resilience.py', '--product publisherstudio')
@@ -112,7 +114,7 @@ try:
 
     require('Directory.Build.props', '<LocalGptWireProtocolVersion>2.1.1</LocalGptWireProtocolVersion>')
 
-    print(f'PublisherStudio 2.8.4 compile/architecture source audit passed: {checks} checks.')
+    print(f'PublisherStudio 2.8.5 compile/architecture source audit passed: {checks} checks.')
 except Exception as exc:
-    print(f'PublisherStudio 2.8.4 source audit failed: {exc}', file=sys.stderr)
+    print(f'PublisherStudio 2.8.5 source audit failed: {exc}', file=sys.stderr)
     raise SystemExit(1)

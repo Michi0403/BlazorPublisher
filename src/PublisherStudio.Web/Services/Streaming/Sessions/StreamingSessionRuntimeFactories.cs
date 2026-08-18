@@ -59,9 +59,11 @@ public interface ILanStreamingServerFactory
 /// Creates configured LAN streaming server instances from the application's current dependencies and runtime settings.
 /// </summary>
 /// <param name="loggerFactory">Logger factory dependency used by the LAN streaming server workflow to provide the corresponding application capability.</param>
+/// <param name="taskRunner">Supervised task runner used by the LAN and RTSP server lifetimes.</param>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class LanStreamingServerFactory(
     ILoggerFactory loggerFactory,
+    ISupervisedTaskRunner taskRunner,
     ILogger<LanStreamingServerFactory> logger) : ILanStreamingServerFactory
 {
     /// <summary>
@@ -74,7 +76,7 @@ public sealed class LanStreamingServerFactory(
         try
         {
             logger.LogTrace("Creating the LAN streaming server for media session {SessionId}.", session.Id);
-            return new LanStreamingServer(session, loggerFactory.CreateLogger<LanStreamingServer>());
+            return new LanStreamingServer(session, taskRunner, loggerFactory.CreateLogger<LanStreamingServer>());
         }
         catch (Exception exception)
         {

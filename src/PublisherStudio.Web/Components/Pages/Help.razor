@@ -75,60 +75,208 @@
     {
         try
         {
-            Status = Documentation.GetStatus();
-            Logger.LogInformation("Loaded PublisherStudio documentation status for version {Version}.", Status.Version);
+            try
+            {
+                Status = Documentation.GetStatus();
+                Logger.LogInformation("Loaded PublisherStudio documentation status for version {Version}.", Status.Version);
+            }
+            catch (Exception exception)
+            {
+                Logger.LogError(exception, "Loading PublisherStudio documentation status failed.");
+                Notifications.Warning("The generated guide is not available yet. Run a normal build or release build to create it.", "Documentation is not ready", nameof(Help));
+            }
+    
         }
-        catch (Exception exception)
+        catch (Exception __componentMethodException)
         {
-            Logger.LogError(exception, "Loading PublisherStudio documentation status failed.");
-            Notifications.Warning("The generated guide is not available yet. Run a normal build or release build to create it.", "Documentation is not ready", nameof(Help));
+            Logger.LogError(__componentMethodException, $"Component method {nameof(Help)}.{nameof(OnInitialized)} failed.");
+            throw;
         }
     }
 
-    private void OpenHtmlGuide() => OpenDocumentation(Status.HtmlUrl, "PublisherStudio HTML guide", Status.HtmlAvailable);
+    private void OpenHtmlGuide() {
+        try
+        {
+            OpenDocumentation(Status.HtmlUrl, "PublisherStudio HTML guide", Status.HtmlAvailable);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(Help)}.{nameof(OpenHtmlGuide)} failed.");
+            throw;
+        }
+    }
 
-    private void OpenPdfBook() => OpenDocumentation(Status.PdfUrl, "PublisherStudio PDF book", Status.PdfAvailable);
+    private void OpenPdfBook() {
+        try
+        {
+            OpenDocumentation(Status.PdfUrl, "PublisherStudio PDF book", Status.PdfAvailable);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(Help)}.{nameof(OpenPdfBook)} failed.");
+            throw;
+        }
+    }
 
-    private void OpenApiReference() => OpenDocumentation("/api/documentation/html/api/index.html", "PublisherStudio API reference", Status.HtmlAvailable);
+    private void OpenApiReference() {
+        try
+        {
+            OpenDocumentation("/api/documentation/html/api/index.html", "PublisherStudio API reference", Status.HtmlAvailable);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(Help)}.{nameof(OpenApiReference)} failed.");
+            throw;
+        }
+    }
 
-    private void OpenBuildStatus() => OpenDocumentation("/api/documentation/status", "PublisherStudio documentation build status");
+    private void OpenBuildStatus() {
+        try
+        {
+            OpenDocumentation("/api/documentation/status", "PublisherStudio documentation build status");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(Help)}.{nameof(OpenBuildStatus)} failed.");
+            throw;
+        }
+    }
 
-    private void OpenGettingStarted() => OpenDocumentation("/api/documentation/html/articles/getting-started.html", "Getting started");
+    private void OpenGettingStarted() {
+        try
+        {
+            OpenDocumentation("/api/documentation/html/articles/getting-started.html", "Getting started");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(Help)}.{nameof(OpenGettingStarted)} failed.");
+            throw;
+        }
+    }
 
-    private void OpenEditorWorkspace() => OpenDocumentation("/api/documentation/html/articles/editor-workspace.html", "Editor workspace");
+    private void OpenEditorWorkspace() {
+        try
+        {
+            OpenDocumentation("/api/documentation/html/articles/editor-workspace.html", "Editor workspace");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(Help)}.{nameof(OpenEditorWorkspace)} failed.");
+            throw;
+        }
+    }
 
-    private void OpenPicturesAndMedia() => OpenDocumentation("/api/documentation/html/articles/pictures-and-media.html", "Pictures and media");
+    private void OpenPicturesAndMedia() {
+        try
+        {
+            OpenDocumentation("/api/documentation/html/articles/pictures-and-media.html", "Pictures and media");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(Help)}.{nameof(OpenPicturesAndMedia)} failed.");
+            throw;
+        }
+    }
 
-    private void OpenStreamingAndRecording() => OpenDocumentation("/api/documentation/html/articles/streaming-and-recording.html", "Streaming and recording");
+    private void OpenStreamingAndRecording() {
+        try
+        {
+            OpenDocumentation("/api/documentation/html/articles/streaming-and-recording.html", "Streaming and recording");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(Help)}.{nameof(OpenStreamingAndRecording)} failed.");
+            throw;
+        }
+    }
 
-    private void OpenPublishingAndExport() => OpenDocumentation("/api/documentation/html/articles/publishing-and-export.html", "Publishing and export");
+    private void OpenPublishingAndExport() {
+        try
+        {
+            OpenDocumentation("/api/documentation/html/articles/publishing-and-export.html", "Publishing and export");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(Help)}.{nameof(OpenPublishingAndExport)} failed.");
+            throw;
+        }
+    }
 
-    private void OpenLocalGptAndOneWire() => OpenDocumentation("/api/documentation/html/articles/localgpt-and-onewire.html", "LocalGPT and 1-Wire");
+    private void OpenLocalGptAndOneWire() {
+        try
+        {
+            OpenDocumentation("/api/documentation/html/articles/localgpt-and-onewire.html", "LocalGPT and 1-Wire");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(Help)}.{nameof(OpenLocalGptAndOneWire)} failed.");
+            throw;
+        }
+    }
 
-    private void OpenInstallerAndUpdates() => OpenDocumentation("/api/documentation/html/articles/installer-and-updates.html", "Installer and updates");
+    private void OpenInstallerAndUpdates() {
+        try
+        {
+            OpenDocumentation("/api/documentation/html/articles/installer-and-updates.html", "Installer and updates");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(Help)}.{nameof(OpenInstallerAndUpdates)} failed.");
+            throw;
+        }
+    }
 
-    private void OpenTroubleshooting() => OpenDocumentation("/api/documentation/html/articles/troubleshooting.html", "Troubleshooting");
+    private void OpenTroubleshooting() {
+        try
+        {
+            OpenDocumentation("/api/documentation/html/articles/troubleshooting.html", "Troubleshooting");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(Help)}.{nameof(OpenTroubleshooting)} failed.");
+            throw;
+        }
+    }
 
     private void OpenDocumentation(string url, string title, bool available = true)
     {
         try
         {
-            if (!available)
+            try
             {
-                Notifications.Warning("The requested documentation artifact is not available in this build.", "Documentation is not ready", nameof(Help));
-                return;
-            }
+                if (!available)
+                {
+                    Notifications.Warning("The requested documentation artifact is not available in this build.", "Documentation is not ready", nameof(Help));
+                    return;
+                }
 
-            Viewer.Open(new PublisherDocumentationViewerRequest { Url = url, Title = title });
-            Logger.LogInformation("Opened PublisherStudio documentation view {DocumentationTitle} at {DocumentationUrl}.", title, url);
+                Viewer.Open(new PublisherDocumentationViewerRequest { Url = url, Title = title });
+                Logger.LogInformation("Opened PublisherStudio documentation view {DocumentationTitle} at {DocumentationUrl}.", title, url);
+            }
+            catch (Exception exception)
+            {
+                Logger.LogError(exception, "Opening PublisherStudio documentation failed for {DocumentationUrl}.", url);
+                Notifications.Warning("The documentation viewer could not be opened.", "Documentation viewer", nameof(Help));
+            }
+    
         }
-        catch (Exception exception)
+        catch (Exception __componentMethodException)
         {
-            Logger.LogError(exception, "Opening PublisherStudio documentation failed for {DocumentationUrl}.", url);
-            Notifications.Warning("The documentation viewer could not be opened.", "Documentation viewer", nameof(Help));
+            Logger.LogError(__componentMethodException, $"Component method {nameof(Help)}.{nameof(OpenDocumentation)} failed.");
+            throw;
         }
     }
 
 
-    private void BackToStudio() => Navigation.NavigateTo("/");
+    private void BackToStudio() {
+        try
+        {
+            Navigation.NavigateTo("/");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(Help)}.{nameof(BackToStudio)} failed.");
+            throw;
+        }
+    }
 }

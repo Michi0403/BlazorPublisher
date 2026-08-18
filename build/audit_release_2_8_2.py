@@ -38,7 +38,7 @@ try:
         "src/PublisherStudio.Web/PublisherStudio.Web.csproj",
         "src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj",
     ):
-        require(rel, "<Version>2.8.4</Version>")
+        require(rel, "<Version>2.8.5</Version>")
 
     # Mainframe canvas remains mounted, but its designer interaction contract is suspended while a studio is open.
     require(
@@ -213,13 +213,13 @@ try:
     )
 
     # Active browser assets must be cache-busted for this release.
-    require("src/PublisherStudio.Web/Components/App.razor", "css/site.css?v=20260818-284", "videoEffectRuntime.js?v=2.8.4", "publisherInterop.js?v=2.8.4")
+    require("src/PublisherStudio.Web/Components/App.razor", "css/site.css?v=20260818-285", "videoEffectRuntime.js?v=2.8.5", "publisherInterop.js?v=2.8.5")
     for rel in (
         "src/PublisherStudio.Web/Components/Pages/Editor.razor",
         "src/PublisherStudio.Web/Components/Editor/MediaStudio.razor",
         "src/PublisherStudio.Web/Components/Editor/InspectorPanel.razor",
     ):
-        require(rel, "mediaStudioInterop.js?v=2.8.4")
+        require(rel, "mediaStudioInterop.js?v=2.8.5")
 
     # JavaScript diagnostics inventory must match the maintained files with normalized newlines.
     manifest = text("build/javascript-diagnostics-files.sha256")

@@ -11,6 +11,7 @@
 @inject IRecurringScreenReaderService RecurringScreenReader
 @inject IUserNotificationService Notifications
 @inject ILogger<OrganicPlugins> Logger
+@inject ISupervisedTaskRunner TaskRunner
 @inject NavigationManager Navigation
 @inject EditorStateService EditorState
 @inject IJSRuntime JS
@@ -437,25 +438,43 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _councilRequest = NewCouncilRequest("general");
-        _permission = NewPermission(string.Empty);
-        Discovery.Changed += OnServiceChanged;
-        Connection.Changed += OnServiceChanged;
-        WorkCoordinator.Changed += OnServiceChanged;
-        ResultStore.Changed += OnServiceChanged;
-        RecurringScreenReader.Changed += OnServiceChanged;
-        _capabilities = await CapabilityCatalog.GetCapabilitiesAsync().ConfigureAwait(true);
-        Refresh();
-        ApplyCurrentPublisherContext();
+        try
+        {
+            _councilRequest = NewCouncilRequest("general");
+            _permission = NewPermission(string.Empty);
+            Discovery.Changed += OnServiceChanged;
+            Connection.Changed += OnServiceChanged;
+            WorkCoordinator.Changed += OnServiceChanged;
+            ResultStore.Changed += OnServiceChanged;
+            RecurringScreenReader.Changed += OnServiceChanged;
+            _capabilities = await CapabilityCatalog.GetCapabilitiesAsync().ConfigureAwait(true);
+            Refresh();
+            ApplyCurrentPublisherContext();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(OnInitializedAsync)} failed.");
+            throw;
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender || _automationStateLoaded) return;
-        _automationStateLoaded = true;
-        try { _browserAutomationEnabled = await JS.InvokeAsync<bool>("publisherAutomation.isEnabled").ConfigureAwait(true); }
-        catch (JSException exception) { Logger.LogDebug(exception, "Browser automation state is not available before JavaScript startup completes."); }
-        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        try
+        {
+            if (!firstRender || _automationStateLoaded) return;
+            _automationStateLoaded = true;
+            try { _browserAutomationEnabled = await JS.InvokeAsync<bool>("publisherAutomation.isEnabled").ConfigureAwait(true); }
+            catch (JSException exception) { Logger.LogDebug(exception, "Browser automation state is not available before JavaScript startup completes."); }
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(OnAfterRenderAsync)} failed.");
+            throw;
+        }
     }
 
     private bool CanRunCouncil => Connection.State.IsLinked && Connection.State.HasCapability("council.run");
@@ -489,170 +508,261 @@
         }
     }
 
-    private void BackToPublisher() => Navigation.NavigateTo("/");
+    private void BackToPublisher() {
+        try
+        {
+            Navigation.NavigateTo("/");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(BackToPublisher)} failed.");
+            throw;
+        }
+    }
 
     private void Refresh()
     {
-        _peers = Discovery.GetPeers();
-        _permissions = PermissionStore.GetRules();
-        _work = WorkCoordinator.GetWork();
-        _results = ResultStore.GetResults();
-        _textProposals = ResultStore.GetTextProposals();
-        _screenReaderSessions = RecurringScreenReader.GetSessions();
-        if (!CouncilTeams.Any(team => string.Equals(team.Key, _councilRequest.TeamKey, StringComparison.OrdinalIgnoreCase)))
-            _councilRequest.TeamKey = CouncilTeams.First().Key;
-        if (!CouncilTeams.Any(team => string.Equals(team.Key, _textGenerationTeamKey, StringComparison.OrdinalIgnoreCase)))
-            _textGenerationTeamKey = CouncilTeams.First().Key;
-        if (string.IsNullOrWhiteSpace(_permission.PeerId))
-            _permission.PeerId = Connection.State.PeerId.Length > 0 ? Connection.State.PeerId : _peers.FirstOrDefault()?.PeerId ?? "localgpt";
+        try
+        {
+            _peers = Discovery.GetPeers();
+            _permissions = PermissionStore.GetRules();
+            _work = WorkCoordinator.GetWork();
+            _results = ResultStore.GetResults();
+            _textProposals = ResultStore.GetTextProposals();
+            _screenReaderSessions = RecurringScreenReader.GetSessions();
+            if (!CouncilTeams.Any(team => string.Equals(team.Key, _councilRequest.TeamKey, StringComparison.OrdinalIgnoreCase)))
+                _councilRequest.TeamKey = CouncilTeams.First().Key;
+            if (!CouncilTeams.Any(team => string.Equals(team.Key, _textGenerationTeamKey, StringComparison.OrdinalIgnoreCase)))
+                _textGenerationTeamKey = CouncilTeams.First().Key;
+            if (string.IsNullOrWhiteSpace(_permission.PeerId))
+                _permission.PeerId = Connection.State.PeerId.Length > 0 ? Connection.State.PeerId : _peers.FirstOrDefault()?.PeerId ?? "localgpt";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(Refresh)} failed.");
+            throw;
+        }
     }
 
-    private void OnServiceChanged() => _ = InvokeAsync(() => { Refresh(); StateHasChanged(); });
+    private void OnServiceChanged()
+    {
+        try
+        {
+            TaskRunner.Run(
+                nameof(OrganicPlugins),
+                nameof(OnServiceChanged),
+                async _ => await InvokeAsync(() =>
+                {
+                        Refresh();
+                        StateHasChanged();
+                }).ConfigureAwait(false));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(OnServiceChanged)} failed.");
+            throw;
+        }
+    }
 
     private async Task ConnectAsync(string peerId)
     {
         try
         {
-            var state = await Connection.ConnectAsync(peerId).ConfigureAwait(true);
-            if (state.IsConnected)
+            try
             {
-                _permission.PeerId = peerId;
-                Notifications.Information($"Transport opened to {state.DisplayName}. Approve the pending link in LocalGPT to finish connecting.", "LocalGPT link requested", nameof(OrganicPlugins));
+                var state = await Connection.ConnectAsync(peerId).ConfigureAwait(true);
+                if (state.IsConnected)
+                {
+                    _permission.PeerId = peerId;
+                    Notifications.Information($"Transport opened to {state.DisplayName}. Approve the pending link in LocalGPT to finish connecting.", "LocalGPT link requested", nameof(OrganicPlugins));
+                }
+                else Notifications.Error(state.LastError, "LocalGPT connection failed", nameof(OrganicPlugins));
             }
-            else Notifications.Error(state.LastError, "LocalGPT connection failed", nameof(OrganicPlugins));
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "PublisherStudio could not connect to LocalGPT peer {PeerId}.", peerId);
+                Notifications.Error(ex.Message, "LocalGPT connection failed", nameof(OrganicPlugins));
+            }
+            Refresh();
+    
         }
-        catch (Exception ex)
+        catch (Exception __componentMethodException)
         {
-            Logger.LogError(ex, "PublisherStudio could not connect to LocalGPT peer {PeerId}.", peerId);
-            Notifications.Error(ex.Message, "LocalGPT connection failed", nameof(OrganicPlugins));
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(ConnectAsync)} failed.");
+            throw;
         }
-        Refresh();
     }
 
     private async Task RunRoundTripTestAsync()
     {
-        if (!Connection.State.IsConnected) return;
         try
         {
-            _roundTripStatus = "Testing the linked 1-Wire transport…";
-            var envelope = new OrganicWireEnvelope
+            if (!Connection.State.IsConnected) return;
+            try
             {
-                MessageType = OrganicWireMessageType.Ping,
-                TargetPeerId = Connection.State.PeerId,
-                UserConfirmed = true,
-                ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(10)
-            };
-            var correlationId = await Connection.SendEnvelopeAsync(envelope).ConfigureAwait(true);
-            var result = await Connection.WaitForResultAsync(correlationId, TimeSpan.FromSeconds(10)).ConfigureAwait(true);
-            if (result.MessageType != OrganicWireMessageType.Pong)
-                throw new InvalidDataException($"Expected a 1-Wire Pong but received {result.MessageType}.");
+                _roundTripStatus = "Testing the linked 1-Wire transport…";
+                var envelope = new OrganicWireEnvelope
+                {
+                    MessageType = OrganicWireMessageType.Ping,
+                    TargetPeerId = Connection.State.PeerId,
+                    UserConfirmed = true,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(10)
+                };
+                var correlationId = await Connection.SendEnvelopeAsync(envelope).ConfigureAwait(true);
+                var result = await Connection.WaitForResultAsync(correlationId, TimeSpan.FromSeconds(10)).ConfigureAwait(true);
+                if (result.MessageType != OrganicWireMessageType.Pong)
+                    throw new InvalidDataException($"Expected a 1-Wire Pong but received {result.MessageType}.");
 
-            _roundTripStatus = $"1-Wire {result.ProtocolVersion} Ping/Pong succeeded; {Connection.State.RemoteCapabilities.Count} LocalGPT capabilities are currently negotiated.";
-            Notifications.Success(_roundTripStatus, "Organic connection verified", nameof(OrganicPlugins));
+                _roundTripStatus = $"1-Wire {result.ProtocolVersion} Ping/Pong succeeded; {Connection.State.RemoteCapabilities.Count} LocalGPT capabilities are currently negotiated.";
+                Notifications.Success(_roundTripStatus, "Organic connection verified", nameof(OrganicPlugins));
+            }
+            catch (Exception exception)
+            {
+                _roundTripStatus = $"Round-trip test failed: {exception.Message}";
+                Notifications.Error(_roundTripStatus, "Organic connection test", nameof(OrganicPlugins));
+            }
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+    
         }
-        catch (Exception exception)
+        catch (Exception __componentMethodException)
         {
-            _roundTripStatus = $"Round-trip test failed: {exception.Message}";
-            Notifications.Error(_roundTripStatus, "Organic connection test", nameof(OrganicPlugins));
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(RunRoundTripTestAsync)} failed.");
+            throw;
         }
-        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
     }
 
     private async Task ToggleBrowserAutomationAsync()
     {
-        if (!Connection.State.IsLinked)
+        try
         {
-            Notifications.Warning("Approve and link LocalGPT before enabling browser automation.", "Browser automation", nameof(OrganicPlugins));
-            return;
+            if (!Connection.State.IsLinked)
+            {
+                Notifications.Warning("Approve and link LocalGPT before enabling browser automation.", "Browser automation", nameof(OrganicPlugins));
+                return;
+            }
+            _browserAutomationEnabled = _browserAutomationEnabled
+                ? await JS.InvokeAsync<bool>("publisherAutomation.disableForSession").ConfigureAwait(true)
+                : await JS.InvokeAsync<bool>("publisherAutomation.enableForSession").ConfigureAwait(true);
+            Notifications.Information(
+                _browserAutomationEnabled
+                    ? "Browser automation is enabled only for this browser tab and only while the 1-Wire peer remains linked."
+                    : "Browser automation polling is disabled for this browser tab.",
+                "Browser automation", nameof(OrganicPlugins));
+    
         }
-        _browserAutomationEnabled = _browserAutomationEnabled
-            ? await JS.InvokeAsync<bool>("publisherAutomation.disableForSession").ConfigureAwait(true)
-            : await JS.InvokeAsync<bool>("publisherAutomation.enableForSession").ConfigureAwait(true);
-        Notifications.Information(
-            _browserAutomationEnabled
-                ? "Browser automation is enabled only for this browser tab and only while the 1-Wire peer remains linked."
-                : "Browser automation polling is disabled for this browser tab.",
-            "Browser automation", nameof(OrganicPlugins));
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(ToggleBrowserAutomationAsync)} failed.");
+            throw;
+        }
     }
 
     private async Task DisconnectAsync()
     {
-        if (_browserAutomationEnabled)
+        try
         {
-            _browserAutomationEnabled = await JS.InvokeAsync<bool>("publisherAutomation.disableForSession").ConfigureAwait(true);
+            if (_browserAutomationEnabled)
+            {
+                _browserAutomationEnabled = await JS.InvokeAsync<bool>("publisherAutomation.disableForSession").ConfigureAwait(true);
+            }
+            await Connection.DisconnectAsync().ConfigureAwait(true);
+            Notifications.Information("PublisherStudio disconnected from LocalGPT.", source: nameof(OrganicPlugins));
+            Refresh();
+    
         }
-        await Connection.DisconnectAsync().ConfigureAwait(true);
-        Notifications.Information("PublisherStudio disconnected from LocalGPT.", source: nameof(OrganicPlugins));
-        Refresh();
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(DisconnectAsync)} failed.");
+            throw;
+        }
     }
 
     private async Task SendCouncilAsync()
     {
         try
         {
-            _councilRequest.RequestedOrganicCapabilities = _councilRequest.TeamKey switch
+            try
             {
-                "openscad-team" => ["publisher.business-context", "publisher.openscad.generate", "publisher.screen.capture", "publisher.screen.capture.result"],
-                "spreadsheet-team" => ["publisher.business-context", "publisher.spreadsheet.inspect", "publisher.screen.capture", "publisher.screen.capture.result", "publisher.input.execute", "publisher.input.result"],
-                "learning-round" => ["publisher.business-context"],
-                _ => ["publisher.business-context"]
-            };
-            var id = await Connection.SendCouncilRequestAsync(_councilRequest).ConfigureAwait(true);
-            Notifications.Success($"Council request {id} was submitted.", "Council round started", nameof(OrganicPlugins));
-            var team = _councilRequest.TeamKey;
-            _councilRequest = NewCouncilRequest(team);
+                _councilRequest.RequestedOrganicCapabilities = _councilRequest.TeamKey switch
+                {
+                    "openscad-team" => ["publisher.business-context", "publisher.openscad.generate", "publisher.screen.capture", "publisher.screen.capture.result"],
+                    "spreadsheet-team" => ["publisher.business-context", "publisher.spreadsheet.inspect", "publisher.screen.capture", "publisher.screen.capture.result", "publisher.input.execute", "publisher.input.result"],
+                    "learning-round" => ["publisher.business-context"],
+                    _ => ["publisher.business-context"]
+                };
+                var id = await Connection.SendCouncilRequestAsync(_councilRequest).ConfigureAwait(true);
+                Notifications.Success($"Council request {id} was submitted.", "Council round started", nameof(OrganicPlugins));
+                var team = _councilRequest.TeamKey;
+                _councilRequest = NewCouncilRequest(team);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Could not submit the LocalGPT council request.");
+                Notifications.Error(ex.Message, "Council request failed", nameof(OrganicPlugins));
+            }
+    
         }
-        catch (Exception ex)
+        catch (Exception __componentMethodException)
         {
-            Logger.LogError(ex, "Could not submit the LocalGPT council request.");
-            Notifications.Error(ex.Message, "Council request failed", nameof(OrganicPlugins));
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(SendCouncilAsync)} failed.");
+            throw;
         }
     }
 
     private async Task GenerateTextProposalAsync()
     {
-        if (!CanGenerateTextProposal)
-            return;
-
         try
         {
-            var resolvedTeamKey = ResolveAiAssistTeamKey();
-            var request = NewCouncilRequest(resolvedTeamKey);
-            request.RequestedOrganicCapabilities = ResolveAiAssistCapabilities();
-            request.ExternalProjectContextJson = System.Text.Json.JsonSerializer.Serialize(new
-            {
-                Source = "PublisherStudio",
-                Target = _textGenerationTarget,
-                Workflow = "Reviewable PublisherStudio AI Assist proposal",
-                Profile = _aiAssistProfile,
-                TeamKey = resolvedTeamKey,
-                Publication = EditorState.Document.Name,
-                Page = EditorState.CurrentPage.Name,
-                SelectedElementId = EditorState.SelectedElement?.Id,
-                SelectedElementName = EditorState.SelectedElement?.Name,
-                SelectedElementKind = EditorState.SelectedElement?.Kind.ToString()
-            });
-            request.Prompt = $"""
-PublisherStudio AI Assist request:
-Profile: {_aiAssistProfile}
-Target: {_textGenerationTarget.Trim()}
-User request:
-{_textGenerationPrompt.Trim()}
+            if (!CanGenerateTextProposal)
+                return;
 
-Required result contract:
-1. Use the connected PublisherStudio context and any requested organic capability that is actually advertised; do not invent unavailable routes.
-2. Generate the final reviewable text/result description for the target above. For spreadsheet, project or OpenSCAD work, preserve domain-specific structure and include exact source/formula/code where useful.
-3. Before completing the Council run, invoke the LocalGPT DX function publisher.text.proposal.request with JSON parameters containing target, text and a concise reason.
-4. Do not mutate the publication automatically. Once the user inserts the proposal it becomes ordinary PublisherStudio content and is included in normal HTML/export output.
-""";
-            var id = await Connection.SendCouncilRequestAsync(request).ConfigureAwait(true);
-            Notifications.Success($"Text-generation Council request {id} was submitted.", "Text proposal requested", nameof(OrganicPlugins));
-            _textGenerationPrompt = string.Empty;
+            try
+            {
+                var resolvedTeamKey = ResolveAiAssistTeamKey();
+                var request = NewCouncilRequest(resolvedTeamKey);
+                request.RequestedOrganicCapabilities = ResolveAiAssistCapabilities();
+                request.ExternalProjectContextJson = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    Source = "PublisherStudio",
+                    Target = _textGenerationTarget,
+                    Workflow = "Reviewable PublisherStudio AI Assist proposal",
+                    Profile = _aiAssistProfile,
+                    TeamKey = resolvedTeamKey,
+                    Publication = EditorState.Document.Name,
+                    Page = EditorState.CurrentPage.Name,
+                    SelectedElementId = EditorState.SelectedElement?.Id,
+                    SelectedElementName = EditorState.SelectedElement?.Name,
+                    SelectedElementKind = EditorState.SelectedElement?.Kind.ToString()
+                });
+                request.Prompt = $"""
+    PublisherStudio AI Assist request:
+    Profile: {_aiAssistProfile}
+    Target: {_textGenerationTarget.Trim()}
+    User request:
+    {_textGenerationPrompt.Trim()}
+
+    Required result contract:
+    1. Use the connected PublisherStudio context and any requested organic capability that is actually advertised; do not invent unavailable routes.
+    2. Generate the final reviewable text/result description for the target above. For spreadsheet, project or OpenSCAD work, preserve domain-specific structure and include exact source/formula/code where useful.
+    3. Before completing the Council run, invoke the LocalGPT DX function publisher.text.proposal.request with JSON parameters containing target, text and a concise reason.
+    4. Do not mutate the publication automatically. Once the user inserts the proposal it becomes ordinary PublisherStudio content and is included in normal HTML/export output.
+    """;
+                var id = await Connection.SendCouncilRequestAsync(request).ConfigureAwait(true);
+                Notifications.Success($"Text-generation Council request {id} was submitted.", "Text proposal requested", nameof(OrganicPlugins));
+                _textGenerationPrompt = string.Empty;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Could not submit the PublisherStudio text-generation request to LocalGPT.");
+                Notifications.Error(ex.Message, "Text proposal request failed", nameof(OrganicPlugins));
+            }
+    
         }
-        catch (Exception ex)
+        catch (Exception __componentMethodException)
         {
-            Logger.LogError(ex, "Could not submit the PublisherStudio text-generation request to LocalGPT.");
-            Notifications.Error(ex.Message, "Text proposal request failed", nameof(OrganicPlugins));
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(GenerateTextProposalAsync)} failed.");
+            throw;
         }
     }
 
@@ -663,26 +773,35 @@ Required result contract:
     {
         try
         {
-            var selected = EditorState.SelectedElement;
-            if (selected is null)
+            try
             {
-                _textGenerationTarget = $"{EditorState.CurrentPage.Name} in {EditorState.Document.Name}";
-                return;
-            }
+                var selected = EditorState.SelectedElement;
+                if (selected is null)
+                {
+                    _textGenerationTarget = $"{EditorState.CurrentPage.Name} in {EditorState.Document.Name}";
+                    return;
+                }
 
-            _textGenerationTarget = $"{selected.Name} ({selected.Kind})";
-            _aiAssistProfile = selected switch
+                _textGenerationTarget = $"{selected.Name} ({selected.Kind})";
+                _aiAssistProfile = selected switch
+                {
+                    TextFrameElement or WordArtElement => "writing",
+                    SpreadsheetElement => "spreadsheet",
+                    HtmlEmbedElement or DevExtremeComponentElement => "project",
+                    _ when selected.Name.Contains("OpenSCAD", StringComparison.OrdinalIgnoreCase) || selected.Name.Contains("3D", StringComparison.OrdinalIgnoreCase) => "openscad",
+                    _ => "auto"
+                };
+            }
+            catch (Exception exception)
             {
-                TextFrameElement or WordArtElement => "writing",
-                SpreadsheetElement => "spreadsheet",
-                HtmlEmbedElement or DevExtremeComponentElement => "project",
-                _ when selected.Name.Contains("OpenSCAD", StringComparison.OrdinalIgnoreCase) || selected.Name.Contains("3D", StringComparison.OrdinalIgnoreCase) => "openscad",
-                _ => "auto"
-            };
+                Logger.LogError(exception, "PublisherStudio could not prefill LocalGPT AI Assist from the current selection.");
+            }
+    
         }
-        catch (Exception exception)
+        catch (Exception __componentMethodException)
         {
-            Logger.LogError(exception, "PublisherStudio could not prefill LocalGPT AI Assist from the current selection.");
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(ApplyCurrentPublisherContext)} failed.");
+            throw;
         }
     }
 
@@ -693,27 +812,36 @@ Required result contract:
     {
         try
         {
-            var target = $"{_textGenerationTarget} {_textGenerationPrompt}".ToLowerInvariant();
-            var preferredKey = _aiAssistProfile switch
+            try
             {
-                "spreadsheet" => "spreadsheet-team",
-                "openscad" => "openscad-team",
-                "project" => "general-project",
-                "writing" => "general",
-                _ when target.Contains("spreadsheet", StringComparison.Ordinal) || target.Contains("sheet", StringComparison.Ordinal) || target.Contains("table", StringComparison.Ordinal) => "spreadsheet-team",
-                _ when target.Contains("openscad", StringComparison.Ordinal) || target.Contains("scad", StringComparison.Ordinal) || target.Contains("3d", StringComparison.Ordinal) => "openscad-team",
-                _ when target.Contains("project", StringComparison.Ordinal) || target.Contains("source", StringComparison.Ordinal) || target.Contains("code", StringComparison.Ordinal) || target.Contains("file", StringComparison.Ordinal) => "general-project",
-                _ => _textGenerationTeamKey
-            };
+                var target = $"{_textGenerationTarget} {_textGenerationPrompt}".ToLowerInvariant();
+                var preferredKey = _aiAssistProfile switch
+                {
+                    "spreadsheet" => "spreadsheet-team",
+                    "openscad" => "openscad-team",
+                    "project" => "general-project",
+                    "writing" => "general",
+                    _ when target.Contains("spreadsheet", StringComparison.Ordinal) || target.Contains("sheet", StringComparison.Ordinal) || target.Contains("table", StringComparison.Ordinal) => "spreadsheet-team",
+                    _ when target.Contains("openscad", StringComparison.Ordinal) || target.Contains("scad", StringComparison.Ordinal) || target.Contains("3d", StringComparison.Ordinal) => "openscad-team",
+                    _ when target.Contains("project", StringComparison.Ordinal) || target.Contains("source", StringComparison.Ordinal) || target.Contains("code", StringComparison.Ordinal) || target.Contains("file", StringComparison.Ordinal) => "general-project",
+                    _ => _textGenerationTeamKey
+                };
 
-            return CouncilTeams.FirstOrDefault(team => string.Equals(team.Key, preferredKey, StringComparison.OrdinalIgnoreCase)).Key
-                ?? CouncilTeams.FirstOrDefault(team => string.Equals(team.Key, _textGenerationTeamKey, StringComparison.OrdinalIgnoreCase)).Key
-                ?? CouncilTeams.First().Key;
+                return CouncilTeams.FirstOrDefault(team => string.Equals(team.Key, preferredKey, StringComparison.OrdinalIgnoreCase)).Key
+                    ?? CouncilTeams.FirstOrDefault(team => string.Equals(team.Key, _textGenerationTeamKey, StringComparison.OrdinalIgnoreCase)).Key
+                    ?? CouncilTeams.First().Key;
+            }
+            catch (Exception exception)
+            {
+                Logger.LogError(exception, "PublisherStudio could not resolve the requested AI Assist profile to a LocalGPT Council team.");
+                return _textGenerationTeamKey;
+            }
+    
         }
-        catch (Exception exception)
+        catch (Exception __componentMethodException)
         {
-            Logger.LogError(exception, "PublisherStudio could not resolve the requested AI Assist profile to a LocalGPT Council team.");
-            return _textGenerationTeamKey;
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(ResolveAiAssistTeamKey)} failed.");
+            throw;
         }
     }
 
@@ -724,27 +852,36 @@ Required result contract:
     {
         try
         {
-            var requested = new List<string> { "publisher.business-context", "publisher.text.insert.propose" };
-            switch (_aiAssistProfile)
+            try
             {
-                case "spreadsheet":
-                    requested.Add("publisher.spreadsheet.inspect");
-                    break;
-                case "openscad":
-                    requested.Add("publisher.openscad.generate");
-                    break;
-            }
+                var requested = new List<string> { "publisher.business-context", "publisher.text.insert.propose" };
+                switch (_aiAssistProfile)
+                {
+                    case "spreadsheet":
+                        requested.Add("publisher.spreadsheet.inspect");
+                        break;
+                    case "openscad":
+                        requested.Add("publisher.openscad.generate");
+                        break;
+                }
 
-            var localKeys = _capabilities
-                .Where(item => item.IsEnabled && item.IsOnline)
-                .Select(item => item.Key)
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
-            return requested.Where(key => localKeys.Contains(key)).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+                var localKeys = _capabilities
+                    .Where(item => item.IsEnabled && item.IsOnline)
+                    .Select(item => item.Key)
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                return requested.Where(key => localKeys.Contains(key)).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            }
+            catch (Exception exception)
+            {
+                Logger.LogError(exception, "PublisherStudio could not build the AI Assist organic capability request.");
+                return ["publisher.business-context", "publisher.text.insert.propose"];
+            }
+    
         }
-        catch (Exception exception)
+        catch (Exception __componentMethodException)
         {
-            Logger.LogError(exception, "PublisherStudio could not build the AI Assist organic capability request.");
-            return ["publisher.business-context", "publisher.text.insert.propose"];
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(ResolveAiAssistCapabilities)} failed.");
+            throw;
         }
     }
 
@@ -752,66 +889,123 @@ Required result contract:
     {
         try
         {
-            var session = await RecurringScreenReader.StartAsync(
-                Connection.State.PeerId, _screenReaderSelector, _screenReaderPrompt, _screenReaderIntervalSeconds).ConfigureAwait(true);
-            Notifications.Success($"Recurring screen-reader session {session.Id} started.", "Screen reader", nameof(OrganicPlugins));
-            Refresh();
+            try
+            {
+                var session = await RecurringScreenReader.StartAsync(
+                    Connection.State.PeerId, _screenReaderSelector, _screenReaderPrompt, _screenReaderIntervalSeconds).ConfigureAwait(true);
+                Notifications.Success($"Recurring screen-reader session {session.Id} started.", "Screen reader", nameof(OrganicPlugins));
+                Refresh();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Could not start recurring screen-reader help.");
+                Notifications.Error(ex.Message, "Screen reader did not start", nameof(OrganicPlugins));
+            }
+    
         }
-        catch (Exception ex)
+        catch (Exception __componentMethodException)
         {
-            Logger.LogError(ex, "Could not start recurring screen-reader help.");
-            Notifications.Error(ex.Message, "Screen reader did not start", nameof(OrganicPlugins));
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(StartScreenReaderAsync)} failed.");
+            throw;
         }
     }
 
     private async Task StopScreenReaderAsync(Guid id)
     {
-        if (await RecurringScreenReader.StopAsync(id).ConfigureAwait(true))
-            Notifications.Information("Recurring screen-reader help stopped.", source: nameof(OrganicPlugins));
-        Refresh();
+        try
+        {
+            if (await RecurringScreenReader.StopAsync(id).ConfigureAwait(true))
+                Notifications.Information("Recurring screen-reader help stopped.", source: nameof(OrganicPlugins));
+            Refresh();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(StopScreenReaderAsync)} failed.");
+            throw;
+        }
     }
 
     private void SavePermission()
     {
         try
         {
-            PermissionStore.Save(_permission);
-            Notifications.Success("The organ permission was saved.", source: nameof(OrganicPlugins));
-            _permission = NewPermission(Connection.State.PeerId.Length > 0 ? Connection.State.PeerId : _permission.PeerId);
-            Refresh();
+            try
+            {
+                PermissionStore.Save(_permission);
+                Notifications.Success("The organ permission was saved.", source: nameof(OrganicPlugins));
+                _permission = NewPermission(Connection.State.PeerId.Length > 0 ? Connection.State.PeerId : _permission.PeerId);
+                Refresh();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Could not save an organic plugin permission.");
+                Notifications.Error(ex.Message, "Permission was not saved", nameof(OrganicPlugins));
+            }
+    
         }
-        catch (Exception ex)
+        catch (Exception __componentMethodException)
         {
-            Logger.LogError(ex, "Could not save an organic plugin permission.");
-            Notifications.Error(ex.Message, "Permission was not saved", nameof(OrganicPlugins));
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(SavePermission)} failed.");
+            throw;
         }
     }
 
     private void DeletePermission(OrganicPermissionRule rule)
     {
-        PermissionStore.Delete(rule.PeerId, rule.CapabilityKey, rule.Organ);
-        Refresh();
+        try
+        {
+            PermissionStore.Delete(rule.PeerId, rule.CapabilityKey, rule.Organ);
+            Refresh();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(DeletePermission)} failed.");
+            throw;
+        }
     }
 
     private async Task ApproveAsync(Guid id)
     {
-        var item = await WorkCoordinator.ApproveAsync(id).ConfigureAwait(true);
-        if (item is null) return;
-        await Connection.SendWorkResultAsync(item).ConfigureAwait(true);
-        Notifications.Success($"{item.CapabilityKey} completed with one-time approval.", "Organic work", nameof(OrganicPlugins));
-        Refresh();
+        try
+        {
+            var item = await WorkCoordinator.ApproveAsync(id).ConfigureAwait(true);
+            if (item is null) return;
+            await Connection.SendWorkResultAsync(item).ConfigureAwait(true);
+            Notifications.Success($"{item.CapabilityKey} completed with one-time approval.", "Organic work", nameof(OrganicPlugins));
+            Refresh();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(ApproveAsync)} failed.");
+            throw;
+        }
     }
 
     private async Task DeclineAsync(Guid id)
     {
-        if (!WorkCoordinator.Decline(id, "Declined by the PublisherStudio user.")) return;
-        var item = WorkCoordinator.Get(id);
-        if (item is not null) await Connection.SendWorkResultAsync(item).ConfigureAwait(true);
-        Notifications.Warning("The requested organ action was declined.", "Organic work", nameof(OrganicPlugins));
-        Refresh();
+        try
+        {
+            if (!WorkCoordinator.Decline(id, "Declined by the PublisherStudio user.")) return;
+            var item = WorkCoordinator.Get(id);
+            if (item is not null) await Connection.SendWorkResultAsync(item).ConfigureAwait(true);
+            Notifications.Warning("The requested organ action was declined.", "Organic work", nameof(OrganicPlugins));
+            Refresh();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(DeclineAsync)} failed.");
+            throw;
+        }
     }
 
-    private OrganicPermissionRule NewPermission(string peerId) => new()
+    private OrganicPermissionRule NewPermission(string peerId) {
+        try
+        {
+            return new()
     {
         PeerId = peerId,
         IsExposed = true,
@@ -821,8 +1015,18 @@ Required result contract:
         InteractionEditor = OrganicInteractionEditor.ConfirmationOnly,
         ApprovalMode = OrganicApprovalMode.AskEveryTime
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(NewPermission)} failed.");
+            throw;
+        }
+    }
 
-    private OrganicCouncilPromptRequest NewCouncilRequest(string team) => new()
+    private OrganicCouncilPromptRequest NewCouncilRequest(string team) {
+        try
+        {
+            return new()
     {
         TeamKey = team,
         ExternalProjectContextJson = "{}",
@@ -833,13 +1037,29 @@ Required result contract:
         IncludeMemory = true,
         SaveToMemory = true
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(NewCouncilRequest)} failed.");
+            throw;
+        }
+    }
 
     public void Dispose()
     {
-        Discovery.Changed -= OnServiceChanged;
-        Connection.Changed -= OnServiceChanged;
-        WorkCoordinator.Changed -= OnServiceChanged;
-        ResultStore.Changed -= OnServiceChanged;
-        RecurringScreenReader.Changed -= OnServiceChanged;
+        try
+        {
+            Discovery.Changed -= OnServiceChanged;
+            Connection.Changed -= OnServiceChanged;
+            WorkCoordinator.Changed -= OnServiceChanged;
+            ResultStore.Changed -= OnServiceChanged;
+            RecurringScreenReader.Changed -= OnServiceChanged;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(Dispose)} failed.");
+            throw;
+        }
     }
 }

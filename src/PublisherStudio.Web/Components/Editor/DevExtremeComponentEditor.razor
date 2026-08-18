@@ -4,6 +4,8 @@
 @inject PublicationDataService DataService
 @inject IJSRuntime JS
 
+@inject ILogger<DevExtremeComponentEditor> Logger
+@inject ISupervisedTaskRunner TaskRunner
 @if (Visible && _draft is not null)
 {
     <div class="modal-backdrop component-modal-backdrop">
@@ -846,17 +848,26 @@
 
     protected override void OnParametersSet()
     {
-        if (Visible) DataService.EnsureBuiltInObjects(State.Document);
-        if (Visible && (!_wasVisible || _loadedId != State.SelectedElementId) && State.SelectedElement is DevExtremeComponentElement selected)
+        try
         {
-            _draft = Components.Clone(selected);
-            _loadedId = selected.Id;
-            _headersText = FormatHeaders(_draft.Connection.Headers);
-            _section = "general";
-            _connectionStatus = string.Empty;
-            _previewSizeKey = "auto";
+            if (Visible) DataService.EnsureBuiltInObjects(State.Document);
+            if (Visible && (!_wasVisible || _loadedId != State.SelectedElementId) && State.SelectedElement is DevExtremeComponentElement selected)
+            {
+                _draft = Components.Clone(selected);
+                _loadedId = selected.Id;
+                _headersText = FormatHeaders(_draft.Connection.Headers);
+                _section = "general";
+                _connectionStatus = string.Empty;
+                _previewSizeKey = "auto";
+            }
+            _wasVisible = Visible;
+    
         }
-        _wasVisible = Visible;
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(OnParametersSet)} failed.");
+            throw;
+        }
     }
 
 
@@ -871,21 +882,133 @@
 
     private void ChangePreviewSize(ChangeEventArgs args)
     {
-        var requested = args.Value?.ToString()?.Trim().ToLowerInvariant() ?? "auto";
-        _previewSizeKey = requested is "phone" or "tablet" or "laptop" or "wide" ? requested : "auto";
+        try
+        {
+            var requested = args.Value?.ToString()?.Trim().ToLowerInvariant() ?? "auto";
+            _previewSizeKey = requested is "phone" or "tablet" or "laptop" or "wide" ? requested : "auto";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(ChangePreviewSize)} failed.");
+            throw;
+        }
     }
 
-    private string SectionClass(string value) => _section == value ? "active" : string.Empty;
-    private void ShowGeneral() => _section = "general";
-    private void ShowData() => _section = "data";
-    private void ShowMenuItems() => _section = "menu";
-    private void ShowFields() => _section = "fields";
-    private void ShowBehavior() => _section = "behavior";
-    private void ShowMap() => _section = "map";
-    private void ShowLayout() => _section = "layout";
-    private void ShowActions() => _section = "actions";
-    private void ShowAdvanced() => _section = "advanced";
-    private string ComponentIcon(PublicationComponentKind kind) => kind switch
+    private string SectionClass(string value) {
+        try
+        {
+            return _section == value ? "active" : string.Empty;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(SectionClass)} failed.");
+            throw;
+        }
+    }
+    private void ShowGeneral() {
+        try
+        {
+            _section = "general";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(ShowGeneral)} failed.");
+            throw;
+        }
+    }
+    private void ShowData() {
+        try
+        {
+            _section = "data";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(ShowData)} failed.");
+            throw;
+        }
+    }
+    private void ShowMenuItems() {
+        try
+        {
+            _section = "menu";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(ShowMenuItems)} failed.");
+            throw;
+        }
+    }
+    private void ShowFields() {
+        try
+        {
+            _section = "fields";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(ShowFields)} failed.");
+            throw;
+        }
+    }
+    private void ShowBehavior() {
+        try
+        {
+            _section = "behavior";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(ShowBehavior)} failed.");
+            throw;
+        }
+    }
+    private void ShowMap() {
+        try
+        {
+            _section = "map";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(ShowMap)} failed.");
+            throw;
+        }
+    }
+    private void ShowLayout() {
+        try
+        {
+            _section = "layout";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(ShowLayout)} failed.");
+            throw;
+        }
+    }
+    private void ShowActions() {
+        try
+        {
+            _section = "actions";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(ShowActions)} failed.");
+            throw;
+        }
+    }
+    private void ShowAdvanced() {
+        try
+        {
+            _section = "advanced";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(ShowAdvanced)} failed.");
+            throw;
+        }
+    }
+    private string ComponentIcon(PublicationComponentKind kind) {
+        try
+        {
+            return kind switch
     {
         PublicationComponentKind.DataGrid => "▦", PublicationComponentKind.TreeList => "⌘", PublicationComponentKind.Scheduler => "▣",
         PublicationComponentKind.Form => "≣", PublicationComponentKind.Gallery => "▧", PublicationComponentKind.TileView => "▥",
@@ -893,305 +1016,674 @@
         PublicationComponentKind.MultiView => "▱", PublicationComponentKind.Splitter => "◫", PublicationComponentKind.ScrollView => "↕",
         PublicationComponentKind.PivotGrid => "⌗", PublicationComponentKind.Map => "⌖", PublicationComponentKind.VectorMap => "◈", PublicationComponentKind.Chat => "◉", PublicationComponentKind.Button => "▰", _ => "⌨"
     };
-    private string Friendly(string value) => Components.Friendly(value);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(ComponentIcon)} failed.");
+            throw;
+        }
+    }
+    private string Friendly(string value) {
+        try
+        {
+            return Components.Friendly(value);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(Friendly)} failed.");
+            throw;
+        }
+    }
 
     private void ChangeKind(PublicationComponentKind kind)
     {
-        if (_draft is null || _draft.ComponentKind == kind) return;
-        _draft.ComponentKind = kind;
-        _draft.Title = Components.ComponentName(kind);
-        _draft.Name = _draft.Title;
-        if (_draft.IsLayoutContainer && _draft.Panels.Count == 0) AddPanel();
-        if (kind == PublicationComponentKind.Button && _draft.Actions.Count == 0)
-            _draft.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.Click, Action = PublicationComponentActionKind.NextPage });
-        if (kind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu)
+        try
         {
-            _draft.MenuSourceMode = PublicationMenuSourceMode.ManualItems;
-            if (_draft.MenuItems.Count == 0) _draft.MenuItems.Add(new PublicationMenuItem { Text = "Menu item" });
-            if (_draft.Actions.All(action => action.Trigger != PublicationComponentActionTrigger.ItemClick || action.Action == PublicationComponentActionKind.None))
-                _draft.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.ItemClick, Action = PublicationComponentActionKind.Navigate });
-        }
-        if (kind is PublicationComponentKind.Gallery or PublicationComponentKind.TileView) UsePublicationMediaDataset();
-        if (kind == PublicationComponentKind.Chat)
-        {
-            var chatData = State.Document.DataObjects.FirstOrDefault(data => string.Equals(data.SourceReference, "publisherstudio:chat-preview", StringComparison.Ordinal));
-            if (chatData is not null)
+            if (_draft is null || _draft.ComponentKind == kind) return;
+            _draft.ComponentKind = kind;
+            _draft.Title = Components.ComponentName(kind);
+            _draft.Name = _draft.Title;
+            if (_draft.IsLayoutContainer && _draft.Panels.Count == 0) AddPanel();
+            if (kind == PublicationComponentKind.Button && _draft.Actions.Count == 0)
+                _draft.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.Click, Action = PublicationComponentActionKind.NextPage });
+            if (kind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu)
             {
-                _draft.Connection.Mode = PublicationComponentDataMode.StaticSnapshot;
-                _draft.Connection.DataObjectId = chatData.Id;
-                Components.ApplyFieldsFromDataObject(State.Document, _draft, replace: true);
+                _draft.MenuSourceMode = PublicationMenuSourceMode.ManualItems;
+                if (_draft.MenuItems.Count == 0) _draft.MenuItems.Add(new PublicationMenuItem { Text = "Menu item" });
+                if (_draft.Actions.All(action => action.Trigger != PublicationComponentActionTrigger.ItemClick || action.Action == PublicationComponentActionKind.None))
+                    _draft.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.ItemClick, Action = PublicationComponentActionKind.Navigate });
             }
+            if (kind is PublicationComponentKind.Gallery or PublicationComponentKind.TileView) UsePublicationMediaDataset();
+            if (kind == PublicationComponentKind.Chat)
+            {
+                var chatData = State.Document.DataObjects.FirstOrDefault(data => string.Equals(data.SourceReference, "publisherstudio:chat-preview", StringComparison.Ordinal));
+                if (chatData is not null)
+                {
+                    _draft.Connection.Mode = PublicationComponentDataMode.StaticSnapshot;
+                    _draft.Connection.DataObjectId = chatData.Id;
+                    Components.ApplyFieldsFromDataObject(State.Document, _draft, replace: true);
+                }
+            }
+            _section = kind is PublicationComponentKind.Map or PublicationComponentKind.VectorMap ? "map" : kind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu ? "menu" : "general";
+    
         }
-        _section = kind is PublicationComponentKind.Map or PublicationComponentKind.VectorMap ? "map" : kind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu ? "menu" : "general";
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(ChangeKind)} failed.");
+            throw;
+        }
     }
 
     private void UseBundledVectorMap()
     {
-        if (_draft is null) return;
-        ChangeKind(PublicationComponentKind.VectorMap);
-        _draft.MapProvider = string.Empty;
-        _draft.MapApiKey = string.Empty;
-        _draft.MapId = string.Empty;
+        try
+        {
+            if (_draft is null) return;
+            ChangeKind(PublicationComponentKind.VectorMap);
+            _draft.MapProvider = string.Empty;
+            _draft.MapApiKey = string.Empty;
+            _draft.MapId = string.Empty;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(UseBundledVectorMap)} failed.");
+            throw;
+        }
     }
 
     private string DrawClassMarker => _drawMode == "marker" ? "active" : string.Empty;
     private string DrawClassLine => _drawMode == "line" ? "active" : string.Empty;
     private string DrawClassPolygon => _drawMode == "polygon" ? "active" : string.Empty;
-    private void SetDrawMode(string mode) { _drawMode = mode; _activeFeatureId = null; }
-    private void SetMarkerDrawMode() => SetDrawMode("marker");
-    private void SetLineDrawMode() => SetDrawMode("line");
-    private void SetPolygonDrawMode() => SetDrawMode("polygon");
-    private void FinishFeature() { _activeFeatureId = null; _drawMode = string.Empty; }
+    private void SetDrawMode(string mode) {
+        try
+        {
+     _drawMode = mode; _activeFeatureId = null; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(SetDrawMode)} failed.");
+            throw;
+        }
+    }
+    private void SetMarkerDrawMode() {
+        try
+        {
+            SetDrawMode("marker");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(SetMarkerDrawMode)} failed.");
+            throw;
+        }
+    }
+    private void SetLineDrawMode() {
+        try
+        {
+            SetDrawMode("line");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(SetLineDrawMode)} failed.");
+            throw;
+        }
+    }
+    private void SetPolygonDrawMode() {
+        try
+        {
+            SetDrawMode("polygon");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(SetPolygonDrawMode)} failed.");
+            throw;
+        }
+    }
+    private void FinishFeature() {
+        try
+        {
+     _activeFeatureId = null; _drawMode = string.Empty; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(FinishFeature)} failed.");
+            throw;
+        }
+    }
     private void UndoPoint()
     {
-        var feature = _draft?.VectorFeatures.FirstOrDefault(item => item.Id == _activeFeatureId) ?? _draft?.VectorFeatures.LastOrDefault();
-        if (feature?.Points.Count > 0) feature.Points.RemoveAt(feature.Points.Count - 1);
+        try
+        {
+            var feature = _draft?.VectorFeatures.FirstOrDefault(item => item.Id == _activeFeatureId) ?? _draft?.VectorFeatures.LastOrDefault();
+            if (feature?.Points.Count > 0) feature.Points.RemoveAt(feature.Points.Count - 1);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(UndoPoint)} failed.");
+            throw;
+        }
     }
-    private void RemoveFeature(PublicationVectorMapFeature feature) { _draft?.VectorFeatures.Remove(feature); if (_activeFeatureId == feature.Id) _activeFeatureId = null; }
-    private void ClearFeatures() { _draft?.VectorFeatures.Clear(); _activeFeatureId = null; }
+    private void RemoveFeature(PublicationVectorMapFeature feature) {
+        try
+        {
+     _draft?.VectorFeatures.Remove(feature); if (_activeFeatureId == feature.Id) _activeFeatureId = null; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(RemoveFeature)} failed.");
+            throw;
+        }
+    }
+    private void ClearFeatures() {
+        try
+        {
+     _draft?.VectorFeatures.Clear(); _activeFeatureId = null; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(ClearFeatures)} failed.");
+            throw;
+        }
+    }
 
     [JSInvokable]
     public void AddVectorDesignerPoint(double longitude, double latitude)
     {
-        if (_draft is null || string.IsNullOrWhiteSpace(_drawMode)) return;
-        var kind = _drawMode switch { "line" => PublicationVectorFeatureKind.Line, "polygon" => PublicationVectorFeatureKind.Polygon, _ => PublicationVectorFeatureKind.Marker };
-        PublicationVectorMapFeature? feature = null;
-        if (kind != PublicationVectorFeatureKind.Marker && _activeFeatureId is { } active)
-            feature = _draft.VectorFeatures.FirstOrDefault(item => item.Id == active && item.Kind == kind);
-        if (feature is null)
+        try
         {
-            feature = new PublicationVectorMapFeature { Name = $"{kind} {_draft.VectorFeatures.Count + 1}", Kind = kind, Color = kind == PublicationVectorFeatureKind.Marker ? "#ef4444" : "#2563eb" };
-            _draft.VectorFeatures.Add(feature);
-            _activeFeatureId = kind == PublicationVectorFeatureKind.Marker ? null : feature.Id;
+            if (_draft is null || string.IsNullOrWhiteSpace(_drawMode)) return;
+            var kind = _drawMode switch { "line" => PublicationVectorFeatureKind.Line, "polygon" => PublicationVectorFeatureKind.Polygon, _ => PublicationVectorFeatureKind.Marker };
+            PublicationVectorMapFeature? feature = null;
+            if (kind != PublicationVectorFeatureKind.Marker && _activeFeatureId is { } active)
+                feature = _draft.VectorFeatures.FirstOrDefault(item => item.Id == active && item.Kind == kind);
+            if (feature is null)
+            {
+                feature = new PublicationVectorMapFeature { Name = $"{kind} {_draft.VectorFeatures.Count + 1}", Kind = kind, Color = kind == PublicationVectorFeatureKind.Marker ? "#ef4444" : "#2563eb" };
+                _draft.VectorFeatures.Add(feature);
+                _activeFeatureId = kind == PublicationVectorFeatureKind.Marker ? null : feature.Id;
+            }
+            feature.Points.Add(new PublicationMapPoint { Longitude = Math.Clamp(longitude, -180, 180), Latitude = Math.Clamp(latitude, -90, 90) });
+            TaskRunner.Run(nameof(DevExtremeComponentEditor), nameof(AddVectorDesignerPoint), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(false));
+    
         }
-        feature.Points.Add(new PublicationMapPoint { Longitude = Math.Clamp(longitude, -180, 180), Latitude = Math.Clamp(latitude, -90, 90) });
-        _ = InvokeAsync(StateHasChanged);
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(AddVectorDesignerPoint)} failed.");
+            throw;
+        }
     }
 
     private void ImportGeoJson()
     {
-        if (_draft is null || string.IsNullOrWhiteSpace(_geoJson)) return;
         try
         {
-            using var json = System.Text.Json.JsonDocument.Parse(_geoJson);
-            var root = json.RootElement;
-            var items = root.TryGetProperty("features", out var features) ? features.EnumerateArray().ToArray() : new[] { root };
-            var added = 0;
-            foreach (var item in items)
+            if (_draft is null || string.IsNullOrWhiteSpace(_geoJson)) return;
+            try
             {
-                if (!item.TryGetProperty("geometry", out var geometry)) geometry = item;
-                if (!geometry.TryGetProperty("type", out var typeProperty) || !geometry.TryGetProperty("coordinates", out var coordinates)) continue;
-                var type = typeProperty.GetString() ?? string.Empty;
-                var properties = item.TryGetProperty("properties", out var p) ? p : default;
-                var name = properties.ValueKind == System.Text.Json.JsonValueKind.Object && properties.TryGetProperty("name", out var n) ? n.GetString() ?? $"Feature {_draft.VectorFeatures.Count + 1}" : $"Feature {_draft.VectorFeatures.Count + 1}";
-                foreach (var parsed in ParseGeoGeometry(type, coordinates, name)) { _draft.VectorFeatures.Add(parsed); added++; }
+                using var json = System.Text.Json.JsonDocument.Parse(_geoJson);
+                var root = json.RootElement;
+                var items = root.TryGetProperty("features", out var features) ? features.EnumerateArray().ToArray() : new[] { root };
+                var added = 0;
+                foreach (var item in items)
+                {
+                    if (!item.TryGetProperty("geometry", out var geometry)) geometry = item;
+                    if (!geometry.TryGetProperty("type", out var typeProperty) || !geometry.TryGetProperty("coordinates", out var coordinates)) continue;
+                    var type = typeProperty.GetString() ?? string.Empty;
+                    var properties = item.TryGetProperty("properties", out var p) ? p : default;
+                    var name = properties.ValueKind == System.Text.Json.JsonValueKind.Object && properties.TryGetProperty("name", out var n) ? n.GetString() ?? $"Feature {_draft.VectorFeatures.Count + 1}" : $"Feature {_draft.VectorFeatures.Count + 1}";
+                    foreach (var parsed in ParseGeoGeometry(type, coordinates, name)) { _draft.VectorFeatures.Add(parsed); added++; }
+                }
+                _geoJsonStatus = $"Imported {added} feature(s).";
             }
-            _geoJsonStatus = $"Imported {added} feature(s).";
+            catch (Exception error) { _geoJsonStatus = $"GeoJSON import failed: {error.Message}"; }
+    
         }
-        catch (Exception error) { _geoJsonStatus = $"GeoJSON import failed: {error.Message}"; }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(ImportGeoJson)} failed.");
+            throw;
+        }
     }
 
     private IEnumerable<PublicationVectorMapFeature> ParseGeoGeometry(string type, System.Text.Json.JsonElement coordinates, string name)
     {
-        PublicationVectorMapFeature Feature(PublicationVectorFeatureKind kind, IEnumerable<System.Text.Json.JsonElement> points) => new()
+        try
         {
-            Name = name, Kind = kind, Points = points.Where(point => point.ValueKind == System.Text.Json.JsonValueKind.Array && point.GetArrayLength() >= 2)
-                .Select(point => new PublicationMapPoint { Longitude = point[0].GetDouble(), Latitude = point[1].GetDouble() }).ToList()
-        };
-        if (type.Equals("Point", StringComparison.OrdinalIgnoreCase)) return new[] { Feature(PublicationVectorFeatureKind.Marker, new[] { coordinates }) };
-        if (type.Equals("LineString", StringComparison.OrdinalIgnoreCase)) return new[] { Feature(PublicationVectorFeatureKind.Line, coordinates.EnumerateArray()) };
-        if (type.Equals("Polygon", StringComparison.OrdinalIgnoreCase)) return coordinates.GetArrayLength() > 0
-            ? new[] { Feature(PublicationVectorFeatureKind.Polygon, coordinates[0].EnumerateArray()) }
-            : Array.Empty<PublicationVectorMapFeature>();
-        if (type.Equals("MultiLineString", StringComparison.OrdinalIgnoreCase)) return coordinates.EnumerateArray().Select((line, index) => Feature(PublicationVectorFeatureKind.Line, line.EnumerateArray())).ToArray();
-        if (type.Equals("MultiPolygon", StringComparison.OrdinalIgnoreCase)) return coordinates.EnumerateArray().Where(polygon => polygon.GetArrayLength() > 0).Select(polygon => Feature(PublicationVectorFeatureKind.Polygon, polygon[0].EnumerateArray())).ToArray();
-        return Array.Empty<PublicationVectorMapFeature>();
+            PublicationVectorMapFeature Feature(PublicationVectorFeatureKind kind, IEnumerable<System.Text.Json.JsonElement> points) => new()
+            {
+                Name = name, Kind = kind, Points = points.Where(point => point.ValueKind == System.Text.Json.JsonValueKind.Array && point.GetArrayLength() >= 2)
+                    .Select(point => new PublicationMapPoint { Longitude = point[0].GetDouble(), Latitude = point[1].GetDouble() }).ToList()
+            };
+            if (type.Equals("Point", StringComparison.OrdinalIgnoreCase)) return new[] { Feature(PublicationVectorFeatureKind.Marker, new[] { coordinates }) };
+            if (type.Equals("LineString", StringComparison.OrdinalIgnoreCase)) return new[] { Feature(PublicationVectorFeatureKind.Line, coordinates.EnumerateArray()) };
+            if (type.Equals("Polygon", StringComparison.OrdinalIgnoreCase)) return coordinates.GetArrayLength() > 0
+                ? new[] { Feature(PublicationVectorFeatureKind.Polygon, coordinates[0].EnumerateArray()) }
+                : Array.Empty<PublicationVectorMapFeature>();
+            if (type.Equals("MultiLineString", StringComparison.OrdinalIgnoreCase)) return coordinates.EnumerateArray().Select((line, index) => Feature(PublicationVectorFeatureKind.Line, line.EnumerateArray())).ToArray();
+            if (type.Equals("MultiPolygon", StringComparison.OrdinalIgnoreCase)) return coordinates.EnumerateArray().Where(polygon => polygon.GetArrayLength() > 0).Select(polygon => Feature(PublicationVectorFeatureKind.Polygon, polygon[0].EnumerateArray())).ToArray();
+            return Array.Empty<PublicationVectorMapFeature>();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(ParseGeoGeometry)} failed.");
+            throw;
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var shouldAttach = Visible && _draft?.ComponentKind == PublicationComponentKind.VectorMap && _section == "map";
-        if (shouldAttach && !_designerAttached)
+        try
         {
-            _self ??= DotNetObjectReference.Create(this);
-            try { _designerAttached = await JS.InvokeAsync<bool>("PublisherStudioComponentRuntime.attachVectorDesigner", "ps-component-vector-designer", _self).ConfigureAwait(true); } catch { _designerAttached = false; }
+            var shouldAttach = Visible && _draft?.ComponentKind == PublicationComponentKind.VectorMap && _section == "map";
+            if (shouldAttach && !_designerAttached)
+            {
+                _self ??= DotNetObjectReference.Create(this);
+                try { _designerAttached = await JS.InvokeAsync<bool>("PublisherStudioComponentRuntime.attachVectorDesigner", "ps-component-vector-designer", _self).ConfigureAwait(true); } catch { _designerAttached = false; }
+            }
+            else if (!shouldAttach && _designerAttached)
+            {
+                try { await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.detachVectorDesigner", "ps-component-vector-designer").ConfigureAwait(true); } catch { }
+                _designerAttached = false;
+            }
+    
         }
-        else if (!shouldAttach && _designerAttached)
+        catch (Exception __componentMethodException)
         {
-            try { await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.detachVectorDesigner", "ps-component-vector-designer").ConfigureAwait(true); } catch { }
-            _designerAttached = false;
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(OnAfterRenderAsync)} failed.");
+            throw;
         }
     }
 
     public async ValueTask DisposeAsync()
     {
-        try { await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.detachVectorDesigner", "ps-component-vector-designer").ConfigureAwait(true); } catch { }
-        _self?.Dispose();
+        try
+        {
+            try { await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.detachVectorDesigner", "ps-component-vector-designer").ConfigureAwait(true); } catch { }
+            _self?.Dispose();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(DisposeAsync)} failed.");
+            throw;
+        }
     }
 
-    private Task ConnectionModeChanged() { _connectionStatus = string.Empty; return Task.CompletedTask; }
-    private Task SyncKeyField() { if (_draft is not null) _draft.KeyField = _draft.Connection.KeyField; return Task.CompletedTask; }
-    private Task SyncConnectionKey() { if (_draft is not null) _draft.Connection.KeyField = _draft.KeyField; return Task.CompletedTask; }
-    private Task UseDatasetFieldsIfEmpty() { if (_draft?.Fields.Count == 0) UseDatasetFields(); return Task.CompletedTask; }
-    private void UseDatasetFields() { if (_draft is not null) Components.ApplyFieldsFromDataObject(State.Document, _draft, replace: true); }
+    private Task ConnectionModeChanged() {
+        try
+        {
+     _connectionStatus = string.Empty; return Task.CompletedTask; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(ConnectionModeChanged)} failed.");
+            throw;
+        }
+    }
+    private Task SyncKeyField() {
+        try
+        {
+     if (_draft is not null) _draft.KeyField = _draft.Connection.KeyField; return Task.CompletedTask; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(SyncKeyField)} failed.");
+            throw;
+        }
+    }
+    private Task SyncConnectionKey() {
+        try
+        {
+     if (_draft is not null) _draft.Connection.KeyField = _draft.KeyField; return Task.CompletedTask; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(SyncConnectionKey)} failed.");
+            throw;
+        }
+    }
+    private Task UseDatasetFieldsIfEmpty() {
+        try
+        {
+     if (_draft?.Fields.Count == 0) UseDatasetFields(); return Task.CompletedTask; 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(UseDatasetFieldsIfEmpty)} failed.");
+            throw;
+        }
+    }
+    private void UseDatasetFields() {
+        try
+        {
+     if (_draft is not null) Components.ApplyFieldsFromDataObject(State.Document, _draft, replace: true); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(UseDatasetFields)} failed.");
+            throw;
+        }
+    }
 
     private void UseLivePageDataset()
     {
-        if (_draft is null) return;
-        DataService.EnsureBuiltInObjects(State.Document);
-        var data = State.Document.DataObjects.First(candidate => candidate.SourceKind == PublicationDataSourceKind.PublicationPages);
-        _draft.MenuSourceMode = PublicationMenuSourceMode.DataConnection;
-        _draft.Connection.Mode = PublicationComponentDataMode.PublicationDataObject;
-        _draft.Connection.DataObjectId = data.Id;
-        Components.ApplyFieldsFromDataObject(State.Document, _draft, replace: true);
-        _draft.KeyField = "id";
-        _draft.Connection.KeyField = "id";
-        _draft.TextField = "text";
-        _draft.DisplayField = "text";
-        _draft.TargetPageField = "targetPageId";
-        _draft.UrlField = "";
-        _draft.Scope = PublicationComponentScope.Document;
-        if (_draft.Actions.All(action => action.Trigger != PublicationComponentActionTrigger.ItemClick || action.Action == PublicationComponentActionKind.None))
-            _draft.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.ItemClick, Action = PublicationComponentActionKind.Navigate });
-        _connectionStatus = "The self-updating Publication pages object is selected. Renaming, adding, removing, or reordering pages is reflected automatically.";
+        try
+        {
+            if (_draft is null) return;
+            DataService.EnsureBuiltInObjects(State.Document);
+            var data = State.Document.DataObjects.First(candidate => candidate.SourceKind == PublicationDataSourceKind.PublicationPages);
+            _draft.MenuSourceMode = PublicationMenuSourceMode.DataConnection;
+            _draft.Connection.Mode = PublicationComponentDataMode.PublicationDataObject;
+            _draft.Connection.DataObjectId = data.Id;
+            Components.ApplyFieldsFromDataObject(State.Document, _draft, replace: true);
+            _draft.KeyField = "id";
+            _draft.Connection.KeyField = "id";
+            _draft.TextField = "text";
+            _draft.DisplayField = "text";
+            _draft.TargetPageField = "targetPageId";
+            _draft.UrlField = "";
+            _draft.Scope = PublicationComponentScope.Document;
+            if (_draft.Actions.All(action => action.Trigger != PublicationComponentActionTrigger.ItemClick || action.Action == PublicationComponentActionKind.None))
+                _draft.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.ItemClick, Action = PublicationComponentActionKind.Navigate });
+            _connectionStatus = "The self-updating Publication pages object is selected. Renaming, adding, removing, or reordering pages is reflected automatically.";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(UseLivePageDataset)} failed.");
+            throw;
+        }
     }
 
     private void UsePublicationMediaDataset()
     {
-        if (_draft is null) return;
-        DataService.EnsureBuiltInObjects(State.Document);
-        var data = State.Document.DataObjects.First(candidate => candidate.SourceKind == PublicationDataSourceKind.PublicationMedia);
-        _draft.Connection.Mode = PublicationComponentDataMode.PublicationDataObject;
-        _draft.Connection.DataObjectId = data.Id;
-        Components.ApplyFieldsFromDataObject(State.Document, _draft, replace: true);
-        _draft.KeyField = "id";
-        _draft.Connection.KeyField = "id";
-        _draft.TextField = "title";
-        _draft.DisplayField = "title";
-        _draft.ImageField = "image";
-        _draft.MediaKindField = "mediaType";
-        _draft.MediaSourceField = "source";
-        _draft.MediaPosterField = "poster";
-        _draft.MediaAltTextField = "altText";
-        _connectionStatus = "The live Publication media object is selected. Pictures, videos, and audio inserted or removed in the document update this component automatically.";
+        try
+        {
+            if (_draft is null) return;
+            DataService.EnsureBuiltInObjects(State.Document);
+            var data = State.Document.DataObjects.First(candidate => candidate.SourceKind == PublicationDataSourceKind.PublicationMedia);
+            _draft.Connection.Mode = PublicationComponentDataMode.PublicationDataObject;
+            _draft.Connection.DataObjectId = data.Id;
+            Components.ApplyFieldsFromDataObject(State.Document, _draft, replace: true);
+            _draft.KeyField = "id";
+            _draft.Connection.KeyField = "id";
+            _draft.TextField = "title";
+            _draft.DisplayField = "title";
+            _draft.ImageField = "image";
+            _draft.MediaKindField = "mediaType";
+            _draft.MediaSourceField = "source";
+            _draft.MediaPosterField = "poster";
+            _draft.MediaAltTextField = "altText";
+            _connectionStatus = "The live Publication media object is selected. Pictures, videos, and audio inserted or removed in the document update this component automatically.";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(UsePublicationMediaDataset)} failed.");
+            throw;
+        }
     }
 
     private void AddMenuItem()
     {
-        if (_draft is null) return;
-        _draft.MenuSourceMode = PublicationMenuSourceMode.ManualItems;
-        _draft.MenuItems.Add(new PublicationMenuItem { Text = $"Menu item {_draft.MenuItems.Count + 1}" });
+        try
+        {
+            if (_draft is null) return;
+            _draft.MenuSourceMode = PublicationMenuSourceMode.ManualItems;
+            _draft.MenuItems.Add(new PublicationMenuItem { Text = $"Menu item {_draft.MenuItems.Count + 1}" });
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(AddMenuItem)} failed.");
+            throw;
+        }
     }
 
     private void AddPublicationPagesToMenu()
     {
-        if (_draft is null) return;
-        _draft.MenuSourceMode = PublicationMenuSourceMode.ManualItems;
-        var existing = _draft.MenuItems.Where(item => item.Destination == PublicationMenuDestinationKind.Page && item.TargetPageId is not null)
-            .Select(item => item.TargetPageId!.Value).ToHashSet();
-        foreach (var page in State.Document.Pages.Where(page => !existing.Contains(page.Id)))
-            _draft.MenuItems.Add(new PublicationMenuItem { Text = page.Name, Destination = PublicationMenuDestinationKind.Page, TargetPageId = page.Id });
+        try
+        {
+            if (_draft is null) return;
+            _draft.MenuSourceMode = PublicationMenuSourceMode.ManualItems;
+            var existing = _draft.MenuItems.Where(item => item.Destination == PublicationMenuDestinationKind.Page && item.TargetPageId is not null)
+                .Select(item => item.TargetPageId!.Value).ToHashSet();
+            foreach (var page in State.Document.Pages.Where(page => !existing.Contains(page.Id)))
+                _draft.MenuItems.Add(new PublicationMenuItem { Text = page.Name, Destination = PublicationMenuDestinationKind.Page, TargetPageId = page.Id });
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(AddPublicationPagesToMenu)} failed.");
+            throw;
+        }
     }
 
     private void SetMenuParent(PublicationMenuItem item, ChangeEventArgs args)
-        => item.ParentId = Guid.TryParse(args.Value?.ToString(), out var id) && id != item.Id ? id : null;
+        {
+        try
+        {
+            item.ParentId = Guid.TryParse(args.Value?.ToString(), out var id) && id != item.Id ? id : null;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(SetMenuParent)} failed.");
+            throw;
+        }
+    }
 
     private void SetMenuTargetPage(PublicationMenuItem item, ChangeEventArgs args)
     {
-        item.TargetPageId = Guid.TryParse(args.Value?.ToString(), out var id) ? id : null;
-        item.Destination = item.TargetPageId is null ? PublicationMenuDestinationKind.None : PublicationMenuDestinationKind.Page;
+        try
+        {
+            item.TargetPageId = Guid.TryParse(args.Value?.ToString(), out var id) ? id : null;
+            item.Destination = item.TargetPageId is null ? PublicationMenuDestinationKind.None : PublicationMenuDestinationKind.Page;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(SetMenuTargetPage)} failed.");
+            throw;
+        }
     }
 
     private void RemoveMenuItem(PublicationMenuItem item)
     {
-        if (_draft is null) return;
-        _draft.MenuItems.Remove(item);
-        foreach (var child in _draft.MenuItems.Where(candidate => candidate.ParentId == item.Id)) child.ParentId = null;
+        try
+        {
+            if (_draft is null) return;
+            _draft.MenuItems.Remove(item);
+            foreach (var child in _draft.MenuItems.Where(candidate => candidate.ParentId == item.Id)) child.ParentId = null;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(RemoveMenuItem)} failed.");
+            throw;
+        }
     }
 
     private void AddField()
     {
-        if (_draft is null) return;
-        var used = _draft.Fields.Select(field => field.DataField).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var column = SourceColumns.FirstOrDefault(candidate => !used.Contains(candidate.Name));
-        if (column is null)
+        try
         {
-            var customName = $"field{_draft.Fields.Count + 1}";
-            _draft.Fields.Add(new PublicationComponentField { DataField = customName, Caption = Friendly(customName) });
-            return;
-        }
-
-        _draft.Fields.Add(new PublicationComponentField
-        {
-            DataField = column.Name,
-            Caption = Friendly(column.Name),
-            ValueKind = column.ValueKind,
-            Editor = column.ValueKind switch
+            if (_draft is null) return;
+            var used = _draft.Fields.Select(field => field.DataField).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var column = SourceColumns.FirstOrDefault(candidate => !used.Contains(candidate.Name));
+            if (column is null)
             {
-                PublicationDataValueKind.Number => PublicationComponentEditorKind.NumberBox,
-                PublicationDataValueKind.Boolean => PublicationComponentEditorKind.CheckBox,
-                PublicationDataValueKind.DateTime => PublicationComponentEditorKind.DateBox,
-                _ => PublicationComponentEditorKind.TextBox
+                var customName = $"field{_draft.Fields.Count + 1}";
+                _draft.Fields.Add(new PublicationComponentField { DataField = customName, Caption = Friendly(customName) });
+                return;
             }
-        });
+
+            _draft.Fields.Add(new PublicationComponentField
+            {
+                DataField = column.Name,
+                Caption = Friendly(column.Name),
+                ValueKind = column.ValueKind,
+                Editor = column.ValueKind switch
+                {
+                    PublicationDataValueKind.Number => PublicationComponentEditorKind.NumberBox,
+                    PublicationDataValueKind.Boolean => PublicationComponentEditorKind.CheckBox,
+                    PublicationDataValueKind.DateTime => PublicationComponentEditorKind.DateBox,
+                    _ => PublicationComponentEditorKind.TextBox
+                }
+            });
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(AddField)} failed.");
+            throw;
+        }
     }
-    private void RemoveField(PublicationComponentField field) => _draft?.Fields.Remove(field);
+    private void RemoveField(PublicationComponentField field) {
+        try
+        {
+            _draft?.Fields.Remove(field);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(RemoveField)} failed.");
+            throw;
+        }
+    }
     private void AddPanel()
     {
-        if (_draft is null) return;
-        _draft.Panels.Add(new PublicationComponentPanel
+        try
         {
-            Title = $"Panel {_draft.Panels.Count + 1}",
-            ChildKind = _draft.Panels.Count == 0 ? PublicationComponentKind.DataGrid : PublicationComponentKind.Form,
-            DataObjectId = _draft.Connection.DataObjectId,
-            Size = _draft.Panels.Count == 0 ? "55%" : string.Empty
-        });
+            if (_draft is null) return;
+            _draft.Panels.Add(new PublicationComponentPanel
+            {
+                Title = $"Panel {_draft.Panels.Count + 1}",
+                ChildKind = _draft.Panels.Count == 0 ? PublicationComponentKind.DataGrid : PublicationComponentKind.Form,
+                DataObjectId = _draft.Connection.DataObjectId,
+                Size = _draft.Panels.Count == 0 ? "55%" : string.Empty
+            });
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(AddPanel)} failed.");
+            throw;
+        }
     }
-    private void RemovePanel(PublicationComponentPanel panel) => _draft?.Panels.Remove(panel);
-    private void AddAction() => _draft?.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.Click, Action = PublicationComponentActionKind.None });
-    private void RemoveAction(PublicationComponentAction action) => _draft?.Actions.Remove(action);
+    private void RemovePanel(PublicationComponentPanel panel) {
+        try
+        {
+            _draft?.Panels.Remove(panel);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(RemovePanel)} failed.");
+            throw;
+        }
+    }
+    private void AddAction() {
+        try
+        {
+            _draft?.Actions.Add(new PublicationComponentAction { Trigger = PublicationComponentActionTrigger.Click, Action = PublicationComponentActionKind.None });
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(AddAction)} failed.");
+            throw;
+        }
+    }
+    private void RemoveAction(PublicationComponentAction action) {
+        try
+        {
+            _draft?.Actions.Remove(action);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(RemoveAction)} failed.");
+            throw;
+        }
+    }
 
     private void ChangeHeaders(ChangeEventArgs args)
     {
-        _headersText = args.Value?.ToString() ?? string.Empty;
-        if (_draft is not null) _draft.Connection.Headers = ParseHeaders(_headersText);
+        try
+        {
+            _headersText = args.Value?.ToString() ?? string.Empty;
+            if (_draft is not null) _draft.Connection.Headers = ParseHeaders(_headersText);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(ChangeHeaders)} failed.");
+            throw;
+        }
     }
 
     private async Task TestEndpoint()
     {
-        if (_draft is null || string.IsNullOrWhiteSpace(_draft.Connection.Url)) return;
-        _testingConnection = true;
-        _connectionStatus = string.Empty;
         try
         {
-            var text = await JS.InvokeAsync<string>("PublisherStudioComponentRuntime.probeConnection", _draft.Connection).ConfigureAwait(true);
-            var sample = new PublicationDataObject { Name = "Endpoint preview", SourceKind = PublicationDataSourceKind.Json, RawSource = text };
-            DataService.ParseInto(sample);
-            _draft.Fields = DataService.ResolveColumns(sample).Select((column, index) => new PublicationComponentField
+            if (_draft is null || string.IsNullOrWhiteSpace(_draft.Connection.Url)) return;
+            _testingConnection = true;
+            _connectionStatus = string.Empty;
+            try
             {
-                DataField = column.Name, Caption = Friendly(column.Name), ValueKind = column.ValueKind,
-                Editor = column.ValueKind switch { PublicationDataValueKind.Number => PublicationComponentEditorKind.NumberBox, PublicationDataValueKind.Boolean => PublicationComponentEditorKind.CheckBox, PublicationDataValueKind.DateTime => PublicationComponentEditorKind.DateBox, _ => PublicationComponentEditorKind.TextBox },
-                Area = index == 0 ? PublicationComponentFieldArea.Row : column.ValueKind == PublicationDataValueKind.Number ? PublicationComponentFieldArea.Data : PublicationComponentFieldArea.Column
-            }).ToList();
-            if (_draft.Fields.Count > 0)
-            {
-                _draft.KeyField = _draft.Fields.FirstOrDefault(field => string.Equals(field.DataField, "id", StringComparison.OrdinalIgnoreCase))?.DataField ?? _draft.Fields[0].DataField;
-                _draft.Connection.KeyField = _draft.KeyField;
-                _draft.TextField = _draft.Fields.FirstOrDefault(field => new[] { "text", "title", "name", "subject" }.Contains(field.DataField, StringComparer.OrdinalIgnoreCase))?.DataField ?? _draft.Fields[0].DataField;
-                _draft.DisplayField = _draft.TextField;
-                _draft.ValueField = _draft.Fields.FirstOrDefault(field => field.ValueKind == PublicationDataValueKind.Number)?.DataField ?? _draft.Fields[0].DataField;
+                var text = await JS.InvokeAsync<string>("PublisherStudioComponentRuntime.probeConnection", _draft.Connection).ConfigureAwait(true);
+                var sample = new PublicationDataObject { Name = "Endpoint preview", SourceKind = PublicationDataSourceKind.Json, RawSource = text };
+                DataService.ParseInto(sample);
+                _draft.Fields = DataService.ResolveColumns(sample).Select((column, index) => new PublicationComponentField
+                {
+                    DataField = column.Name, Caption = Friendly(column.Name), ValueKind = column.ValueKind,
+                    Editor = column.ValueKind switch { PublicationDataValueKind.Number => PublicationComponentEditorKind.NumberBox, PublicationDataValueKind.Boolean => PublicationComponentEditorKind.CheckBox, PublicationDataValueKind.DateTime => PublicationComponentEditorKind.DateBox, _ => PublicationComponentEditorKind.TextBox },
+                    Area = index == 0 ? PublicationComponentFieldArea.Row : column.ValueKind == PublicationDataValueKind.Number ? PublicationComponentFieldArea.Data : PublicationComponentFieldArea.Column
+                }).ToList();
+                if (_draft.Fields.Count > 0)
+                {
+                    _draft.KeyField = _draft.Fields.FirstOrDefault(field => string.Equals(field.DataField, "id", StringComparison.OrdinalIgnoreCase))?.DataField ?? _draft.Fields[0].DataField;
+                    _draft.Connection.KeyField = _draft.KeyField;
+                    _draft.TextField = _draft.Fields.FirstOrDefault(field => new[] { "text", "title", "name", "subject" }.Contains(field.DataField, StringComparer.OrdinalIgnoreCase))?.DataField ?? _draft.Fields[0].DataField;
+                    _draft.DisplayField = _draft.TextField;
+                    _draft.ValueField = _draft.Fields.FirstOrDefault(field => field.ValueKind == PublicationDataValueKind.Number)?.DataField ?? _draft.Fields[0].DataField;
+                }
+                _connectionStatus = $"Connected: {sample.Rows.Count} sample rows, {_draft.Fields.Count} fields discovered.";
+                _section = "fields";
             }
-            _connectionStatus = $"Connected: {sample.Rows.Count} sample rows, {_draft.Fields.Count} fields discovered.";
-            _section = "fields";
+            catch (Exception error) { _connectionStatus = $"Connection failed: {error.Message}"; }
+            finally { _testingConnection = false; }
+    
         }
-        catch (Exception error) { _connectionStatus = $"Connection failed: {error.Message}"; }
-        finally { _testingConnection = false; }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(TestEndpoint)} failed.");
+            throw;
+        }
     }
 
-    private List<PublicationWebHeader> ParseHeaders(string value) => value.Replace("\r", string.Empty).Split('\n', StringSplitOptions.RemoveEmptyEntries)
+    private List<PublicationWebHeader> ParseHeaders(string value) {
+        try
+        {
+            return value.Replace("\r", string.Empty).Split('\n', StringSplitOptions.RemoveEmptyEntries)
         .Select(line => line.Split(':', 2)).Where(parts => parts.Length == 2 && !string.IsNullOrWhiteSpace(parts[0]))
         .Select(parts => new PublicationWebHeader { Name = parts[0].Trim(), Value = parts[1].Trim() }).ToList();
-    private string FormatHeaders(IEnumerable<PublicationWebHeader> headers) => string.Join(Environment.NewLine, headers.Select(header => $"{header.Name}: {header.Value}"));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(ParseHeaders)} failed.");
+            throw;
+        }
+    }
+    private string FormatHeaders(IEnumerable<PublicationWebHeader> headers) {
+        try
+        {
+            return string.Join(Environment.NewLine, headers.Select(header => $"{header.Name}: {header.Value}"));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(FormatHeaders)} failed.");
+            throw;
+        }
+    }
 
     private IReadOnlyList<PublicationDataColumn> SourceColumns
     {
@@ -1214,58 +1706,117 @@
 
     private IReadOnlyList<PublicationDataColumn> FieldChoices(PublicationComponentField field)
     {
-        var columns = SourceColumns.ToList();
-        if (!string.IsNullOrWhiteSpace(field.DataField) && columns.All(column => !string.Equals(column.Name, field.DataField, StringComparison.OrdinalIgnoreCase)))
-            columns.Add(new PublicationDataColumn { Name = field.DataField, ValueKind = field.ValueKind });
-        return columns;
+        try
+        {
+            var columns = SourceColumns.ToList();
+            if (!string.IsNullOrWhiteSpace(field.DataField) && columns.All(column => !string.Equals(column.Name, field.DataField, StringComparison.OrdinalIgnoreCase)))
+                columns.Add(new PublicationDataColumn { Name = field.DataField, ValueKind = field.ValueKind });
+            return columns;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(FieldChoices)} failed.");
+            throw;
+        }
     }
 
     private void SetFieldDataProperty(PublicationComponentField field, ChangeEventArgs args)
     {
-        var previous = field.DataField;
-        field.DataField = args.Value?.ToString() ?? string.Empty;
-        var selected = SourceColumns.FirstOrDefault(column => string.Equals(column.Name, field.DataField, StringComparison.OrdinalIgnoreCase));
-        if (selected is null) return;
-        field.ValueKind = selected.ValueKind;
-        field.Editor = selected.ValueKind switch
+        try
         {
-            PublicationDataValueKind.Number => PublicationComponentEditorKind.NumberBox,
-            PublicationDataValueKind.Boolean => PublicationComponentEditorKind.CheckBox,
-            PublicationDataValueKind.DateTime => PublicationComponentEditorKind.DateBox,
-            _ => PublicationComponentEditorKind.TextBox
-        };
-        if (string.IsNullOrWhiteSpace(field.Caption) || string.Equals(field.Caption, Friendly(previous), StringComparison.OrdinalIgnoreCase))
-            field.Caption = Friendly(selected.Name);
+            var previous = field.DataField;
+            field.DataField = args.Value?.ToString() ?? string.Empty;
+            var selected = SourceColumns.FirstOrDefault(column => string.Equals(column.Name, field.DataField, StringComparison.OrdinalIgnoreCase));
+            if (selected is null) return;
+            field.ValueKind = selected.ValueKind;
+            field.Editor = selected.ValueKind switch
+            {
+                PublicationDataValueKind.Number => PublicationComponentEditorKind.NumberBox,
+                PublicationDataValueKind.Boolean => PublicationComponentEditorKind.CheckBox,
+                PublicationDataValueKind.DateTime => PublicationComponentEditorKind.DateBox,
+                _ => PublicationComponentEditorKind.TextBox
+            };
+            if (string.IsNullOrWhiteSpace(field.Caption) || string.Equals(field.Caption, Friendly(previous), StringComparison.OrdinalIgnoreCase))
+                field.Caption = Friendly(selected.Name);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(SetFieldDataProperty)} failed.");
+            throw;
+        }
     }
 
     private IReadOnlyList<PublicationDataColumn> LookupColumns(PublicationComponentField field)
-        => field.LookupDataObjectId is { } id
+        {
+        try
+        {
+            return field.LookupDataObjectId is { } id
             ? DataService.ResolveColumns(State.Document.DataObjects.FirstOrDefault(data => data.Id == id))
             : Array.Empty<PublicationDataColumn>();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(LookupColumns)} failed.");
+            throw;
+        }
+    }
 
     private void SetLookupDataObject(PublicationComponentField field, ChangeEventArgs args)
     {
-        field.LookupDataObjectId = Guid.TryParse(args.Value?.ToString(), out var id) ? id : null;
-        if (field.LookupDataObjectId is not { } dataId) return;
-        var data = State.Document.DataObjects.FirstOrDefault(candidate => candidate.Id == dataId);
-        var columns = DataService.ResolveColumns(data);
-        field.LookupDataField = columns.FirstOrDefault()?.Name ?? string.Empty;
-        field.LookupDisplayField = columns.Skip(1).FirstOrDefault()?.Name ?? field.LookupDataField;
-        if (field.Editor is PublicationComponentEditorKind.Auto or PublicationComponentEditorKind.TextBox)
-            field.Editor = PublicationComponentEditorKind.SelectBox;
+        try
+        {
+            field.LookupDataObjectId = Guid.TryParse(args.Value?.ToString(), out var id) ? id : null;
+            if (field.LookupDataObjectId is not { } dataId) return;
+            var data = State.Document.DataObjects.FirstOrDefault(candidate => candidate.Id == dataId);
+            var columns = DataService.ResolveColumns(data);
+            field.LookupDataField = columns.FirstOrDefault()?.Name ?? string.Empty;
+            field.LookupDisplayField = columns.Skip(1).FirstOrDefault()?.Name ?? field.LookupDataField;
+            if (field.Editor is PublicationComponentEditorKind.Auto or PublicationComponentEditorKind.TextBox)
+                field.Editor = PublicationComponentEditorKind.SelectBox;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(SetLookupDataObject)} failed.");
+            throw;
+        }
     }
 
-    private void SetTargetPage(PublicationComponentAction action, ChangeEventArgs args) => action.TargetPageId = Guid.TryParse(args.Value?.ToString(), out var id) ? id : null;
+    private void SetTargetPage(PublicationComponentAction action, ChangeEventArgs args) {
+        try
+        {
+            action.TargetPageId = Guid.TryParse(args.Value?.ToString(), out var id) ? id : null;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(SetTargetPage)} failed.");
+            throw;
+        }
+    }
     private void SetTargetElement(PublicationComponentAction action, ChangeEventArgs args)
     {
-        action.TargetElementId = Guid.TryParse(args.Value?.ToString(), out var id) ? id : null;
-        action.TargetSharedComponentId = action.TargetElementId is { } targetId
-            ? State.CurrentPage.Elements.OfType<DevExtremeComponentElement>()
-                .FirstOrDefault(component => component.Id == targetId)?.SharedComponentId
-            : null;
+        try
+        {
+            action.TargetElementId = Guid.TryParse(args.Value?.ToString(), out var id) ? id : null;
+            action.TargetSharedComponentId = action.TargetElementId is { } targetId
+                ? State.CurrentPage.Elements.OfType<DevExtremeComponentElement>()
+                    .FirstOrDefault(component => component.Id == targetId)?.SharedComponentId
+                : null;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(SetTargetElement)} failed.");
+            throw;
+        }
     }
 
-    private RenderFragment MethodOptions() => builder =>
+    private RenderFragment MethodOptions() {
+        try
+        {
+            return builder =>
     {
         var sequence = 0;
         foreach (var method in Enum.GetValues<PublicationComponentHttpMethod>())
@@ -1276,14 +1827,50 @@
             builder.CloseElement();
         }
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(MethodOptions)} failed.");
+            throw;
+        }
+    }
 
-    private Task RequestManageData() => ManageDataRequested.InvokeAsync();
+    private Task RequestManageData() {
+        try
+        {
+            return ManageDataRequested.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(RequestManageData)} failed.");
+            throw;
+        }
+    }
     private async Task Save()
     {
-        if (_draft is null || !CanSave) return;
-        _draft.Connection.Headers = ParseHeaders(_headersText);
-        Components.Normalize(State.Document, _draft);
-        await Saved.InvokeAsync(_draft).ConfigureAwait(true);
+        try
+        {
+            if (_draft is null || !CanSave) return;
+            _draft.Connection.Headers = ParseHeaders(_headersText);
+            Components.Normalize(State.Document, _draft);
+            await Saved.InvokeAsync(_draft).ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(Save)} failed.");
+            throw;
+        }
     }
-    private Task Cancel() => Cancelled.InvokeAsync();
+    private Task Cancel() {
+        try
+        {
+            return Cancelled.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(Cancel)} failed.");
+            throw;
+        }
+    }
 }

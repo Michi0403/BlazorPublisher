@@ -1,5 +1,6 @@
 @namespace PublisherStudio.Components.Editor
 
+@inject ILogger<BarcodeView> Logger
 <div class="barcode-view" aria-label="@Item.Name">
     @if (string.IsNullOrWhiteSpace(Item.SvgMarkup))
     {

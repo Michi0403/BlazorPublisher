@@ -3,6 +3,7 @@
 @inject IJSRuntime JS
 @inject StreamingProfileStore ProfileStore
 
+@inject ILogger<LiveSourceView> Logger
 <div class="live-source-frame source-@Item.SourceKind.ToString().ToLowerInvariant() @(Item.IsVisual ? "visual" : "audio-only")"
      style="@FrameStyle" data-live-source-id="@Item.Id">
     @if (Item.SourceKind == PublicationLiveSourceKind.NowPlaying)
@@ -92,92 +93,113 @@
     {
         try
         {
-            var machine = await ProfileStore.LoadAsync().ConfigureAwait(true);
-            var profile = Item.DeviceProfileId is Guid profileId
-                ? machine.Devices.FirstOrDefault(candidate => candidate.Id == profileId)
-                : null;
-            var sourceKind = Item.SourceKind;
-            var deviceId = string.IsNullOrWhiteSpace(Item.DeviceId) ? profile?.DeviceId ?? string.Empty : Item.DeviceId;
-            var audioDeviceId = string.IsNullOrWhiteSpace(Item.AudioDeviceId) ? profile?.AudioDeviceId ?? string.Empty : Item.AudioDeviceId;
-            var applicationId = string.IsNullOrWhiteSpace(Item.ApplicationId) ? profile?.ApplicationId ?? string.Empty : Item.ApplicationId;
-            var windowTitle = string.IsNullOrWhiteSpace(Item.WindowTitle) ? profile?.WindowTitle ?? string.Empty : Item.WindowTitle;
-            var useDeviceTimestamp = Item.UseDeviceTimestamp;
-            var captureBackend = Item.CaptureBackend == PublicationCaptureBackend.Auto ? profile?.CaptureBackend ?? PublicationCaptureBackend.Auto : Item.CaptureBackend;
-            var nativeBackend = string.IsNullOrWhiteSpace(Item.NativeBackend) ? profile?.NativeBackend ?? string.Empty : Item.NativeBackend;
-
-            _active = await JS.InvokeAsync<bool>("publisherStreaming.attachSource", new
+            try
             {
-                id = RuntimeSourceId,
-                videoId = VideoId,
-                canvasId = CanvasId,
-                meterId = MeterId,
-                metadataId = MetadataId,
-                kind = sourceKind.ToString(),
-                deviceId,
-                audioDeviceId,
-                applicationId,
-                windowTitle,
-                captureBackend = captureBackend.ToString(),
-                nativeBackend,
-                networkUrl = Item.NetworkUrl,
-                nowPlayingDirectory = Item.NowPlayingDirectory,
-                mediaHostUrl = string.Empty,
-                ffmpegPath = machine.FfmpegPath,
-                includeAudio = Item.IncludeAudio,
-                muted = Item.Muted,
-                volume = Item.Volume,
-                audioDelayMilliseconds = Item.AudioDelayMilliseconds,
-                fitMode = Item.FitMode.ToString().ToLowerInvariant(),
-                captureWidth = Item.CaptureWidth,
-                captureHeight = Item.CaptureHeight,
-                captureFrameRate = Item.CaptureFrameRate,
-                useDeviceTimestamp,
-                brightness = Item.Brightness,
-                contrast = Item.Contrast,
-                saturation = Item.Saturation,
-                hueRotation = Item.HueRotation,
-                blur = Item.Blur,
-                videoLayers = VideoLayerPayload(),
-                chromaKeyEnabled = Item.ChromaKeyEnabled,
-                chromaKeyColor = Item.ChromaKeyColor,
-                chromaSimilarity = Item.ChromaSimilarity,
-                chromaSmoothness = Item.ChromaSmoothness,
-                chromaSpill = Item.ChromaSpill,
-                chromaResidualOpacity = Item.ChromaResidualOpacity
-            }).ConfigureAwait(true);
+                var machine = await ProfileStore.LoadAsync().ConfigureAwait(true);
+                var profile = Item.DeviceProfileId is Guid profileId
+                    ? machine.Devices.FirstOrDefault(candidate => candidate.Id == profileId)
+                    : null;
+                var sourceKind = Item.SourceKind;
+                var deviceId = string.IsNullOrWhiteSpace(Item.DeviceId) ? profile?.DeviceId ?? string.Empty : Item.DeviceId;
+                var audioDeviceId = string.IsNullOrWhiteSpace(Item.AudioDeviceId) ? profile?.AudioDeviceId ?? string.Empty : Item.AudioDeviceId;
+                var applicationId = string.IsNullOrWhiteSpace(Item.ApplicationId) ? profile?.ApplicationId ?? string.Empty : Item.ApplicationId;
+                var windowTitle = string.IsNullOrWhiteSpace(Item.WindowTitle) ? profile?.WindowTitle ?? string.Empty : Item.WindowTitle;
+                var useDeviceTimestamp = Item.UseDeviceTimestamp;
+                var captureBackend = Item.CaptureBackend == PublicationCaptureBackend.Auto ? profile?.CaptureBackend ?? PublicationCaptureBackend.Auto : Item.CaptureBackend;
+                var nativeBackend = string.IsNullOrWhiteSpace(Item.NativeBackend) ? profile?.NativeBackend ?? string.Empty : Item.NativeBackend;
+
+                _active = await JS.InvokeAsync<bool>("publisherStreaming.attachSource", new
+                {
+                    id = RuntimeSourceId,
+                    videoId = VideoId,
+                    canvasId = CanvasId,
+                    meterId = MeterId,
+                    metadataId = MetadataId,
+                    kind = sourceKind.ToString(),
+                    deviceId,
+                    audioDeviceId,
+                    applicationId,
+                    windowTitle,
+                    captureBackend = captureBackend.ToString(),
+                    nativeBackend,
+                    networkUrl = Item.NetworkUrl,
+                    nowPlayingDirectory = Item.NowPlayingDirectory,
+                    mediaHostUrl = string.Empty,
+                    ffmpegPath = machine.FfmpegPath,
+                    includeAudio = Item.IncludeAudio,
+                    muted = Item.Muted,
+                    volume = Item.Volume,
+                    audioDelayMilliseconds = Item.AudioDelayMilliseconds,
+                    fitMode = Item.FitMode.ToString().ToLowerInvariant(),
+                    captureWidth = Item.CaptureWidth,
+                    captureHeight = Item.CaptureHeight,
+                    captureFrameRate = Item.CaptureFrameRate,
+                    useDeviceTimestamp,
+                    brightness = Item.Brightness,
+                    contrast = Item.Contrast,
+                    saturation = Item.Saturation,
+                    hueRotation = Item.HueRotation,
+                    blur = Item.Blur,
+                    videoLayers = VideoLayerPayload(),
+                    chromaKeyEnabled = Item.ChromaKeyEnabled,
+                    chromaKeyColor = Item.ChromaKeyColor,
+                    chromaSimilarity = Item.ChromaSimilarity,
+                    chromaSmoothness = Item.ChromaSmoothness,
+                    chromaSpill = Item.ChromaSpill,
+                    chromaResidualOpacity = Item.ChromaResidualOpacity
+                }).ConfigureAwait(true);
+            }
+            catch { _active = false; }
+    
         }
-        catch { _active = false; }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(LiveSourceView)}.{nameof(Activate)} failed.");
+            throw;
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!_active || !Item.IsVisual) return;
         try
         {
-            await JS.InvokeVoidAsync("publisherStreaming.updateSourceEffects", new
+            if (!_active || !Item.IsVisual) return;
+            try
             {
-                id = RuntimeSourceId,
-                videoId = VideoId,
-                canvasId = CanvasId,
-                fitMode = Item.FitMode.ToString().ToLowerInvariant(),
-                brightness = Item.Brightness,
-                contrast = Item.Contrast,
-                saturation = Item.Saturation,
-                hueRotation = Item.HueRotation,
-                blur = Item.Blur,
-                videoLayers = VideoLayerPayload(),
-                chromaKeyEnabled = Item.ChromaKeyEnabled,
-                chromaKeyColor = Item.ChromaKeyColor,
-                chromaSimilarity = Item.ChromaSimilarity,
-                chromaSmoothness = Item.ChromaSmoothness,
-                chromaSpill = Item.ChromaSpill,
-                chromaResidualOpacity = Item.ChromaResidualOpacity
-            }).ConfigureAwait(true);
+                await JS.InvokeVoidAsync("publisherStreaming.updateSourceEffects", new
+                {
+                    id = RuntimeSourceId,
+                    videoId = VideoId,
+                    canvasId = CanvasId,
+                    fitMode = Item.FitMode.ToString().ToLowerInvariant(),
+                    brightness = Item.Brightness,
+                    contrast = Item.Contrast,
+                    saturation = Item.Saturation,
+                    hueRotation = Item.HueRotation,
+                    blur = Item.Blur,
+                    videoLayers = VideoLayerPayload(),
+                    chromaKeyEnabled = Item.ChromaKeyEnabled,
+                    chromaKeyColor = Item.ChromaKeyColor,
+                    chromaSimilarity = Item.ChromaSimilarity,
+                    chromaSmoothness = Item.ChromaSmoothness,
+                    chromaSpill = Item.ChromaSpill,
+                    chromaResidualOpacity = Item.ChromaResidualOpacity
+                }).ConfigureAwait(true);
+            }
+            catch { }
+    
         }
-        catch { }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(LiveSourceView)}.{nameof(OnAfterRenderAsync)} failed.");
+            throw;
+        }
     }
 
-    private object[] VideoLayerPayload() => (Item.VideoLayers ?? [])
+    private object[] VideoLayerPayload() {
+        try
+        {
+            return (Item.VideoLayers ?? [])
         .Where(layer => layer is not null)
         .Select(layer => (object)new
         {
@@ -207,12 +229,38 @@
             }).ToArray()
         })
         .ToArray();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(LiveSourceView)}.{nameof(VideoLayerPayload)} failed.");
+            throw;
+        }
+    }
 
     public async ValueTask DisposeAsync()
     {
-        try { await JS.InvokeVoidAsync("publisherStreaming.detachSource", RuntimeSourceId).ConfigureAwait(true); }
-        catch { }
+        try
+        {
+            try { await JS.InvokeVoidAsync("publisherStreaming.detachSource", RuntimeSourceId).ConfigureAwait(true); }
+            catch { }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(LiveSourceView)}.{nameof(DisposeAsync)} failed.");
+            throw;
+        }
     }
 
-    private string Inv(double value) => value.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+    private string Inv(double value) {
+        try
+        {
+            return value.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(LiveSourceView)}.{nameof(Inv)} failed.");
+            throw;
+        }
+    }
 }

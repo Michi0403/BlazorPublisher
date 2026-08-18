@@ -2,6 +2,7 @@
 @implements IAsyncDisposable
 @inject IJSRuntime JS
 
+@inject ILogger<WordArtPathEditor> Logger
 <div class="wordart-path-editor">
     <div class="wordart-path-heading">
         <strong>Custom text path</strong>
@@ -61,84 +62,236 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js").ConfigureAwait(true);
-        _self ??= DotNetObjectReference.Create(this);
+        try
+        {
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js").ConfigureAwait(true);
+            _self ??= DotNetObjectReference.Create(this);
 
-        if (!_initialized)
-        {
-            await _module.InvokeVoidAsync("initializeWordArtPathEditor", EditorId, _self, Item.CustomPathPoints).ConfigureAwait(true);
-            _initialized = true;
+            if (!_initialized)
+            {
+                await _module.InvokeVoidAsync("initializeWordArtPathEditor", EditorId, _self, Item.CustomPathPoints).ConfigureAwait(true);
+                _initialized = true;
+            }
+            else
+            {
+                await _module.InvokeVoidAsync("updateWordArtPathEditor", EditorId, Item.CustomPathPoints).ConfigureAwait(true);
+            }
+    
         }
-        else
+        catch (Exception __componentMethodException)
         {
-            await _module.InvokeVoidAsync("updateWordArtPathEditor", EditorId, Item.CustomPathPoints).ConfigureAwait(true);
+            Logger.LogError(__componentMethodException, $"Component method {nameof(WordArtPathEditor)}.{nameof(OnAfterRenderAsync)} failed.");
+            throw;
         }
     }
 
-    private Task StraightPresetAsync() => ApplyPresetAsync("Straight");
-    private Task RisePresetAsync() => ApplyPresetAsync("Rise");
-    private Task FallPresetAsync() => ApplyPresetAsync("Fall");
-    private Task ArchUpPresetAsync() => ApplyPresetAsync("ArchUp");
-    private Task ArchDownPresetAsync() => ApplyPresetAsync("ArchDown");
-    private Task GentleWavePresetAsync() => ApplyPresetAsync("GentleWave");
-    private Task SCurvePresetAsync() => ApplyPresetAsync("SCurve");
-    private Task CircleArcPresetAsync() => ApplyPresetAsync("CircleArc");
+    private Task StraightPresetAsync() {
+        try
+        {
+            return ApplyPresetAsync("Straight");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(WordArtPathEditor)}.{nameof(StraightPresetAsync)} failed.");
+            throw;
+        }
+    }
+    private Task RisePresetAsync() {
+        try
+        {
+            return ApplyPresetAsync("Rise");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(WordArtPathEditor)}.{nameof(RisePresetAsync)} failed.");
+            throw;
+        }
+    }
+    private Task FallPresetAsync() {
+        try
+        {
+            return ApplyPresetAsync("Fall");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(WordArtPathEditor)}.{nameof(FallPresetAsync)} failed.");
+            throw;
+        }
+    }
+    private Task ArchUpPresetAsync() {
+        try
+        {
+            return ApplyPresetAsync("ArchUp");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(WordArtPathEditor)}.{nameof(ArchUpPresetAsync)} failed.");
+            throw;
+        }
+    }
+    private Task ArchDownPresetAsync() {
+        try
+        {
+            return ApplyPresetAsync("ArchDown");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(WordArtPathEditor)}.{nameof(ArchDownPresetAsync)} failed.");
+            throw;
+        }
+    }
+    private Task GentleWavePresetAsync() {
+        try
+        {
+            return ApplyPresetAsync("GentleWave");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(WordArtPathEditor)}.{nameof(GentleWavePresetAsync)} failed.");
+            throw;
+        }
+    }
+    private Task SCurvePresetAsync() {
+        try
+        {
+            return ApplyPresetAsync("SCurve");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(WordArtPathEditor)}.{nameof(SCurvePresetAsync)} failed.");
+            throw;
+        }
+    }
+    private Task CircleArcPresetAsync() {
+        try
+        {
+            return ApplyPresetAsync("CircleArc");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(WordArtPathEditor)}.{nameof(CircleArcPresetAsync)} failed.");
+            throw;
+        }
+    }
 
     private async Task ApplyPresetAsync(string key)
     {
-        _drawingArmed = false;
-        await SetDrawModeAsync(false).ConfigureAwait(true);
-        await PathChanged.InvokeAsync(WordArtGeometry.CreatePreset(key)).ConfigureAwait(true);
+        try
+        {
+            _drawingArmed = false;
+            await SetDrawModeAsync(false).ConfigureAwait(true);
+            await PathChanged.InvokeAsync(WordArtGeometry.CreatePreset(key)).ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(WordArtPathEditor)}.{nameof(ApplyPresetAsync)} failed.");
+            throw;
+        }
     }
 
     private async Task ArmDrawingAsync()
     {
-        _drawingArmed = !_drawingArmed;
-        await SetDrawModeAsync(_drawingArmed).ConfigureAwait(true);
+        try
+        {
+            _drawingArmed = !_drawingArmed;
+            await SetDrawModeAsync(_drawingArmed).ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(WordArtPathEditor)}.{nameof(ArmDrawingAsync)} failed.");
+            throw;
+        }
     }
 
     private async Task ReverseAsync()
     {
-        _drawingArmed = false;
-        await SetDrawModeAsync(false).ConfigureAwait(true);
-        await PathChanged.InvokeAsync(WordArtGeometry.Reverse(Item.CustomPathPoints)).ConfigureAwait(true);
+        try
+        {
+            _drawingArmed = false;
+            await SetDrawModeAsync(false).ConfigureAwait(true);
+            await PathChanged.InvokeAsync(WordArtGeometry.Reverse(Item.CustomPathPoints)).ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(WordArtPathEditor)}.{nameof(ReverseAsync)} failed.");
+            throw;
+        }
     }
 
     private async Task ReduceAsync()
     {
-        _drawingArmed = false;
-        await SetDrawModeAsync(false).ConfigureAwait(true);
-        await PathChanged.InvokeAsync(WordArtGeometry.Reduce(Item.CustomPathPoints)).ConfigureAwait(true);
+        try
+        {
+            _drawingArmed = false;
+            await SetDrawModeAsync(false).ConfigureAwait(true);
+            await PathChanged.InvokeAsync(WordArtGeometry.Reduce(Item.CustomPathPoints)).ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(WordArtPathEditor)}.{nameof(ReduceAsync)} failed.");
+            throw;
+        }
     }
 
     private async Task SetDrawModeAsync(bool enabled)
     {
-        if (_module is not null)
-            await _module.InvokeVoidAsync("setWordArtPathDrawMode", EditorId, enabled).ConfigureAwait(true);
+        try
+        {
+            if (_module is not null)
+                await _module.InvokeVoidAsync("setWordArtPathDrawMode", EditorId, enabled).ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(WordArtPathEditor)}.{nameof(SetDrawModeAsync)} failed.");
+            throw;
+        }
     }
 
     [JSInvokable]
     public async Task CommitWordArtPath(WordArtPathPoint[] points)
     {
-        _drawingArmed = false;
-        var normalized = WordArtGeometry.Normalize(points);
-        await PathChanged.InvokeAsync(normalized).ConfigureAwait(true);
-        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        try
+        {
+            _drawingArmed = false;
+            var normalized = WordArtGeometry.Normalize(points);
+            await PathChanged.InvokeAsync(normalized).ConfigureAwait(true);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(WordArtPathEditor)}.{nameof(CommitWordArtPath)} failed.");
+            throw;
+        }
     }
 
     public async ValueTask DisposeAsync()
     {
-        if (_module is not null && _initialized)
-        {
-            try { await _module.InvokeVoidAsync("disposeWordArtPathEditor", EditorId).ConfigureAwait(true); }
-            catch (JSDisconnectedException) { }
-        }
-        _self?.Dispose();
         try
         {
-            if (_module is not null) await _module.DisposeAsync().ConfigureAwait(true);
+            if (_module is not null && _initialized)
+            {
+                try { await _module.InvokeVoidAsync("disposeWordArtPathEditor", EditorId).ConfigureAwait(true); }
+                catch (JSDisconnectedException) { }
+            }
+            _self?.Dispose();
+            try
+            {
+                if (_module is not null) await _module.DisposeAsync().ConfigureAwait(true);
+            }
+            catch (JSDisconnectedException) { }
+            catch (TaskCanceledException) { }
+    
         }
-        catch (JSDisconnectedException) { }
-        catch (TaskCanceledException) { }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(WordArtPathEditor)}.{nameof(DisposeAsync)} failed.");
+            throw;
+        }
     }
 }

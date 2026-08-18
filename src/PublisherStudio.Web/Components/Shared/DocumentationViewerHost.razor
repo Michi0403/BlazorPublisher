@@ -1,6 +1,7 @@
 @implements IDisposable
 @inject IPublisherDocumentationViewerService Viewer
 @inject ILogger<DocumentationViewerHost> Logger
+@inject ISupervisedTaskRunner TaskRunner
 @inject IUserNotificationService Notifications
 
 @if (Viewer.State.IsOpen)
@@ -29,30 +30,57 @@
     {
         try
         {
-            Viewer.StateChanged += OnViewerStateChanged;
+            try
+            {
+                Viewer.StateChanged += OnViewerStateChanged;
+            }
+            catch (Exception exception)
+            {
+                Logger.LogError(exception, "Subscribing the PublisherStudio documentation viewer failed.");
+                Notifications.Error("PublisherStudio could not attach the documentation viewer.", "Documentation viewer", nameof(DocumentationViewerHost));
+            }
+    
         }
-        catch (Exception exception)
+        catch (Exception __componentMethodException)
         {
-            Logger.LogError(exception, "Subscribing the PublisherStudio documentation viewer failed.");
-            Notifications.Error("PublisherStudio could not attach the documentation viewer.", "Documentation viewer", nameof(DocumentationViewerHost));
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DocumentationViewerHost)}.{nameof(OnInitialized)} failed.");
+            throw;
         }
     }
 
     private void OnViewerStateChanged()
     {
-        _ = RefreshViewerAsync();
+        try
+        {
+            TaskRunner.Run(nameof(DocumentationViewerHost), nameof(RefreshViewerAsync), _ => RefreshViewerAsync());
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DocumentationViewerHost)}.{nameof(OnViewerStateChanged)} failed.");
+            throw;
+        }
     }
 
     private async Task RefreshViewerAsync()
     {
         try
         {
-            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            try
+            {
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                Logger.LogError(exception, "Refreshing the PublisherStudio documentation viewer state failed.");
+                Notifications.Error("PublisherStudio could not refresh the documentation viewer.", "Documentation viewer", nameof(DocumentationViewerHost));
+            }
+    
         }
-        catch (Exception exception)
+        catch (Exception __componentMethodException)
         {
-            Logger.LogError(exception, "Refreshing the PublisherStudio documentation viewer state failed.");
-            Notifications.Error("PublisherStudio could not refresh the documentation viewer.", "Documentation viewer", nameof(DocumentationViewerHost));
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DocumentationViewerHost)}.{nameof(RefreshViewerAsync)} failed.");
+            throw;
         }
     }
 
@@ -60,20 +88,48 @@
     {
         try
         {
-            Viewer.Close();
+            try
+            {
+                Viewer.Close();
+            }
+            catch (Exception exception)
+            {
+                Logger.LogError(exception, "Closing the PublisherStudio documentation viewer failed.");
+                Notifications.Error("PublisherStudio could not close the documentation viewer.", "Documentation viewer", nameof(DocumentationViewerHost));
+            }
+    
         }
-        catch (Exception exception)
+        catch (Exception __componentMethodException)
         {
-            Logger.LogError(exception, "Closing the PublisherStudio documentation viewer failed.");
-            Notifications.Error("PublisherStudio could not close the documentation viewer.", "Documentation viewer", nameof(DocumentationViewerHost));
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DocumentationViewerHost)}.{nameof(Close)} failed.");
+            throw;
         }
     }
 
     [Microsoft.JSInterop.JSInvokable]
-    public void CloseFromBrowser() => Close();
+    public void CloseFromBrowser() {
+        try
+        {
+            Close();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DocumentationViewerHost)}.{nameof(CloseFromBrowser)} failed.");
+            throw;
+        }
+    }
 
     public void Dispose()
     {
-        Viewer.StateChanged -= OnViewerStateChanged;
+        try
+        {
+            Viewer.StateChanged -= OnViewerStateChanged;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DocumentationViewerHost)}.{nameof(Dispose)} failed.");
+            throw;
+        }
     }
 }

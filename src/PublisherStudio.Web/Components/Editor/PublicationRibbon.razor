@@ -5,6 +5,8 @@
 @inject IPublisherDocumentationViewerService DocumentationViewer
 @inject IFileLocalizationService Localization
 
+@inject ILogger<PublicationRibbon> Logger
+@inject ISupervisedTaskRunner TaskRunner
 <DxRibbon CssClass="publication-ribbon categorized-ribbon" SizeMode="SizeMode.Medium" AdaptivityAutoCollapseItemsToGroups="true">
     <DxRibbonApplicationTab Text='@LT("File")'>
         <DxRibbonApplicationTabItem Text='@LT("New publication")' IconCssClass="pub-icon pub-icon-newpage" Click="RequestNew" />
@@ -628,28 +630,117 @@
 </DxRibbon>
 
 @code {
-    private string LT(string text) => Localization.GetText(text);
+    private string LT(string text) {
+        try
+        {
+            return Localization.GetText(text);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(LT)} failed.");
+            throw;
+        }
+    }
 
     private string LocalGptButtonText => LocalGptConnection.State.IsLinked ? "LocalGPT AI Assist" : LocalGptConnection.State.IsConnected ? "Approve LocalGPT link" : "Connect LocalGPT";
     private bool CanShowAiCouncil => LocalGptConnection.State.HasCapability("council.run");
 
     protected override void OnInitialized()
     {
-        LocalGptConnection.Changed += OnLocalGptChanged;
+        try
+        {
+            LocalGptConnection.Changed += OnLocalGptChanged;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(OnInitialized)} failed.");
+            throw;
+        }
     }
 
-    private void OnLocalGptChanged() => _ = InvokeAsync(StateHasChanged);
+    private void OnLocalGptChanged() {
+        try
+        {
+            TaskRunner.Run(nameof(PublicationRibbon), nameof(OnLocalGptChanged), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(false));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(OnLocalGptChanged)} failed.");
+            throw;
+        }
+    }
 
-    private bool HasCouncilTeam(string teamKey) => LocalGptConnection.State.RemoteCapabilities
+    private bool HasCouncilTeam(string teamKey) {
+        try
+        {
+            return LocalGptConnection.State.RemoteCapabilities
         .Where(item => item.IsEnabled && item.IsOnline && string.Equals(item.Key, "council.run", StringComparison.OrdinalIgnoreCase))
         .SelectMany(item => item.Skills)
         .Any(item => string.Equals(item, teamKey, StringComparison.OrdinalIgnoreCase));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(HasCouncilTeam)} failed.");
+            throw;
+        }
+    }
 
-    private void OpenOrganicPlugins() => Navigation.NavigateTo("/organic-plugins");
-    private void OpenDocumentation() => Navigation.NavigateTo("/help");
-    private void OpenHtmlDocumentation() => DocumentationViewer.Open(new PublisherDocumentationViewerRequest { Url = "/api/documentation/html/index.html", Title = "PublisherStudio HTML guide" });
-    private void OpenPdfDocumentation() => DocumentationViewer.Open(new PublisherDocumentationViewerRequest { Url = "/api/documentation/pdf", Title = "PublisherStudio PDF book" });
-    private void OpenApiDocumentation() => DocumentationViewer.Open(new PublisherDocumentationViewerRequest { Url = "/api/documentation/html/api/index.html", Title = "PublisherStudio API reference" });
+    private void OpenOrganicPlugins() {
+        try
+        {
+            Navigation.NavigateTo("/organic-plugins");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(OpenOrganicPlugins)} failed.");
+            throw;
+        }
+    }
+    private void OpenDocumentation() {
+        try
+        {
+            Navigation.NavigateTo("/help");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(OpenDocumentation)} failed.");
+            throw;
+        }
+    }
+    private void OpenHtmlDocumentation() {
+        try
+        {
+            DocumentationViewer.Open(new PublisherDocumentationViewerRequest { Url = "/api/documentation/html/index.html", Title = "PublisherStudio HTML guide" });
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(OpenHtmlDocumentation)} failed.");
+            throw;
+        }
+    }
+    private void OpenPdfDocumentation() {
+        try
+        {
+            DocumentationViewer.Open(new PublisherDocumentationViewerRequest { Url = "/api/documentation/pdf", Title = "PublisherStudio PDF book" });
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(OpenPdfDocumentation)} failed.");
+            throw;
+        }
+    }
+    private void OpenApiDocumentation() {
+        try
+        {
+            DocumentationViewer.Open(new PublisherDocumentationViewerRequest { Url = "/api/documentation/html/api/index.html", Title = "PublisherStudio API reference" });
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(OpenApiDocumentation)} failed.");
+            throw;
+        }
+    }
 
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
     [Parameter] public bool TimelineVisible { get; set; }
@@ -728,85 +819,855 @@
         : "Rendering: compact transform";
     private string CssZoomModeText => CheckText(State.Document.View.CanvasZoomMode == PublicationCanvasZoomMode.CssLayout, "Sharp CSS layout (default)");
     private string TransformZoomModeText => CheckText(State.Document.View.CanvasZoomMode == PublicationCanvasZoomMode.Transform, "Compact transform");
-    private string CheckText(bool value, string text) => value ? $"✓ {text}" : text;
+    private string CheckText(bool value, string text) {
+        try
+        {
+            return value ? $"✓ {text}" : text;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(CheckText)} failed.");
+            throw;
+        }
+    }
 
-    private Task RequestNew() => OnNew.InvokeAsync();
-    private Task RequestOpen() => OnOpen.InvokeAsync();
-    private Task RequestImportOpenDocument() => OnImportOpenDocument.InvokeAsync();
-    private Task RequestSave() => OnSave.InvokeAsync();
-    private Task RequestPrint() => OnPrint.InvokeAsync();
-    private Task RequestExportPng() => OnExportPng.InvokeAsync();
-    private Task RequestExportJpeg() => OnExportJpeg.InvokeAsync();
-    private Task RequestExportSvg() => OnExportSvg.InvokeAsync();
-    private Task RequestExportSelectedPng() => OnExportSelectedPng.InvokeAsync();
-    private Task RequestExportSelectedSvg() => OnExportSelectedSvg.InvokeAsync();
-    private Task RequestExportWebsite() => OnExportWebsite.InvokeAsync();
-    private Task RequestExportSite() => OnExportSite.InvokeAsync();
-    private Task RequestExportStructuredSite() => OnExportStructuredSite.InvokeAsync();
-    private Task RequestExportVideo() => OnExportVideo.InvokeAsync();
-    private Task RequestPicture() => OnInsertPicture.InvokeAsync();
-    private Task RequestCreatePicture() => OnCreatePicture.InvokeAsync();
-    private Task RequestEditPicture() => OnEditPicture.InvokeAsync();
-    private Task RequestSpreadsheet() => OnInsertSpreadsheet.InvokeAsync();
-    private Task RequestCreateSpreadsheet() => OnCreateSpreadsheet.InvokeAsync();
-    private void SetTextFit(PublicationContentFitMode mode) { if (State.SelectedElement is TextFrameElement text) State.UpdateSelected(_ => text.ContentFit = mode); }
-    private void TextFitClip() => SetTextFit(PublicationContentFitMode.Clip);
-    private void TextFitWhole() => SetTextFit(PublicationContentFitMode.Fit);
-    private void TextFitFill() => SetTextFit(PublicationContentFitMode.Fill);
-    private void TextFitStretch() => SetTextFit(PublicationContentFitMode.Stretch);
-    private void SetSpreadsheetFit(PublicationContentFitMode mode) { if (State.SelectedElement is SpreadsheetElement spreadsheet) State.UpdateSelected(_ => spreadsheet.ContentFit = mode); }
-    private void SpreadsheetFitClip() => SetSpreadsheetFit(PublicationContentFitMode.Clip);
-    private void SpreadsheetFitWhole() => SetSpreadsheetFit(PublicationContentFitMode.Fit);
-    private void SpreadsheetFitFill() => SetSpreadsheetFit(PublicationContentFitMode.Fill);
-    private void SpreadsheetFitStretch() => SetSpreadsheetFit(PublicationContentFitMode.Stretch);
-    private void ToggleSpreadsheetGridLines() { if (State.SelectedElement is SpreadsheetElement spreadsheet) State.UpdateSelected(_ => spreadsheet.ShowGridLines = !spreadsheet.ShowGridLines); }
-    private void ToggleSpreadsheetSheetName() { if (State.SelectedElement is SpreadsheetElement spreadsheet) State.UpdateSelected(_ => spreadsheet.ShowSheetName = !spreadsheet.ShowSheetName); }
+    private Task RequestNew() {
+        try
+        {
+            return OnNew.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestNew)} failed.");
+            throw;
+        }
+    }
+    private Task RequestOpen() {
+        try
+        {
+            return OnOpen.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestOpen)} failed.");
+            throw;
+        }
+    }
+    private Task RequestImportOpenDocument() {
+        try
+        {
+            return OnImportOpenDocument.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestImportOpenDocument)} failed.");
+            throw;
+        }
+    }
+    private Task RequestSave() {
+        try
+        {
+            return OnSave.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestSave)} failed.");
+            throw;
+        }
+    }
+    private Task RequestPrint() {
+        try
+        {
+            return OnPrint.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestPrint)} failed.");
+            throw;
+        }
+    }
+    private Task RequestExportPng() {
+        try
+        {
+            return OnExportPng.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestExportPng)} failed.");
+            throw;
+        }
+    }
+    private Task RequestExportJpeg() {
+        try
+        {
+            return OnExportJpeg.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestExportJpeg)} failed.");
+            throw;
+        }
+    }
+    private Task RequestExportSvg() {
+        try
+        {
+            return OnExportSvg.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestExportSvg)} failed.");
+            throw;
+        }
+    }
+    private Task RequestExportSelectedPng() {
+        try
+        {
+            return OnExportSelectedPng.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestExportSelectedPng)} failed.");
+            throw;
+        }
+    }
+    private Task RequestExportSelectedSvg() {
+        try
+        {
+            return OnExportSelectedSvg.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestExportSelectedSvg)} failed.");
+            throw;
+        }
+    }
+    private Task RequestExportWebsite() {
+        try
+        {
+            return OnExportWebsite.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestExportWebsite)} failed.");
+            throw;
+        }
+    }
+    private Task RequestExportSite() {
+        try
+        {
+            return OnExportSite.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestExportSite)} failed.");
+            throw;
+        }
+    }
+    private Task RequestExportStructuredSite() {
+        try
+        {
+            return OnExportStructuredSite.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestExportStructuredSite)} failed.");
+            throw;
+        }
+    }
+    private Task RequestExportVideo() {
+        try
+        {
+            return OnExportVideo.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestExportVideo)} failed.");
+            throw;
+        }
+    }
+    private Task RequestPicture() {
+        try
+        {
+            return OnInsertPicture.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestPicture)} failed.");
+            throw;
+        }
+    }
+    private Task RequestCreatePicture() {
+        try
+        {
+            return OnCreatePicture.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestCreatePicture)} failed.");
+            throw;
+        }
+    }
+    private Task RequestEditPicture() {
+        try
+        {
+            return OnEditPicture.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestEditPicture)} failed.");
+            throw;
+        }
+    }
+    private Task RequestSpreadsheet() {
+        try
+        {
+            return OnInsertSpreadsheet.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestSpreadsheet)} failed.");
+            throw;
+        }
+    }
+    private Task RequestCreateSpreadsheet() {
+        try
+        {
+            return OnCreateSpreadsheet.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestCreateSpreadsheet)} failed.");
+            throw;
+        }
+    }
+    private void SetTextFit(PublicationContentFitMode mode) {
+        try
+        {
+     if (State.SelectedElement is TextFrameElement text) State.UpdateSelected(_ => text.ContentFit = mode); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetTextFit)} failed.");
+            throw;
+        }
+    }
+    private void TextFitClip() {
+        try
+        {
+            SetTextFit(PublicationContentFitMode.Clip);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(TextFitClip)} failed.");
+            throw;
+        }
+    }
+    private void TextFitWhole() {
+        try
+        {
+            SetTextFit(PublicationContentFitMode.Fit);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(TextFitWhole)} failed.");
+            throw;
+        }
+    }
+    private void TextFitFill() {
+        try
+        {
+            SetTextFit(PublicationContentFitMode.Fill);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(TextFitFill)} failed.");
+            throw;
+        }
+    }
+    private void TextFitStretch() {
+        try
+        {
+            SetTextFit(PublicationContentFitMode.Stretch);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(TextFitStretch)} failed.");
+            throw;
+        }
+    }
+    private void SetSpreadsheetFit(PublicationContentFitMode mode) {
+        try
+        {
+     if (State.SelectedElement is SpreadsheetElement spreadsheet) State.UpdateSelected(_ => spreadsheet.ContentFit = mode); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetSpreadsheetFit)} failed.");
+            throw;
+        }
+    }
+    private void SpreadsheetFitClip() {
+        try
+        {
+            SetSpreadsheetFit(PublicationContentFitMode.Clip);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SpreadsheetFitClip)} failed.");
+            throw;
+        }
+    }
+    private void SpreadsheetFitWhole() {
+        try
+        {
+            SetSpreadsheetFit(PublicationContentFitMode.Fit);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SpreadsheetFitWhole)} failed.");
+            throw;
+        }
+    }
+    private void SpreadsheetFitFill() {
+        try
+        {
+            SetSpreadsheetFit(PublicationContentFitMode.Fill);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SpreadsheetFitFill)} failed.");
+            throw;
+        }
+    }
+    private void SpreadsheetFitStretch() {
+        try
+        {
+            SetSpreadsheetFit(PublicationContentFitMode.Stretch);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SpreadsheetFitStretch)} failed.");
+            throw;
+        }
+    }
+    private void ToggleSpreadsheetGridLines() {
+        try
+        {
+     if (State.SelectedElement is SpreadsheetElement spreadsheet) State.UpdateSelected(_ => spreadsheet.ShowGridLines = !spreadsheet.ShowGridLines); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ToggleSpreadsheetGridLines)} failed.");
+            throw;
+        }
+    }
+    private void ToggleSpreadsheetSheetName() {
+        try
+        {
+     if (State.SelectedElement is SpreadsheetElement spreadsheet) State.UpdateSelected(_ => spreadsheet.ShowSheetName = !spreadsheet.ShowSheetName); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ToggleSpreadsheetSheetName)} failed.");
+            throw;
+        }
+    }
 
-    private Task RequestEditSpreadsheet() => OnEditSpreadsheet.InvokeAsync();
-    private Task RequestDownloadSpreadsheet() => OnDownloadSpreadsheet.InvokeAsync();
-    private Task RequestVideo() => OnInsertVideo.InvokeAsync();
-    private Task RequestAudio() => OnInsertAudio.InvokeAsync();
-    private Task RequestCreateVideo() => OnCreateVideo.InvokeAsync();
-    private Task RequestCreateAudio() => OnCreateAudio.InvokeAsync();
-    private Task RequestEditMedia() => OnEditMedia.InvokeAsync();
-    private Task RequestStreamingSetup() => OnStreamingSetup.InvokeAsync();
-    private Task RequestStartDryRun() => OnStartDryRun.InvokeAsync();
-    private Task RequestStartStreaming() => OnStartStreaming.InvokeAsync();
-    private Task RequestStopStreaming() => OnStopStreaming.InvokeAsync();
-    private Task RequestStopRecording() => OnStopRecording.InvokeAsync();
-    private Task RequestStopSession() => OnStopSession.InvokeAsync();
-    private Task RequestToggleRecording() => OnToggleRecording.InvokeAsync();
-    private Task AddLiveCamera() => OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.Camera);
-    private Task AddLiveScreen() => OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.Screen);
-    private Task AddLiveWindow() => OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.Window);
-    private Task AddLiveBrowserTab() => OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.BrowserTab);
-    private Task AddLiveCaptureDevice() => OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.CaptureDevice);
-    private Task AddLiveNetworkMedia() => OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.NetworkMedia);
-    private Task AddLiveMicrophone() => OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.Microphone);
-    private Task AddLiveSystemAudio() => OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.SystemAudio);
-    private Task AddLiveApplicationAudio() => OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.ApplicationAudio);
-    private Task AddNowPlaying() => OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.NowPlaying);
-    private Task RequestBarcode() => OnInsertBarcode.InvokeAsync();
-    private Task RequestToggleTimeline() => OnToggleTimeline.InvokeAsync();
-    private Task RequestStoryEditor() => OnEditStory.InvokeAsync();
-    private Task RequestFitPage() => OnFitPage.InvokeAsync();
-    private Task RequestTogglePagesPane() => OnTogglePagesPane.InvokeAsync();
-    private Task RequestToggleInspectorPane() => OnToggleInspectorPane.InvokeAsync();
-    private Task RequestResetWorkspace() => OnResetWorkspace.InvokeAsync();
-    private Task RequestEditDataVisual() => OnEditDataVisual.InvokeAsync();
-    private Task RequestManageData() => OnManageData.InvokeAsync();
-    private Task RequestEditComponent() => OnEditComponent.InvokeAsync();
-    private Task RequestPanel() => OnInsertPanel.InvokeAsync();
-    private Task RequestHtmlEmbed() => OnInsertHtmlEmbed.InvokeAsync();
-    private Task RequestVideoBlob() => OnInsertVideoBlob.InvokeAsync();
-    private Task RequestPanelLibrary() => OnTogglePanelLibrary.InvokeAsync();
-    private Task RequestMediaConverter() => OnOpenMediaConverter.InvokeAsync();
-    private void ToggleContentPan() => State.ToggleContentPanMode();
-    private void ResetContentViewport() => State.ResetContentViewport();
-    private Task RequestPreviewPageAnimations() => OnPreviewPageAnimations.InvokeAsync();
-    private Task RequestPageEffects() => OnEditPageEffects.InvokeAsync();
-    private Task RequestPreviewObjectAnimations() => OnPreviewObjectAnimations.InvokeAsync();
-    private Task RequestStopAnimations() => OnStopAnimations.InvokeAsync();
+    private Task RequestEditSpreadsheet() {
+        try
+        {
+            return OnEditSpreadsheet.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestEditSpreadsheet)} failed.");
+            throw;
+        }
+    }
+    private Task RequestDownloadSpreadsheet() {
+        try
+        {
+            return OnDownloadSpreadsheet.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestDownloadSpreadsheet)} failed.");
+            throw;
+        }
+    }
+    private Task RequestVideo() {
+        try
+        {
+            return OnInsertVideo.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestVideo)} failed.");
+            throw;
+        }
+    }
+    private Task RequestAudio() {
+        try
+        {
+            return OnInsertAudio.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestAudio)} failed.");
+            throw;
+        }
+    }
+    private Task RequestCreateVideo() {
+        try
+        {
+            return OnCreateVideo.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestCreateVideo)} failed.");
+            throw;
+        }
+    }
+    private Task RequestCreateAudio() {
+        try
+        {
+            return OnCreateAudio.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestCreateAudio)} failed.");
+            throw;
+        }
+    }
+    private Task RequestEditMedia() {
+        try
+        {
+            return OnEditMedia.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestEditMedia)} failed.");
+            throw;
+        }
+    }
+    private Task RequestStreamingSetup() {
+        try
+        {
+            return OnStreamingSetup.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestStreamingSetup)} failed.");
+            throw;
+        }
+    }
+    private Task RequestStartDryRun() {
+        try
+        {
+            return OnStartDryRun.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestStartDryRun)} failed.");
+            throw;
+        }
+    }
+    private Task RequestStartStreaming() {
+        try
+        {
+            return OnStartStreaming.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestStartStreaming)} failed.");
+            throw;
+        }
+    }
+    private Task RequestStopStreaming() {
+        try
+        {
+            return OnStopStreaming.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestStopStreaming)} failed.");
+            throw;
+        }
+    }
+    private Task RequestStopRecording() {
+        try
+        {
+            return OnStopRecording.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestStopRecording)} failed.");
+            throw;
+        }
+    }
+    private Task RequestStopSession() {
+        try
+        {
+            return OnStopSession.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestStopSession)} failed.");
+            throw;
+        }
+    }
+    private Task RequestToggleRecording() {
+        try
+        {
+            return OnToggleRecording.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestToggleRecording)} failed.");
+            throw;
+        }
+    }
+    private Task AddLiveCamera() {
+        try
+        {
+            return OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.Camera);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddLiveCamera)} failed.");
+            throw;
+        }
+    }
+    private Task AddLiveScreen() {
+        try
+        {
+            return OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.Screen);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddLiveScreen)} failed.");
+            throw;
+        }
+    }
+    private Task AddLiveWindow() {
+        try
+        {
+            return OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.Window);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddLiveWindow)} failed.");
+            throw;
+        }
+    }
+    private Task AddLiveBrowserTab() {
+        try
+        {
+            return OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.BrowserTab);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddLiveBrowserTab)} failed.");
+            throw;
+        }
+    }
+    private Task AddLiveCaptureDevice() {
+        try
+        {
+            return OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.CaptureDevice);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddLiveCaptureDevice)} failed.");
+            throw;
+        }
+    }
+    private Task AddLiveNetworkMedia() {
+        try
+        {
+            return OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.NetworkMedia);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddLiveNetworkMedia)} failed.");
+            throw;
+        }
+    }
+    private Task AddLiveMicrophone() {
+        try
+        {
+            return OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.Microphone);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddLiveMicrophone)} failed.");
+            throw;
+        }
+    }
+    private Task AddLiveSystemAudio() {
+        try
+        {
+            return OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.SystemAudio);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddLiveSystemAudio)} failed.");
+            throw;
+        }
+    }
+    private Task AddLiveApplicationAudio() {
+        try
+        {
+            return OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.ApplicationAudio);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddLiveApplicationAudio)} failed.");
+            throw;
+        }
+    }
+    private Task AddNowPlaying() {
+        try
+        {
+            return OnInsertLiveSource.InvokeAsync(PublicationLiveSourceKind.NowPlaying);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddNowPlaying)} failed.");
+            throw;
+        }
+    }
+    private Task RequestBarcode() {
+        try
+        {
+            return OnInsertBarcode.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestBarcode)} failed.");
+            throw;
+        }
+    }
+    private Task RequestToggleTimeline() {
+        try
+        {
+            return OnToggleTimeline.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestToggleTimeline)} failed.");
+            throw;
+        }
+    }
+    private Task RequestStoryEditor() {
+        try
+        {
+            return OnEditStory.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestStoryEditor)} failed.");
+            throw;
+        }
+    }
+    private Task RequestFitPage() {
+        try
+        {
+            return OnFitPage.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestFitPage)} failed.");
+            throw;
+        }
+    }
+    private Task RequestTogglePagesPane() {
+        try
+        {
+            return OnTogglePagesPane.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestTogglePagesPane)} failed.");
+            throw;
+        }
+    }
+    private Task RequestToggleInspectorPane() {
+        try
+        {
+            return OnToggleInspectorPane.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestToggleInspectorPane)} failed.");
+            throw;
+        }
+    }
+    private Task RequestResetWorkspace() {
+        try
+        {
+            return OnResetWorkspace.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestResetWorkspace)} failed.");
+            throw;
+        }
+    }
+    private Task RequestEditDataVisual() {
+        try
+        {
+            return OnEditDataVisual.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestEditDataVisual)} failed.");
+            throw;
+        }
+    }
+    private Task RequestManageData() {
+        try
+        {
+            return OnManageData.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestManageData)} failed.");
+            throw;
+        }
+    }
+    private Task RequestEditComponent() {
+        try
+        {
+            return OnEditComponent.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestEditComponent)} failed.");
+            throw;
+        }
+    }
+    private Task RequestPanel() {
+        try
+        {
+            return OnInsertPanel.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestPanel)} failed.");
+            throw;
+        }
+    }
+    private Task RequestHtmlEmbed() {
+        try
+        {
+            return OnInsertHtmlEmbed.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestHtmlEmbed)} failed.");
+            throw;
+        }
+    }
+    private Task RequestVideoBlob() {
+        try
+        {
+            return OnInsertVideoBlob.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestVideoBlob)} failed.");
+            throw;
+        }
+    }
+    private Task RequestPanelLibrary() {
+        try
+        {
+            return OnTogglePanelLibrary.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestPanelLibrary)} failed.");
+            throw;
+        }
+    }
+    private Task RequestMediaConverter() {
+        try
+        {
+            return OnOpenMediaConverter.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestMediaConverter)} failed.");
+            throw;
+        }
+    }
+    private void ToggleContentPan() {
+        try
+        {
+            State.ToggleContentPanMode();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ToggleContentPan)} failed.");
+            throw;
+        }
+    }
+    private void ResetContentViewport() {
+        try
+        {
+            State.ResetContentViewport();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ResetContentViewport)} failed.");
+            throw;
+        }
+    }
+    private Task RequestPreviewPageAnimations() {
+        try
+        {
+            return OnPreviewPageAnimations.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestPreviewPageAnimations)} failed.");
+            throw;
+        }
+    }
+    private Task RequestPageEffects() {
+        try
+        {
+            return OnEditPageEffects.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestPageEffects)} failed.");
+            throw;
+        }
+    }
+    private Task RequestPreviewObjectAnimations() {
+        try
+        {
+            return OnPreviewObjectAnimations.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestPreviewObjectAnimations)} failed.");
+            throw;
+        }
+    }
+    private Task RequestStopAnimations() {
+        try
+        {
+            return OnStopAnimations.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestStopAnimations)} failed.");
+            throw;
+        }
+    }
 
     private bool HasSelection => State.SelectedElements.Count > 0;
     private bool CanExportSelection => State.SelectedElements.Count == 1 && State.SelectedElement is not null and not ConnectorElement;
@@ -834,268 +1695,2515 @@
 
     private void UpdateSelectedMedia(Action<PublicationMediaElement> update)
     {
-        if (State.SelectedElement is PublicationMediaElement media) State.UpdateMedia(media.Id, update);
+        try
+        {
+            if (State.SelectedElement is PublicationMediaElement media) State.UpdateMedia(media.Id, update);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(UpdateSelectedMedia)} failed.");
+            throw;
+        }
     }
-    private void ToggleMediaMuted() => UpdateSelectedMedia(media => media.Muted = !media.Muted);
-    private void ToggleMediaLoop() => UpdateSelectedMedia(media => media.Loop = !media.Loop);
-    private void ToggleMediaAutoPlay() => UpdateSelectedMedia(media => media.AutoPlay = !media.AutoPlay);
-    private void MediaStartAtPageEntry() => UpdateSelectedMedia(media => media.PlaybackTrigger = PublicationMediaPlaybackTrigger.OnPageEnter);
-    private void MediaStartOnClick() => UpdateSelectedMedia(media => media.PlaybackTrigger = PublicationMediaPlaybackTrigger.OnClick);
-    private void MediaStartWithAnimation() => UpdateSelectedMedia(media => media.PlaybackTrigger = PublicationMediaPlaybackTrigger.WithAnimation);
+    private void ToggleMediaMuted() {
+        try
+        {
+            UpdateSelectedMedia(media => media.Muted = !media.Muted);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ToggleMediaMuted)} failed.");
+            throw;
+        }
+    }
+    private void ToggleMediaLoop() {
+        try
+        {
+            UpdateSelectedMedia(media => media.Loop = !media.Loop);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ToggleMediaLoop)} failed.");
+            throw;
+        }
+    }
+    private void ToggleMediaAutoPlay() {
+        try
+        {
+            UpdateSelectedMedia(media => media.AutoPlay = !media.AutoPlay);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ToggleMediaAutoPlay)} failed.");
+            throw;
+        }
+    }
+    private void MediaStartAtPageEntry() {
+        try
+        {
+            UpdateSelectedMedia(media => media.PlaybackTrigger = PublicationMediaPlaybackTrigger.OnPageEnter);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(MediaStartAtPageEntry)} failed.");
+            throw;
+        }
+    }
+    private void MediaStartOnClick() {
+        try
+        {
+            UpdateSelectedMedia(media => media.PlaybackTrigger = PublicationMediaPlaybackTrigger.OnClick);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(MediaStartOnClick)} failed.");
+            throw;
+        }
+    }
+    private void MediaStartWithAnimation() {
+        try
+        {
+            UpdateSelectedMedia(media => media.PlaybackTrigger = PublicationMediaPlaybackTrigger.WithAnimation);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(MediaStartWithAnimation)} failed.");
+            throw;
+        }
+    }
 
-    private void Undo() => State.Undo();
-    private void Redo() => State.Redo();
-    private void Copy() => State.CopySelected();
-    private void Paste() => State.Paste();
-    private void Duplicate() => State.DuplicateSelected();
-    private void Delete() => State.DeleteSelected();
-    private void GroupSelected() => State.GroupSelected();
-    private void UngroupSelected() => State.UngroupSelected();
-    private void BringToFront() => State.BringToFront();
-    private void BringForward() => State.BringForward();
-    private void SendBackward() => State.SendBackward();
-    private void SendToBack() => State.SendToBack();
-    private void AlignLeft() => State.Align("left");
-    private void AlignCenter() => State.Align("center");
-    private void AlignRight() => State.Align("right");
-    private void AlignTop() => State.Align("top");
-    private void AlignMiddle() => State.Align("middle");
-    private void AlignBottom() => State.Align("bottom");
-    private void AddAnimation(PublicationAnimationEffect effect, PublicationAnimationPhase phase) => State.AddAnimation(effect, phase);
-    private void AnimationFadeIn() => AddAnimation(PublicationAnimationEffect.Fade, PublicationAnimationPhase.Entrance);
-    private void AnimationFlyIn() => AddAnimation(PublicationAnimationEffect.Fly, PublicationAnimationPhase.Entrance);
-    private void AnimationZoomIn() => AddAnimation(PublicationAnimationEffect.Zoom, PublicationAnimationPhase.Entrance);
-    private void AnimationWipeIn() => AddAnimation(PublicationAnimationEffect.Wipe, PublicationAnimationPhase.Entrance);
-    private void AnimationPulse() => AddAnimation(PublicationAnimationEffect.Pulse, PublicationAnimationPhase.Emphasis);
-    private void AnimationSpin() => AddAnimation(PublicationAnimationEffect.Spin, PublicationAnimationPhase.Emphasis);
-    private void AnimationMove() => AddAnimation(PublicationAnimationEffect.Move, PublicationAnimationPhase.Motion);
-    private void AnimationFadeOut() => AddAnimation(PublicationAnimationEffect.Fade, PublicationAnimationPhase.Exit);
-    private void AnimationFlyOut() => AddAnimation(PublicationAnimationEffect.Fly, PublicationAnimationPhase.Exit);
-    private void ClearAnimations() => State.ClearSelectedAnimations();
-    private void SetTransition(PublicationPageTransitionKind kind) => State.UpdatePageTransition(item => item.Kind = kind);
-    private void TransitionNone() => SetTransition(PublicationPageTransitionKind.None);
-    private void TransitionFade() => SetTransition(PublicationPageTransitionKind.Fade);
-    private void TransitionPush() => SetTransition(PublicationPageTransitionKind.Push);
-    private void TransitionWipe() => SetTransition(PublicationPageTransitionKind.Wipe);
-    private void TransitionZoom() => SetTransition(PublicationPageTransitionKind.Zoom);
-    private void TransitionFlip() => SetTransition(PublicationPageTransitionKind.Flip);
+    private void Undo() {
+        try
+        {
+            State.Undo();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(Undo)} failed.");
+            throw;
+        }
+    }
+    private void Redo() {
+        try
+        {
+            State.Redo();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(Redo)} failed.");
+            throw;
+        }
+    }
+    private void Copy() {
+        try
+        {
+            State.CopySelected();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(Copy)} failed.");
+            throw;
+        }
+    }
+    private void Paste() {
+        try
+        {
+            State.Paste();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(Paste)} failed.");
+            throw;
+        }
+    }
+    private void Duplicate() {
+        try
+        {
+            State.DuplicateSelected();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(Duplicate)} failed.");
+            throw;
+        }
+    }
+    private void Delete() {
+        try
+        {
+            State.DeleteSelected();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(Delete)} failed.");
+            throw;
+        }
+    }
+    private void GroupSelected() {
+        try
+        {
+            State.GroupSelected();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(GroupSelected)} failed.");
+            throw;
+        }
+    }
+    private void UngroupSelected() {
+        try
+        {
+            State.UngroupSelected();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(UngroupSelected)} failed.");
+            throw;
+        }
+    }
+    private void BringToFront() {
+        try
+        {
+            State.BringToFront();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(BringToFront)} failed.");
+            throw;
+        }
+    }
+    private void BringForward() {
+        try
+        {
+            State.BringForward();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(BringForward)} failed.");
+            throw;
+        }
+    }
+    private void SendBackward() {
+        try
+        {
+            State.SendBackward();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SendBackward)} failed.");
+            throw;
+        }
+    }
+    private void SendToBack() {
+        try
+        {
+            State.SendToBack();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SendToBack)} failed.");
+            throw;
+        }
+    }
+    private void AlignLeft() {
+        try
+        {
+            State.Align("left");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AlignLeft)} failed.");
+            throw;
+        }
+    }
+    private void AlignCenter() {
+        try
+        {
+            State.Align("center");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AlignCenter)} failed.");
+            throw;
+        }
+    }
+    private void AlignRight() {
+        try
+        {
+            State.Align("right");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AlignRight)} failed.");
+            throw;
+        }
+    }
+    private void AlignTop() {
+        try
+        {
+            State.Align("top");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AlignTop)} failed.");
+            throw;
+        }
+    }
+    private void AlignMiddle() {
+        try
+        {
+            State.Align("middle");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AlignMiddle)} failed.");
+            throw;
+        }
+    }
+    private void AlignBottom() {
+        try
+        {
+            State.Align("bottom");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AlignBottom)} failed.");
+            throw;
+        }
+    }
+    private void AddAnimation(PublicationAnimationEffect effect, PublicationAnimationPhase phase) {
+        try
+        {
+            State.AddAnimation(effect, phase);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddAnimation)} failed.");
+            throw;
+        }
+    }
+    private void AnimationFadeIn() {
+        try
+        {
+            AddAnimation(PublicationAnimationEffect.Fade, PublicationAnimationPhase.Entrance);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AnimationFadeIn)} failed.");
+            throw;
+        }
+    }
+    private void AnimationFlyIn() {
+        try
+        {
+            AddAnimation(PublicationAnimationEffect.Fly, PublicationAnimationPhase.Entrance);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AnimationFlyIn)} failed.");
+            throw;
+        }
+    }
+    private void AnimationZoomIn() {
+        try
+        {
+            AddAnimation(PublicationAnimationEffect.Zoom, PublicationAnimationPhase.Entrance);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AnimationZoomIn)} failed.");
+            throw;
+        }
+    }
+    private void AnimationWipeIn() {
+        try
+        {
+            AddAnimation(PublicationAnimationEffect.Wipe, PublicationAnimationPhase.Entrance);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AnimationWipeIn)} failed.");
+            throw;
+        }
+    }
+    private void AnimationPulse() {
+        try
+        {
+            AddAnimation(PublicationAnimationEffect.Pulse, PublicationAnimationPhase.Emphasis);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AnimationPulse)} failed.");
+            throw;
+        }
+    }
+    private void AnimationSpin() {
+        try
+        {
+            AddAnimation(PublicationAnimationEffect.Spin, PublicationAnimationPhase.Emphasis);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AnimationSpin)} failed.");
+            throw;
+        }
+    }
+    private void AnimationMove() {
+        try
+        {
+            AddAnimation(PublicationAnimationEffect.Move, PublicationAnimationPhase.Motion);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AnimationMove)} failed.");
+            throw;
+        }
+    }
+    private void AnimationFadeOut() {
+        try
+        {
+            AddAnimation(PublicationAnimationEffect.Fade, PublicationAnimationPhase.Exit);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AnimationFadeOut)} failed.");
+            throw;
+        }
+    }
+    private void AnimationFlyOut() {
+        try
+        {
+            AddAnimation(PublicationAnimationEffect.Fly, PublicationAnimationPhase.Exit);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AnimationFlyOut)} failed.");
+            throw;
+        }
+    }
+    private void ClearAnimations() {
+        try
+        {
+            State.ClearSelectedAnimations();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ClearAnimations)} failed.");
+            throw;
+        }
+    }
+    private void SetTransition(PublicationPageTransitionKind kind) {
+        try
+        {
+            State.UpdatePageTransition(item => item.Kind = kind);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetTransition)} failed.");
+            throw;
+        }
+    }
+    private void TransitionNone() {
+        try
+        {
+            SetTransition(PublicationPageTransitionKind.None);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(TransitionNone)} failed.");
+            throw;
+        }
+    }
+    private void TransitionFade() {
+        try
+        {
+            SetTransition(PublicationPageTransitionKind.Fade);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(TransitionFade)} failed.");
+            throw;
+        }
+    }
+    private void TransitionPush() {
+        try
+        {
+            SetTransition(PublicationPageTransitionKind.Push);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(TransitionPush)} failed.");
+            throw;
+        }
+    }
+    private void TransitionWipe() {
+        try
+        {
+            SetTransition(PublicationPageTransitionKind.Wipe);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(TransitionWipe)} failed.");
+            throw;
+        }
+    }
+    private void TransitionZoom() {
+        try
+        {
+            SetTransition(PublicationPageTransitionKind.Zoom);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(TransitionZoom)} failed.");
+            throw;
+        }
+    }
+    private void TransitionFlip() {
+        try
+        {
+            SetTransition(PublicationPageTransitionKind.Flip);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(TransitionFlip)} failed.");
+            throw;
+        }
+    }
 
-    private void AddText() => State.AddText();
-    private void AddWordArt() => State.AddWordArt();
-    private void AddRectangle() => State.AddShape(PublicationShape.Rectangle);
-    private void AddRoundedRectangle() => State.AddShape(PublicationShape.RoundedRectangle);
-    private void AddEllipse() => State.AddShape(PublicationShape.Ellipse);
-    private void AddLine() => State.AddShape(PublicationShape.Line);
-    private Task AddChart() => OnInsertDataVisual.InvokeAsync(DataVisualKind.CartesianChart);
-    private Task AddPieChart() => OnInsertDataVisual.InvokeAsync(DataVisualKind.PieChart);
-    private Task AddPolarChart() => OnInsertDataVisual.InvokeAsync(DataVisualKind.PolarChart);
-    private Task AddSparkline() => OnInsertDataVisual.InvokeAsync(DataVisualKind.Sparkline);
-    private Task AddBarGauge() => OnInsertDataVisual.InvokeAsync(DataVisualKind.BarGauge);
-    private Task AddCircularGauge() => OnInsertDataVisual.InvokeAsync(DataVisualKind.CircularGauge);
-    private Task AddLinearGauge() => OnInsertDataVisual.InvokeAsync(DataVisualKind.LinearGauge);
-    private Task AddRangeSelector() => OnInsertDataVisual.InvokeAsync(DataVisualKind.RangeSelector);
-    private Task AddSankey() => OnInsertDataVisual.InvokeAsync(DataVisualKind.Sankey);
-    private Task AddFunnel() => OnInsertDataVisual.InvokeAsync(DataVisualKind.Funnel);
-    private Task AddPyramid() => OnInsertDataVisual.InvokeAsync(DataVisualKind.Pyramid);
-    private Task AddTreeMap() => OnInsertDataVisual.InvokeAsync(DataVisualKind.TreeMap);
-    private Task AddDataTable() => OnInsertDataVisual.InvokeAsync(DataVisualKind.DataTable);
-    private Task AddKpi() => OnInsertDataVisual.InvokeAsync(DataVisualKind.KpiProgress);
-    private Task AddComponent(PublicationComponentKind kind) => OnInsertComponent.InvokeAsync(kind);
-    private Task AddComponentDataGrid() => AddComponent(PublicationComponentKind.DataGrid);
-    private Task AddComponentTreeList() => AddComponent(PublicationComponentKind.TreeList);
-    private Task AddComponentScheduler() => AddComponent(PublicationComponentKind.Scheduler);
-    private Task AddComponentPivotGrid() => AddComponent(PublicationComponentKind.PivotGrid);
-    private Task AddComponentMap() => AddComponent(PublicationComponentKind.Map);
-    private Task AddComponentVectorMap() => AddComponent(PublicationComponentKind.VectorMap);
-    private Task AddComponentForm() => AddComponent(PublicationComponentKind.Form);
-    private Task AddComponentTextBox() => AddComponent(PublicationComponentKind.TextBox);
-    private Task AddComponentTextArea() => AddComponent(PublicationComponentKind.TextArea);
-    private Task AddComponentNumberBox() => AddComponent(PublicationComponentKind.NumberBox);
-    private Task AddComponentDateBox() => AddComponent(PublicationComponentKind.DateBox);
-    private Task AddComponentCheckBox() => AddComponent(PublicationComponentKind.CheckBox);
-    private Task AddComponentSelectBox() => AddComponent(PublicationComponentKind.SelectBox);
-    private Task AddComponentTagBox() => AddComponent(PublicationComponentKind.TagBox);
-    private Task AddComponentGallery() => AddComponent(PublicationComponentKind.Gallery);
-    private Task AddComponentTileView() => AddComponent(PublicationComponentKind.TileView);
-    private Task AddComponentChat() => AddComponent(PublicationComponentKind.Chat);
-    private Task AddComponentMenu() => AddComponent(PublicationComponentKind.Menu);
-    private Task AddComponentContextMenu() => AddComponent(PublicationComponentKind.ContextMenu);
-    private Task AddComponentTabPanel() => AddComponent(PublicationComponentKind.TabPanel);
-    private Task AddComponentMultiView() => AddComponent(PublicationComponentKind.MultiView);
-    private Task AddComponentSplitter() => AddComponent(PublicationComponentKind.Splitter);
-    private Task AddComponentScrollView() => AddComponent(PublicationComponentKind.ScrollView);
-    private Task AddComponentButton() => AddComponent(PublicationComponentKind.Button);
-    private void RefreshData() => State.RefreshDataVisuals();
-    private void MakeCartesian() => SetDataVisualKind(DataVisualKind.CartesianChart);
-    private void MakePie() => SetDataVisualKind(DataVisualKind.PieChart);
-    private void MakePolar() => SetDataVisualKind(DataVisualKind.PolarChart);
-    private void MakeSparkline() => SetDataVisualKind(DataVisualKind.Sparkline);
-    private void MakeGauge() => SetDataVisualKind(DataVisualKind.BarGauge);
-    private void MakeCircularGauge() => SetDataVisualKind(DataVisualKind.CircularGauge);
-    private void MakeLinearGauge() => SetDataVisualKind(DataVisualKind.LinearGauge);
-    private void MakeRangeSelector() => SetDataVisualKind(DataVisualKind.RangeSelector);
-    private void MakeSankey() => SetDataVisualKind(DataVisualKind.Sankey);
-    private void MakeFunnel() => SetDataVisualKind(DataVisualKind.Funnel);
-    private void MakePyramid() => SetDataVisualKind(DataVisualKind.Pyramid);
-    private void MakeTreeMap() => SetDataVisualKind(DataVisualKind.TreeMap);
-    private void MakeTable() => SetDataVisualKind(DataVisualKind.DataTable);
-    private void MakeKpi() => SetDataVisualKind(DataVisualKind.KpiProgress);
-    private void SetDataVisualKind(DataVisualKind kind) => State.UpdateSelected(element => { if (element is DataVisualElement visual) visual.VisualKind = kind; });
-    private void StartConnector() => State.SetConnectorTool(ConnectorToolKind.Line);
-    private void StartArrowConnector() => State.SetConnectorTool(ConnectorToolKind.Arrow);
-    private void StartSignalConnector() => State.SetConnectorTool(ConnectorToolKind.SignalConnector);
-    private void StartSignalArrow() => State.SetConnectorTool(ConnectorToolKind.SignalArrow);
-    private void AddPage() => State.AddPage();
-    private void DuplicatePage() => State.DuplicatePage();
-    private void DeletePage() => State.DeletePage();
+    private void AddText() {
+        try
+        {
+            State.AddText();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddText)} failed.");
+            throw;
+        }
+    }
+    private void AddWordArt() {
+        try
+        {
+            State.AddWordArt();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddWordArt)} failed.");
+            throw;
+        }
+    }
+    private void AddRectangle() {
+        try
+        {
+            State.AddShape(PublicationShape.Rectangle);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddRectangle)} failed.");
+            throw;
+        }
+    }
+    private void AddRoundedRectangle() {
+        try
+        {
+            State.AddShape(PublicationShape.RoundedRectangle);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddRoundedRectangle)} failed.");
+            throw;
+        }
+    }
+    private void AddEllipse() {
+        try
+        {
+            State.AddShape(PublicationShape.Ellipse);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddEllipse)} failed.");
+            throw;
+        }
+    }
+    private void AddLine() {
+        try
+        {
+            State.AddShape(PublicationShape.Line);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddLine)} failed.");
+            throw;
+        }
+    }
+    private Task AddChart() {
+        try
+        {
+            return OnInsertDataVisual.InvokeAsync(DataVisualKind.CartesianChart);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddChart)} failed.");
+            throw;
+        }
+    }
+    private Task AddPieChart() {
+        try
+        {
+            return OnInsertDataVisual.InvokeAsync(DataVisualKind.PieChart);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddPieChart)} failed.");
+            throw;
+        }
+    }
+    private Task AddPolarChart() {
+        try
+        {
+            return OnInsertDataVisual.InvokeAsync(DataVisualKind.PolarChart);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddPolarChart)} failed.");
+            throw;
+        }
+    }
+    private Task AddSparkline() {
+        try
+        {
+            return OnInsertDataVisual.InvokeAsync(DataVisualKind.Sparkline);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddSparkline)} failed.");
+            throw;
+        }
+    }
+    private Task AddBarGauge() {
+        try
+        {
+            return OnInsertDataVisual.InvokeAsync(DataVisualKind.BarGauge);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddBarGauge)} failed.");
+            throw;
+        }
+    }
+    private Task AddCircularGauge() {
+        try
+        {
+            return OnInsertDataVisual.InvokeAsync(DataVisualKind.CircularGauge);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddCircularGauge)} failed.");
+            throw;
+        }
+    }
+    private Task AddLinearGauge() {
+        try
+        {
+            return OnInsertDataVisual.InvokeAsync(DataVisualKind.LinearGauge);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddLinearGauge)} failed.");
+            throw;
+        }
+    }
+    private Task AddRangeSelector() {
+        try
+        {
+            return OnInsertDataVisual.InvokeAsync(DataVisualKind.RangeSelector);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddRangeSelector)} failed.");
+            throw;
+        }
+    }
+    private Task AddSankey() {
+        try
+        {
+            return OnInsertDataVisual.InvokeAsync(DataVisualKind.Sankey);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddSankey)} failed.");
+            throw;
+        }
+    }
+    private Task AddFunnel() {
+        try
+        {
+            return OnInsertDataVisual.InvokeAsync(DataVisualKind.Funnel);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddFunnel)} failed.");
+            throw;
+        }
+    }
+    private Task AddPyramid() {
+        try
+        {
+            return OnInsertDataVisual.InvokeAsync(DataVisualKind.Pyramid);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddPyramid)} failed.");
+            throw;
+        }
+    }
+    private Task AddTreeMap() {
+        try
+        {
+            return OnInsertDataVisual.InvokeAsync(DataVisualKind.TreeMap);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddTreeMap)} failed.");
+            throw;
+        }
+    }
+    private Task AddDataTable() {
+        try
+        {
+            return OnInsertDataVisual.InvokeAsync(DataVisualKind.DataTable);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddDataTable)} failed.");
+            throw;
+        }
+    }
+    private Task AddKpi() {
+        try
+        {
+            return OnInsertDataVisual.InvokeAsync(DataVisualKind.KpiProgress);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddKpi)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponent(PublicationComponentKind kind) {
+        try
+        {
+            return OnInsertComponent.InvokeAsync(kind);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponent)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponentDataGrid() {
+        try
+        {
+            return AddComponent(PublicationComponentKind.DataGrid);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponentDataGrid)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponentTreeList() {
+        try
+        {
+            return AddComponent(PublicationComponentKind.TreeList);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponentTreeList)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponentScheduler() {
+        try
+        {
+            return AddComponent(PublicationComponentKind.Scheduler);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponentScheduler)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponentPivotGrid() {
+        try
+        {
+            return AddComponent(PublicationComponentKind.PivotGrid);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponentPivotGrid)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponentMap() {
+        try
+        {
+            return AddComponent(PublicationComponentKind.Map);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponentMap)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponentVectorMap() {
+        try
+        {
+            return AddComponent(PublicationComponentKind.VectorMap);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponentVectorMap)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponentForm() {
+        try
+        {
+            return AddComponent(PublicationComponentKind.Form);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponentForm)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponentTextBox() {
+        try
+        {
+            return AddComponent(PublicationComponentKind.TextBox);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponentTextBox)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponentTextArea() {
+        try
+        {
+            return AddComponent(PublicationComponentKind.TextArea);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponentTextArea)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponentNumberBox() {
+        try
+        {
+            return AddComponent(PublicationComponentKind.NumberBox);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponentNumberBox)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponentDateBox() {
+        try
+        {
+            return AddComponent(PublicationComponentKind.DateBox);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponentDateBox)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponentCheckBox() {
+        try
+        {
+            return AddComponent(PublicationComponentKind.CheckBox);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponentCheckBox)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponentSelectBox() {
+        try
+        {
+            return AddComponent(PublicationComponentKind.SelectBox);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponentSelectBox)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponentTagBox() {
+        try
+        {
+            return AddComponent(PublicationComponentKind.TagBox);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponentTagBox)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponentGallery() {
+        try
+        {
+            return AddComponent(PublicationComponentKind.Gallery);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponentGallery)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponentTileView() {
+        try
+        {
+            return AddComponent(PublicationComponentKind.TileView);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponentTileView)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponentChat() {
+        try
+        {
+            return AddComponent(PublicationComponentKind.Chat);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponentChat)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponentMenu() {
+        try
+        {
+            return AddComponent(PublicationComponentKind.Menu);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponentMenu)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponentContextMenu() {
+        try
+        {
+            return AddComponent(PublicationComponentKind.ContextMenu);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponentContextMenu)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponentTabPanel() {
+        try
+        {
+            return AddComponent(PublicationComponentKind.TabPanel);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponentTabPanel)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponentMultiView() {
+        try
+        {
+            return AddComponent(PublicationComponentKind.MultiView);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponentMultiView)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponentSplitter() {
+        try
+        {
+            return AddComponent(PublicationComponentKind.Splitter);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponentSplitter)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponentScrollView() {
+        try
+        {
+            return AddComponent(PublicationComponentKind.ScrollView);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponentScrollView)} failed.");
+            throw;
+        }
+    }
+    private Task AddComponentButton() {
+        try
+        {
+            return AddComponent(PublicationComponentKind.Button);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddComponentButton)} failed.");
+            throw;
+        }
+    }
+    private void RefreshData() {
+        try
+        {
+            State.RefreshDataVisuals();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RefreshData)} failed.");
+            throw;
+        }
+    }
+    private void MakeCartesian() {
+        try
+        {
+            SetDataVisualKind(DataVisualKind.CartesianChart);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(MakeCartesian)} failed.");
+            throw;
+        }
+    }
+    private void MakePie() {
+        try
+        {
+            SetDataVisualKind(DataVisualKind.PieChart);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(MakePie)} failed.");
+            throw;
+        }
+    }
+    private void MakePolar() {
+        try
+        {
+            SetDataVisualKind(DataVisualKind.PolarChart);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(MakePolar)} failed.");
+            throw;
+        }
+    }
+    private void MakeSparkline() {
+        try
+        {
+            SetDataVisualKind(DataVisualKind.Sparkline);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(MakeSparkline)} failed.");
+            throw;
+        }
+    }
+    private void MakeGauge() {
+        try
+        {
+            SetDataVisualKind(DataVisualKind.BarGauge);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(MakeGauge)} failed.");
+            throw;
+        }
+    }
+    private void MakeCircularGauge() {
+        try
+        {
+            SetDataVisualKind(DataVisualKind.CircularGauge);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(MakeCircularGauge)} failed.");
+            throw;
+        }
+    }
+    private void MakeLinearGauge() {
+        try
+        {
+            SetDataVisualKind(DataVisualKind.LinearGauge);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(MakeLinearGauge)} failed.");
+            throw;
+        }
+    }
+    private void MakeRangeSelector() {
+        try
+        {
+            SetDataVisualKind(DataVisualKind.RangeSelector);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(MakeRangeSelector)} failed.");
+            throw;
+        }
+    }
+    private void MakeSankey() {
+        try
+        {
+            SetDataVisualKind(DataVisualKind.Sankey);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(MakeSankey)} failed.");
+            throw;
+        }
+    }
+    private void MakeFunnel() {
+        try
+        {
+            SetDataVisualKind(DataVisualKind.Funnel);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(MakeFunnel)} failed.");
+            throw;
+        }
+    }
+    private void MakePyramid() {
+        try
+        {
+            SetDataVisualKind(DataVisualKind.Pyramid);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(MakePyramid)} failed.");
+            throw;
+        }
+    }
+    private void MakeTreeMap() {
+        try
+        {
+            SetDataVisualKind(DataVisualKind.TreeMap);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(MakeTreeMap)} failed.");
+            throw;
+        }
+    }
+    private void MakeTable() {
+        try
+        {
+            SetDataVisualKind(DataVisualKind.DataTable);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(MakeTable)} failed.");
+            throw;
+        }
+    }
+    private void MakeKpi() {
+        try
+        {
+            SetDataVisualKind(DataVisualKind.KpiProgress);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(MakeKpi)} failed.");
+            throw;
+        }
+    }
+    private void SetDataVisualKind(DataVisualKind kind) {
+        try
+        {
+            State.UpdateSelected(element => { if (element is DataVisualElement visual) visual.VisualKind = kind; });
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetDataVisualKind)} failed.");
+            throw;
+        }
+    }
+    private void StartConnector() {
+        try
+        {
+            State.SetConnectorTool(ConnectorToolKind.Line);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(StartConnector)} failed.");
+            throw;
+        }
+    }
+    private void StartArrowConnector() {
+        try
+        {
+            State.SetConnectorTool(ConnectorToolKind.Arrow);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(StartArrowConnector)} failed.");
+            throw;
+        }
+    }
+    private void StartSignalConnector() {
+        try
+        {
+            State.SetConnectorTool(ConnectorToolKind.SignalConnector);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(StartSignalConnector)} failed.");
+            throw;
+        }
+    }
+    private void StartSignalArrow() {
+        try
+        {
+            State.SetConnectorTool(ConnectorToolKind.SignalArrow);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(StartSignalArrow)} failed.");
+            throw;
+        }
+    }
+    private void AddPage() {
+        try
+        {
+            State.AddPage();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddPage)} failed.");
+            throw;
+        }
+    }
+    private void DuplicatePage() {
+        try
+        {
+            State.DuplicatePage();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(DuplicatePage)} failed.");
+            throw;
+        }
+    }
+    private void DeletePage() {
+        try
+        {
+            State.DeletePage();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(DeletePage)} failed.");
+            throw;
+        }
+    }
 
-    private void SetA3Portrait() => SetPage(297, 420);
-    private void SetA3Landscape() => SetPage(420, 297);
-    private void SetA4Portrait() => SetPage(210, 297);
-    private void SetA4Landscape() => SetPage(297, 210);
-    private void SetA5Portrait() => SetPage(148, 210);
-    private void SetA5Landscape() => SetPage(210, 148);
-    private void SetLetterPortrait() => SetPage(215.9, 279.4);
-    private void SetLetterLandscape() => SetPage(279.4, 215.9);
-    private void SetLegalPortrait() => SetPage(215.9, 355.6);
-    private void SetTabloidLandscape() => SetPage(431.8, 279.4);
-    private void SetBusinessCard() => SetPage(85, 55);
-    private void SetSquare() => SetPage(210, 210);
-    private void SwapOrientation() => State.SwapPageOrientation();
+    private void SetA3Portrait() {
+        try
+        {
+            SetPage(297, 420);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetA3Portrait)} failed.");
+            throw;
+        }
+    }
+    private void SetA3Landscape() {
+        try
+        {
+            SetPage(420, 297);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetA3Landscape)} failed.");
+            throw;
+        }
+    }
+    private void SetA4Portrait() {
+        try
+        {
+            SetPage(210, 297);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetA4Portrait)} failed.");
+            throw;
+        }
+    }
+    private void SetA4Landscape() {
+        try
+        {
+            SetPage(297, 210);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetA4Landscape)} failed.");
+            throw;
+        }
+    }
+    private void SetA5Portrait() {
+        try
+        {
+            SetPage(148, 210);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetA5Portrait)} failed.");
+            throw;
+        }
+    }
+    private void SetA5Landscape() {
+        try
+        {
+            SetPage(210, 148);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetA5Landscape)} failed.");
+            throw;
+        }
+    }
+    private void SetLetterPortrait() {
+        try
+        {
+            SetPage(215.9, 279.4);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetLetterPortrait)} failed.");
+            throw;
+        }
+    }
+    private void SetLetterLandscape() {
+        try
+        {
+            SetPage(279.4, 215.9);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetLetterLandscape)} failed.");
+            throw;
+        }
+    }
+    private void SetLegalPortrait() {
+        try
+        {
+            SetPage(215.9, 355.6);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetLegalPortrait)} failed.");
+            throw;
+        }
+    }
+    private void SetTabloidLandscape() {
+        try
+        {
+            SetPage(431.8, 279.4);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetTabloidLandscape)} failed.");
+            throw;
+        }
+    }
+    private void SetBusinessCard() {
+        try
+        {
+            SetPage(85, 55);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetBusinessCard)} failed.");
+            throw;
+        }
+    }
+    private void SetSquare() {
+        try
+        {
+            SetPage(210, 210);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetSquare)} failed.");
+            throw;
+        }
+    }
+    private void SwapOrientation() {
+        try
+        {
+            State.SwapPageOrientation();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SwapOrientation)} failed.");
+            throw;
+        }
+    }
 
-    private void ToggleCrop() => State.ToggleCropMode();
-    private void AddVerticalGuide() => State.AddGuide(GuideOrientation.Vertical);
-    private void AddHorizontalGuide() => State.AddGuide(GuideOrientation.Horizontal);
-    private void ClearGuides() => State.ClearGuides();
-    private void ToggleRulers() => State.SetViewOption(view => view.RulersVisible = !view.RulersVisible);
-    private void ToggleGrid() => State.SetViewOption(view => view.GridVisible = !view.GridVisible);
-    private void ToggleGuides() => State.SetViewOption(view => view.GuidesVisible = !view.GuidesVisible);
-    private void ToggleSnapGrid() => State.SetViewOption(view => view.SnapToGrid = !view.SnapToGrid);
-    private void ToggleSnapGuides() => State.SetViewOption(view => view.SnapToGuides = !view.SnapToGuides);
-    private void ToggleSnapPage() => State.SetViewOption(view => view.SnapToPage = !view.SnapToPage);
-    private void ToggleSnapObjects() => State.SetViewOption(view => view.SnapToObjects = !view.SnapToObjects);
-    private void ToggleSnapInObjects() => State.SetViewOption(view => view.SnapInObjects = !view.SnapInObjects);
-    private void UnitMillimeter() => State.SetRulerUnit(MeasurementUnit.Millimeter);
-    private void UnitCentimeter() => State.SetRulerUnit(MeasurementUnit.Centimeter);
-    private void UnitInch() => State.SetRulerUnit(MeasurementUnit.Inch);
-    private void UnitPixel() => State.SetRulerUnit(MeasurementUnit.Pixel);
-    private void Zoom50() => State.SetZoom(.5);
-    private void Zoom75() => State.SetZoom(.75);
-    private void Zoom100() => State.SetZoom(1);
-    private void Zoom125() => State.SetZoom(1.25);
-    private void Zoom150() => State.SetZoom(1.5);
-    private void UseCssZoomMode() => State.SetCanvasZoomMode(PublicationCanvasZoomMode.CssLayout);
-    private void UseTransformZoomMode() => State.SetCanvasZoomMode(PublicationCanvasZoomMode.Transform);
+    private void ToggleCrop() {
+        try
+        {
+            State.ToggleCropMode();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ToggleCrop)} failed.");
+            throw;
+        }
+    }
+    private void AddVerticalGuide() {
+        try
+        {
+            State.AddGuide(GuideOrientation.Vertical);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddVerticalGuide)} failed.");
+            throw;
+        }
+    }
+    private void AddHorizontalGuide() {
+        try
+        {
+            State.AddGuide(GuideOrientation.Horizontal);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(AddHorizontalGuide)} failed.");
+            throw;
+        }
+    }
+    private void ClearGuides() {
+        try
+        {
+            State.ClearGuides();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ClearGuides)} failed.");
+            throw;
+        }
+    }
+    private void ToggleRulers() {
+        try
+        {
+            State.SetViewOption(view => view.RulersVisible = !view.RulersVisible);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ToggleRulers)} failed.");
+            throw;
+        }
+    }
+    private void ToggleGrid() {
+        try
+        {
+            State.SetViewOption(view => view.GridVisible = !view.GridVisible);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ToggleGrid)} failed.");
+            throw;
+        }
+    }
+    private void ToggleGuides() {
+        try
+        {
+            State.SetViewOption(view => view.GuidesVisible = !view.GuidesVisible);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ToggleGuides)} failed.");
+            throw;
+        }
+    }
+    private void ToggleSnapGrid() {
+        try
+        {
+            State.SetViewOption(view => view.SnapToGrid = !view.SnapToGrid);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ToggleSnapGrid)} failed.");
+            throw;
+        }
+    }
+    private void ToggleSnapGuides() {
+        try
+        {
+            State.SetViewOption(view => view.SnapToGuides = !view.SnapToGuides);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ToggleSnapGuides)} failed.");
+            throw;
+        }
+    }
+    private void ToggleSnapPage() {
+        try
+        {
+            State.SetViewOption(view => view.SnapToPage = !view.SnapToPage);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ToggleSnapPage)} failed.");
+            throw;
+        }
+    }
+    private void ToggleSnapObjects() {
+        try
+        {
+            State.SetViewOption(view => view.SnapToObjects = !view.SnapToObjects);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ToggleSnapObjects)} failed.");
+            throw;
+        }
+    }
+    private void ToggleSnapInObjects() {
+        try
+        {
+            State.SetViewOption(view => view.SnapInObjects = !view.SnapInObjects);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ToggleSnapInObjects)} failed.");
+            throw;
+        }
+    }
+    private void UnitMillimeter() {
+        try
+        {
+            State.SetRulerUnit(MeasurementUnit.Millimeter);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(UnitMillimeter)} failed.");
+            throw;
+        }
+    }
+    private void UnitCentimeter() {
+        try
+        {
+            State.SetRulerUnit(MeasurementUnit.Centimeter);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(UnitCentimeter)} failed.");
+            throw;
+        }
+    }
+    private void UnitInch() {
+        try
+        {
+            State.SetRulerUnit(MeasurementUnit.Inch);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(UnitInch)} failed.");
+            throw;
+        }
+    }
+    private void UnitPixel() {
+        try
+        {
+            State.SetRulerUnit(MeasurementUnit.Pixel);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(UnitPixel)} failed.");
+            throw;
+        }
+    }
+    private void Zoom50() {
+        try
+        {
+            State.SetZoom(.5);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(Zoom50)} failed.");
+            throw;
+        }
+    }
+    private void Zoom75() {
+        try
+        {
+            State.SetZoom(.75);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(Zoom75)} failed.");
+            throw;
+        }
+    }
+    private void Zoom100() {
+        try
+        {
+            State.SetZoom(1);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(Zoom100)} failed.");
+            throw;
+        }
+    }
+    private void Zoom125() {
+        try
+        {
+            State.SetZoom(1.25);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(Zoom125)} failed.");
+            throw;
+        }
+    }
+    private void Zoom150() {
+        try
+        {
+            State.SetZoom(1.5);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(Zoom150)} failed.");
+            throw;
+        }
+    }
+    private void UseCssZoomMode() {
+        try
+        {
+            State.SetCanvasZoomMode(PublicationCanvasZoomMode.CssLayout);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(UseCssZoomMode)} failed.");
+            throw;
+        }
+    }
+    private void UseTransformZoomMode() {
+        try
+        {
+            State.SetCanvasZoomMode(PublicationCanvasZoomMode.Transform);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(UseTransformZoomMode)} failed.");
+            throw;
+        }
+    }
 
-    private void PictureFit() => SetImage(image => image.FitInsideFrame = true);
-    private void PictureFill() => SetImage(image => image.FitInsideFrame = false);
-    private void BrightenPicture() => SetImage(image => image.Brightness = Math.Min(2, image.Brightness + .15));
-    private void DarkenPicture() => SetImage(image => image.Brightness = Math.Max(0, image.Brightness - .15));
-    private void ContrastPicture() => SetImage(image => image.Contrast = Math.Min(2, image.Contrast + .15));
-    private void ReduceContrastPicture() => SetImage(image => image.Contrast = Math.Max(0, image.Contrast - .15));
-    private void SaturatePicture() => SetImage(image => image.Saturation = Math.Min(2, image.Saturation + .15));
-    private void DesaturatePicture() => SetImage(image => image.Saturation = Math.Max(0, image.Saturation - .15));
-    private void ToggleGrayscale() => SetImage(image => image.Grayscale = image.Grayscale > 0 ? 0 : 1);
-    private void ToggleSepia() => SetImage(image => image.Sepia = image.Sepia > 0 ? 0 : .85);
-    private void ToggleInvert() => SetImage(image => image.Invert = image.Invert > 0 ? 0 : 1);
-    private void TintBlue() => Tint("#2f75b5", ImageTintMode.Overlay);
-    private void TintWarm() => Tint("#d97706", ImageTintMode.Overlay);
-    private void TintGreen() => Tint("#16a34a", ImageTintMode.Overlay);
-    private void FullRecolor() => SetImage(image => { image.TintMode = ImageTintMode.Recolor; image.TintOpacity = 1; });
-    private void ClearTint() => SetImage(image => image.TintOpacity = 0);
-    private void Tint(string color, ImageTintMode mode) => SetImage(image => { image.TintColor = color; image.TintMode = mode; image.TintOpacity = .55; });
-    private void MaskRectangle() => SetImage(image => image.MaskShape = ImageMaskShape.Rectangle);
-    private void MaskRounded() => SetImage(image => image.MaskShape = ImageMaskShape.RoundedRectangle);
-    private void MaskEllipse() => SetImage(image => image.MaskShape = ImageMaskShape.Ellipse);
-    private void ToggleShadow() => SetImage(image => image.ShadowEnabled = !image.ShadowEnabled);
-    private void RatioSquare() => SetImageRatio(1);
-    private void RatioFourThree() => SetImageRatio(4d / 3d);
-    private void RatioSixteenNine() => SetImageRatio(16d / 9d);
-    private void RotateLeft() => Rotate(-90);
-    private void RotateRight() => Rotate(90);
-    private void RotatePictureLeft() => SetImage(image => image.ImageRotation = NormalizeAngle(image.ImageRotation - 90));
-    private void RotatePictureRight() => SetImage(image => image.ImageRotation = NormalizeAngle(image.ImageRotation + 90));
-    private void FlipHorizontal() => SetImage(image => image.FlipHorizontal = !image.FlipHorizontal);
-    private void FlipVertical() => SetImage(image => image.FlipVertical = !image.FlipVertical);
-    private void TextNoFill() => SetText(text => text.Background = "transparent");
-    private void TextWhiteFill() => SetText(text => text.Background = "#ffffff");
+    private void PictureFit() {
+        try
+        {
+            SetImage(image => image.FitInsideFrame = true);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(PictureFit)} failed.");
+            throw;
+        }
+    }
+    private void PictureFill() {
+        try
+        {
+            SetImage(image => image.FitInsideFrame = false);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(PictureFill)} failed.");
+            throw;
+        }
+    }
+    private void BrightenPicture() {
+        try
+        {
+            SetImage(image => image.Brightness = Math.Min(2, image.Brightness + .15));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(BrightenPicture)} failed.");
+            throw;
+        }
+    }
+    private void DarkenPicture() {
+        try
+        {
+            SetImage(image => image.Brightness = Math.Max(0, image.Brightness - .15));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(DarkenPicture)} failed.");
+            throw;
+        }
+    }
+    private void ContrastPicture() {
+        try
+        {
+            SetImage(image => image.Contrast = Math.Min(2, image.Contrast + .15));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ContrastPicture)} failed.");
+            throw;
+        }
+    }
+    private void ReduceContrastPicture() {
+        try
+        {
+            SetImage(image => image.Contrast = Math.Max(0, image.Contrast - .15));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ReduceContrastPicture)} failed.");
+            throw;
+        }
+    }
+    private void SaturatePicture() {
+        try
+        {
+            SetImage(image => image.Saturation = Math.Min(2, image.Saturation + .15));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SaturatePicture)} failed.");
+            throw;
+        }
+    }
+    private void DesaturatePicture() {
+        try
+        {
+            SetImage(image => image.Saturation = Math.Max(0, image.Saturation - .15));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(DesaturatePicture)} failed.");
+            throw;
+        }
+    }
+    private void ToggleGrayscale() {
+        try
+        {
+            SetImage(image => image.Grayscale = image.Grayscale > 0 ? 0 : 1);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ToggleGrayscale)} failed.");
+            throw;
+        }
+    }
+    private void ToggleSepia() {
+        try
+        {
+            SetImage(image => image.Sepia = image.Sepia > 0 ? 0 : .85);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ToggleSepia)} failed.");
+            throw;
+        }
+    }
+    private void ToggleInvert() {
+        try
+        {
+            SetImage(image => image.Invert = image.Invert > 0 ? 0 : 1);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ToggleInvert)} failed.");
+            throw;
+        }
+    }
+    private void TintBlue() {
+        try
+        {
+            Tint("#2f75b5", ImageTintMode.Overlay);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(TintBlue)} failed.");
+            throw;
+        }
+    }
+    private void TintWarm() {
+        try
+        {
+            Tint("#d97706", ImageTintMode.Overlay);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(TintWarm)} failed.");
+            throw;
+        }
+    }
+    private void TintGreen() {
+        try
+        {
+            Tint("#16a34a", ImageTintMode.Overlay);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(TintGreen)} failed.");
+            throw;
+        }
+    }
+    private void FullRecolor() {
+        try
+        {
+            SetImage(image => { image.TintMode = ImageTintMode.Recolor; image.TintOpacity = 1; });
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(FullRecolor)} failed.");
+            throw;
+        }
+    }
+    private void ClearTint() {
+        try
+        {
+            SetImage(image => image.TintOpacity = 0);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ClearTint)} failed.");
+            throw;
+        }
+    }
+    private void Tint(string color, ImageTintMode mode) {
+        try
+        {
+            SetImage(image => { image.TintColor = color; image.TintMode = mode; image.TintOpacity = .55; });
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(Tint)} failed.");
+            throw;
+        }
+    }
+    private void MaskRectangle() {
+        try
+        {
+            SetImage(image => image.MaskShape = ImageMaskShape.Rectangle);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(MaskRectangle)} failed.");
+            throw;
+        }
+    }
+    private void MaskRounded() {
+        try
+        {
+            SetImage(image => image.MaskShape = ImageMaskShape.RoundedRectangle);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(MaskRounded)} failed.");
+            throw;
+        }
+    }
+    private void MaskEllipse() {
+        try
+        {
+            SetImage(image => image.MaskShape = ImageMaskShape.Ellipse);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(MaskEllipse)} failed.");
+            throw;
+        }
+    }
+    private void ToggleShadow() {
+        try
+        {
+            SetImage(image => image.ShadowEnabled = !image.ShadowEnabled);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ToggleShadow)} failed.");
+            throw;
+        }
+    }
+    private void RatioSquare() {
+        try
+        {
+            SetImageRatio(1);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RatioSquare)} failed.");
+            throw;
+        }
+    }
+    private void RatioFourThree() {
+        try
+        {
+            SetImageRatio(4d / 3d);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RatioFourThree)} failed.");
+            throw;
+        }
+    }
+    private void RatioSixteenNine() {
+        try
+        {
+            SetImageRatio(16d / 9d);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RatioSixteenNine)} failed.");
+            throw;
+        }
+    }
+    private void RotateLeft() {
+        try
+        {
+            Rotate(-90);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RotateLeft)} failed.");
+            throw;
+        }
+    }
+    private void RotateRight() {
+        try
+        {
+            Rotate(90);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RotateRight)} failed.");
+            throw;
+        }
+    }
+    private void RotatePictureLeft() {
+        try
+        {
+            SetImage(image => image.ImageRotation = NormalizeAngle(image.ImageRotation - 90));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RotatePictureLeft)} failed.");
+            throw;
+        }
+    }
+    private void RotatePictureRight() {
+        try
+        {
+            SetImage(image => image.ImageRotation = NormalizeAngle(image.ImageRotation + 90));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RotatePictureRight)} failed.");
+            throw;
+        }
+    }
+    private void FlipHorizontal() {
+        try
+        {
+            SetImage(image => image.FlipHorizontal = !image.FlipHorizontal);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(FlipHorizontal)} failed.");
+            throw;
+        }
+    }
+    private void FlipVertical() {
+        try
+        {
+            SetImage(image => image.FlipVertical = !image.FlipVertical);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(FlipVertical)} failed.");
+            throw;
+        }
+    }
+    private void TextNoFill() {
+        try
+        {
+            SetText(text => text.Background = "transparent");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(TextNoFill)} failed.");
+            throw;
+        }
+    }
+    private void TextWhiteFill() {
+        try
+        {
+            SetText(text => text.Background = "#ffffff");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(TextWhiteFill)} failed.");
+            throw;
+        }
+    }
 
-    private void WordArtBlue() => SetWordArt(item => { item.FillColor = "#175b9c"; item.SecondaryColor = "#8ec5ff"; item.GradientFill = true; });
-    private void WordArtGold() => SetWordArt(item => { item.FillColor = "#b45309"; item.SecondaryColor = "#fde68a"; item.GradientFill = true; item.ExtrudeColor = "#78350f"; });
-    private void WordArtGreen() => SetWordArt(item => { item.FillColor = "#15803d"; item.SecondaryColor = "#86efac"; item.GradientFill = true; });
-    private void WordArtFlat() => SetWordArt(item => item.GradientFill = false);
-    private void WordArtStraight() => SetWordArt(item => item.Warp = WordArtWarp.None);
-    private void WordArtArchUp() => SetWordArt(item => item.Warp = WordArtWarp.ArchUp);
-    private void WordArtArchDown() => SetWordArt(item => item.Warp = WordArtWarp.ArchDown);
-    private void WordArtWave() => SetWordArt(item => item.Warp = WordArtWarp.Wave);
-    private void WordArtCustomPath() => SetWordArt(item =>
+    private void WordArtBlue() {
+        try
+        {
+            SetWordArt(item => { item.FillColor = "#175b9c"; item.SecondaryColor = "#8ec5ff"; item.GradientFill = true; });
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(WordArtBlue)} failed.");
+            throw;
+        }
+    }
+    private void WordArtGold() {
+        try
+        {
+            SetWordArt(item => { item.FillColor = "#b45309"; item.SecondaryColor = "#fde68a"; item.GradientFill = true; item.ExtrudeColor = "#78350f"; });
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(WordArtGold)} failed.");
+            throw;
+        }
+    }
+    private void WordArtGreen() {
+        try
+        {
+            SetWordArt(item => { item.FillColor = "#15803d"; item.SecondaryColor = "#86efac"; item.GradientFill = true; });
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(WordArtGreen)} failed.");
+            throw;
+        }
+    }
+    private void WordArtFlat() {
+        try
+        {
+            SetWordArt(item => item.GradientFill = false);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(WordArtFlat)} failed.");
+            throw;
+        }
+    }
+    private void WordArtStraight() {
+        try
+        {
+            SetWordArt(item => item.Warp = WordArtWarp.None);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(WordArtStraight)} failed.");
+            throw;
+        }
+    }
+    private void WordArtArchUp() {
+        try
+        {
+            SetWordArt(item => item.Warp = WordArtWarp.ArchUp);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(WordArtArchUp)} failed.");
+            throw;
+        }
+    }
+    private void WordArtArchDown() {
+        try
+        {
+            SetWordArt(item => item.Warp = WordArtWarp.ArchDown);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(WordArtArchDown)} failed.");
+            throw;
+        }
+    }
+    private void WordArtWave() {
+        try
+        {
+            SetWordArt(item => item.Warp = WordArtWarp.Wave);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(WordArtWave)} failed.");
+            throw;
+        }
+    }
+    private void WordArtCustomPath() {
+        try
+        {
+            SetWordArt(item =>
     {
         item.Warp = WordArtWarp.Custom;
         item.CustomPathPoints = WordArtGeometry.Normalize(item.CustomPathPoints);
     });
-    private void WordArtReversePath() => SetWordArt(item =>
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(WordArtCustomPath)} failed.");
+            throw;
+        }
+    }
+    private void WordArtReversePath() {
+        try
+        {
+            SetWordArt(item =>
     {
         item.Warp = WordArtWarp.Custom;
         item.CustomPathPoints = WordArtGeometry.Reverse(item.CustomPathPoints);
     });
-    private void WordArtMoreDepth() => SetWordArt(item => item.ExtrudeDepth = Math.Min(18, item.ExtrudeDepth + 2));
-    private void WordArtLessDepth() => SetWordArt(item => item.ExtrudeDepth = Math.Max(0, item.ExtrudeDepth - 2));
-    private void WordArtShadow() => SetWordArt(item => item.ShadowEnabled = !item.ShadowEnabled);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(WordArtReversePath)} failed.");
+            throw;
+        }
+    }
+    private void WordArtMoreDepth() {
+        try
+        {
+            SetWordArt(item => item.ExtrudeDepth = Math.Min(18, item.ExtrudeDepth + 2));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(WordArtMoreDepth)} failed.");
+            throw;
+        }
+    }
+    private void WordArtLessDepth() {
+        try
+        {
+            SetWordArt(item => item.ExtrudeDepth = Math.Max(0, item.ExtrudeDepth - 2));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(WordArtLessDepth)} failed.");
+            throw;
+        }
+    }
+    private void WordArtShadow() {
+        try
+        {
+            SetWordArt(item => item.ShadowEnabled = !item.ShadowEnabled);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(WordArtShadow)} failed.");
+            throw;
+        }
+    }
 
-    private void SetConnector(Action<ConnectorElement> update) { if (State.SelectedElement is ConnectorElement connector) State.UpdateSelected(_ => update(connector)); }
-    private void ConnectorStraight() => SetConnector(connector => connector.PathKind = ConnectorPathKind.Straight);
-    private void ConnectorElbow() => SetConnector(connector => connector.PathKind = ConnectorPathKind.Elbow);
-    private void ConnectorCurved() => SetConnector(connector => connector.PathKind = ConnectorPathKind.Curved);
-    private void ConnectorSolid() => SetConnector(connector => connector.DashStyle = ConnectorDashStyle.Solid);
-    private void ConnectorDashed() => SetConnector(connector => connector.DashStyle = ConnectorDashStyle.Dash);
-    private void ConnectorDotted() => SetConnector(connector => connector.DashStyle = ConnectorDashStyle.Dot);
-    private void ConnectorThicker() => SetConnector(connector => connector.StrokeWidthMm = Math.Min(6, connector.StrokeWidthMm + .2));
-    private void ConnectorThinner() => SetConnector(connector => connector.StrokeWidthMm = Math.Max(.15, connector.StrokeWidthMm - .2));
-    private void ConnectorNoArrows() => SetConnector(connector => { connector.StartMarker = ConnectorMarker.None; connector.EndMarker = ConnectorMarker.None; });
-    private void ConnectorArrowEnd() => SetConnector(connector => { connector.StartMarker = ConnectorMarker.None; connector.EndMarker = ConnectorMarker.Arrow; });
-    private void ConnectorArrowsBoth() => SetConnector(connector => { connector.StartMarker = ConnectorMarker.Arrow; connector.EndMarker = ConnectorMarker.Arrow; });
-    private void ConnectorDiamondStart() => SetConnector(connector => connector.StartMarker = ConnectorMarker.Diamond);
-    private void OnConnectorStrokeChanged(string value) => SetConnector(connector => connector.Stroke = value);
+    private void SetConnector(Action<ConnectorElement> update) {
+        try
+        {
+     if (State.SelectedElement is ConnectorElement connector) State.UpdateSelected(_ => update(connector)); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetConnector)} failed.");
+            throw;
+        }
+    }
+    private void ConnectorStraight() {
+        try
+        {
+            SetConnector(connector => connector.PathKind = ConnectorPathKind.Straight);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ConnectorStraight)} failed.");
+            throw;
+        }
+    }
+    private void ConnectorElbow() {
+        try
+        {
+            SetConnector(connector => connector.PathKind = ConnectorPathKind.Elbow);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ConnectorElbow)} failed.");
+            throw;
+        }
+    }
+    private void ConnectorCurved() {
+        try
+        {
+            SetConnector(connector => connector.PathKind = ConnectorPathKind.Curved);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ConnectorCurved)} failed.");
+            throw;
+        }
+    }
+    private void ConnectorSolid() {
+        try
+        {
+            SetConnector(connector => connector.DashStyle = ConnectorDashStyle.Solid);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ConnectorSolid)} failed.");
+            throw;
+        }
+    }
+    private void ConnectorDashed() {
+        try
+        {
+            SetConnector(connector => connector.DashStyle = ConnectorDashStyle.Dash);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ConnectorDashed)} failed.");
+            throw;
+        }
+    }
+    private void ConnectorDotted() {
+        try
+        {
+            SetConnector(connector => connector.DashStyle = ConnectorDashStyle.Dot);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ConnectorDotted)} failed.");
+            throw;
+        }
+    }
+    private void ConnectorThicker() {
+        try
+        {
+            SetConnector(connector => connector.StrokeWidthMm = Math.Min(6, connector.StrokeWidthMm + .2));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ConnectorThicker)} failed.");
+            throw;
+        }
+    }
+    private void ConnectorThinner() {
+        try
+        {
+            SetConnector(connector => connector.StrokeWidthMm = Math.Max(.15, connector.StrokeWidthMm - .2));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ConnectorThinner)} failed.");
+            throw;
+        }
+    }
+    private void ConnectorNoArrows() {
+        try
+        {
+            SetConnector(connector => { connector.StartMarker = ConnectorMarker.None; connector.EndMarker = ConnectorMarker.None; });
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ConnectorNoArrows)} failed.");
+            throw;
+        }
+    }
+    private void ConnectorArrowEnd() {
+        try
+        {
+            SetConnector(connector => { connector.StartMarker = ConnectorMarker.None; connector.EndMarker = ConnectorMarker.Arrow; });
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ConnectorArrowEnd)} failed.");
+            throw;
+        }
+    }
+    private void ConnectorArrowsBoth() {
+        try
+        {
+            SetConnector(connector => { connector.StartMarker = ConnectorMarker.Arrow; connector.EndMarker = ConnectorMarker.Arrow; });
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ConnectorArrowsBoth)} failed.");
+            throw;
+        }
+    }
+    private void ConnectorDiamondStart() {
+        try
+        {
+            SetConnector(connector => connector.StartMarker = ConnectorMarker.Diamond);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ConnectorDiamondStart)} failed.");
+            throw;
+        }
+    }
+    private void OnConnectorStrokeChanged(string value) {
+        try
+        {
+            SetConnector(connector => connector.Stroke = value);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(OnConnectorStrokeChanged)} failed.");
+            throw;
+        }
+    }
 
-    private void SetPage(double width, double height) => State.SetPageSize(width, height);
-    private void Rotate(double amount) => State.UpdateSelected(element => element.Rotation = NormalizeAngle(element.Rotation + amount));
-    private double NormalizeAngle(double value) => (value % 360 + 360) % 360;
-    private void SetImage(Action<ImageFrameElement> update) { if (State.SelectedElement is ImageFrameElement image) State.UpdateSelected(_ => update(image)); }
-    private void SetImageRatio(double ratio) => SetImage(image => image.Height = Math.Max(2, image.Width / ratio));
-    private void SetText(Action<TextFrameElement> update) { if (State.SelectedElement is TextFrameElement text) State.UpdateSelected(_ => update(text)); }
-    private void SetWordArt(Action<WordArtElement> update) { if (State.SelectedElement is WordArtElement item) State.UpdateSelected(_ => update(item)); }
-    private void OnPageColorChanged(string value) => State.UpdatePage(publicationPage => publicationPage.Background = value);
-    private void SetTransparentPage() => State.UpdatePage(publicationPage => publicationPage.Background = "transparent");
-    private void SetWhitePage() => State.UpdatePage(publicationPage => publicationPage.Background = "#ffffff");
+    private void SetPage(double width, double height) {
+        try
+        {
+            State.SetPageSize(width, height);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetPage)} failed.");
+            throw;
+        }
+    }
+    private void Rotate(double amount) {
+        try
+        {
+            State.UpdateSelected(element => element.Rotation = NormalizeAngle(element.Rotation + amount));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(Rotate)} failed.");
+            throw;
+        }
+    }
+    private double NormalizeAngle(double value) {
+        try
+        {
+            return (value % 360 + 360) % 360;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(NormalizeAngle)} failed.");
+            throw;
+        }
+    }
+    private void SetImage(Action<ImageFrameElement> update) {
+        try
+        {
+     if (State.SelectedElement is ImageFrameElement image) State.UpdateSelected(_ => update(image)); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetImage)} failed.");
+            throw;
+        }
+    }
+    private void SetImageRatio(double ratio) {
+        try
+        {
+            SetImage(image => image.Height = Math.Max(2, image.Width / ratio));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetImageRatio)} failed.");
+            throw;
+        }
+    }
+    private void SetText(Action<TextFrameElement> update) {
+        try
+        {
+     if (State.SelectedElement is TextFrameElement text) State.UpdateSelected(_ => update(text)); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetText)} failed.");
+            throw;
+        }
+    }
+    private void SetWordArt(Action<WordArtElement> update) {
+        try
+        {
+     if (State.SelectedElement is WordArtElement item) State.UpdateSelected(_ => update(item)); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetWordArt)} failed.");
+            throw;
+        }
+    }
+    private void OnPageColorChanged(string value) {
+        try
+        {
+            State.UpdatePage(publicationPage => publicationPage.Background = value);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(OnPageColorChanged)} failed.");
+            throw;
+        }
+    }
+    private void SetTransparentPage() {
+        try
+        {
+            State.UpdatePage(publicationPage => publicationPage.Background = "transparent");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetTransparentPage)} failed.");
+            throw;
+        }
+    }
+    private void SetWhitePage() {
+        try
+        {
+            State.UpdatePage(publicationPage => publicationPage.Background = "#ffffff");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetWhitePage)} failed.");
+            throw;
+        }
+    }
     private void SetSelectedShape(PublicationShape shapeKind)
     {
-        if (State.SelectedElement is not ShapeElement shape) return;
-        State.UpdateSelected(_ =>
+        try
         {
-            shape.Shape = shapeKind;
-            if (shapeKind == PublicationShape.RoundedRectangle && shape.CornerRadiusMm < 1) shape.CornerRadiusMm = 3;
-            if (shapeKind == PublicationShape.Line && shape.Height > 3) shape.Height = 2;
-        });
+            if (State.SelectedElement is not ShapeElement shape) return;
+            State.UpdateSelected(_ =>
+            {
+                shape.Shape = shapeKind;
+                if (shapeKind == PublicationShape.RoundedRectangle && shape.CornerRadiusMm < 1) shape.CornerRadiusMm = 3;
+                if (shapeKind == PublicationShape.Line && shape.Height > 3) shape.Height = 2;
+            });
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SetSelectedShape)} failed.");
+            throw;
+        }
     }
-    private void SelectedShapeRectangle() => SetSelectedShape(PublicationShape.Rectangle);
-    private void SelectedShapeRoundedRectangle() => SetSelectedShape(PublicationShape.RoundedRectangle);
-    private void SelectedShapeEllipse() => SetSelectedShape(PublicationShape.Ellipse);
-    private void SelectedShapeLine() => SetSelectedShape(PublicationShape.Line);
-    private void OnShapeFillChanged(string value) { if (State.SelectedElement is ShapeElement shape) State.UpdateSelected(_ => shape.Fill = value); }
-    private void OnShapeStrokeChanged(string value) { if (State.SelectedElement is ShapeElement shape) State.UpdateSelected(_ => shape.Stroke = value); }
+    private void SelectedShapeRectangle() {
+        try
+        {
+            SetSelectedShape(PublicationShape.Rectangle);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SelectedShapeRectangle)} failed.");
+            throw;
+        }
+    }
+    private void SelectedShapeRoundedRectangle() {
+        try
+        {
+            SetSelectedShape(PublicationShape.RoundedRectangle);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SelectedShapeRoundedRectangle)} failed.");
+            throw;
+        }
+    }
+    private void SelectedShapeEllipse() {
+        try
+        {
+            SetSelectedShape(PublicationShape.Ellipse);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SelectedShapeEllipse)} failed.");
+            throw;
+        }
+    }
+    private void SelectedShapeLine() {
+        try
+        {
+            SetSelectedShape(PublicationShape.Line);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(SelectedShapeLine)} failed.");
+            throw;
+        }
+    }
+    private void OnShapeFillChanged(string value) {
+        try
+        {
+     if (State.SelectedElement is ShapeElement shape) State.UpdateSelected(_ => shape.Fill = value); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(OnShapeFillChanged)} failed.");
+            throw;
+        }
+    }
+    private void OnShapeStrokeChanged(string value) {
+        try
+        {
+     if (State.SelectedElement is ShapeElement shape) State.UpdateSelected(_ => shape.Stroke = value); 
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(OnShapeStrokeChanged)} failed.");
+            throw;
+        }
+    }
 
     private void ResetPicture()
     {
-        SetImage(image =>
+        try
         {
-            image.CropX = 0; image.CropY = 0; image.CropScale = 1; image.ImageRotation = 0;
-            image.Opacity = 1; image.Brightness = 1; image.Contrast = 1; image.Saturation = 1;
-            image.HueRotation = 0; image.Invert = 0; image.Grayscale = 0; image.Sepia = 0; image.Blur = 0;
-            image.FlipHorizontal = false; image.FlipVertical = false; image.MaskShape = ImageMaskShape.Rectangle;
-            image.CornerRadiusMm = 4; image.BorderColor = "transparent"; image.BorderWidthMm = 0;
-            image.ShadowEnabled = false; image.FitInsideFrame = false; image.TintOpacity = 0;
-        });
+            SetImage(image =>
+            {
+                image.CropX = 0; image.CropY = 0; image.CropScale = 1; image.ImageRotation = 0;
+                image.Opacity = 1; image.Brightness = 1; image.Contrast = 1; image.Saturation = 1;
+                image.HueRotation = 0; image.Invert = 0; image.Grayscale = 0; image.Sepia = 0; image.Blur = 0;
+                image.FlipHorizontal = false; image.FlipVertical = false; image.MaskShape = ImageMaskShape.Rectangle;
+                image.CornerRadiusMm = 4; image.BorderColor = "transparent"; image.BorderWidthMm = 0;
+                image.ShadowEnabled = false; image.FitInsideFrame = false; image.TintOpacity = 0;
+            });
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(ResetPicture)} failed.");
+            throw;
+        }
     }
 
-    public void Dispose() => LocalGptConnection.Changed -= OnLocalGptChanged;
+    public void Dispose() {
+        try
+        {
+            LocalGptConnection.Changed -= OnLocalGptChanged;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(Dispose)} failed.");
+            throw;
+        }
+    }
 }

@@ -1,5 +1,6 @@
 @inject SystemFontCatalog SystemFonts
 
+@inject ILogger<SystemFontPicker> Logger
 <div class="system-font-picker @CssClass">
     <input type="text"
            class="system-font-picker-input"
@@ -36,5 +37,15 @@
     [Parameter] public string? CssClass { get; set; }
     [Parameter] public EventCallback<ChangeEventArgs> Changed { get; set; }
 
-    private Task HandleChanged(ChangeEventArgs args) => Changed.InvokeAsync(args);
+    private Task HandleChanged(ChangeEventArgs args) {
+        try
+        {
+            return Changed.InvokeAsync(args);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SystemFontPicker)}.{nameof(HandleChanged)} failed.");
+            throw;
+        }
+    }
 }

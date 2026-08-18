@@ -1,7 +1,7 @@
-# PublisherStudio 2.7.9
+# PublisherStudio 2.8.5
 
-Source-only browser-recording quality release.
+Strict LocalGPT-style architecture maintenance and compile-repair source release.
 
-See `CHANGELOG-v2.7.9-RECORDING-QUALITY.md` and `VALIDATION-v2.7.9-source.md` for the changes, supplied-media diagnosis, preserved behavior, and source-validation scope.
+See `CHANGELOG-v2.8.5-source.md` and `VALIDATION-v2.8.5-source.md` for the exact method-safety, ConfigureAwait, supervised-task, compile-repair, preserved-media, and source-validation scope.
 
-LocalGPT is unchanged. The LocalGPT 1-Wire protocol remains at its existing version; this release does not change the protocol contract.
+The LocalGPT 1-Wire protocol remains `2.1.1`. No .NET build was run while preparing this source package.

@@ -3,6 +3,7 @@
 @inject PublisherStudio.Services.Configuration.IFileLocalizationService Localization
 @inject NavigationManager Navigation
 
+@inject ILogger<MainLayout> Logger
 <main class="application-root">
     <UserNotificationHost />
     <OperationalErrorBoundary @key="Navigation.Uri">

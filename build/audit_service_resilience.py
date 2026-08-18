@@ -9,13 +9,7 @@ BOOT_EXCLUSIONS = {
         ('LoggingConfigurationService', 'Configure'),
         ('ChatClientFactory', 'Build'),
     },
-    'publisherstudio': {
-        ('SystemVariableStoreService', 'AttachLogger'),
-        ('SystemVariableStoreService', 'GetAvailableCultures'),
-        ('FileLocalizationService', 'GetAvailableCultures'),
-        ('ApplicationPortResolver', 'Resolve'),
-        ('ApplicationPathService', 'EnsureDirectories'),
-    },
+    'publisherstudio': set(),
 }
 
 def load_parser(path: Path):
@@ -118,10 +112,10 @@ def main() -> int:
         print('Service resilience audit failed:')
         for failure in failures:
             print(f'  - {failure}')
-        print(f'Checked {checked} service methods and {checked_yield} iterator/yield methods; skipped {skipped_boot} Program/Startup boot methods.')
+        print(f'Checked {checked} service methods and {checked_yield} iterator/yield methods; exemptions/skips: {skipped_boot}.')
         return 1
 
-    print(f'Service resilience audit passed: {checked} service methods own try/catch + diagnostics; {checked_yield} iterator/yield methods own try/finally + diagnostics; skipped {skipped_boot} direct Program/Startup methods.')
+    print(f'Service resilience audit passed: {checked} service methods own try/catch + diagnostics; {checked_yield} iterator/yield methods own try/finally + diagnostics; exemptions/skips: {skipped_boot}.')
     return 0
 
 if __name__ == '__main__':

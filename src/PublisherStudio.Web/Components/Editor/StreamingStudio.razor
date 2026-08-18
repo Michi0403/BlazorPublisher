@@ -6,6 +6,7 @@
 @inject PublisherStudio.Services.Streaming.MediaQualityRecommendationService MediaQuality
 @using System.Text.Json
 
+@inject ILogger<StreamingStudio> Logger
 @if (Visible)
 {
     <div class="editor-modal-backdrop streaming-studio-backdrop">
@@ -807,728 +808,1388 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        if (Visible && !_wasVisible)
+        try
         {
-            _draft = Clone(Document.Streaming);
-            _machine = await ProfileStore.LoadAsync().ConfigureAwait(true);
-            _providerDraft = _machine.Providers.FirstOrDefault() is { } first ? Clone(first) : null;
-            _selectedOutputId = _draft.Outputs.FirstOrDefault()?.Id;
-            _twitchIngestCandidates = [];
-            _twitchAuthorization = null;
-            _status = "Machine profiles are reusable across publications.";
+            if (Visible && !_wasVisible)
+            {
+                _draft = Clone(Document.Streaming);
+                _machine = await ProfileStore.LoadAsync().ConfigureAwait(true);
+                _providerDraft = _machine.Providers.FirstOrDefault() is { } first ? Clone(first) : null;
+                _selectedOutputId = _draft.Outputs.FirstOrDefault()?.Id;
+                _twitchIngestCandidates = [];
+                _twitchAuthorization = null;
+                _status = "Machine profiles are reusable across publications.";
+            }
+            else if (!Visible && _wasVisible)
+            {
+                _twitchOAuthCancellation?.Cancel();
+                await CloseTwitchAuthorizationWindowAsync().ConfigureAwait(true);
+            }
+            _wasVisible = Visible;
+    
         }
-        else if (!Visible && _wasVisible)
+        catch (Exception __componentMethodException)
         {
-            _twitchOAuthCancellation?.Cancel();
-            await CloseTwitchAuthorizationWindowAsync().ConfigureAwait(true);
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(OnParametersSetAsync)} failed.");
+            throw;
         }
-        _wasVisible = Visible;
     }
 
-    private void ShowProviders() => _tab = "providers";
-    private void ShowOutputs() => _tab = "outputs";
-    private void ShowRecording() => _tab = "recording";
-    private void ShowLan() => _tab = "lan";
-    private void ShowDevices() => _tab = "devices";
-    private void ShowAdvanced() => _tab = "advanced";
-    private void ToggleWorkflowHelp() => _showWorkflowHelp = !_showWorkflowHelp;
+    private void ShowProviders() {
+        try
+        {
+            _tab = "providers";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ShowProviders)} failed.");
+            throw;
+        }
+    }
+    private void ShowOutputs() {
+        try
+        {
+            _tab = "outputs";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ShowOutputs)} failed.");
+            throw;
+        }
+    }
+    private void ShowRecording() {
+        try
+        {
+            _tab = "recording";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ShowRecording)} failed.");
+            throw;
+        }
+    }
+    private void ShowLan() {
+        try
+        {
+            _tab = "lan";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ShowLan)} failed.");
+            throw;
+        }
+    }
+    private void ShowDevices() {
+        try
+        {
+            _tab = "devices";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ShowDevices)} failed.");
+            throw;
+        }
+    }
+    private void ShowAdvanced() {
+        try
+        {
+            _tab = "advanced";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ShowAdvanced)} failed.");
+            throw;
+        }
+    }
+    private void ToggleWorkflowHelp() {
+        try
+        {
+            _showWorkflowHelp = !_showWorkflowHelp;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ToggleWorkflowHelp)} failed.");
+            throw;
+        }
+    }
 
     private void ChangeProvider(ChangeEventArgs args)
     {
-        if (_providerDraft is null
-            || !Enum.TryParse<PublicationStreamProvider>(args.Value?.ToString(), out var provider)) return;
-        _providerDraft.Provider = provider;
-        _twitchOAuthCancellation?.Cancel();
-        _twitchIngestCandidates = [];
-        _twitchAuthorization = null;
-        if (provider == PublicationStreamProvider.Twitch)
+        try
         {
-            _providerDraft.Transport = PublicationStreamTransport.Rtmp;
-            if (string.IsNullOrWhiteSpace(_providerDraft.Endpoint)) _providerDraft.Endpoint = DefaultTwitchEndpoint;
-            if (string.IsNullOrWhiteSpace(_providerDraft.OAuthClientId)) _providerDraft.OAuthClientId = TwitchOAuth.DefaultClientId;
+            if (_providerDraft is null
+                || !Enum.TryParse<PublicationStreamProvider>(args.Value?.ToString(), out var provider)) return;
+            _providerDraft.Provider = provider;
+            _twitchOAuthCancellation?.Cancel();
+            _twitchIngestCandidates = [];
+            _twitchAuthorization = null;
+            if (provider == PublicationStreamProvider.Twitch)
+            {
+                _providerDraft.Transport = PublicationStreamTransport.Rtmp;
+                if (string.IsNullOrWhiteSpace(_providerDraft.Endpoint)) _providerDraft.Endpoint = DefaultTwitchEndpoint;
+                if (string.IsNullOrWhiteSpace(_providerDraft.OAuthClientId)) _providerDraft.OAuthClientId = TwitchOAuth.DefaultClientId;
+            }
+            else
+            {
+                _providerDraft.AuthenticationMode = StreamingProviderAuthenticationMode.Manual;
+            }
+            _status = $"Provider changed to {provider}.";
+    
         }
-        else
+        catch (Exception __componentMethodException)
         {
-            _providerDraft.AuthenticationMode = StreamingProviderAuthenticationMode.Manual;
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ChangeProvider)} failed.");
+            throw;
         }
-        _status = $"Provider changed to {provider}.";
     }
 
     private void ChangeAuthenticationMode(ChangeEventArgs args)
     {
-        if (_providerDraft is null
-            || !Enum.TryParse<StreamingProviderAuthenticationMode>(args.Value?.ToString(), out var mode)) return;
-        _providerDraft.AuthenticationMode = mode;
-        if (mode == StreamingProviderAuthenticationMode.OAuth)
+        try
         {
-            _providerDraft.Transport = PublicationStreamTransport.Rtmp;
-            if (string.IsNullOrWhiteSpace(_providerDraft.Endpoint)) _providerDraft.Endpoint = DefaultTwitchEndpoint;
-            if (string.IsNullOrWhiteSpace(_providerDraft.OAuthClientId)) _providerDraft.OAuthClientId = TwitchOAuth.DefaultClientId;
-            _status = "Twitch OAuth selected. Connect Twitch to retrieve the account, stream key, and refresh session.";
+            if (_providerDraft is null
+                || !Enum.TryParse<StreamingProviderAuthenticationMode>(args.Value?.ToString(), out var mode)) return;
+            _providerDraft.AuthenticationMode = mode;
+            if (mode == StreamingProviderAuthenticationMode.OAuth)
+            {
+                _providerDraft.Transport = PublicationStreamTransport.Rtmp;
+                if (string.IsNullOrWhiteSpace(_providerDraft.Endpoint)) _providerDraft.Endpoint = DefaultTwitchEndpoint;
+                if (string.IsNullOrWhiteSpace(_providerDraft.OAuthClientId)) _providerDraft.OAuthClientId = TwitchOAuth.DefaultClientId;
+                _status = "Twitch OAuth selected. Connect Twitch to retrieve the account, stream key, and refresh session.";
+            }
+            else
+            {
+                _twitchOAuthCancellation?.Cancel();
+                _status = "Manual Twitch configuration selected.";
+            }
+    
         }
-        else
+        catch (Exception __componentMethodException)
         {
-            _twitchOAuthCancellation?.Cancel();
-            _status = "Manual Twitch configuration selected.";
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ChangeAuthenticationMode)} failed.");
+            throw;
         }
     }
 
     private async Task ConnectTwitchOAuth()
     {
-        if (_providerDraft is null || _providerDraft.Provider != PublicationStreamProvider.Twitch || _twitchOAuthBusy) return;
-        _twitchOAuthCancellation?.Cancel();
-        _twitchOAuthCancellation?.Dispose();
-        var cancellation = new CancellationTokenSource();
-        _twitchOAuthCancellation = cancellation;
-        _twitchOAuthBusy = true;
-        _twitchAuthorization = null;
         try
         {
-            var popupReserved = await JS.InvokeAsync<bool>("publisherStreaming.reserveExternalAuthorizationWindow", "publisherstudio-twitch-oauth").ConfigureAwait(true);
-            if (!popupReserved)
-                throw new InvalidOperationException("The Twitch sign-in window was blocked. Allow pop-ups for PublisherStudio and try again.");
-            _providerDraft.AuthenticationMode = StreamingProviderAuthenticationMode.OAuth;
-            _providerDraft.Transport = PublicationStreamTransport.Rtmp;
-            _providerDraft.OAuthClientId = TwitchOAuth.ResolveClientId(_providerDraft.OAuthClientId);
-            if (string.IsNullOrWhiteSpace(_providerDraft.Endpoint)) _providerDraft.Endpoint = DefaultTwitchEndpoint;
-            var saved = await ProfileStore.SaveProviderAsync(_providerDraft, cancellation.Token).ConfigureAwait(true);
-            _providerDraft = Clone(saved);
-            var authorization = await TwitchOAuth.StartDeviceAuthorizationAsync(
-                _providerDraft.OAuthClientId,
-                _providerDraft.ChatEnabled,
-                cancellation.Token).ConfigureAwait(true);
-            _twitchAuthorization = authorization;
-            _status = $"Twitch sign-in is waiting in the browser. Activation code: {authorization.UserCode}.";
-            var navigated = await JS.InvokeAsync<bool>(
-                "publisherStreaming.navigateExternalAuthorizationWindow",
-                "publisherstudio-twitch-oauth",
-                authorization.VerificationUri).ConfigureAwait(true);
-            if (!navigated)
-                throw new InvalidOperationException("PublisherStudio could not open the Twitch authorization page. Allow pop-ups and try again.");
-            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
-
-            var result = await TwitchOAuth.CompleteDeviceAuthorizationAsync(
-                _providerDraft.Id,
-                authorization,
-                _providerDraft.AutoSelectIngest,
-                _providerDraft.Endpoint,
-                cancellation.Token).ConfigureAwait(true);
-            _machine = await ProfileStore.LoadAsync(cancellation.Token).ConfigureAwait(true);
-            _providerDraft = result.Profile is not null
-                ? Clone(result.Profile)
-                : _machine.Providers.FirstOrDefault(profile => profile.Id == saved.Id) is { } stored
-                    ? Clone(stored)
-                    : null;
-            _twitchIngestCandidates = result.IngestCandidates;
+            if (_providerDraft is null || _providerDraft.Provider != PublicationStreamProvider.Twitch || _twitchOAuthBusy) return;
+            _twitchOAuthCancellation?.Cancel();
+            _twitchOAuthCancellation?.Dispose();
+            var cancellation = new CancellationTokenSource();
+            _twitchOAuthCancellation = cancellation;
+            _twitchOAuthBusy = true;
             _twitchAuthorization = null;
-            _status = result.Message;
-            await CloseTwitchAuthorizationWindowAsync().ConfigureAwait(true);
-        }
-        catch (OperationCanceledException)
-        {
-            _status = "Twitch sign-in was cancelled.";
-            await CloseTwitchAuthorizationWindowAsync().ConfigureAwait(true);
-        }
-        catch (Exception exception)
-        {
-            _status = $"Twitch connection failed: {exception.Message}";
             try
             {
-                await JS.InvokeAsync<bool>(
-                    "publisherStreaming.showExternalAuthorizationMessage",
+                var popupReserved = await JS.InvokeAsync<bool>("publisherStreaming.reserveExternalAuthorizationWindow", "publisherstudio-twitch-oauth").ConfigureAwait(true);
+                if (!popupReserved)
+                    throw new InvalidOperationException("The Twitch sign-in window was blocked. Allow pop-ups for PublisherStudio and try again.");
+                _providerDraft.AuthenticationMode = StreamingProviderAuthenticationMode.OAuth;
+                _providerDraft.Transport = PublicationStreamTransport.Rtmp;
+                _providerDraft.OAuthClientId = TwitchOAuth.ResolveClientId(_providerDraft.OAuthClientId);
+                if (string.IsNullOrWhiteSpace(_providerDraft.Endpoint)) _providerDraft.Endpoint = DefaultTwitchEndpoint;
+                var saved = await ProfileStore.SaveProviderAsync(_providerDraft, cancellation.Token).ConfigureAwait(true);
+                _providerDraft = Clone(saved);
+                var authorization = await TwitchOAuth.StartDeviceAuthorizationAsync(
+                    _providerDraft.OAuthClientId,
+                    _providerDraft.ChatEnabled,
+                    cancellation.Token).ConfigureAwait(true);
+                _twitchAuthorization = authorization;
+                _status = $"Twitch sign-in is waiting in the browser. Activation code: {authorization.UserCode}.";
+                var navigated = await JS.InvokeAsync<bool>(
+                    "publisherStreaming.navigateExternalAuthorizationWindow",
                     "publisherstudio-twitch-oauth",
-                    "Twitch connection failed",
-                    exception.Message).ConfigureAwait(true);
+                    authorization.VerificationUri).ConfigureAwait(true);
+                if (!navigated)
+                    throw new InvalidOperationException("PublisherStudio could not open the Twitch authorization page. Allow pop-ups and try again.");
+                await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+
+                var result = await TwitchOAuth.CompleteDeviceAuthorizationAsync(
+                    _providerDraft.Id,
+                    authorization,
+                    _providerDraft.AutoSelectIngest,
+                    _providerDraft.Endpoint,
+                    cancellation.Token).ConfigureAwait(true);
+                _machine = await ProfileStore.LoadAsync(cancellation.Token).ConfigureAwait(true);
+                _providerDraft = result.Profile is not null
+                    ? Clone(result.Profile)
+                    : _machine.Providers.FirstOrDefault(profile => profile.Id == saved.Id) is { } stored
+                        ? Clone(stored)
+                        : null;
+                _twitchIngestCandidates = result.IngestCandidates;
+                _twitchAuthorization = null;
+                _status = result.Message;
+                await CloseTwitchAuthorizationWindowAsync().ConfigureAwait(true);
             }
-            catch { }
+            catch (OperationCanceledException)
+            {
+                _status = "Twitch sign-in was cancelled.";
+                await CloseTwitchAuthorizationWindowAsync().ConfigureAwait(true);
+            }
+            catch (Exception exception)
+            {
+                _status = $"Twitch connection failed: {exception.Message}";
+                try
+                {
+                    await JS.InvokeAsync<bool>(
+                        "publisherStreaming.showExternalAuthorizationMessage",
+                        "publisherstudio-twitch-oauth",
+                        "Twitch connection failed",
+                        exception.Message).ConfigureAwait(true);
+                }
+                catch { }
+            }
+            finally
+            {
+                _twitchAuthorization = null;
+                _twitchOAuthBusy = false;
+                if (ReferenceEquals(_twitchOAuthCancellation, cancellation)) _twitchOAuthCancellation = null;
+                cancellation.Dispose();
+                await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            }
+    
         }
-        finally
+        catch (Exception __componentMethodException)
         {
-            _twitchAuthorization = null;
-            _twitchOAuthBusy = false;
-            if (ReferenceEquals(_twitchOAuthCancellation, cancellation)) _twitchOAuthCancellation = null;
-            cancellation.Dispose();
-            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ConnectTwitchOAuth)} failed.");
+            throw;
         }
     }
 
     private async Task CancelTwitchOAuth()
     {
-        _twitchOAuthCancellation?.Cancel();
-        await CloseTwitchAuthorizationWindowAsync().ConfigureAwait(true);
+        try
+        {
+            _twitchOAuthCancellation?.Cancel();
+            await CloseTwitchAuthorizationWindowAsync().ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(CancelTwitchOAuth)} failed.");
+            throw;
+        }
     }
 
     private async Task CloseTwitchAuthorizationWindowAsync()
     {
-        try { await JS.InvokeVoidAsync("publisherStreaming.closeExternalAuthorizationWindow", "publisherstudio-twitch-oauth").ConfigureAwait(true); }
-        catch { }
+        try
+        {
+            try { await JS.InvokeVoidAsync("publisherStreaming.closeExternalAuthorizationWindow", "publisherstudio-twitch-oauth").ConfigureAwait(true); }
+            catch { }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(CloseTwitchAuthorizationWindowAsync)} failed.");
+            throw;
+        }
     }
 
     private async Task DisconnectTwitchOAuth()
     {
-        if (_providerDraft is null) return;
-        var profileId = _providerDraft.Id;
-        await TwitchOAuth.DisconnectAsync(profileId).ConfigureAwait(true);
-        _machine = await ProfileStore.LoadAsync().ConfigureAwait(true);
-        _providerDraft = _machine.Providers.FirstOrDefault(profile => profile.Id == profileId) is { } stored
-            ? Clone(stored)
-            : null;
-        _twitchAuthorization = null;
-        _twitchIngestCandidates = [];
-        _status = "Twitch OAuth disconnected. The provider remains available for manual configuration.";
+        try
+        {
+            if (_providerDraft is null) return;
+            var profileId = _providerDraft.Id;
+            await TwitchOAuth.DisconnectAsync(profileId).ConfigureAwait(true);
+            _machine = await ProfileStore.LoadAsync().ConfigureAwait(true);
+            _providerDraft = _machine.Providers.FirstOrDefault(profile => profile.Id == profileId) is { } stored
+                ? Clone(stored)
+                : null;
+            _twitchAuthorization = null;
+            _twitchIngestCandidates = [];
+            _status = "Twitch OAuth disconnected. The provider remains available for manual configuration.";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(DisconnectTwitchOAuth)} failed.");
+            throw;
+        }
     }
 
     private async Task TestTwitchIngestEndpoints()
     {
-        if (_providerDraft is null || _providerDraft.Provider != PublicationStreamProvider.Twitch || _twitchIngestBusy) return;
-        _twitchIngestBusy = true;
         try
         {
-            _status = "Testing Twitch ingest endpoints from this computer…";
-            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
-            _twitchIngestCandidates = await TwitchOAuth.TestIngestEndpointsAsync().ConfigureAwait(true);
-            var selected = _twitchIngestCandidates.FirstOrDefault(candidate => candidate.Reachable)
-                ?? _twitchIngestCandidates.FirstOrDefault(candidate => candidate.IsGlobal);
-            if (selected is not null) ApplyTwitchIngestCandidate(selected);
-            _status = selected is null
-                ? "Twitch did not return a usable ingest endpoint. The existing manual endpoint was left unchanged."
-                : selected.LatencyMilliseconds is { } milliseconds
-                    ? $"Selected {selected.Name} at approximately {milliseconds:0} ms TCP connection latency."
-                    : $"Selected {selected.Name}. Direct latency testing was unavailable, so Twitch global routing remains the fallback.";
+            if (_providerDraft is null || _providerDraft.Provider != PublicationStreamProvider.Twitch || _twitchIngestBusy) return;
+            _twitchIngestBusy = true;
+            try
+            {
+                _status = "Testing Twitch ingest endpoints from this computer…";
+                await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+                _twitchIngestCandidates = await TwitchOAuth.TestIngestEndpointsAsync().ConfigureAwait(true);
+                var selected = _twitchIngestCandidates.FirstOrDefault(candidate => candidate.Reachable)
+                    ?? _twitchIngestCandidates.FirstOrDefault(candidate => candidate.IsGlobal);
+                if (selected is not null) ApplyTwitchIngestCandidate(selected);
+                _status = selected is null
+                    ? "Twitch did not return a usable ingest endpoint. The existing manual endpoint was left unchanged."
+                    : selected.LatencyMilliseconds is { } milliseconds
+                        ? $"Selected {selected.Name} at approximately {milliseconds:0} ms TCP connection latency."
+                        : $"Selected {selected.Name}. Direct latency testing was unavailable, so Twitch global routing remains the fallback.";
+            }
+            catch (Exception exception)
+            {
+                _status = $"Twitch endpoint test failed: {exception.Message}";
+            }
+            finally
+            {
+                _twitchIngestBusy = false;
+            }
+    
         }
-        catch (Exception exception)
+        catch (Exception __componentMethodException)
         {
-            _status = $"Twitch endpoint test failed: {exception.Message}";
-        }
-        finally
-        {
-            _twitchIngestBusy = false;
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(TestTwitchIngestEndpoints)} failed.");
+            throw;
         }
     }
 
     private void SelectTwitchIngestEndpoint(ChangeEventArgs args)
     {
-        if (_providerDraft is null) return;
-        var endpoint = args.Value?.ToString() ?? string.Empty;
-        var candidate = _twitchIngestCandidates.FirstOrDefault(item => string.Equals(item.Endpoint, endpoint, StringComparison.Ordinal));
-        if (candidate is not null) ApplyTwitchIngestCandidate(candidate);
+        try
+        {
+            if (_providerDraft is null) return;
+            var endpoint = args.Value?.ToString() ?? string.Empty;
+            var candidate = _twitchIngestCandidates.FirstOrDefault(item => string.Equals(item.Endpoint, endpoint, StringComparison.Ordinal));
+            if (candidate is not null) ApplyTwitchIngestCandidate(candidate);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(SelectTwitchIngestEndpoint)} failed.");
+            throw;
+        }
     }
 
     private void ApplyTwitchIngestCandidate(TwitchIngestCandidate candidate)
     {
-        if (_providerDraft is null) return;
-        _providerDraft.Transport = PublicationStreamTransport.Rtmp;
-        _providerDraft.Endpoint = candidate.Endpoint;
-        _providerDraft.IngestServerName = candidate.Name;
-        _providerDraft.IngestLatencyMilliseconds = candidate.LatencyMilliseconds;
-        _providerDraft.IngestLastTestedUtc = DateTimeOffset.UtcNow;
+        try
+        {
+            if (_providerDraft is null) return;
+            _providerDraft.Transport = PublicationStreamTransport.Rtmp;
+            _providerDraft.Endpoint = candidate.Endpoint;
+            _providerDraft.IngestServerName = candidate.Name;
+            _providerDraft.IngestLatencyMilliseconds = candidate.LatencyMilliseconds;
+            _providerDraft.IngestLastTestedUtc = DateTimeOffset.UtcNow;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ApplyTwitchIngestCandidate)} failed.");
+            throw;
+        }
     }
 
-    private string TwitchIngestOption(TwitchIngestCandidate candidate) =>
-        candidate.Reachable && candidate.LatencyMilliseconds is { } milliseconds
+    private string TwitchIngestOption(TwitchIngestCandidate candidate) {
+        try
+        {
+            return candidate.Reachable && candidate.LatencyMilliseconds is { } milliseconds
             ? $"{candidate.Name} — {milliseconds:0} ms"
             : candidate.Reachable
                 ? $"{candidate.Name} — reachable"
                 : $"{candidate.Name} — unreachable (fallback only)";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(TwitchIngestOption)} failed.");
+            throw;
+        }
+    }
 
     private void NewProvider()
     {
-        _providerDraft = new StreamingProviderProfile
+        try
         {
-            Endpoint = DefaultTwitchEndpoint,
-            OAuthClientId = TwitchOAuth.DefaultClientId
-        };
-        _twitchIngestCandidates = [];
-        _twitchAuthorization = null;
-        _tab = "providers";
-        _status = "New provider profile. Choose Twitch OAuth or keep the manual workflow, then save it.";
+            _providerDraft = new StreamingProviderProfile
+            {
+                Endpoint = DefaultTwitchEndpoint,
+                OAuthClientId = TwitchOAuth.DefaultClientId
+            };
+            _twitchIngestCandidates = [];
+            _twitchAuthorization = null;
+            _tab = "providers";
+            _status = "New provider profile. Choose Twitch OAuth or keep the manual workflow, then save it.";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(NewProvider)} failed.");
+            throw;
+        }
     }
 
     private void EditProvider(StreamingProviderProfile profile)
     {
-        _providerDraft = Clone(profile);
-        _twitchIngestCandidates = [];
-        _twitchAuthorization = null;
-        _tab = "providers";
-        _status = $"Editing {profile.Name}.";
+        try
+        {
+            _providerDraft = Clone(profile);
+            _twitchIngestCandidates = [];
+            _twitchAuthorization = null;
+            _tab = "providers";
+            _status = $"Editing {profile.Name}.";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(EditProvider)} failed.");
+            throw;
+        }
     }
 
     private async Task SaveProvider()
     {
-        if (_providerDraft is null) return;
-        if (_providerDraft.Provider == PublicationStreamProvider.Twitch
-            && _providerDraft.AuthenticationMode == StreamingProviderAuthenticationMode.OAuth)
+        try
         {
-            _providerDraft.Transport = PublicationStreamTransport.Rtmp;
-            _providerDraft.OAuthClientId = TwitchOAuth.ResolveClientId(_providerDraft.OAuthClientId);
-            if (string.IsNullOrWhiteSpace(_providerDraft.Endpoint)) _providerDraft.Endpoint = DefaultTwitchEndpoint;
-        }
+            if (_providerDraft is null) return;
+            if (_providerDraft.Provider == PublicationStreamProvider.Twitch
+                && _providerDraft.AuthenticationMode == StreamingProviderAuthenticationMode.OAuth)
+            {
+                _providerDraft.Transport = PublicationStreamTransport.Rtmp;
+                _providerDraft.OAuthClientId = TwitchOAuth.ResolveClientId(_providerDraft.OAuthClientId);
+                if (string.IsNullOrWhiteSpace(_providerDraft.Endpoint)) _providerDraft.Endpoint = DefaultTwitchEndpoint;
+            }
 
-        var saved = await ProfileStore.SaveProviderAsync(_providerDraft).ConfigureAwait(true);
-        _machine = await ProfileStore.LoadAsync().ConfigureAwait(true);
-        _providerDraft = Clone(saved);
-        _status = saved.AuthenticationMode == StreamingProviderAuthenticationMode.OAuth && !saved.HasStoredOAuthSession
-            ? $"Saved {saved.Name}. Connect Twitch to complete OAuth authorization."
-            : $"Saved {saved.Name}.";
+            var saved = await ProfileStore.SaveProviderAsync(_providerDraft).ConfigureAwait(true);
+            _machine = await ProfileStore.LoadAsync().ConfigureAwait(true);
+            _providerDraft = Clone(saved);
+            _status = saved.AuthenticationMode == StreamingProviderAuthenticationMode.OAuth && !saved.HasStoredOAuthSession
+                ? $"Saved {saved.Name}. Connect Twitch to complete OAuth authorization."
+                : $"Saved {saved.Name}.";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(SaveProvider)} failed.");
+            throw;
+        }
     }
 
     private async Task DeleteProvider()
     {
-        if (_providerDraft is null) return;
-        var id = _providerDraft.Id;
-        await ProfileStore.DeleteProviderAsync(id).ConfigureAwait(true);
-        _machine = await ProfileStore.LoadAsync().ConfigureAwait(true);
-        _providerDraft = _machine.Providers.FirstOrDefault() is { } first ? Clone(first) : null;
-        _draft.Outputs.RemoveAll(output => output.ProfileId == id);
-        if (SelectedOutput is null) _selectedOutputId = _draft.Outputs.FirstOrDefault()?.Id;
-        _status = "Provider deleted.";
+        try
+        {
+            if (_providerDraft is null) return;
+            var id = _providerDraft.Id;
+            await ProfileStore.DeleteProviderAsync(id).ConfigureAwait(true);
+            _machine = await ProfileStore.LoadAsync().ConfigureAwait(true);
+            _providerDraft = _machine.Providers.FirstOrDefault() is { } first ? Clone(first) : null;
+            _draft.Outputs.RemoveAll(output => output.ProfileId == id);
+            if (SelectedOutput is null) _selectedOutputId = _draft.Outputs.FirstOrDefault()?.Id;
+            _status = "Provider deleted.";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(DeleteProvider)} failed.");
+            throw;
+        }
     }
 
     private void DuplicateCurrentProvider()
     {
-        if (_providerDraft is null) return;
-        var copy = Clone(_providerDraft);
-        copy.Id = Guid.NewGuid();
-        copy.Name = $"{copy.Name} copy";
-        copy.Secret = string.Empty;
-        copy.ChatSecret = string.Empty;
-        copy.HasStoredSecret = false;
-        copy.HasStoredChatSecret = false;
-        copy.HasStoredOAuthSession = false;
-        copy.OAuthAccessTokenExpiresUtc = null;
-        copy.OAuthLastValidatedUtc = null;
-        copy.OAuthScopes = string.Empty;
-        copy.IngestLatencyMilliseconds = null;
-        copy.IngestLastTestedUtc = null;
-        if (copy.AuthenticationMode == StreamingProviderAuthenticationMode.OAuth)
+        try
         {
-            copy.ChannelId = string.Empty;
-            copy.AccountName = string.Empty;
+            if (_providerDraft is null) return;
+            var copy = Clone(_providerDraft);
+            copy.Id = Guid.NewGuid();
+            copy.Name = $"{copy.Name} copy";
+            copy.Secret = string.Empty;
+            copy.ChatSecret = string.Empty;
+            copy.HasStoredSecret = false;
+            copy.HasStoredChatSecret = false;
+            copy.HasStoredOAuthSession = false;
+            copy.OAuthAccessTokenExpiresUtc = null;
+            copy.OAuthLastValidatedUtc = null;
+            copy.OAuthScopes = string.Empty;
+            copy.IngestLatencyMilliseconds = null;
+            copy.IngestLastTestedUtc = null;
+            if (copy.AuthenticationMode == StreamingProviderAuthenticationMode.OAuth)
+            {
+                copy.ChannelId = string.Empty;
+                copy.AccountName = string.Empty;
+            }
+            _providerDraft = copy;
+            _twitchIngestCandidates = [];
+            _status = copy.AuthenticationMode == StreamingProviderAuthenticationMode.OAuth
+                ? "Provider duplicated without credentials. Save it, then connect the Twitch account."
+                : "Provider duplicated. Enter credentials if needed, then save the new profile.";
+    
         }
-        _providerDraft = copy;
-        _twitchIngestCandidates = [];
-        _status = copy.AuthenticationMode == StreamingProviderAuthenticationMode.OAuth
-            ? "Provider duplicated without credentials. Save it, then connect the Twitch account."
-            : "Provider duplicated. Enter credentials if needed, then save the new profile.";
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(DuplicateCurrentProvider)} failed.");
+            throw;
+        }
     }
 
     private void AddOutput()
     {
-        var profile = _machine.Providers.FirstOrDefault(item => item.Enabled);
-        var output = new PublicationStreamOutput();
-        if (profile is not null)
+        try
         {
-            output.ProfileId = profile.Id;
-            output.Provider = profile.Provider;
-            output.Name = profile.Name;
-            output.ChatChannel = profile.ChannelId;
+            var profile = _machine.Providers.FirstOrDefault(item => item.Enabled);
+            var output = new PublicationStreamOutput();
+            if (profile is not null)
+            {
+                output.ProfileId = profile.Id;
+                output.Provider = profile.Provider;
+                output.Name = profile.Name;
+                output.ChatChannel = profile.ChannelId;
+            }
+            ApplyRecommendedDefaults(output);
+            _draft.Outputs.Add(output);
+            _selectedOutputId = output.Id;
+            _tab = "outputs";
+            _status = $"Added {output.Name}.";
+    
         }
-        ApplyRecommendedDefaults(output);
-        _draft.Outputs.Add(output);
-        _selectedOutputId = output.Id;
-        _tab = "outputs";
-        _status = $"Added {output.Name}.";
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(AddOutput)} failed.");
+            throw;
+        }
     }
 
-    private void SelectOutput(Guid id) => _selectedOutputId = id;
+    private void SelectOutput(Guid id) {
+        try
+        {
+            _selectedOutputId = id;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(SelectOutput)} failed.");
+            throw;
+        }
+    }
 
     private void ChangeOutputProfile(PublicationStreamOutput output, ChangeEventArgs args)
     {
-        if (!Guid.TryParse(args.Value?.ToString(), out var id)) return;
-        var profile = _machine.Providers.FirstOrDefault(item => item.Id == id);
-        if (profile is null) return;
-        output.ProfileId = id;
-        output.Provider = profile.Provider;
-        output.Name = profile.Name;
-        output.ChatChannel = profile.ChannelId;
-        ApplyRecommendedDefaults(output);
-        _selectedOutputId = output.Id;
+        try
+        {
+            if (!Guid.TryParse(args.Value?.ToString(), out var id)) return;
+            var profile = _machine.Providers.FirstOrDefault(item => item.Id == id);
+            if (profile is null) return;
+            output.ProfileId = id;
+            output.Provider = profile.Provider;
+            output.Name = profile.Name;
+            output.ChatChannel = profile.ChannelId;
+            ApplyRecommendedDefaults(output);
+            _selectedOutputId = output.Id;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ChangeOutputProfile)} failed.");
+            throw;
+        }
     }
 
     private void ChangeOutputPreset(PublicationStreamOutput output, ChangeEventArgs args)
     {
-        if (!Enum.TryParse<PublicationStreamQualityPreset>(args.Value?.ToString(), out var preset)) return;
-        output.QualityPreset = preset;
-        ApplyQualityPreset(output);
-        _selectedOutputId = output.Id;
+        try
+        {
+            if (!Enum.TryParse<PublicationStreamQualityPreset>(args.Value?.ToString(), out var preset)) return;
+            output.QualityPreset = preset;
+            ApplyQualityPreset(output);
+            _selectedOutputId = output.Id;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ChangeOutputPreset)} failed.");
+            throw;
+        }
     }
 
     private void ApplyRecommendedDefaults(PublicationStreamOutput output)
     {
-        output.QualityPreset = PublicationStreamQualityPreset.Recommended;
-        ApplyQualityPreset(output);
+        try
+        {
+            output.QualityPreset = PublicationStreamQualityPreset.Recommended;
+            ApplyQualityPreset(output);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ApplyRecommendedDefaults)} failed.");
+            throw;
+        }
     }
 
     private void ApplyQualityPreset(PublicationStreamOutput output)
     {
-        if (output.QualityPreset == PublicationStreamQualityPreset.Custom) return;
-
-        var recommendation = MediaQuality.RecommendProviderOutput(
-            output.Provider,
-            output.QualityPreset,
-            _draft.MasterWidth,
-            _draft.MasterHeight,
-            _draft.MasterFrameRate,
-            output.VideoCodec,
-            _draft.AdaptiveMedia.Profile,
-            _draft.AdaptiveMedia.UseProviderKnowledge);
-        if (!_draft.AdaptiveMedia.Enabled || _draft.AdaptiveMedia.AdaptVideo)
+        try
         {
-            output.Width = recommendation.Width;
-            output.Height = recommendation.Height;
-            output.FrameRate = recommendation.FrameRate;
-            output.VideoBitrateKbps = recommendation.VideoBitrateKbps;
-            output.KeyFrameIntervalSeconds = recommendation.KeyFrameIntervalSeconds;
+            if (output.QualityPreset == PublicationStreamQualityPreset.Custom) return;
+
+            var recommendation = MediaQuality.RecommendProviderOutput(
+                output.Provider,
+                output.QualityPreset,
+                _draft.MasterWidth,
+                _draft.MasterHeight,
+                _draft.MasterFrameRate,
+                output.VideoCodec,
+                _draft.AdaptiveMedia.Profile,
+                _draft.AdaptiveMedia.UseProviderKnowledge);
+            if (!_draft.AdaptiveMedia.Enabled || _draft.AdaptiveMedia.AdaptVideo)
+            {
+                output.Width = recommendation.Width;
+                output.Height = recommendation.Height;
+                output.FrameRate = recommendation.FrameRate;
+                output.VideoBitrateKbps = recommendation.VideoBitrateKbps;
+                output.KeyFrameIntervalSeconds = recommendation.KeyFrameIntervalSeconds;
+            }
+            if (!_draft.AdaptiveMedia.Enabled || _draft.AdaptiveMedia.AdaptAudio)
+                output.AudioBitrateKbps = recommendation.AudioBitrateKbps;
+    
         }
-        if (!_draft.AdaptiveMedia.Enabled || _draft.AdaptiveMedia.AdaptAudio)
-            output.AudioBitrateKbps = recommendation.AudioBitrateKbps;
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ApplyQualityPreset)} failed.");
+            throw;
+        }
     }
 
     private void ChangeLanPreset(ChangeEventArgs args)
     {
-        if (!Enum.TryParse<PublicationStreamQualityPreset>(args.Value?.ToString(), out var preset)) return;
-        _draft.Lan.QualityPreset = preset;
-        if (preset != PublicationStreamQualityPreset.Custom) ApplyLanRecommendation();
+        try
+        {
+            if (!Enum.TryParse<PublicationStreamQualityPreset>(args.Value?.ToString(), out var preset)) return;
+            _draft.Lan.QualityPreset = preset;
+            if (preset != PublicationStreamQualityPreset.Custom) ApplyLanRecommendation();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ChangeLanPreset)} failed.");
+            throw;
+        }
     }
 
     private void ApplyLanRecommendation()
     {
-        var recommendation = MediaQuality.RecommendLan(
-            _draft.MasterWidth,
-            _draft.MasterHeight,
-            _draft.MasterFrameRate,
-            _draft.AdaptiveMedia.Profile);
-        _draft.Lan.Width = recommendation.Width;
-        _draft.Lan.Height = recommendation.Height;
-        _draft.Lan.FrameRate = recommendation.FrameRate;
-        _draft.Lan.VideoBitrateKbps = recommendation.VideoBitrateKbps;
-        _draft.Lan.AudioBitrateKbps = recommendation.AudioBitrateKbps;
+        try
+        {
+            var recommendation = MediaQuality.RecommendLan(
+                _draft.MasterWidth,
+                _draft.MasterHeight,
+                _draft.MasterFrameRate,
+                _draft.AdaptiveMedia.Profile);
+            _draft.Lan.Width = recommendation.Width;
+            _draft.Lan.Height = recommendation.Height;
+            _draft.Lan.FrameRate = recommendation.FrameRate;
+            _draft.Lan.VideoBitrateKbps = recommendation.VideoBitrateKbps;
+            _draft.Lan.AudioBitrateKbps = recommendation.AudioBitrateKbps;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ApplyLanRecommendation)} failed.");
+            throw;
+        }
     }
 
     private void ApplySelectedOutputDefaults()
     {
-        if (SelectedOutput is not { } output) return;
-        ApplyRecommendedDefaults(output);
-        _status = $"Applied recommended {output.Provider} settings to {output.Name}.";
+        try
+        {
+            if (SelectedOutput is not { } output) return;
+            ApplyRecommendedDefaults(output);
+            _status = $"Applied recommended {output.Provider} settings to {output.Name}.";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ApplySelectedOutputDefaults)} failed.");
+            throw;
+        }
     }
 
     private void DuplicateSelectedOutput()
     {
-        if (SelectedOutput is not { } output) return;
-        DuplicateOutput(output);
+        try
+        {
+            if (SelectedOutput is not { } output) return;
+            DuplicateOutput(output);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(DuplicateSelectedOutput)} failed.");
+            throw;
+        }
     }
 
     private void DuplicateOutput(PublicationStreamOutput output)
     {
-        var copy = Clone(output);
-        copy.Id = Guid.NewGuid();
-        copy.Name = $"{copy.Name} copy";
-        _draft.Outputs.Add(copy);
-        _selectedOutputId = copy.Id;
-        _status = $"Duplicated {output.Name}.";
+        try
+        {
+            var copy = Clone(output);
+            copy.Id = Guid.NewGuid();
+            copy.Name = $"{copy.Name} copy";
+            _draft.Outputs.Add(copy);
+            _selectedOutputId = copy.Id;
+            _status = $"Duplicated {output.Name}.";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(DuplicateOutput)} failed.");
+            throw;
+        }
     }
 
     private void RemoveSelectedOutput()
     {
-        if (SelectedOutput is { } output) RemoveOutput(output.Id);
+        try
+        {
+            if (SelectedOutput is { } output) RemoveOutput(output.Id);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(RemoveSelectedOutput)} failed.");
+            throw;
+        }
     }
 
     private void RemoveOutput(Guid id)
     {
-        var removed = _draft.Outputs.FirstOrDefault(output => output.Id == id);
-        _draft.Outputs.RemoveAll(output => output.Id == id);
-        _draft.Recording.SelectedOutputIds.Remove(id);
-        _selectedOutputId = _draft.Outputs.FirstOrDefault()?.Id;
-        _status = removed is null ? "Output removed." : $"Removed {removed.Name}.";
+        try
+        {
+            var removed = _draft.Outputs.FirstOrDefault(output => output.Id == id);
+            _draft.Outputs.RemoveAll(output => output.Id == id);
+            _draft.Recording.SelectedOutputIds.Remove(id);
+            _selectedOutputId = _draft.Outputs.FirstOrDefault()?.Id;
+            _status = removed is null ? "Output removed." : $"Removed {removed.Name}.";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(RemoveOutput)} failed.");
+            throw;
+        }
     }
 
-    private void ToggleRecording() => _draft.Recording.Enabled = !_draft.Recording.Enabled;
-    private void UseCleanMasterRecording() => _draft.Recording.Variant = PublicationStreamRecordingVariant.CleanMaster;
-    private void UseEnabledOutputRecording() => _draft.Recording.Variant = PublicationStreamRecordingVariant.EachEnabledOutput;
+    private void ToggleRecording() {
+        try
+        {
+            _draft.Recording.Enabled = !_draft.Recording.Enabled;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ToggleRecording)} failed.");
+            throw;
+        }
+    }
+    private void UseCleanMasterRecording() {
+        try
+        {
+            _draft.Recording.Variant = PublicationStreamRecordingVariant.CleanMaster;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(UseCleanMasterRecording)} failed.");
+            throw;
+        }
+    }
+    private void UseEnabledOutputRecording() {
+        try
+        {
+            _draft.Recording.Variant = PublicationStreamRecordingVariant.EachEnabledOutput;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(UseEnabledOutputRecording)} failed.");
+            throw;
+        }
+    }
 
     private void ToggleRecordingOutput(Guid id)
     {
-        if (!_draft.Recording.SelectedOutputIds.Remove(id)) _draft.Recording.SelectedOutputIds.Add(id);
+        try
+        {
+            if (!_draft.Recording.SelectedOutputIds.Remove(id)) _draft.Recording.SelectedOutputIds.Add(id);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ToggleRecordingOutput)} failed.");
+            throw;
+        }
     }
 
-    private void ToggleLan() => _draft.Lan.Enabled = !_draft.Lan.Enabled;
+    private void ToggleLan() {
+        try
+        {
+            _draft.Lan.Enabled = !_draft.Lan.Enabled;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ToggleLan)} failed.");
+            throw;
+        }
+    }
 
     private void UseLoopbackLan()
     {
-        _draft.Lan.BindAddress = "127.0.0.1";
-        _draft.Lan.Enabled = true;
-        _status = "LAN output is limited to this computer.";
+        try
+        {
+            _draft.Lan.BindAddress = "127.0.0.1";
+            _draft.Lan.Enabled = true;
+            _status = "LAN output is limited to this computer.";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(UseLoopbackLan)} failed.");
+            throw;
+        }
     }
 
     private void UseBrowserAndHlsLan()
     {
-        _draft.Lan.EnableBrowserWebRtc = true;
-        _draft.Lan.EnableHls = true;
-        _draft.Lan.Enabled = true;
-        _status = "Browser and HLS LAN delivery enabled.";
+        try
+        {
+            _draft.Lan.EnableBrowserWebRtc = true;
+            _draft.Lan.EnableHls = true;
+            _draft.Lan.Enabled = true;
+            _status = "Browser and HLS LAN delivery enabled.";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(UseBrowserAndHlsLan)} failed.");
+            throw;
+        }
     }
 
     private async Task RefreshDevices()
     {
         try
         {
-            var browserDevicesInvocation = JS.InvokeAsync<List<BrowserMediaDeviceInfo>>("publisherStreaming.enumerateDevices");
-            _browserDevices = await browserDevicesInvocation.ConfigureAwait(true) ?? [];
-            _status = $"Found {_browserDevices.Count} browser media devices.";
+            try
+            {
+                var browserDevicesInvocation = JS.InvokeAsync<List<BrowserMediaDeviceInfo>>("publisherStreaming.enumerateDevices");
+                _browserDevices = await browserDevicesInvocation.ConfigureAwait(true) ?? [];
+                _status = $"Found {_browserDevices.Count} browser media devices.";
+            }
+            catch (Exception exception) { _status = exception.Message; }
+    
         }
-        catch (Exception exception) { _status = exception.Message; }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(RefreshDevices)} failed.");
+            throw;
+        }
     }
 
     private async Task RefreshNativeDevices()
     {
         try
         {
-            var ffmpeg = FfmpegLocatorService.Resolve(_machine.FfmpegPath);
-            _nativeDevices = await MediaHost.DiscoverNativeDevicesAsync().ConfigureAwait(true);
-            if (_nativeDevices.Count > 0)
+            try
             {
-                _status = ffmpeg is null
-                    ? $"Found {_nativeDevices.Count} operating-system application targets. Install FFmpeg to discover and use native camera/capture devices."
-                    : $"Found {_nativeDevices.Count} native devices and application targets. FFmpeg: {Path.GetFileName(ffmpeg)}.";
+                var ffmpeg = FfmpegLocatorService.Resolve(_machine.FfmpegPath);
+                _nativeDevices = await MediaHost.DiscoverNativeDevicesAsync().ConfigureAwait(true);
+                if (_nativeDevices.Count > 0)
+                {
+                    _status = ffmpeg is null
+                        ? $"Found {_nativeDevices.Count} operating-system application targets. Install FFmpeg to discover and use native camera/capture devices."
+                        : $"Found {_nativeDevices.Count} native devices and application targets. FFmpeg: {Path.GetFileName(ffmpeg)}.";
+                }
+                else
+                {
+                    _status = ffmpeg is null
+                        ? "FFmpeg was not found. Run PublisherStudio.Setup --install-ffmpeg or configure the executable path, then refresh."
+                        : "No native devices were reported. Check operating-system capture permissions and whether the devices are in use.";
+                }
             }
-            else
+            catch (Exception exception)
             {
-                _status = ffmpeg is null
-                    ? "FFmpeg was not found. Run PublisherStudio.Setup --install-ffmpeg or configure the executable path, then refresh."
-                    : "No native devices were reported. Check operating-system capture permissions and whether the devices are in use.";
+                _nativeDevices = [];
+                _status = $"Native device discovery failed: {exception.Message}";
             }
+    
         }
-        catch (Exception exception)
+        catch (Exception __componentMethodException)
         {
-            _nativeDevices = [];
-            _status = $"Native device discovery failed: {exception.Message}";
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(RefreshNativeDevices)} failed.");
+            throw;
         }
     }
 
     private void SaveNativeDevice(NativeMediaDeviceInfo device)
     {
-        var kind = Enum.TryParse<PublicationLiveSourceKind>(device.Kind, true, out var parsed) ? parsed : PublicationLiveSourceKind.CaptureDevice;
-        var existing = _machine.Devices.FirstOrDefault(profile =>
-            profile.CaptureBackend == PublicationCaptureBackend.Native
-            && string.Equals(profile.NativeBackend, device.Backend, StringComparison.OrdinalIgnoreCase)
-            && string.Equals(profile.DeviceId, device.Id, StringComparison.OrdinalIgnoreCase));
-        if (existing is null)
+        try
         {
-            existing = new StreamingDeviceProfile { Id = Guid.NewGuid() };
-            _machine.Devices.Add(existing);
+            var kind = Enum.TryParse<PublicationLiveSourceKind>(device.Kind, true, out var parsed) ? parsed : PublicationLiveSourceKind.CaptureDevice;
+            var existing = _machine.Devices.FirstOrDefault(profile =>
+                profile.CaptureBackend == PublicationCaptureBackend.Native
+                && string.Equals(profile.NativeBackend, device.Backend, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(profile.DeviceId, device.Id, StringComparison.OrdinalIgnoreCase));
+            if (existing is null)
+            {
+                existing = new StreamingDeviceProfile { Id = Guid.NewGuid() };
+                _machine.Devices.Add(existing);
+            }
+            existing.Name = device.Name;
+            existing.Kind = kind;
+            existing.DeviceId = device.Id;
+            existing.ApplicationId = device.ProcessId ?? (kind == PublicationLiveSourceKind.ApplicationAudio ? device.Id : string.Empty);
+            existing.WindowTitle = device.WindowTitle ?? string.Empty;
+            existing.CaptureBackend = PublicationCaptureBackend.Native;
+            existing.NativeBackend = device.Backend;
+            existing.UseDeviceTimestamps = _draft.PreferDeviceTimestamps;
+            _status = $"Added {existing.Name}. Save device profiles to reuse it.";
+    
         }
-        existing.Name = device.Name;
-        existing.Kind = kind;
-        existing.DeviceId = device.Id;
-        existing.ApplicationId = device.ProcessId ?? (kind == PublicationLiveSourceKind.ApplicationAudio ? device.Id : string.Empty);
-        existing.WindowTitle = device.WindowTitle ?? string.Empty;
-        existing.CaptureBackend = PublicationCaptureBackend.Native;
-        existing.NativeBackend = device.Backend;
-        existing.UseDeviceTimestamps = _draft.PreferDeviceTimestamps;
-        _status = $"Added {existing.Name}. Save device profiles to reuse it.";
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(SaveNativeDevice)} failed.");
+            throw;
+        }
     }
 
     private void AddDeviceProfile()
     {
-        var profile = new StreamingDeviceProfile
+        try
         {
-            Name = "New device profile",
-            Kind = PublicationLiveSourceKind.Camera,
-            UseDeviceTimestamps = _draft.PreferDeviceTimestamps
-        };
-        _machine.Devices.Add(profile);
-        _tab = "devices";
-        _status = "New device profile added.";
+            var profile = new StreamingDeviceProfile
+            {
+                Name = "New device profile",
+                Kind = PublicationLiveSourceKind.Camera,
+                UseDeviceTimestamps = _draft.PreferDeviceTimestamps
+            };
+            _machine.Devices.Add(profile);
+            _tab = "devices";
+            _status = "New device profile added.";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(AddDeviceProfile)} failed.");
+            throw;
+        }
     }
 
     private void RemoveDeviceProfile(Guid id)
     {
-        var profile = _machine.Devices.FirstOrDefault(item => item.Id == id);
-        _machine.Devices.RemoveAll(item => item.Id == id);
-        _status = profile is null ? "Device profile removed." : $"Removed {profile.Name}.";
+        try
+        {
+            var profile = _machine.Devices.FirstOrDefault(item => item.Id == id);
+            _machine.Devices.RemoveAll(item => item.Id == id);
+            _status = profile is null ? "Device profile removed." : $"Removed {profile.Name}.";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(RemoveDeviceProfile)} failed.");
+            throw;
+        }
     }
 
     private void DuplicateDeviceProfile(StreamingDeviceProfile profile)
     {
-        var copy = Clone(profile);
-        copy.Id = Guid.NewGuid();
-        copy.Name = $"{copy.Name} copy";
-        _machine.Devices.Add(copy);
-        _status = $"Duplicated {profile.Name}.";
+        try
+        {
+            var copy = Clone(profile);
+            copy.Id = Guid.NewGuid();
+            copy.Name = $"{copy.Name} copy";
+            _machine.Devices.Add(copy);
+            _status = $"Duplicated {profile.Name}.";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(DuplicateDeviceProfile)} failed.");
+            throw;
+        }
     }
 
-    private bool CanSaveBrowserDevice(BrowserMediaDeviceInfo device) =>
-        !string.IsNullOrWhiteSpace(device.DeviceId)
+    private bool CanSaveBrowserDevice(BrowserMediaDeviceInfo device) {
+        try
+        {
+            return !string.IsNullOrWhiteSpace(device.DeviceId)
         && (string.Equals(device.Kind, "videoinput", StringComparison.OrdinalIgnoreCase)
             || string.Equals(device.Kind, "audioinput", StringComparison.OrdinalIgnoreCase));
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(CanSaveBrowserDevice)} failed.");
+            throw;
+        }
+    }
 
     private void SaveBrowserDevice(BrowserMediaDeviceInfo device)
     {
-        if (!CanSaveBrowserDevice(device)) return;
-        var existing = _machine.Devices.FirstOrDefault(profile =>
-            string.Equals(profile.DeviceId, device.DeviceId, StringComparison.Ordinal));
-        if (existing is not null)
+        try
         {
-            existing.Name = string.IsNullOrWhiteSpace(device.Label) ? existing.Name : device.Label;
-            _status = $"Updated {existing.Name}.";
-            return;
-        }
+            if (!CanSaveBrowserDevice(device)) return;
+            var existing = _machine.Devices.FirstOrDefault(profile =>
+                string.Equals(profile.DeviceId, device.DeviceId, StringComparison.Ordinal));
+            if (existing is not null)
+            {
+                existing.Name = string.IsNullOrWhiteSpace(device.Label) ? existing.Name : device.Label;
+                _status = $"Updated {existing.Name}.";
+                return;
+            }
 
-        var profile = new StreamingDeviceProfile
+            var profile = new StreamingDeviceProfile
+            {
+                Name = string.IsNullOrWhiteSpace(device.Label) || device.Label == "Permission required"
+                    ? (string.Equals(device.Kind, "videoinput", StringComparison.OrdinalIgnoreCase) ? "Browser camera" : "Browser microphone")
+                    : device.Label,
+                Kind = string.Equals(device.Kind, "videoinput", StringComparison.OrdinalIgnoreCase)
+                    ? PublicationLiveSourceKind.Camera
+                    : PublicationLiveSourceKind.Microphone,
+                DeviceId = device.DeviceId,
+                CaptureBackend = PublicationCaptureBackend.Browser,
+                NativeBackend = string.Empty,
+                UseDeviceTimestamps = _draft.PreferDeviceTimestamps
+            };
+            _machine.Devices.Add(profile);
+            _status = $"Added {profile.Name}. Save device profiles to reuse it.";
+    
+        }
+        catch (Exception __componentMethodException)
         {
-            Name = string.IsNullOrWhiteSpace(device.Label) || device.Label == "Permission required"
-                ? (string.Equals(device.Kind, "videoinput", StringComparison.OrdinalIgnoreCase) ? "Browser camera" : "Browser microphone")
-                : device.Label,
-            Kind = string.Equals(device.Kind, "videoinput", StringComparison.OrdinalIgnoreCase)
-                ? PublicationLiveSourceKind.Camera
-                : PublicationLiveSourceKind.Microphone,
-            DeviceId = device.DeviceId,
-            CaptureBackend = PublicationCaptureBackend.Browser,
-            NativeBackend = string.Empty,
-            UseDeviceTimestamps = _draft.PreferDeviceTimestamps
-        };
-        _machine.Devices.Add(profile);
-        _status = $"Added {profile.Name}. Save device profiles to reuse it.";
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(SaveBrowserDevice)} failed.");
+            throw;
+        }
     }
 
     private void AddHotkey()
     {
-        _draft.Hotkeys.Add(new PublicationStreamingHotkey { Gesture = "F11", Command = "ToggleStreaming" });
-        _tab = "advanced";
-        _status = "New hotkey added.";
+        try
+        {
+            _draft.Hotkeys.Add(new PublicationStreamingHotkey { Gesture = "F11", Command = "ToggleStreaming" });
+            _tab = "advanced";
+            _status = "New hotkey added.";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(AddHotkey)} failed.");
+            throw;
+        }
     }
 
     private void RemoveHotkey(Guid id)
     {
-        _draft.Hotkeys.RemoveAll(item => item.Id == id);
-        _status = "Hotkey removed.";
+        try
+        {
+            _draft.Hotkeys.RemoveAll(item => item.Id == id);
+            _status = "Hotkey removed.";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(RemoveHotkey)} failed.");
+            throw;
+        }
     }
 
     private void DuplicateHotkey(PublicationStreamingHotkey hotkey)
     {
-        var copy = Clone(hotkey);
-        copy.Id = Guid.NewGuid();
-        _draft.Hotkeys.Add(copy);
-        _status = $"Duplicated {hotkey.Gesture}.";
+        try
+        {
+            var copy = Clone(hotkey);
+            copy.Id = Guid.NewGuid();
+            _draft.Hotkeys.Add(copy);
+            _status = $"Duplicated {hotkey.Gesture}.";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(DuplicateHotkey)} failed.");
+            throw;
+        }
     }
 
     private async Task SaveMachineOptions()
     {
-        await ProfileStore.SaveMachineOptionsAsync(_machine).ConfigureAwait(true);
-        _status = "Machine options and reusable profiles saved.";
+        try
+        {
+            await ProfileStore.SaveMachineOptionsAsync(_machine).ConfigureAwait(true);
+            _status = "Machine options and reusable profiles saved.";
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(SaveMachineOptions)} failed.");
+            throw;
+        }
     }
 
     private async Task ShowProviderContextMenu(StreamingProviderProfile profile, MouseEventArgs args)
     {
-        _contextKind = "provider";
-        _contextId = profile.Id;
-        EditProvider(profile);
-        await ShowContextMenu(args).ConfigureAwait(true);
+        try
+        {
+            _contextKind = "provider";
+            _contextId = profile.Id;
+            EditProvider(profile);
+            await ShowContextMenu(args).ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ShowProviderContextMenu)} failed.");
+            throw;
+        }
     }
 
     private async Task ShowOutputContextMenu(PublicationStreamOutput output, MouseEventArgs args)
     {
-        _contextKind = "output";
-        _contextId = output.Id;
-        _selectedOutputId = output.Id;
-        await ShowContextMenu(args).ConfigureAwait(true);
+        try
+        {
+            _contextKind = "output";
+            _contextId = output.Id;
+            _selectedOutputId = output.Id;
+            await ShowContextMenu(args).ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ShowOutputContextMenu)} failed.");
+            throw;
+        }
     }
 
     private async Task ShowDeviceContextMenu(StreamingDeviceProfile profile, MouseEventArgs args)
     {
-        _contextKind = "device";
-        _contextId = profile.Id;
-        await ShowContextMenu(args).ConfigureAwait(true);
+        try
+        {
+            _contextKind = "device";
+            _contextId = profile.Id;
+            await ShowContextMenu(args).ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ShowDeviceContextMenu)} failed.");
+            throw;
+        }
     }
 
     private async Task ShowHotkeyContextMenu(PublicationStreamingHotkey hotkey, MouseEventArgs args)
     {
-        _contextKind = "hotkey";
-        _contextId = hotkey.Id;
-        await ShowContextMenu(args).ConfigureAwait(true);
+        try
+        {
+            _contextKind = "hotkey";
+            _contextId = hotkey.Id;
+            await ShowContextMenu(args).ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ShowHotkeyContextMenu)} failed.");
+            throw;
+        }
     }
 
     private async Task ShowWorkspaceContextMenu(MouseEventArgs args)
     {
-        _contextKind = "workspace";
-        _contextId = null;
-        await ShowContextMenu(args).ConfigureAwait(true);
+        try
+        {
+            _contextKind = "workspace";
+            _contextId = null;
+            await ShowContextMenu(args).ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ShowWorkspaceContextMenu)} failed.");
+            throw;
+        }
     }
 
     private async Task ShowContextMenu(MouseEventArgs args)
     {
-        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
-        await _streamingContextMenu.ShowAsync(args).ConfigureAwait(true);
+        try
+        {
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            await _streamingContextMenu.ShowAsync(args).ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ShowContextMenu)} failed.");
+            throw;
+        }
     }
 
     private void EditContextProvider()
     {
-        var profile = _machine.Providers.FirstOrDefault(item => item.Id == _contextId);
-        if (profile is not null) EditProvider(profile);
+        try
+        {
+            var profile = _machine.Providers.FirstOrDefault(item => item.Id == _contextId);
+            if (profile is not null) EditProvider(profile);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(EditContextProvider)} failed.");
+            throw;
+        }
     }
 
     private void DuplicateContextProvider()
     {
-        var profile = _machine.Providers.FirstOrDefault(item => item.Id == _contextId);
-        if (profile is null) return;
-        _providerDraft = Clone(profile);
-        DuplicateCurrentProvider();
+        try
+        {
+            var profile = _machine.Providers.FirstOrDefault(item => item.Id == _contextId);
+            if (profile is null) return;
+            _providerDraft = Clone(profile);
+            DuplicateCurrentProvider();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(DuplicateContextProvider)} failed.");
+            throw;
+        }
     }
 
     private async Task DeleteContextProvider()
     {
-        var profile = _machine.Providers.FirstOrDefault(item => item.Id == _contextId);
-        if (profile is null) return;
-        _providerDraft = Clone(profile);
-        await DeleteProvider().ConfigureAwait(true);
+        try
+        {
+            var profile = _machine.Providers.FirstOrDefault(item => item.Id == _contextId);
+            if (profile is null) return;
+            _providerDraft = Clone(profile);
+            await DeleteProvider().ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(DeleteContextProvider)} failed.");
+            throw;
+        }
     }
 
     private void SelectContextOutput()
     {
-        if (_contextId is { } id) _selectedOutputId = id;
+        try
+        {
+            if (_contextId is { } id) _selectedOutputId = id;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(SelectContextOutput)} failed.");
+            throw;
+        }
     }
 
     private void ApplyContextOutputDefaults()
     {
-        if (_contextId is not { } id) return;
-        var output = _draft.Outputs.FirstOrDefault(item => item.Id == id);
-        if (output is null) return;
-        _selectedOutputId = id;
-        ApplySelectedOutputDefaults();
+        try
+        {
+            if (_contextId is not { } id) return;
+            var output = _draft.Outputs.FirstOrDefault(item => item.Id == id);
+            if (output is null) return;
+            _selectedOutputId = id;
+            ApplySelectedOutputDefaults();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ApplyContextOutputDefaults)} failed.");
+            throw;
+        }
     }
 
     private void DuplicateContextOutput()
     {
-        if (_contextId is not { } id) return;
-        var output = _draft.Outputs.FirstOrDefault(item => item.Id == id);
-        if (output is not null) DuplicateOutput(output);
+        try
+        {
+            if (_contextId is not { } id) return;
+            var output = _draft.Outputs.FirstOrDefault(item => item.Id == id);
+            if (output is not null) DuplicateOutput(output);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(DuplicateContextOutput)} failed.");
+            throw;
+        }
     }
 
     private void RemoveContextOutput()
     {
-        if (_contextId is { } id) RemoveOutput(id);
+        try
+        {
+            if (_contextId is { } id) RemoveOutput(id);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(RemoveContextOutput)} failed.");
+            throw;
+        }
     }
 
     private void DuplicateContextDevice()
     {
-        var profile = _machine.Devices.FirstOrDefault(item => item.Id == _contextId);
-        if (profile is not null) DuplicateDeviceProfile(profile);
+        try
+        {
+            var profile = _machine.Devices.FirstOrDefault(item => item.Id == _contextId);
+            if (profile is not null) DuplicateDeviceProfile(profile);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(DuplicateContextDevice)} failed.");
+            throw;
+        }
     }
 
     private void RemoveContextDevice()
     {
-        if (_contextId is { } id) RemoveDeviceProfile(id);
+        try
+        {
+            if (_contextId is { } id) RemoveDeviceProfile(id);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(RemoveContextDevice)} failed.");
+            throw;
+        }
     }
 
     private void DuplicateContextHotkey()
     {
-        var hotkey = _draft.Hotkeys.FirstOrDefault(item => item.Id == _contextId);
-        if (hotkey is not null) DuplicateHotkey(hotkey);
+        try
+        {
+            var hotkey = _draft.Hotkeys.FirstOrDefault(item => item.Id == _contextId);
+            if (hotkey is not null) DuplicateHotkey(hotkey);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(DuplicateContextHotkey)} failed.");
+            throw;
+        }
     }
 
     private void RemoveContextHotkey()
     {
-        if (_contextId is { } id) RemoveHotkey(id);
+        try
+        {
+            if (_contextId is { } id) RemoveHotkey(id);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(RemoveContextHotkey)} failed.");
+            throw;
+        }
     }
 
     private string EstimatedRecordingStorageText
@@ -1560,35 +2221,73 @@
         }
     }
 
-    private string RecordingVariantName(PublicationStreamRecordingVariant value) => value switch
+    private string RecordingVariantName(PublicationStreamRecordingVariant value) {
+        try
+        {
+            return value switch
     {
         PublicationStreamRecordingVariant.CleanMaster => "Clean master",
         PublicationStreamRecordingVariant.EachEnabledOutput => "Each enabled output",
         PublicationStreamRecordingVariant.SelectedOutputs => "Selected outputs",
         _ => value.ToString()
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(RecordingVariantName)} failed.");
+            throw;
+        }
+    }
 
     private async Task Apply()
     {
-        _twitchOAuthCancellation?.Cancel();
-        await CloseTwitchAuthorizationWindowAsync().ConfigureAwait(true);
-        if (_draft.AdaptiveMedia.Enabled)
+        try
         {
-            foreach (var output in _draft.Outputs.Where(item => item.QualityPreset != PublicationStreamQualityPreset.Custom))
-                ApplyQualityPreset(output);
-            if (_draft.Lan.QualityPreset != PublicationStreamQualityPreset.Custom) ApplyLanRecommendation();
+            _twitchOAuthCancellation?.Cancel();
+            await CloseTwitchAuthorizationWindowAsync().ConfigureAwait(true);
+            if (_draft.AdaptiveMedia.Enabled)
+            {
+                foreach (var output in _draft.Outputs.Where(item => item.QualityPreset != PublicationStreamQualityPreset.Custom))
+                    ApplyQualityPreset(output);
+                if (_draft.Lan.QualityPreset != PublicationStreamQualityPreset.Custom) ApplyLanRecommendation();
+            }
+            await Saved.InvokeAsync(_draft).ConfigureAwait(true);
+    
         }
-        await Saved.InvokeAsync(_draft).ConfigureAwait(true);
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(Apply)} failed.");
+            throw;
+        }
     }
 
     private async Task Cancel()
     {
-        _twitchOAuthCancellation?.Cancel();
-        await CloseTwitchAuthorizationWindowAsync().ConfigureAwait(true);
-        await Cancelled.InvokeAsync().ConfigureAwait(true);
+        try
+        {
+            _twitchOAuthCancellation?.Cancel();
+            await CloseTwitchAuthorizationWindowAsync().ConfigureAwait(true);
+            await Cancelled.InvokeAsync().ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(Cancel)} failed.");
+            throw;
+        }
     }
     private T Clone<T>(T value) => JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(value))!;
-    private string ShortId(string value) => string.IsNullOrWhiteSpace(value) ? "default" : value.Length <= 16 ? value : value[..16] + "…";
+    private string ShortId(string value) {
+        try
+        {
+            return string.IsNullOrWhiteSpace(value) ? "default" : value.Length <= 16 ? value : value[..16] + "…";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StreamingStudio)}.{nameof(ShortId)} failed.");
+            throw;
+        }
+    }
 
     private sealed record WorkflowStep(int Number, string Title, string Text);
 }

@@ -65,52 +65,118 @@
     {
         try
         {
-            if (!LocalizationService.GetAvailableCultures().Contains(_culture, StringComparer.OrdinalIgnoreCase)) _culture = "en-US";
-            Load();
+            try
+            {
+                if (!LocalizationService.GetAvailableCultures().Contains(_culture, StringComparer.OrdinalIgnoreCase)) _culture = "en-US";
+                Load();
+            }
+            catch (Exception exception)
+            {
+                Logger.LogError(exception, "Could not initialize the PublisherStudio localization editor.");
+                _status = exception.Message;
+                Notifications.Error(exception.Message, "Translations could not be loaded", nameof(Localization));
+            }
+    
         }
-        catch (Exception exception)
+        catch (Exception __componentMethodException)
         {
-            Logger.LogError(exception, "Could not initialize the PublisherStudio localization editor.");
-            _status = exception.Message;
-            Notifications.Error(exception.Message, "Translations could not be loaded", nameof(Localization));
+            Logger.LogError(__componentMethodException, $"Component method {nameof(Localization)}.{nameof(OnInitialized)} failed.");
+            throw;
         }
     }
 
     private Task ChangeCultureAsync(ChangeEventArgs args)
     {
-        _culture = args.Value?.ToString() ?? "en-US";
-        Load();
-        return Task.CompletedTask;
+        try
+        {
+            _culture = args.Value?.ToString() ?? "en-US";
+            Load();
+            return Task.CompletedTask;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(Localization)}.{nameof(ChangeCultureAsync)} failed.");
+            throw;
+        }
     }
 
     private void Load()
     {
-        _strings = new Dictionary<string, string>(LocalizationService.GetStrings(_culture), StringComparer.OrdinalIgnoreCase);
-        _status = $"Loaded {_strings.Count} strings for {_culture}.";
-        Logger.LogInformation("Loaded {StringCount} localization strings for culture {Culture}.", _strings.Count, _culture);
+        try
+        {
+            _strings = new Dictionary<string, string>(LocalizationService.GetStrings(_culture), StringComparer.OrdinalIgnoreCase);
+            _status = $"Loaded {_strings.Count} strings for {_culture}.";
+            Logger.LogInformation("Loaded {StringCount} localization strings for culture {Culture}.", _strings.Count, _culture);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(Localization)}.{nameof(Load)} failed.");
+            throw;
+        }
     }
 
-    private void Update(string key, string? value) => _strings[key] = value ?? string.Empty;
+    private void Update(string key, string? value) {
+        try
+        {
+            _strings[key] = value ?? string.Empty;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(Localization)}.{nameof(Update)} failed.");
+            throw;
+        }
+    }
 
     private async Task SaveAsync()
     {
-        _saving = true;
         try
         {
-            await LocalizationService.SaveOverridesAsync(_culture, _strings).ConfigureAwait(true);
-            _status = $"Saved {_strings.Count} {_culture} string overrides.";
-            Logger.LogInformation("Saved {StringCount} localization overrides for culture {Culture}.", _strings.Count, _culture);
-            Notifications.Success(_status, "Translations saved", nameof(Localization));
+            _saving = true;
+            try
+            {
+                await LocalizationService.SaveOverridesAsync(_culture, _strings).ConfigureAwait(true);
+                _status = $"Saved {_strings.Count} {_culture} string overrides.";
+                Logger.LogInformation("Saved {StringCount} localization overrides for culture {Culture}.", _strings.Count, _culture);
+                Notifications.Success(_status, "Translations saved", nameof(Localization));
+            }
+            catch (Exception exception)
+            {
+                Logger.LogError(exception, "Could not save localization overrides for culture {Culture}.", _culture);
+                _status = exception.Message;
+                Notifications.Error(exception.Message, "Translations were not saved", nameof(Localization));
+            }
+            finally { _saving = false; }
+    
         }
-        catch (Exception exception)
+        catch (Exception __componentMethodException)
         {
-            Logger.LogError(exception, "Could not save localization overrides for culture {Culture}.", _culture);
-            _status = exception.Message;
-            Notifications.Error(exception.Message, "Translations were not saved", nameof(Localization));
+            Logger.LogError(__componentMethodException, $"Component method {nameof(Localization)}.{nameof(SaveAsync)} failed.");
+            throw;
         }
-        finally { _saving = false; }
     }
 
-    private void ApplyCulture() => Navigation.NavigateTo($"api/configuration/localization/select?culture={Uri.EscapeDataString(_culture)}&returnUrl=%2F", true);
-    private void Back() => Navigation.NavigateTo("/");
+    private void ApplyCulture() {
+        try
+        {
+            Navigation.NavigateTo($"api/configuration/localization/select?culture={Uri.EscapeDataString(_culture)}&returnUrl=%2F", true);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(Localization)}.{nameof(ApplyCulture)} failed.");
+            throw;
+        }
+    }
+    private void Back() {
+        try
+        {
+            Navigation.NavigateTo("/");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(Localization)}.{nameof(Back)} failed.");
+            throw;
+        }
+    }
 }

@@ -158,22 +158,31 @@
 
     protected override void OnParametersSet()
     {
-        if (!Visible)
+        try
         {
-            _ready = false;
-            _saving = false;
-            _opening = false;
-            _error = null;
-            ResetDataSelection();
+            if (!Visible)
+            {
+                _ready = false;
+                _saving = false;
+                _opening = false;
+                _error = null;
+                ResetDataSelection();
+            }
+            else if (_initializedSession != SessionId)
+            {
+                _initializedSession = SessionId;
+                _ready = false;
+                _saving = false;
+                _opening = false;
+                _error = null;
+                ResetDataSelection();
+            }
+    
         }
-        else if (_initializedSession != SessionId)
+        catch (Exception __componentMethodException)
         {
-            _initializedSession = SessionId;
-            _ready = false;
-            _saving = false;
-            _opening = false;
-            _error = null;
-            ResetDataSelection();
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(OnParametersSet)} failed.");
+            throw;
         }
     }
 
@@ -181,83 +190,152 @@
     {
         try
         {
-            if (!Visible)
+            try
             {
-                if (_module is not null && _registeredSession != Guid.Empty)
+                if (!Visible)
                 {
-                    await _module.InvokeVoidAsync("dispose", $"spreadsheet-frame-{_registeredSession:N}").ConfigureAwait(true);
-                    _registeredSession = Guid.Empty;
+                    if (_module is not null && _registeredSession != Guid.Empty)
+                    {
+                        await _module.InvokeVoidAsync("dispose", $"spreadsheet-frame-{_registeredSession:N}").ConfigureAwait(true);
+                        _registeredSession = Guid.Empty;
+                    }
+                    return;
                 }
-                return;
+                if (SessionId == Guid.Empty || _initializedSession != SessionId || _registeredSession == SessionId) return;
+                _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/spreadsheetEditorInterop.js").ConfigureAwait(true);
+                _self ??= DotNetObjectReference.Create(this);
+                if (_registeredSession != Guid.Empty)
+                    await _module.InvokeVoidAsync("dispose", $"spreadsheet-frame-{_registeredSession:N}").ConfigureAwait(true);
+                await _module.InvokeVoidAsync("initialize", FrameId, SessionId.ToString("D"), _self).ConfigureAwait(true);
+                _registeredSession = SessionId;
             }
-            if (SessionId == Guid.Empty || _initializedSession != SessionId || _registeredSession == SessionId) return;
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/spreadsheetEditorInterop.js").ConfigureAwait(true);
-            _self ??= DotNetObjectReference.Create(this);
-            if (_registeredSession != Guid.Empty)
-                await _module.InvokeVoidAsync("dispose", $"spreadsheet-frame-{_registeredSession:N}").ConfigureAwait(true);
-            await _module.InvokeVoidAsync("initialize", FrameId, SessionId.ToString("D"), _self).ConfigureAwait(true);
-            _registeredSession = SessionId;
+            catch (JSDisconnectedException) { }
+            catch (TaskCanceledException) { }
+            catch (JSException ex)
+            {
+                _registeredSession = SessionId;
+                _ready = false;
+                _error = $"Spreadsheet Studio could not start: {ex.Message}";
+                await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            }
+    
         }
-        catch (JSDisconnectedException) { }
-        catch (TaskCanceledException) { }
-        catch (JSException ex)
+        catch (Exception __componentMethodException)
         {
-            _registeredSession = SessionId;
-            _ready = false;
-            _error = $"Spreadsheet Studio could not start: {ex.Message}";
-            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(OnAfterRenderAsync)} failed.");
+            throw;
         }
     }
 
-    private Task Apply() => RequestSave("apply");
+    private Task Apply() {
+        try
+        {
+            return RequestSave("apply");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(Apply)} failed.");
+            throw;
+        }
+    }
 
-    private Task Download() => RequestSave("download");
+    private Task Download() {
+        try
+        {
+            return RequestSave("download");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(Download)} failed.");
+            throw;
+        }
+    }
 
     private async Task RequestDataObject()
     {
-        if (_module is null || !_ready || _saving || _opening) return;
-        _selectionError = null;
-        try { await _module.InvokeVoidAsync("requestDataSelection", FrameId, SessionId.ToString("D")).ConfigureAwait(true); }
-        catch (JSException ex) { _error = $"The spreadsheet selection could not be read: {ex.Message}"; }
+        try
+        {
+            if (_module is null || !_ready || _saving || _opening) return;
+            _selectionError = null;
+            try { await _module.InvokeVoidAsync("requestDataSelection", FrameId, SessionId.ToString("D")).ConfigureAwait(true); }
+            catch (JSException ex) { _error = $"The spreadsheet selection could not be read: {ex.Message}"; }
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(RequestDataObject)} failed.");
+            throw;
+        }
     }
 
     private async Task RequestSave(string intent)
     {
-        if (_module is null || !_ready || _saving || _opening) return;
-        _saving = true;
-        _error = null;
         try
         {
-            await _module.InvokeVoidAsync("requestSave", FrameId, SessionId.ToString("D"), intent).ConfigureAwait(true);
+            if (_module is null || !_ready || _saving || _opening) return;
+            _saving = true;
+            _error = null;
+            try
+            {
+                await _module.InvokeVoidAsync("requestSave", FrameId, SessionId.ToString("D"), intent).ConfigureAwait(true);
+            }
+            catch (JSDisconnectedException)
+            {
+                _saving = false;
+                _error = "The browser connection closed before the workbook could be saved.";
+            }
+            catch (JSException ex)
+            {
+                _saving = false;
+                _error = $"The workbook save command failed: {ex.Message}";
+            }
+    
         }
-        catch (JSDisconnectedException)
+        catch (Exception __componentMethodException)
         {
-            _saving = false;
-            _error = "The browser connection closed before the workbook could be saved.";
-        }
-        catch (JSException ex)
-        {
-            _saving = false;
-            _error = $"The workbook save command failed: {ex.Message}";
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(RequestSave)} failed.");
+            throw;
         }
     }
 
     private async Task Cancel()
     {
-        if (_saving || _opening) return;
-        await Cancelled.InvokeAsync().ConfigureAwait(true);
+        try
+        {
+            if (_saving || _opening) return;
+            await Cancelled.InvokeAsync().ConfigureAwait(true);
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(Cancel)} failed.");
+            throw;
+        }
     }
 
     [JSInvokable]
-    public Task SpreadsheetOpening() => InvokeAsync(() =>
+    public Task SpreadsheetOpening() {
+        try
+        {
+            return InvokeAsync(() =>
     {
         _opening = true;
         _error = null;
         StateHasChanged();
     });
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(SpreadsheetOpening)} failed.");
+            throw;
+        }
+    }
 
     [JSInvokable]
-    public Task SpreadsheetReady(string? fileName) => InvokeAsync(() =>
+    public Task SpreadsheetReady(string? fileName) {
+        try
+        {
+            return InvokeAsync(() =>
     {
         _ready = true;
         _opening = false;
@@ -265,9 +343,19 @@
         _error = null;
         StateHasChanged();
     });
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(SpreadsheetReady)} failed.");
+            throw;
+        }
+    }
 
     [JSInvokable]
-    public Task SpreadsheetSaved(string intent) => InvokeAsync(async () =>
+    public Task SpreadsheetSaved(string intent) {
+        try
+        {
+            return InvokeAsync(async () =>
     {
         _saving = false;
         if (!Sessions.TryGet(SessionId, out var session))
@@ -282,9 +370,19 @@
         else
             StateHasChanged();
     });
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(SpreadsheetSaved)} failed.");
+            throw;
+        }
+    }
 
     [JSInvokable]
-    public Task SpreadsheetDataSelectionReceived(SpreadsheetDataSelection selection) => InvokeAsync(() =>
+    public Task SpreadsheetDataSelectionReceived(SpreadsheetDataSelection selection) {
+        try
+        {
+            return InvokeAsync(() =>
     {
         if (selection.Rows.Count == 0 || selection.Rows.All(row => row.All(string.IsNullOrWhiteSpace)))
         {
@@ -301,127 +399,227 @@
         RebuildSelectionColumnNames();
         StateHasChanged();
     });
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(SpreadsheetDataSelectionReceived)} failed.");
+            throw;
+        }
+    }
 
     private void ToggleSelectionHeaders(ChangeEventArgs args)
     {
-        _selectionFirstRowHeaders = args.Value is bool value && value;
-        _selectionError = null;
-        RebuildSelectionColumnNames();
+        try
+        {
+            _selectionFirstRowHeaders = args.Value is bool value && value;
+            _selectionError = null;
+            RebuildSelectionColumnNames();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(ToggleSelectionHeaders)} failed.");
+            throw;
+        }
     }
 
-    private void ChangeDataObjectName(ChangeEventArgs args) => _dataObjectName = args.Value?.ToString() ?? string.Empty;
+    private void ChangeDataObjectName(ChangeEventArgs args) {
+        try
+        {
+            _dataObjectName = args.Value?.ToString() ?? string.Empty;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(ChangeDataObjectName)} failed.");
+            throw;
+        }
+    }
 
     private void ChangeSelectionColumnName(int index, ChangeEventArgs args)
     {
-        if (index < 0 || index >= _selectionColumnNames.Count) return;
-        _selectionColumnNames[index] = args.Value?.ToString() ?? string.Empty;
-        _selectionError = null;
+        try
+        {
+            if (index < 0 || index >= _selectionColumnNames.Count) return;
+            _selectionColumnNames[index] = args.Value?.ToString() ?? string.Empty;
+            _selectionError = null;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(ChangeSelectionColumnName)} failed.");
+            throw;
+        }
     }
 
     private void ChangeSelectionColumnType(int index, ChangeEventArgs args)
     {
-        if (index < 0 || index >= _selectionColumnTypeKeys.Count) return;
-        var value = args.Value?.ToString() ?? "Auto";
-        _selectionColumnTypeKeys[index] = Enum.TryParse<PublicationDataValueKind>(value, out var kind) ? kind.ToString() : "Auto";
-        _selectionError = null;
+        try
+        {
+            if (index < 0 || index >= _selectionColumnTypeKeys.Count) return;
+            var value = args.Value?.ToString() ?? "Auto";
+            _selectionColumnTypeKeys[index] = Enum.TryParse<PublicationDataValueKind>(value, out var kind) ? kind.ToString() : "Auto";
+            _selectionError = null;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(ChangeSelectionColumnType)} failed.");
+            throw;
+        }
     }
 
     private PublicationDataValueKind EffectiveSelectionKind(int index)
-        => index >= 0 && index < _selectionColumnTypeKeys.Count && Enum.TryParse<PublicationDataValueKind>(_selectionColumnTypeKeys[index], out var explicitKind)
+        {
+        try
+        {
+            return index >= 0 && index < _selectionColumnTypeKeys.Count && Enum.TryParse<PublicationDataValueKind>(_selectionColumnTypeKeys[index], out var explicitKind)
             ? explicitKind
             : index >= 0 && index < _selectionInferredKinds.Count ? _selectionInferredKinds[index] : PublicationDataValueKind.Text;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(EffectiveSelectionKind)} failed.");
+            throw;
+        }
+    }
 
     private async Task CreateDataObject()
     {
-        if (_dataSelection is null) return;
-        var name = _dataObjectName.Trim();
-        if (string.IsNullOrWhiteSpace(name)) { _selectionError = "Enter a data object name."; return; }
-        var columns = _selectionColumnNames.Select(value => value.Trim()).ToList();
-        if (columns.Count == 0 || columns.Any(string.IsNullOrWhiteSpace)) { _selectionError = "Every selected column needs a name."; return; }
-        if (columns.Distinct(StringComparer.OrdinalIgnoreCase).Count() != columns.Count) { _selectionError = "Column names must be unique."; return; }
-
-        var sourceRows = _dataSelection.Rows.Skip(_selectionFirstRowHeaders ? 1 : 0).ToList();
-        if (sourceRows.Count == 0) { _selectionError = "The selection contains headers but no data rows."; return; }
-        var normalizedRows = sourceRows.Select(row => Enumerable.Range(0, columns.Count)
-            .Select(index => index < row.Count ? row[index] : string.Empty)
-            .ToList()).ToList();
-
-        var typedColumns = columns.Select((column, index) => new PublicationDataColumn
+        try
         {
-            Name = column,
-            ValueKind = EffectiveSelectionKind(index),
-            ValueKindExplicit = index < _selectionColumnTypeKeys.Count && !string.Equals(_selectionColumnTypeKeys[index], "Auto", StringComparison.OrdinalIgnoreCase)
-        }).ToList();
-        var candidate = BuildSelectionDataObject(typedColumns, normalizedRows);
-        var validation = DataService.Validate(candidate);
-        if (validation.Severity == PublicationDataValidationSeverity.Error)
-        {
-            _selectionError = validation.Issues.FirstOrDefault(issue => issue.Severity == PublicationDataValidationSeverity.Error)?.Message ?? validation.Message;
-            return;
+            if (_dataSelection is null) return;
+            var name = _dataObjectName.Trim();
+            if (string.IsNullOrWhiteSpace(name)) { _selectionError = "Enter a data object name."; return; }
+            var columns = _selectionColumnNames.Select(value => value.Trim()).ToList();
+            if (columns.Count == 0 || columns.Any(string.IsNullOrWhiteSpace)) { _selectionError = "Every selected column needs a name."; return; }
+            if (columns.Distinct(StringComparer.OrdinalIgnoreCase).Count() != columns.Count) { _selectionError = "Column names must be unique."; return; }
+
+            var sourceRows = _dataSelection.Rows.Skip(_selectionFirstRowHeaders ? 1 : 0).ToList();
+            if (sourceRows.Count == 0) { _selectionError = "The selection contains headers but no data rows."; return; }
+            var normalizedRows = sourceRows.Select(row => Enumerable.Range(0, columns.Count)
+                .Select(index => index < row.Count ? row[index] : string.Empty)
+                .ToList()).ToList();
+
+            var typedColumns = columns.Select((column, index) => new PublicationDataColumn
+            {
+                Name = column,
+                ValueKind = EffectiveSelectionKind(index),
+                ValueKindExplicit = index < _selectionColumnTypeKeys.Count && !string.Equals(_selectionColumnTypeKeys[index], "Auto", StringComparison.OrdinalIgnoreCase)
+            }).ToList();
+            var candidate = BuildSelectionDataObject(typedColumns, normalizedRows);
+            var validation = DataService.Validate(candidate);
+            if (validation.Severity == PublicationDataValidationSeverity.Error)
+            {
+                _selectionError = validation.Issues.FirstOrDefault(issue => issue.Severity == PublicationDataValidationSeverity.Error)?.Message ?? validation.Message;
+                return;
+            }
+
+            await DataObjectCreated.InvokeAsync(new SpreadsheetDataObjectResult
+            {
+                Name = name,
+                WorkbookFileName = FileName,
+                SheetName = _dataSelection.SheetName,
+                RangeAddress = _dataSelection.RangeAddress,
+                FirstRowContainsHeaders = _selectionFirstRowHeaders,
+                ColumnNames = columns,
+                Columns = typedColumns,
+                Rows = normalizedRows
+            }).ConfigureAwait(true);
+            ResetDataSelection();
+    
         }
-
-        await DataObjectCreated.InvokeAsync(new SpreadsheetDataObjectResult
+        catch (Exception __componentMethodException)
         {
-            Name = name,
-            WorkbookFileName = FileName,
-            SheetName = _dataSelection.SheetName,
-            RangeAddress = _dataSelection.RangeAddress,
-            FirstRowContainsHeaders = _selectionFirstRowHeaders,
-            ColumnNames = columns,
-            Columns = typedColumns,
-            Rows = normalizedRows
-        }).ConfigureAwait(true);
-        ResetDataSelection();
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(CreateDataObject)} failed.");
+            throw;
+        }
     }
 
-    private void CancelDataObject() => ResetDataSelection();
+    private void CancelDataObject() {
+        try
+        {
+            ResetDataSelection();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(CancelDataObject)} failed.");
+            throw;
+        }
+    }
 
     private void ResetDataSelection()
     {
-        _dataSelection = null;
-        _dataObjectName = "Spreadsheet Data";
-        _selectionFirstRowHeaders = true;
-        _selectionColumnNames = [];
-        _selectionInferredKinds = [];
-        _selectionColumnTypeKeys = [];
-        _selectionError = null;
+        try
+        {
+            _dataSelection = null;
+            _dataObjectName = "Spreadsheet Data";
+            _selectionFirstRowHeaders = true;
+            _selectionColumnNames = [];
+            _selectionInferredKinds = [];
+            _selectionColumnTypeKeys = [];
+            _selectionError = null;
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(ResetDataSelection)} failed.");
+            throw;
+        }
     }
 
     private void RebuildSelectionColumnNames()
     {
-        var width = SelectionColumnCount;
-        IReadOnlyList<string> source = _selectionFirstRowHeaders && _dataSelection?.Rows.Count > 0 ? _dataSelection.Rows[0] : Array.Empty<string>();
-        _selectionColumnNames = Enumerable.Range(0, width)
-            .Select(index => index < source.Count ? source[index].Trim() : string.Empty)
-            .ToList();
-        var dataRows = (_dataSelection?.Rows ?? []).Skip(_selectionFirstRowHeaders ? 1 : 0).ToList();
-        _selectionInferredKinds = Enumerable.Range(0, width)
-            .Select(index => DataService.InferKind(dataRows.Select(row => index < row.Count ? row[index] : string.Empty)))
-            .ToList();
-        _selectionColumnTypeKeys = Enumerable.Repeat("Auto", width).ToList();
+        try
+        {
+            var width = SelectionColumnCount;
+            IReadOnlyList<string> source = _selectionFirstRowHeaders && _dataSelection?.Rows.Count > 0 ? _dataSelection.Rows[0] : Array.Empty<string>();
+            _selectionColumnNames = Enumerable.Range(0, width)
+                .Select(index => index < source.Count ? source[index].Trim() : string.Empty)
+                .ToList();
+            var dataRows = (_dataSelection?.Rows ?? []).Skip(_selectionFirstRowHeaders ? 1 : 0).ToList();
+            _selectionInferredKinds = Enumerable.Range(0, width)
+                .Select(index => DataService.InferKind(dataRows.Select(row => index < row.Count ? row[index] : string.Empty)))
+                .ToList();
+            _selectionColumnTypeKeys = Enumerable.Repeat("Auto", width).ToList();
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(RebuildSelectionColumnNames)} failed.");
+            throw;
+        }
     }
 
     private PublicationDataObject BuildSelectionDataObject(IReadOnlyList<PublicationDataColumn>? schema = null, IReadOnlyList<List<string>>? normalizedRows = null)
     {
-        var columns = schema?.ToList() ?? _selectionColumnNames.Select((name, index) => new PublicationDataColumn
+        try
         {
-            Name = name.Trim(),
-            ValueKind = EffectiveSelectionKind(index),
-            ValueKindExplicit = index < _selectionColumnTypeKeys.Count && !string.Equals(_selectionColumnTypeKeys[index], "Auto", StringComparison.OrdinalIgnoreCase)
-        }).ToList();
-        var rows = normalizedRows?.ToList() ?? (_dataSelection?.Rows ?? []).Skip(_selectionFirstRowHeaders ? 1 : 0)
-            .Select(row => Enumerable.Range(0, columns.Count).Select(index => index < row.Count ? row[index] : string.Empty).ToList()).ToList();
-        return new PublicationDataObject
-        {
-            Name = _dataObjectName.Trim(),
-            SourceKind = PublicationDataSourceKind.Json,
-            Columns = columns,
-            Rows = rows.Select(row => new PublicationDataRow
+            var columns = schema?.ToList() ?? _selectionColumnNames.Select((name, index) => new PublicationDataColumn
             {
-                Values = columns.Select((column, index) => (column.Name, Value: index < row.Count ? row[index] : string.Empty))
-                    .ToDictionary(pair => pair.Name, pair => pair.Value, StringComparer.OrdinalIgnoreCase)
-            }).ToList()
-        };
+                Name = name.Trim(),
+                ValueKind = EffectiveSelectionKind(index),
+                ValueKindExplicit = index < _selectionColumnTypeKeys.Count && !string.Equals(_selectionColumnTypeKeys[index], "Auto", StringComparison.OrdinalIgnoreCase)
+            }).ToList();
+            var rows = normalizedRows?.ToList() ?? (_dataSelection?.Rows ?? []).Skip(_selectionFirstRowHeaders ? 1 : 0)
+                .Select(row => Enumerable.Range(0, columns.Count).Select(index => index < row.Count ? row[index] : string.Empty).ToList()).ToList();
+            return new PublicationDataObject
+            {
+                Name = _dataObjectName.Trim(),
+                SourceKind = PublicationDataSourceKind.Json,
+                Columns = columns,
+                Rows = rows.Select(row => new PublicationDataRow
+                {
+                    Values = columns.Select((column, index) => (column.Name, Value: index < row.Count ? row[index] : string.Empty))
+                        .ToDictionary(pair => pair.Name, pair => pair.Value, StringComparer.OrdinalIgnoreCase)
+                }).ToList()
+            };
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(BuildSelectionDataObject)} failed.");
+            throw;
+        }
     }
 
     private PublicationDataValidationResult SelectionValidation
@@ -438,53 +636,111 @@
         }
     }
 
-    private string ValidationCss(PublicationDataValidationSeverity severity) => severity.ToString().ToLowerInvariant();
-    private string ValidationIcon(PublicationDataValidationSeverity severity) => severity switch
+    private string ValidationCss(PublicationDataValidationSeverity severity) {
+        try
+        {
+            return severity.ToString().ToLowerInvariant();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(ValidationCss)} failed.");
+            throw;
+        }
+    }
+    private string ValidationIcon(PublicationDataValidationSeverity severity) {
+        try
+        {
+            return severity switch
     {
         PublicationDataValidationSeverity.Success => "✓",
         PublicationDataValidationSeverity.Warning => "⚠",
         _ => "✕"
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(ValidationIcon)} failed.");
+            throw;
+        }
+    }
 
 
     private string DisplaySelectionColumnName(int index)
-        => index >= 0 && index < _selectionColumnNames.Count && !string.IsNullOrWhiteSpace(_selectionColumnNames[index])
+        {
+        try
+        {
+            return index >= 0 && index < _selectionColumnNames.Count && !string.IsNullOrWhiteSpace(_selectionColumnNames[index])
             ? _selectionColumnNames[index]
             : $"Column {index + 1}";
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(DisplaySelectionColumnName)} failed.");
+            throw;
+        }
+    }
 
     private bool LooksLikeHeaders(IReadOnlyList<List<string>> rows)
     {
-        if (rows.Count < 2 || rows[0].Count == 0) return false;
-        var first = rows[0].Select(value => value?.Trim() ?? string.Empty).ToArray();
-        var nonEmpty = first.Where(value => !string.IsNullOrWhiteSpace(value)).ToArray();
-        if (nonEmpty.Length == 0 || nonEmpty.Distinct(StringComparer.OrdinalIgnoreCase).Count() != nonEmpty.Length) return false;
-        return nonEmpty.Any(value => !DataService.TryParseNumber(value, out _)
-            && !bool.TryParse(value, out _)
-            && !DateTimeOffset.TryParse(value, out _));
+        try
+        {
+            if (rows.Count < 2 || rows[0].Count == 0) return false;
+            var first = rows[0].Select(value => value?.Trim() ?? string.Empty).ToArray();
+            var nonEmpty = first.Where(value => !string.IsNullOrWhiteSpace(value)).ToArray();
+            if (nonEmpty.Length == 0 || nonEmpty.Distinct(StringComparer.OrdinalIgnoreCase).Count() != nonEmpty.Length) return false;
+            return nonEmpty.Any(value => !DataService.TryParseNumber(value, out _)
+                && !bool.TryParse(value, out _)
+                && !DateTimeOffset.TryParse(value, out _));
+    
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(LooksLikeHeaders)} failed.");
+            throw;
+        }
     }
 
     [JSInvokable]
-    public Task SpreadsheetFailed(string message) => InvokeAsync(() =>
+    public Task SpreadsheetFailed(string message) {
+        try
+        {
+            return InvokeAsync(() =>
     {
         _saving = false;
         _opening = false;
         _error = message;
         StateHasChanged();
     });
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(SpreadsheetFailed)} failed.");
+            throw;
+        }
+    }
 
     public async ValueTask DisposeAsync()
     {
-        if (_module is not null)
+        try
         {
-            try { await _module.InvokeVoidAsync("dispose", FrameId).ConfigureAwait(true); }
-            catch (JSDisconnectedException) { }
-            catch (TaskCanceledException) { }
-            try { await _module.DisposeAsync().ConfigureAwait(true); }
-            catch (JSDisconnectedException exception) { Logger.LogDebug(exception, "Spreadsheet Studio module disposal observed an already disconnected circuit."); }
-            catch (TaskCanceledException exception) { Logger.LogDebug(exception, "Spreadsheet Studio module disposal was cancelled during circuit shutdown."); }
-            catch (ObjectDisposedException exception) { Logger.LogDebug(exception, "Spreadsheet Studio module was already disposed during circuit shutdown."); }
+            if (_module is not null)
+            {
+                try { await _module.InvokeVoidAsync("dispose", FrameId).ConfigureAwait(true); }
+                catch (JSDisconnectedException) { }
+                catch (TaskCanceledException) { }
+                try { await _module.DisposeAsync().ConfigureAwait(true); }
+                catch (JSDisconnectedException exception) { Logger.LogDebug(exception, "Spreadsheet Studio module disposal observed an already disconnected circuit."); }
+                catch (TaskCanceledException exception) { Logger.LogDebug(exception, "Spreadsheet Studio module disposal was cancelled during circuit shutdown."); }
+                catch (ObjectDisposedException exception) { Logger.LogDebug(exception, "Spreadsheet Studio module was already disposed during circuit shutdown."); }
+            }
+            _self?.Dispose();
+    
         }
-        _self?.Dispose();
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(SpreadsheetEditor)}.{nameof(DisposeAsync)} failed.");
+            throw;
+        }
     }
 }
 

@@ -1,5 +1,6 @@
 @namespace PublisherStudio.Components.Editor
 
+@inject ILogger<HtmlEmbedView> Logger
 <div class="publication-html-embed-shell @(DesignerMode ? "designer-object-mode" : "interaction-mode")">
     <iframe class="publication-html-embed"
             title="@Item.Name"
@@ -32,5 +33,15 @@
         }
     }
 
-    private string SafeScript(string value) => value.Replace("</script", "<\\/script", StringComparison.OrdinalIgnoreCase);
+    private string SafeScript(string value) {
+        try
+        {
+            return value.Replace("</script", "<\\/script", StringComparison.OrdinalIgnoreCase);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(HtmlEmbedView)}.{nameof(SafeScript)} failed.");
+            throw;
+        }
+    }
 }

@@ -44,15 +44,19 @@ public sealed class RtspLanServer : IAsyncDisposable
     /// Stores the internal access token state used by <see cref="RtspLanServer"/> while executing its surrounding workflow.
     /// </summary>
     private readonly string _accessToken;
+    /// <summary>Observes each accepted RTSP client operation so no client task is discarded.</summary>
+    private readonly ISupervisedTaskRunner _taskRunner;
 
     /// <summary>
     /// Initializes a new <see cref="RtspLanServer"/> instance and captures the dependencies or initial state required by its rtsp LAN server workflow.
     /// </summary>
     /// <param name="bindAddress">P address dependency used by the rtsp LAN server workflow to provide the corresponding application capability.</param>
     /// <param name="port">Port value supplied to the rtsp LAN server operation and used when producing its result.</param>
+    /// <param name="taskRunner">Supervised task runner used to observe accepted RTSP clients.</param>
     /// <param name="accessToken">Access token value supplied to the rtsp LAN server operation and used when producing its result.</param>
-    public RtspLanServer(IPAddress bindAddress, int port, string? accessToken = null)
+    public RtspLanServer(IPAddress bindAddress, int port, ISupervisedTaskRunner taskRunner, string? accessToken = null)
     {
+        _taskRunner = taskRunner;
         _accessToken = accessToken?.Trim() ?? string.Empty;
         _listener = new TcpListener(bindAddress, port);
         _rtpInput = new UdpClient(new IPEndPoint(IPAddress.Loopback, 0));
@@ -110,7 +114,7 @@ public sealed class RtspLanServer : IAsyncDisposable
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     var client = await _listener.AcceptTcpClientAsync(cancellationToken).ConfigureAwait(false);
-                    _ = Task.Run(() => HandleClientAsync(client, cancellationToken), cancellationToken);
+                    _taskRunner.Run(nameof(RtspLanServer), "HandleClient", _ => HandleClientAsync(client, cancellationToken), cancellationToken);
                 }
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }

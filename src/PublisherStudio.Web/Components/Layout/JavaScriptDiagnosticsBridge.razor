@@ -12,28 +12,37 @@
     {
         try
         {
-            if (!firstRender || _disposed)
-                return;
+            try
+            {
+                if (!firstRender || _disposed)
+                    return;
 
-            _diagnosticsReference = DotNetObjectReference.Create(this);
-            await JS.InvokeVoidAsync("publisherStudioJavaScriptDiagnostics.bindDotNet", _diagnosticsReference).ConfigureAwait(true);
-            Logger.LogInformation($"PublisherStudio browser diagnostics attached; JavaScript failures will be mirrored to the application logger.");
+                _diagnosticsReference = DotNetObjectReference.Create(this);
+                await JS.InvokeVoidAsync("publisherStudioJavaScriptDiagnostics.bindDotNet", _diagnosticsReference).ConfigureAwait(true);
+                Logger.LogInformation($"PublisherStudio browser diagnostics attached; JavaScript failures will be mirrored to the application logger.");
+            }
+            catch (JSDisconnectedException exception)
+            {
+                Logger.LogDebug(exception, $"PublisherStudio browser diagnostics ended because the circuit disconnected.");
+            }
+            catch (OperationCanceledException exception)
+            {
+                Logger.LogDebug(exception, $"PublisherStudio browser diagnostics were cancelled during circuit shutdown.");
+            }
+            catch (Exception exception)
+            {
+                Logger.LogError(exception, $"PublisherStudio browser diagnostics could not attach.");
+                OperationalNotifications.Error(
+                    "Browser diagnostics could not attach. Review the application log for the underlying error.",
+                    "Browser diagnostics",
+                    nameof(JavaScriptDiagnosticsBridge));
+            }
+    
         }
-        catch (JSDisconnectedException exception)
+        catch (Exception __componentMethodException)
         {
-            Logger.LogDebug(exception, $"PublisherStudio browser diagnostics ended because the circuit disconnected.");
-        }
-        catch (OperationCanceledException exception)
-        {
-            Logger.LogDebug(exception, $"PublisherStudio browser diagnostics were cancelled during circuit shutdown.");
-        }
-        catch (Exception exception)
-        {
-            Logger.LogError(exception, $"PublisherStudio browser diagnostics could not attach.");
-            OperationalNotifications.Error(
-                "Browser diagnostics could not attach. Review the application log for the underlying error.",
-                "Browser diagnostics",
-                nameof(JavaScriptDiagnosticsBridge));
+            Logger.LogError(__componentMethodException, $"Component method {nameof(JavaScriptDiagnosticsBridge)}.{nameof(OnAfterRenderAsync)} failed.");
+            throw;
         }
     }
 
@@ -42,13 +51,22 @@
     {
         try
         {
-            Logger.LogError($"Browser JavaScript failure in {context}: {message}{Environment.NewLine}{stack}");
-            return Task.CompletedTask;
+            try
+            {
+                Logger.LogError($"Browser JavaScript failure in {context}: {message}{Environment.NewLine}{stack}");
+                return Task.CompletedTask;
+            }
+            catch (Exception exception)
+            {
+                Logger.LogError(exception, $"PublisherStudio could not record a browser JavaScript failure from {context}.");
+                return Task.CompletedTask;
+            }
+    
         }
-        catch (Exception exception)
+        catch (Exception __componentMethodException)
         {
-            Logger.LogError(exception, $"PublisherStudio could not record a browser JavaScript failure from {context}.");
-            return Task.CompletedTask;
+            Logger.LogError(__componentMethodException, $"Component method {nameof(JavaScriptDiagnosticsBridge)}.{nameof(ReportJavaScriptErrorAsync)} failed.");
+            throw;
         }
     }
 
@@ -56,17 +74,26 @@
     {
         try
         {
-            if (_disposed)
-                return;
+            try
+            {
+                if (_disposed)
+                    return;
 
-            _disposed = true;
-            _diagnosticsReference?.Dispose();
-            _diagnosticsReference = null;
-            Logger.LogDebug($"The PublisherStudio JavaScript diagnostics bridge was disposed.");
+                _disposed = true;
+                _diagnosticsReference?.Dispose();
+                _diagnosticsReference = null;
+                Logger.LogDebug($"The PublisherStudio JavaScript diagnostics bridge was disposed.");
+            }
+            catch (Exception exception)
+            {
+                Logger.LogWarning(exception, $"The PublisherStudio JavaScript diagnostics bridge could not be disposed cleanly.");
+            }
+    
         }
-        catch (Exception exception)
+        catch (Exception __componentMethodException)
         {
-            Logger.LogWarning(exception, $"The PublisherStudio JavaScript diagnostics bridge could not be disposed cleanly.");
+            Logger.LogError(__componentMethodException, $"Component method {nameof(JavaScriptDiagnosticsBridge)}.{nameof(Dispose)} failed.");
+            throw;
         }
     }
 }

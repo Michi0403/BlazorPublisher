@@ -1,5 +1,6 @@
 @namespace PublisherStudio.Components.Editor
 
+@inject ILogger<PanelElementPreview> Logger
 <div class="panel-element-preview kind-@Item.Kind.ToString().ToLowerInvariant()">
     @switch (Item)
     {
@@ -67,7 +68,10 @@
 @code {
     [Parameter, EditorRequired] public PublicationElement Item { get; set; } = default!;
 
-    private string Icon(PublicationComponentKind kind) => kind switch
+    private string Icon(PublicationComponentKind kind) {
+        try
+        {
+            return kind switch
     {
         PublicationComponentKind.Chat => "pub-icon pub-icon-chat",
         PublicationComponentKind.Map or PublicationComponentKind.VectorMap => "pub-icon pub-icon-map",
@@ -75,4 +79,11 @@
         PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu => "pub-icon pub-icon-menu",
         _ => "pub-icon pub-icon-data"
     };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelElementPreview)}.{nameof(Icon)} failed.");
+            throw;
+        }
+    }
 }

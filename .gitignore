@@ -5,9 +5,14 @@ artifacts/
 *.user
 *.suo
 *.db
+*.db-shm
+*.db-wal
 *.pfx
 *.snk
 *.licx
+*.log
+*.tmp
+*.bak
 PublisherStudio/runtime/
 src/PublisherStudio.Web/node_modules/
 src/PublisherStudio.Web/wwwroot/vendor/devextreme-dist/
@@ -19,31 +24,66 @@ src/PublisherStudio.Web/wwwroot/vendor/devextreme-license.meta.json
 src/PublisherStudio.Web/wwwroot/vendor/devextreme-license.version
 **/SpreadsheetHibernation/
 
-# Downloaded authoritative LocalGPT protocol release package
+# Downloaded authoritative LocalGPT protocol release packages are restored/generated locally.
 packages/*.nupkg
+packages/*.snupkg
 packages/*.download
 
-# Keep build gates, regression tests and localization catalogs visible to Git.
+# Build gates, regression tests, localization and documentation build inputs are source.
 !Directory.Build.targets
 !Build-LocalDevelopment.ps1
 !Build-Release.ps1
 !New-VerifiedSourcePackage.ps1
+!Update-GitHubPagesSnapshot.cmd
 !build/
-!build/*.ps1
-!build/*.json
-!build/*.sha256
+!build/**
 !tests/
-!tests/*.mjs
+!tests/**
 !src/PublisherStudio.Web/Localization/
-!src/PublisherStudio.Web/Localization/*.json
+!src/PublisherStudio.Web/Localization/**
 
-# Generated DocFX inputs, tool caches, print workspaces, and outputs
+# Keep the authored DocFX/Kawaii documentation source in Git. These files are what another
+# developer needs to rebuild the same styled HTML/PDF documentation from source.
+!docs/
+!docs/**/*.md
+!docs/**/*.yml
+!docs/**/*.yaml
+!docs/**/*.json
+!docs/**/*.css
+!docs/**/*.js
+!docs/**/*.html
+!docs/**/*.svg
+!docs/**/*.ico
+!docs/templates/
+!docs/templates/**
+!docs/styles/
+!docs/styles/**
+!docs/articles/
+!docs/articles/**
+!docs/guide/
+!docs/guide/**
+!docs/pdf/
+!docs/pdf/**
+!docs/docfx.json
+!docs/filterConfig.yml
+!docs/toc.yml
+!docs/pdf-cover.html
+!.config/dotnet-tools.json
+
+# GitHub Pages intentionally publishes the tracked, version-matched Kawaii snapshot.
+!.github/pages/
+!.github/pages/**
+!.github/scripts/
+!.github/scripts/**
+!.github/workflows/
+!.github/workflows/**
+
+# Generated documentation products. Build-Documentation.ps1 recreates all of these from
+# the tracked docs source, compiler XML and application assembly; they do not belong in Git.
 docs/input/
 docs/api/
 docs/_site/
 docs/.tools/
 docs/.print-book/
+docs/PublisherStudio-*.pdf
 src/PublisherStudio.Web/wwwroot/help-docs/
-
-
-!Update-GitHubPagesSnapshot.cmd

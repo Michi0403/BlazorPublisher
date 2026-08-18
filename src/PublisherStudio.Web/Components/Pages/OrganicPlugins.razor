@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @using System.Text.Json
 @implements IDisposable
+@inject ILocalGptDiscoveryActivationService DiscoveryActivation
 @inject ILocalGptDiscoveryRegistry Discovery
 @inject ILocalGptConnectionService Connection
 @inject IOrganicCapabilityCatalog CapabilityCatalog
@@ -32,7 +33,11 @@
 
     <section class="organic-status-strip" aria-live="polite">
         <strong>@(Connection.State.IsLinked ? "Connected and linked" : Connection.State.IsConnected ? "Awaiting LocalGPT approval" : "Not connected")</strong>
-        <span>@(Connection.State.IsConnected ? Connection.State.DisplayName : "Waiting for UDP discovery on port 51141")</span>
+        <span>@(Connection.State.IsConnected
+            ? Connection.State.DisplayName
+            : DiscoveryActivation.IsRequested
+                ? $"LocalGPT discovery is active on UDP {OrganicOptions.Value.DiscoveryPort} because this frontend workflow is open"
+                : "LocalGPT discovery is idle until the frontend connection workflow requests it")</span>
         @if (!string.IsNullOrWhiteSpace(Connection.State.LastError) && !Connection.State.IsConnected)
         {
             <span class="organic-error">@Connection.State.LastError</span>
@@ -219,7 +224,7 @@
         <h2>Active PublisherStudio protocol settings</h2>
         <div class="organic-capability-grid">
             <article class="organic-capability"><strong>Protocol</strong><p>1-Wire @OrganicWireProtocol.Version (minimum @OrganicWireProtocol.MinimumCompatibleVersion)</p></article>
-            <article class="organic-capability"><strong>Runtime</strong><p>@(OrganicOptions.Value.Enabled ? "enabled" : "disabled") · discovery @(OrganicOptions.Value.EnableDiscovery ? "enabled" : "disabled") · auto-connect @(OrganicOptions.Value.AutoConnectDiscoveredPeer ? "enabled" : "disabled")</p></article>
+            <article class="organic-capability"><strong>Runtime</strong><p>@(OrganicOptions.Value.Enabled ? "enabled" : "disabled") · discovery @(OrganicOptions.Value.EnableDiscovery ? "enabled" : "disabled") · frontend activation @(OrganicOptions.Value.RequireFrontendDiscoveryActivation ? "required" : "not required") · active request @(DiscoveryActivation.IsRequested ? "yes" : "no") · auto-connect @(OrganicOptions.Value.AutoConnectDiscoveredPeer ? "enabled" : "disabled")</p></article>
             <article class="organic-capability"><strong>Transports</strong><p>TCP and HTTP/JSON · discovery UDP @OrganicOptions.Value.DiscoveryPort</p></article>
             <article class="organic-capability"><strong>Limits</strong><p>@OrganicOptions.Value.MaximumMessageBytes bytes · peer expiry @OrganicOptions.Value.PeerExpirySeconds seconds · screen reader minimum @OrganicOptions.Value.MinimumRecurringScreenReaderIntervalSeconds seconds</p></article>
         </div>
@@ -435,6 +440,7 @@
     private string _roundTripStatus = string.Empty;
     private bool _browserAutomationEnabled;
     private bool _automationStateLoaded;
+    private const string DiscoveryOwner = ILocalGptDiscoveryActivationService.FrontendConnectionWorkflowOwner;
 
     protected override async Task OnInitializedAsync()
     {
@@ -442,6 +448,7 @@
         {
             _councilRequest = NewCouncilRequest("general");
             _permission = NewPermission(string.Empty);
+            SynchronizeDiscoveryActivation();
             Discovery.Changed += OnServiceChanged;
             Connection.Changed += OnServiceChanged;
             WorkCoordinator.Changed += OnServiceChanged;
@@ -508,6 +515,22 @@
         }
     }
 
+    private void SynchronizeDiscoveryActivation()
+    {
+        try
+        {
+            if (Connection.State.IsConnected && OrganicOptions.Value.SuspendDiscoveryWhileConnected)
+                DiscoveryActivation.Release(DiscoveryOwner);
+            else
+                DiscoveryActivation.Request(DiscoveryOwner);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(SynchronizeDiscoveryActivation)} failed.");
+            throw;
+        }
+    }
+
     private void BackToPublisher() {
         try
         {
@@ -554,6 +577,7 @@
                 nameof(OnServiceChanged),
                 async _ => await InvokeAsync(() =>
                 {
+                        SynchronizeDiscoveryActivation();
                         Refresh();
                         StateHasChanged();
                 }).ConfigureAwait(false));
@@ -667,6 +691,7 @@
                 _browserAutomationEnabled = await JS.InvokeAsync<bool>("publisherAutomation.disableForSession").ConfigureAwait(true);
             }
             await Connection.DisconnectAsync().ConfigureAwait(true);
+            SynchronizeDiscoveryActivation();
             Notifications.Information("PublisherStudio disconnected from LocalGPT.", source: nameof(OrganicPlugins));
             Refresh();
     
@@ -1054,6 +1079,7 @@
             WorkCoordinator.Changed -= OnServiceChanged;
             ResultStore.Changed -= OnServiceChanged;
             RecurringScreenReader.Changed -= OnServiceChanged;
+            DiscoveryActivation.Release(DiscoveryOwner);
     
         }
         catch (Exception __componentMethodException)

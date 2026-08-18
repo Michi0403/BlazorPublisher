@@ -192,6 +192,16 @@ public sealed class OrganicPluginOptions
     /// <value>The enable discovery value exposed by <see cref="OrganicPluginOptions"/>.</value>
     public bool EnableDiscovery { get; set; } = true;
     /// <summary>
+    /// Gets or sets a value indicating whether LocalGPT discovery sockets may be activated only by an explicit PublisherStudio frontend connection workflow.
+    /// </summary>
+    /// <value><see langword="true"/> keeps discovery network activity idle until the frontend requests it; <see langword="false"/> permits legacy always-on discovery.</value>
+    public bool RequireFrontendDiscoveryActivation { get; set; } = true;
+    /// <summary>
+    /// Gets or sets a value indicating whether discovery listening is suspended while a LocalGPT transport is already connected.
+    /// </summary>
+    /// <value><see langword="true"/> stops unnecessary discovery socket activity for an already connected LocalGPT peer.</value>
+    public bool SuspendDiscoveryWhileConnected { get; set; } = true;
+    /// <summary>
     /// Gets or sets a value indicating whether auto connect discovered peer applies to the organic plugin state.
     /// </summary>
     /// <value>The auto connect discovered peer value exposed by <see cref="OrganicPluginOptions"/>.</value>

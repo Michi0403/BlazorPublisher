@@ -4,7 +4,7 @@ PublisherStudio works without LocalGPT. The 1-Wire connection is an optional loc
 
 ## Discovery and connection
 
-PublisherStudio listens for compact LocalGPT discovery broadcasts on UDP port `51141`. A selected peer can then establish the larger approved transport over TCP port `51140`.
+PublisherStudio keeps LocalGPT discovery network activity idle by default. Opening **Connect LocalGPT** in the PublisherStudio frontend explicitly activates the compact UDP discovery listener on port `51141`; leaving that frontend workflow releases the request, and an established LocalGPT transport can suspend discovery because the peer is already known. A selected peer can then establish the larger approved transport over TCP port `51140`. Deployments can change the activation policy through `OrganicPlugins` configuration, but the shipped policy is frontend-on-demand.
 
 Discovery does not grant control. The user must approve the link, and each protected eye, hand, screen, spreadsheet, media, or publishing capability remains subject to its permission policy.
 
@@ -28,7 +28,7 @@ LocalGPT updates the already-linked peer registry immediately. PublisherStudio a
 
 ## Quiet standalone behavior
 
-When LocalGPT is absent, PublisherStudio continues normally. The Organic Plugins page reports that no peer is connected instead of treating the optional capability as an application failure.
+When LocalGPT is absent, PublisherStudio continues normally and does not bind the LocalGPT discovery UDP socket until the frontend connection workflow requests discovery. The Organic Plugins page reports that no peer is connected instead of treating the optional capability as an application failure.
 
 ## Runtime identity and small devices
 

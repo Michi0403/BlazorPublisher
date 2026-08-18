@@ -2,6 +2,7 @@
 @implements IDisposable
 @inject NavigationManager Navigation
 @inject ILocalGptConnectionService LocalGptConnection
+@inject ILocalGptDiscoveryActivationService LocalGptDiscoveryActivation
 @inject IPublisherDocumentationViewerService DocumentationViewer
 @inject IFileLocalizationService Localization
 
@@ -689,6 +690,8 @@
     private void OpenOrganicPlugins() {
         try
         {
+            if (!LocalGptConnection.State.IsConnected)
+                LocalGptDiscoveryActivation.Request(ILocalGptDiscoveryActivationService.FrontendConnectionWorkflowOwner);
             Navigation.NavigateTo("/organic-plugins");
         }
         catch (Exception __componentMethodException)

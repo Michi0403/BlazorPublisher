@@ -36,6 +36,39 @@ public interface IOrganicPluginProtocolCodec
 }
 
 /// <summary>
+/// Defines the explicit frontend-demand gate that owns when PublisherStudio may activate LocalGPT discovery network activity.
+/// </summary>
+public interface ILocalGptDiscoveryActivationService
+{
+    /// <summary>
+    /// Defines the stable owner key used by the PublisherStudio frontend connection workflow so repeated activation requests remain idempotent across ribbon and routed-page transitions.
+    /// </summary>
+    const string FrontendConnectionWorkflowOwner = "PublisherStudio.OrganicPlugins.Frontend";
+    /// <summary>
+    /// Gets a value indicating whether at least one explicit PublisherStudio frontend workflow currently requests LocalGPT discovery.
+    /// </summary>
+    /// <value><see langword="true"/> only while an explicit frontend owner requests discovery; otherwise <see langword="false"/>.</value>
+    bool IsRequested { get; }
+
+    /// <summary>
+    /// Occurs when the explicit frontend discovery request set changes so the hosted listener can start or stop without polling.
+    /// </summary>
+    event Action? Changed;
+
+    /// <summary>
+    /// Adds a named PublisherStudio frontend workflow to the active discovery-demand set and signals the hosted listener only when that set changes.
+    /// </summary>
+    /// <param name="owner">Stable frontend owner key used to make repeated requests idempotent.</param>
+    void Request(string owner);
+
+    /// <summary>
+    /// Releases a previously registered frontend discovery owner.
+    /// </summary>
+    /// <param name="owner">Stable frontend owner key previously supplied to <see cref="Request"/>.</param>
+    void Release(string owner);
+}
+
+/// <summary>
 /// Defines the contract for LocalGPT discovery behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
 public interface ILocalGptDiscoveryRegistry

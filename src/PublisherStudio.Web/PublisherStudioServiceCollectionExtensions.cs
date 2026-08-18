@@ -141,6 +141,7 @@ public static class PublisherStudioServiceCollectionExtensions
         AddSingleton<IOrganicConnectionRuntimeState, OrganicConnectionRuntimeStateService>(services);
         AddSingleton<IOrganicWireEnvelopeFactory, OrganicWireEnvelopeFactory>(services);
         AddSingleton<IOrganicRuntimeSecurityService, OrganicRuntimeSecurityService>(services);
+        AddSingleton<ILocalGptDiscoveryActivationService, LocalGptDiscoveryActivationService>(services);
         AddSingleton<ILocalGptDiscoveryRegistry, LocalGptDiscoveryRegistry>(services);
         AddSingleton<IPublisherDxFunctionCatalogDataService, PublisherDxFunctionCatalogDataService>(services);
         AddSingleton<OrganicCapabilityCatalog, OrganicCapabilityCatalog>(services);

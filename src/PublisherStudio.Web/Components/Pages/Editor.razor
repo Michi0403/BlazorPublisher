@@ -287,11 +287,11 @@
                 <button type="button" class="publisher-dialog-close" title="Close" @onclick="CloseSelectedPictureExport">×</button>
             </header>
             <div class="selected-picture-export-options">
-                <button type="button" class="primary" @onclick="ExportSelectedMergedChoice">Merged @(_selectedPictureExportFormat.ToUpperInvariant())</button>
-                <button type="button" @onclick="ExportSelectedLayeredChoice">Layered Picture Studio SVG</button>
+                <button type="button" class="publisher-dialog-button primary" @onclick="ExportSelectedMergedChoice">Merged @(_selectedPictureExportFormat.ToUpperInvariant())</button>
+                <button type="button" class="publisher-dialog-button" @onclick="ExportSelectedLayeredChoice">Layered Picture Studio SVG</button>
                 <small>Merged export bakes recoloring, paint, effects and all visible layers into the final pixels. Layered SVG preserves the Picture Studio layer document for later editing.</small>
             </div>
-            <footer><button type="button" @onclick="CloseSelectedPictureExport">Cancel</button></footer>
+            <footer class="publisher-dialog-actions"><button type="button" class="publisher-dialog-button" @onclick="CloseSelectedPictureExport">Cancel</button></footer>
         </section>
     </div>
 }
@@ -346,9 +346,11 @@
                 }
             </div>
             <aside class="website-export-doctrine">Preserve is the default and changes nothing. Compression only affects media embedded into this exported file; publication source data stays untouched.</aside>
-            <footer>
-                <DxButton Text="Cancel" Enabled="@(!_singleWebsiteExporting)" Click="CloseSingleWebsiteExport" />
-                <DxButton Text="@(_singleWebsiteExporting ? "Exporting…" : "Export HTML")" RenderStyle="ButtonRenderStyle.Primary" Enabled="@(!_singleWebsiteExporting)" Click="ExportSingleWebsite" />
+            <footer class="publisher-dialog-actions">
+                <button type="button" class="publisher-dialog-button" @onclick="CloseSingleWebsiteExport" disabled="@_singleWebsiteExporting">Cancel</button>
+                <button type="button" class="publisher-dialog-button primary" @onclick="ExportSingleWebsite" disabled="@_singleWebsiteExporting">
+                    @(_singleWebsiteExporting ? "Exporting…" : "Export HTML")
+                </button>
             </footer>
         </section>
     </div>
@@ -427,9 +429,9 @@
                 Separating media from HTML is already lossless and removes Base64 overhead. PublisherStudio never labels video transcoding as lossless; exact preservation remains the default.
             </aside>
 
-            <footer>
-                <button type="button" @onclick="CloseStructuredWebsiteExport" disabled="@_structuredWebsiteExporting">Cancel</button>
-                <button type="button" class="primary" @onclick="ExportStructuredWebsite" disabled="@_structuredWebsiteExporting">
+            <footer class="publisher-dialog-actions">
+                <button type="button" class="publisher-dialog-button" @onclick="CloseStructuredWebsiteExport" disabled="@_structuredWebsiteExporting">Cancel</button>
+                <button type="button" class="publisher-dialog-button primary" @onclick="ExportStructuredWebsite" disabled="@_structuredWebsiteExporting">
                     @(_structuredWebsiteExporting ? "Exporting…" : "Export website ZIP")
                 </button>
             </footer>
@@ -2690,7 +2692,7 @@
                 var bytes = buffer.ToArray();
                 if (bytes.Length == 0) throw new InvalidDataException("The selected media file is empty.");
 
-                module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.8.6").ConfigureAwait(true);
+                module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.8.7").ConfigureAwait(true);
                 temporaryAssetId = Guid.NewGuid();
                 var inspectionUrl = MediaAssets.RegisterBytes(temporaryAssetId, bytes, mimeType);
                 MediaSourceInfo info;

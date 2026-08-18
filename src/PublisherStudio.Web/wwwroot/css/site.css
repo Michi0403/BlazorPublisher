@@ -4605,16 +4605,24 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
     gap: 14px;
     padding: 14px 18px;
 }
-.publisher-dialog > header { border-bottom: 1px solid #d8e0e8; }
+.publisher-dialog > header {
+    border-bottom: 1px solid #0b3f66;
+    color: #fff;
+    background: linear-gradient(90deg,#0f4b78,#1768a0);
+}
 .publisher-dialog > footer { justify-content: flex-end; border-top: 1px solid #d8e0e8; }
-.publisher-dialog h2 { margin: 0 0 3px; font-size: 18px; }
-.publisher-dialog p { margin: 0; color: #5f6b7a; font-size: 12px; }
+.publisher-dialog h2 { margin: 0 0 3px; font-size: 18px; color: inherit; }
+.publisher-dialog > header p { margin: 0; color: #dcecf8; font-size: 12px; }
+.publisher-dialog > :not(header) p { color: #5f6b7a; }
+.publisher-dialog p { margin: 0; font-size: 12px; }
 .publisher-dialog-close {
     width: 34px;
     height: 34px;
     border: 0;
     border-radius: 4px;
     background: transparent;
+    color: inherit;
+    -webkit-text-fill-color: currentColor;
     font-size: 24px;
     line-height: 1;
 }
@@ -4646,16 +4654,55 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
     font-size: 12px;
     line-height: 1.45;
 }
-.publisher-dialog footer button {
-    min-width: 92px;
+.publisher-dialog-actions { background: #f8fafc; }
+.publisher-dialog-button {
+    min-width: 104px;
     min-height: 34px;
     padding: 6px 14px;
-    border: 1px solid #aeb9c5;
+    border: 1px solid #9aa8b8;
     border-radius: 4px;
-    background: #f7f9fb;
+    color: #172033;
+    -webkit-text-fill-color: #172033;
+    background: linear-gradient(#ffffff,#eef2f6);
+    box-shadow: 0 1px 1px #0f172a12;
+    font-weight: 600;
 }
-.publisher-dialog footer button.primary { border-color: #087a54; color: #fff; background: #0b8f63; }
-.publisher-dialog footer button:disabled { opacity: .55; cursor: wait; }
+.publisher-dialog-button:hover:not(:disabled),
+.publisher-dialog-button:focus-visible:not(:disabled) {
+    border-color: #1768a0;
+    color: #0f4b78;
+    -webkit-text-fill-color: #0f4b78;
+    background: #eef7fd;
+    outline: 2px solid #84b9df66;
+    outline-offset: 1px;
+}
+.publisher-dialog-button.primary {
+    border-color: #0f4b78;
+    color: #fff;
+    -webkit-text-fill-color: #fff;
+    background: linear-gradient(180deg,#1768a0,#0f4b78);
+}
+.publisher-dialog-button.primary:hover:not(:disabled),
+.publisher-dialog-button.primary:focus-visible:not(:disabled) {
+    border-color: #0a3d63;
+    color: #fff;
+    -webkit-text-fill-color: #fff;
+    background: linear-gradient(180deg,#1d75ae,#0d5687);
+}
+.publisher-dialog-button:disabled {
+    border-color: #c6ced8;
+    color: #657386;
+    -webkit-text-fill-color: #657386;
+    background: #e8edf2;
+    opacity: 1;
+    cursor: wait;
+}
+.publisher-dialog-button.primary:disabled {
+    border-color: #aeb9c5;
+    color: #5e6a79;
+    -webkit-text-fill-color: #5e6a79;
+    background: #dce3e9;
+}
 @media print { .publisher-dialog-backdrop { display: none !important; } }
 
 /* PublisherStudio v1.0.80: reusable Panel/Div Studio compositions. */
@@ -5263,11 +5310,8 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 
 /* PublisherStudio 2.6.8: targeted interaction, export contrast, and authoring repairs. */
 .panel-studio-canvas-shell.preview-preset-editing{grid-template-rows:auto auto minmax(0,1fr)!important}
-.publisher-dialog footer :is(button,.dxbl-btn){color:#172033!important}
-.publisher-dialog footer :is(button,.dxbl-btn) .dxbl-btn-caption{color:inherit!important}
-.publisher-dialog footer :is(button,.dxbl-btn):disabled{color:#64748b!important;opacity:.78}
-.publisher-dialog footer :is(.dxbl-btn-primary,.primary){color:#fff!important}
-.publisher-dialog footer :is(.dxbl-btn-primary,.primary):disabled{color:#fff!important;opacity:.58}
+.publisher-dialog footer .publisher-dialog-button{opacity:1!important}
+.publisher-dialog footer .publisher-dialog-button:disabled{opacity:1!important}
 .website-publication [data-panel-root],.website-publication [data-panel-element]{pointer-events:auto}
 .website-publication [data-panel-element].ps-interactive:hover{outline:2px solid #48a7e8aa;outline-offset:2px}
 .picture-layer-row{grid-template-columns:minmax(0,1fr) 24px 24px 24px 24px!important}

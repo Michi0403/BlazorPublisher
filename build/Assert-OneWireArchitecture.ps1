@@ -21,6 +21,7 @@ $globalUsing = Read-OptionalText 'src\PublisherStudio.Web\GlobalUsings.OneWire.c
 $interfaces = Read-OptionalText 'src\PublisherStudio.Web\Services\OrganicPlugins\IOrganicPluginServices.cs'
 $connection = Read-OptionalText 'src\PublisherStudio.Web\Services\OrganicPlugins\LocalGptConnectionService.cs'
 $state = Read-OptionalText 'src\PublisherStudio.Web\Services\OrganicPlugins\OrganicPluginStateServices.cs'
+$serviceRegistration = Read-OptionalText 'src\PublisherStudio.Web\PublisherStudioServiceCollectionExtensions.cs'
 $discovery = Read-OptionalText 'src\PublisherStudio.Web\HostedServices\OrganicPlugins\LocalGptDiscoveryHostedService.cs'
 $applicationHost = Read-OptionalText 'src\PublisherStudio.Web\Services\ApplicationHostServices.cs'
 $systemVariableStore = Read-OptionalText 'src\PublisherStudio.Web\Services\Configuration\SystemVariableStoreService.cs'
@@ -35,6 +36,11 @@ if ($state -and $state -notmatch 'class OrganicReplayGuard') { Add-Finding 'The 
 if ($connection -and $connection -notmatch 'IOrganicConnectionRuntimeState') { Add-Finding 'Connection transport locality is no longer owned by the runtime-state service.' }
 if ($connection -and $connection -notmatch 'SourcePeerId does not match the peer identity owned by this connection') { Add-Finding 'The TCP connection no longer pins SourcePeerId to its discovered peer.' }
 if ($discovery -and $discovery -notmatch 'automaticallyAttemptedPeers\.Remove') { Add-Finding 'Failed automatic connections will not become retryable.' }
+if ($interfaces -and $interfaces -notmatch 'ILocalGptDiscoveryActivationService') { Add-Finding 'The explicit frontend LocalGPT discovery activation contract is missing.' }
+if ($state -and $state -notmatch 'class LocalGptDiscoveryActivationService') { Add-Finding 'The explicit frontend LocalGPT discovery activation service is missing.' }
+if ($serviceRegistration -and $serviceRegistration -notmatch 'AddSingleton<ILocalGptDiscoveryActivationService, LocalGptDiscoveryActivationService>') { Add-Finding 'Frontend LocalGPT discovery activation is not registered as a singleton.' }
+if ($discovery -and $discovery -notmatch 'RequireFrontendDiscoveryActivation') { Add-Finding 'The LocalGPT discovery listener no longer honors frontend-on-demand activation policy.' }
+if ($discovery -and $discovery -match 'receiveCancellation\.CancelAfter') { Add-Finding 'LocalGPT discovery has regressed to cancellation-driven receive polling that produces expected OperationCanceledException noise.' }
 if ($applicationHost -and $applicationHost -notmatch 'systemVariables\.DefaultPort') { Add-Finding 'PublisherStudio port resolution no longer uses systemVariables.DefaultPort.' }
 if ($systemVariableStore -and $systemVariableStore -notmatch 'Application\.DefaultPort') { Add-Finding 'SystemVariableStoreService.cs no longer owns Application.DefaultPort.' }
 if ($connection -and ($connection -notmatch 'SynchronizeLocalCapabilityDirectoryAsync' -or $connection -notmatch 'capabilities\.Changed \+= SignalCapabilitySynchronization')) { Add-Finding 'PublisherStudio no longer performs event-driven post-link capability synchronization.' }
@@ -54,6 +60,8 @@ else {
     if ($settings) {
         if ([int]$settings.PublisherStudio.Port -ne 58071) { Add-Finding 'PublisherStudio default port is not 58071.' }
         if ([int]$settings.OrganicPlugins.ServicePort -ne 51140 -or [int]$settings.OrganicPlugins.DiscoveryPort -ne 51141) { Add-Finding 'Organic 1-Wire ports no longer match LocalGPT.' }
+        if (-not [bool]$settings.OrganicPlugins.RequireFrontendDiscoveryActivation) { Add-Finding 'Shipped LocalGPT discovery policy is not frontend-on-demand.' }
+        if (-not [bool]$settings.OrganicPlugins.SuspendDiscoveryWhileConnected) { Add-Finding 'Shipped LocalGPT discovery policy does not suspend discovery after connection.' }
     }
 }
 

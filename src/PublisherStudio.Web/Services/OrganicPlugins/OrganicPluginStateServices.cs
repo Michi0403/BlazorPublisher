@@ -5,6 +5,98 @@ using System.Text.Json;
 namespace PublisherStudio.Services.OrganicPlugins;
 
 /// <summary>
+/// Tracks explicit frontend demand for LocalGPT discovery so PublisherStudio does not bind or poll discovery sockets before the user opens the connection workflow.
+/// </summary>
+/// <param name="logger">Logger used to record discovery activation lifecycle diagnostics.</param>
+public sealed class LocalGptDiscoveryActivationService(ILogger<LocalGptDiscoveryActivationService> logger) : ILocalGptDiscoveryActivationService
+{
+    /// <summary>
+    /// Synchronizes access to the active frontend owner set.
+    /// </summary>
+    private readonly object gate = new();
+
+    /// <summary>
+    /// Keeps the distinct frontend workflow keys whose presence authorizes the optional discovery listener to own a UDP socket.
+    /// </summary>
+    private readonly HashSet<string> owners = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// Gets a value indicating whether explicit frontend discovery is currently requested.
+    /// </summary>
+    /// <value><see langword="true"/> when at least one frontend owner is registered; otherwise <see langword="false"/>.</value>
+    public bool IsRequested
+    {
+        get
+        {
+            lock (gate) return owners.Count > 0;
+        }
+    }
+
+    /// <summary>
+    /// Notifies the hosted discovery listener that frontend network demand transitioned so socket ownership can be reevaluated immediately.
+    /// </summary>
+    public event Action? Changed;
+
+    /// <summary>
+    /// Adds a named frontend workflow to the discovery-demand set and raises the transition event only when ownership actually changes.
+    /// </summary>
+    /// <param name="owner">Stable frontend owner key used to make repeated requests idempotent.</param>
+    public void Request(string owner)
+    {
+        try
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(owner);
+            bool changed;
+            lock (gate) changed = owners.Add(owner);
+            if (!changed) return;
+            logger.LogInformation("LocalGPT discovery was requested by frontend owner {Owner}; discovery demand is now active.", owner);
+            Changed?.Invoke();
+        }
+        catch (Exception __serviceMethodException)
+        {
+            if (__serviceMethodException is OperationCanceledException)
+                logger.LogDebug(__serviceMethodException, $"Service method {nameof(LocalGptDiscoveryActivationService)}.{nameof(Request)} was canceled.");
+            else
+                logger.LogError(__serviceMethodException, $"Service method {nameof(LocalGptDiscoveryActivationService)}.{nameof(Request)} failed.");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Releases a previously registered frontend discovery owner.
+    /// </summary>
+    /// <param name="owner">Stable frontend owner key previously supplied to <see cref="Request"/>.</param>
+    public void Release(string owner)
+    {
+        try
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(owner);
+            bool changed;
+            bool stillRequested;
+            lock (gate)
+            {
+                changed = owners.Remove(owner);
+                stillRequested = owners.Count > 0;
+            }
+            if (!changed) return;
+            logger.LogInformation(
+                "LocalGPT discovery frontend owner {Owner} was released; discovery demand remains active: {IsRequested}.",
+                owner,
+                stillRequested);
+            Changed?.Invoke();
+        }
+        catch (Exception __serviceMethodException)
+        {
+            if (__serviceMethodException is OperationCanceledException)
+                logger.LogDebug(__serviceMethodException, $"Service method {nameof(LocalGptDiscoveryActivationService)}.{nameof(Release)} was canceled.");
+            else
+                logger.LogError(__serviceMethodException, $"Service method {nameof(LocalGptDiscoveryActivationService)}.{nameof(Release)} failed.");
+            throw;
+        }
+    }
+}
+
+/// <summary>
 /// Maintains the authoritative directory of LocalGPT discovery entries used for discovery, validation, and runtime lookup.
 /// </summary>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>

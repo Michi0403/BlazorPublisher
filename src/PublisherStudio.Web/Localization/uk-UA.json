@@ -3281,5 +3281,14 @@
   "Text.Smart␠adaptive␠mode␠waits␠for␠the␠real␠capture-track␠settings,␠then␠uses␠browser␠MediaCapabilities␠where␠available␠plus␠configurable␠runtime␠quality␠policy␠to␠select␠codec,␠video␠bitrate,␠audio␠bitrate,␠and␠smoothness␠fallbacks.␠Manual␠mode␠keeps␠every␠explicit␠control␠available.": "Режим розумної адаптації очікує фактичні параметри доріжки захоплення, а потім використовує MediaCapabilities браузера, якщо доступно, і налаштовувану політику якості для вибору кодека, бітрейту відео й аудіо та резервних варіантів для плавності. У ручному режимі всі явні налаштування залишаються доступними.",
   "Text.The␠browser␠share␠picker␠still␠decides␠which␠screen,␠window,␠or␠tab␠is␠captured;␠PublisherStudio␠never␠assumes␠one␠user's␠monitor␠resolution.": "Засіб вибору спільного доступу браузера й надалі визначає, який екран, вікно або вкладку захоплювати; PublisherStudio ніколи не припускає роздільність монітора конкретного користувача.",
   "Text.Use␠browser␠capability␠probe": "Використовувати перевірку можливостей браузера",
-  "Text.smart␠bitrate␠/␠codec␠selection": "розумний вибір бітрейту / кодека"
+  "Text.smart␠bitrate␠/␠codec␠selection": "розумний вибір бітрейту / кодека",
+  "Text.Rendered␠video": "Відрендерене відео",
+  "Text.Render␠selected␠range␠to␠video…": "Відрендерити вибраний діапазон у відео…",
+  "Text.Cancel␠rendered␠export": "Скасувати відрендерений експорт",
+  "Text.Rendering␠effects␠to␠video…": "Рендеринг ефектів у відео…",
+  "Text.A␠rendered␠video␠export␠is␠already␠running.": "Експорт відрендереного відео вже виконується.",
+  "Text.Rendering␠the␠selected␠range␠with␠the␠current␠Video␠Studio␠layers␠and␠effects.␠The␠browser␠writes␠only␠the␠video␠canvas␠and␠audio␠stream;␠player␠controls␠and␠editor␠chrome␠are␠not␠captured.": "Вибраний діапазон рендериться з поточними шарами та ефектами Video Studio. Браузер записує лише відеополотно й аудіопотік; елементи керування програвачем та інтерфейс редактора не захоплюються.",
+  "Text.Rendered␠video␠export␠could␠not␠start": "Не вдалося запустити експорт відрендереного відео",
+  "Text.Rendered␠video␠exported": "Відрендерене відео експортовано",
+  "Text.Rendered␠video␠export␠failed": "Помилка експорту відрендереного відео"
 }

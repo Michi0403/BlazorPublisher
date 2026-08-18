@@ -449,14 +449,17 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         let lastHeight = 0;
 
         const resize = () => { try {
-            const pixelRatio = Math.min(2, Math.max(1, Number(window.devicePixelRatio) || 1));
-            const cssWidth = Math.max(2, canvas.clientWidth || video.clientWidth || 640);
-            const cssHeight = Math.max(2, canvas.clientHeight || video.clientHeight || 360);
-            const maximumPixels = 1920 * 1080 * 2;
-            let width = Math.round(cssWidth * pixelRatio);
-            let height = Math.round(cssHeight * pixelRatio);
+            const configuredWidth = Math.max(0, Math.trunc(Number(currentConfig.outputWidth) || 0));
+            const configuredHeight = Math.max(0, Math.trunc(Number(currentConfig.outputHeight) || 0));
+            const explicitSize = configuredWidth > 0 && configuredHeight > 0;
+            const pixelRatio = explicitSize ? 1 : Math.min(2, Math.max(1, Number(window.devicePixelRatio) || 1));
+            const cssWidth = Math.max(2, canvas.clientWidth || video.clientWidth || video.videoWidth || 2);
+            const cssHeight = Math.max(2, canvas.clientHeight || video.clientHeight || video.videoHeight || 2);
+            const maximumPixels = Math.max(0, Math.trunc(Number(currentConfig.maximumPixels) || 0));
+            let width = explicitSize ? configuredWidth : Math.round(cssWidth * pixelRatio);
+            let height = explicitSize ? configuredHeight : Math.round(cssHeight * pixelRatio);
             const pixels = width * height;
-            if (pixels > maximumPixels) {
+            if (maximumPixels > 0 && pixels > maximumPixels) {
                 const scale = Math.sqrt(maximumPixels / pixels);
                 width = Math.max(2, Math.round(width * scale));
                 height = Math.max(2, Math.round(height * scale));

@@ -3,6 +3,7 @@
 @inject IMediaConversionService Conversions
 @inject IJSRuntime JS
 @inject PublicationMediaAssetStore MediaAssets
+@inject IPublisherRuntimePolicyDataService RuntimePolicy
 
 @if (Visible)
 {
@@ -195,12 +196,12 @@
                             <summary>Video encoder</summary>
                             <div class="data-form-grid">
                                 <label>Encoder<input value="@_options.VideoCodec" @onchange="args => _options.VideoCodec = Text(args)" placeholder="Preset encoder" list="ffmpeg-encoders" /></label>
-                                <label>Encoder preset<input value="@_options.VideoEncoderPreset" @onchange="args => _options.VideoEncoderPreset = Text(args)" placeholder="medium / slow / veryfast" /></label>
+                                <label>Encoder preset<input value="@_options.VideoEncoderPreset" @onchange="args => _options.VideoEncoderPreset = Text(args)" placeholder="Preset/encoder default" list="ffmpeg-encoder-presets" /><small class="field-help">Common speed/quality presets are suggested; support remains encoder-specific and the field stays editable.</small></label>
                                 <label>CRF / quality<input type="number" min="0" max="63" value="@NullableNumber(_options.Crf)" @onchange="args => _options.Crf = NullableInt(args)" /></label>
                                 <label>Bitrate kbit/s<input type="number" min="1" value="@NullableNumber(_options.VideoBitrateKbps)" @onchange="args => _options.VideoBitrateKbps = NullableInt(args)" /></label>
                                 <label>Max bitrate kbit/s<input type="number" min="1" value="@NullableNumber(_options.MaximumVideoBitrateKbps)" @onchange="args => _options.MaximumVideoBitrateKbps = NullableInt(args)" /></label>
                                 <label>Buffer kbit<input type="number" min="1" value="@NullableNumber(_options.VideoBufferKbps)" @onchange="args => _options.VideoBufferKbps = NullableInt(args)" /></label>
-                                <label>Pixel format<input value="@_options.PixelFormat" @onchange="args => _options.PixelFormat = Text(args)" placeholder="yuv420p" /></label>
+                                <label>Pixel format<input value="@_options.PixelFormat" @onchange="args => _options.PixelFormat = Text(args)" placeholder="Preset/source default" list="ffmpeg-pixel-formats" /><small class="field-help">The selected preset supplies a compatibility-oriented suggestion when known. Any pixel format supported by the installed FFmpeg build can still be entered.</small></label>
                                 <label class="check-row"><input type="checkbox" checked="@_options.DisableVideo" @onchange="args => _options.DisableVideo = Bool(args)" /> Remove video</label>
                             </div>
                         </details>
@@ -230,6 +231,12 @@
 
                     <datalist id="ffmpeg-encoders">
                         @foreach (var encoder in _capabilities?.Encoders ?? Array.Empty<string>()) { <option value="@encoder"></option> }
+                    </datalist>
+                    <datalist id="ffmpeg-encoder-presets">
+                        @foreach (var preset in EncoderPresetSuggestions) { <option value="@preset"></option> }
+                    </datalist>
+                    <datalist id="ffmpeg-pixel-formats">
+                        @foreach (var format in PixelFormatSuggestions) { <option value="@format"></option> }
                     </datalist>
 
                     <section class="media-converter-jobs">
@@ -306,6 +313,8 @@
     private MediaConversionInsertRequest? _lastInitialSource;
     private string _presetId = string.Empty;
     private MediaConversionOptions _options = new();
+    private IReadOnlyList<string> EncoderPresetSuggestions => RuntimePolicy.GetCollection(PublisherRuntimeCollection.FfmpegEncoderPresetSuggestions);
+    private IReadOnlyList<string> PixelFormatSuggestions => RuntimePolicy.GetCollection(PublisherRuntimeCollection.FfmpegPixelFormatSuggestions);
     private readonly List<MediaConversionJobInfo> _jobs = [];
     private readonly List<MediaConversionProfile> _profiles = [];
     private Guid _selectedProfileId;
@@ -436,11 +445,56 @@
     private void ClearSource() { _file = null; _memorySource = null; }
     private void EnsurePreset()
     {
-        if (MatchingPresets.Any(preset => preset.Id == _presetId && preset.Available)) return;
+        if (MatchingPresets.Any(preset => preset.Id == _presetId && preset.Available))
+        {
+            ApplyPresetGuidance(overwriteEncoderFields: false);
+            return;
+        }
         var first = MatchingPresets.FirstOrDefault(preset => preset.Available) ?? MatchingPresets.FirstOrDefault();
         _presetId = first?.Id ?? string.Empty;
+        ApplyPresetGuidance(overwriteEncoderFields: false);
     }
-    private void ChangePreset(ChangeEventArgs args) { _presetId = Text(args); _selectedProfileId = Guid.Empty; }
+
+    private void ChangePreset(ChangeEventArgs args)
+    {
+        _presetId = Text(args);
+        _selectedProfileId = Guid.Empty;
+        ApplyPresetGuidance(overwriteEncoderFields: true);
+    }
+
+    private void ApplyPresetGuidance(bool overwriteEncoderFields)
+    {
+        var preset = SelectedPreset;
+        if (preset is null) return;
+        var inputKind = preset.InputKind.Trim().ToLowerInvariant();
+        var encoders = preset.RequiredEncoders.Where(value => !string.IsNullOrWhiteSpace(value)).ToArray();
+        var videoEncoder = inputKind is "video" or "image" ? encoders.FirstOrDefault() ?? string.Empty : string.Empty;
+        var audioEncoder = inputKind == "audio" ? encoders.FirstOrDefault() ?? string.Empty : encoders.Skip(1).FirstOrDefault() ?? string.Empty;
+        if (overwriteEncoderFields || string.IsNullOrWhiteSpace(_options.VideoCodec)) _options.VideoCodec = videoEncoder;
+        if (overwriteEncoderFields || string.IsNullOrWhiteSpace(_options.AudioCodec)) _options.AudioCodec = audioEncoder;
+        if (overwriteEncoderFields || string.IsNullOrWhiteSpace(_options.OutputExtension)) _options.OutputExtension = preset.OutputExtension;
+        if (overwriteEncoderFields || string.IsNullOrWhiteSpace(_options.OutputMimeType)) _options.OutputMimeType = preset.OutputMimeType;
+        if (overwriteEncoderFields || string.IsNullOrWhiteSpace(_options.VideoEncoderPreset)) _options.VideoEncoderPreset = preset.RecommendedVideoEncoderPreset;
+        if (overwriteEncoderFields || string.IsNullOrWhiteSpace(_options.PixelFormat)) _options.PixelFormat = preset.RecommendedPixelFormat;
+        if (overwriteEncoderFields || _options.Crf is null) _options.Crf = preset.RecommendedCrf;
+        if (overwriteEncoderFields || _options.AudioBitrateKbps is null) _options.AudioBitrateKbps = preset.RecommendedAudioBitrateKbps;
+
+        var guidance = _profiles
+            .Where(profile => profile.BuiltIn && string.Equals(profile.PresetId, preset.Id, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(profile => profile.Options.Target == _options.Target ? 0 : 1)
+            .ThenBy(profile => profile.Name.Contains("balanced", StringComparison.OrdinalIgnoreCase) ? 0 : 1)
+            .FirstOrDefault();
+        if (guidance is null) return;
+        var options = guidance.Options;
+        if (overwriteEncoderFields || string.IsNullOrWhiteSpace(_options.VideoEncoderPreset)) _options.VideoEncoderPreset = options.VideoEncoderPreset;
+        if (overwriteEncoderFields || string.IsNullOrWhiteSpace(_options.PixelFormat)) _options.PixelFormat = options.PixelFormat;
+        if (overwriteEncoderFields || _options.Crf is null) _options.Crf = options.Crf;
+        if (overwriteEncoderFields || _options.AudioBitrateKbps is null) _options.AudioBitrateKbps = options.AudioBitrateKbps;
+        if (overwriteEncoderFields || _options.VideoBitrateKbps is null) _options.VideoBitrateKbps = options.VideoBitrateKbps;
+        if (overwriteEncoderFields || _options.MaximumVideoBitrateKbps is null) _options.MaximumVideoBitrateKbps = options.MaximumVideoBitrateKbps;
+        if (overwriteEncoderFields || _options.VideoBufferKbps is null) _options.VideoBufferKbps = options.VideoBufferKbps;
+        if (overwriteEncoderFields) _options.FastStart = options.FastStart;
+    }
 
     private async Task Start()
     {

@@ -3281,5 +3281,14 @@
   "Text.Smart␠adaptive␠mode␠waits␠for␠the␠real␠capture-track␠settings,␠then␠uses␠browser␠MediaCapabilities␠where␠available␠plus␠configurable␠runtime␠quality␠policy␠to␠select␠codec,␠video␠bitrate,␠audio␠bitrate,␠and␠smoothness␠fallbacks.␠Manual␠mode␠keeps␠every␠explicit␠control␠available.": "Der intelligente adaptive Modus wartet auf die tatsächlichen Einstellungen der Aufnahmespur und verwendet dann, soweit verfügbar, Browser-MediaCapabilities sowie die konfigurierbare Laufzeit-Qualitätsrichtlinie, um Codec, Video-Bitrate, Audio-Bitrate und Fallbacks für flüssige Kodierung auszuwählen. Im manuellen Modus bleiben alle expliziten Steuerelemente verfügbar.",
   "Text.The␠browser␠share␠picker␠still␠decides␠which␠screen,␠window,␠or␠tab␠is␠captured;␠PublisherStudio␠never␠assumes␠one␠user's␠monitor␠resolution.": "Der Browser-Freigabedialog entscheidet weiterhin, welcher Bildschirm, welches Fenster oder welcher Tab aufgenommen wird; PublisherStudio setzt niemals die Monitorauflösung eines bestimmten Benutzers voraus.",
   "Text.Use␠browser␠capability␠probe": "Browser-Fähigkeitsprüfung verwenden",
-  "Text.smart␠bitrate␠/␠codec␠selection": "intelligente Bitraten-/Codec-Auswahl"
+  "Text.smart␠bitrate␠/␠codec␠selection": "intelligente Bitraten-/Codec-Auswahl",
+  "Text.Rendered␠video": "Gerendertes Video",
+  "Text.Render␠selected␠range␠to␠video…": "Ausgewählten Bereich als Video rendern…",
+  "Text.Cancel␠rendered␠export": "Gerenderten Export abbrechen",
+  "Text.Rendering␠effects␠to␠video…": "Effekte werden ins Video gerendert…",
+  "Text.A␠rendered␠video␠export␠is␠already␠running.": "Ein gerenderter Videoexport läuft bereits.",
+  "Text.Rendering␠the␠selected␠range␠with␠the␠current␠Video␠Studio␠layers␠and␠effects.␠The␠browser␠writes␠only␠the␠video␠canvas␠and␠audio␠stream;␠player␠controls␠and␠editor␠chrome␠are␠not␠captured.": "Der ausgewählte Bereich wird mit den aktuellen Video-Studio-Ebenen und -Effekten gerendert. Der Browser schreibt nur die Videoleinwand und den Audiostream; Player-Steuerelemente und die Editor-Oberfläche werden nicht aufgezeichnet.",
+  "Text.Rendered␠video␠export␠could␠not␠start": "Gerenderter Videoexport konnte nicht gestartet werden",
+  "Text.Rendered␠video␠exported": "Gerendertes Video exportiert",
+  "Text.Rendered␠video␠export␠failed": "Gerenderter Videoexport fehlgeschlagen"
 }

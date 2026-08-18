@@ -6,7 +6,7 @@
 @inject ILogger<PageSurface> Logger
 @inject IPublisherRuntimePolicyDataService RuntimePolicy
 
-<div id="publisher-stage" class="publication-stage @(State.Document.View.RulersVisible ? null : "rulers-hidden") @(State.ConnectorTool != ConnectorToolKind.None ? "connector-tool-active" : null) @(!SelectionVisualsEnabled ? "selection-visuals-suppressed" : null)"
+<div id="publisher-stage" class="publication-stage @(State.Document.View.RulersVisible ? null : "rulers-hidden") @(State.ConnectorTool != ConnectorToolKind.None ? "connector-tool-active" : null) @(!SelectionVisualsEnabled ? "selection-visuals-suppressed" : null) @(!InteractionEnabled ? "canvas-interaction-suspended" : null)"
      tabindex="0" @oncontextmenu="ShowPageContextMenu" @oncontextmenu:preventDefault>
     @if (State.Document.View.RulersVisible)
     {
@@ -660,6 +660,7 @@
 @code {
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
     [Parameter] public bool SelectionVisualsEnabled { get; set; } = true;
+    [Parameter] public bool InteractionEnabled { get; set; } = true;
     [Parameter] public EventCallback<Guid> EditTextRequested { get; set; }
     [Parameter] public EventCallback RequestPicture { get; set; }
     [Parameter] public EventCallback RequestReplacePicture { get; set; }
@@ -767,7 +768,7 @@
             .OrderBy(id => id)
             .Select(id => id.ToString("D"))
             .ToArray();
-        var selectionKey = $"{SelectionVisualsEnabled}|{string.Join(",", selectedElementIds)}";
+        var selectionKey = $"{SelectionVisualsEnabled}|{InteractionEnabled}|{string.Join(",", selectedElementIds)}";
         var clipboardKey = $"{State.CanPaste}:{State.ClipboardRevision}";
         var initializationKey = $"{State.CurrentPage.Id:N}|" +
             $"{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}|{State.Document.View.CanvasZoomMode}|{State.CropMode}|{State.ContentPanMode}|{State.Document.View.RulerUnit}|" +
@@ -801,6 +802,7 @@
                         snapInObjects = State.Document.View.SnapInObjects,
                         gridSpacingMm = State.Document.View.GridSpacingMm,
                         connectorTool = State.ConnectorTool.ToString(),
+                        interactionEnabled = InteractionEnabled,
                         selectedElementIds,
                         internalClipboardAvailable = State.CanPaste,
                         clipboardRevision = State.ClipboardRevision
@@ -1094,6 +1096,7 @@
 
     private async Task ShowElementContextMenu(PublicationElement element, MouseEventArgs args)
     {
+        if (!InteractionEnabled) return;
         State.SetPrimarySelection(element.Id);
         if (element is not ConnectorElement)
         {
@@ -1115,6 +1118,7 @@
 
     private async Task ShowPageContextMenu(MouseEventArgs args)
     {
+        if (!InteractionEnabled) return;
         State.SelectElement(null);
         await InvokeAsync(StateHasChanged).ConfigureAwait(true);
         await _contextMenu.ShowAsync(args).ConfigureAwait(true);

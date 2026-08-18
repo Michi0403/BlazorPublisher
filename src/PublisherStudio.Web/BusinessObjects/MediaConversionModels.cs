@@ -50,6 +50,10 @@ public enum MediaConversionTarget
 /// <param name="RequiredEncoders">String dependency used by the media conversion preset workflow to provide the corresponding application capability.</param>
 /// <param name="Available">Value indicating whether the value is available should apply to this operation.</param>
 /// <param name="UnavailableReason">Unavailable reason value supplied to the media conversion preset operation and used when producing its result.</param>
+/// <param name="RecommendedVideoEncoderPreset">Optional configurable FFmpeg encoder-preset recommendation used for smart UI preselection.</param>
+/// <param name="RecommendedPixelFormat">Optional configurable FFmpeg pixel-format recommendation used for smart UI preselection.</param>
+/// <param name="RecommendedCrf">Optional configurable CRF/quality recommendation used for smart UI preselection.</param>
+/// <param name="RecommendedAudioBitrateKbps">Optional configurable audio-bitrate recommendation used for smart UI preselection.</param>
 public sealed record MediaConversionPreset(
     string Id,
     string Name,
@@ -61,7 +65,11 @@ public sealed record MediaConversionPreset(
     bool BrowserOriented,
     IReadOnlyList<string> RequiredEncoders,
     bool Available = true,
-    string UnavailableReason = "");
+    string UnavailableReason = "",
+    string RecommendedVideoEncoderPreset = "",
+    string RecommendedPixelFormat = "",
+    int? RecommendedCrf = null,
+    int? RecommendedAudioBitrateKbps = null);
 
 /// <summary>
 /// Canonical FFmpeg options shared by the Mainframe UI, VideoStudio hand-offs,

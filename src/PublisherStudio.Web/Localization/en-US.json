@@ -3281,5 +3281,14 @@
   "Text.Smart␠adaptive␠mode␠waits␠for␠the␠real␠capture-track␠settings,␠then␠uses␠browser␠MediaCapabilities␠where␠available␠plus␠configurable␠runtime␠quality␠policy␠to␠select␠codec,␠video␠bitrate,␠audio␠bitrate,␠and␠smoothness␠fallbacks.␠Manual␠mode␠keeps␠every␠explicit␠control␠available.": "Smart adaptive mode waits for the real capture-track settings, then uses browser MediaCapabilities where available plus configurable runtime quality policy to select codec, video bitrate, audio bitrate, and smoothness fallbacks. Manual mode keeps every explicit control available.",
   "Text.The␠browser␠share␠picker␠still␠decides␠which␠screen,␠window,␠or␠tab␠is␠captured;␠PublisherStudio␠never␠assumes␠one␠user's␠monitor␠resolution.": "The browser share picker still decides which screen, window, or tab is captured; PublisherStudio never assumes one user's monitor resolution.",
   "Text.Use␠browser␠capability␠probe": "Use browser capability probe",
-  "Text.smart␠bitrate␠/␠codec␠selection": "smart bitrate / codec selection"
+  "Text.smart␠bitrate␠/␠codec␠selection": "smart bitrate / codec selection",
+  "Text.Rendered␠video": "Rendered video",
+  "Text.Render␠selected␠range␠to␠video…": "Render selected range to video…",
+  "Text.Cancel␠rendered␠export": "Cancel rendered export",
+  "Text.Rendering␠effects␠to␠video…": "Rendering effects to video…",
+  "Text.A␠rendered␠video␠export␠is␠already␠running.": "A rendered video export is already running.",
+  "Text.Rendering␠the␠selected␠range␠with␠the␠current␠Video␠Studio␠layers␠and␠effects.␠The␠browser␠writes␠only␠the␠video␠canvas␠and␠audio␠stream;␠player␠controls␠and␠editor␠chrome␠are␠not␠captured.": "Rendering the selected range with the current Video Studio layers and effects. The browser writes only the video canvas and audio stream; player controls and editor chrome are not captured.",
+  "Text.Rendered␠video␠export␠could␠not␠start": "Rendered video export could not start",
+  "Text.Rendered␠video␠exported": "Rendered video exported",
+  "Text.Rendered␠video␠export␠failed": "Rendered video export failed"
 }

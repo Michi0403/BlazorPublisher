@@ -128,6 +128,13 @@
                     <DxRibbonGroup Text='@LT("Recording")' IconCssClass="pub-icon pub-icon-download">
                         <DxRibbonItem Text='@LT("Download recording")' IconCssClass="pub-icon pub-icon-download" Enabled="@HasRetainedRecording" Click="DownloadRecording" />
                     </DxRibbonGroup>
+                    @if (IsVideo)
+                    {
+                        <DxRibbonGroup Text='@LT("Rendered video")' IconCssClass="pub-icon pub-icon-effects">
+                            <DxRibbonItem Text='@LT("Render selected range to video…")' IconCssClass="pub-icon pub-icon-download" Enabled="@(HasSource && !_renderingVideoExport)" Click="RenderEffectsToVideo" />
+                            <DxRibbonItem Text='@LT("Cancel rendered export")' IconCssClass="pub-icon pub-icon-stop" Enabled="@_renderingVideoExport" Click="CancelRenderedVideoExport" />
+                        </DxRibbonGroup>
+                    }
                     <DxRibbonGroup Text='@LT("Convert")' IconCssClass="pub-icon pub-icon-media">
                         <DxRibbonItem Text='@LT("Send selection to converter")' Enabled="@HasSelectedSegment" Click="SendSelectedMediaToConverter" />
                     </DxRibbonGroup>
@@ -807,7 +814,7 @@
                         <DxButton Text='@LT("Download recording")' Click="DownloadRecording" />
                     }
                     <DxButton Text='@LT("Cancel")' Click="Cancel" />
-                    <DxButton Text="@ApplyButtonText" Enabled="@(HasSource && !_recording && !_recordingStopping && !_saving && !_embedding)" Click="Save" RenderStyle="ButtonRenderStyle.Primary" />
+                    <DxButton Text="@ApplyButtonText" Enabled="@(HasSource && !_recording && !_recordingStopping && !_renderingVideoExport && !_saving && !_embedding)" Click="Save" RenderStyle="ButtonRenderStyle.Primary" />
                 </div>
             </footer>
         </section>
@@ -928,6 +935,7 @@
     private bool _autoPlay = true;
     private bool _recording;
     private bool _recordingStopping;
+    private bool _renderingVideoExport;
     private bool _recordingAdaptiveQuality = true;
     private string _recordingAdaptiveProfile = "quality";
     private bool _recordingAdaptVideo = true;
@@ -1190,7 +1198,9 @@
     private string ImportMenuText => IsVideo ? LT("Import video…") : LT("Import audio…");
     private string Accept => IsVideo ? "video/mp4,video/webm,video/ogg,video/quicktime" : "audio/mpeg,audio/wav,audio/ogg,audio/webm,audio/mp4,audio/aac,audio/flac";
     private string MimeLabel => string.IsNullOrWhiteSpace(_mimeType) ? (IsVideo ? LT("Video") : LT("Audio")) : _mimeType;
-    private string SourceStatus => _recordingStopping
+    private string SourceStatus => _renderingVideoExport
+        ? LT("Rendering effects to video…")
+        : _recordingStopping
         ? LT("Finalizing recording…")
         : _recording
             ? LT("Recording…")
@@ -1223,6 +1233,7 @@
         _warning = null;
         _recording = false;
         _recordingStopping = false;
+        _renderingVideoExport = false;
         _recordingAdaptiveQuality = RecordingPolicy.AdaptiveQuality.Enabled;
         _recordingAdaptiveProfile = NormalizeAdaptiveProfile(RecordingPolicy.AdaptiveQuality.DefaultProfile);
         _recordingAdaptVideo = true;
@@ -1467,7 +1478,7 @@
     private async Task<IJSObjectReference> EnsureMediaModuleAsync()
     {
         if (_disposed) throw new ObjectDisposedException(nameof(MediaStudio));
-        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.8.1").ConfigureAwait(true);
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.8.2").ConfigureAwait(true);
         _self ??= DotNetObjectReference.Create(this);
         if (SessionId != Guid.Empty)
         {
@@ -1493,21 +1504,26 @@
         return _module;
     }
 
+    private object BuildVideoEffectConfiguration(int outputWidth = 0, int outputHeight = 0) => new
+    {
+        fitMode = _videoFitMode switch
+        {
+            PublicationVideoFitMode.Cover => "cover",
+            PublicationVideoFitMode.Stretch => "stretch",
+            _ => "contain"
+        },
+        forceCanvas = true,
+        outputWidth,
+        outputHeight,
+        maximumPixels = 0,
+        layers = VideoLayerPayload(SelectedSegment?.VideoLayers ?? [])
+    };
+
     private async Task SyncVideoEffectsAsync(IJSObjectReference? module = null)
     {
         if (!IsVideo || !HasSource || SelectedSegment is null || !IsPlayableSegment(SelectedSegment)) return;
         module ??= await EnsureMediaModuleAsync().ConfigureAwait(true);
-        await module.InvokeVoidAsync("configureVideoEffects", "media-studio-preview", "media-studio-video-effects", new
-        {
-            fitMode = _videoFitMode switch
-            {
-                PublicationVideoFitMode.Cover => "cover",
-                PublicationVideoFitMode.Stretch => "stretch",
-                _ => "contain"
-            },
-            forceCanvas = true,
-            layers = VideoLayerPayload(SelectedSegment.VideoLayers)
-        }).ConfigureAwait(true);
+        await module.InvokeVoidAsync("configureVideoEffects", "media-studio-preview", "media-studio-video-effects", BuildVideoEffectConfiguration()).ConfigureAwait(true);
     }
 
     private object[] VideoLayerPayload(IEnumerable<VideoEffectLayer> layers) => layers
@@ -3471,6 +3487,78 @@
                 metadataAnalysisDelayMilliseconds = Math.Clamp(adaptive.MetadataAnalysisDelayMilliseconds, 0, 10000)
             }
         };
+    }
+
+    private async Task RenderEffectsToVideo()
+    {
+        if (!IsVideo || !HasSource || SelectedSegment is null || !IsPlayableSegment(SelectedSegment) || _renderingVideoExport) return;
+        _error = null;
+        try
+        {
+            var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+            var start = _videoSelectionIsPoint ? _trimStart : VideoSelectionStart;
+            var end = _videoSelectionIsPoint ? _trimEnd : VideoSelectionEnd;
+            if (end <= start + .001) { start = _trimStart; end = _trimEnd; }
+            var started = await module.InvokeAsync<bool>(
+                "startRenderedVideoExport",
+                "media-studio-preview",
+                _self,
+                BuildVideoEffectConfiguration(RecordingTargetWidth, RecordingTargetHeight),
+                BuildBrowserRecordingOptions(),
+                start,
+                end,
+                Math.Max(.1, _playbackRate),
+                _muted ? 0 : Math.Clamp(_volume, 0, 1),
+                _name).ConfigureAwait(true);
+            if (!started)
+            {
+                _warning = LT("A rendered video export is already running.");
+                return;
+            }
+            _renderingVideoExport = true;
+            _warning = LT("Rendering the selected range with the current Video Studio layers and effects. The browser writes only the video canvas and audio stream; player controls and editor chrome are not captured.");
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        }
+        catch (Exception ex) when (ex is JSDisconnectedException or TaskCanceledException or ObjectDisposedException or JSException)
+        {
+            _renderingVideoExport = false;
+            _error = $"{LT("Rendered video export could not start")}: {ex.Message}";
+        }
+    }
+
+    private async Task CancelRenderedVideoExport()
+    {
+        try
+        {
+            if (_module is not null) await _module.InvokeVoidAsync("cancelRenderedVideoExport", "media-studio-preview").ConfigureAwait(true);
+        }
+        catch (Exception ex) when (ex is JSDisconnectedException or TaskCanceledException or ObjectDisposedException or JSException)
+        {
+            Logger.LogDebug(ex, "Rendered Video Studio export cancellation could not reach the browser runtime.");
+        }
+        finally
+        {
+            _renderingVideoExport = false;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        }
+    }
+
+    [JSInvokable]
+    public async Task RenderedVideoExportReady(string fileName, string mimeType, long sizeBytes, int width, int height, double durationSeconds)
+    {
+        _renderingVideoExport = false;
+        _warning = $"{LT("Rendered video exported")}: {fileName} · {width} × {height} · {Time(durationSeconds)} · {FormatBytes(sizeBytes)} · {mimeType}.";
+        Logger.LogInformation("Rendered Video Studio export {FileName} completed at {Width}x{Height} with {SizeBytes} bytes and MIME {MimeType}.", fileName, width, height, sizeBytes, mimeType);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+    }
+
+    [JSInvokable]
+    public async Task RenderedVideoExportFailed(string message)
+    {
+        _renderingVideoExport = false;
+        _error = $"{LT("Rendered video export failed")}: {message}";
+        Logger.LogError("Rendered Video Studio export failed: {RenderError}", message);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
     }
 
     private async Task StartRecording(string source)

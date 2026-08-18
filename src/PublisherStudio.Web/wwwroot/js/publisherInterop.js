@@ -12,6 +12,78 @@ const PX_PER_MM_AT_96_DPI = 96 / 25.4;
 let publisherDocumentDirty = false;
 let activeVideoExportCancel = null;
 
+function installStableNativeRangeLifecycle() { try {
+    if (globalThis.__publisherStableNativeRangeLifecycleInstalled) return;
+    globalThis.__publisherStableNativeRangeLifecycleInstalled = true;
+    let active = null;
+    let pending = null;
+    let pendingFrame = 0;
+    const rangeFor = target => target instanceof HTMLInputElement && target.type === 'range' ? target : null;
+    const dispatchCoalescedInput = element => { try {
+        if (!(element instanceof HTMLInputElement) || element.type !== 'range' || !element.isConnected) return;
+        const event = new Event('input', { bubbles: true, composed: true });
+        Object.defineProperty(event, '__publisherRangeCoalesced', { value: true });
+        element.dispatchEvent(event);
+    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:range-lifecycle:dispatch', __javascriptError); }};
+    const flush = () => { try {
+        if (pendingFrame) cancelAnimationFrame(pendingFrame);
+        pendingFrame = 0;
+        const element = pending;
+        pending = null;
+        if (element) dispatchCoalescedInput(element);
+    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:range-lifecycle:flush', __javascriptError); }};
+    const schedule = element => { try {
+        pending = element;
+        if (pendingFrame) return;
+        pendingFrame = requestAnimationFrame(() => { try {
+            pendingFrame = 0;
+            const scheduled = pending;
+            pending = null;
+            if (scheduled) dispatchCoalescedInput(scheduled);
+        } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:range-lifecycle:frame', __javascriptError); }});
+    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:range-lifecycle:schedule', __javascriptError); }};
+    const release = () => { try {
+        flush();
+        active = null;
+    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:range-lifecycle:release', __javascriptError); }};
+
+    // Native range controls can emit far more input events than an InteractiveServer circuit can render.
+    // Keep the browser thumb fully native while coalescing only the server-bound input notifications to
+    // the browser's own animation cadence. A final value is always flushed on change/pointer release.
+    document.addEventListener('input', event => { try {
+        if (event.__publisherRangeCoalesced === true) return;
+        const element = rangeFor(event.target);
+        if (!element) return;
+        event.stopPropagation();
+        schedule(element);
+    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:range-lifecycle:input', __javascriptError); }}, true);
+    document.addEventListener('change', event => { try {
+        const element = rangeFor(event.target);
+        if (!element) return;
+        flush();
+    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:range-lifecycle:change', __javascriptError); }}, true);
+    document.addEventListener('pointerdown', event => { try {
+        const element = rangeFor(event.target);
+        if (!element || event.button !== 0) return;
+        release();
+        active = { element, pointerId: event.pointerId };
+    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:range-lifecycle:pointerdown', __javascriptError); }}, true);
+    window.addEventListener('pointerup', event => { try {
+        if (active?.pointerId === event.pointerId) release();
+    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:range-lifecycle:pointerup', __javascriptError); }}, true);
+    window.addEventListener('pointercancel', event => { try {
+        if (active?.pointerId === event.pointerId) release();
+    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:range-lifecycle:pointercancel', __javascriptError); }}, true);
+    window.addEventListener('pointermove', event => { try {
+        if (active?.pointerId === event.pointerId && event.pointerType === 'mouse' && (event.buttons & 1) === 0) release();
+    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:range-lifecycle:pointermove', __javascriptError); }}, true);
+    window.addEventListener('mouseup', release, true);
+    window.addEventListener('blur', release);
+    document.addEventListener('visibilitychange', () => { try { if (document.hidden) release(); }
+    catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:range-lifecycle:visibilitychange', __javascriptError); } });
+} catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:installStableNativeRangeLifecycle', __javascriptError); }}
+installStableNativeRangeLifecycle();
+
 window.addEventListener('beforeunload', event => { try {
     if (!publisherDocumentDirty) return;
     event.preventDefault();
@@ -1010,6 +1082,10 @@ export function initializeSignalConnectors(rootId, options = {}) { try {
     return Boolean(root.__publisherSignalRuntime);
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:initializeSignalConnectors@863', __javascriptError); throw __javascriptError; }}
 
+function canvasInteractionEnabled(state) { try {
+    return state?.config?.interactionEnabled !== false;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:canvasInteractionEnabled', __javascriptError); return false; }}
+
 export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, verticalRulerId, dotnet, config) { try {
     const stage = document.getElementById(stageId);
     const scroll = document.getElementById(scrollId);
@@ -1030,6 +1106,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         snapInObjects: Boolean(config?.snapInObjects),
         gridSpacingMm: Math.max(.1, number(config?.gridSpacingMm, 2.5)),
         connectorTool: String(config?.connectorTool || 'None'),
+        interactionEnabled: config?.interactionEnabled !== false,
         selectedElementIds: new Set((Array.isArray(config?.selectedElementIds) ? config.selectedElementIds : [])
             .map(value => { try { return (String(value || '').toLowerCase()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:(Array.isArray(config?.selectedElementIds) ? config.selectedElementIds@892', __javascriptError); throw __javascriptError; } })
             .filter(Boolean)),
@@ -1066,12 +1143,12 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         };
 
         const handlers = state.handlers;
-        handlers.stagePointerDown = event => { try { return (pointerDown(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stagePointerDown@927', __javascriptError); throw __javascriptError; } };
-        handlers.stageDoubleClick = event => { try { return (componentDoubleClick(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageDoubleClick@928', __javascriptError); throw __javascriptError; } };
-        handlers.stageContextMenu = event => { try { return (designerContextMenu(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageContextMenu@929', __javascriptError); throw __javascriptError; } };
-        handlers.stagePointerMove = event => { try { return (pointerMove(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stagePointerMove@930', __javascriptError); throw __javascriptError; } };
-        handlers.stagePointerUp = event => { try { return (pointerUp(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stagePointerUp@931', __javascriptError); throw __javascriptError; } };
-        handlers.stagePointerCancel = event => { try { return (pointerCancel(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stagePointerCancel@932', __javascriptError); throw __javascriptError; } };
+        handlers.stagePointerDown = event => { try { if (!canvasInteractionEnabled(state)) return; return (pointerDown(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stagePointerDown@927', __javascriptError); throw __javascriptError; } };
+        handlers.stageDoubleClick = event => { try { if (!canvasInteractionEnabled(state)) return; return (componentDoubleClick(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageDoubleClick@928', __javascriptError); throw __javascriptError; } };
+        handlers.stageContextMenu = event => { try { if (!canvasInteractionEnabled(state)) return; return (designerContextMenu(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageContextMenu@929', __javascriptError); throw __javascriptError; } };
+        handlers.stagePointerMove = event => { try { if (!canvasInteractionEnabled(state) && !state.operation) return; return (pointerMove(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stagePointerMove@930', __javascriptError); throw __javascriptError; } };
+        handlers.stagePointerUp = event => { try { if (!canvasInteractionEnabled(state) && !state.operation) return; return (pointerUp(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stagePointerUp@931', __javascriptError); throw __javascriptError; } };
+        handlers.stagePointerCancel = event => { try { if (!state.operation) return; return (pointerCancel(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stagePointerCancel@932', __javascriptError); throw __javascriptError; } };
         handlers.lostPointerCapture = event => { try {
             if (state.operation?.pointerId === event.pointerId) resetPointerOperation(state, true);
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.lostPointerCapture@933', __javascriptError); throw __javascriptError; }};
@@ -1096,13 +1173,13 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
             state.cursorY = null;
             nextAnimationFrame(state);
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stagePointerLeave@952', __javascriptError); throw __javascriptError; }};
-        handlers.stageWheel = event => { try { return (cropWheel(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageWheel@957', __javascriptError); throw __javascriptError; } };
-        handlers.stageKeyDown = event => { try { return (canvasKeyDown(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageKeyDown@958', __javascriptError); throw __javascriptError; } };
-        handlers.documentKeyDown = event => { try { return (canvasDocumentKeyDown(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.documentKeyDown@959', __javascriptError); throw __javascriptError; } };
-        handlers.documentPaste = event => { try { return (canvasDocumentPaste(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.documentPaste@960', __javascriptError); throw __javascriptError; } };
-        handlers.stageDragEnter = event => { try { return (insertionDragOver(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageDragEnter@961', __javascriptError); throw __javascriptError; } };
-        handlers.stageDragOver = event => { try { return (insertionDragOver(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageDragOver@962', __javascriptError); throw __javascriptError; } };
-        handlers.stageDrop = event => { try { return (insertionDrop(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageDrop@963', __javascriptError); throw __javascriptError; } };
+        handlers.stageWheel = event => { try { if (!canvasInteractionEnabled(state)) return; return (cropWheel(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageWheel@957', __javascriptError); throw __javascriptError; } };
+        handlers.stageKeyDown = event => { try { if (!canvasInteractionEnabled(state)) return; return (canvasKeyDown(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageKeyDown@958', __javascriptError); throw __javascriptError; } };
+        handlers.documentKeyDown = event => { try { if (!canvasInteractionEnabled(state)) return; return (canvasDocumentKeyDown(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.documentKeyDown@959', __javascriptError); throw __javascriptError; } };
+        handlers.documentPaste = event => { try { if (!canvasInteractionEnabled(state)) return; return (canvasDocumentPaste(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.documentPaste@960', __javascriptError); throw __javascriptError; } };
+        handlers.stageDragEnter = event => { try { if (!canvasInteractionEnabled(state)) return; return (insertionDragOver(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageDragEnter@961', __javascriptError); throw __javascriptError; } };
+        handlers.stageDragOver = event => { try { if (!canvasInteractionEnabled(state)) return; return (insertionDragOver(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageDragOver@962', __javascriptError); throw __javascriptError; } };
+        handlers.stageDrop = event => { try { if (!canvasInteractionEnabled(state)) return; return (insertionDrop(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageDrop@963', __javascriptError); throw __javascriptError; } };
         handlers.stageDragLeave = event => { try {
             const next = event.relatedTarget;
             if (!next || !state.stage.contains(next)) {
@@ -1110,7 +1187,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
                 clearInsertionDrag(state);
             }
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageDragLeave@964', __javascriptError); throw __javascriptError; }};
-        handlers.documentDragStart = event => { try { namedMediaDragStart(event); return insertionDragStart(state, event); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.documentDragStart@971', __javascriptError); throw __javascriptError; } };
+        handlers.documentDragStart = event => { try { namedMediaDragStart(event); if (!canvasInteractionEnabled(state)) return; return insertionDragStart(state, event); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.documentDragStart@971', __javascriptError); throw __javascriptError; } };
         handlers.documentDragEnd = () => { try { return (insertionDragEnd(state)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.documentDragEnd@972', __javascriptError); throw __javascriptError; } };
         handlers.documentClick = event => { try {
             if (performance.now() < number(state.suppressNextComponentClickUntil) && event.target?.closest?.('.devextreme-component-host')) {
@@ -1178,6 +1255,14 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         clearInsertionDrag(state);
         clearExternalDropPreview(state);
         try { clearPublicationPreview(state.page?.id || state.page); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@1037', __caughtJavaScriptError);  }
+    }
+    const interactionWasEnabled = canvasInteractionEnabled(state);
+    if (interactionWasEnabled && !normalizedConfig.interactionEnabled) {
+        resetPointerOperation(state, true);
+        cancelPendingComponentAction(state);
+        clearInsertionDrag(state);
+        clearExternalDropPreview(state);
+        state.keyboardActive = false;
     }
     state.scroll = scroll;
     state.page = page;

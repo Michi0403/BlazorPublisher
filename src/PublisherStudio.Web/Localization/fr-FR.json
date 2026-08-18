@@ -3281,5 +3281,14 @@
   "Text.Smart␠adaptive␠mode␠waits␠for␠the␠real␠capture-track␠settings,␠then␠uses␠browser␠MediaCapabilities␠where␠available␠plus␠configurable␠runtime␠quality␠policy␠to␠select␠codec,␠video␠bitrate,␠audio␠bitrate,␠and␠smoothness␠fallbacks.␠Manual␠mode␠keeps␠every␠explicit␠control␠available.": "Le mode adaptatif intelligent attend les paramètres réels de la piste de capture, puis utilise MediaCapabilities du navigateur lorsqu’il est disponible et la stratégie de qualité configurable pour choisir le codec, les débits vidéo et audio ainsi que les replis de fluidité. Le mode manuel conserve tous les réglages explicites.",
   "Text.The␠browser␠share␠picker␠still␠decides␠which␠screen,␠window,␠or␠tab␠is␠captured;␠PublisherStudio␠never␠assumes␠one␠user's␠monitor␠resolution.": "Le sélecteur de partage du navigateur décide toujours quel écran, quelle fenêtre ou quel onglet est capturé ; PublisherStudio ne suppose jamais la résolution d’écran d’un utilisateur particulier.",
   "Text.Use␠browser␠capability␠probe": "Utiliser la détection des capacités du navigateur",
-  "Text.smart␠bitrate␠/␠codec␠selection": "sélection intelligente du débit / codec"
+  "Text.smart␠bitrate␠/␠codec␠selection": "sélection intelligente du débit / codec",
+  "Text.Rendered␠video": "Vidéo rendue",
+  "Text.Render␠selected␠range␠to␠video…": "Rendre la plage sélectionnée en vidéo…",
+  "Text.Cancel␠rendered␠export": "Annuler l’export rendu",
+  "Text.Rendering␠effects␠to␠video…": "Rendu des effets dans la vidéo…",
+  "Text.A␠rendered␠video␠export␠is␠already␠running.": "Un export vidéo rendu est déjà en cours.",
+  "Text.Rendering␠the␠selected␠range␠with␠the␠current␠Video␠Studio␠layers␠and␠effects.␠The␠browser␠writes␠only␠the␠video␠canvas␠and␠audio␠stream;␠player␠controls␠and␠editor␠chrome␠are␠not␠captured.": "La plage sélectionnée est rendue avec les calques et effets actuels de Video Studio. Le navigateur n’écrit que le canevas vidéo et le flux audio ; les commandes du lecteur et l’interface de l’éditeur ne sont pas capturées.",
+  "Text.Rendered␠video␠export␠could␠not␠start": "Impossible de démarrer l’export vidéo rendu",
+  "Text.Rendered␠video␠exported": "Vidéo rendue exportée",
+  "Text.Rendered␠video␠export␠failed": "Échec de l’export vidéo rendu"
 }

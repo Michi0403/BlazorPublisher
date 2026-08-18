@@ -34,7 +34,9 @@ public enum PublisherRuntimeCollection
     ForbiddenFfmpegAdvancedOptions,
     FfmpegWindowsBundledPaths,
     FfmpegUnixBundledPaths,
-    FfmpegUnixInstallPaths
+    FfmpegUnixInstallPaths,
+    FfmpegEncoderPresetSuggestions,
+    FfmpegPixelFormatSuggestions
 }
 
 /// <summary>

@@ -3281,5 +3281,14 @@
   "Text.Smart␠adaptive␠mode␠waits␠for␠the␠real␠capture-track␠settings,␠then␠uses␠browser␠MediaCapabilities␠where␠available␠plus␠configurable␠runtime␠quality␠policy␠to␠select␠codec,␠video␠bitrate,␠audio␠bitrate,␠and␠smoothness␠fallbacks.␠Manual␠mode␠keeps␠every␠explicit␠control␠available.": "スマート適応モードは実際のキャプチャトラック設定を待ち、利用可能な場合はブラウザーの MediaCapabilities と設定可能な実行時品質ポリシーを使って、コーデック、映像ビットレート、音声ビットレート、滑らかさ維持のフォールバックを選択します。手動モードではすべての明示的な設定を利用できます。",
   "Text.The␠browser␠share␠picker␠still␠decides␠which␠screen,␠window,␠or␠tab␠is␠captured;␠PublisherStudio␠never␠assumes␠one␠user's␠monitor␠resolution.": "どの画面、ウィンドウ、タブをキャプチャするかは引き続きブラウザーの共有選択画面が決定します。PublisherStudio は特定ユーザーのモニター解像度を前提にしません。",
   "Text.Use␠browser␠capability␠probe": "ブラウザー能力判定を使用",
-  "Text.smart␠bitrate␠/␠codec␠selection": "スマートなビットレート / コーデック選択"
+  "Text.smart␠bitrate␠/␠codec␠selection": "スマートなビットレート / コーデック選択",
+  "Text.Rendered␠video": "レンダリング済み動画",
+  "Text.Render␠selected␠range␠to␠video…": "選択範囲を動画にレンダリング…",
+  "Text.Cancel␠rendered␠export": "レンダリング書き出しをキャンセル",
+  "Text.Rendering␠effects␠to␠video…": "エフェクトを動画へレンダリング中…",
+  "Text.A␠rendered␠video␠export␠is␠already␠running.": "レンダリング済み動画の書き出しはすでに実行中です。",
+  "Text.Rendering␠the␠selected␠range␠with␠the␠current␠Video␠Studio␠layers␠and␠effects.␠The␠browser␠writes␠only␠the␠video␠canvas␠and␠audio␠stream;␠player␠controls␠and␠editor␠chrome␠are␠not␠captured.": "選択範囲を現在の Video Studio レイヤーとエフェクトでレンダリングしています。ブラウザーは動画キャンバスと音声ストリームだけを書き出し、プレーヤー操作部やエディター UI は記録しません。",
+  "Text.Rendered␠video␠export␠could␠not␠start": "レンダリング済み動画の書き出しを開始できませんでした",
+  "Text.Rendered␠video␠exported": "レンダリング済み動画を書き出しました",
+  "Text.Rendered␠video␠export␠failed": "レンダリング済み動画の書き出しに失敗しました"
 }

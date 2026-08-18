@@ -3281,5 +3281,14 @@
   "Text.Smart␠adaptive␠mode␠waits␠for␠the␠real␠capture-track␠settings,␠then␠uses␠browser␠MediaCapabilities␠where␠available␠plus␠configurable␠runtime␠quality␠policy␠to␠select␠codec,␠video␠bitrate,␠audio␠bitrate,␠and␠smoothness␠fallbacks.␠Manual␠mode␠keeps␠every␠explicit␠control␠available.": "El modo adaptativo inteligente espera la configuración real de la pista de captura y después usa MediaCapabilities del navegador cuando está disponible junto con la política de calidad configurable para seleccionar códec, bitrate de vídeo, bitrate de audio y alternativas para mantener la fluidez. El modo manual conserva todos los controles explícitos.",
   "Text.The␠browser␠share␠picker␠still␠decides␠which␠screen,␠window,␠or␠tab␠is␠captured;␠PublisherStudio␠never␠assumes␠one␠user's␠monitor␠resolution.": "El selector de compartición del navegador sigue decidiendo qué pantalla, ventana o pestaña se captura; PublisherStudio nunca presupone la resolución del monitor de un usuario concreto.",
   "Text.Use␠browser␠capability␠probe": "Usar detección de capacidades del navegador",
-  "Text.smart␠bitrate␠/␠codec␠selection": "selección inteligente de bitrate / códec"
+  "Text.smart␠bitrate␠/␠codec␠selection": "selección inteligente de bitrate / códec",
+  "Text.Rendered␠video": "Vídeo renderizado",
+  "Text.Render␠selected␠range␠to␠video…": "Renderizar el intervalo seleccionado como vídeo…",
+  "Text.Cancel␠rendered␠export": "Cancelar exportación renderizada",
+  "Text.Rendering␠effects␠to␠video…": "Renderizando efectos en el vídeo…",
+  "Text.A␠rendered␠video␠export␠is␠already␠running.": "Ya se está ejecutando una exportación de vídeo renderizado.",
+  "Text.Rendering␠the␠selected␠range␠with␠the␠current␠Video␠Studio␠layers␠and␠effects.␠The␠browser␠writes␠only␠the␠video␠canvas␠and␠audio␠stream;␠player␠controls␠and␠editor␠chrome␠are␠not␠captured.": "Se está renderizando el intervalo seleccionado con las capas y efectos actuales de Video Studio. El navegador escribe únicamente el lienzo de vídeo y el flujo de audio; no se capturan los controles del reproductor ni la interfaz del editor.",
+  "Text.Rendered␠video␠export␠could␠not␠start": "No se pudo iniciar la exportación de vídeo renderizado",
+  "Text.Rendered␠video␠exported": "Vídeo renderizado exportado",
+  "Text.Rendered␠video␠export␠failed": "Falló la exportación de vídeo renderizado"
 }

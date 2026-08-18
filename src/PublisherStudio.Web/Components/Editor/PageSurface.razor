@@ -5,6 +5,7 @@
 @inject IUserNotificationService Notifications
 @inject ILogger<PageSurface> Logger
 @inject IPublisherRuntimePolicyDataService RuntimePolicy
+@inject PublicationEditorTextService EditorText
 
 <div id="publisher-stage" class="publication-stage @(State.Document.View.RulersVisible ? null : "rulers-hidden") @(State.ConnectorTool != ConnectorToolKind.None ? "connector-tool-active" : null) @(!SelectionVisualsEnabled ? "selection-visuals-suppressed" : null) @(!InteractionEnabled ? "canvas-interaction-suspended" : null)"
      tabindex="0" @oncontextmenu="ShowPageContextMenu" @oncontextmenu:preventDefault>
@@ -764,22 +765,20 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (_disposed || _canvasInitializationInProgress) return;
-        var selectedElementIds = (SelectionVisualsEnabled ? State.SelectedElementIds : Array.Empty<Guid>())
-            .OrderBy(id => id)
-            .Select(id => id.ToString("D"))
-            .ToArray();
-        var selectionKey = $"{SelectionVisualsEnabled}|{InteractionEnabled}|{string.Join(",", selectedElementIds)}";
-        var clipboardKey = $"{State.CanPaste}:{State.ClipboardRevision}";
-        var initializationKey = $"{State.CurrentPage.Id:N}|" +
-            $"{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}|{State.Document.View.CanvasZoomMode}|{State.CropMode}|{State.ContentPanMode}|{State.Document.View.RulerUnit}|" +
-            $"{State.Document.View.RulersVisible}|{State.Document.View.GuidesVisible}|{State.Document.View.SnapToGrid}|" +
-            $"{State.Document.View.SnapToGuides}|{State.Document.View.SnapToPage}|{State.Document.View.SnapToObjects}|{State.Document.View.SnapInObjects}|" +
-            $"{State.Document.View.GridSpacingMm.ToString("R", CultureInfo.InvariantCulture)}|{State.ConnectorTool}|{selectionKey}|{clipboardKey}";
-        var dataVisualLayoutKey = $"{State.CurrentPage.Id:N}|{State.Revision}|{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}|{State.Document.View.CanvasZoomMode}";
 
         _canvasInitializationInProgress = true;
         try
         {
+            var selectedElementIds = EditorText.BuildCanvasSelectedElementIds(SelectionVisualsEnabled, State.SelectedElementIds);
+            var selectionKey = EditorText.BuildCanvasSelectionKey(SelectionVisualsEnabled, InteractionEnabled, selectedElementIds);
+            var clipboardKey = $"{State.CanPaste}:{State.ClipboardRevision}";
+            var initializationKey = $"{State.CurrentPage.Id:N}|" +
+                $"{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}|{State.Document.View.CanvasZoomMode}|{State.CropMode}|{State.ContentPanMode}|{State.Document.View.RulerUnit}|" +
+                $"{State.Document.View.RulersVisible}|{State.Document.View.GuidesVisible}|{State.Document.View.SnapToGrid}|" +
+                $"{State.Document.View.SnapToGuides}|{State.Document.View.SnapToPage}|{State.Document.View.SnapToObjects}|{State.Document.View.SnapInObjects}|" +
+                $"{State.Document.View.GridSpacingMm.ToString("R", CultureInfo.InvariantCulture)}|{State.ConnectorTool}|{selectionKey}|{clipboardKey}";
+            var dataVisualLayoutKey = $"{State.CurrentPage.Id:N}|{State.Revision}|{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}|{State.Document.View.CanvasZoomMode}";
+
             _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js").ConfigureAwait(true);
             if (initializationKey != _canvasInitializationKey)
             {
@@ -818,25 +817,36 @@
                 await _module.InvokeVoidAsync("initializeSignalConnectors", "publisher-page", new { autoStart = false, editor = true }).ConfigureAwait(true);
             }
         }
-        catch (JSDisconnectedException) { }
-        catch (TaskCanceledException) { }
-        catch (ObjectDisposedException) { }
-        catch (InvalidOperationException) { }
-        catch (JSException ex)
+        catch (JSDisconnectedException exception)
         {
-            Console.WriteLine($"Publisher canvas initialization failed: {ex.Message}");
+            Logger.LogDebug(exception, "Publisher canvas initialization stopped because the InteractiveServer circuit disconnected.");
+        }
+        catch (TaskCanceledException exception)
+        {
+            Logger.LogDebug(exception, "Publisher canvas initialization was canceled.");
+        }
+        catch (ObjectDisposedException exception)
+        {
+            Logger.LogDebug(exception, "Publisher canvas initialization stopped because an interop resource was disposed.");
+        }
+        catch (InvalidOperationException exception)
+        {
+            Logger.LogWarning(exception, "Publisher canvas initialization could not complete because the interactive renderer was not ready.");
+        }
+        catch (JSException exception)
+        {
+            Logger.LogError(exception, "Publisher canvas JavaScript initialization failed.");
+            Notifications.Warning("Canvas interaction could not initialize completely. Review the local log if the problem continues.", "Canvas warning", nameof(PageSurface));
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Publisher canvas initialization failed unexpectedly.");
+            Notifications.Error("Canvas initialization failed. Review the local application log for technical details.", "Canvas error", nameof(PageSurface));
         }
         finally
         {
             _canvasInitializationInProgress = false;
         }
-    }
-
-    public async Task FitPageAsync()
-    {
-        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js").ConfigureAwait(true);
-        var zoom = await _module.InvokeAsync<double>("calculateFitZoom", "publisher-stage", State.CurrentPage.WidthMm, State.CurrentPage.HeightMm, State.Document.View.RulersVisible).ConfigureAwait(true);
-        State.SetZoom(zoom);
     }
 
     [JSInvokable] public void SelectElement(string id, bool additive = false) { if (Guid.TryParse(id, out var guid)) State.SelectElement(guid, additive); }

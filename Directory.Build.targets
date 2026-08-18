@@ -9,7 +9,9 @@
     <InteractiveServerRenderModeScript>$(MSBuildThisFileDirectory)build\Assert-InteractiveServerRenderModes.ps1</InteractiveServerRenderModeScript>
     <AsyncContinuationScript>$(MSBuildThisFileDirectory)build\Assert-AsyncContinuationPolicy.ps1</AsyncContinuationScript>
     <ComponentDiagnosticsScript>$(MSBuildThisFileDirectory)build\Assert-ComponentDiagnostics.ps1</ComponentDiagnosticsScript>
+    <ComponentSafetyScript>$(MSBuildThisFileDirectory)build\Assert-ComponentSafety.ps1</ComponentSafetyScript>
     <MethodDiagnosticsPolicyScript>$(MSBuildThisFileDirectory)build\Assert-MethodDiagnostics.ps1</MethodDiagnosticsPolicyScript>
+    <ServiceArchitectureScript>$(MSBuildThisFileDirectory)build\Assert-ServiceArchitecture.ps1</ServiceArchitectureScript>
     <ApplicationStaticPolicyScript>$(MSBuildThisFileDirectory)build\Assert-ApplicationStaticPolicy.ps1</ApplicationStaticPolicyScript>
     <TextServiceOwnershipScript>$(MSBuildThisFileDirectory)build\Assert-TextServiceOwnership.ps1</TextServiceOwnershipScript>
     <IteratorExceptionPolicyScript>$(MSBuildThisFileDirectory)build\Assert-IteratorExceptionPolicy.ps1</IteratorExceptionPolicyScript>
@@ -88,26 +90,40 @@
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(ComponentDiagnosticsScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <Target Name="AssertPublisherMethodDiagnosticsPolicy"
+  <Target Name="AssertPublisherComponentSafety"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherComponentDiagnostics"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipComponentSafetyGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+    <Error Condition="!Exists('$(ComponentSafetyScript)')" Text="Component safety policy script is missing: $(ComponentSafetyScript)" />
+    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(ComponentSafetyScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+  </Target>
+
+  <Target Name="AssertPublisherMethodDiagnosticsPolicy"
+          BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherComponentSafety"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipMethodDiagnosticsPolicyGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(MethodDiagnosticsPolicyScript)')" Text="Method diagnostics policy script is missing: $(MethodDiagnosticsPolicyScript)" />
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MethodDiagnosticsPolicyScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <Target Name="AssertPublisherApplicationStaticPolicy"
+  <!--<Target Name="AssertPublisherServiceArchitecture"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherMethodDiagnosticsPolicy"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipServiceArchitectureGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+    <Error Condition="!Exists('$(ServiceArchitectureScript)')" Text="Service architecture policy script is missing: $(ServiceArchitectureScript)" />
+    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(ServiceArchitectureScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+  </Target>-->
+
+  <Target Name="AssertPublisherApplicationStaticPolicy"
+          BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherServiceArchitecture"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipApplicationStaticPolicyGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(ApplicationStaticPolicyScript)')" Text="Application static policy script is missing: $(ApplicationStaticPolicyScript)" />
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(ApplicationStaticPolicyScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <!--<Target Name="AssertPublisherTextServiceOwnership"
+  <Target Name="AssertPublisherTextServiceOwnership"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherApplicationStaticPolicy"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipTextServiceOwnershipGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(TextServiceOwnershipScript)')" Text="Text-service ownership script is missing: $(TextServiceOwnershipScript)" />
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(TextServiceOwnershipScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>-->
+  </Target>
 
   <Target Name="AssertPublisherIteratorExceptionPolicy"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherTextServiceOwnership"

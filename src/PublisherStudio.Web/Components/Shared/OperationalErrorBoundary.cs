@@ -29,18 +29,26 @@ public sealed class OperationalErrorBoundary : ErrorBoundary
     /// <returns>A task that completes when the operation has finished.</returns>
     protected override Task OnErrorAsync(Exception exception)
     {
-        if (exception is OperationCanceledException or TaskCanceledException or JSDisconnectedException)
+        try
         {
-            Logger.LogDebug(exception, "PublisherStudio interactive work ended during normal cancellation or circuit shutdown.");
+            if (exception is OperationCanceledException or TaskCanceledException or JSDisconnectedException)
+            {
+                Logger.LogDebug(exception, "PublisherStudio interactive work ended during normal cancellation or circuit shutdown.");
+                return Task.CompletedTask;
+            }
+
+            Logger.LogError(exception, "Unhandled PublisherStudio component failure in the active interactive circuit.");
+            Notifications.Error(
+                "The current view encountered an error. Review the local application log for the full exception.",
+                "PublisherStudio component error",
+                nameof(OperationalErrorBoundary),
+                persistent: true);
             return Task.CompletedTask;
         }
-
-        Logger.LogError(exception, "Unhandled PublisherStudio component failure in the active interactive circuit.");
-        Notifications.Error(
-            "The current view encountered an error. Review the local application log for the full exception.",
-            "PublisherStudio component error",
-            nameof(OperationalErrorBoundary),
-            persistent: true);
-        return Task.CompletedTask;
+        catch (Exception boundaryException)
+        {
+            Logger.LogCritical(boundaryException, "PublisherStudio could not report an unhandled component failure through the operational error boundary.");
+            return Task.CompletedTask;
+        }
     }
 }

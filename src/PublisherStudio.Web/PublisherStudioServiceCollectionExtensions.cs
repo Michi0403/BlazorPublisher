@@ -56,6 +56,7 @@ public static class PublisherStudioServiceCollectionExtensions
         AddSingleton<IPanelStudioTextPatternDataService, PanelStudioTextPatternDataService>(services);
         AddSingleton<IPublisherRuntimePolicyDataService, PublisherRuntimePolicyDataService>(services);
         AddSingleton<PanelStudioTextService, PanelStudioTextService>(services);
+        AddSingleton<PublicationEditorTextService, PublicationEditorTextService>(services);
         AddSingleton<IPanelStudioPreviewPresetService, PanelStudioPreviewPresetService>(services);
         AddSingleton<IApplicationPortResolver, ApplicationPortResolver>(services);
         AddSingleton<IRuntimeEndpointState, RuntimeEndpointState>(services);

@@ -28,7 +28,7 @@ try:
         "src/PublisherStudio.Web/PublisherStudio.Web.csproj",
         "src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj",
     ]:
-        require(rel, "<Version>2.7.9</Version>")
+        require(rel, "<Version>2.9.0</Version>")
         match = re.search(r"<Version>(\d+)\.(\d+)\.(\d+)</Version>", read(rel))
         if not match or int(match.group(2)) > 9 or int(match.group(3)) > 9:
             raise AssertionError(f"version-slot policy failed for {rel}")
@@ -39,7 +39,7 @@ try:
         "src/PublisherStudio.Web/Components/Editor/InspectorPanel.razor",
         "src/PublisherStudio.Web/Components/Editor/MediaStudio.razor",
     ]:
-        require(rel, "v=2.7.9")
+        require(rel, "v=2.9.0")
 
     cultures = ["de-DE", "en-US", "es-ES", "fr-FR", "ja-JP", "uk-UA"]
     catalogs = {}

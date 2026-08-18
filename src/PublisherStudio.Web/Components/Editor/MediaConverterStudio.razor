@@ -393,6 +393,10 @@
     /// </summary>
     private CancellationTokenSource? _polling;
     /// <summary>
+    /// Synchronizes ownership transfer and disposal of the media-converter polling cancellation source.
+    /// </summary>
+    private readonly object _pollingSync = new();
+    /// <summary>
     /// Stores the internal self state used by <see cref="MediaConverterStudio"/> while executing its surrounding workflow.
     /// </summary>
     private DotNetObjectReference<MediaConverterStudio>? _self;
@@ -862,13 +866,53 @@
     {
         try
         {
-            if (_polling is not null) return;
-            _polling = new CancellationTokenSource();
-            TaskRunner.Run(
-                nameof(MediaConverterStudio),
-                nameof(PollAsync),
-                _ => PollAsync(_polling.Token),
-                _polling.Token);
+            var polling = new CancellationTokenSource();
+            CancellationToken pollingToken;
+            lock (_pollingSync)
+            {
+                if (_polling is not null)
+                {
+                    polling.Dispose();
+                    return;
+                }
+
+                pollingToken = polling.Token;
+                _polling = polling;
+            }
+
+            try
+            {
+                TaskRunner.Run(
+                    nameof(MediaConverterStudio),
+                    nameof(PollAsync),
+                    async _ =>
+                    {
+                        try
+                        {
+                            await PollAsync(pollingToken).ConfigureAwait(false);
+                        }
+                        finally
+                        {
+                            lock (_pollingSync)
+                            {
+                                if (ReferenceEquals(_polling, polling))
+                                    _polling = null;
+                                polling.Dispose();
+                            }
+                        }
+                    },
+                    pollingToken);
+            }
+            catch
+            {
+                lock (_pollingSync)
+                {
+                    if (ReferenceEquals(_polling, polling))
+                        _polling = null;
+                    polling.Dispose();
+                }
+                throw;
+            }
     
         }
         catch (Exception __componentMethodException)
@@ -886,27 +930,27 @@
     {
         try
         {
-            try
+            var cancellationSignal = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            using var cancellationRegistration = cancellationToken.Register(
+                static state => ((TaskCompletionSource<bool>)state!).TrySetResult(true),
+                cancellationSignal);
+
+            while (!cancellationToken.IsCancellationRequested)
             {
-                while (!cancellationToken.IsCancellationRequested)
+                var delayTask = Task.Delay(500);
+                var completedTask = await Task.WhenAny(delayTask, cancellationSignal.Task).ConfigureAwait(false);
+                if (!ReferenceEquals(completedTask, delayTask) || cancellationToken.IsCancellationRequested)
                 {
-                    await Task.Delay(500, cancellationToken).ConfigureAwait(false);
-                    await InvokeAsync(() =>
-                    {
-                        RefreshJobs();
-                        StateHasChanged();
-                    }).ConfigureAwait(false);
-                    if (_jobs.All(job => job.Status is not (MediaConversionJobStatus.Queued or MediaConversionJobStatus.Running))) break;
+                    Logger.LogDebug("Media Converter polling ended because its owning Studio lifetime was canceled.");
+                    return;
                 }
-            }
-            catch (OperationCanceledException exception) when (cancellationToken.IsCancellationRequested)
-            {
-                Logger.LogDebug(exception, "Media Converter polling was canceled by its owning Studio lifetime.");
-            }
-            finally
-            {
-                _polling?.Dispose();
-                _polling = null;
+
+                await InvokeAsync(() =>
+                {
+                    RefreshJobs();
+                    StateHasChanged();
+                }).ConfigureAwait(false);
+                if (_jobs.All(job => job.Status is not (MediaConversionJobStatus.Queued or MediaConversionJobStatus.Running))) break;
             }
     
         }
@@ -2044,7 +2088,10 @@
     {
         try
         {
-            if (_polling is not null) { await _polling.CancelAsync().ConfigureAwait(true); _polling.Dispose(); _polling = null; }
+            lock (_pollingSync)
+            {
+                _polling?.Cancel();
+            }
             if (_dropBound)
             {
                 try { await JS.InvokeVoidAsync("publisherStudio.unbindMediaConverterDrop", _sourceDropZone).ConfigureAwait(true); } catch { }

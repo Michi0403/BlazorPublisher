@@ -24,7 +24,7 @@ try:
         "src/PublisherStudio.Web/PublisherStudio.Web.csproj",
         "src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj",
     ):
-        require(rel, "<Version>2.8.8</Version>")
+        require(rel, "<Version>2.9.0</Version>")
 
     require(
         "src/PublisherStudio.Web/BusinessObjects/PublicationStreamingModels.cs",
@@ -106,7 +106,7 @@ try:
         "src/PublisherStudio.Web/Components/Editor/MediaStudio.razor",
         "src/PublisherStudio.Web/Components/Editor/InspectorPanel.razor",
     ):
-        require(rel, "v=2.8.8")
+        require(rel, "v=2.9.0")
 
     require(
         "src/PublisherStudio.Web/Services/Streaming/MediaQualityRecommendationService.cs",

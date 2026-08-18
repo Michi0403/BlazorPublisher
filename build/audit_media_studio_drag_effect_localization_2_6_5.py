@@ -42,7 +42,7 @@ try:
             '<DxRibbonTab Text=\'@LT("Output")\'>',
             'data-media-segment-id', 'data-video-layer-id', 'data-video-filter-id',
             'MediaStudioTimelineSegmentDropped', 'MediaStudioVideoLayerDropped', 'MediaStudioVideoFilterDropped',
-            './js/mediaStudioInterop.js?v=2.7.9')
+            './js/mediaStudioInterop.js?v=2.9.0')
     require('src/PublisherStudio.Web/Services/MediaStudio/UseCases/MediaTimelineEditService.cs',
             'MoveAt(List<PublicationMediaSegment>', 'InsertAt(')
     require('src/PublisherStudio.Web/wwwroot/js/mediaStudioInterop.js',
@@ -64,9 +64,9 @@ try:
             'font-family: "Segoe UI Symbol", "Noto Sans Symbols 2", "DejaVu Sans", sans-serif;',
             'v2.6.5 shared studio drag/layer affordances')
     require('src/PublisherStudio.Web/Components/App.razor',
-            'videoEffectRuntime.js?v=2.6.5', 'publisherInterop.js?v=2.7.9')
-    require('src/PublisherStudio.Web/PublisherStudio.Web.csproj', '<Version>2.7.9</Version>')
-    require('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj', '<Version>2.7.9</Version>')
+            'videoEffectRuntime.js?v=2.6.5', 'publisherInterop.js?v=2.9.0')
+    require('src/PublisherStudio.Web/PublisherStudio.Web.csproj', '<Version>2.9.0</Version>')
+    require('src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj', '<Version>2.9.0</Version>')
     require('src/PublisherStudio.Web/BusinessObjects/PublicationModels.cs', 'FormatVersion { get; set; } = "1.58"')
     print('PublisherStudio 2.6.5 media-studio/drag/effect/localization source audit passed.')
 except AssertionError as exc:

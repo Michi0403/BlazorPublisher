@@ -19,14 +19,14 @@ try:
     web_project = 'src/PublisherStudio.Web/PublisherStudio.Web.csproj'
     installer_project = 'src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'
     for rel in (web_project, installer_project):
-        require(rel, '<Version>2.7.9</Version>')
+        require(rel, '<Version>2.9.0</Version>')
 
     media = 'src/PublisherStudio.Web/Components/Editor/MediaStudio.razor'
     js = 'src/PublisherStudio.Web/wwwroot/js/mediaStudioInterop.js'
     policy = 'src/PublisherStudio.Web/BusinessObjects/PublisherRuntimePolicyModels.cs'
     settings = 'src/PublisherStudio.Web/appsettings.json'
 
-    require(media, './js/mediaStudioInterop.js?v=2.7.9')
+    require(media, './js/mediaStudioInterop.js?v=2.9.0')
     require(media, '@LT("Recording capture quality")')
     require(media, '<option value="source">@LT("Source/native")</option>')
     require(media, '<option value="master">@LT("Streaming master")')

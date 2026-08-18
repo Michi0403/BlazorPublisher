@@ -16,14 +16,14 @@ def require(rel,*needles):
     if missing: raise AssertionError(f"{rel} missing {missing}")
 try:
     for rel in ['src/PublisherStudio.Web/PublisherStudio.Web.csproj','src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj']:
-        require(rel,'<Version>2.7.9</Version>')
+        require(rel,'<Version>2.9.0</Version>')
         m=re.search(r'<Version>(\d+)\.(\d+)\.(\d+)</Version>',read(rel))
         if not m or int(m.group(2))>9 or int(m.group(3))>9:
             raise AssertionError(f'version-slot policy failed for {rel}')
     require('Directory.Build.props','<LocalGptWireProtocolVersion>2.1.1</LocalGptWireProtocolVersion>')
-    require('src/PublisherStudio.Web/Components/App.razor','publisherInterop.js?v=2.7.9')
+    require('src/PublisherStudio.Web/Components/App.razor','publisherInterop.js?v=2.9.0')
     for rel in ['src/PublisherStudio.Web/Components/Editor/InspectorPanel.razor','src/PublisherStudio.Web/Components/Pages/Editor.razor','src/PublisherStudio.Web/Components/Editor/MediaStudio.razor']:
-        require(rel,'mediaStudioInterop.js?v=2.7.9')
+        require(rel,'mediaStudioInterop.js?v=2.9.0')
     modes=[]
     for p in (root/'src').rglob('*.razor'):
         for line in p.read_text(encoding='utf-8').splitlines():

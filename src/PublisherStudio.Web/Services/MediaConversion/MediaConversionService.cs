@@ -334,8 +334,29 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
                         Options = normalizedOptions,
                         Cancellation = linked
                     };
-                    if (!_jobs.TryAdd(id, job)) throw new InvalidOperationException("The conversion job could not be registered.");
-                    _taskRunner.Run(nameof(MediaConversionService), $"ExecuteConversion:{id:D}", _ => ExecuteAsync(job, capabilities.Executable), linked.Token);
+                    if (!_jobs.TryAdd(id, job))
+                    {
+                        linked.Dispose();
+                        throw new InvalidOperationException("The conversion job could not be registered.");
+                    }
+
+                    var executionToken = linked.Token;
+                    try
+                    {
+                        _taskRunner.Run(
+                            nameof(MediaConversionService),
+                            $"ExecuteConversion:{id:D}",
+                            _ => ExecuteAsync(job, capabilities.Executable, executionToken),
+                            executionToken);
+                    }
+                    catch
+                    {
+                        _jobs.TryRemove(id, out _);
+                        linked.Dispose();
+                        try { Directory.Delete(directory, true); } catch { }
+                        throw;
+                    }
+
                     return Snapshot(job);
     
         }
@@ -535,7 +556,6 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
                     if (!_jobs.TryRemove(id, out var job)) return false;
                     CancelState(job);
                     try { Directory.Delete(Path.GetDirectoryName(job.SourcePath)!, true); } catch { }
-                    job.Cancellation.Dispose();
                     return true;
     
         }
@@ -551,8 +571,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
     /// </summary>
     /// <param name="job">Job value supplied to the media conversion operation and used when producing its result.</param>
     /// <param name="executable">Executable value supplied to the media conversion operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token captured before background execution starts so source disposal cannot race token retrieval.</param>
     /// <returns>A task that completes when the operation has finished.</returns>
-    private async Task ExecuteAsync(JobState job, string executable)
+    private async Task ExecuteAsync(JobState job, string executable, CancellationToken cancellationToken)
     {
         double durationSeconds = job.Options.DurationSeconds.GetValueOrDefault();
         try
@@ -577,7 +598,7 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
 
             var stdoutTask = Task.Run(async () =>
             {
-                while (await process.StandardOutput.ReadLineAsync(job.Cancellation.Token).ConfigureAwait(false) is { } line)
+                while (await process.StandardOutput.ReadLineAsync(cancellationToken).ConfigureAwait(false) is { } line)
                 {
                     if (line.StartsWith("out_time_us=", StringComparison.Ordinal)
                         && long.TryParse(line.AsSpan("out_time_us=".Length), NumberStyles.Integer, CultureInfo.InvariantCulture, out var microseconds)
@@ -594,12 +615,12 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
                         lock (job.Sync) job.Progress = 1;
                     }
                 }
-            }, job.Cancellation.Token);
+            }, cancellationToken);
 
             var stderr = new StringBuilder();
             var stderrTask = Task.Run(async () =>
             {
-                while (await process.StandardError.ReadLineAsync(job.Cancellation.Token).ConfigureAwait(false) is { } line)
+                while (await process.StandardError.ReadLineAsync(cancellationToken).ConfigureAwait(false) is { } line)
                 {
                     if (stderr.Length < 16_384) stderr.AppendLine(line);
                     if (durationSeconds <= 0)
@@ -614,9 +635,9 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
                         }
                     }
                 }
-            }, job.Cancellation.Token);
+            }, cancellationToken);
 
-            await process.WaitForExitAsync(job.Cancellation.Token).ConfigureAwait(false);
+            await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
             await Task.WhenAll(stdoutTask, stderrTask).ConfigureAwait(false);
             if (process.ExitCode != 0)
             {
@@ -656,6 +677,10 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
                 job.Process = null;
             }
             TryDelete(job.OutputPath);
+        }
+        finally
+        {
+            job.Cancellation.Dispose();
         }
     }
 
@@ -1458,8 +1483,13 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         try
         {
             logger.LogTrace($"Entering MediaConversionService.CancelState.");
-                    try { job.Cancellation.Cancel(); } catch { }
-                    try { if (job.Process is { HasExited: false }) job.Process.Kill(entireProcessTree: true); } catch { }
+                    lock (job.Sync)
+                    {
+                        if (job.Status is MediaConversionJobStatus.Completed or MediaConversionJobStatus.Failed or MediaConversionJobStatus.Cancelled)
+                            return;
+                        job.Cancellation.Cancel();
+                        try { if (job.Process is { HasExited: false }) job.Process.Kill(entireProcessTree: true); } catch { }
+                    }
     
         }
         catch (Exception exception)
@@ -1480,7 +1510,6 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
                     if (_disposed) return;
                     _disposed = true;
                     foreach (var job in _jobs.Values) CancelState(job);
-                    foreach (var job in _jobs.Values) job.Cancellation.Dispose();
                     _capabilityLock.Dispose();
     
         }

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Static source audit for PublisherStudio 2.8.8 compile repair and architecture maintenance."""
+"""Static source audit for PublisherStudio 2.9.0 compile repair and architecture maintenance."""
 from pathlib import Path
 import re, sys
 
@@ -29,17 +29,17 @@ try:
     for rel in (
         'src/PublisherStudio.Web/PublisherStudio.Web.csproj',
         'src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'):
-        require(rel, '<Version>2.8.8</Version>')
+        require(rel, '<Version>2.9.0</Version>')
 
     require('src/PublisherStudio.Web/Components/App.razor',
-            'css/site.css?v=20260818-288',
-            'videoEffectRuntime.js?v=2.8.8',
-            'publisherInterop.js?v=2.8.8')
+            'css/site.css?v=20260818-290',
+            'videoEffectRuntime.js?v=2.9.0',
+            'publisherInterop.js?v=2.9.0')
     for rel in (
         'src/PublisherStudio.Web/Components/Pages/Editor.razor',
         'src/PublisherStudio.Web/Components/Editor/InspectorPanel.razor',
         'src/PublisherStudio.Web/Components/Editor/MediaStudio.razor'):
-        require(rel, 'mediaStudioInterop.js?v=2.8.8')
+        require(rel, 'mediaStudioInterop.js?v=2.9.0')
 
     page = 'src/PublisherStudio.Web/Components/Editor/PageSurface.razor'
     require(page,
@@ -114,7 +114,7 @@ try:
 
     require('Directory.Build.props', '<LocalGptWireProtocolVersion>2.1.1</LocalGptWireProtocolVersion>')
 
-    print(f'PublisherStudio 2.8.8 compile/architecture source audit passed: {checks} checks.')
+    print(f'PublisherStudio 2.9.0 compile/architecture source audit passed: {checks} checks.')
 except Exception as exc:
-    print(f'PublisherStudio 2.8.8 source audit failed: {exc}', file=sys.stderr)
+    print(f'PublisherStudio 2.9.0 source audit failed: {exc}', file=sys.stderr)
     raise SystemExit(1)

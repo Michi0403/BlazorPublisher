@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Static source audit for PublisherStudio 2.8.8 on-demand networking, XML docs, and export UI."""
+"""Static source audit for PublisherStudio 2.9.0 on-demand networking, XML docs, and export UI."""
 from pathlib import Path
 import argparse, json, re, sys
 
@@ -35,17 +35,17 @@ try:
     for rel in (
         'src/PublisherStudio.Web/PublisherStudio.Web.csproj',
         'src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'):
-        require(rel, '<Version>2.8.8</Version>')
+        require(rel, '<Version>2.9.0</Version>')
 
     require('src/PublisherStudio.Web/Components/App.razor',
-            'css/site.css?v=20260818-288',
-            'videoEffectRuntime.js?v=2.8.8',
-            'publisherInterop.js?v=2.8.8')
+            'css/site.css?v=20260818-290',
+            'videoEffectRuntime.js?v=2.9.0',
+            'publisherInterop.js?v=2.9.0')
     for rel in (
         'src/PublisherStudio.Web/Components/Pages/Editor.razor',
         'src/PublisherStudio.Web/Components/Editor/MediaStudio.razor',
         'src/PublisherStudio.Web/Components/Editor/InspectorPanel.razor'):
-        require(rel, 'mediaStudioInterop.js?v=2.8.8')
+        require(rel, 'mediaStudioInterop.js?v=2.9.0')
 
     # Discovery is application-hosted but network-idle until an explicit frontend workflow requests it.
     require('src/PublisherStudio.Web/Services/OrganicPlugins/IOrganicPluginServices.cs',
@@ -192,7 +192,7 @@ try:
     checks += len(expected_render_files)
     require('Directory.Build.props', '<LocalGptWireProtocolVersion>2.1.1</LocalGptWireProtocolVersion>')
 
-    print(f'PublisherStudio 2.8.8 on-demand discovery/XML-doc/export-UI source audit passed: {checks} checks.')
+    print(f'PublisherStudio 2.9.0 on-demand discovery/XML-doc/export-UI source audit passed: {checks} checks.')
 except Exception as exc:
-    print(f'PublisherStudio 2.8.8 source audit failed: {exc}', file=sys.stderr)
+    print(f'PublisherStudio 2.9.0 source audit failed: {exc}', file=sys.stderr)
     raise SystemExit(1)

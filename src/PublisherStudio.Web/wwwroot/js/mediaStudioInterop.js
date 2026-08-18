@@ -449,6 +449,165 @@ function arrayBufferToBase64(buffer) { try {
     return btoa(binary);
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:arrayBufferToBase64@259', __javascriptError); throw __javascriptError; }}
 
+
+function readEbmlVint(bytes, offset, maximumWidth, keepMarker) { try {
+    if (!(bytes instanceof Uint8Array) || offset < 0 || offset >= bytes.length) return null;
+    const first = bytes[offset];
+    let marker = 0x80;
+    let width = 1;
+    while (width <= maximumWidth && (first & marker) === 0) {
+        marker >>= 1;
+        width++;
+    }
+    if (width > maximumWidth || offset + width > bytes.length || marker === 0) return null;
+
+    let value = keepMarker ? first : (first & (marker - 1));
+    let unknown = !keepMarker && (first & (marker - 1)) === marker - 1;
+    for (let index = 1; index < width; index++) {
+        value = value * 256 + bytes[offset + index];
+        if (unknown && bytes[offset + index] !== 0xff) unknown = false;
+    }
+    return { value, width, unknown };
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:readEbmlVint', __javascriptError); throw __javascriptError; }}
+
+function encodeEbmlSize(value, preferredWidth = 0) { try {
+    const normalized = Math.max(0, Math.trunc(Number(value) || 0));
+    let width = Math.max(0, Math.trunc(Number(preferredWidth) || 0));
+    const fits = candidate => candidate >= 1
+        && candidate <= 8
+        && normalized < Math.pow(2, candidate * 7) - 1;
+    if (!fits(width)) {
+        width = 1;
+        while (width < 8 && !fits(width)) width++;
+    }
+    if (!fits(width)) throw new RangeError('EBML size is too large to encode safely.');
+
+    const bytes = new Uint8Array(width);
+    let remaining = normalized;
+    for (let index = width - 1; index >= 0; index--) {
+        bytes[index] = remaining & 0xff;
+        remaining = Math.floor(remaining / 256);
+    }
+    bytes[0] |= 1 << (8 - width);
+    return bytes;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:encodeEbmlSize', __javascriptError); throw __javascriptError; }}
+
+function locateWebmInfo(bytes) { try {
+    if (!(bytes instanceof Uint8Array) || bytes.length < 16) return null;
+    let cursor = 0;
+    const ebmlId = readEbmlVint(bytes, cursor, 4, true);
+    if (!ebmlId || ebmlId.value !== 0x1a45dfa3) return null;
+    const ebmlSize = readEbmlVint(bytes, cursor + ebmlId.width, 8, false);
+    if (!ebmlSize || ebmlSize.unknown) return null;
+    cursor += ebmlId.width + ebmlSize.width + ebmlSize.value;
+    if (cursor >= bytes.length) return null;
+
+    const segmentId = readEbmlVint(bytes, cursor, 4, true);
+    if (!segmentId || segmentId.value !== 0x18538067) return null;
+    const segmentSize = readEbmlVint(bytes, cursor + segmentId.width, 8, false);
+    if (!segmentSize) return null;
+    cursor += segmentId.width + segmentSize.width;
+    const segmentEnd = segmentSize.unknown ? bytes.length : Math.min(bytes.length, cursor + segmentSize.value);
+
+    while (cursor < segmentEnd) {
+        const elementId = readEbmlVint(bytes, cursor, 4, true);
+        if (!elementId) return null;
+        const sizeOffset = cursor + elementId.width;
+        const elementSize = readEbmlVint(bytes, sizeOffset, 8, false);
+        if (!elementSize || elementSize.unknown) return null;
+        const contentOffset = sizeOffset + elementSize.width;
+        const contentEnd = contentOffset + elementSize.value;
+        if (contentEnd > segmentEnd) return null;
+        if (elementId.value === 0x1549a966)
+            return { sizeOffset, sizeWidth: elementSize.width, contentOffset, contentEnd, contentSize: elementSize.value };
+        cursor = contentEnd;
+    }
+    return null;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:locateWebmInfo', __javascriptError); throw __javascriptError; }}
+
+function webmTimecodeScaleAndDuration(bytes, info) { try {
+    let cursor = info.contentOffset;
+    let timecodeScale = 1000000;
+    let duration = null;
+    while (cursor < info.contentEnd) {
+        const elementId = readEbmlVint(bytes, cursor, 4, true);
+        if (!elementId) break;
+        const elementSize = readEbmlVint(bytes, cursor + elementId.width, 8, false);
+        if (!elementSize || elementSize.unknown) break;
+        const contentOffset = cursor + elementId.width + elementSize.width;
+        const contentEnd = contentOffset + elementSize.value;
+        if (contentEnd > info.contentEnd) break;
+
+        if (elementId.value === 0x2ad7b1 && elementSize.value > 0 && elementSize.value <= 8) {
+            let scale = 0;
+            for (let index = contentOffset; index < contentEnd; index++)
+                scale = scale * 256 + bytes[index];
+            if (Number.isFinite(scale) && scale > 0) timecodeScale = scale;
+        } else if (elementId.value === 0x4489 && (elementSize.value === 4 || elementSize.value === 8)) {
+            duration = { contentOffset, byteLength: elementSize.value };
+        }
+        cursor = contentEnd;
+    }
+    return { timecodeScale, duration };
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:webmTimecodeScaleAndDuration', __javascriptError); throw __javascriptError; }}
+
+async function webmBlobWithDuration(blob, durationSeconds, mimeType) { try {
+    const normalizedMime = baseMimeType(mimeType || blob?.type, '');
+    const duration = Number(durationSeconds);
+    if (!(blob instanceof Blob)
+        || !blob.size
+        || !normalizedMime.toLowerCase().includes('webm')
+        || !Number.isFinite(duration)
+        || duration <= 0)
+        return blob;
+
+    const source = new Uint8Array(await blob.arrayBuffer());
+    const info = locateWebmInfo(source);
+    if (!info) return blob;
+    const metadata = webmTimecodeScaleAndDuration(source, info);
+    const durationTicks = duration * 1000000000 / Math.max(1, metadata.timecodeScale);
+    if (!Number.isFinite(durationTicks) || durationTicks <= 0) return blob;
+
+    if (metadata.duration) {
+        const patched = source.slice();
+        const view = new DataView(patched.buffer, patched.byteOffset, patched.byteLength);
+        if (metadata.duration.byteLength === 8)
+            view.setFloat64(metadata.duration.contentOffset, durationTicks, false);
+        else
+            view.setFloat32(metadata.duration.contentOffset, durationTicks, false);
+        return new Blob([patched], { type: normalizedMime || blob.type });
+    }
+
+    const durationElement = new Uint8Array(11);
+    durationElement[0] = 0x44;
+    durationElement[1] = 0x89;
+    durationElement[2] = 0x88;
+    new DataView(durationElement.buffer).setFloat64(3, durationTicks, false);
+
+    const newInfoSize = info.contentSize + durationElement.byteLength;
+    const encodedSize = encodeEbmlSize(newInfoSize, info.sizeWidth);
+    const patched = new Uint8Array(
+        info.sizeOffset
+        + encodedSize.byteLength
+        + info.contentSize
+        + durationElement.byteLength
+        + (source.byteLength - info.contentEnd));
+    let target = 0;
+    patched.set(source.subarray(0, info.sizeOffset), target);
+    target += info.sizeOffset;
+    patched.set(encodedSize, target);
+    target += encodedSize.byteLength;
+    patched.set(source.subarray(info.contentOffset, info.contentEnd), target);
+    target += info.contentSize;
+    patched.set(durationElement, target);
+    target += durationElement.byteLength;
+    patched.set(source.subarray(info.contentEnd), target);
+    return new Blob([patched], { type: normalizedMime || blob.type });
+ } catch (__javascriptError) {
+    publisherStudioDiagnostics.report('js/mediaStudioInterop.js:webmBlobWithDuration', __javascriptError);
+    return blob;
+ }}
+
 function isInterruptedPlaybackError(error) { try {
     const name = String(error?.name || '');
     const message = String(error?.message || error || '').toLowerCase();
@@ -1938,22 +2097,23 @@ export async function embedRetainedRecording(id) { try {
         throw new Error('No completed recording is available to embed.');
 
     const mimeType = state.retainedRecordingMimeType || baseMimeType(blob.type, state.retainedRecordingKind === 'audio' ? 'audio/webm' : 'video/webm');
+    const embeddedBlob = await webmBlobWithDuration(blob, state.retainedRecordingInfo?.durationSeconds, mimeType);
     const transferId = crypto.randomUUID();
-    const chunkCount = Math.max(1, Math.ceil(blob.size / RECORDING_TRANSFER_CHUNK_SIZE));
-    const accepted = await state.dotnet?.invokeMethodAsync('BeginMediaRecordingTransfer', transferId, mimeType, blob.size, chunkCount);
+    const chunkCount = Math.max(1, Math.ceil(embeddedBlob.size / RECORDING_TRANSFER_CHUNK_SIZE));
+    const accepted = await state.dotnet?.invokeMethodAsync('BeginMediaRecordingTransfer', transferId, mimeType, embeddedBlob.size, chunkCount);
     if (!accepted) throw new Error('The publication could not begin the recording transfer.');
 
     let transferred = 0;
     for (let index = 0; index < chunkCount; index++) {
         const start = index * RECORDING_TRANSFER_CHUNK_SIZE;
-        const end = Math.min(blob.size, start + RECORDING_TRANSFER_CHUNK_SIZE);
-        const buffer = await blob.slice(start, end).arrayBuffer();
+        const end = Math.min(embeddedBlob.size, start + RECORDING_TRANSFER_CHUNK_SIZE);
+        const buffer = await embeddedBlob.slice(start, end).arrayBuffer();
         const chunk = arrayBufferToBase64(buffer);
         const ok = await state.dotnet.invokeMethodAsync('AppendMediaRecordingChunk', transferId, index, chunk);
         if (!ok) throw new Error('The recording transfer was interrupted.');
         transferred = end;
         if (index === chunkCount - 1 || index % 32 === 0)
-            await state.dotnet.invokeMethodAsync('MediaRecordingTransferProgress', transferred, blob.size);
+            await state.dotnet.invokeMethodAsync('MediaRecordingTransferProgress', transferred, embeddedBlob.size);
     }
     await state.dotnet.invokeMethodAsync('CompleteMediaRecordingTransfer', transferId);
     return true;

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Static source audit for PublisherStudio 2.8.8 InteractiveServer prerender and Razor XML architecture."""
+"""Static source audit for PublisherStudio 2.9.0 InteractiveServer prerender and Razor XML architecture."""
 from __future__ import annotations
 from pathlib import Path
 import re, sys
@@ -28,10 +28,10 @@ def forbid(rel:str,*tokens:str):
 
 try:
     for rel in ['src/PublisherStudio.Web/PublisherStudio.Web.csproj','src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj']:
-        require(rel,'<Version>2.8.8</Version>')
-    require('src/PublisherStudio.Web/Components/App.razor','css/site.css?v=20260818-288','videoEffectRuntime.js?v=2.8.8','publisherInterop.js?v=2.8.8','<Routes />')
+        require(rel,'<Version>2.9.0</Version>')
+    require('src/PublisherStudio.Web/Components/App.razor','css/site.css?v=20260818-290','videoEffectRuntime.js?v=2.9.0','publisherInterop.js?v=2.9.0','<Routes />')
     for rel in ['src/PublisherStudio.Web/Components/Pages/Editor.razor','src/PublisherStudio.Web/Components/Editor/MediaStudio.razor','src/PublisherStudio.Web/Components/Editor/InspectorPanel.razor']:
-        require(rel,'mediaStudioInterop.js?v=2.8.8') if 'App.razor' not in rel else None
+        require(rel,'mediaStudioInterop.js?v=2.9.0') if 'App.razor' not in rel else None
 
     expected={
         'src/PublisherStudio.Web/Components/Pages/Editor.razor':'@rendermode InteractiveServer',
@@ -103,7 +103,7 @@ try:
     # Existing 1-Wire compatibility remains unchanged.
     require('Directory.Build.props','<LocalGptWireProtocolVersion>2.1.1</LocalGptWireProtocolVersion>')
 
-    print(f'PublisherStudio 2.8.8 InteractiveServer prerender/Razor XML source audit passed: {checks} checks.')
+    print(f'PublisherStudio 2.9.0 InteractiveServer prerender/Razor XML source audit passed: {checks} checks.')
 except Exception as exc:
-    print(f'PublisherStudio 2.8.8 source audit failed: {exc}',file=sys.stderr)
+    print(f'PublisherStudio 2.9.0 source audit failed: {exc}',file=sys.stderr)
     raise SystemExit(1)

@@ -679,6 +679,10 @@
     /// </summary>
     private PublicationRecoverySnapshot? _recoveryCandidate;
     /// <summary>
+    /// Synchronizes ownership transfer and disposal of recovery debounce cancellation sources so cancellation cannot race source disposal.
+    /// </summary>
+    private readonly object _recoveryCancellationSync = new();
+    /// <summary>
     /// Stores the cancellation source used by <see cref="Editor"/> to stop its current background or asynchronous operation.
     /// </summary>
     private CancellationTokenSource? _recoverySaveCancellation;
@@ -1914,15 +1918,50 @@
         try
         {
             _scheduledRecoveryRevision = State.Revision;
-            _recoverySaveCancellation?.Cancel();
-            _recoverySaveCancellation?.Dispose();
-            var cancellation = _recoverySaveCancellation = new CancellationTokenSource();
-            TaskRunner.Run(
-                nameof(Editor),
-                nameof(DebouncedRecoverySaveAsync),
-                _ => DebouncedRecoverySaveAsync(cancellation),
-                cancellation.Token);
-    
+            var cancellation = new CancellationTokenSource();
+            CancellationToken cancellationToken;
+            lock (_recoveryCancellationSync)
+            {
+                cancellationToken = cancellation.Token;
+                var previousCancellation = _recoverySaveCancellation;
+                _recoverySaveCancellation = cancellation;
+                previousCancellation?.Cancel();
+            }
+
+            try
+            {
+                TaskRunner.Run(
+                    nameof(Editor),
+                    nameof(DebouncedRecoverySaveAsync),
+                    async _ =>
+                    {
+                        try
+                        {
+                            await DebouncedRecoverySaveAsync(cancellationToken).ConfigureAwait(false);
+                        }
+                        finally
+                        {
+                            lock (_recoveryCancellationSync)
+                            {
+                                if (ReferenceEquals(_recoverySaveCancellation, cancellation))
+                                    _recoverySaveCancellation = null;
+                                cancellation.Dispose();
+                            }
+                        }
+                    },
+                    cancellationToken);
+            }
+            catch
+            {
+                lock (_recoveryCancellationSync)
+                {
+                    if (ReferenceEquals(_recoverySaveCancellation, cancellation))
+                        _recoverySaveCancellation = null;
+                    cancellation.Dispose();
+                }
+                throw;
+            }
+
         }
         catch (Exception __componentMethodException)
         {
@@ -1934,27 +1973,44 @@
     /// <summary>
     /// Performs debounced recovery save for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
     /// </summary>
-    /// <param name="cancellation">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
     /// <returns>A task that completes when the operation has finished.</returns>
-    private async Task DebouncedRecoverySaveAsync(CancellationTokenSource cancellation)
+    private async Task DebouncedRecoverySaveAsync(CancellationToken cancellationToken)
     {
         try
         {
             try
             {
-                await Task.Delay(1800, cancellation.Token).ConfigureAwait(false);
-                await InvokeAsync(() => SaveRecoveryNow(cancellation.Token)).ConfigureAwait(false);
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    Logger.LogDebug("Publication recovery debounce was superseded before its delay started.");
+                    return;
+                }
+
+                var cancellationSignal = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+                using var cancellationRegistration = cancellationToken.Register(
+                    static state => ((TaskCompletionSource<bool>)state!).TrySetResult(true),
+                    cancellationSignal);
+                var delayTask = Task.Delay(1800);
+                var completedTask = await Task.WhenAny(delayTask, cancellationSignal.Task).ConfigureAwait(false);
+                if (!ReferenceEquals(completedTask, delayTask) || cancellationToken.IsCancellationRequested)
+                {
+                    Logger.LogDebug("Publication recovery debounce was superseded by a newer revision or editor disposal.");
+                    return;
+                }
+
+                await InvokeAsync(() => SaveRecoveryNow(cancellationToken)).ConfigureAwait(false);
             }
-            catch (OperationCanceledException exception) when (cancellation.Token.IsCancellationRequested)
+            catch (OperationCanceledException exception) when (cancellationToken.IsCancellationRequested)
             {
-                Logger.LogDebug(exception, "Publication recovery debounce was canceled by a newer revision or editor disposal.");
+                Logger.LogDebug(exception, "Publication recovery persistence was canceled after the debounce elapsed.");
             }
             catch (Exception exception)
             {
                 Logger.LogError(exception, "Publication recovery save failed.");
                 throw;
             }
-    
+
         }
         catch (Exception __componentMethodException)
         {
@@ -3297,7 +3353,7 @@
                 var bytes = buffer.ToArray();
                 if (bytes.Length == 0) throw new InvalidDataException("The selected media file is empty.");
 
-                module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.8.8").ConfigureAwait(true);
+                module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.9.0").ConfigureAwait(true);
                 temporaryAssetId = Guid.NewGuid();
                 var inspectionUrl = MediaAssets.RegisterBytes(temporaryAssetId, bytes, mimeType);
                 MediaSourceInfo info;
@@ -5282,8 +5338,12 @@
                 Logger.LogDebug("Editor disposal skipped browser hotkey cleanup because this component instance never attached to an interactive browser circuit (normal prerender disposal).");
             }
             _streamingHotkeyReference?.Dispose();
-            _recoverySaveCancellation?.Cancel();
-            _recoverySaveCancellation?.Dispose();
+            lock (_recoveryCancellationSync)
+            {
+                var recoveryCancellation = _recoverySaveCancellation;
+                _recoverySaveCancellation = null;
+                recoveryCancellation?.Cancel();
+            }
             if (_spreadsheetEditorSessionId != Guid.Empty) SpreadsheetSessions.Remove(_spreadsheetEditorSessionId);
             if (State.IsDirty)
             {
